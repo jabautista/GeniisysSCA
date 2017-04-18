@@ -1,0 +1,361 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GIACJournalEntry">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<resultMap class="java.util.HashMap" id="dailyCollectionMap" extends="BaseEntity.TableGridResultMap">
+		<result column="dcb_no"			property="dcbNo" />
+		<result column="dcb_year"		property="dcbYear" />
+		<result column="fund_cd"		property="fundCd" />
+		<result column="branch_cd"		property="branchCd" />
+		<result column="tran_date"		property="tranDate" />
+		<result column="sdf_tran_date"  property="sdfTranDate" />
+		<result column="dcb_flag"		property="dcbFlag" />
+		<result column="remarks"		property="remarks" />
+		<result column="user_id"		property="userId" />
+		<result column="cashier_cd"		property="cashierCd" />
+		<result column="print_name"		property="printName" />
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="cashierLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="cashier_cd"		property="cashierCd" />
+		<result column="print_name"		property="printName" />
+	</resultMap>
+	
+	<select id="getGIARDC01CashierLOV" resultMap="cashierLOVMap">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+			b.count_,
+			a.*
+				FROM (SELECT *
+					FROM TABLE(giardc01_pkg.get_cashier_lov(#userId#,#branchCd#,#fundCd#,#dcbNo#,TO_DATE(#dcbDate#, 'MM-DD-RRRR'),#dcbYear#)) <!-- Added parameters Jerome Bautista 09.16.2015 SR 20162 -->
+						<isNotNull property="findText">
+							WHERE (UPPER(cashier_cd) LIKE UPPER(#findText#) 
+							OR UPPER(print_name) LIKE UPPER(#findText#))
+						</isNotNull>
+					  	<isNull property="findText">
+		                  	WHERE (UPPER(cashier_cd) LIKE UPPER(#findText2#) 
+							OR UPPER(print_name) LIKE UPPER(#findText2#))
+	             	  	</isNull>
+						<isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="cashierCd">
+								ORDER BY cashier_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="printName">
+								ORDER BY print_name
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>
+					) a,
+			(SELECT count(*) count_
+				FROM TABLE(giardc01_pkg.get_cashier_lov(#userId#,#branchCd#,#fundCd#,#dcbNo#,TO_DATE(#dcbDate#, 'MM-DD-RRRR'),#dcbYear#)) <!-- Added parameters Jerome Bautista 09.16.2015 SR 20162 -->
+					<isNotNull property="findText">
+						WHERE (UPPER(cashier_cd) LIKE UPPER(#findText#) 
+						OR UPPER(print_name) LIKE UPPER(#findText#))
+					</isNotNull>
+				  	<isNull property="findText">
+	                  	WHERE (UPPER(cashier_cd) LIKE UPPER(#findText2#) 
+						OR UPPER(print_name) LIKE UPPER(#findText2#))
+             	  	</isNull>
+				) b)
+		WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getDailyCollectionRecord" resultMap="dailyCollectionMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*
+		          FROM (SELECT * 
+		          			FROM TABLE(GIARDC01_PKG.get_daily_collection_record(TO_DATE(#dspDate#,'MM-DD-YYYY'),#dcbNo#,#userId#))
+			          			<isNotNull property="filter">
+									WHERE 1=1
+									<isNotEmpty prepend="AND"  property="dcbYear">
+										dcb_year = #dcbYear#
+									</isNotEmpty>	
+									<isNotEmpty prepend="AND"  property="fundCd">
+										UPPER(fund_cd) = UPPER(#fundCd#)
+									</isNotEmpty>	
+									<isNotEmpty prepend="AND"  property="branchCd">
+										UPPER(branch_cd) = UPPER(#branchCd#)
+									</isNotEmpty>	
+								</isNotNull>
+		          			) a,
+		               (SELECT count(*) count_
+		                FROM TABLE(GIARDC01_PKG.get_daily_collection_record(TO_DATE(#dspDate#,'MM-DD-YYYY'),#dcbNo#,#userId#))
+			                <isNotNull property="filter">
+								WHERE 1=1
+								<isNotEmpty prepend="AND"  property="dcbYear">
+									dcb_year = #dcbYear#
+								</isNotEmpty>	
+								<isNotEmpty prepend="AND"  property="fundCd">
+									UPPER(fund_cd) = UPPER(#fundCd#)
+								</isNotEmpty>	
+								<isNotEmpty prepend="AND"  property="branchCd">
+									UPPER(branch_cd) = UPPER(#branchCd#)
+								</isNotEmpty>	
+							</isNotNull>
+		                ) b)
+               WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="getGIACS093BranchLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="branchCd"		column="BRANCH_CD"/>
+		<result property="branchName" 	column="BRANCH_NAME"/>
+	</resultMap>
+	
+	<select id="getGIACS093BranchLOV" resultMap="getGIACS093BranchLOVResultMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		  		  FROM  (SELECT * FROM TABLE(GIACS093_PKG.GET_BRANCH_LOV(#userId#))
+		  		  		  WHERE 1=1
+		  		  		  <isNotNull property="findText" prepend="AND">
+		  		  		  		UPPER(branch_cd) LIKE UPPER(#findText#)
+		  		  		  	 OR UPPER(branch_name) LIKE UPPER(#findText#)	
+		  		  		  </isNotNull>
+		  		  		  <isNull property="findText" prepend="AND">
+		  		  		  		UPPER(branch_cd) LIKE UPPER(#searchString# )
+		  		  		  	 OR UPPER(branch_name) LIKE UPPER(#searchString#)	
+		  		  		  </isNull>
+		  		  		  <isNotNull property="sortColumn">
+		  		  		  		<isEqual property="sortColumn" compareValue="branchCd">
+		  		  		  			ORDER BY branch_cd
+		  		  		  		</isEqual>
+		  		  		  		<isEqual property="sortColumn" compareValue="branchName">
+		  		  		  			ORDER BY branch_name
+		  		  		  		</isEqual>
+		  		  		  		<isEqual property="ascDescFlg" compareValue="ASC">
+		  		  		  			ASC
+		  		  		  		</isEqual>
+		  		  		  		<isEqual property="ascDescFlg" compareValue="DESC">
+		  		  		  			DESC
+		  		  		  		</isEqual>
+		  		  		  </isNotNull>
+		  		  		) a,
+		  		  		(SELECT count(*) count_ FROM TABLE(GIACS093_PKG.GET_BRANCH_LOV(#userId#))
+		  		  		  WHERE 1=1
+		  		  		  <isNotNull property="findText" prepend="AND">
+		  		  		  		UPPER(branch_cd) LIKE UPPER(#findText#)
+		  		  		  	 OR UPPER(branch_name) LIKE UPPER(#findText#)	
+		  		  		  </isNotNull>
+		  		  		  <isNull property="findText" prepend="AND">
+		  		  		  		UPPER(branch_cd) LIKE UPPER(#searchString# )
+		  		  		  	 OR UPPER(branch_name) LIKE UPPER(#searchString#)	
+		  		  		  </isNull>
+		  		  		) b
+		  )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="validateGiacs093BranchCd" resultClass="java.lang.String" parameterClass="java.util.HashMap">
+		SELECT GIACS093_PKG.validate_branch_cd(#branchCd#, #userId#) FROM DUAL
+	</select>
+	
+	<parameterMap class="map" id="populateGiacPdcMap">
+		<parameter property="asOfDate"		javaType="java.lang.String"		jdbcType="VARCHAR"	mode="IN"/>
+		<parameter property="cutOffDate"	javaType="java.lang.String"		jdbcType="VARCHAR"	mode="IN"/>
+		<parameter property="branchCd"		javaType="java.lang.String"		jdbcType="VARCHAR"	mode="IN"/>
+		<parameter property="register"		javaType="java.lang.String"		jdbcType="VARCHAR"	mode="IN"/>
+		<parameter property="outstanding"	javaType="java.lang.String"		jdbcType="VARCHAR"	mode="IN"/>
+		<parameter property="user"			javaType="java.lang.String"		jdbcType="VARCHAR"	mode="IN"/>
+		<parameter property="extractFlag"	javaType="java.lang.String"		jdbcType="VARCHAR"	mode="OUT"/>
+		<parameter property="beginExtract"	javaType="java.lang.String"		jdbcType="VARCHAR"	mode="OUT"/>
+		<parameter property="endExtract"	javaType="java.lang.String"		jdbcType="VARCHAR"	mode="OUT"/>
+		<parameter property="msg"			javaType="java.lang.String"		jdbcType="VARCHAR"	mode="OUT"/>		
+	</parameterMap>
+	
+	<select id="validateGIACS281BankAcctCd" resultClass="java.lang.String">
+		SELECT GIAC_DCB_BANK_DEP_PKG.validate_giacs281_bank_acct(#bankAcctCd#) FROM DUAL
+	</select>
+
+	<procedure id="populateGiacPdc" parameterMap="populateGiacPdcMap">
+		CALL GIACS093_PKG.POPULATE_GIAC_PDC(TO_DATE(?, 'MM-DD-RRRR'), TO_DATE(?, 'MM-DD-RRRR'), ?, ?, ?, ?, ?, ?, ?, ?)
+	</procedure>
+	
+	<!-- GIACS078 -->
+	<parameterMap class="java.util.HashMap" id="giacs078InitialValuesMap">
+		<parameter property="userId"		jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+		<parameter property="dateFrom"		jdbcType="VARCHAR"	javaType="java.lang.String"	mode="OUT"/>
+		<parameter property="dateTo"		jdbcType="VARCHAR"	javaType="java.lang.String"	mode="OUT"/>
+		<parameter property="branchCd"		jdbcType="VARCHAR"	javaType="java.lang.String"	mode="OUT"/>
+		<parameter property="branchName"	jdbcType="VARCHAR"	javaType="java.lang.String"	mode="OUT"/>
+		<parameter property="intmNo"		jdbcType="VARCHAR"	javaType="java.lang.String"	mode="OUT"/>
+		<parameter property="intmName"		jdbcType="VARCHAR"	javaType="java.lang.String"	mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="getGIACS078InitialValues" parameterMap="giacs078InitialValuesMap" >
+		CALL GIACS078_PKG.get_initial_values(?, ?, ?, ?, ?, ?, ?)
+	</procedure>
+	
+	<resultMap id="GIACS078IntmNoLOVMap" class="com.geniisys.common.entity.GIISIntermediary">
+		<result column="INTM_NO" 		property="intmNo" />
+		<result column="INTM_NAME" 		property="intmName" />
+		<result column="REF_INTM_CD"    property="refIntmCd" />
+		<result column="ACTIVE_TAG"     property="activeTag" />
+		<result property="rowNum"		column="ROWNUM_"/>
+		<result property="rowCount"		column="COUNT_"/>
+	</resultMap>
+	
+	<select id="getGIACS078IntmLOV" resultMap="GIACS078IntmNoLOVMap">  	
+  		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIIS_INTERMEDIARY_PKG.get_intm_name4_list)
+		          		  <isNotNull property="findText">
+		          		  		WHERE (intm_no LIKE NVL(#findText#, intm_no)
+		          		  		       OR UPPER(intm_name) LIKE NVL(UPPER(#findText#), intm_name)
+		          		  		      )
+		          		  </isNotNull>
+		          		  <isNull property="findText">		          		  		
+		          		  		WHERE (intm_no LIKE NVL(#searchString#, intm_no)
+		          		  		       OR UPPER(intm_name) LIKE NVL(UPPER(#searchString#), intm_name)
+		          		  		      )		          		  
+		          		  </isNull>
+		          		  <isEqual property="sortColumn" compareValue="intmNo">
+			              		ORDER BY intm_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="intmName">
+			              		ORDER BY intm_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="refIntmCd">
+			              		ORDER BY ref_intm_cd
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIIS_INTERMEDIARY_PKG.get_intm_name4_list)
+		                  <isNotNull property="findText">		          		  		
+		          		  		WHERE (intm_no LIKE NVL(#findText#, intm_no)
+		          		  		       OR UPPER(intm_name) LIKE NVL(UPPER(#findText#), intm_name)
+		          		  		      )
+		          		  </isNotNull>
+		          		  <isNull property="findText">
+		          		  		WHERE (intm_no LIKE NVL(#searchString#, intm_no)
+		          		  		       OR UPPER(intm_name) LIKE NVL(UPPER(#searchString#), intm_name)
+		          		  		      )	
+		          		  </isNull>
+		          		) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+	
+	<resultMap class="java.util.HashMap" id="GIACS078IntmMap">
+		<result column="intm_no" 		property="intmNo"/>
+		<result column="intm_name"		property="intmName"/>
+	</resultMap>
+	
+	<select id="validateIntmNoGiacs078" resultMap="GIACS078IntmMap" parameterClass="java.lang.Integer">
+  		SELECT * FROM TABLE(giis_intermediary_pkg.validate_intm_no_giexs006(#intmNo#))
+  	</select>
+  	
+  	<parameterMap class="java.util.HashMap" id="extractGiacs078Map">
+  		<parameter property="appUser"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+  		<parameter property="fromDate"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+  		<parameter property="toDate"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+  		<parameter property="branchCd"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+  		<parameter property="intmNo"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+  		<parameter property="dateTag"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+  		<parameter property="userId"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+  		<parameter property="extractedRec"	jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="OUT"/>
+  	</parameterMap>
+  	
+  	<procedure id="extractGiacs078Records" parameterMap="extractGiacs078Map" >
+  		BEGIN
+  			giis_users_pkg.app_user := ?;
+  			GIACS078_PKG.extract_records(TO_DATE(?, 'MM-DD-RRRR'), TO_DATE(?, 'MM-DD-RRRR'), ?, ?, ?, ?, ?);
+  		END;
+  	</procedure>
+  	
+  	<select id="countGiacs078ExtractedRecords" resultClass="java.lang.Integer" parameterClass="java.util.HashMap">
+  		SELECT count(*)
+  		  FROM giac_coll_analysis_ext
+	 	 WHERE date_from BETWEEN TRUNC (TO_DATE(#fromDate#, 'MM/DD/RRRR')) 
+                          AND TRUNC (TO_DATE(#fromDate#, 'MM/DD/RRRR')) + .99999
+	 	   AND date_to BETWEEN TRUNC (TO_DATE(#toDate#, 'MM/DD/RRRR')) 
+                          AND TRUNC (TO_DATE(#toDate#, 'MM/DD/RRRR')) + .99999
+     	   AND user_id  = #userId#
+  	</select>
+  	<!-- end GIACS078 -->
+  	
+  	<resultMap class="java.util.HashMap" id="getGiardc01DcbNoLovMap" extends="BaseEntity.TableGridResultMap">
+		<result column="fund_cd"		property="fundCd" />
+		<result column="branch_cd"	    property="branchCd" />
+		<result column="dcb_year"	    property="dcbYear" />
+		<result column="dcb_no"	    	property="dcbNo" />
+		<result column="tran_date"	    property="dcbDate" />
+		<result column="cashier_cd"	    property="cashierCd" />
+		<result column="print_name"		property="cashierName" />
+	</resultMap>
+	
+  	<select id="getGiardc01DcbNoLov" resultMap="getGiardc01DcbNoLovMap" parameterClass="map">
+	SELECT *
+	  FROM (SELECT rownum rownum_, 
+				   b.count_, 
+				   a.* 
+			  FROM (SELECT * 
+					  FROM TABLE (giardc01_pkg.get_dcb_lov(#userId#, #fundCd#, #branchCd#, #dcbYear#, #dcbNo#, TO_DATE(#dcbDate#, 'MM-DD-RRRR'), #cashierCd#, #cashierName#))
+					  <isEqual property="sortColumn" compareValue="fundCd">
+							ORDER BY fund_cd
+					  </isEqual>
+					  <isEqual property="sortColumn" compareValue="branchCd">
+							ORDER BY branch_cd
+					  </isEqual>
+					  <isEqual property="sortColumn" compareValue="dcbYear">
+							ORDER BY dcb_year
+					  </isEqual>
+					  <isEqual property="sortColumn" compareValue="dcbNo">
+							ORDER BY dcb_no
+					  </isEqual>
+					  <isEqual property="sortColumn" compareValue="dcbDate">
+							ORDER BY tran_date
+					  </isEqual>
+					  <isEqual property="sortColumn" compareValue="cashierCd">
+							ORDER BY cashier_cd
+					  </isEqual>
+					  <isEqual property="sortColumn" compareValue="cashierName">
+							ORDER BY print_name
+					  </isEqual>
+					  <isNotNull property="sortColumn">
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+					  </isNotNull>
+					  ) a, 
+				   (SELECT count(*) count_ 
+					  FROM TABLE (giardc01_pkg.get_dcb_lov(#userId#, #fundCd#, #branchCd#, #dcbYear#, #dcbNo#, TO_DATE(#dcbDate#, 'MM-DD-RRRR'), #cashierCd#, #cashierName#))) b) 
+	 WHERE rownum_ BETWEEN #from# AND #to#
+</select>
+
+	<parameterMap class="java.util.HashMap" id="giacs093LastExtractParamMap">
+		<parameter property="userId"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="asOfDate"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+		<parameter property="cutOffDate"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+		<parameter property="pdcType"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+		<parameter property="branchCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+		<parameter property="branchName"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+	</parameterMap>
+	
+	<procedure id="giacs093LastExtractParams" parameterMap="giacs093LastExtractParamMap">
+  		BEGIN
+  			GIACS093_PKG.last_extract_params(?,?,?,?,?,?);
+  		END;
+  	</procedure>  
+</sqlMap>

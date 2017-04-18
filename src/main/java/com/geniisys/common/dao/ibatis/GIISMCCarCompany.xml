@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISMCCarCompany">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIISMCCarCompany" type="com.geniisys.common.entity.GIISMCCarCompany"/>
+	
+	<resultMap class="GIISMCCarCompany" id="GIISMCCarCompanyLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="carCompanyCd" column="CAR_COMPANY_CD" />
+		<result property="carCompany"	column="CAR_COMPANY"	/>
+	</resultMap>
+	
+	<resultMap class="GIISMCCarCompany" id="giisMcCarCompanyResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="car_company_cd"     property="carCompanyCd"/>
+		<result column="car_company"  property="carCompany"/>
+		<result column="user_id"     property="userId"/>
+		<result column="last_update" property="lastUpdate"/>
+		<result column="remarks"     property="remarks"/>
+	</resultMap>
+	
+	<select id="getCarCompanyLOV" resultMap="GIISMCCarCompanyLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giis_mc_car_company_pkg.get_car_company_list_tg(#findText#))
+						  <isNull property="sortColumn">
+							ORDER BY car_company ASC
+						  </isNull>
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="carCompanyCd">
+								ORDER BY car_company_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="carCompany">
+								ORDER BY car_company
+							</isEqual>							
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(giis_mc_car_company_pkg.get_car_company_list_tg(#findText#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiiss115RecList" resultMap="giisMcCarCompanyResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss115_pkg.get_rec_list(#carCompanyCd#, #carCompany#))
+		                  <isEqual property="sortColumn" compareValue="carCompanyCd">
+			              		ORDER BY car_company_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="carCompany">
+			              		ORDER BY car_company
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss115_pkg.get_rec_list(#carCompanyCd#, #carCompany#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setCarCompany" parameterClass="GIISMCCarCompany">
+	    DECLARE
+	    	v_rec giis_mc_car_company%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.car_company_cd := #carCompanyCd#;
+ 			v_rec.car_company := #carCompany#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			giiss115_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteCarCompany" parameterClass="java.lang.Integer">
+ 		BEGIN
+ 			giiss115_pkg.val_del_rec(#recId#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddCarCompany" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss115_pkg.val_add_rec( #carCompany#, #carCompanyCd#, #pAction#); <!-- carlo - 08062015 - SR 19241 -->
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delCarCompany" parameterClass="java.lang.Integer">
+		BEGIN
+ 			giiss115_pkg.del_rec(#carCompanyCd#);
+ 		END;
+ 	</delete>
+</sqlMap>

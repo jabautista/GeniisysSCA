@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap>
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIPIWPolBasicClass" type="com.geniisys.gipi.entity.GIPIWPolBasic"/>
+	
+	<resultMap class="GIPIWPolBasicClass" id="GIPIWPolBasicMap">
+		<result column="SUBLINE_CD" 			property="sublineCd"/>
+		<result column="PAR_ID" 				property="parId"/>
+		<result column="LINE_CD" 				property="lineCd"/>
+		<result column="ISS_CD" 				property="issCd"/>
+		<result column="FOREIGN_ACC_SW" 		property="foreignAccSw"/>
+		<result column="INVOICE_SW" 			property="invoiceSw"/>
+		<result column="QUOTATION_PRINTED_SW" 	property="quotationPrintedSw"/>
+		<result column="COVERNOTE_PRINTED_SW" 	property="covernotePrintedSw"/>
+		<result column="AUTO_RENEW_FLAG" 		property="autoRenewFlag"/>
+		<result column="PROV_PREM_TAG" 			property="provPremTag"/>
+		<result column="SAME_POLNO_SW" 			property="samePolnoSw"/>
+		<result column="REG_POLICY_SW" 			property="regPolicySw"/>
+		<result column="CO_INSURANCE_SW" 		property="coInsuranceSw"/>
+		<result column="MANUAL_RENEW_NO" 		property="manualRenewNo"/>
+		<result column="PRORATE_FLAG"			property="prorateFlag"/>
+		<result column="ENDT_EXPIRY_DATE" 		property="endtExpiryDate"/>
+		<result column="EFF_DATE" 				property="effDate"/>
+		<result column="SHORT_RT_PERCENT" 		property="shortRtPercent"/>
+		<result column="PROV_PREM_PCT" 			property="provPremPct"/>
+		<result column="EXPIRY_DATE" 			property="expiryDate"/>
+		<result column="WITH_TARIFF_SW" 		property="withTariffSw"/>
+		<result column="COMP_SW"				property="compSw"/>
+	</resultMap>
+	
+	<select id="getSublineCdFromPar" resultMap="GIPIWPolBasicMap">
+		SELECT * FROM TABLE(Gipi_Wpolbas_Pkg.get_gipi_wpolbas1(#parId#))
+	</select>
+	
+	<select id="getExpiryDate" resultClass="java.util.Date">
+		SELECT (GIPI_WPOLBAS_PKG.get_expiry_date(#parId#)) FROM DUAL
+	</select>
+	
+	<procedure id="updatePackWPolbas" parameterClass="java.lang.Integer">
+		BEGIN
+			GIPI_WPOLBAS_PKG.update_pack_wpolbas(#packParId#);
+		END;
+	</procedure>
+	
+	<procedure id="getAcctOfName" parameterClass="java.lang.Integer" resultClass="java.lang.String">
+		SELECT in_account_of FROM TABLE(GIPI_WPOLBAS_PKG.get_gipi_wpolbas(#parId#))
+	</procedure>
+</sqlMap>

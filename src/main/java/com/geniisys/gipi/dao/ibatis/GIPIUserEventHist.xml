@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIUserEventHist">
+	
+	<typeAlias alias="GIPIUserEventHistClass" type="com.geniisys.gipi.entity.GIPIUserEventHist"/>
+
+	<resultMap class="GIPIUserEventHistClass" id="GIPIUserEventHistResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="eventCd" 		column="EVENT_CD"/>
+		<result property="dateReceived" column="DATE_RECEIVED"/>
+		<result property="newUserId" 	column="NEW_USERID"/>
+		<result property="oldUserId" 	column="OLD_USERID"/>		
+		<result property="remarks" 		column="REMARKS"/>
+		<result property="tranId" 		column="TRAN_ID"/>
+	</resultMap>
+
+	<procedure id="getGIPIUserEventHistList" resultMap="GIPIUserEventHistResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (gipi_user_events_hist_pkg.get_user_events_hist_list(#tranId#))     
+			          	  <isNotNull property="sortColumn">
+			          	  	<isEqual property="sortColumn" compareValue="dateReceived">
+			          	  		ORDER BY date_received
+			          	  	</isEqual>
+			          	  	<isEqual property="sortColumn" compareValue="oldUserId">
+			          	  		ORDER BY old_userid
+			          	  	</isEqual>
+			          	  	<isEqual property="sortColumn" compareValue="newUserId">
+			          	  		ORDER BY new_userid
+			          	  	</isEqual>
+			          	  	<isEqual property="sortColumn" compareValue="remarks">
+			          	  		ORDER BY remarks
+			          	  	</isEqual>
+			              	<isEqual property="ascDescFlg" compareValue="ASC">
+			              		ASC
+			              	</isEqual>
+			              	<isEqual property="ascDescFlg" compareValue="DESC">
+			              		DESC
+			              	</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (gipi_user_events_hist_pkg.get_user_events_hist_list(#tranId#))
+		                  )b)		                   
+		 WHERE rownum_ BETWEEN #from# AND #to#		
+	</procedure>
+
+	<procedure id="getEventHistByDateSent" resultMap="GIPIUserEventHistResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (gipi_user_events_hist_pkg.get_events_hist_by_date_sent(#userId#, #eventCd#, #date#, #newUserId#, #dateReceived#, #remarks#, #tranId#))     
+			          	  <isNotNull property="sortColumn">
+			              	<isEqual property="ascDescFlg" compareValue="ASC">
+			              		ASC
+			              	</isEqual>
+			              	<isEqual property="ascDescFlg" compareValue="DESC">
+			              		DESC
+			              	</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (gipi_user_events_hist_pkg.get_events_hist_by_date_sent(#userId#, #eventCd#, #date#, #newUserId#, #dateReceived#, #remarks#, #tranId#))
+		                  )b)		                   
+		 WHERE rownum_ BETWEEN #from# AND #to#		
+	</procedure>
+	
+	<procedure id="getEventHistByDateRange" resultMap="GIPIUserEventHistResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (gipi_user_events_hist_pkg.get_events_hist_by_date_range(#userId#, #eventCd#, #dateFrom#, #dateTo#, #newUserId#, #dateReceived#, #remarks#, #tranId#))
+		                  <isEqual property="sortColumn" compareValue="tranDtl">
+			              		ORDER BY tran_dtl
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="newUserId">
+			              		ORDER BY new_userid
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="dateReceived">
+			              		ORDER BY date_received
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="remarks">
+			              		ORDER BY remarks
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="tranId">
+			              		ORDER BY tran_id
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">			          	  	
+			              	<isEqual property="ascDescFlg" compareValue="ASC">
+			              		ASC
+			              	</isEqual>
+			              	<isEqual property="ascDescFlg" compareValue="DESC">
+			              		DESC
+			              	</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (gipi_user_events_hist_pkg.get_events_hist_by_date_range(#userId#, #eventCd#, #dateFrom#, #dateTo#, #newUserId#, #dateReceived#, #remarks#, #tranId#))
+		                  )b)		                   
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</procedure>
+</sqlMap>

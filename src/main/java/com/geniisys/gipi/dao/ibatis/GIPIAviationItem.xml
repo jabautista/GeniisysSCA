@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIAviationItem">
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<resultMap class="com.geniisys.gipi.entity.GIPIAviationItem" id="GIPIAviationItemResultMap">
+		<result column="policy_id" 			property="policyId" />
+		<result column="item_no" 			property="itemNo" />
+		<result column="vessel_cd" 		    property="vesselCd"/>
+		<result column="total_fly_time" 	property="totalFlyTime"/>
+		<result column="qualification" 		property="qualification"/>
+		<result column="purpose" 			property="purpose"/>
+		<result column="geog_limit" 		property="geogLimit"/>
+		<result column="deduct_text" 		property="deductText"/>
+		<result column="rec_flag_av" 		property="recFlagAv"/>
+		<result column="fixed_wing" 		property="fixedWing"/>
+		<result column="rotor" 				property="rotor"/>
+		<result column="prev_util_hrs" 		property="prevUtilHrs"/>
+		<result column="est_util_hrs" 		property="estUtilHrs"/>
+		<result column="air_desc" property="airDesc"/>
+	</resultMap>	
+	
+	<resultMap class="com.geniisys.gipi.entity.GIPIAviationItem" id="aviationItemInfoMap">
+		<result property="policyId"			column="policy_id"/>
+		<result property="itemNo"			column="item_no"/>
+		<result property="vesselCd"			column="vessel_cd"/>
+		<result property="geogLimit"		column="geog_limit"/>
+		<result property="qualification"	column="qualification"/>
+		<result property="totalFlyTime" 	column="total_fly_time"/>
+		<result property="prevUtilHrs" 		column="prev_util_hrs"/>
+		<result property="estUtilHrs" 		column="est_util_hrs"/>
+		<result property="deductText" 		column="deduct_text"/>
+		<result property="purpose" 			column="purpose"/>
+		
+		<result property="itemTitle"		column="item_title"/>
+		<result property="vesselName" 		column="vessel_name"/>
+		<result property="airDesc" 			column="air_desc"/>
+		<result property="rpcNo" 			column="rpc_no"/>
+	</resultMap>
+	
+	<select id="getGIPIAviationItemForEndt" resultMap="GIPIAviationItemResultMap">
+	<!-- andrew - 08062015 - KB 308 -->
+		SELECT policy_id,			
+		       item_no,			
+			   vessel_cd,
+			   total_fly_time,
+			   qualification,		
+			   purpose,
+			   geog_limit,		
+			   deduct_text,		
+			   rec_flag rec_flag_av,
+			   air_desc,
+			   fixed_wing,		
+			   rotor,
+			   prev_util_hrs,
+			   est_util_hrs
+		  FROM TABLE(GIPI_AVIATION_ITEM_PKG.get_gipi_aviation_item(#policyId#, #itemNo#))
+	</select>
+	
+	<select id="getAviationItemInfo" resultMap="aviationItemInfoMap" parameterClass="java.util.HashMap">
+		SELECT * FROM TABLE (gipi_aviation_item_pkg.get_aviation_item_info (#policyId#, #itemNo#))
+	</select>
+	
+</sqlMap>	

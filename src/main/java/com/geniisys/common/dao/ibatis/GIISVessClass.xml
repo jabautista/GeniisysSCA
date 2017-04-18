@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISVessClass">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIISVessClass" type="com.geniisys.common.entity.GIISVessClass" />
+		
+	<resultMap class="java.util.HashMap" id="GIISVessClassResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="vessClassCd" 		column="vess_class_cd"/>
+		<result property="vessClassDesc" 		column="vess_class_desc"/>		
+		<result property="userId" 				column="user_id"/>	
+		<result property="lastUpdate" 			column="last_update"/>	
+		<result property="remarks" 				column="remarks"/>	
+		<result property="cpiRecNo" 			column="cpi_rec_no"/>	
+		<result property="cpiBranchCd" 			column="cpi_branch_cd"/>							
+	</resultMap> 		
+
+	<select id="showVesselClassification" resultMap="GIISVessClassResultMap">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+						 b.count_, 
+						 a.*
+					FROM (SELECT *
+							FROM TABLE (GIISS047_PKG.show_vessel_classification)		
+							<isNotNull property="filter">
+								WHERE 1 = 1 
+									<isNotEmpty prepend="AND" property="vessClassCd">
+										UPPER(vess_class_cd) LIKE UPPER(#vessClassCd#)
+									</isNotEmpty>
+	 								<isNotEmpty prepend="AND" property="vessClassDesc">
+										UPPER(vess_class_desc) LIKE UPPER(#vessClassDesc#)
+									</isNotEmpty>																																							
+							</isNotNull>					
+							<isEqual property="sortColumn" compareValue="vessClassCd">
+								ORDER BY vess_class_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="vessClassDesc">
+								ORDER BY vess_class_desc
+							</isEqual>																		
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>
+						) a,
+						(SELECT count(*) count_
+						   FROM TABLE (GIISS047_PKG.show_vessel_classification)						 		
+								<isNotNull property="filter">
+								WHERE 1 = 1 
+									<isNotEmpty prepend="AND" property="vessClassCd">
+										UPPER(vess_class_cd) LIKE UPPER(#vessClassCd#)
+									</isNotEmpty>
+	 								<isNotEmpty prepend="AND" property="vessClassDesc">
+										UPPER(vess_class_desc) LIKE UPPER(#vessClassDesc#)
+									</isNotEmpty>																																							
+							</isNotNull>								  
+						   ) b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select>		
+	
+	<select id="validateGIISS047VesselClass" resultClass="java.lang.String">
+		SELECT GIISS047_PKG.validate_giiss047_vessel_class(#vessClassCd#)FROM dual							
+	</select>
+	
+	<insert id="setVessClass" parameterClass="GIISVessClass">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;						
+			GIISS047_PKG.set_vess_class(
+			#vessClassCd#,#vessClassDesc#,
+			#remarks#,#cpiRecNo#,
+			#cpiBranchCd#);
+		END;	
+	</insert>
+	
+	<procedure id="valDelVessClass" parameterClass="java.lang.Integer">
+ 		BEGIN
+ 			GIISS047_PKG.val_del_rec(#vessClassCd#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="delVessClass" parameterClass="GIISVessClass">
+ 		BEGIN
+ 			GIISS047_PKG.del_rec(#vessClassCd#);
+ 		END;
+ 	</procedure>
+		
+</sqlMap>

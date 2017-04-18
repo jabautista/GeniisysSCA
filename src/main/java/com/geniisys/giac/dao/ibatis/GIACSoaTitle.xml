@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIACSoaTitle">
+	
+	<typeAlias alias="giacSoaTitle" type="com.geniisys.giac.entity.GIACSoaTitle"/>
+  	
+	<resultMap class="giacSoaTitle" id="giacSoaTitleResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="rep_cd"    		property="repCd"/>
+		<result column="col_no"    		property="colNo"/>
+		<result column="col_title" 		property="colTitle"/>
+		<result column="user_id"     	property="userId"/>
+		<result column="last_update" 	property="lastUpdate"/>
+		<result column="remarks"     	property="remarks"/>
+	</resultMap>
+	
+	<select id="getGiacs335RecList" resultMap="giacSoaTitleResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giacs335_pkg.get_rec_list)
+		  	      <isNotNull property="filter">
+		  	      	WHERE 1 = 1 
+		  	      		<isNotEmpty prepend="AND" property="repCd">
+                        	rep_cd = #repCd#
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="colNo">
+                        	col_no = #colNo#
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="colTitle">
+                            UPPER(col_title) LIKE UPPER(#colTitle#)
+                        </isNotEmpty>
+		  	      </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="repCd">
+			              		ORDER BY rep_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="colNo">
+			              		ORDER BY col_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="colTitle">
+			              		ORDER BY col_title
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giacs335_pkg.get_rec_list)
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setSoaTitle" parameterClass="giacSoaTitle">
+	    DECLARE
+	    	v_rec giac_soa_title%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.rep_cd := #repCd#;
+ 			v_rec.col_no := #colNo#;
+ 			v_rec.col_title := #colTitle#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			giacs335_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<!-- <procedure id="valDeleteSoaTitle" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giacs335_pkg.val_del_rec(#recId#);
+ 		END;
+ 	</procedure> -->
+ 	
+ 	<select id="valDeleteSoaTitle" resultClass="java.lang.String">
+		SELECT giacs335_pkg.val_del_rec(#repCd#)FROM dual							
+	</select>
+	
+ 	<!-- <procedure id="valAddSoaTitle" parameterMap="giacSoaTitle">
+ 		BEGIN
+ 			giacs335_pkg.val_add_rec(#repCd#,#colNo#);
+ 		END;
+ 	</procedure>  -->	
+ 	
+	<select id="valAddSoaTitle" resultClass="java.lang.String">
+		SELECT giacs335_pkg.val_add_rec(#repCd#,#colNo#) FROM dual					
+	</select>
+ 	
+	<delete id="delSoaTitle" parameterClass="giacSoaTitle">
+		BEGIN
+ 			giacs335_pkg.del_rec(#repCd#, #colNo#);
+ 		END;
+ 	</delete>
+ 	
+ 	<resultMap class="java.util.HashMap" id="giacs335LOVMap" extends="BaseEntity.TableGridResultMap">
+		<result property="rvLowValue" 		column="rv_low_value" />
+		<result property="rvMeaning" 		column="rv_meaning" />
+		<result property="rowNum" 			column="rownum_"/>
+		<result property="rowCount" 		column="count_"/>
+	</resultMap>
+	
+	<select id="getGiacs335LOV" resultMap="giacs335LOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giacs335_pkg.get_giacs335_lov)
+		                 <isNotNull property="findText">
+					         WHERE (UPPER(rv_low_value) = (#findText#) 
+					         	 OR UPPER(rv_meaning) LIKE UPPER(#findText#)
+					         	 )
+				         </isNotNull>          
+			          	  <isNotNull property="sortColumn">
+			                  <isEqual property="sortColumn" compareValue="rvLowValue">
+				              		ORDER BY rv_low_value
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="rvMeaning">
+				              		ORDER BY rv_meaning
+				              </isEqual>
+				          	  <isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              </isNotNull>
+				          </isNotNull>    
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (giacs335_pkg.get_giacs335_lov)
+			              <isNotNull property="findText">
+					          WHERE (UPPER(rv_low_value) = (#findText#) 
+					         	 OR UPPER(rv_meaning) LIKE UPPER(#findText#)
+					         	 )
+				          </isNotNull> 
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<parameterMap class="map" id="validateRepCdMap">
+		<parameter property="repCd"	jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="INOUT"/>
+	</parameterMap>
+	
+	<procedure id="validateRepCd" parameterMap="validateRepCdMap">
+		BEGIN
+ 			giacs335_pkg.validate_rep_cd(?);
+ 		END;
+	</procedure>
+</sqlMap>

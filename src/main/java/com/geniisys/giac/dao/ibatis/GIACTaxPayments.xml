@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIAPaytRequest">
+
+	<typeAlias alias="GIACTaxPayments" type="com.geniisys.giac.entity.GIACTaxPayments"/>
+
+	<resultMap id="giacTaxPaymentsMap" class="GIACTaxPayments" extends="BaseEntity.TableGridResultMap">
+		<result column="GACC_TRAN_ID"		property="gaccTranId"/>
+		<result column="ITEM_NO"			property="itemNo"/>
+		<result column="TRANSACTION_TYPE"	property="transactionType"/>
+		<result column="FUND_CD"			property="fundCd"/>
+		<result column="TAX_CD"				property="taxCd"/>
+		<result column="BRANCH_CD"			property="branchCd"/>
+		<result column="TAX_AMT"			property="taxAmt"/>
+		<result column="OR_PRINT_TAG"		property="orPrintTag"/>
+		<result column="REMARKS"			property="remarks"/>
+		<result column="CPI_REC_NO"			property="cpiRecNo"/>
+		<result column="CPI_BRANCH_CD"		property="cpiBranchCd"/>
+		<result column="SL_CD"				property="slCd"/>
+		<result column="SL_TYPE_CD"			property="slTypeCd"/>
+		<result column="SL_NAME"			property="slName"/>
+		<result column="TAX_NAME"			property="taxName"/>
+		<result column="TRANSACTION_DESC"	property="transactionDesc"/>
+		<result column="BRANCH_NAME"		property="branchName"/>
+		<result column="FUND_DESC"			property="fundDesc"/>
+		<result column="TRANSACTION"		property="transaction"/>
+	</resultMap>
+	
+	<resultMap id="giacTaxesMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result column="GL_ACCT_ID"			property="glAcctId"/>
+		<result column="TAX_CD"				property="taxCd"/>
+		<result column="TAX_NAME"			property="taxName"/>
+		<result column="SL_TYPE_CD"			property="slTypeCd"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="giacSlLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="sl_cd" 				property="slCd"/>
+		<result column="sl_name" 			property="slName"/>
+		<result column="sl_type_cd" 		property="slTypeCd"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="giacs021VariablesMap">
+		<result column="TOTAL_TAX"			property="totalTax"/>
+		<result column="MAX_ITEM"			property="maxItem"/>
+	</resultMap>
+	
+	<resultMap class="java.lang.Integer" id="GIACS021ItemsMap">
+		<result column="ITEM_NO"			property="itemNo"/>
+	</resultMap>
+	
+	<select id="getGiacTaxPayments" resultMap="giacTaxPaymentsMap">
+		SELECT *
+          FROM (SELECT ROWNUM rownum_,
+            		   b.count_,
+            		   a.*,
+            		   a.transaction_type||' - '||a.transaction_desc AS transaction
+                  FROM (SELECT *
+                          FROM TABLE(GIAC_TAX_PAYMENTS_PKG.get_giac_tax_payments(#gaccTranId#))
+                         WHERE item_no = NVL(#itemNo#, item_no)
+                           AND UPPER(branch_name) LIKE UPPER(NVL(#branchName#, branch_name))
+                           AND UPPER(fund_cd) LIKE UPPER(NVL(#fundCd#, fund_cd))
+                           AND UPPER(NVL(sl_name, '*')) LIKE UPPER(NVL(#slName#, NVL(sl_name, '*')))
+                           AND UPPER(tax_name) LIKE UPPER(NVL(#taxName#, tax_name))
+                           AND tax_amt = NVL(#taxAmt#, tax_amt)
+                           AND UPPER(transaction_type || ' - ' || transaction_desc) LIKE UPPER(NVL(#transaction#, transaction_type || ' - ' || transaction_desc))
+                          	<isEqual property="sortColumn" compareValue="itemNo">
+								ORDER BY item_no
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="transaction">
+								ORDER BY transaction_type || ' - ' || transaction_desc
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="fundCd">
+								ORDER BY fund_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="branchName">
+								ORDER BY branch_name
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="taxName">
+								ORDER BY tax_name
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="slName">
+								ORDER BY sl_name
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="taxAmt">
+								ORDER BY tax_amt
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>) a,
+               (SELECT COUNT(*) count_
+                  FROM TABLE(GIAC_TAX_PAYMENTS_PKG.get_giac_tax_payments(#gaccTranId#))
+                 WHERE item_no = NVL(#itemNo#, item_no)
+                   AND UPPER(branch_name) LIKE UPPER(NVL(#branchName#, branch_name))
+                   AND UPPER(fund_cd) LIKE UPPER(NVL(#fundCd#, fund_cd))
+                   AND UPPER(NVL(sl_name, '*')) LIKE UPPER(NVL(#slName#, NVL(sl_name, '*')))
+                   AND UPPER(tax_name) LIKE UPPER(NVL(#taxName#, tax_name))
+                   AND tax_amt = NVL(#taxAmt#, tax_amt)
+                   AND UPPER(transaction_type || ' - ' || transaction_desc) LIKE UPPER(NVL(#transaction#, transaction_type || ' - ' || transaction_desc))
+				) b)
+          WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGIACTaxesLOV" resultMap="giacTaxesMap">
+		SELECT *
+          FROM (SELECT ROWNUM rownum_,
+            		   b.count_,
+            		   a.*
+                  FROM (SELECT *
+                          FROM TABLE(GIAC_TAX_PAYMENTS_PKG.get_taxes(#fundCd#))
+                        <isNotNull property="findText">
+                         WHERE tax_cd LIKE #findText#
+                           OR UPPER(tax_name) LIKE UPPER(#findText#)
+                        </isNotNull>
+                            <isEqual property="sortColumn" compareValue="taxCd">
+								ORDER BY tax_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="taxName">
+								ORDER BY tax_name
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>) a,
+               (SELECT COUNT(*) count_
+                  FROM TABLE(GIAC_TAX_PAYMENTS_PKG.get_taxes(#fundCd#))
+                 <isNotNull property="findText">
+                 WHERE tax_cd LIKE #findText#
+                    OR UPPER(tax_name) LIKE UPPER(#findText#)
+                 </isNotNull>
+                 ) b)
+          WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGIACSlLOV" resultMap="giacSlLOVMap" parameterClass="map">
+		SELECT * 
+			FROM (SELECT rownum rownum_,
+						 b.count_,
+						 a.*
+					FROM (SELECT * 
+							FROM TABLE(GIAC_TAX_PAYMENTS_PKG.get_sl_list(#slTypeCd#, #findText#))
+							<isEqual property="sortColumn" compareValue="slCd">
+								ORDER BY sl_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="slName">
+								ORDER BY sl_name
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>) a, 
+							(SELECT count(*) count_
+								FROM TABLE(GIAC_SL_LISTS_PKG.get_sl_list_GIACS030(#slTypeCd#, #findText#))) B)
+		WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGIACS021Variables" resultMap="giacs021VariablesMap">
+		SELECT *
+		  FROM TABLE(GIAC_TAX_PAYMENTS_PKG.get_giacs021_variables(#gaccTranId#))
+	</select>
+	
+	<select id="getGIACS021Items" resultMap="GIACS021ItemsMap">
+		SELECT *
+		  FROM TABLE(GIAC_TAX_PAYMENTS_PKG.get_giacs021_item_list(#gaccTranId#))
+	</select>
+	
+	<procedure id="deleteTaxPayment" parameterClass="GIACTaxPayments">
+		BEGIN
+			GIAC_TAX_PAYMENTS_PKG.delete_giac_tax_payment(#gaccTranId#, #itemNo#);
+		END;
+	</procedure>
+	
+	<insert id="insertTaxPayment" parameterClass="GIACTaxPayments">
+		BEGIN
+			GIAC_TAX_PAYMENTS_PKG.insert_giac_tax_payment(#gaccTranId#, #itemNo#, #transactionType#, #fundCd#, #taxCd#,
+														  #branchCd#, #taxAmt#, #orPrintTag#, #remarks#, #userId#,
+														  #slCd#, #slTypeCd#);
+		END;
+	</insert>
+	
+	<procedure id="updateGiacOpTextGIACS021" parameterClass="java.lang.Integer">
+		BEGIN
+			GIAC_OP_TEXT_PKG.update_giac_op_text_giacs021(#gaccTranId#);
+		END;
+	</procedure>
+	
+	<procedure id="aegParametersGIACS021" parameterClass="java.util.HashMap">
+		BEGIN
+			GIAC_TAX_PAYMENTS_PKG.aeg_parameters_giacs021(#gaccTranId#, #fundCd#, #branchCd#, #userId#);
+		END;
+	</procedure>
+	
+</sqlMap>

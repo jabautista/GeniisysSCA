@@ -1,0 +1,386 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISLossExp">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIISLossExp" type="com.geniisys.common.entity.GIISLossExp"/>
+	
+	<resultMap class="GIISLossExp" 		id="GIISLossExpResultMap">
+		<result property="lossExpCd"		column="LOSS_EXP_CD"/>
+		<result property="lossExpDesc"		column="LOSS_EXP_DESC"/>
+		<result property="sumDedAmt"		column="SUM_DED_AMT"/>
+		<result property="sublineCd"		column="SUBLINE_CD"/>
+		<result property="deductibleRate"	column="DEDUCTIBLE_RATE"/>
+		<result property="compSw"			column="COMP_SW"/>
+		<result property="partSw"			column="PART_SW"/>
+		<result property="rowNum"			column="ROWNUM_"/>
+		<result property="rowCount"			column="COUNT_"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap"  id="GIISLossExpForDedResultMap">
+		<result property="dedCd"			column="DED_CD"/>
+		<result property="dedTitle"			column="DED_TITLE"/>
+		<result property="dedType"			column="DED_TYPE"/>
+		<result property="dedRate"			column="DED_RATE"/>
+		<result property="dedAmount"		column="DED_AMOUNT"/>
+		<result property="dedText"			column="DED_TEXT"/>
+		<result property="dedSublineCd"		column="DED_SUBLINE_CD"/>
+		<result property="compSw"			column="COMP_SW"/>
+		<result property="aggregateSw"		column="AGGREGATE_SW"/>
+		<result property="ceilingSw"		column="CEILING_SW"/>
+		<result property="minAmt"			column="MIN_AMT"/>
+		<result property="maxAmt"			column="MAX_AMT"/>
+		<result property="rangeSw"			column="RANGE_SW"/>
+		<result property="deductibleType"	column="DEDUCTIBLE_TYPE"/>
+		<result property="dedAmt"			column="DED_AMT"/>
+		<result property="rowNum"			column="ROWNUM_"/>
+		<result property="rowCount"			column="COUNT_"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap"    id="MCEvalDeductibleListResultMap">
+		<result property="lossExpCd"		column="LOSS_EXP_CD"/>
+		<result property="lossExpDesc"		column="LOSS_EXP_DESC"/>
+		<result property="amount"			column="AMOUNT"/>
+		<result property="sublineCd"		column="SUBLINE_CD"/>
+		<result property="dedRate"			column="DED_RATE"/>
+		<result property="compSw"			column="COMP_SW"/>
+		<result property="dedText"			column="DED_TEXT"/>
+		<result property="rowNum"			column="ROWNUM_"/>
+		<result property="rowCount"			column="COUNT_"/>
+	</resultMap>
+	
+	<select id="getGiisLossExpList" resultMap="GIISLossExpResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIIS_LOSS_EXP_PKG.get_giis_loss_exp_list(#claimId#, #clmLossId#, #itemNo#, #perilCd#, #payeeType#, #lineCd#, #sublineCd#, #polIssCd#, #issueYy#, #polSeqNo#, #renewNo#, #lossDate#))
+		          		WHERE (UPPER(loss_exp_cd) LIKE UPPER(NVL(#findText#, loss_exp_cd))
+		          		   OR UPPER(loss_exp_desc) LIKE UPPER(NVL(#findText#, loss_exp_desc)))
+		          		<isNotNull property="notIn">
+						   AND loss_exp_cd NOT IN $notIn$
+						</isNotNull>
+		          		<isEqual property="sortColumn" compareValue="lossExpCd">
+			            	ORDER BY loss_exp_cd
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="lossExpDesc">
+			            	ORDER BY loss_exp_desc
+			          	</isEqual>
+			           	<isNotNull property="sortColumn">
+			              	<isEqual property="ascDescFlg" compareValue="ASC">
+			              		ASC
+			              	</isEqual>
+			              	<isEqual property="ascDescFlg" compareValue="DESC">
+			              		DESC
+			              	</isEqual>
+			            </isNotNull>  
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GIIS_LOSS_EXP_PKG.get_giis_loss_exp_list(#claimId#, #clmLossId#, #itemNo#, #perilCd#, #payeeType#, #lineCd#, #sublineCd#, #polIssCd#, #issueYy#, #polSeqNo#, #renewNo#, #lossDate#))
+		                WHERE (UPPER(loss_exp_cd) LIKE UPPER(NVL(#findText#, loss_exp_cd))
+		          		   OR UPPER(loss_exp_desc) LIKE UPPER(NVL(#findText#, loss_exp_desc)))
+		          		   <isNotNull property="notIn">
+							   AND loss_exp_cd NOT IN $notIn$
+							</isNotNull>
+		          		   ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiisLossExpForDedList" resultMap="GIISLossExpForDedResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIIS_LOSS_EXP_PKG.get_giis_loss_exp_lov_for_ded(#claimId#, #clmLossId#, #itemNo#, #perilCd#, #payeeType#, #lineCd#, #sublineCd#, #polIssCd#, #issueYy#, #polSeqNo#, #renewNo#, #lossDate#, #polEffDate#, #expiryDate#))
+		          		WHERE (UPPER(ded_cd) LIKE UPPER(NVL(#findText#, ded_cd))
+		          		   OR UPPER(ded_title) LIKE UPPER(NVL(#findText#, ded_title)))
+		          		<isEqual property="sortColumn" compareValue="dedCd">
+			            	ORDER BY ded_cd
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="dedTitle">
+			            	ORDER BY ded_title
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="dedType">
+			            	ORDER BY ded_type
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="dedRate">
+			            	ORDER BY ded_rate
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="dedAmount">
+			            	ORDER BY ded_amount
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="dedText">
+			            	ORDER BY ded_text
+			          	</isEqual>
+			           	<isNotNull property="sortColumn">
+			              	<isEqual property="ascDescFlg" compareValue="ASC">
+			              		ASC
+			              	</isEqual>
+			              	<isEqual property="ascDescFlg" compareValue="DESC">
+			              		DESC
+			              	</isEqual>
+			            </isNotNull>  
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GIIS_LOSS_EXP_PKG.get_giis_loss_exp_lov_for_ded(#claimId#, #clmLossId#, #itemNo#, #perilCd#, #payeeType#, #lineCd#, #sublineCd#, #polIssCd#, #issueYy#, #polSeqNo#, #renewNo#, #lossDate#, #polEffDate#, #expiryDate#))
+		                WHERE (UPPER(ded_cd) LIKE UPPER(NVL(#findText#, ded_cd))
+		          		   OR UPPER(ded_title) LIKE UPPER(NVL(#findText#, ded_title)))
+		          		   ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getMCEvalDeductibleListing" resultMap="MCEvalDeductibleListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIIS_LOSS_EXP_PKG.get_deduct_list_for_mc_eval(#claimId#, #lineCd#, #sublineCd#, #polIssCd#, #issueYy#, #polSeqNo#, #renewNo#, #lossDate#, #itemNo#, #perilCd#))
+		          		WHERE (UPPER(loss_exp_cd) LIKE UPPER(NVL(#findText#, loss_exp_cd))
+		          		   OR UPPER(loss_exp_desc) LIKE UPPER(NVL(#findText#, loss_exp_desc)))
+			          	<isEqual property="sortColumn" compareValue="lossExpDesc">
+			            	ORDER BY loss_exp_desc
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="amount">
+			            	ORDER BY amount
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="dedRate">
+			            	ORDER BY ded_rate
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="sublineCd">
+			            	ORDER BY subline_cd
+			          	</isEqual>
+			           	<isNotNull property="sortColumn">
+			              	<isEqual property="ascDescFlg" compareValue="ASC">
+			              		ASC
+			              	</isEqual>
+			              	<isEqual property="ascDescFlg" compareValue="DESC">
+			              		DESC
+			              	</isEqual>
+			            </isNotNull>  
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GIIS_LOSS_EXP_PKG.get_deduct_list_for_mc_eval(#claimId#, #lineCd#, #sublineCd#, #polIssCd#, #issueYy#, #polSeqNo#, #renewNo#, #lossDate#, #itemNo#, #perilCd#))
+		                WHERE (UPPER(loss_exp_cd) LIKE UPPER(NVL(#findText#, loss_exp_cd))
+		          		   OR UPPER(loss_exp_desc) LIKE UPPER(NVL(#findText#, loss_exp_desc)))
+		          		   ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<!-- for GICLS104: Loss/Expense Maintenance -->
+	<resultMap class="GIISLossExp" id="giisLossExpListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="LINE_CD"   			property="lineCd"/>
+		<result column="MENU_LINE_CD"   	property="menuLineCd"/>
+		<result column="LOSS_EXP_CD" 		property="lossExpCd"/>
+		<result column="LOSS_EXP_DESC" 		property="lossExpDesc"/>
+		<result column="LOSS_EXP_TYPE" 		property="lossExpType"/>
+		<result column="LOSS_EXP_TYPE_SP"	property="lossExpTypeSp"/>
+		<result column="OLD_LOSS_EXP_TYPE"	property="oldLossExpType"/>
+		<result column="COMP_SW" 			property="compSw"/>
+		<result column="PART_SW" 			property="partSw"/>
+		<result column="LPS_SW" 			property="lpsSw"/>
+		<result column="PERIL_CD" 			property="perilCd"/>
+		<result column="PERIL_NAME" 		property="perilName"/>
+		<result column="SUBLINE_CD" 		property="sublineCd"/>
+		<result column="USER_ID"     		property="userId"/>
+		<result column="LAST_UPDATE" 		property="lastUpdate"/>
+		<result column="REMARKS"     		property="remarks"/>
+	</resultMap>
+	
+	<select id="getGicls104RecList" resultMap="giisLossExpListResultMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(gicls104_pkg.get_rec_list(#lineCd#, #lossExpCd#, #lossExpDesc#, #lossExpType#, #perilCd#, #compSw#, #partSw#))
+		  	      		   <isNotNull property="filter">
+		          			 WHERE 1 = 1
+		          			 	<isNotEmpty prepend="AND"  property="lossExpType">
+		          			 		UPPER(loss_exp_type) LIKE UPPER(#lossExpType#) OR
+		          			 		UPPER(loss_exp_type_sp) LIKE UPPER(#lossExpType#)
+		          			 	</isNotEmpty>
+		          			 	<isNotEmpty prepend="AND"  property="lpsSw">
+		          			 		UPPER(NVL(lps_sw, 'N')) = UPPER(#lpsSw#)
+		          			 	</isNotEmpty>
+		          			 	<isNotEmpty prepend="AND"  property="partSw">
+		          			 		UPPER(NVL(part_sw, 'N')) = UPPER(#partSw#)
+		          			 	</isNotEmpty>
+		          			 	<isNotEmpty prepend="AND"  property="perilName">
+		          			 		UPPER(peril_name) LIKE UPPER(#perilName#)
+		          			 	</isNotEmpty>
+		          			</isNotNull>
+		                          <isEqual property="sortColumn" compareValue="lossExpType">
+					              		ORDER BY loss_exp_type
+					              </isEqual>
+					              <isEqual property="sortColumn" compareValue="compSw">
+					              		ORDER BY comp_sw
+					              </isEqual>
+					              <isEqual property="sortColumn" compareValue="lossExpCd">
+					              		ORDER BY loss_exp_cd
+					              </isEqual>
+					              <isEqual property="sortColumn" compareValue="lossExpDesc">
+					              		ORDER BY loss_exp_desc
+					              </isEqual>
+					              <isEqual property="sortColumn" compareValue="perilCd perilName">
+					              		ORDER BY peril_cd
+					              </isEqual>
+					              <isEqual property="sortColumn" compareValue="partSw">
+					              		ORDER BY part_sw
+					              </isEqual>
+					              <isEqual property="sortColumn" compareValue="lpsSw">
+					              		ORDER BY lps_sw
+					              </isEqual>
+					      <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(gicls104_pkg.get_rec_list(#lineCd#, #lossExpCd#, #lossExpDesc#, #lossExpType#, #perilCd#, #compSw#, #partSw#))
+		                   <isNotNull property="filter">
+		          			 WHERE 1 = 1
+		          			 	<isNotEmpty prepend="AND"  property="lossExpType">
+		          			 		UPPER(loss_exp_type) LIKE UPPER(#lossExpType#) OR
+		          			 		UPPER(loss_exp_type_sp) LIKE UPPER(#lossExpType#)
+		          			 	</isNotEmpty>
+		          			 	<isNotEmpty prepend="AND"  property="lpsSw">
+		          			 		UPPER(NVL(lps_sw, 'N')) = UPPER(#lpsSw#)
+		          			 	</isNotEmpty>
+		          			 	<isNotEmpty prepend="AND"  property="partSw">
+		          			 		UPPER(NVL(part_sw, 'N')) = UPPER(#partSw#)
+		          			 	</isNotEmpty>
+		          			 	<isNotEmpty prepend="AND"  property="perilName">
+		          			 		UPPER(peril_name) LIKE UPPER(#perilName#)
+		          			 	</isNotEmpty>
+		          			</isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setLossExp" parameterClass="GIISLossExp">
+	    DECLARE
+	    	v_rec giis_loss_exp%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			<!-- v_rec.line_cd 	:= #lineCd#;
+ 			v_rec.loss_exp_cd 		:= #lossExpCd#;
+ 			v_rec.loss_exp_desc		:= #lossExpDesc#;
+ 			v_rec.loss_exp_type		:= #lossExpType#;
+ 			v_rec.comp_sw			:= #compSw#;
+ 			v_rec.part_sw			:= #partSw#;
+ 			v_rec.lps_sw			:= #lpsSw#;
+ 			v_rec.peril_cd			:= #perilCd#;
+ 			v_rec.subline_cd		:= #sublineCd#;
+ 			v_rec.user_id 			:= #userId#;
+ 			v_rec.remarks 			:= #remarks#;
+ 			
+ 			Gicls104_pkg.set_rec(v_rec); -->
+ 			
+ 			Gicls104_pkg.set_rec(#lineCd#, #lossExpCd#, #lossExpDesc#, #lossExpType#, #oldLossExpType#, 
+ 								 #compSw#, #partSw#, #lpsSw#, #perilCd#, #sublineCd#, #remarks#, #userId#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteLossExp" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			Gicls104_pkg.val_del_rec(#lineCd#, #sublineCd#, #lossExpCd#, #lossExpType#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddLossExp" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			Gicls104_pkg.val_add_rec(#lineCd#, #lossExpCd#, #lossExpType#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delLossExp" parameterClass="GIISLossExp">
+		BEGIN
+ 			Gicls104_pkg.del_rec(#lineCd#, #lossExpCd#, #lossExpType#);
+ 		END;
+ 	</delete>
+ 	
+ 	<parameterMap class="map"  id="valPartSwParamMap">
+		<parameter property="lossExpCd" 	jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"/>
+		<parameter property="partVar" 		jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT"/>
+		<parameter property="partExists" 	jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT"/>
+		<parameter property="lpsExists" 	jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT"/>
+	</parameterMap>
+ 	<procedure id="valPartSw" parameterMap="valPartSwParamMap">
+ 		CALL GICLS104_PKG.validate_part_sw(?, ?, ?, ?)
+ 	</procedure>
+ 	
+ 	<select id="valLpsSw" parameterClass="java.lang.String" resultClass="java.lang.String">
+ 		SELECT GICLS104_PKG.validate_lps_sw(#lossExpCd#)
+ 		  FROM dual
+ 	</select>
+	
+	<parameterMap class="map"  id="valCompSwParamMap">
+		<parameter property="lineCd"	 	jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"/>
+		<parameter property="lossExpCd" 	jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"/>
+		<parameter property="lossExpDesc" 	jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"/>
+		<parameter property="lossExpType"	jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"/>
+		<parameter property="variable" 		jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT"/>
+		<parameter property="compSw" 		jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT"/>
+	</parameterMap>
+ 	<procedure id="valCompSw" parameterMap="valCompSwParamMap">
+ 		CALL GICLS104_PKG.validate_comp_sw(?, ?, ?, ?, ?, ?)
+ 	</procedure>
+ 	
+ 	<select id="valLossExpType" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+ 		SELECT Gicls104_pkg.validate_loss_exp_type(#lineCd#, #sublineCd#, #lossExpCd#, #lossExpType#)
+ 		  FROM dual
+ 	</select>
+ 	
+ 	<resultMap class="java.util.HashMap" id="getGicls104PerilLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="PERIL_CD"			property="perilCd"/>
+		<result column="PERIL_NAME"			property="perilName"/>
+	</resultMap>
+	<select id="getGicls104PerilLOV" resultMap="getGicls104PerilLOVMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(gicls104_pkg.get_peril_lov(#lineCd#, #findText#))
+		                  <isNotNull property="sortColumn">
+			                  	<isEqual property="sortColumn" compareValue="perilCd">
+				              		ORDER BY peril_cd
+				              	</isEqual>
+				              	<isEqual property="sortColumn" compareValue="perilName">
+				              		ORDER BY peril_name
+				              	</isEqual>			              
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(gicls104_pkg.get_peril_lov(#lineCd#, #findText#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<parameterMap class="map"  id="origSurplusAmtMap"> <!-- Added by Kenneth L. 06.11.2015 SR 3626 @lines 374 - 384 -->
+		<parameter property="claimId"		jdbcType="NUMBER" 	mode="IN"/>
+		<parameter property="itemNo" 		jdbcType="NUMBER" 	mode="IN"/>
+		<parameter property="lossExpCd"		jdbcType="NUMBER" 	mode="IN"/>
+		<parameter property="tag" 			jdbcType="VARCHAR" 	mode="IN"/>
+		<parameter property="amount" 		jdbcType="VARCHAR"	mode="OUT"/>
+	</parameterMap>
+
+ 	<procedure id="getOrigSurplusAmt" parameterMap="origSurplusAmtMap">
+ 		CALL GIIS_LOSS_EXP_PKG.get_orig_surplus_amt(?, ?, ?, ?, ?)			
+ 	</procedure>
+ 	
+</sqlMap>

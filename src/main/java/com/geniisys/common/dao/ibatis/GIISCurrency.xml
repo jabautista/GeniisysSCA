@@ -1,0 +1,433 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISCurrency">
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+
+	<typeAlias alias="GIISCurrency" type="com.geniisys.common.entity.GIISCurrency" />
+	
+	<resultMap id="giisCurrencyListingMap" class="GIISCurrency">
+		<result column="MAIN_CURRENCY_CD" 	property="code" 		jdbcType="VARCHAR" />
+		<result column="CURRENCY_DESC" 		property="desc" 		jdbcType="VARCHAR" />
+		<result column="CURRENCY_RT" 		property="valueFloat" 	jdbcType="NUMBER" />
+		<result column="SHORT_NAME" 		property="shortName" 	jdbcType="VARCHAR" />
+	</resultMap>
+	
+	<resultMap id="dcbCurrencyLOVMap" class="GIISCurrency">
+		<result column="short_name"			property="shortName"	jdbcType="VARCHAR" />
+		<result column="currency_desc"		property="desc"			jdbcType="VARCHAR" />
+		<result column="main_currency_cd"	property="code"			jdbcType="INTEGER" />
+		<result column="currency_rt"		property="currencyRt"	jdbcType="NUMBER" />
+		<result column="curr_rt"			property="currRt"		jdbcType="VARCHAR" />
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="currencyResultMapTG">
+		<result column="MAIN_CURRENCY_CD" 	property="mainCurrencyCd" />
+		<result column="CURRENCY_DESC" 		property="currencyDesc" />
+		<result column="CURRENCY_RT" 		property="currencyRt" />
+		<result column="SHORT_NAME" 		property="shortName" />
+		<result column="rownum_" 			property="rowNum" />
+		<result column="count_"				property="rowCount" />
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="currencyResultMapTG2">
+		<result column="MAIN_CURRENCY_CD" 	property="mainCurrencyCd" />
+		<result column="CURRENCY_DESC" 		property="currencyDesc" />
+		<result column="CURRENCY_RT" 		property="currencyRt" />
+		<result column="SHORT_NAME" 		property="shortName" />
+		<result column="REMARKS" 		    property="remarks" />
+		<result column="rownum_" 			property="rowNum" />
+		<result column="count_"				property="rowCount" />
+	</resultMap>
+	
+	<select id="getGiisCurrencyLOVListing" resultMap="giisCurrencyListingMap" parameterClass="java.util.HashMap">
+			SELECT *
+  		  FROM(SELECT rownum rownum_,
+  		               b.count_,
+  		               a.*
+          		  FROM (SELECT * FROM TABLE(GIIS_CURRENCY_PKG.get_currency_lov(#keyword#)) 
+ 		                  <isEqual property="sortColumn" compareValue="mainCurrencyCd">
+			              		ORDER BY MAIN_CURRENCY_CD
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="currencyDesc">
+			              		ORDER BY CURRENCY_DESC
+			              </isEqual>	
+			              <isEqual property="sortColumn" compareValue="shortName">
+			              		ORDER BY SHORT_NAME
+			              </isEqual>	
+			              <isEqual property="sortColumn" compareValue="currencyRt">
+			              		ORDER BY CURRENCY_RT
+			              </isEqual>	
+		              	  <isNotNull>
+		              	  		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              	    </isEqual>
+			              	    <isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              	    </isEqual>
+		              	  </isNotNull>
+  		                  ) a,
+               		      (SELECT count(*) count_  
+               		     	 FROM (SELECT * FROM TABLE(GIIS_CURRENCY_PKG.get_currency_lov(#keyword#)))
+               		      ) b)
+ 		 			WHERE rownum_ BETWEEN #from# AND #to#
+ 		 			ORDER BY currency_desc
+	</select>
+	
+	<select id="getDCBCurrencyLOV" resultMap="dcbCurrencyLOVMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM TABLE(giis_currency_pkg.get_dcb_currency_lov(#gibrBranchCd#, #gfunFundCd#, #dcbNo#, #dcbDate#, #payMode#, #keyword#))
+	</select>
+	
+	<select id="getCurrencyLOVByShortName" parameterClass="java.lang.String" resultMap="giisCurrencyListingMap">
+		SELECT * FROM TABLE(GIIS_CURRENCY_PKG.get_currency_lov_by_short_name(#shortName#)) 
+		ORDER BY currency_desc
+	</select>
+	
+	<select id="getGiisCurrencyLOV" resultMap="currencyResultMapTG">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (Giis_Currency_Pkg.get_currency_list)
+		                 <isNotNull property="findText">
+				         WHERE (UPPER(MAIN_CURRENCY_CD) LIKE UPPER(#findText#) 
+				         	 OR UPPER(CURRENCY_DESC) LIKE UPPER(#findText#)
+				         	 OR UPPER(SHORT_NAME) LIKE UPPER(#findText#) 
+				         	 OR UPPER(CURRENCY_RT) LIKE UPPER(#findText#)
+				         	 )
+				         </isNotNull>          
+			          	  <isEqual property="sortColumn" compareValue="mainCurrencyCd">
+			              		ORDER BY MAIN_CURRENCY_CD
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="currencyDesc">
+				              		ORDER BY CURRENCY_DESC
+				          </isEqual>
+			              <isEqual property="sortColumn" compareValue="shortName">
+			              		ORDER BY SHORT_NAME
+			              </isEqual>	
+			              <isEqual property="sortColumn" compareValue="currencyRt">
+			              		ORDER BY CURRENCY_RT
+			              </isEqual>	
+			              <isNotNull property="sortColumn">
+				            <isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (Giis_Currency_Pkg.get_currency_list) 
+			             <isNotNull property="findText">
+				         WHERE (UPPER(MAIN_CURRENCY_CD) LIKE UPPER(#findText#) 
+				         	 OR UPPER(CURRENCY_DESC) LIKE UPPER(#findText#)
+				         	 OR UPPER(SHORT_NAME) LIKE UPPER(#findText#) 
+				         	 OR UPPER(CURRENCY_RT) LIKE UPPER(#findText#)
+				         	 )
+				         </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+		 	ORDER BY CURRENCY_DESC
+	</select>
+	
+	<select id="getCurrencyList" resultMap="currencyResultMapTG2">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (Giis_Currency_Pkg.get_currency_listj)
+		                 <isNotNull property="findText">
+				         WHERE (UPPER(MAIN_CURRENCY_CD) LIKE UPPER(#findText#) 
+				         	 OR UPPER(CURRENCY_DESC) LIKE UPPER(#findText#)
+				         	 OR UPPER(SHORT_NAME) LIKE UPPER(#findText#) 
+				         	 OR UPPER(CURRENCY_RT) LIKE UPPER(#findText#)
+				         	 OR UPPER(REMARKS) LIKE UPPER(#findText#)
+				         	 )
+				         </isNotNull>          
+			          	  <isEqual property="sortColumn" compareValue="mainCurrencyCd">
+			              		ORDER BY MAIN_CURRENCY_CD
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="currencyDesc">
+				              		ORDER BY CURRENCY_DESC
+				          </isEqual>
+			              <isEqual property="sortColumn" compareValue="shortName">
+			              		ORDER BY SHORT_NAME
+			              </isEqual>	
+			              <isEqual property="sortColumn" compareValue="currencyRt">
+			              		ORDER BY CURRENCY_RT
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="remarks">
+			              		ORDER BY REMARKS
+			              </isEqual>	
+			              <isNotNull property="sortColumn">
+				            <isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (Giis_Currency_Pkg.get_currency_listj) 
+			             <isNotNull property="findText">
+				         WHERE (UPPER(MAIN_CURRENCY_CD) LIKE UPPER(#findText#) 
+				         	 OR UPPER(CURRENCY_DESC) LIKE UPPER(#findText#)
+				         	 OR UPPER(SHORT_NAME) LIKE UPPER(#findText#) 
+				         	 OR UPPER(CURRENCY_RT) LIKE UPPER(#findText#)
+				         	 OR UPPER(REMARKS) LIKE UPPER(#findText#)
+				         	 )
+				         </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+		 	ORDER BY CURRENCY_DESC
+	</select>
+	
+	<!-- Joms 05.23.2013 -->
+	<resultMap class="java.util.HashMap" id="currencyResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="code"         		column="main_currency_cd"/>
+		<result property="currencyDesc" 		column="currency_desc"/>
+		<result property="currencyRt" 		    column="currency_rt"/>
+		<result property="shortName" 		    column="short_name"/>
+		<result property="userId" 		        column="user_id"/>
+		<result property="lastUpdate" 		    column="last_update"/>
+		<result property="remarks" 		        column="remarks"/>
+	</resultMap>
+	
+	<select id="showCurrencyList" resultMap="currencyResultMap">
+		SELECT *
+  	      FROM (SELECT ROWNUM rownum_, b.count_, a.*
+                  FROM (SELECT *
+                          FROM TABLE (giiss009_pkg.get_currency_list)
+                        <isNotNull property="filter">
+                        	WHERE 1 = 1
+                        	<isNotEmpty prepend="AND" property="code">
+								main_currency_cd LIKE #code#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="currencyDesc">
+								UPPER(currency_desc) LIKE UPPER(#currencyDesc#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="currencyRt">
+								UPPER(currency_rt) LIKE UPPER(#currencyRt#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="shortName">
+								UPPER(short_name) LIKE UPPER(#shortName#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="remarks">
+								UPPER(remarks) LIKE UPPER(#remarks#)
+							</isNotEmpty>
+                        </isNotNull>
+                        <isEqual property="sortColumn" compareValue="code">
+		              		ORDER BY main_currency_cd
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="currencyDesc">
+		              		ORDER BY currency_desc
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="currencyRt">
+		              		ORDER BY currency_rt
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="shortName">
+		              		ORDER BY short_name
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="remarks">
+		              		ORDER BY remarks
+			            </isEqual>
+			            <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	</isNotNull>
+                          ) a,
+               (SELECT COUNT (*) count_
+                  FROM TABLE (giiss009_pkg.get_currency_list)
+                  <isNotNull property="filter">
+                        WHERE 1 = 1
+                        <isNotEmpty prepend="AND" property="code">
+							main_currency_cd LIKE #code#
+						</isNotEmpty>
+						<isNotEmpty prepend="AND" property="currencyDesc">
+							UPPER(currency_desc) LIKE UPPER(#currencyDesc#)
+						</isNotEmpty>
+						<isNotEmpty prepend="AND" property="currencyRt">
+							UPPER(currency_rt) LIKE UPPER(#currencyRt#)
+						</isNotEmpty>
+						<isNotEmpty prepend="AND" property="shortName">
+							UPPER(short_name) LIKE UPPER(#shortName#)
+						</isNotEmpty>
+						<isNotEmpty prepend="AND" property="remarks">
+							UPPER(remarks) LIKE UPPER(#remarks#)
+						</isNotEmpty>
+                   </isNotNull>
+                  ) b)
+         WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getAllMainCurrencyCd" resultMap="currencyResultMap">
+	   SELECT *
+         FROM (SELECT ROWNUM rownum_, b.count_, a.*
+                 FROM (SELECT *
+                         FROM TABLE (giiss009_pkg.get_all_main_currency_cd)) a,
+                      (SELECT COUNT (*) count_
+                         FROM TABLE (giiss009_pkg.get_all_main_currency_cd)) b)
+	</select>
+	
+	<select id="getAllShortName" resultMap="currencyResultMap">
+	   SELECT *
+         FROM (SELECT ROWNUM rownum_, b.count_, a.*
+                 FROM (SELECT *
+                         FROM TABLE (giiss009_pkg.get_all_short_name)) a,
+                      (SELECT COUNT (*) count_
+                         FROM TABLE (giiss009_pkg.get_all_short_name)) b)
+	</select>
+	
+	<select id="getAllCurrencyDesc" resultMap="currencyResultMap">
+	   SELECT *
+         FROM (SELECT ROWNUM rownum_, b.count_, a.*
+                 FROM (SELECT *
+                         FROM TABLE (giiss009_pkg.get_all_currency_desc)) a,
+                      (SELECT COUNT (*) count_
+                         FROM TABLE (giiss009_pkg.get_all_currency_desc)) b)
+	</select>
+	
+	<select id="validateDeleteCurrency" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT giiss009_pkg.validate_delete_currency(#code#) FROM DUAL
+	</select>
+	
+	<select id="validateMainCurrencyCd" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT giiss009_pkg.validate_main_currency_cd(#code#) FROM DUAL
+	</select>
+	
+	<select id="validateShortName" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT giiss009_pkg.validate_short_name(#shortName#) FROM DUAL
+	</select>
+	
+	<select id="validateCurrencyDesc" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT giiss009_pkg.validate_currency_desc(#currencyDesc#) FROM DUAL
+	</select>
+	
+	<delete id="deleteGIISCurrency" parameterClass="com.geniisys.common.entity.GIISCurrency">
+  		BEGIN
+  			giiss009_pkg.delete_giis_currency(#code#);
+  		END;
+  	</delete>
+  	
+  	<procedure id="setGIISCurrency" parameterClass="com.geniisys.common.entity.GIISCurrency">
+		DECLARE
+		  v_currency GIIS_CURRENCY%ROWTYPE;
+		BEGIN
+		  giis_users_pkg.app_user := #appUser#;
+		  		 
+		  v_currency.main_currency_cd 	:= #code#;
+		  v_currency.currency_desc  	:= #currencyDesc#;
+		  v_currency.currency_rt     	:= #currencyRt#;
+		  v_currency.short_name     	:= #shortName#;
+          v_currency.user_id 		    := #appUser#;
+		  v_currency.remarks		 	:= #remarks#;
+		  giiss009_pkg.set_giis_currency(v_currency);
+		END;
+	</procedure>
+	
+	<select id="getCurrencyByShortname" resultClass="java.math.BigDecimal">
+		SELECT Giis_Currency_Pkg.get_currency_rt_by_shortname(#shortName#) FROM DUAL
+	</select> 
+	
+	<resultMap class="java.util.HashMap" id="giacs035CurrencyLovResultMap">
+		<result column="short_name"			property="shortName" />
+		<result column="currency_rt"		property="currencyRt" />
+		<result column="currency_cd"		property="currencyCd" />
+		<result column="rownum_" 			property="rowNum" />
+		<result column="count_"				property="rowCount" />
+	</resultMap>
+	
+	<select id="showGiacs035CurrencyLov" resultMap="giacs035CurrencyLovResultMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+					   b.count_, 
+					   a.* 
+				  FROM (SELECT * 
+						  FROM TABLE (giis_currency_pkg.get_giacs035currency_lov(#moduleId#, #userId#, #findText#, #shortName#))
+						  <isEqual property="sortColumn" compareValue="shortName">
+								ORDER BY short_name
+						  </isEqual>
+						  <isEqual property="sortColumn" compareValue="currencyRt">
+								ORDER BY currency_rt
+						  </isEqual>
+						  <isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+						  </isNotNull>
+						  ) a, 
+					   (SELECT count(*) count_ 
+						  FROM TABLE (giis_currency_pkg.get_giacs035currency_lov(#moduleId#, #userId#, #findText#, #shortName#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="valDeleteCurrency" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss009_pkg.val_del_rec(#mainCurrencyCd#);
+ 		END;
+ 	</procedure>
+
+	<resultMap class="java.util.HashMap" id="GIACS035CurrencyLOVMap" extends="BaseEntity.TableGridResultMap"> <!-- dren 07.16.2015 : SR 0017729 - Added GIACS035CurrencyLOV - Start -->
+		<result column="MAIN_CURRENCY_CD" 	property="code" 			jdbcType="VARCHAR" />
+		<result column="CURRENCY_DESC" 		property="currencyDesc" 	jdbcType="VARCHAR" />
+		<result column="CURRENCY_RT" 		property="currencyRt" 		jdbcType="NUMBER" />
+		<result column="SHORT_NAME" 		property="shortName" 		jdbcType="VARCHAR" />
+	</resultMap>
+
+	<select id="getGIACS035CurrencyLOV" resultMap="GIACS035CurrencyLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (Giis_Currency_Pkg.GET_GIACS035_CURRENY_LOV(#search#,#gibrBranchCd#,#gfunFundCd#,#dspDcbDate#,#payMode#,#dcbNo#))		          
+		                 <isNotNull property="findText">
+					         WHERE (UPPER(short_name) LIKE (#findText#))
+				         </isNotNull>          
+			          	  <isNotNull property="sortColumn">
+				              <isEqual property="sortColumn" compareValue="shortName">
+				              		ORDER BY short_name
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="currencyDesc">
+				              		ORDER BY currency_desc
+				              </isEqual>	
+				              <isEqual property="sortColumn" compareValue="currencyRt">
+				              		ORDER BY currency_rt
+				              </isEqual>					              	                           				              
+				          	  <isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              </isNotNull>
+				          </isNotNull>    
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (Giis_Currency_Pkg.GET_GIACS035_CURRENY_LOV(#search#,#gibrBranchCd#,#gfunFundCd#,#dspDcbDate#,#payMode#,#dcbNo#))
+			              <isNotNull property="findText">
+					          WHERE (UPPER(short_name) LIKE (#findText#))
+				          </isNotNull> 
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>	<!-- dren 07.16.2015 : SR 0017729 - Added GIACS035CurrencyLOV - End -->	
+	
+</sqlMap>

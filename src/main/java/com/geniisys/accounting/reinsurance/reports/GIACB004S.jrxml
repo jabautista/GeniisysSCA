@@ -1,0 +1,809 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIACB004S" language="groovy" pageWidth="800" pageHeight="612" whenNoDataType="BlankPage" columnWidth="760" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="ireport.zoom" value="1.3636363636363749"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="P_DATE" class="java.util.Date"/>
+	<parameter name="P_USER_ID" class="java.lang.String"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select * from table(GIACB004S_PKG.populate_GIACB004S_main(TO_DATE($P{P_DATE}), $P{P_USER_ID}))]]>
+	</queryString>
+	<field name="COMPANY_NAME" class="java.lang.String"/>
+	<field name="COMPANY_ADDRESS" class="java.lang.String"/>
+	<field name="LINE_CD" class="java.lang.String"/>
+	<field name="SUBLINE_CD" class="java.lang.String"/>
+	<field name="PERIL_CD" class="java.math.BigDecimal"/>
+	<field name="PREM_INVOICE" class="java.math.BigDecimal"/>
+	<field name="COMM_INVOICE" class="java.math.BigDecimal"/>
+	<field name="TAX_AMT" class="java.math.BigDecimal"/>
+	<field name="RI_COMM_VAT" class="java.math.BigDecimal"/>
+	<field name="CURRENCY_RT" class="java.math.BigDecimal"/>
+	<field name="PREM_AMT" class="java.math.BigDecimal"/>
+	<field name="TSI_AMT" class="java.math.BigDecimal"/>
+	<field name="RI_COMM_AMT" class="java.math.BigDecimal"/>
+	<field name="PERIL_NAME" class="java.lang.String"/>
+	<field name="PREM_VAT" class="java.math.BigDecimal"/>
+	<field name="COMM_VAT" class="java.math.BigDecimal"/>
+	<field name="TSI_BASIC_AMT" class="java.math.BigDecimal"/>
+	<field name="LINE_NAME" class="java.lang.String"/>
+	<field name="SUBLINE_NAME" class="java.lang.String"/>
+	<field name="V_FLAG" class="java.lang.String"/>
+	<variable name="V_NET_PREM" class="java.math.BigDecimal">
+		<variableExpression><![CDATA[(($F{PREM_AMT} + $F{PREM_VAT})) - (($F{RI_COMM_AMT}+$F{COMM_VAT}))]]></variableExpression>
+	</variable>
+	<variable name="SUBLINE_SUM_TSI_AMT" class="java.math.BigDecimal" resetType="Group" resetGroup="SUBLINE_CD" calculation="Sum">
+		<variableExpression><![CDATA[$F{TSI_BASIC_AMT}]]></variableExpression>
+	</variable>
+	<variable name="SUBLINE_SUM_BASIC_TSI_AMT" class="java.math.BigDecimal" resetType="Group" resetGroup="SUBLINE_CD" calculation="Sum">
+		<variableExpression><![CDATA[$F{TSI_BASIC_AMT}]]></variableExpression>
+	</variable>
+	<variable name="SUBLINE_SUM_PREM_AMT" class="java.math.BigDecimal" resetType="Group" resetGroup="SUBLINE_CD" calculation="Sum">
+		<variableExpression><![CDATA[$F{PREM_AMT}]]></variableExpression>
+	</variable>
+	<variable name="SUBLINE_SUM_PREMVAT" class="java.math.BigDecimal" incrementType="Group" incrementGroup="SUBLINE_CD" calculation="Sum">
+		<variableExpression><![CDATA[$F{PREM_VAT}]]></variableExpression>
+	</variable>
+	<variable name="SUBLINE_SUM_RICOMMAMT" class="java.math.BigDecimal" resetType="Group" resetGroup="SUBLINE_CD" calculation="Sum">
+		<variableExpression><![CDATA[$F{RI_COMM_AMT}]]></variableExpression>
+	</variable>
+	<variable name="SUBLINE_SUM_COMMVAT" class="java.math.BigDecimal" resetType="Group" resetGroup="SUBLINE_CD" calculation="Sum">
+		<variableExpression><![CDATA[$F{COMM_VAT}]]></variableExpression>
+	</variable>
+	<variable name="SUBLINE_SUM_NET_PREM" class="java.math.BigDecimal" resetType="Group" resetGroup="SUBLINE_CD" calculation="Sum">
+		<variableExpression><![CDATA[$V{V_NET_PREM}]]></variableExpression>
+	</variable>
+	<variable name="LINE_SUM_TSIAMT" class="java.math.BigDecimal" resetType="Group" resetGroup="LINECD" calculation="Sum">
+		<variableExpression><![CDATA[$F{TSI_BASIC_AMT}*10]]></variableExpression>
+	</variable>
+	<variable name="LINE_SUM_PREM_AMT" class="java.math.BigDecimal" resetType="Group" resetGroup="LINECD" calculation="Sum">
+		<variableExpression><![CDATA[$F{PREM_AMT}]]></variableExpression>
+	</variable>
+	<variable name="LINE_SUM_PREMVAT" class="java.math.BigDecimal" resetType="Group" resetGroup="LINECD" calculation="Sum">
+		<variableExpression><![CDATA[$V{SUBLINE_SUM_PREMVAT}]]></variableExpression>
+	</variable>
+	<variable name="LINE_SUM_COMM_AMT" class="java.math.BigDecimal" resetType="Group" resetGroup="LINECD" calculation="Sum">
+		<variableExpression><![CDATA[$F{RI_COMM_AMT}]]></variableExpression>
+	</variable>
+	<variable name="LINE_SUM_COMM_VAT" class="java.math.BigDecimal" resetType="Group" resetGroup="LINECD" calculation="Sum">
+		<variableExpression><![CDATA[$F{COMM_VAT}]]></variableExpression>
+	</variable>
+	<variable name="LINE_SUM_V_NET_PREM" class="java.math.BigDecimal" resetType="Group" resetGroup="LINECD" calculation="Sum">
+		<variableExpression><![CDATA[$V{V_NET_PREM}]]></variableExpression>
+	</variable>
+	<variable name="SUM_TSI_AMT" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{TSI_BASIC_AMT}*10]]></variableExpression>
+	</variable>
+	<variable name="SUM_PREM_AMT" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{PREM_AMT}]]></variableExpression>
+	</variable>
+	<variable name="SUM_PREM_VAT" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{PREM_VAT}]]></variableExpression>
+	</variable>
+	<variable name="SUM_COMM_AMT" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{RI_COMM_AMT}]]></variableExpression>
+	</variable>
+	<variable name="SUM_COMM_VAT" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{COMM_VAT}]]></variableExpression>
+	</variable>
+	<variable name="SUM_NET_PREM" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$V{V_NET_PREM}]]></variableExpression>
+	</variable>
+	<group name="LINECD" isStartNewPage="true" isReprintHeaderOnEachPage="true">
+		<groupExpression><![CDATA[$F{LINE_CD}]]></groupExpression>
+		<groupHeader>
+			<band height="35">
+				<printWhenExpression><![CDATA[$F{V_FLAG} == "Y"]]></printWhenExpression>
+				<staticText>
+					<reportElement x="1" y="0" width="34" height="11"/>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[Line]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="24" y="13" width="165" height="11"/>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[PERIL]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="200" y="13" width="80" height="11"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[Total Sum Insured]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="291" y="13" width="80" height="11"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[Premium Amt]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="382" y="13" width="80" height="11"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[Premium VAT]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="473" y="13" width="80" height="11"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[Commission Amt]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="564" y="13" width="80" height="11"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[Commission VAT]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="655" y="13" width="80" height="11"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[Due from RI]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="24" y="24" width="165" height="11"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[--------------------------------------------------------------------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="200" y="24" width="80" height="11"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[------------------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="291" y="24" width="80" height="11"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[------------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="382" y="24" width="80" height="11"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[------------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="473" y="24" width="80" height="11"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[------------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="564" y="24" width="80" height="11"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[------------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="655" y="24" width="80" height="11"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[------------------------------------]]></text>
+				</staticText>
+				<textField isBlankWhenNull="true">
+					<reportElement x="39" y="0" width="105" height="11"/>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{LINE_NAME}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="35" y="0" width="4" height="11"/>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[:]]></text>
+				</staticText>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="25">
+				<printWhenExpression><![CDATA[$F{V_FLAG} == "Y"]]></printWhenExpression>
+				<staticText>
+					<reportElement x="119" y="2" width="65" height="11"/>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[Line Totals]]></text>
+				</staticText>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement x="291" y="2" width="80" height="11"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{LINE_SUM_PREM_AMT}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement x="382" y="2" width="80" height="11"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{LINE_SUM_PREMVAT}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement x="473" y="2" width="80" height="11"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{LINE_SUM_COMM_AMT}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement x="564" y="2" width="80" height="11"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{LINE_SUM_COMM_VAT}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement x="655" y="2" width="80" height="11"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{LINE_SUM_V_NET_PREM}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="200" y="13" width="80" height="11"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[------------------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="291" y="13" width="80" height="11"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[---------------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="382" y="13" width="80" height="11"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[---------------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="473" y="13" width="80" height="11"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[------------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="564" y="13" width="80" height="11"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[------------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="655" y="14" width="80" height="11"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[------------------------------------]]></text>
+				</staticText>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement x="200" y="2" width="80" height="11"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{LINE_SUM_TSIAMT}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="184" y="2" width="5" height="11"/>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[:]]></text>
+				</staticText>
+			</band>
+		</groupFooter>
+	</group>
+	<group name="SUBLINE_CD" isReprintHeaderOnEachPage="true">
+		<groupExpression><![CDATA[$F{SUBLINE_CD}]]></groupExpression>
+		<groupHeader>
+			<band height="16">
+				<printWhenExpression><![CDATA[$F{V_FLAG} == "Y"]]></printWhenExpression>
+				<textField isBlankWhenNull="true">
+					<reportElement x="39" y="3" width="105" height="11"/>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{SUBLINE_NAME}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="1" y="3" width="34" height="11"/>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[Subline]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="35" y="3" width="4" height="11"/>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[:]]></text>
+				</staticText>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="33">
+				<printWhenExpression><![CDATA[$F{V_FLAG} == "Y"]]></printWhenExpression>
+				<staticText>
+					<reportElement x="119" y="11" width="65" height="11"/>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[Subline Totals]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="200" y="0" width="80" height="11"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[------------------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="291" y="0" width="80" height="11"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[------------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="382" y="0" width="80" height="11"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[------------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="473" y="0" width="80" height="11"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[------------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="564" y="0" width="80" height="11"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[------------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="655" y="0" width="80" height="11"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[------------------------------------]]></text>
+				</staticText>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement x="291" y="11" width="80" height="11"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{SUBLINE_SUM_PREM_AMT}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement x="382" y="11" width="80" height="11"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{SUBLINE_SUM_PREMVAT}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement x="473" y="11" width="80" height="11"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{SUBLINE_SUM_RICOMMAMT}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement x="564" y="11" width="80" height="11"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{SUBLINE_SUM_COMMVAT}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement x="655" y="11" width="80" height="11"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{SUBLINE_SUM_NET_PREM}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="200" y="22" width="80" height="11"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[------------------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="382" y="22" width="80" height="11"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[------------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="473" y="22" width="80" height="11"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[------------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="564" y="22" width="80" height="11"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[------------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="655" y="22" width="80" height="11"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[------------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="291" y="22" width="80" height="11"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[------------------------------------]]></text>
+				</staticText>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement x="200" y="11" width="80" height="9"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{SUBLINE_SUM_TSI_AMT}*10]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="184" y="11" width="5" height="11"/>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[:]]></text>
+				</staticText>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band height="61" splitType="Stretch">
+			<textField isBlankWhenNull="true">
+				<reportElement x="144" y="0" width="464" height="11"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{COMPANY_NAME}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="144" y="11" width="464" height="11"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{COMPANY_ADDRESS}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="1" y="0" width="39" height="11"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[Run Date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1" y="11" width="39" height="11"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[Run Time]]></text>
+			</staticText>
+			<textField pattern="MM-dd-yyyy">
+				<reportElement x="44" y="0" width="100" height="11"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.util.Date"><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField pattern="hh:mm:ss a">
+				<reportElement x="44" y="11" width="100" height="11"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.util.Date"><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="144" y="27" width="464" height="11"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[INWARD FACULTATIVE ACCEPTANCES]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="144" y="39" width="464" height="11"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["For the month of " + (new SimpleDateFormat("MMMMM, yyyy").format($P{P_DATE})).toString()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="608" y="0" width="144" height="11"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[GIACB004S]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="40" y="11" width="4" height="11"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="40" y="0" width="4" height="11"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="608" y="11" width="132" height="11"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["Page "+$V{PAGE_NUMBER}+" of "]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="740" y="11" width="12" height="11"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="11" splitType="Stretch">
+			<printWhenExpression><![CDATA[$F{V_FLAG} == "Y"]]></printWhenExpression>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement x="200" y="0" width="80" height="11"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{TSI_AMT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement x="291" y="0" width="80" height="11"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{PREM_AMT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement x="382" y="0" width="80" height="11"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{PREM_VAT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement x="473" y="0" width="80" height="11"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{RI_COMM_AMT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement x="564" y="0" width="80" height="11"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{COMM_VAT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement x="655" y="0" width="80" height="11"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_NET_PREM}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="24" y="0" width="165" height="11"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{PERIL_NAME}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<summary>
+		<band height="181">
+			<staticText>
+				<reportElement x="200" y="12" width="80" height="11">
+					<printWhenExpression><![CDATA[$F{V_FLAG} == 'Y' ? true : false]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[=======================]]></text>
+			</staticText>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement x="655" y="1" width="80" height="10">
+					<printWhenExpression><![CDATA[$F{V_FLAG} == 'Y' ? true : false]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{SUM_NET_PREM}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement x="564" y="1" width="80" height="10">
+					<printWhenExpression><![CDATA[$F{V_FLAG} == 'Y' ? true : false]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{SUM_COMM_VAT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement x="473" y="1" width="80" height="10">
+					<printWhenExpression><![CDATA[$F{V_FLAG} == 'Y' ? true : false]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{SUM_COMM_AMT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement x="382" y="1" width="80" height="10">
+					<printWhenExpression><![CDATA[$F{V_FLAG} == 'Y' ? true : false]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{SUM_PREM_VAT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement x="291" y="1" width="80" height="10">
+					<printWhenExpression><![CDATA[$F{V_FLAG} == 'Y' ? true : false]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{SUM_PREM_AMT}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="291" y="11" width="80" height="11">
+					<printWhenExpression><![CDATA[$F{V_FLAG} == 'Y' ? true : false]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[=======================]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="382" y="11" width="80" height="11">
+					<printWhenExpression><![CDATA[$F{V_FLAG} == 'Y' ? true : false]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[=======================]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="473" y="11" width="80" height="11">
+					<printWhenExpression><![CDATA[$F{V_FLAG} == 'Y' ? true : false]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[=======================]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="564" y="11" width="80" height="11">
+					<printWhenExpression><![CDATA[$F{V_FLAG} == 'Y' ? true : false]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[=======================]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="655" y="11" width="80" height="11">
+					<printWhenExpression><![CDATA[$F{V_FLAG} == 'Y' ? true : false]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[===========================================]]></text>
+			</staticText>
+			<break>
+				<reportElement mode="Transparent" x="0" y="78" width="760" height="1"/>
+			</break>
+			<staticText>
+				<reportElement x="119" y="1" width="65" height="11">
+					<printWhenExpression><![CDATA[$F{V_FLAG} == 'Y' ? true : false]]></printWhenExpression>
+				</reportElement>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[Grand Totals]]></text>
+			</staticText>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement x="200" y="1" width="80" height="11">
+					<printWhenExpression><![CDATA[$F{V_FLAG} == 'Y' ? true : false]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{SUM_TSI_AMT}]]></textFieldExpression>
+			</textField>
+			<subreport>
+				<reportElement positionType="Float" x="1" y="123" width="759" height="58"/>
+				<subreportParameter name="SUBREPORT_DIR">
+					<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="LAST">
+					<subreportParameterExpression><![CDATA[$V{PAGE_NUMBER}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_DATE">
+					<subreportParameterExpression><![CDATA[$P{P_DATE}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_USER_ID">
+					<subreportParameterExpression><![CDATA[$P{P_USER_ID}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression class="java.lang.String"><![CDATA[$P{SUBREPORT_DIR} + "GIACB004S_SUB.jasper"]]></subreportExpression>
+			</subreport>
+			<staticText>
+				<reportElement x="184" y="1" width="5" height="11">
+					<printWhenExpression><![CDATA[$F{V_FLAG} == 'Y' ? true : false]]></printWhenExpression>
+				</reportElement>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="24" y="67" width="165" height="11">
+					<printWhenExpression><![CDATA[$F{V_FLAG} == 'Y' ? true : false]]></printWhenExpression>
+				</reportElement>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[*Basic Perils]]></text>
+			</staticText>
+		</band>
+	</summary>
+</jasperReport>

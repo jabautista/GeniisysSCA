@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIWEngBasic"> 
+	
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIPIWEngBasic" type="com.geniisys.gipi.entity.GIPIWEngBasic"/>
+	
+	<resultMap id="GIPIWEngBasicMap" class="com.geniisys.gipi.entity.GIPIWEngBasic" >
+		<result column="par_id" 					property="parId"/>
+		<result column="engg_basic_infonum" 		property="enggBasicInfoNum"/>
+		<result column="contract_proj_buss_title" 	property="projTitle"/>
+		<result column="site_location" 				property="siteLocation"/>
+		<result column="construct_start_date" 		property="consStartDate"/>
+		<result column="construct_end_date" 		property="consEndDate"/>
+		<result column="maintain_start_date" 		property="maintStartDate"/>
+		<result column="maintain_end_date" 			property="maintEndDate"/>
+		<result column="testing_start_date" 		property="testStartDate"/>
+		<result column="testing_end_date" 			property="testEndDate"/>
+		<result column="weeks_test" 				property="weeksTest"/>
+		<result column="time_excess" 				property="timeExcess"/>
+		<result column="mbi_policy_no" 				property="mbiPolicyNo"/>
+	</resultMap>
+	
+	<procedure id="getAdditionalENBasicInfo" resultMap="GIPIWEngBasicMap" parameterClass="java.lang.Integer">
+		<!-- removed escape_value reymon 03052013
+		 SELECT par_id, engg_basic_infonum, ESCAPE_VALUE(contract_proj_buss_title) contract_proj_buss_title, 
+			   ESCAPE_VALUE(site_location) site_location, construct_start_date, construct_end_date, 
+			   maintain_start_date, maintain_end_date, testing_start_date, testing_end_date,
+			   weeks_test, time_excess, ESCAPE_VALUE(mbi_policy_no) mbi_policy_no
+		FROM TABLE(GIPI_wengg_basic_pkg.get_gipi_wengg_basic(#parId#))-->
+		SELECT par_id, engg_basic_infonum, contract_proj_buss_title, 
+			   site_location, construct_start_date, construct_end_date, 
+			   maintain_start_date, maintain_end_date, testing_start_date, testing_end_date,
+			   weeks_test, time_excess, ESCAPE_VALUE(mbi_policy_no) mbi_policy_no
+		FROM TABLE(GIPI_wengg_basic_pkg.get_gipi_wengg_basic(#parId#))
+	</procedure>
+
+	<procedure id="setENAdditionalInfo" parameterClass="GIPIWEngBasic">
+		BEGIN
+			GIPI_WENGG_BASIC_PKG.set_gipi_wengg_basic(
+				#parId#, #enggBasicInfoNum#, #projTitle#, #siteLocation#, #consStartDate#, 
+				#consEndDate#, #maintStartDate#, #maintEndDate#, #testStartDate#, #testEndDate#,
+				#weeksTest#, #timeExcess#, #mbiPolicyNo#
+			);
+		END;
+	</procedure>
+
+</sqlMap>
+

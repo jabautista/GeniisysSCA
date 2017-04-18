@@ -1,0 +1,3 @@
+ALTER TABLE giac_dcb_users
+DROP CONSTRAINT GDCU_PK;
+

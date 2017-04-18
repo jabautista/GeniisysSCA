@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIQuoteItmmortgagee">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIPIQuoteItmmortgagee" type="com.geniisys.quote.entity.GIPIQuoteItmmortgagee"/>
+	
+	<resultMap class="java.util.HashMap" id="itemMortgageeListMap" extends="BaseEntity.TableGridResultMap">
+			<result column="mortg_cd"				property="mortgCd"/>
+			<result column="mortg_name"				property="mortgName"/>
+			<result column="amount"					property="amount"/>
+			<result column="item_no"				property="itemNo"/>
+			<result column="remarks"				property="remarks"/>
+			<result column="mortgagee_id"			property="mortgageeId"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="mortgageeLOVMap" extends="BaseEntity.TableGridResultMap">
+			<result column="mortg_cd"				property="mortgCd"/>
+			<result column="mortg_name"				property="mortgName"/>
+			<result column="mortgagee_id"			property="mortgageeId"/>
+	</resultMap>
+	
+	
+	<select id="getDetailMortgageeList" resultMap="itemMortgageeListMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*
+		          FROM (SELECT *
+		                  FROM TABLE (GIPI_QUOTE_MORTGAGEE_PKG.get_mortgagee(#quoteId#,#issCd#,#itemNo#))
+			            <isNotNull property="filter">
+				   		  WHERE 1=1
+				   		  		<isNotEmpty prepend="AND" property="mortgCd">
+				   		  			mortg_cd LIKE upper(#mortgCd#)
+				   		  		</isNotEmpty>
+				   		  		<isNotEmpty prepend="AND" property="mortgName">
+				   		  			mortg_name LIKE upper(#mortgName#)
+				   		  		</isNotEmpty>
+				   		 </isNotNull>
+			            <isEqual property="sortColumn" compareValue="mortgCd">
+			            		ORDER BY mortg_cd
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="mortgName">
+			            		ORDER BY mortg_name
+			          	</isEqual>       
+			          	<isEqual property="sortColumn" compareValue="amount">
+			            		ORDER BY amount
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="itemNo">
+			            		ORDER BY item_no
+			          	</isEqual> 
+			           	<isNotNull property="sortColumn">
+			              	<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              	</isEqual>
+			              	<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              	</isEqual>
+			             </isNotNull>
+		              	) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIPI_QUOTE_MORTGAGEE_PKG.get_mortgagee(#quoteId#,#issCd#,#itemNo#))
+		                  <isNotNull property="filter">
+				   		  WHERE 1=1
+				   		  		<isNotEmpty prepend="AND" property="mortgCd">
+				   		  			mortg_cd LIKE upper(#mortgCd#)
+				   		  		</isNotEmpty>
+				   		  		<isNotEmpty prepend="AND" property="mortgName">
+				   		  			mortg_name LIKE upper(#mortgName#)
+				   		  		</isNotEmpty>
+				   		 </isNotNull>) b)
+		WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getMortgageeLOV2" resultMap="mortgageeLOVMap">                 
+         SELECT *
+          FROM (SELECT rownum rownum_, 
+                       b.count_, 
+                       a.* 
+                  FROM (SELECT * FROM TABLE(GIPI_QUOTE_MORTGAGEE_PKG.get_mortgagee_lov(#issCd#))
+                  WHERE 1=1
+                  <isNotNull property="notIn">
+		            AND mortgagee_id NOT IN ($notIn$)					               
+		          </isNotNull>
+		          <isNotNull property="findText">
+		               AND (UPPER(mortg_cd) LIKE UPPER(#findText#) OR UPPER(mortg_name) LIKE UPPER(#findText#))
+		          </isNotNull> 
+                  ) a, 
+                       (SELECT count(*) count_ 
+                          FROM TABLE(GIPI_QUOTE_MORTGAGEE_PKG.get_mortgagee_lov(#issCd#))
+                  	WHERE 1=1
+                  <isNotNull property="notIn">
+		            AND mortgagee_id NOT IN ($notIn$)					               
+		          </isNotNull>
+		          <isNotNull property="findText">
+		               AND (UPPER(mortg_cd) LIKE UPPER(#findText#) OR UPPER(mortg_name) LIKE UPPER(#findText#))
+		          </isNotNull> 
+		          ) b) 
+         WHERE rownum_ BETWEEN #from# AND #to# 
+	</select>
+	
+	<insert id="setMortgagee" parameterClass="GIPIQuoteItmmortgagee">
+		BEGIN
+			GIIS_USERS_PKG.app_user := #appUser#;
+			GIPI_QUOTE_MORTGAGEE_PKG.set_mortgagee_dtl(#quoteId#,#issCd#,#mortgCd#,#itemNo#,#amount#,#remarks#);
+		END;
+	</insert>
+	
+	<delete id="deleteMortgagee" parameterClass="GIPIQuoteItmmortgagee">
+		BEGIN
+			GIIS_USERS_PKG.app_user := #appUser#;
+			GIPI_QUOTE_MORTGAGEE_PKG.delete_mortgagee_dtl(#issCd#,#itemNo#,#mortgCd#,#quoteId#);
+		END;
+	</delete>
+	
+</sqlMap>

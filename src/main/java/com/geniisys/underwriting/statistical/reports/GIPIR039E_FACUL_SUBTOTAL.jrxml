@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIPIR039E_FACUL_SUBTOTAL" language="groovy" pageWidth="1152" pageHeight="752" columnWidth="1152" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="Crosstab Data Text" isDefault="false" hAlign="Center"/>
+	<parameter name="P_ZONE_TYPE" class="java.lang.String"/>
+	<parameter name="P_DATE" class="java.lang.String"/>
+	<parameter name="P_AS_OF_SW" class="java.lang.String"/>
+	<parameter name="P_FROM_DATE" class="java.lang.String"/>
+	<parameter name="P_TO_DATE" class="java.lang.String"/>
+	<parameter name="P_AS_OF_DATE" class="java.lang.String"/>
+	<parameter name="P_USER_ID" class="java.lang.String"/>
+	<parameter name="P_ZONE_GRP" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT $P{P_ZONE_GRP} zone_grp, fi_item_grp, SUM(total_tsi) zone_tot_tsi, SUM(total_prem) zone_tot_prem
+  FROM (
+    SELECT fi_item_grp, total_tsi, total_prem
+      FROM TABLE(GIPIR039E_PKG.populate_main_report_v2(
+        $P{P_ZONE_TYPE}, $P{P_AS_OF_SW},
+        $P{P_FROM_DATE}, $P{P_TO_DATE}, $P{P_AS_OF_DATE},
+        $P{P_USER_ID} ))
+    WHERE zone_grp = $P{P_ZONE_GRP}
+    UNION
+    SELECT DISTINCT fi_item_grp, 0 total_tsi, 0 total_prem
+      FROM TABLE(GIPIR039E_PKG.populate_main_report_v2(
+        $P{P_ZONE_TYPE}, $P{P_AS_OF_SW},
+        $P{P_FROM_DATE}, $P{P_TO_DATE}, $P{P_AS_OF_DATE},
+        $P{P_USER_ID} ))
+    UNION
+    SELECT 'T' fi_item_grp, SUM(total_tsi), SUM(total_prem)
+      FROM TABLE(GIPIR039E_PKG.populate_main_report_v2(
+        $P{P_ZONE_TYPE}, $P{P_AS_OF_SW},
+        $P{P_FROM_DATE}, $P{P_TO_DATE}, $P{P_AS_OF_DATE},
+        $P{P_USER_ID} ))
+    WHERE zone_grp = $P{P_ZONE_GRP}
+    )
+GROUP BY fi_item_grp
+ORDER BY fi_item_grp]]>
+	</queryString>
+	<field name="ZONE_GRP" class="java.math.BigDecimal"/>
+	<field name="FI_ITEM_GRP" class="java.lang.String"/>
+	<field name="ZONE_TOT_TSI" class="java.math.BigDecimal"/>
+	<field name="ZONE_TOT_PREM" class="java.math.BigDecimal"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<summary>
+		<band height="21" splitType="Stretch">
+			<crosstab>
+				<reportElement x="0" y="0" width="1152" height="21"/>
+				<rowGroup name="ZONE_GRP" width="0">
+					<bucket>
+						<bucketExpression class="java.lang.String"><![CDATA[$F{ZONE_GRP}]]></bucketExpression>
+					</bucket>
+					<crosstabRowHeader>
+						<cellContents backcolor="#F0F8FF" mode="Opaque"/>
+					</crosstabRowHeader>
+					<crosstabTotalRowHeader>
+						<cellContents/>
+					</crosstabTotalRowHeader>
+				</rowGroup>
+				<columnGroup name="FI_ITEM_GRP" height="0" totalPosition="End">
+					<bucket>
+						<bucketExpression class="java.lang.String"><![CDATA[$F{FI_ITEM_GRP}]]></bucketExpression>
+					</bucket>
+					<crosstabColumnHeader>
+						<cellContents backcolor="#F0F8FF" mode="Opaque"/>
+					</crosstabColumnHeader>
+					<crosstabTotalColumnHeader>
+						<cellContents/>
+					</crosstabTotalColumnHeader>
+				</columnGroup>
+				<measure name="ZONE_TOT_TSIMeasure" class="java.math.BigDecimal" calculation="Sum">
+					<measureExpression><![CDATA[$F{ZONE_TOT_TSI}]]></measureExpression>
+				</measure>
+				<measure name="ZONE_TOT_PREMMeasure" class="java.lang.Object" calculation="Sum">
+					<measureExpression><![CDATA[$F{ZONE_TOT_PREM}]]></measureExpression>
+				</measure>
+				<crosstabCell width="177" height="20">
+					<cellContents>
+						<textField pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+							<reportElement style="Crosstab Data Text" x="0" y="9" width="85" height="11"/>
+							<textElement textAlignment="Right">
+								<font fontName="Arial" size="7"/>
+							</textElement>
+							<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{ZONE_TOT_TSIMeasure}]]></textFieldExpression>
+						</textField>
+						<textField pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+							<reportElement style="Crosstab Data Text" x="87" y="9" width="85" height="11"/>
+							<textElement textAlignment="Right">
+								<font fontName="Arial" size="7"/>
+							</textElement>
+							<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{ZONE_TOT_PREMMeasure}]]></textFieldExpression>
+						</textField>
+						<staticText>
+							<reportElement style="Crosstab Data Text" x="0" y="0" width="85" height="9"/>
+							<textElement textAlignment="Right">
+								<font fontName="Arial" size="7"/>
+							</textElement>
+							<text><![CDATA[-------------------------------------]]></text>
+						</staticText>
+						<staticText>
+							<reportElement style="Crosstab Data Text" x="87" y="0" width="85" height="9"/>
+							<textElement textAlignment="Right">
+								<font fontName="Arial" size="7"/>
+							</textElement>
+							<text><![CDATA[-----------------------------------------]]></text>
+						</staticText>
+					</cellContents>
+				</crosstabCell>
+				<crosstabCell width="0" height="20" columnTotalGroup="FI_ITEM_GRP">
+					<cellContents backcolor="#BFE1FF" mode="Transparent"/>
+				</crosstabCell>
+			</crosstab>
+		</band>
+	</summary>
+</jasperReport>

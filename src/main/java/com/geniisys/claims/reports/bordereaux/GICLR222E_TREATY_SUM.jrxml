@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GICLR222E_TREATY_SUM" language="groovy" pageWidth="990" pageHeight="35" columnWidth="990" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="Crosstab Data Text" isDefault="false" hAlign="Center"/>
+	<parameter name="P_SESSION_ID" class="java.lang.String"/>
+	<parameter name="P_CLAIM_ID" class="java.lang.Integer"/>
+	<parameter name="P_POLICY_NO" class="java.lang.String"/>
+	<parameter name="P_BRDRX_RECORD_ID" class="java.lang.Integer"/>
+	<queryString>
+		<![CDATA[SELECT *
+  FROM TABLE(GICLR222E_PKG.get_treaty_details(
+			$P{P_SESSION_ID},
+			$P{P_CLAIM_ID},
+			$P{P_POLICY_NO},
+			$P{P_BRDRX_RECORD_ID}) )]]>
+	</queryString>
+	<field name="POLICY_NO" class="java.lang.String"/>
+	<field name="CLAIM_ID" class="java.lang.Integer"/>
+	<field name="TREATY_NAME" class="java.lang.String"/>
+	<field name="BRDRX_RECORD_ID" class="java.lang.Integer"/>
+	<field name="BRDRX_DS_RECORD_ID" class="java.lang.Integer"/>
+	<field name="GRP_SEQ_NO" class="java.lang.Integer"/>
+	<field name="SHR_PCT" class="java.math.BigDecimal"/>
+	<field name="PAID_LOSSES" class="java.math.BigDecimal"/>
+	<field name="FACUL_RI_CD" class="java.lang.Integer"/>
+	<field name="FACUL_RI_NAME" class="java.lang.String"/>
+	<field name="FACUL_SHR_RI_PCT" class="java.math.BigDecimal"/>
+	<field name="PAID_LOSSES2" class="java.math.BigDecimal"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<summary>
+		<band height="35" splitType="Stretch">
+			<crosstab>
+				<reportElement x="0" y="0" width="990" height="35"/>
+				<rowGroup name="POLICY_NO" width="0">
+					<bucket>
+						<bucketExpression class="java.lang.String"><![CDATA[$F{POLICY_NO}]]></bucketExpression>
+					</bucket>
+					<crosstabRowHeader>
+						<cellContents backcolor="#F0F8FF" mode="Opaque"/>
+					</crosstabRowHeader>
+					<crosstabTotalRowHeader>
+						<cellContents/>
+					</crosstabTotalRowHeader>
+				</rowGroup>
+				<columnGroup name="TREATY_NAME" height="0">
+					<bucket order="Descending">
+						<bucketExpression class="java.lang.String"><![CDATA[$F{TREATY_NAME}]]></bucketExpression>
+					</bucket>
+					<crosstabColumnHeader>
+						<cellContents backcolor="#F0F8FF" mode="Opaque"/>
+					</crosstabColumnHeader>
+					<crosstabTotalColumnHeader>
+						<cellContents/>
+					</crosstabTotalColumnHeader>
+				</columnGroup>
+				<measure name="PAID_LOSSESMeasure" class="java.math.BigDecimal" calculation="Sum">
+					<measureExpression><![CDATA[$F{PAID_LOSSES}]]></measureExpression>
+				</measure>
+				<crosstabCell width="81" height="22">
+					<cellContents>
+						<textField pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+							<reportElement style="Crosstab Data Text" mode="Transparent" x="1" y="9" width="75" height="12" backcolor="#CCCCCC"/>
+							<textElement textAlignment="Right">
+								<font fontName="Arial" size="7"/>
+							</textElement>
+							<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{PAID_LOSSESMeasure}]]></textFieldExpression>
+						</textField>
+						<staticText>
+							<reportElement style="Crosstab Data Text" x="1" y="0" width="75" height="9"/>
+							<textElement textAlignment="Right">
+								<font fontName="Arial" size="7"/>
+							</textElement>
+							<text><![CDATA[----------------------------------]]></text>
+						</staticText>
+					</cellContents>
+				</crosstabCell>
+			</crosstab>
+		</band>
+	</summary>
+</jasperReport>

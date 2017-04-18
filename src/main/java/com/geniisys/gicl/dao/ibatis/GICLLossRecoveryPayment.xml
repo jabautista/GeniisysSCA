@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GICLLossRecoveryPayment">
+
+	<resultMap class="java.util.HashMap" id="lossRecoveryPaymentResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="recoveryId"			column="recovery_id"/>
+		<result property="lineCd"				column="line_cd"/>
+		<result property="issCd"				column="iss_cd"/>
+		<result property="recYear"				column="rec_year"/>
+		<result property="recSeqNo"				column="rec_seq_no"/>
+		<result property="cancelTag"			column="cancel_tag"/>
+		<result property="recoverableAmt"		column="recoverable_amt"/>
+		<result property="recoveredAmt"			column="recovered_amt"/>
+		<result property="claimId"				column="claim_id"/>
+		<result property="lineCd2"				column="line_cd2"/>
+		<result property="sublineCd"			column="subline_cd"/>
+		<result property="issCd2"				column="iss_cd2"/>
+		<result property="clmYy"				column="clm_yy"/>
+		<result property="clmSeqNo"				column="clm_seq_no"/>
+		<result property="issueYy"				column="issue_yy"/>
+		<result property="polSeqNo"				column="pol_seq_no"/>
+		<result property="renewNo"				column="renew_no"/>
+		<result property="assdNo"				column="assd_no"/>
+		<result property="assuredName"			column="assured_name"/>
+		<result property="lossCatCd"			column="loss_cat_cd"/>
+		<result property="lossDate"				column="loss_date"/>
+		<result property="cancelDesc"			column="cancel_desc"/>
+		<result property="claimNumber"			column="claim_number"/>
+		<result property="recoveryNumber"		column="recovery_number"/>
+		<result property="lossCatDesc"			column="loss_cat_desc"/>
+		<result property="vCheck" 				column="v_check"/>
+		<result property="policyNumber"			column="policy_number"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="gicls270PaymentDetailsResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="payorClassCd"			column="payor_class_cd"/>
+		<result property="payorCd"				column="payor_cd"/>
+		<result property="recoveredAmt"			column="recovered_amt"/>
+		<result property="tranDate"				column="tran_date"/>
+		<result property="cancelTag"			column="cancel_tag"/>
+		<result property="distSw"				column="dist_sw"/>
+		<result property="claimId"				column="claim_id"/>
+		<result property="acctTranId"			column="acct_tran_id"/>
+		<result property="recoveryId"			column="recovery_id"/>
+		<result property="recoveryPaytId"		column="recovery_payt_id"/>
+		<result property="refNo"				column="ref_no"/>
+		<result property="payeeName"			column="payee_name"/>
+		<result property="vCheck"				column="v_check"/>
+		<result property="payorDet"				column="payor_det"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="gicls270DistributionDSDetailsResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="recoveryId"		column="recovery_id"/>
+		<result property="recoveryPaytId"	column="recovery_payt_id"/>
+		<result property="recDistNo"		column="rec_dist_no"/>
+		<result property="lineCd"			column="line_cd"/>
+		<result property="grpSeqNo"			column="grp_seq_no"/>
+		<result property="shareType"		column="share_type"/>
+		<result property="acctTrtyType"		column="acct_trty_type"/>
+		<result property="distYear"			column="dist_year"/>
+		<result property="shrRecoveryAmt"	column="shr_recovery_amt"/>
+		<result property="negateTag"		column="negate_tag"/>
+		<result property="negateDate"		column="negate_date"/>
+		<result property="userId"			column="user_id"/>
+		<result property="lastUpdate"		column="last_update"/>
+		<result property="shareName"		column="share_name"/>
+		<result property="sharePct"			column="share_pct"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="gicls270DistributionRidsDetailsResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="recoveryId"		column="recovery_id"/>
+		<result property="recoveryPaytId"	column="recovery_payt_id"/>
+		<result property="recDistNo"		column="rec_dist_no"/>
+		<result property="lineCd"			column="line_cd"/>
+		<result property="grpSeqNo"			column="grp_seq_no"/>
+		<result property="distYear"			column="dist_year"/>
+		<result property="shareType"		column="share_type"/>
+		<result property="acctTrtyType"		column="acct_trty_type"/>
+		<result property="riCd"				column="ri_cd"/>
+		<result property="shareRiPct"		column="share_ri_pct"/>
+		<result property="shrRiRecoveryAmt"	column="shr_ri_recovery_amt"/>
+		<result property="shareRiPctReal"	column="share_ri_pct_real"	/>
+		<result property="negateTag"		column="negate_tag"/>
+		<result property="negateDate"		column="negate_date"/>
+		<result property="userId"			column="user_id"/>
+		<result property="lastUpdate"		column="last_update"/>
+		<result property="cpiRecNo"			column="cpi_rec_no"/>
+		<result property="cpiBranchCd"		column="cpi_branch_cd"/>
+		<result property="riName"			column="ri_name"/>
+	</resultMap>
+	
+	<select id="getLossRecoveryPayment" resultMap="lossRecoveryPaymentResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, a.*
+		          FROM 	(SELECT * 
+		          			FROM TABLE(GICLS270_PKG.populate_gicls270(#appUser#))
+		          		<isNotNull property="filter">
+							WHERE 1 = 1
+							<isNotEmpty prepend="AND" property="recoveryNumber">
+								UPPER(recovery_number) LIKE UPPER(#recoveryNumber#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="claimNumber">
+								UPPER(claim_number) LIKE UPPER(#claimNumber#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="cancelDesc">
+								UPPER(cancel_desc) LIKE UPPER(#cancelDesc#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="recoverableAmt">
+								recoverable_amt = #recoverableAmt#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="recoveredAmt">
+								recovered_amt = #recoveredAmt#
+							</isNotEmpty>
+						</isNotNull>
+	          			<isEqual property="sortColumn" compareValue="recoveryNumber">
+		              		ORDER BY recovery_number
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="claimNumber">
+		              		ORDER BY claim_number
+			            </isEqual>
+			        	<isEqual property="sortColumn" compareValue="cancelDesc">
+		              		ORDER BY cancel_desc
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="recoverableAmt">
+		              		ORDER BY recoverable_amt
+			            </isEqual>
+			             <isEqual property="sortColumn" compareValue="recoveredAmt">
+		              		ORDER BY recovered_amt
+			            </isEqual>
+			            <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	 </isNotNull>
+		          		) a,
+		          	    (
+		          	     SELECT COUNT(*) count_
+		          	     	FROM TABLE(GICLS270_PKG.populate_gicls270(#appUser#))
+		          	     <isNotNull property="filter">
+							WHERE 1 = 1
+							<isNotEmpty prepend="AND" property="recoveryNumber">
+								UPPER(recovery_number) LIKE UPPER(#recoveryNumber#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="claimNumber">
+								UPPER(claim_number) LIKE UPPER(#claimNumber#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="cancelDesc">
+								UPPER(cancel_desc) LIKE UPPER(#cancelDesc#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="recoverableAmt">
+								recoverable_amt = #recoverableAmt#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="recoveredAmt">
+								recovered_amt = #recoveredAmt#
+							</isNotEmpty>
+						</isNotNull>
+		          	    ) b)
+		  WHERE rownum_ BETWEEN #from# AND #to#	     			
+	</select>
+	
+	<select id="getPaymentDetails" resultMap="gicls270PaymentDetailsResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, a.*
+		          FROM 	(SELECT * 
+		          			FROM TABLE(GICLS270_PKG.populate_payment_det(#recoveryId#))
+		          		<isNotNull property="filter">
+							WHERE 1 = 1
+						</isNotNull>
+						<isEqual property="sortColumn" compareValue="cancelTag">
+		              		ORDER BY cancel_tag
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="distSw">
+		              		ORDER BY dist_sw
+			            </isEqual>
+			        	<isEqual property="sortColumn" compareValue="refNo">
+		              		ORDER BY dist_sw
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="payorDet">
+		              		ORDER BY payor_det
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="recoveredAmt">
+		              		ORDER BY recovered_amt
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="tranDate">
+		              		ORDER BY tran_date
+			            </isEqual>
+			            <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	 </isNotNull>
+		          		) a,
+		          	    (
+		          	     SELECT COUNT(*) count_
+		          	     	FROM TABLE(GICLS270_PKG.populate_payment_det(#recoveryId#))	
+		          	    ) b)
+		  WHERE rownum_ BETWEEN #from# AND #to#	     	
+	</select>
+	
+	<select id="getDistributionDsDetails" resultMap="gicls270DistributionDSDetailsResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, a.*
+		          FROM 	(SELECT * 
+		          			FROM TABLE(GICLS270_PKG.populate_distribution_ds(#recoveryId#, #recoveryPaytId#))
+		          		<isNotNull property="filter">
+							WHERE 1 = 1
+						</isNotNull>
+						<isEqual property="sortColumn" compareValue="shareName">
+		              		ORDER BY share_name
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="sharePct">
+		              		ORDER BY share_pct
+			            </isEqual>
+			        	<isEqual property="sortColumn" compareValue="distYear">
+		              		ORDER BY dist_year
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="shrRecoveryAmt">
+		              		ORDER BY shr_recovery_amt
+			            </isEqual>
+			            <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	 </isNotNull>
+		          		) a,
+		          	    (
+		          	     SELECT COUNT(*) count_
+		          	     	FROM TABLE(GICLS270_PKG.populate_distribution_ds(#recoveryId#, #recoveryPaytId#))	
+		          	    ) b)
+		  WHERE rownum_ BETWEEN #from# AND #to#	     	
+	</select>
+	
+	<select id="getDistributionRidsDetails" resultMap="gicls270DistributionRidsDetailsResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, a.*
+		          FROM 	(SELECT * 
+		          			FROM TABLE(GICLS270_PKG.populate_distribution_rids(#recoveryId#, #recoveryPaytId#, #recDistNo#, #grpSeqNo#))
+		          		<isNotNull property="filter">
+							WHERE 1 = 1
+						</isNotNull>
+						<isEqual property="sortColumn" compareValue="riCd">
+		              		ORDER BY ri_cd
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="riName">
+		              		ORDER BY ri_name
+			            </isEqual>
+			        	<isEqual property="sortColumn" compareValue="shareRiPct">
+		              		ORDER BY share_ri_pct
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="shrRiRecoveryAmt">
+		              		ORDER BY shr_ri_recovery_amt
+			            </isEqual>
+			            <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	 </isNotNull>
+		          		) a,
+		          	    (
+		          	     SELECT COUNT(*) count_
+		          	     	FROM TABLE(GICLS270_PKG.populate_distribution_rids(#recoveryId#, #recoveryPaytId#, #recDistNo#, #grpSeqNo#))	
+		          	    ) b)
+		  WHERE rownum_ BETWEEN #from# AND #to#	     	
+	</select>
+	
+</sqlMap>

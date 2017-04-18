@@ -1,0 +1,420 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISBondClass">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIISBondClass" type="com.geniisys.common.entity.GIISBondClass"/>
+	<typeAlias alias="GIISBondClassSubline" type="com.geniisys.common.entity.GIISBondClassSubline"/>
+	<typeAlias alias="GIISBondClassRt" type="com.geniisys.common.entity.GIISBondClassRt"/>
+	
+	<resultMap class="java.util.HashMap" id="giiss043BondClassResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="class_no" property="classNo"/>
+		<result column="fixed_flag" property="fixedFlag"/>
+		<result column="fixed_amt" property="fixedAmt"/>
+		<result column="fixed_rt" property="fixedRt"/>
+		<result column="min_amt" property="minAmt"/>
+		<result column="user_id" property="userId"/>
+		<result column="last_update" property="lastUpdate"/>
+		<result column="remarks" property="remarks"/>
+	</resultMap>
+	
+	<select id="getGiiss043BondClass" resultMap="giiss043BondClassResultMap" parameterClass="java.util.HashMap">
+		SELECT *
+  		  FROM (SELECT rownum rownum_,b.count_,a.*
+          		  FROM (SELECT * FROM TABLE(GIISS043_PKG.get_bond_class)
+          		  <isNotNull property="filter">
+			      	WHERE 1=1
+           			<isNotEmpty prepend="AND" property="classNo">
+           			  UPPER(class_no) LIKE UPPER(#classNo#)
+           			</isNotEmpty>
+           			<isNotEmpty prepend="AND" property="fixedFlag">
+           			  UPPER(fixed_flag) LIKE UPPER(#fixedFlag#)
+           			</isNotEmpty>
+           			<isNotEmpty prepend="AND" property="fixedAmt">
+           			  fixed_amt = #fixedAmt#
+           			</isNotEmpty>
+           			<isNotEmpty prepend="AND" property="fixedRt">
+           			  fixed_rt = #fixedRt#
+           			</isNotEmpty>
+           			<isNotEmpty prepend="AND" property="minAmt">
+           			  min_amt = #minAmt#
+           			</isNotEmpty>
+                  </isNotNull>
+          		  <isNotNull property="sortColumn">
+					<isEqual property="sortColumn" compareValue="classNo">
+						ORDER BY class_no
+					</isEqual>
+					<isEqual property="sortColumn" compareValue="fixedFlag">
+						ORDER BY fixed_flag
+					</isEqual>
+					<isEqual property="sortColumn" compareValue="fixedAmt">
+						ORDER BY fixed_amt
+					</isEqual>
+					<isEqual property="sortColumn" compareValue="fixedRt">
+						ORDER BY fixed_rt
+					</isEqual>
+					<isEqual property="sortColumn" compareValue="minAmt">
+						ORDER BY min_amt
+					</isEqual>
+					<isEqual property="ascDescFlg" compareValue="ASC">
+						ASC
+					</isEqual>
+					<isEqual property="ascDescFlg" compareValue="DESC">
+						DESC
+					</isEqual>
+				  </isNotNull>) a,
+               (SELECT count(*) count_ FROM TABLE(GIISS043_PKG.get_bond_class)
+                <isNotNull property="filter">
+			      	WHERE 1=1
+           			<isNotEmpty prepend="AND" property="classNo">
+           			  UPPER(class_no) LIKE UPPER(#classNo#)
+           			</isNotEmpty>
+           			<isNotEmpty prepend="AND" property="fixedFlag">
+           			  UPPER(fixed_flag) LIKE UPPER(#fixedFlag#)
+           			</isNotEmpty>
+           			<isNotEmpty prepend="AND" property="fixedAmt">
+           			  fixed_amt = #fixedAmt#
+           			</isNotEmpty>
+           			<isNotEmpty prepend="AND" property="fixedRt">
+           			  fixed_rt = #fixedRt#
+           			</isNotEmpty>
+           			<isNotEmpty prepend="AND" property="minAmt">
+           			  min_amt = #minAmt#
+           			</isNotEmpty>
+                  </isNotNull>) b)
+ 		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="saveGiiss043BondClass" parameterClass="GIISBondClass">
+	    DECLARE
+	    	v_rec giis_bond_class%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.class_no := #classNo#;
+			v_rec.fixed_flag := #fixedFlag#;
+			v_rec.fixed_amt := #fixedAmt#;
+			v_rec.fixed_rt := #fixedRt#;
+			v_rec.min_amt := #minAmt#;
+			v_rec.user_id := #userId#;
+			v_rec.last_update := #lastUpdate#;
+			v_rec.remarks := #remarks#;
+ 			 			
+ 			giiss043_pkg.save_bond_class(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="giiss043ValAddBondClass" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss043_pkg.val_add_bond_class(#classNo#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="giiss043DelBondClass" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss043_pkg.del_bond_class(#classNo#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="giiss043ValDelBondClass" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss043_pkg.val_del_bond_class(#classNo#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<resultMap class="java.util.HashMap" id="giiss043BondClassSublineResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="class_no" property="classNo" />
+		<result column="line_cd" property="lineCd" />
+		<result column="subline_cd" property="sublineCd" />
+		<result column="subline_name" property="sublineName" />
+		<result column="clause_type" property="clauseType" />
+		<result column="clause_desc" property="clauseDesc" />
+		<result column="waiver_limit" property="waiverLimit" />
+		<result column="last_update" property="lastUpdate" />
+		<result column="remarks" property="remarks" />
+		<result column="user_id" property="userId" />
+	</resultMap>
+	
+	<select id="getGiiss043BondClassSubline" resultMap="giiss043BondClassSublineResultMap" parameterClass="java.util.HashMap">
+		SELECT *
+  		  FROM (SELECT rownum rownum_,b.count_,a.*
+          		  FROM (SELECT * FROM TABLE(GIISS043_PKG.get_bond_class_subline(#classNo#))
+          		  <isNotNull property="filter">
+			      	WHERE 1=1
+           			<isNotEmpty prepend="AND" property="sublineCd">
+           			  UPPER(subline_cd) LIKE UPPER(#sublineCd#)
+           			</isNotEmpty>
+           			<isNotEmpty prepend="AND" property="sublineName">
+           			  UPPER(subline_name) LIKE UPPER(#sublineName#)
+           			</isNotEmpty>
+           			<isNotEmpty prepend="AND" property="clauseType">
+           			  UPPER(clause_type) LIKE UPPER(#clauseType#)
+           			</isNotEmpty>
+           			<isNotEmpty prepend="AND" property="clauseDesc">
+           			  UPPER(clause_desc) LIKE UPPER(#clauseDesc#)
+           			</isNotEmpty>
+           			<isNotEmpty prepend="AND" property="waiverLimit">
+           			  waiver_limit = #waiverLimit#
+           			</isNotEmpty>
+                  </isNotNull>
+          		  <isNotNull property="sortColumn">
+					<isEqual property="sortColumn" compareValue="sublineCd sublineName">
+						ORDER BY subline_cd
+					</isEqual>
+					<isEqual property="sortColumn" compareValue="clauseType clauseDesc">
+						ORDER BY clause_type
+					</isEqual>
+					<isEqual property="sortColumn" compareValue="waiverLimit">
+						ORDER BY waiver_limit
+					</isEqual>
+					<isEqual property="ascDescFlg" compareValue="ASC">
+						ASC
+					</isEqual>
+					<isEqual property="ascDescFlg" compareValue="DESC">
+						DESC
+					</isEqual>
+				  </isNotNull>) a,
+               (SELECT count(*) count_ FROM TABLE(GIISS043_PKG.get_bond_class_subline(#classNo#))
+              	<isNotNull property="filter">
+			      	WHERE 1=1
+           			<isNotEmpty prepend="AND" property="sublineCd">
+           			  UPPER(subline_cd) LIKE UPPER(#sublineCd#)
+           			</isNotEmpty>
+           			<isNotEmpty prepend="AND" property="sublineName">
+           			  UPPER(subline_name) LIKE UPPER(#sublineName#)
+           			</isNotEmpty>
+           			<isNotEmpty prepend="AND" property="clauseType">
+           			  UPPER(clause_type) LIKE UPPER(#clauseType#)
+           			</isNotEmpty>
+           			<isNotEmpty prepend="AND" property="clauseDesc">
+           			  UPPER(clause_desc) LIKE UPPER(#clauseDesc#)
+           			</isNotEmpty>
+           			<isNotEmpty prepend="AND" property="waiverLimit">
+           			  waiver_limit = #waiverLimit#
+           			</isNotEmpty>
+                  </isNotNull>) b)
+ 		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="giiss043SublineLovResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="subline_cd" property="sublineCd" />
+		<result column="subline_name" property="sublineName" />
+	</resultMap>
+	
+	<select id="getGiiss043SublineLov" resultMap="giiss043SublineLovResultMap" parameterClass="java.util.HashMap">
+		SELECT *
+  		  FROM (SELECT rownum rownum_,b.count_,a.*
+          		  FROM (SELECT * FROM TABLE(GIISS043_PKG.get_subline_lov)
+          		  WHERE 1 = 1
+          		  <isNotEmpty prepend="AND" property="findText">
+              			   (UPPER(subline_cd) LIKE UPPER(NVL(#findText#, subline_cd))
+              			   OR UPPER(subline_name) LIKE UPPER(NVL(#findText#, subline_name)))
+              		</isNotEmpty>
+              		<isNotEmpty prepend="AND" property="filterText">
+              			(UPPER(subline_cd) LIKE UPPER(NVL(#filterText#, subline_cd))
+              			   OR UPPER(subline_name) LIKE UPPER(NVL(#filterText#, subline_name)))
+              		</isNotEmpty>
+          		  <isNotNull property="sortColumn">
+					<isEqual property="sortColumn" compareValue="sublineCd">
+						ORDER BY subline_cd
+					</isEqual>
+					<isEqual property="sortColumn" compareValue="sublineName">
+						ORDER BY subline_name
+					</isEqual>
+					<isEqual property="ascDescFlg" compareValue="ASC">
+						ASC
+					</isEqual>
+					<isEqual property="ascDescFlg" compareValue="DESC">
+						DESC
+					</isEqual>
+				  </isNotNull>) a,
+               (SELECT count(*) count_ FROM TABLE(GIISS043_PKG.get_subline_lov)
+              	WHERE 1 = 1
+          		  <isNotEmpty prepend="AND" property="findText">
+              			   (UPPER(subline_cd) LIKE UPPER(NVL(#findText#, subline_cd))
+              			   OR UPPER(subline_name) LIKE UPPER(NVL(#findText#, subline_name)))
+              		</isNotEmpty>
+              		<isNotEmpty prepend="AND" property="filterText">
+              			(UPPER(subline_cd) LIKE UPPER(NVL(#filterText#, subline_cd))
+              			   OR UPPER(subline_name) LIKE UPPER(NVL(#filterText#, subline_name)))
+              		</isNotEmpty>) b)
+ 		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="giiss043ClauseLovResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="clause_type" property="clauseType" />
+		<result column="clause_desc" property="clauseDesc" />
+	</resultMap>
+	
+	<select id="getGiiss043ClauseLov" resultMap="giiss043ClauseLovResultMap" parameterClass="java.util.HashMap">
+		SELECT *
+  		  FROM (SELECT rownum rownum_,b.count_,a.*
+          		  FROM (SELECT * FROM TABLE(GIISS043_PKG.get_clause_lov)
+			      	WHERE 1=1
+          		  <isNotEmpty prepend="AND" property="findText">
+              			   (UPPER(clause_type) LIKE UPPER(NVL(#findText#, clause_type))
+              			   OR UPPER(clause_desc) LIKE UPPER(NVL(#findText#, clause_desc)))
+              		</isNotEmpty>
+              		<isNotEmpty prepend="AND" property="filterText">
+              			(UPPER(clause_type) LIKE UPPER(NVL(#filterText#, clause_type))
+              			   OR UPPER(clause_desc) LIKE UPPER(NVL(#filterText#, clause_desc)))
+              		</isNotEmpty>
+          		  <isNotNull property="sortColumn">
+					<isEqual property="sortColumn" compareValue="clauseType">
+						ORDER BY clause_type
+					</isEqual>
+					<isEqual property="sortColumn" compareValue="clauseDesc">
+						ORDER BY clause_desc
+					</isEqual>
+					<isEqual property="ascDescFlg" compareValue="ASC">
+						ASC
+					</isEqual>
+					<isEqual property="ascDescFlg" compareValue="DESC">
+						DESC
+					</isEqual>
+				  </isNotNull>) a,
+               (SELECT count(*) count_ FROM TABLE(GIISS043_PKG.get_clause_lov)
+			      	WHERE 1=1
+          		  <isNotEmpty prepend="AND" property="findText">
+              			   (UPPER(clause_type) LIKE UPPER(NVL(#findText#, clause_type))
+              			   OR UPPER(clause_desc) LIKE UPPER(NVL(#findText#, clause_desc)))
+              		</isNotEmpty>
+              		<isNotEmpty prepend="AND" property="filterText">
+              			(UPPER(clause_type) LIKE UPPER(NVL(#filterText#, clause_type))
+              			   OR UPPER(clause_desc) LIKE UPPER(NVL(#filterText#, clause_desc)))
+              		</isNotEmpty>) b)
+ 		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="giiss043ValAddBondClassSubline" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss043_pkg.val_add_bond_class_subline(#classNo#,#sublineCd#, #clauseType#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="giiss043ValDelBondClassSubline" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss043_pkg.val_del_bond_class_subline(#sublineCd#, #clauseType#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="saveGiiss043BondClassSubline" parameterClass="GIISBondClassSubline">
+	    DECLARE
+	    	v_rec giis_bond_class_subline%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.class_no := #classNo#;
+			v_rec.line_cd := #lineCd#;
+			v_rec.subline_cd := #sublineCd#;
+			v_rec.clause_type := #clauseType#;
+			v_rec.waiver_limit := #waiverLimit#;
+			v_rec.user_id := #userId#;
+			v_rec.last_update := #lastUpdate#;
+			v_rec.remarks := #remarks#;
+ 			 			
+ 			giiss043_pkg.save_bond_class_subline(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="giiss043DelBondClassSubline" parameterClass="GIISBondClassSubline">
+ 		BEGIN
+ 			giiss043_pkg.del_bond_class_subline(#classNo#, #sublineCd#, #clauseType#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<resultMap class="java.util.HashMap" id="giiss043BondClassRtResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="class_no" property="classNo" />
+		<result column="range_low" property="rangeLow" />
+		<result column="range_high" property="rangeHigh" />
+		<result column="default_rt" property="defaultRt" />
+		<result column="user_id" property="userId" />
+		<result column="last_update" property="lastUpdate" />
+		<result column="remarks" property="remarks" />
+	</resultMap>
+	
+	<select id="getGiiss043BondClassRt" resultMap="giiss043BondClassRtResultMap" parameterClass="java.util.HashMap">
+		SELECT *
+  		  FROM (SELECT rownum rownum_,b.count_,a.*
+          		  FROM (SELECT * FROM TABLE(GIISS043_PKG.get_bond_class_rt(#classNo#))
+          		  <isNotNull property="filter">
+			      	WHERE 1=1
+           			<isNotEmpty prepend="AND" property="rangeLow">
+           			  range_low = #rangeLow#
+           			</isNotEmpty>
+           			<isNotEmpty prepend="AND" property="rangeHigh">
+           			  range_high = #rangeHigh#
+           			</isNotEmpty>
+           			<isNotEmpty prepend="AND" property="defaultRt">
+           			  default_rt = #defaultRt#
+           			</isNotEmpty>
+                  </isNotNull>
+          		  <isNotNull property="sortColumn">
+					<isEqual property="sortColumn" compareValue="rangeLow">
+						ORDER BY range_low
+					</isEqual>
+					<isEqual property="sortColumn" compareValue="rangeHigh">
+						ORDER BY range_high
+					</isEqual>
+					<isEqual property="sortColumn" compareValue="defaultRt">
+						ORDER BY default_rt
+					</isEqual>
+					<isEqual property="ascDescFlg" compareValue="ASC">
+						ASC
+					</isEqual>
+					<isEqual property="ascDescFlg" compareValue="DESC">
+						DESC
+					</isEqual>
+				  </isNotNull>) a,
+               (SELECT count(*) count_ FROM TABLE(GIISS043_PKG.get_bond_class_rt(#classNo#))
+              <isNotNull property="filter">
+			      	WHERE 1=1
+           			<isNotEmpty prepend="AND" property="rangeLow">
+           			  range_low = #rangeLow#
+           			</isNotEmpty>
+           			<isNotEmpty prepend="AND" property="rangeHigh">
+           			  range_high = #rangeHigh#
+           			</isNotEmpty>
+           			<isNotEmpty prepend="AND" property="defaultRt">
+           			  default_rt = #defaultRt#
+           			</isNotEmpty>
+                  </isNotNull>) b)
+ 		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="giiss043ValAddBondClassRt" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss043_pkg.val_add_bond_class_rt(#rangeLow#, #rangeHigh#, #classNo#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="saveGiiss043BondClassRt" parameterClass="GIISBondClassRt">
+	    DECLARE
+	    	v_rec giis_bond_class_rt%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.class_no := #classNo#;
+ 			v_rec.range_low := #rangeLow#;
+ 			v_rec.range_high := #rangeHigh#;
+ 			v_rec.default_rt := #defaultRt#;
+			v_rec.user_id := #userId#;
+			v_rec.last_update := #lastUpdate#;
+			v_rec.remarks := #remarks#;
+ 			 			
+ 			giiss043_pkg.save_bond_class_rt(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="giiss043DelBondClassRt" parameterClass="GIISBondClassRt">
+ 		BEGIN
+ 			giiss043_pkg.del_bond_class_rt(#rangeLow#, #rangeHigh#, #classNo#);
+ 		END;
+ 	</procedure>
+	
+</sqlMap>

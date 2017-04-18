@@ -1,0 +1,706 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIItem">
+	
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIPIItem" type="com.geniisys.gipi.entity.GIPIItem"/>
+	
+	<resultMap class="GIPIItem" id="GIPIItemForEndtResultMap">
+		<result column="POLICY_ID"			property="policyId" 	    jdbcType="INTEGER" />
+		<result column="ITEM_NO"			property="itemNo" 			jdbcType="INTEGER" />
+		<result column="ITEM_TITLE"			property="itemTitle" 		jdbcType="VARCHAR" />
+		<result column="ITEM_GRP"			property="itemGrp" 			jdbcType="NUMBER" />
+		<result column="ITEM_DESC"			property="itemDesc" 		jdbcType="VARCHAR" />
+		<result column="ITEM_DESC2"			property="itemDesc2" 		jdbcType="VARCHAR" />
+		<result column="TSI_AMT"			property="tsiAmt" 			jdbcType="NUMERIC" />
+		<result column="PREM_AMT"			property="premAmt" 			jdbcType="NUMERIC" />
+		<result column="ANN_PREM_AMT"		property="annPremAmt" 		jdbcType="NUMERIC" />
+		<result column="ANN_TSI_AMT"		property="annTsiAmt" 		jdbcType="NUMERIC" />
+		<result column="REC_FLAG"			property="recFlag" 			jdbcType="VARCHAR" />
+		<result column="CURRENCY_CD"		property="currencyCd" 		jdbcType="INTEGER" />
+		<result column="CURRENCY_RT"		property="currencyRt" 		jdbcType="NUMERIC" />
+		<result column="CURRENCY_DESC"		property="currencyDesc" 	jdbcType="VARCHAR" />
+		<result column="GROUP_CD"			property="groupCd" 			jdbcType="INTEGER" />
+		<result column="FROM_DATE"			property="fromDate" 		jdbcType="DATE" />
+		<result column="TO_DATE"			property="toDate" 			jdbcType="DATE" />
+		<result column="PACK_LINE_CD"		property="packLineCd" 		jdbcType="VARCHAR" />
+		<result column="PACK_SUBLINE_CD"	property="packSublineCd" 	jdbcType="VARCHAR" />
+		<result column="DISCOUNT_SW"		property="discountSw" 		jdbcType="VARCHAR" />
+		<result column="COVERAGE_CD"		property="coverageCd" 		jdbcType="INTEGER" />
+		<result column="OTHER_INFO"			property="otherInfo" 		jdbcType="VARCHAR" />
+		<result column="SURCHARGE_SW"		property="surchargeSw"		jdbcType="VARCHAR" />
+		<result column="REGION_CD"			property="regionCd" 		jdbcType="INTEGER" />		
+		<result column="RISK_NO"			property="riskNo" 			jdbcType="INTEGER" />
+		<result column="RISK_ITEM_NO"		property="riskItemNo" 		jdbcType="INTEGER" />
+	</resultMap>	
+	
+	<resultMap class="GIPIItem" id="GIPIItemFIResultMap" extends="GIPIItemForEndtResultMap">
+		<result column="{policyId=POLICY_ID, itemNo=ITEM_NO}"	property="gipiFireItem"	select="getGIPIFireItemForEndt" />
+	</resultMap>
+
+	<resultMap class="GIPIItem" id="GIPIItemMCResultMap" extends="GIPIItemForEndtResultMap">
+		<result column="{policyId=POLICY_ID, itemNo=ITEM_NO}"	property="gipiVehicle"	select="getGIPIVehicleForEndt" />
+	</resultMap>
+
+	<resultMap class="GIPIItem" id="GIPIItemMNResultMap" extends="GIPIItemForEndtResultMap">
+		<result column="{policyId=POLICY_ID, itemNo=ITEM_NO}"	property="gipiCargo"	select="getGIPICargoForEndt" />
+	</resultMap>
+
+	<resultMap class="GIPIItem" id="GIPIItemCAResultMap" extends="GIPIItemForEndtResultMap">
+		<result column="{policyId=POLICY_ID, itemNo=ITEM_NO}"	property="gipiCasualtyItem"	select="getGIPICasualtyItemForEndt" />
+	</resultMap>
+
+	<resultMap class="GIPIItem" id="GIPIItemMHResultMap" extends="GIPIItemForEndtResultMap">
+		<result column="{policyId=POLICY_ID, itemNo=ITEM_NO}"	property="gipiItemVes"	select="getGIPIItemVesForEndt" />
+	</resultMap>
+
+	<resultMap class="GIPIItem" id="GIPIItemAVResultMap" extends="GIPIItemForEndtResultMap">
+		<result column="{policyId=POLICY_ID, itemNo=ITEM_NO}"	property="gipiAviationItem"	select="getGIPIAviationItemForEndt" />
+	</resultMap>	
+	
+<!-- 	<resultMap class="GIPIItem" id="GIPIItemResultMap">
+		<result property="policyId" 		column="POLICY_ID"/>
+		<result property="itemNo" 			column="ITEM_NO"/>
+		<result property="itemTitle" 		column="ITEM_TITLE"/>
+		<result property="itemGrp" 			column="ITEM_GRP"/>
+		<result property="itemDesc" 		column="ITEM_DESC"/>
+		<result property="itemDesc2"		column="ITEM_DESC2"/>
+		<result property="tsiAmt" 			column="TSI_AMT"/>
+		<result property="premAmt" 			column="PREM_AMT"/>
+		<result property="annTsiAmt" 		column="ANN_TSI_AMT"/>
+		<result property="annPremAmt" 		column="ANN_PREM_AMT"/>
+		<result property="recFlag" 			column="REC_FLAG"/>
+		<result property="currencyCd" 		column="CURRENCY_CD"/>
+		<result property="currencyRt" 		column="CURRENCY_RT"/>
+		<result property="groupCd" 			column="GROUP_CD"/>
+		<result property="fromDate" 		column="FROM_DATE"/>
+		<result property="toDate" 			column="TO_DATE"/>
+		<result property="packLineCd" 		column="PACK_LINE_CD"/>
+		<result property="packSublineCd" 	column="PACK_SUBLINE_CD"/>
+		<result property="discountSw" 		column="DISCOUNT_SW"/>
+		<result property="coverageCd" 		column="COVERAGE_CD"/>
+		<result property="otherInfo" 		column="OTHER_INFO"/>
+		<result property="surchargeSw" 		column="SURCHARGE_SW"/>
+		<result property="regionCd" 		column="REGION_CD"/>
+		<result property="changedTag" 		column="CHANGED_TAG"/>
+		<result property="prorateFlag" 		column="PRORATE_FLAG"/>
+		<result property="compSw" 			column="COMP_SW"/>
+		<result property="shortRtPercent"	column="SHORT_RT_PERCENT"/>
+		<result property="packBenCd" 		column="PACK_BEN_CD"/>
+		<result property="paytTerms" 		column="PAYT_TERMS"/>
+		<result property="riskNo" 			column="RISK_NO"/>
+		<result property="riskItemNo" 		column="RISK_ITEM_NO"/>
+		<result property="currencyDesc" 	column="CURRENCY_DESC"/>
+		<result property="gipiCargo" 		column="{policyId=POLICY_ID, itemNo=ITEM_NO}" select="getGIPICargoForEndt"/>
+	</resultMap> -->
+	
+<!-- 	<resultMap class="GIPIItem" id="GIPIItemCAResultMap">
+		<result property="policyId" 		column="POLICY_ID"/>
+		<result property="itemNo" 			column="ITEM_NO"/>
+		<result property="itemTitle" 		column="ITEM_TITLE"/>
+		<result property="itemGrp" 			column="ITEM_GRP"/>
+		<result property="itemDesc" 		column="ITEM_DESC"/>
+		<result property="itemDesc2"		column="ITEM_DESC2"/>
+		<result property="tsiAmt" 			column="TSI_AMT"/>
+		<result property="premAmt" 			column="PREM_AMT"/>
+		<result property="annTsiAmt" 		column="ANN_TSI_AMT"/>
+		<result property="annPremAmt" 		column="ANN_PREM_AMT"/>
+		<result property="recFlag" 			column="REC_FLAG"/>
+		<result property="currencyCd" 		column="CURRENCY_CD"/>
+		<result property="currencyRt" 		column="CURRENCY_RT"/>
+		<result property="groupCd" 			column="GROUP_CD"/>
+		<result property="fromDate" 		column="FROM_DATE"/>
+		<result property="toDate" 			column="TO_DATE"/>
+		<result property="packLineCd" 		column="PACK_LINE_CD"/>
+		<result property="packSublineCd" 	column="PACK_SUBLINE_CD"/>
+		<result property="discountSw" 		column="DISCOUNT_SW"/>
+		<result property="coverageCd" 		column="COVERAGE_CD"/>
+		<result property="otherInfo" 		column="OTHER_INFO"/>
+		<result property="surchargeSw" 		column="SURCHARGE_SW"/>
+		<result property="regionCd" 		column="REGION_CD"/>
+		<result property="changedTag" 		column="CHANGED_TAG"/>
+		<result property="prorateFlag" 		column="PRORATE_FLAG"/>
+		<result property="compSw" 			column="COMP_SW"/>
+		<result property="shortRtPercent"	column="SHORT_RT_PERCENT"/>
+		<result property="packBenCd" 		column="PACK_BEN_CD"/>
+		<result property="paytTerms" 		column="PAYT_TERMS"/>
+		<result property="riskNo" 			column="RISK_NO"/>
+		<result property="riskItemNo" 		column="RISK_ITEM_NO"/>
+		<result property="currencyDesc" 	column="CURRENCY_DESC"/>
+		<result property="gipiCasualtyItem" column="{policyId=POLICY_ID, itemNo=ITEM_NO}" select="getGIPICasualtyItemForEndt"/>
+	</resultMap> -->
+	
+	<resultMap class="GIPIItem" id="GIPIItemACResultMap">
+		<result property="policyId" 		column="POLICY_ID"/>
+		<result property="itemNo" 			column="ITEM_NO"/>
+		<result property="itemTitle" 		column="ITEM_TITLE"/>
+		<result property="itemGrp" 			column="ITEM_GRP"/>
+		<result property="itemDesc" 		column="ITEM_DESC"/>
+		<result property="itemDesc2"		column="ITEM_DESC2"/>
+		<result property="tsiAmt" 			column="TSI_AMT"/>
+		<result property="premAmt" 			column="PREM_AMT"/>
+		<result property="annTsiAmt" 		column="ANN_TSI_AMT"/>
+		<result property="annPremAmt" 		column="ANN_PREM_AMT"/>
+		<result property="recFlag" 			column="REC_FLAG"/>
+		<result property="currencyCd" 		column="CURRENCY_CD"/>
+		<result property="currencyRt" 		column="CURRENCY_RT"/>
+		<result property="groupCd" 			column="GROUP_CD"/>
+		<result property="fromDate" 		column="FROM_DATE"/>
+		<result property="toDate" 			column="TO_DATE"/>
+		<result property="packLineCd" 		column="PACK_LINE_CD"/>
+		<result property="packSublineCd" 	column="PACK_SUBLINE_CD"/>
+		<result property="discountSw" 		column="DISCOUNT_SW"/>
+		<result property="coverageCd" 		column="COVERAGE_CD"/>
+		<result property="otherInfo" 		column="OTHER_INFO"/>
+		<result property="surchargeSw" 		column="SURCHARGE_SW"/>
+		<result property="regionCd" 		column="REGION_CD"/>
+		<result property="changedTag" 		column="CHANGED_TAG"/>
+		<result property="prorateFlag" 		column="PRORATE_FLAG"/>
+		<result property="compSw" 			column="COMP_SW"/>
+		<result property="shortRtPercent"	column="SHORT_RT_PERCENT"/>
+		<result property="packBenCd" 		column="PACK_BEN_CD"/>
+		<result property="paytTerms" 		column="PAYT_TERMS"/>
+		<result property="riskNo" 			column="RISK_NO"/>
+		<result property="riskItemNo" 		column="RISK_ITEM_NO"/>
+		<result property="currencyDesc" 	column="CURRENCY_DESC"/>
+		<result property="gipiAccidentItem" column="{policyId=POLICY_ID, itemNo=ITEM_NO}" select="getGIPIAccidentItemForEndt"/>
+	</resultMap>
+	
+	<resultMap class="GIPIItem" id="relatedItemInfoMap">
+		<result property="policyId" 			column="policy_id"/>
+		<result property="itemNo" 				column="item_no"/>
+		<result property="itemGrp" 				column="item_grp"/>
+		<result property="itemTitle" 			column="item_title"/>
+		<result property="itemDesc" 			column="item_desc"/>
+		<result property="itemDesc2" 			column="item_desc2"/>
+		<result property="currencyRt" 			column="currency_rt"/>
+		<result property="packLineCd" 			column="pack_line_cd"/>
+		<result property="packSublineCd" 		column="pack_subline_cd"/>
+		<result property="surchargeSw" 			column="surcharge_sw"/>
+		<result property="discountSw" 			column="discount_sw"/>		
+		<result property="tsiAmt" 				column="tsi_amt"/>
+		<result property="premAmt" 				column="prem_amt"/>
+		<result	property="annTsiAmt"			column="ann_tsi_amt"/>		
+		<result	property="annPremAmt"			column="ann_prem_amt"/>	
+		<result property="otherInfo"			column="other_info"/>	
+		<result	property="packPolFlag"			column="pack_pol_flag"/> 
+		<result property="currencyDesc" 		column="currency_desc"/>
+		<result property="coverageDesc" 		column="coverage_desc"/>
+		<result property="perilViewType" 		column="peril_view_type"/>
+		<result property="itemType" 			column="item_type"/>
+		<result property="rowNum" 				column="rownum_"/>			
+		<result property="rowCount"				column="count_"/>
+	</resultMap>
+	
+	<resultMap class="GIPIItem" 				id="PackPolicyItemsResultMap">
+		<result property="policyId"				column="POLICY_ID"/>
+		<result property="itemNo"				column="ITEM_NO"/>
+		<result property="itemTitle"			column="ITEM_TITLE"/>
+		<result property="itemDesc" 		    column="ITEM_DESC"/>
+		<result property="itemDesc2"		    column="ITEM_DESC2"/>
+		<result property="currencyCd" 		    column="CURRENCY_CD"/>
+		<result property="currencyRt" 		    column="CURRENCY_RT"/>
+		<result property="packLineCd" 			column="PACK_LINE_CD"/>
+		<result property="packSublineCd" 		column="PACK_SUBLINE_CD"/>
+		<result property="rowNum" 				column="ROWNUM_"/>			
+		<result property="rowCount"				column="COUNT_"/>
+	</resultMap>
+	
+	<resultMap class="GIPIItem" 				id="itemNoLOVResultMap">
+		<result property="itemNo"				column="ITEM_NO"/>
+		<result property="itemTitle"			column="ITEM_TITLE"/>
+		<result property="rowNum" 				column="ROWNUM_"/>			
+		<result property="rowCount"				column="COUNT_"/>
+	</resultMap>	
+	
+	<!-- Rey 08-02-2011 item group list -->
+	<resultMap class="GIPIItem" id="itemGrpList">
+		<result property="policyId"         column="policy_id"/>
+		<result property="itemGrp"			column="item_grp"/>
+		<result property="tsiAmt"			column="tsi_amt"/>
+		<result property="annPremAmt"		column="ann_prem_amt"/>
+		<result property="annTsiAmt"		column="ann_tsi_amt"/>
+		<result property="currencyRt"		column="currency_rt"/>
+		<result property="currencyDesc"		column="currency_desc"/>
+	</resultMap>
+	
+	<resultMap id="ItemLOVMap" class="java.util.HashMap">
+  		<result property="itemNo" 					column="item_no" />
+  		<result property="itemTitle" 				column="item_title" />			
+  		<result property="rowNum" 				column="rownum_" />
+		<result property="rowCount"				column="count_" />
+  	</resultMap>
+	
+	<select id="getGIPIItemForEndt" resultMap="GIPIItemForEndtResultMap">
+		SELECT policy_id, 							item_no, 									ESCAPE_VALUE(item_title) item_title, 	item_grp,
+	   		   ESCAPE_VALUE(item_desc) item_desc, 	ESCAPE_VALUE(item_desc2) item_desc2, 		tsi_amt, 								prem_amt,
+	   		   ann_prem_amt, 						ann_tsi_amt, 								rec_flag, 								currency_cd,
+	   		   currency_rt, 						ESCAPE_VALUE(currency_desc) currency_desc,	group_cd, 								from_date,
+	   		   to_date, 							pack_line_cd, 								pack_subline_cd, 						discount_sw,
+	   		   coverage_cd, 						ESCAPE_VALUE(other_info) other_info, 		surcharge_sw,							region_cd,
+	   		   risk_no,								risk_item_no
+		  FROM TABLE(GIPI_ITEM_PKG.get_item_from_policy(#policyId#, #lineCd#, #sublineCd#, #issCd#, #issueYy#, #polSeqNo#, #renewNo#, #effDate#))
+		  <!-- FROM TABLE(GIPI_ITEM_PKG.get_gipi_item(#policyId#, #lineCd#, #sublineCd#, #issCd#, #issueYy#, #polSeqNo#, #renewNo#)) -->
+		  <!-- bonok :: 05152014 :: PHILFIRE SIT - SR 1614 -->
+	</select>
+	
+	<!-- Gzelle 02112015 removed ESCAPE VALUE -->	
+	<select id="getGIPIItemFIForEndt" resultMap="GIPIItemFIResultMap">
+		SELECT policy_id, 							item_no, 									item_title, 							item_grp,
+	   		   item_desc, 							item_desc2, 								tsi_amt, 								prem_amt,
+	   		   ann_prem_amt, 						ann_tsi_amt, 								rec_flag, 								currency_cd,
+	   		   currency_rt, 						currency_desc,								group_cd, 								from_date,
+	   		   to_date, 							pack_line_cd, 								pack_subline_cd, 						discount_sw,
+	   		   coverage_cd, 						other_info, 								surcharge_sw,							region_cd,
+	   		   risk_no,								risk_item_no
+	   	  FROM TABLE(GIPI_ITEM_PKG.get_item_from_policy(#policyId#, #lineCd#, #sublineCd#, #issCd#, #issueYy#, #polSeqNo#, #renewNo#, #effDate#))
+		  <!-- FROM TABLE(GIPI_ITEM_PKG.get_gipi_item(#policyId#, #lineCd#, #sublineCd#, #issCd#, #issueYy#, #polSeqNo#, #renewNo#)) -->
+	</select>
+	
+	<select id="getGIPIItemMCForEndt" resultMap="GIPIItemMCResultMap">
+	<!-- andrew - 07162015 - SR 19819/19298 -->
+		SELECT policy_id, 		item_no, 		item_title, 		item_grp,
+	   		   item_desc,		item_desc2, 	tsi_amt, 			prem_amt,
+	   		   ann_prem_amt, 	ann_tsi_amt, 	rec_flag, 			currency_cd,
+	   		   currency_rt, 	currency_desc,	group_cd, 			from_date,
+	   		   to_date, 		pack_line_cd, 	pack_subline_cd, 	discount_sw,
+	   		   coverage_cd, 	other_info, 	surcharge_sw,		region_cd,
+	   		   risk_no,			risk_item_no
+	   	  FROM TABLE(GIPI_ITEM_PKG.get_item_from_policy(#policyId#, #lineCd#, #sublineCd#, #issCd#, #issueYy#, #polSeqNo#, #renewNo#, #effDate#))	   
+		  <!-- FROM TABLE(GIPI_ITEM_PKG.get_gipi_item(#policyId#, #lineCd#, #sublineCd#, #issCd#, #issueYy#, #polSeqNo#, #renewNo#)) -->
+	</select>
+
+	<select id="getGIPIItemMNForEndt" resultMap="GIPIItemMNResultMap">
+	<!-- andrew - 07152015 - SR 19806 -->
+		SELECT policy_id, 		item_no, 		item_title, 	 item_grp,
+	   		   item_desc, 		item_desc2, 	tsi_amt, 		 prem_amt,
+	   		   ann_prem_amt, 	ann_tsi_amt, 	rec_flag, 		 currency_cd,
+	   		   currency_rt, 	currency_desc,	group_cd, 		 from_date,
+	   		   to_date, 		pack_line_cd, 	pack_subline_cd, discount_sw,
+	   		   coverage_cd, 	other_info, 	surcharge_sw,	 region_cd,
+	   		   risk_no,			risk_item_no	
+	   	  FROM TABLE(GIPI_ITEM_PKG.get_item_from_policy(#policyId#, #lineCd#, #sublineCd#, #issCd#, #issueYy#, #polSeqNo#, #renewNo#, #effDate#))	    
+		  <!-- FROM TABLE(GIPI_ITEM_PKG.get_gipi_item(#policyId#, #lineCd#, #sublineCd#, #issCd#, #issueYy#, #polSeqNo#, #renewNo#)) -->
+	</select>
+	
+	<!-- Gzelle 02262015 removed ESCAPE_VALUE -->
+	<select id="getGIPIItemCAForEndt" resultMap="GIPIItemCAResultMap">
+		SELECT policy_id,		item_no, 		item_title, 		item_grp,
+	   		   item_desc, 		item_desc2, 	tsi_amt, 			prem_amt,
+	   		   ann_prem_amt, 	ann_tsi_amt, 	rec_flag, 			currency_cd,
+	   		   currency_rt, 	currency_desc,	group_cd, 			from_date,
+	   		   to_date, 		pack_line_cd, 	pack_subline_cd, 	discount_sw,
+	   		   coverage_cd, 	other_info, 	surcharge_sw,		region_cd,
+	   		   risk_no,			risk_item_no
+	      FROM TABLE(GIPI_ITEM_PKG.get_item_from_policy(#policyId#, #lineCd#, #sublineCd#, #issCd#, #issueYy#, #polSeqNo#, #renewNo#, #effDate#))
+		  <!-- FROM TABLE(GIPI_ITEM_PKG.get_gipi_item(#policyId#, #lineCd#, #sublineCd#, #issCd#, #issueYy#, #polSeqNo#, #renewNo#)) -->
+	</select>
+	
+	<select id="getGIPIItemACForEndt" resultMap="GIPIItemACResultMap">
+		SELECT policy_id, 							item_no, 									item_title, 	item_grp,
+	   		   item_desc, 							item_desc2, 								tsi_amt, 								prem_amt,
+	   		   ann_prem_amt, 						ann_tsi_amt, 								rec_flag, 								currency_cd,
+	   		   currency_rt, 						currency_desc,								group_cd, 								from_date,
+	   		   to_date, 							pack_line_cd, 								pack_subline_cd, 						discount_sw,
+	   		   coverage_cd, 						other_info, 								surcharge_sw,							region_cd,
+	   		   risk_no,								risk_item_no,								changed_tag, 							prorate_flag, 
+	   		   comp_sw, 							short_rt_percent, 							pack_ben_cd, 							payt_terms
+		 FROM TABLE(GIPI_ITEM_PKG.get_item_from_policy(#policyId#, #lineCd#, #sublineCd#, #issCd#, #issueYy#, #polSeqNo#, #renewNo#, #effDate#))
+	</select>
+
+	<select id="getGIPIItemMHForEndt" resultMap="GIPIItemMHResultMap">
+	<!-- andrew - 07152015 - SR 19741 -->
+		SELECT policy_id, 		item_no, 		item_title, 		item_grp,
+	   		   item_desc, 		item_desc2, 	tsi_amt, 			prem_amt,
+	   		   ann_prem_amt, 	ann_tsi_amt, 	rec_flag, 			currency_cd,
+	   		   currency_rt, 	currency_desc,	group_cd, 			from_date,
+	   		   to_date, 		pack_line_cd, 	pack_subline_cd, 	discount_sw,
+	   		   coverage_cd, 	other_info, 	surcharge_sw,		region_cd,
+	   		   risk_no,			risk_item_no
+	      FROM TABLE(GIPI_ITEM_PKG.get_item_from_policy(#policyId#, #lineCd#, #sublineCd#, #issCd#, #issueYy#, #polSeqNo#, #renewNo#, #effDate#))
+		  <!-- FROM TABLE(GIPI_ITEM_PKG.get_gipi_item(#policyId#, #lineCd#, #sublineCd#, #issCd#, #issueYy#, #polSeqNo#, #renewNo#)) -->
+	</select>
+
+	<select id="getGIPIItemAVForEndt" resultMap="GIPIItemAVResultMap">
+	<!-- andrew - 08062015 - KB 308 -->
+		SELECT policy_id, 		item_no, 		item_title, 		item_grp,
+	   		   item_desc, 		item_desc2, 	tsi_amt, 			prem_amt,
+	   		   ann_prem_amt, 	ann_tsi_amt, 	rec_flag, 			currency_cd,
+	   		   currency_rt, 	currency_desc,	group_cd, 			from_date,
+	   		   to_date, 		pack_line_cd, 	pack_subline_cd, 	discount_sw,
+	   		   coverage_cd, 	other_info, 	surcharge_sw,		region_cd,
+	   		   risk_no,			risk_item_no
+	      FROM TABLE(GIPI_ITEM_PKG.get_item_from_policy(#policyId#, #lineCd#, #sublineCd#, #issCd#, #issueYy#, #polSeqNo#, #renewNo#, #effDate#))
+		  <!-- FROM TABLE(GIPI_ITEM_PKG.get_gipi_item(#policyId#, #lineCd#, #sublineCd#, #issCd#, #issueYy#, #polSeqNo#, #renewNo#)) -->
+	</select>	
+	
+	<select id="getGIPIItemENForEndt" resultMap="GIPIItemForEndtResultMap">
+	<!-- andrew - 08072015 - SR 19335 -->
+		SELECT policy_id, 		item_no, 			item_title, 		item_grp,
+	   		   item_desc, 		item_desc2, 		tsi_amt, 			prem_amt,
+	   		   ann_prem_amt, 	ann_tsi_amt, 		rec_flag, 			currency_cd,
+	   		   currency_rt, 	currency_desc,		group_cd, 			from_date,
+	   		   to_date, 		pack_line_cd, 		pack_subline_cd, 	discount_sw,
+	   		   coverage_cd, 	other_info, 		surcharge_sw,		region_cd,
+	   		   risk_no,			risk_item_no
+	      FROM TABLE(GIPI_ITEM_PKG.get_item_from_policy(#policyId#, #lineCd#, #sublineCd#, #issCd#, #issueYy#, #polSeqNo#, #renewNo#, #effDate#))
+	</select>
+	
+	<!--Modified by Gzelle 06.14.2013 - added sortColumn-->
+	<select id="getRelatedItemInfo" resultMap="relatedItemInfoMap" parameterClass="java.util.HashMap">
+		SELECT *       
+  		  FROM (SELECT rownum rownum_ ,b.count_,a.*     
+          		  FROM (SELECT * FROM TABLE(GIPI_ITEM_PKG.get_related_item_info(#policyId#))
+          		  	  <isEqual property="sortColumn" compareValue="itemGrp">
+          		  	  	ORDER BY item_grp		
+          		  	  </isEqual>
+			          <isEqual property="sortColumn" compareValue="itemNo">
+			          	ORDER BY item_no
+			          </isEqual>
+			          <isEqual property="sortColumn" compareValue="itemTitle">
+			          	ORDER BY item_title
+			          </isEqual>
+			          <isEqual property="sortColumn" compareValue="tsiAmt">
+			          	ORDER BY tsi_amt
+			          </isEqual>
+			          <isEqual property="sortColumn" compareValue="itemDesc">
+			          	ORDER BY item_desc
+			          </isEqual>
+			          <isEqual property="sortColumn" compareValue="itemDesc2">
+			          	ORDER BY item_desc2
+			          </isEqual>
+			          <isEqual property="sortColumn" compareValue="coverageDesc">
+			          	ORDER BY coverage_desc
+			          </isEqual>
+			          <isEqual property="sortColumn" compareValue="premAmt">
+			          	ORDER BY prem_amt
+			          </isEqual>
+			          <isEqual property="sortColumn" compareValue="currencyDesc">
+			          	ORDER BY currency_desc
+			          </isEqual>
+			          <isEqual property="sortColumn" compareValue="currencyRt">
+			          	ORDER BY currency_rt
+			          </isEqual>
+			          <isNotNull property="sortColumn">
+			          	<isEqual property="ascDescFlg" compareValue="ASC">
+			          		ASC
+			          	</isEqual>
+			          	<isEqual property="ascDescFlg" compareValue="DESC">
+			          		DESC
+			          	</isEqual>
+			          </isNotNull>          		  
+          		  	   ) a,
+               		   (SELECT count(*) count_ FROM TABLE(GIPI_ITEM_PKG.get_related_item_info(#policyId#))) b)
+          WHERE rownum_ BETWEEN NVL(#from#,rownum_) AND NVL(#to#,rownum_)
+	</select>
+	<!-- Rey 08-02-2011 item group list -->
+	<select id="getItemGrpList" resultMap="itemGrpList" parameterClass="java.util.HashMap">
+			SELECT *       
+  		  FROM (SELECT rownum rownum_ ,b.count_,a.*     
+          		  FROM (SELECT * FROM TABLE(GIPI_ITEM_PKG.get_item_group_list(#policyId#))) a,
+               		   (SELECT count(*) count_ FROM TABLE(GIPI_ITEM_PKG.get_item_group_list(#policyId#))) b)
+          WHERE rownum_ BETWEEN NVL(#from#,rownum_) AND NVL(#to#,rownum_)
+	</select>
+	
+	<select id="getPackPolicyItemsList" resultMap="PackPolicyItemsResultMap">
+		SELECT *
+			  FROM (SELECT rownum rownum_, 
+			               b.count_, 
+			               a.* 
+			          FROM (SELECT * 
+			                  FROM TABLE (GIPI_ITEM_PKG.get_pack_policy_items(#lineCd#, #issCd#, #sublineCd#, #issueYy#, #polSeqNo#, #renewNo#, #effDate#, #expiryDate#))
+			                <isEqual property="sortColumn" compareValue="itemNo">
+			              		ORDER BY item_no
+				            </isEqual>
+				            <isEqual property="sortColumn" compareValue="itemTitle">
+			              		ORDER BY item_title
+				            </isEqual> 
+				            <isEqual property="sortColumn" compareValue="packLineCd">
+			              		ORDER BY pack_line_cd
+				            </isEqual>
+				            <isEqual property="sortColumn" compareValue="packSublineCd">
+			              		ORDER BY pack_subline_cd
+				            </isEqual>
+				            <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	</isNotNull>) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (GIPI_ITEM_PKG.get_pack_policy_items(#lineCd#, #issCd#, #sublineCd#, #issueYy#, #polSeqNo#, #renewNo#, #effDate#, #expiryDate#))) b) 
+			 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="checkExistingItem" resultClass="java.lang.Integer" parameterClass="java.util.HashMap">
+		SELECT GIPI_ITEM_PKG.check_existing_item(
+				#lineCd#, #sublineCd#, #polIssCd#, 
+				#issueYy#, #polSeqNo#, #renewNo#, 
+				#polEffDate#, #expiryDate#, #lossDate#, #itemNo#
+				) 
+		  FROM dual
+	</select>
+	
+	<select id="getNonMotCarItemLOV" resultMap="ItemLOVMap">
+  	    SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          		 FROM (SELECT * 
+		                  				  FROM TABLE (gipi_item_pkg.get_nonmotcar_item_gicls026(#lineCd#, #sublineCd#, #issCd#, #issueYy#, #polSeqNo#, #renewNo#))
+		                  <isNotNull property="findText">
+		                  	WHERE item_no LIKE #findText#
+		                  	   OR UPPER(item_title) LIKE UPPER(#findText#)
+		                  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="itemNo">
+			              		ORDER BY item_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="itemTitle">
+			              		ORDER BY item_title
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (gipi_item_pkg.get_nonmotcar_item_gicls026(#lineCd#, #sublineCd#, #issCd#, #issueYy#, #polSeqNo#, #renewNo#))
+		                  <isNotNull property="findText">
+		                  	WHERE item_no LIKE #findText#
+		                  	   OR UPPER(item_title) LIKE UPPER(#findText#)
+		                  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+  	
+  	<select id="getItemGIEXS007LOV" resultMap="ItemLOVMap">
+  	    SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          		 FROM (SELECT * 
+		                  				  FROM TABLE (gipi_item_pkg.get_item_no_giexs007(#policyId#))
+		                  <isEqual property="sortColumn" compareValue="itemNo">
+			              		ORDER BY item_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="itemTitle">
+			              		ORDER BY item_title
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (gipi_item_pkg.get_item_no_giexs007(#policyId#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+  	
+  	<select id="getNonMCItemTitle" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		 SELECT gipi_item_pkg.get_item_title(
+                  #itemNo#,  #lineCd#, #sublineCd#, #issCd#, #issueYy#,  #polSeqNo#, #renewNo#)         
+           FROM dual
+	</select>
+	
+	<resultMap id="getGiuts027PolicyItemList" class="GIPIItem" extends="BaseEntity.TableGridResultMap">
+		<result column="POLICY_ID"			property="policyId" 	    jdbcType="INTEGER" />
+		<result column="ITEM_NO"			property="itemNo" 			jdbcType="INTEGER" />
+		<result column="ITEM_TITLE"			property="itemTitle" 		jdbcType="VARCHAR" />
+		<result column="COVERAGE_CD"		property="coverageCd" 		jdbcType="INTEGER" />
+		<result column="COVERAGE_DESC"		property="coverageDesc" 	jdbcType="VARCHAR" />
+	</resultMap>	
+	<select id="getGiuts027PolicyItemList" resultMap="getGiuts027PolicyItemList">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                   FROM TABLE (GIPI_ITEM_PKG.get_item_giuts027(#policyId#))
+		                   <isNotNull property="filter">
+						      WHERE 1=1
+              			        <isNotEmpty prepend="AND" property="itemNo">
+              					  item_no LIKE #itemNo#
+              			        </isNotEmpty>
+              			        <isNotEmpty prepend="AND" property="itemTitle">
+              					  UPPER(item_title) LIKE UPPER(#itemTitle#)
+              			        </isNotEmpty>
+              			        <isNotEmpty prepend="AND" property="coverageCd">
+              					  coverage_cd LIKE #coverageCd#
+              			        </isNotEmpty>
+              			        <isNotEmpty prepend="AND" property="coverageDesc">
+              					  UPPER(coverage_desc) LIKE UPPER(#coverageDesc#)
+              			        </isNotEmpty>
+                   		  </isNotNull>
+		                  <isNotNull property="sortColumn">
+		                  		<isEqual property="sortColumn" compareValue="itemNo">
+				              		ORDER BY item_no
+				              	</isEqual>
+				              	<isEqual property="sortColumn" compareValue="itemTitle">
+				              		ORDER BY item_title
+				              	</isEqual>
+				              	<isEqual property="sortColumn" compareValue="coverageCd">
+				              		ORDER BY coverage_cd
+				              	</isEqual>
+				              	<isEqual property="sortColumn" compareValue="coverageDesc">
+				              		ORDER BY coverage_desc
+				              	</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIPI_ITEM_PKG.get_item_giuts027(#policyId#))
+		                  <isNotNull property="filter">
+						      WHERE 1=1
+              			        <isNotEmpty prepend="AND" property="itemNo">
+              					  item_no LIKE #itemNo#
+              			        </isNotEmpty>
+              			        <isNotEmpty prepend="AND" property="itemTitle">
+              					  UPPER(item_title) LIKE UPPER(#itemTitle#)
+              			        </isNotEmpty>
+              			        <isNotEmpty prepend="AND" property="coverageCd">
+              					  coverage_cd LIKE #coverageCd#
+              			        </isNotEmpty>
+              			        <isNotEmpty prepend="AND" property="coverageDesc">
+              					  UPPER(coverage_desc) LIKE UPPER(#coverageDesc#)
+              			        </isNotEmpty>
+                   		  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<update id="updatePolicyItemCoverage" parameterClass="map">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GIPI_ITEM_PKG.update_item_coverage(#policyId#, #itemNo#, #coverageCd#);
+		END;
+	</update>
+	
+	<resultMap id="gipis175ItemsResultMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result	property="premSeqNo" column="prem_seq_no"/>
+		<result	property="itemGrp" column="item_grp"/>
+		<result	property="itemDesc" column="item_desc"/>
+		<result	property="itemDesc2" column="item_desc2"/>
+		<result	property="recFlag" column="rec_flag"/>
+		<result	property="currencyCd" column="currency_cd"/>
+		<result	property="dspCurrencyDesc" column="dsp_currency_desc"/>
+		<result	property="packLineCd" column="pack_line_cd"/>
+		<result	property="packSublineCd" column="pack_subline_cd"/>
+		<result	property="itemNo" column="item_no"/>
+		<result	property="itemTitle" column="item_title"/>
+		<result	property="sumCommAmt" column="sum_comm_amt"/>
+		<result	property="riCommVat" column="ri_comm_vat"/>
+	</resultMap>
+	
+	<select id="getGIPIS175Items" resultMap="gipis175ItemsResultMap">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+						 b.count_, 
+						 a.*
+					FROM (SELECT *
+							FROM TABLE (GIPIS175_PKG.get_items(#policyId#))
+							<isNotNull property="filter">
+								WHERE 1 = 1 
+									<isNotEmpty prepend="AND" property="itemNo">
+										item_no = #itemNo#
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="itemTitle">
+										UPPER(item_title) LIKE UPPER(#itemTitle#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="dspCurrencyDesc">
+										UPPER(dsp_currency_desc) LIKE UPPER(#dspCurrencyDesc#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="sumCommAmt">
+										sum_comm_amt = #sumCommAmt#
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="riCommVat">
+										ri_comm_vat = #riCommVat#
+									</isNotEmpty>
+							</isNotNull>
+							<isEqual property="sortColumn" compareValue="itemNo">
+								ORDER BY item_no
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="itemTitle">
+								ORDER BY item_title
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="dspCurrencyDesc">
+								ORDER BY dsp_currency_desc
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="sumCommAmt">
+								ORDER BY sum_comm_amt
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="riCommVat">
+								ORDER BY ri_comm_vat
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>
+						) a,
+						(SELECT count(*) count_
+						   FROM TABLE (GIPIS175_PKG.get_items(#policyId#))
+						   <isNotNull property="filter">
+								WHERE 1 = 1 
+									<isNotEmpty prepend="AND" property="itemNo">
+										item_no = #itemNo#
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="itemTitle">
+										UPPER(item_title) LIKE UPPER(#itemTitle#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="dspCurrencyDesc">
+										UPPER(dsp_currency_desc) LIKE UPPER(#dspCurrencyDesc#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="sumCommAmt">
+										sum_comm_amt = #sumCommAmt#
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="riCommVat">
+										ri_comm_vat = #riCommVat#
+									</isNotEmpty>
+							</isNotNull>
+						   ) b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getEndtItemList" parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+		SELECT item_no
+  		  FROM TABLE(GIPI_ITEM_PKG.get_endt_item_list(#lineCd#, #sublineCd#, #issCd#, #issueYy#,
+  		  											  #polSeqNo#, #renewNo#, TO_DATE(#effDate#, 'mm-dd-yyyy')))
+	</select>
+	
+	<!-- monmon -->
+	<resultMap class="GIPIItem" 				id="itemNoAnnTsiPrem">
+		<result property="itemNo"				column="ITEM_NO"/>
+		<result property="annPremAmt"			column="ann_prem_amt"/>
+		<result property="annTsiAmt"			column="ann_tsi_amt"/>
+	</resultMap>
+	
+	<select id="getItemAnnTsiPrem" parameterClass="java.lang.Integer" resultMap="itemNoAnnTsiPrem">
+		 SELECT *
+  		  FROM TABLE (gipi_item_pkg.get_item_ann_tsi_prem (#parId#))
+	</select>
+	
+</sqlMap>

@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISUserGroup">
+
+	<typeAlias alias="GiisUserGrpHdr" type="com.geniisys.common.entity.GIISUserGrpHdr" />
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+
+	<resultMap id="GIISUserGrpHdrList" class="GiisUserGrpHdr" >
+		<result column="USER_GRP" 		property="userGrp" />
+		<result column="USER_GRP_DESC" 	property="userGrpDesc" />
+		<result column="GRP_ISS_CD" 	property="grpIssCd" />
+		<result column="ISS_NAME" 		property="issName" />
+		<result column="REMARKS"	 	property="remarks" />
+		<result column="USER_ID"	 	property="userId" />
+		<result column="LAST_UPDATE" 	property="lastUpdate" />
+	</resultMap>
+	
+	<resultMap id="GIISUserGrpHdr" class="GiisUserGrpHdr" >
+		<result column="USER_GRP" 		property="userGrp" />
+		<result column="USER_GRP_DESC" 	property="userGrpDesc" />
+		<result column="USER_ID"	 	property="userId" />
+		<result column="LAST_UPDATE" 	property="lastUpdate" />
+		<result column="REMARKS"	 	property="remarks" />
+		<result column="GRP_ISS_CD" 	property="grpIssCd" />
+		<result column="CREATE_USER" 	property="createUser" />
+		<result column="CREATE_DATE" 	property="createDate" />
+	</resultMap>
+	
+	<resultMap id="GIISUserGrpHdrListingMap" class="GiisUserGrpHdr" >
+	  	<result column="USER_GRP"		property="userGrp"/>
+	  	<result column="USER_GRP_DESC"	property="userGrpDesc"	/>
+		<result property="rowNum"		column="ROWNUM_"/>
+		<result property="rowCount"		column="COUNT_"/>
+  	</resultMap>
+
+	<select id="getGiisUserGrpHdr" resultMap="GIISUserGrpHdr" parameterClass="java.lang.Integer">
+		select * from giis_user_grp_hdr where user_grp = #userGrp#
+	</select>
+
+	<select id="getGiisUserGrpList" resultMap="GIISUserGrpHdrList">
+		select user_grp, escape_value(user_grp_desc) user_grp_desc, user_id, last_update, remarks, grp_iss_cd, iss_name
+ 			from table(GIIS_USER_GRP_HDR_PKG.get_giis_user_grp_list(#value#)) order by user_grp_desc
+  	</select>
+  	
+  	<insert id="setGiisUserGrpHdr" parameterClass="GiisUserGrpHdr">
+  		BEGIN
+  			giis_users_pkg.app_user := #userId#;
+  			GIIS_USER_GRP_HDR_PKG.set_giis_user_grp_hdr(#userGrp#, #userGrpDesc#, #remarks#, #grpIssCd#, #userId#);
+  		END;
+  	</insert>
+  	
+  	<delete id="deleteGiisUserGrpHdr" parameterClass="java.lang.Integer">
+  		BEGIN
+  			giis_users_pkg.app_user := #appUser#;
+  			GIIS_USER_GRP_HDR_PKG.del_giis_user_grp_hdr(#userGrp#);
+  		END;
+  	</delete>
+  	
+  	<select id="getUserGrpLOV" resultMap="GIISUserGrpHdrListingMap" parameterClass="java.util.HashMap">
+		 SELECT *
+		   FROM (SELECT rownum rownum_, 
+		                b.count_, 
+		                a.* 
+		           FROM (SELECT * 
+		                   FROM TABLE (GIIS_USER_GRP_HDR_PKG.get_giis_user_grp_list(#findText#))
+		                  <isEqual property="sortColumn" compareValue="userGrp">
+			              		ORDER BY user_grp
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="userGrpDesc">
+			              		ORDER BY user_grp_desc
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               	  (SELECT count(*) count_ 
+		                     FROM TABLE (GIIS_USER_GRP_HDR_PKG.get_giis_user_grp_list(#findText#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<insert id="copyUserGrp" parameterClass="java.util.HashMap">
+  		BEGIN
+  			GIIS_USERS_PKG.app_user := #userId#;
+  			<!-- GIIS_USER_GRP_HDR_PKG.copy_user_group_records(#userGrp#, #newUserGrp#, #userGrpDesc#,
+  														#grpIssCd#, #remarks#, #userId#); -->
+			GIIS_USER_GRP_HDR_PKG.copy_user_group_records(#userGrp#, #newUserGrp#, #userId#);
+  		END;
+  	</insert>
+
+	<resultMap id="userGrpLOVResultMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+	  	<result column="USER_GRP"		property="userGrp"/>
+	  	<result column="USER_GRP_DESC"	property="userGrpDesc"	/>
+	  	<result column="grp_iss_cd"		property="grpIssCd"	/>
+  	</resultMap>
+
+	<select id="getGIISS040UserGrpLOV" resultMap="userGrpLOVResultMap">
+		 SELECT *
+		   FROM (SELECT rownum rownum_, 
+		                b.count_, 
+		                a.* 
+		           FROM (SELECT * 
+		                   FROM TABLE (GIISS040_PKG.get_user_grp_lov(#findText#))
+		                  <isEqual property="sortColumn" compareValue="userGrp">
+			              		ORDER BY user_grp
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="userGrpDesc">
+			              		ORDER BY user_grp_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="grpIssCd">
+			              		ORDER BY grp_iss_cd
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               	  (SELECT count(*) count_ 
+		                     FROM TABLE (GIISS040_PKG.get_user_grp_lov(#findText#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="GiisUserGrpHdr" id="GIISS041RecListMap" extends="BaseEntity.TableGridResultMap">
+		<result column="user_grp" 			property="userGrp" />
+		<result column="user_grp_desc" 		property="userGrpDesc" />
+		<result column="grp_iss_cd" 		property="grpIssCd" />
+		<result column="iss_name" 			property="issName" />
+		<result column="remarks"	 		property="remarks" />
+		<result column="user_id"	 		property="userId" />
+		<result column="last_update" 		property="lastUpdate" />
+		<result column="dsp_last_update" 	property="dspLastUpdate" />
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="grpIssCdLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="iss_cd"     		property="issCd"/>
+		<result column="iss_name"     		property="issName"/>
+	</resultMap>
+	
+	<resultMap id="userGrpLOVMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+	  	<result column="USER_GRP"		property="userGrp"/>
+	  	<result column="USER_GRP_DESC"	property="userGrpDesc"/>
+  	</resultMap>
+	
+	<select id="getGIISS041RecList" resultMap="GIISS041RecListMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss041_pkg.get_giiss041_rec_list(#userGrp#, #userGrpDesc#, #issName#))
+		                  <isEqual property="sortColumn" compareValue="userGrp">
+			              		ORDER BY user_grp
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="userGrpDesc">
+			              		ORDER BY user_grp_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="issName">
+			              		ORDER BY iss_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss041_pkg.get_giiss041_rec_list(#userGrp#, #userGrpDesc#, #issName#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<select id="getGIISS041UserGrpLOV" resultMap="userGrpLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giiss041_pkg.get_user_grp_lov(#findText#))
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="userGrp">
+								ORDER BY user_grp
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="userGrpDesc">
+								ORDER BY user_grp_desc
+							</isEqual>							
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(giiss041_pkg.get_user_grp_lov(#findText#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGIISS041GrpIssCdLOV" resultMap="grpIssCdLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giiss041_pkg.get_grp_iss_cd_lov(#findText#))
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="issCd">
+								ORDER BY iss_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="issName">
+								ORDER BY iss_name
+							</isEqual>							
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(giiss041_pkg.get_grp_iss_cd_lov(#findText#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="valDeleteRecGIISS041" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss041_pkg.val_del_rec(#userGrp#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<delete id="deleteRecGIISS041" parameterClass="GiisUserGrpHdr">
+		BEGIN
+ 			giiss041_pkg.del_rec(#userGrp#);
+ 		END;
+ 	</delete>
+ 	
+ 	<procedure id="valAddRecGIISS041" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss041_pkg.val_add_rec(#userGrp#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="setRecGIISS041" parameterClass="GiisUserGrpHdr">
+	    DECLARE
+	    	v_rec giis_user_grp_hdr%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.user_grp := #userGrp#;
+			v_rec.user_grp_desc := #userGrpDesc#;
+			v_rec.grp_iss_cd := #grpIssCd#;
+			v_rec.remarks := #remarks#;
+			v_rec.user_id := #userId#;
+ 			
+ 			giiss041_pkg.add_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="copyUserGrpGIISS041" parameterClass="java.util.HashMap">
+  		BEGIN
+  			giis_users_pkg.app_user := #userId#;
+			giiss041_pkg.copy_user_grp(#userGrp#, #newUserGrp#, #userId#);
+  		END;
+  	</procedure>
+</sqlMap>

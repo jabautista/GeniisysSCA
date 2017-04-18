@@ -1,0 +1,803 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIACR117" pageWidth="990" pageHeight="612" columnWidth="960" leftMargin="15" rightMargin="15" topMargin="20" bottomMargin="20" isSummaryWithPageHeaderAndFooter="true" uuid="099c5f50-da30-45ee-9422-29775b11c6f9">
+	<property name="ireport.zoom" value="1.9965000000000006"/>
+	<property name="ireport.x" value="1131"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="P_DATE" class="java.util.Date">
+		<parameterDescription><![CDATA[]]></parameterDescription>
+	</parameter>
+	<parameter name="P_DATE2" class="java.util.Date"/>
+	<parameter name="P_BRANCH" class="java.lang.String"/>
+	<parameter name="P_POST_TRAN_TOGGLE" class="java.lang.String"/>
+	<parameter name="P_FUND" class="java.lang.String" isForPrompting="false"/>
+	<parameter name="P_TRAN_CLASS" class="java.lang.String">
+		<parameterDescription><![CDATA[]]></parameterDescription>
+	</parameter>
+	<parameter name="P_PER_BRANCH" class="java.lang.String"/>
+	<parameter name="P_USER_ID" class="java.lang.String"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String">
+		<defaultValueExpression><![CDATA["./"]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT *
+  FROM TABLE(GIACR117_PKG.get_cr_reg_details(
+		TO_DATE($P{P_DATE}),
+		TO_DATE($P{P_DATE2}),
+		$P{P_POST_TRAN_TOGGLE},
+		$P{P_BRANCH},
+		$P{P_TRAN_CLASS},
+		$P{P_PER_BRANCH},
+		$P{P_USER_ID} ))]]>
+	</queryString>
+	<field name="COMPANY_NAME" class="java.lang.String"/>
+	<field name="COMPANY_ADDRESS" class="java.lang.String"/>
+	<field name="RUNDATE" class="java.lang.String"/>
+	<field name="POSTING_TRAN" class="java.lang.String"/>
+	<field name="TOP_DATE" class="java.lang.String"/>
+	<field name="GIBR_BRANCH_CD" class="java.lang.String"/>
+	<field name="BRANCH_NAME" class="java.lang.String"/>
+	<field name="OR_NO" class="java.lang.String"/>
+	<field name="TRAN_ID" class="java.math.BigDecimal"/>
+	<field name="DCB_NO" class="java.math.BigDecimal"/>
+	<field name="OR_DATE" class="java.lang.String"/>
+	<field name="POSTING_DATE" class="java.lang.String"/>
+	<field name="INTM_NO" class="java.lang.String"/>
+	<field name="PAYOR" class="java.lang.String"/>
+	<field name="TIN" class="java.lang.String"/>
+	<field name="COLLECTION_AMT" class="java.math.BigDecimal"/>
+	<field name="PARTICULARS" class="java.lang.String"/>
+	<field name="GL_ACCOUNT" class="java.lang.String"/>
+	<field name="GL_ACCT_NAME" class="java.lang.String"/>
+	<field name="SL_CD" class="java.math.BigDecimal"/>
+	<field name="DEBIT_AMT" class="java.math.BigDecimal"/>
+	<field name="CREDIT_AMT" class="java.math.BigDecimal"/>
+	<field name="DIST_OR_TRAN_ID" class="java.math.BigDecimal"/>
+	<field name="BRANCH_COLLECTION_AMT" class="java.math.BigDecimal"/>
+	<field name="OR_VAT_AMT" class="java.math.BigDecimal"/>
+	<field name="OR_NONVAT_AMT" class="java.math.BigDecimal"/>
+	<field name="PREV_PAYOR_VALUE" class="java.lang.String"/>
+	<field name="PRINT_DETAILS" class="java.lang.String"/>
+	<field name="TRAN_FLAG" class="java.lang.String"/>
+	<field name="OR_FLAG" class="java.lang.String"/>
+	<field name="GEN_VERSION" class="java.lang.String"/>
+	<field name="COMPANY_TIN" class="java.lang.String"/>
+	<variable name="V_TOTAL_OR_CD" class="java.math.BigDecimal" resetType="Group" resetGroup="PAYOR" calculation="Sum">
+		<variableExpression><![CDATA[$V{V_OR_CD}]]></variableExpression>
+		<initialValueExpression><![CDATA[new BigDecimal(0.00)]]></initialValueExpression>
+	</variable>
+	<variable name="V_TOTAL_BRANCH_DB" class="java.math.BigDecimal" resetType="Group" resetGroup="BRANCH" calculation="Sum">
+		<variableExpression><![CDATA[$V{V_OR_DB}]]></variableExpression>
+		<initialValueExpression><![CDATA[new BigDecimal(0.00)]]></initialValueExpression>
+	</variable>
+	<variable name="V_TOTAL_BRANCH_CD" class="java.math.BigDecimal" resetType="Group" resetGroup="BRANCH" calculation="Sum">
+		<variableExpression><![CDATA[!$F{PAYOR}.equals( "SPOILED" ) || !$F{PAYOR}.equals( "CANCELLED" ) ?
+    $V{V_OR_CD} : new BigDecimal("0.00")]]></variableExpression>
+		<initialValueExpression><![CDATA[new BigDecimal(0.00)]]></initialValueExpression>
+	</variable>
+	<variable name="V_BRANCH_COLLECTION_AMT" class="java.math.BigDecimal" resetType="Group" resetGroup="BRANCH" calculation="Sum">
+		<variableExpression><![CDATA[$F{BRANCH_COLLECTION_AMT}]]></variableExpression>
+		<initialValueExpression><![CDATA[new BigDecimal(0.00)]]></initialValueExpression>
+	</variable>
+	<variable name="V_TOTAL_BRANCH_TRANS" class="java.lang.Integer" resetType="Group" resetGroup="BRANCH" calculation="Sum">
+		<variableExpression><![CDATA[$F{DIST_OR_TRAN_ID}]]></variableExpression>
+	</variable>
+	<variable name="V_TOTAL_OR_VAT_AMT" class="java.math.BigDecimal" resetType="Group" resetGroup="BRANCH" calculation="Sum">
+		<variableExpression><![CDATA[$F{OR_VAT_AMT}]]></variableExpression>
+		<initialValueExpression><![CDATA[new BigDecimal(0.00)]]></initialValueExpression>
+	</variable>
+	<variable name="V_TOTAL_OR_NONVAT_AMT" class="java.math.BigDecimal" resetType="Group" resetGroup="BRANCH" calculation="Sum">
+		<variableExpression><![CDATA[$F{OR_NONVAT_AMT}]]></variableExpression>
+		<initialValueExpression><![CDATA[new BigDecimal(0.00)]]></initialValueExpression>
+	</variable>
+	<variable name="V_PAYOR_GRP_COUNT" class="java.lang.Integer" resetType="Group" resetGroup="OR_NO" calculation="Count">
+		<variableExpression><![CDATA[$F{PAYOR}]]></variableExpression>
+	</variable>
+	<variable name="V_OR_NO_GRP_COUNT" class="java.lang.Integer" resetType="Group" resetGroup="OR_NO" calculation="Count">
+		<variableExpression><![CDATA[$F{OR_NO}]]></variableExpression>
+	</variable>
+	<variable name="V_OR_COUNT" class="java.lang.Integer" calculation="Count">
+		<variableExpression><![CDATA[$F{OR_NO}]]></variableExpression>
+	</variable>
+	<variable name="V_OR_DB" class="java.math.BigDecimal" resetType="None">
+		<variableExpression><![CDATA[$F{OR_FLAG}.equals("C") && $F{TRAN_FLAG}.equals("D") ? new BigDecimal("0") : $F{DEBIT_AMT}]]></variableExpression>
+	</variable>
+	<variable name="V_OR_CD" class="java.math.BigDecimal" resetType="None">
+		<variableExpression><![CDATA[$F{OR_FLAG}.equals("C") && $F{TRAN_FLAG}.equals("D") ? new BigDecimal("0") : $F{CREDIT_AMT}]]></variableExpression>
+	</variable>
+	<variable name="V_TOTAL_OR_DB" class="java.math.BigDecimal" resetType="Group" resetGroup="PAYOR" calculation="Sum">
+		<variableExpression><![CDATA[$V{V_OR_DB}]]></variableExpression>
+		<initialValueExpression><![CDATA[new BigDecimal(0.00)]]></initialValueExpression>
+	</variable>
+	<group name="BRANCH" isStartNewPage="true" isReprintHeaderOnEachPage="true">
+		<groupExpression><![CDATA[$F{GIBR_BRANCH_CD}]]></groupExpression>
+		<groupHeader>
+			<band height="32">
+				<staticText>
+					<reportElement x="0" y="1" width="35" height="9" uuid="e40cace0-f7f1-4f11-9a74-c999ccb7e6f3"/>
+					<textElement>
+						<font fontName="SansSerif" size="7"/>
+					</textElement>
+					<text><![CDATA[Branch :]]></text>
+				</staticText>
+				<textField isBlankWhenNull="true">
+					<reportElement x="35" y="1" width="237" height="9" uuid="4ed45f43-63be-4f49-bbda-905448948113"/>
+					<textElement>
+						<font fontName="SansSerif" size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{GIBR_BRANCH_CD} + " - " + $F{BRANCH_NAME}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="0" y="18" width="56" height="9" uuid="83c709e9-5840-46ba-97cf-92b9e983abd7"/>
+					<textElement>
+						<font fontName="SansSerif" size="7"/>
+					</textElement>
+					<text><![CDATA[OR No]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="60" y="18" width="60" height="9" uuid="0d0f34be-b023-444a-b773-ea4257d75488"/>
+					<textElement>
+						<font fontName="SansSerif" size="7"/>
+					</textElement>
+					<text><![CDATA[Tran ID]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="125" y="18" width="40" height="9" uuid="865bc3c8-0612-4477-b290-915caafae822"/>
+					<textElement textAlignment="Right">
+						<font fontName="SansSerif" size="7"/>
+					</textElement>
+					<text><![CDATA[DCB No]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="171" y="18" width="47" height="9" uuid="eae9b849-9ccc-49c6-b435-187c1ad7e3fa"/>
+					<textElement>
+						<font fontName="SansSerif" size="7"/>
+					</textElement>
+					<text><![CDATA[OR Date]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="223" y="18" width="47" height="9" uuid="59ec153a-e490-48cb-9f6c-7ffa4a9e54b2"/>
+					<textElement>
+						<font fontName="SansSerif" size="7"/>
+					</textElement>
+					<text><![CDATA[Date Posted]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="274" y="18" width="40" height="9" uuid="e89f98f6-7c0d-4fc7-87b8-f041173fca54"/>
+					<textElement textAlignment="Left">
+						<font fontName="SansSerif" size="7"/>
+					</textElement>
+					<text><![CDATA[Intm CD]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="319" y="18" width="70" height="9" uuid="d88afbe9-b623-4bef-a06b-639cff68eb56"/>
+					<textElement>
+						<font fontName="SansSerif" size="7"/>
+					</textElement>
+					<text><![CDATA[Payor]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Transparent" x="394" y="18" width="45" height="9" uuid="b8f86ba8-496d-47ed-bdb0-afd141bda0c7"/>
+					<textElement textAlignment="Right">
+						<font fontName="SansSerif" size="7"/>
+					</textElement>
+					<text><![CDATA[TIN  ]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="444" y="18" width="76" height="9" uuid="b22656cd-2ce7-43df-bb3c-f2282b15e375"/>
+					<textElement textAlignment="Right">
+						<font fontName="SansSerif" size="7"/>
+					</textElement>
+					<text><![CDATA[Collection Amt]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="525" y="18" width="70" height="9" uuid="e0483534-085e-4f74-b6d1-1642befe1073"/>
+					<textElement>
+						<font fontName="SansSerif" size="7"/>
+					</textElement>
+					<text><![CDATA[Particulars]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="600" y="18" width="70" height="9" uuid="c65d0ccf-97a6-4ed7-85ed-bec5245c8721"/>
+					<textElement>
+						<font fontName="SansSerif" size="7"/>
+					</textElement>
+					<text><![CDATA[GL Account]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="675" y="18" width="70" height="9" uuid="3ee20fd3-4242-49c3-afe2-e192518453a2"/>
+					<textElement>
+						<font fontName="SansSerif" size="7"/>
+					</textElement>
+					<text><![CDATA[GL Account Name]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="750" y="18" width="45" height="9" uuid="2f08ba97-5f67-4e8e-abf0-160b01f0d141"/>
+					<textElement textAlignment="Center">
+						<font fontName="SansSerif" size="7"/>
+					</textElement>
+					<text><![CDATA[SL Code]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="800" y="18" width="77" height="9" uuid="21869ea9-88d1-4854-9be2-e54d06ae1389"/>
+					<textElement textAlignment="Right">
+						<font fontName="SansSerif" size="7"/>
+					</textElement>
+					<text><![CDATA[Debit Amount]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="882" y="18" width="77" height="9" uuid="00118976-13d5-458e-ac83-0f52ab6dc5f2"/>
+					<textElement textAlignment="Right">
+						<font fontName="SansSerif" size="7"/>
+					</textElement>
+					<text><![CDATA[Credit Amount]]></text>
+				</staticText>
+				<line>
+					<reportElement x="0" y="28" width="54" height="1" uuid="9d2227cc-e048-4088-b489-3bbd93017c86"/>
+					<graphicElement>
+						<pen lineWidth="0.5" lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="60" y="28" width="60" height="1" uuid="56300891-2cd4-4c7b-ae5f-43a855810445"/>
+					<graphicElement>
+						<pen lineWidth="0.5" lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="125" y="28" width="40" height="1" uuid="da9f585a-c8dc-4dbb-8809-ddf078f94d99"/>
+					<graphicElement>
+						<pen lineWidth="0.5" lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="171" y="28" width="47" height="1" uuid="8fd9c8b7-a664-41f8-9588-cac21899e7a3"/>
+					<graphicElement>
+						<pen lineWidth="0.5" lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="223" y="28" width="47" height="1" uuid="78bd9bf3-1964-4a76-9996-fe3bb5ba3fff"/>
+					<graphicElement>
+						<pen lineWidth="0.5" lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="274" y="28" width="37" height="1" uuid="376707bb-1ba9-4318-b023-d6e5c0b53a7f"/>
+					<graphicElement>
+						<pen lineWidth="0.5" lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="319" y="28" width="68" height="1" uuid="9626da25-158f-4693-8e79-4ba6a9ecf23f"/>
+					<graphicElement>
+						<pen lineWidth="0.5" lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="395" y="28" width="43" height="1" uuid="5d93a374-87c4-4dcc-b0ee-64d95437a657"/>
+					<graphicElement>
+						<pen lineWidth="0.5" lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="444" y="28" width="76" height="1" uuid="151a80b7-0d71-4095-9b6b-2d412d139ea3"/>
+					<graphicElement>
+						<pen lineWidth="0.5" lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="526" y="28" width="67" height="1" uuid="e4b3da51-eb1c-4105-b072-293d58757b9d"/>
+					<graphicElement>
+						<pen lineWidth="0.5" lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="601" y="28" width="68" height="1" uuid="93f85348-2d8b-4846-a41a-8e22ed3706c5"/>
+					<graphicElement>
+						<pen lineWidth="0.5" lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="676" y="28" width="67" height="1" uuid="e6196a1c-d70b-4f32-bb2e-55ca984c8c2e"/>
+					<graphicElement>
+						<pen lineWidth="0.5" lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="750" y="28" width="43" height="1" uuid="447559e6-d423-4e63-b6a6-6c6bca858758"/>
+					<graphicElement>
+						<pen lineWidth="0.5" lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="800" y="28" width="77" height="1" uuid="787cc736-4f1e-44ca-9eaf-4d249c7e725e"/>
+					<graphicElement>
+						<pen lineWidth="0.5" lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="882" y="28" width="77" height="1" uuid="945eb8a8-308c-4873-b75e-cd7fde34b05d"/>
+					<graphicElement>
+						<pen lineWidth="0.5" lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="48">
+				<printWhenExpression><![CDATA[$F{PRINT_DETAILS}.equals("Y")]]></printWhenExpression>
+				<staticText>
+					<reportElement x="722" y="1" width="73" height="9" uuid="2c51a02f-36ca-419b-821a-5c2688ba31bf"/>
+					<textElement textAlignment="Right">
+						<font fontName="SansSerif" size="7"/>
+					</textElement>
+					<text><![CDATA[BranchTotals :  ]]></text>
+				</staticText>
+				<line>
+					<reportElement x="882" y="11" width="77" height="1" uuid="4a21ecba-16be-45c2-a7e2-6b111168e93a"/>
+					<graphicElement>
+						<pen lineWidth="0.5" lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="800" y="11" width="77" height="1" uuid="9bd585c7-94f7-46d2-8eee-5004320fc3cc"/>
+					<graphicElement>
+						<pen lineWidth="0.5" lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="882" y="13" width="77" height="1" uuid="77c4c61c-2f72-4b6d-88df-c8784df1a795"/>
+					<graphicElement>
+						<pen lineWidth="0.5" lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="800" y="13" width="77" height="1" uuid="7b738867-6619-45d7-a605-901102c79f3c"/>
+					<graphicElement>
+						<pen lineWidth="0.5" lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<staticText>
+					<reportElement x="186" y="5" width="128" height="9" uuid="e497d189-6bee-4e68-844e-032b56a00ae7"/>
+					<textElement>
+						<font fontName="SansSerif" size="7"/>
+					</textElement>
+					<text><![CDATA[Total Collections Per Branch : ]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="186" y="17" width="128" height="9" uuid="5d0d8d59-004f-417e-87a5-a13c56c8bcb3"/>
+					<textElement>
+						<font fontName="SansSerif" size="7"/>
+					</textElement>
+					<text><![CDATA[No. of Branch Transactions :]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="186" y="27" width="128" height="9" uuid="e016d63d-8d72-416a-9d14-d56f8a10258b"/>
+					<textElement>
+						<font fontName="SansSerif" size="7"/>
+					</textElement>
+					<text><![CDATA[Branch Total Breakdown : ]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="328" y="27" width="110" height="9" uuid="4023f32e-6586-4092-ba8a-6431ea3e25e6"/>
+					<textElement textAlignment="Right">
+						<font fontName="SansSerif" size="7"/>
+					</textElement>
+					<text><![CDATA[VAT OR AMOUNT  : ]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="328" y="37" width="110" height="9" uuid="b10fdcc6-a4f6-4ac0-a61b-84a90244ac39"/>
+					<textElement textAlignment="Right">
+						<font fontName="SansSerif" size="7"/>
+					</textElement>
+					<text><![CDATA[NONVAT OR AMOUNT  : ]]></text>
+				</staticText>
+				<line>
+					<reportElement x="444" y="3" width="76" height="1" uuid="2b9d53bd-8776-475d-bef7-c6f18b5006e8"/>
+					<graphicElement>
+						<pen lineWidth="0.5" lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="444" y="15" width="76" height="1" uuid="c80932d3-0b20-4f83-8b9c-84dfcd9f0e3f"/>
+					<graphicElement>
+						<pen lineWidth="0.5" lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="444" y="17" width="76" height="1" uuid="7d34fc5b-342c-45da-8664-6557377c5e6f"/>
+					<graphicElement>
+						<pen lineWidth="0.5" lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<textField isBlankWhenNull="true">
+					<reportElement x="320" y="17" width="31" height="9" uuid="d777d148-a899-438f-a501-27a8211313da"/>
+					<textElement>
+						<font fontName="SansSerif" size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{V_TOTAL_BRANCH_TRANS}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+					<reportElement x="444" y="27" width="76" height="9" uuid="df4e4561-5a66-4b6b-aca4-2d4581caf228"/>
+					<textElement textAlignment="Right">
+						<font fontName="SansSerif" size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{V_TOTAL_OR_VAT_AMT}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+					<reportElement x="444" y="37" width="76" height="9" uuid="b3725cff-b147-434d-9ec7-1c0087b2b679"/>
+					<textElement textAlignment="Right">
+						<font fontName="SansSerif" size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{V_TOTAL_OR_NONVAT_AMT}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+					<reportElement x="444" y="5" width="76" height="9" uuid="e1d3b5e6-76d1-430e-850c-c51549759c54"/>
+					<textElement textAlignment="Right">
+						<font fontName="SansSerif" size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{V_BRANCH_COLLECTION_AMT}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+					<reportElement x="800" y="1" width="77" height="9" uuid="8a4b9fb2-b3da-4a3a-b3a2-87a7340054d2"/>
+					<textElement textAlignment="Right">
+						<font fontName="SansSerif" size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{V_TOTAL_BRANCH_DB}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+					<reportElement x="882" y="1" width="77" height="9" uuid="6582f114-6901-4d4e-b9e9-0f3b495e6dec"/>
+					<textElement textAlignment="Right">
+						<font fontName="SansSerif" size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{V_TOTAL_BRANCH_CD}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<group name="OR_NO">
+		<groupExpression><![CDATA[$F{OR_NO}]]></groupExpression>
+	</group>
+	<group name="PAYOR">
+		<groupExpression><![CDATA[$F{PAYOR}]]></groupExpression>
+		<groupFooter>
+			<band height="17">
+				<printWhenExpression><![CDATA[$F{PRINT_DETAILS}.equals("Y")]]></printWhenExpression>
+				<line>
+					<reportElement x="800" y="2" width="77" height="1" uuid="7443bd09-131b-4e52-9e17-41671634f837"/>
+					<graphicElement>
+						<pen lineWidth="0.5" lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="881" y="2" width="77" height="1" uuid="02d97833-0845-4fec-a2aa-be14312b7776"/>
+					<graphicElement>
+						<pen lineWidth="0.5" lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<staticText>
+					<reportElement x="722" y="4" width="73" height="9" uuid="87918b74-ff4f-41d4-a6ff-b694ce81bcfe"/>
+					<textElement textAlignment="Right">
+						<font fontName="SansSerif" size="7"/>
+					</textElement>
+					<text><![CDATA[Totals :  ]]></text>
+				</staticText>
+				<line>
+					<reportElement x="800" y="14" width="77" height="1" uuid="4763b766-5988-40a0-a547-79e0000230f8"/>
+					<graphicElement>
+						<pen lineWidth="0.5" lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="882" y="14" width="77" height="1" uuid="85605c8d-6b4e-4070-8901-a4cf1f78611a"/>
+					<graphicElement>
+						<pen lineWidth="0.5" lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<textField pattern="#,##0.00;(#,##0.00)">
+					<reportElement x="881" y="4" width="77" height="10" uuid="80412770-e7b6-466d-be39-7a9a17535b6e"/>
+					<textElement textAlignment="Right">
+						<font size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{V_TOTAL_OR_CD}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;(#,##0.00)">
+					<reportElement x="800" y="4" width="77" height="10" uuid="1653a758-8177-4234-9481-5c947dfae84a"/>
+					<textElement textAlignment="Right">
+						<font size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{V_TOTAL_OR_DB}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<pageHeader>
+		<band height="74">
+			<staticText>
+				<reportElement x="0" y="0" width="45" height="9" uuid="4eac2b0f-b983-497c-8911-c4b3a11763a0"/>
+				<textElement>
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<text><![CDATA[RUNDATE :  ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="9" width="45" height="9" uuid="9edf15de-e390-498e-90c3-8173032cbaa7"/>
+				<textElement>
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<text><![CDATA[RUNTIME :  ]]></text>
+			</staticText>
+			<textField pattern="" isBlankWhenNull="true">
+				<reportElement x="48" y="0" width="81" height="9" uuid="dc2646fc-f0da-4a71-a4f7-c1138018d484"/>
+				<textElement>
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{RUNDATE}]]></textFieldExpression>
+			</textField>
+			<textField pattern="hh:mm:ss a">
+				<reportElement x="48" y="9" width="81" height="9" uuid="ea888e4a-63ef-4c47-bcac-bff0a0e0bf4d"/>
+				<textElement>
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="173" y="0" width="622" height="9" uuid="7148edf5-0594-4aed-bbb2-8989cecdbff7"/>
+				<textElement textAlignment="Center">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COMPANY_NAME}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="173" y="9" width="622" height="9" uuid="a92e70d5-ee2d-4574-bf39-e7c2e1ac88a0"/>
+				<textElement textAlignment="Center">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COMPANY_ADDRESS}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement positionType="Float" x="173" y="35" width="622" height="9" uuid="285ded53-a1d4-4e3e-9f5e-a4dbb07bc76f"/>
+				<textElement textAlignment="Center">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<text><![CDATA[CASH RECEIPT REGISTER]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement positionType="Float" x="173" y="44" width="622" height="9" uuid="bc294863-4e63-46f9-b08d-4b7b2528bba6"/>
+				<textElement textAlignment="Center">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{POSTING_TRAN}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement positionType="Float" x="173" y="53" width="622" height="20" uuid="192b1086-20c3-4d30-98d1-0b9818e77ec3"/>
+				<textElement textAlignment="Center">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{TOP_DATE}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="870" y="0" width="90" height="9" uuid="0840d50c-6955-4531-8e04-2b676299620f"/>
+				<textElement>
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<text><![CDATA[GIACR117]]></text>
+			</staticText>
+			<textField>
+				<reportElement positionType="Float" x="870" y="18" width="35" height="9" uuid="94583970-9bd3-44cb-be09-ddedb0ba00c9"/>
+				<textElement>
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement positionType="Float" x="905" y="18" width="55" height="9" uuid="21c7555b-4446-4fe0-a103-605501f653d3"/>
+				<textElement>
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="18" width="129" height="9" uuid="3db4a75f-8274-4554-9367-f8455d10c1aa"/>
+				<textElement>
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_USER_ID}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="870" y="9" width="90" height="9" uuid="7dcb3941-9d2d-4960-ade8-8fa4beb90164"/>
+				<textElement>
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{GEN_VERSION}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="173" y="18" width="622" height="9" uuid="6021a844-7bd4-4f1b-8c8a-e3cee9dcc2c9"/>
+				<textElement textAlignment="Center">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COMPANY_TIN}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="11" splitType="Stretch">
+			<printWhenExpression><![CDATA[$F{PRINT_DETAILS}.equals("Y")]]></printWhenExpression>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="0" y="1" width="56" height="9" uuid="4e82ad11-6b33-48a8-88bf-f259e01fbd53">
+					<printWhenExpression><![CDATA[$V{V_OR_NO_GRP_COUNT}.intValue() == 1 ?
+    Boolean.TRUE : Boolean.valueOf(!$F{PAYOR}.equals($F{PREV_PAYOR_VALUE}) )]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{OR_NO}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="000000000000" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="60" y="1" width="60" height="9" uuid="cd2866bd-7fcc-4854-b9bf-0621ce84b67c">
+					<printWhenExpression><![CDATA[$V{V_OR_NO_GRP_COUNT}.intValue() == 1 ?
+  Boolean.TRUE : Boolean.valueOf(!$F{PAYOR}.equals($F{PREV_PAYOR_VALUE}) )]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Left">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{TRAN_ID}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="125" y="1" width="40" height="9" uuid="6f169c46-cbfd-4eba-a0fd-819d25ffd7c4">
+					<printWhenExpression><![CDATA[$V{V_OR_NO_GRP_COUNT}.intValue() == 1 ?
+  Boolean.TRUE : Boolean.valueOf(!$F{PAYOR}.equals($F{PREV_PAYOR_VALUE}) )]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font fontName="SansSerif" size="7" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DCB_NO}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="171" y="1" width="47" height="9" uuid="083cb5a6-e1e3-47b9-93df-a9fdaa368760">
+					<printWhenExpression><![CDATA[$V{V_OR_NO_GRP_COUNT}.intValue() == 1 ?
+  Boolean.TRUE : Boolean.valueOf(!$F{PAYOR}.equals($F{PREV_PAYOR_VALUE}) )]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{OR_DATE}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="223" y="1" width="47" height="9" uuid="adaa9459-6c04-464c-b665-699bb89d1915">
+					<printWhenExpression><![CDATA[$F{PAYOR}.equals("SPOILED") && ($F{OR_FLAG}.equals("C") && $F{TRAN_FLAG}.equals("D")) ?
+  Boolean.FALSE : $V{V_OR_NO_GRP_COUNT}.intValue() == 1 ?
+    Boolean.TRUE : Boolean.valueOf(!$F{PAYOR}.equals($F{PREV_PAYOR_VALUE}) )]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Left">
+					<font fontName="SansSerif" size="7" isItalic="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{POSTING_DATE}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="274" y="1" width="40" height="9" uuid="3c1c5077-21c4-4ffb-97b6-fb1236d45ad5">
+					<printWhenExpression><![CDATA[$V{V_OR_NO_GRP_COUNT}.intValue() == 1 ?
+  Boolean.TRUE : Boolean.valueOf(!$F{PAYOR}.equals($F{PREV_PAYOR_VALUE}) )]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{INTM_NO}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="319" y="1" width="70" height="9" uuid="a04f8e92-631b-440c-8c8c-0e27e7f890c5">
+					<printWhenExpression><![CDATA[$V{V_OR_NO_GRP_COUNT}.intValue() == 1 ?
+  Boolean.TRUE : Boolean.valueOf(!$F{PAYOR}.equals($F{PREV_PAYOR_VALUE}) )]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PAYOR}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="394" y="1" width="45" height="9" uuid="1e9823e8-a347-4cd5-b83f-fe5698993852">
+					<printWhenExpression><![CDATA[$V{OR_NO_COUNT} == 1]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{TIN}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="444" y="1" width="76" height="9" uuid="ab421910-49ce-4bd2-8acb-96a298531a08">
+					<printWhenExpression><![CDATA[$F{PAYOR}.equals("SPOILED") || $F{PAYOR}.equals("CANCELLED") && ($F{OR_FLAG}.equals("C") && $F{TRAN_FLAG}.equals("D")) ?
+  Boolean.FALSE : $V{V_OR_NO_GRP_COUNT}.intValue() == 1 ?
+                    Boolean.TRUE : Boolean.valueOf(!$F{PAYOR}.equals($F{PREV_PAYOR_VALUE}) )]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COLLECTION_AMT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" isPrintRepeatedValues="false" x="525" y="1" width="70" height="9" uuid="8e7f8df7-eeb3-4eb1-ac84-8ff58b445c6c">
+					<printWhenExpression><![CDATA[$F{PAYOR}.equals("SPOILED") || $F{PAYOR}.equals("CANCELLED") && ($F{OR_FLAG}.equals("C") && $F{TRAN_FLAG}.equals("D"))  ?
+  Boolean.FALSE : $V{V_OR_NO_GRP_COUNT}.intValue() == 1 ?
+                    Boolean.TRUE : Boolean.valueOf(!$F{PAYOR}.equals($F{PREV_PAYOR_VALUE}) )]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PARTICULARS}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="600" y="1" width="70" height="9" uuid="f9eab749-a7d9-4f14-afa8-cb078a241b19">
+					<printWhenExpression><![CDATA[$F{PAYOR}.equals("SPOILED") || $F{PAYOR}.equals("CANCELLED") && ($F{OR_FLAG}.equals("C") && $F{TRAN_FLAG}.equals("D")) ?         Boolean.FALSE : Boolean.TRUE]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{GL_ACCOUNT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="675" y="1" width="70" height="9" uuid="d1eeb96d-e15f-484f-85cb-10be0edd81e2">
+					<printWhenExpression><![CDATA[$F{PAYOR}.equals("SPOILED") ? Boolean.FALSE : Boolean.TRUE]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{GL_ACCT_NAME}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="750" y="1" width="45" height="9" uuid="448aa03e-b102-4c00-9a7a-9d38bb4746b7">
+					<printWhenExpression><![CDATA[$F{PAYOR}.equals("SPOILED") || $F{PAYOR}.equals("CANCELLED") && ($F{OR_FLAG}.equals("C") && $F{TRAN_FLAG}.equals("D")) ?         Boolean.FALSE : Boolean.TRUE]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SL_CD}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(#,##0.00)">
+				<reportElement x="800" y="1" width="77" height="9" uuid="85c86d88-adf1-4e5e-9970-933c0f2da3b0">
+					<printWhenExpression><![CDATA[$F{PAYOR}.equals("SPOILED") ? Boolean.FALSE : Boolean.TRUE]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{V_OR_DB}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(#,##0.00)">
+				<reportElement x="882" y="1" width="76" height="9" uuid="5f59a805-c7cd-4238-bf61-04237514fe16">
+					<printWhenExpression><![CDATA[$F{PAYOR}.equals("SPOILED") ? Boolean.FALSE : Boolean.TRUE]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{V_OR_CD}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<summary>
+		<band height="22">
+			<printWhenExpression><![CDATA[$F{PRINT_DETAILS}.equals("Y")]]></printWhenExpression>
+			<subreport runToBottom="false">
+				<reportElement x="0" y="1" width="959" height="20" isRemoveLineWhenBlank="true" uuid="a0a24d53-d564-40c8-9248-99eed5ce9412"/>
+				<subreportParameter name="P_BRANCH">
+					<subreportParameterExpression><![CDATA[$P{P_BRANCH}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_POST_TRAN_TOGGLE">
+					<subreportParameterExpression><![CDATA[$P{P_POST_TRAN_TOGGLE}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_DATE2">
+					<subreportParameterExpression><![CDATA[$P{P_DATE2}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_PER_BRANCH">
+					<subreportParameterExpression><![CDATA[$P{P_PER_BRANCH}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_DATE">
+					<subreportParameterExpression><![CDATA[$P{P_DATE}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_USER_ID">
+					<subreportParameterExpression><![CDATA[$P{P_USER_ID}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "GIACR117_SUBREPORT.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</summary>
+</jasperReport>

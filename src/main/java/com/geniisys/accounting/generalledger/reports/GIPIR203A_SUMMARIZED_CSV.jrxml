@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIPIR203A" language="groovy" pageWidth="1224" pageHeight="595" columnWidth="1204" leftMargin="0" rightMargin="20" topMargin="20" bottomMargin="20" uuid="dfaaf120-a1f1-4fce-8237-394124167f60">
+	<property name="ireport.zoom" value="0.5644739300537828"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="P_INCLUDE_ENDT" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT POLICY_NO, ASSD_NAME, LINE_NAME, SUM(PREMIUM_AMT) PREMIUM_AMT, REGION_CD, REGION_DESC, IND_GRP_CD, IND_GRP_NM
+FROM(SELECT *
+  FROM TABLE(GIPIR203A_PKg.populate_report_details($P{P_INCLUDE_ENDT})))
+GROUP BY POLICY_NO, ASSD_NAME, LINE_NAME, REGION_CD, REGION_DESC, IND_GRP_CD, IND_GRP_NM
+ORDER BY line_name, region_cd, ind_grp_cd, policy_no, assd_name, premium_amt]]>
+	</queryString>
+	<field name="POLICY_NO" class="java.lang.String"/>
+	<field name="ASSD_NAME" class="java.lang.String"/>
+	<field name="LINE_NAME" class="java.lang.String"/>
+	<field name="PREMIUM_AMT" class="java.math.BigDecimal"/>
+	<field name="REGION_CD" class="java.math.BigDecimal"/>
+	<field name="REGION_DESC" class="java.lang.String"/>
+	<field name="IND_GRP_CD" class="java.math.BigDecimal"/>
+	<field name="IND_GRP_NM" class="java.lang.String"/>
+	<variable name="SUM_PREM_IND" class="java.math.BigDecimal" resetType="Group" resetGroup="INDUSTRY" calculation="Sum">
+		<variableExpression><![CDATA[$F{PREMIUM_AMT}]]></variableExpression>
+	</variable>
+	<variable name="SUM_PREM_REGION" class="java.math.BigDecimal" resetType="Group" resetGroup="REGION" calculation="Sum">
+		<variableExpression><![CDATA[$F{PREMIUM_AMT}]]></variableExpression>
+	</variable>
+	<variable name="SUM_PREM_LINE" class="java.math.BigDecimal" resetType="Group" resetGroup="LINE" calculation="Sum">
+		<variableExpression><![CDATA[$F{PREMIUM_AMT}]]></variableExpression>
+	</variable>
+	<variable name="SUM_PREM_REPORT" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{PREMIUM_AMT}]]></variableExpression>
+	</variable>
+	<group name="LINE" isReprintHeaderOnEachPage="true">
+		<groupExpression><![CDATA[$F{LINE_NAME}]]></groupExpression>
+	</group>
+	<group name="REGION">
+		<groupExpression><![CDATA[$F{REGION_CD}]]></groupExpression>
+	</group>
+	<group name="INDUSTRY">
+		<groupExpression><![CDATA[$F{IND_GRP_CD}]]></groupExpression>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="15">
+			<staticText>
+				<reportElement x="472" y="0" width="135" height="15" uuid="5c93bbd5-3b36-4bb6-9ec1-594b8f37d752"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Industry Name]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="607" y="0" width="200" height="15" uuid="7567e251-0c06-460f-8d30-50accda36a66"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Policy Number]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="807" y="0" width="267" height="15" uuid="7ed276a5-b95e-4813-af77-ad6c6533cfc2"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Assured Name]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1074" y="0" width="105" height="15" uuid="ba01210b-0b29-4c32-b463-efd0729e54e0"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Premium Amount]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="0" width="158" height="15" uuid="aaa642a3-b23b-4313-bd2c-822f55bc4f51"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Line]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="208" y="0" width="195" height="15" uuid="8c9e8124-1fce-4709-8a9a-d94680cc442d"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Region Description]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="158" y="0" width="50" height="15" uuid="2c3b73a7-24fa-469f-afb6-dff9dd035210"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Region CD]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="403" y="0" width="69" height="15" uuid="c33bbf13-f15b-46d9-86fa-c9f3d45e7da3"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Industry CD]]></text>
+			</staticText>
+		</band>
+	</title>
+	<detail>
+		<band height="11" splitType="Stretch">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="607" y="0" width="200" height="11" uuid="68a93ae8-9dc2-4ac6-9278-5ecaf7dc7bf8"/>
+				<textElement verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{POLICY_NO}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="807" y="0" width="267" height="11" uuid="13eb6d61-d718-45a7-a64a-e27a5c5dcc05"/>
+				<textElement verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ASSD_NAME}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="1074" y="0" width="105" height="11" uuid="b6a9e9f6-abed-4c7f-8845-897d1147cb9c"/>
+				<textElement verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PREMIUM_AMT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="0" y="0" width="158" height="11" uuid="315587c0-6c2b-4b26-a4aa-cda6c6600b5e"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{LINE_NAME}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="208" y="0" width="195" height="11" uuid="24877a01-3303-4cda-8664-4429f08e8116"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{REGION_DESC}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="472" y="0" width="135" height="11" uuid="9b76f756-38b1-4a8d-8d26-8dd8d46c8095"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{IND_GRP_CD}!=0?$F{IND_GRP_NM}:"Micro Insurance"]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="158" y="0" width="50" height="11" uuid="f5cf3b58-baec-4d6e-84b5-daeca7525b94"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{REGION_CD}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="403" y="0" width="69" height="11" uuid="6659fa8b-29f1-443f-b49f-8dfde97b11c6"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{IND_GRP_CD}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

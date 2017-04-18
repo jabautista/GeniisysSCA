@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIACJvTran">
+	
+	<typeAlias alias="giisHullType" type="com.geniisys.common.entity.GIISHullType"/>
+  	
+	<resultMap class="giisHullType" id="giisHullTypeListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="hull_type_cd"     property="hullTypeCd"/>
+		<result column="hull_desc"  property="hullDesc"/>
+		<result column="user_id"     property="userId"/>
+		<result column="last_update" property="lastUpdate"/>
+		<result column="remarks"     property="remarks"/>
+	</resultMap>
+	
+	<select id="getGiiss046RecList" resultMap="giisHullTypeListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(Giiss046_pkg.get_rec_list(#hullTypeCd#, #hullDesc#))
+		  	      		  <isNotNull property="filter">
+							WHERE 1=1
+								<isNotEmpty prepend="AND"  property="hullTypeCd">
+									hull_type_cd = #hullTypeCd#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="hullDesc">
+									upper(hull_desc) LIKE upper(#hullDesc#)
+								</isNotEmpty>
+						</isNotNull>
+		                  <isEqual property="sortColumn" compareValue="hullTypeCd">
+			              		ORDER BY hull_type_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="hullDesc">
+			              		ORDER BY hull_desc
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(Giiss046_pkg.get_rec_list(#hullTypeCd#, #hullDesc#))
+		                  <isNotNull property="filter">
+							WHERE 1=1
+								<isNotEmpty prepend="AND"  property="hullTypeCd">
+									hull_type_cd = #hullTypeCd#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="hullDesc">
+									upper(hull_desc) LIKE upper(#hullDesc#)
+								</isNotEmpty>
+						</isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setHullType" parameterClass="giisHullType">
+	    DECLARE
+	    	v_rec giis_hull_type%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.hull_type_cd := #hullTypeCd#;
+ 			v_rec.hull_desc := #hullDesc#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			Giiss046_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure> 
+ 	
+ 	<procedure id="valDeleteHullType" parameterClass="java.lang.Integer">
+ 		BEGIN
+ 			Giiss046_pkg.val_del_rec(#recId#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddHullType" parameterClass="java.lang.Integer">
+ 		BEGIN
+ 			Giiss046_pkg.val_add_rec(#recId#);
+ 		END;
+ 	</procedure>	
+ 	
+	<delete id="delHullType" parameterClass="java.lang.Integer">
+		BEGIN
+ 			Giiss046_pkg.del_rec(#hullTypeCd#);
+ 		END;
+ 	</delete>
+</sqlMap>

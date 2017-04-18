@@ -1,0 +1,42 @@
+DROP TRIGGER CPI.GICL_BENEFICIARY_DTL_TAIUD;
+
+CREATE OR REPLACE TRIGGER CPI.GICL_BENEFICIARY_DTL_TAIUD
+AFTER INSERT OR UPDATE OR DELETE ON CPI.GICL_BENEFICIARY_DTL FOR EACH ROW
+BEGIN
+  IF INSERTING THEN
+     INSERT INTO GICL_CLM_ITEM
+       (CLAIM_ID               ,ITEM_NO                   ,
+        CURRENCY_CD            ,USER_ID                   ,
+        LAST_UPDATE            ,ITEM_TITLE                ,
+        LOSS_DATE)
+     VALUES
+       (:NEW.CLAIM_ID          ,:NEW.ITEM_NO              ,
+        :NEW.CURRENCY_CD       ,:NEW.USER_ID              ,
+        :NEW.LAST_UPDATE       ,:NEW.ITEM_TITLE           ,
+        :NEW.LOSS_DATE);
+  ELSIF UPDATING THEN
+   BEGIN
+   UPDATE GICL_CLM_ITEM
+      SET ITEM_NO       = :NEW.ITEM_NO,
+          ITEM_TITLE    = :NEW.ITEM_TITLE,
+          CURRENCY_CD   = :NEW.CURRENCY_CD,
+          LOSS_DATE     = :NEW.LOSS_DATE,
+          USER_ID       = :NEW.USER_ID,
+          LAST_UPDATE   = :NEW.LAST_UPDATE
+       WHERE CLAIM_ID      =  :OLD.CLAIM_ID
+         AND ITEM_NO       =  :OLD.ITEM_NO;
+   END;
+  ELSIF DELETING THEN
+   BEGIN
+     DELETE FROM GICL_CLM_ITEM
+       WHERE CLAIM_ID =  :OLD.CLAIM_ID
+         AND ITEM_NO  =  :OLD.ITEM_NO;
+    EXCEPTION
+     WHEN NO_DATA_FOUND THEN
+       NULL;
+    END;
+  END IF;
+END;
+/
+
+

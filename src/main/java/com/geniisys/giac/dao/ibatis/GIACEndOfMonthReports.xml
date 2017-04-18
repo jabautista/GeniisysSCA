@@ -1,0 +1,527 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIACEndOfMonthReports">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<resultMap class="java.util.HashMap" id="sublineLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="subline_cd"			property="sublineCd" />
+		<result column="subline_name"	    property="sublineName" />
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="lineLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="line_cd"			property="lineCd" />
+		<result column="line_name"			property="lineName" />
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="branchLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="branch_cd"			property="branchCd" />
+		<result column="branch_name"		property="branchName" />
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="reportLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="rep_cd"			property="repCd" />
+		<result column="rep_title"		property="repTitle" />
+	</resultMap>
+
+	<select id="getGiacs138SublineLOV" resultMap="sublineLOVMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		          FROM (SELECT * 
+		  		   		  FROM TABLE(GIACS138_PKG.get_subline_lov(#lineCd#,#issCd#))
+						 <isNotNull property="findText">
+							WHERE (UPPER(subline_cd) LIKE UPPER(#findText#)
+							OR UPPER(subline_name) LIKE UPPER(#findText#))
+						 </isNotNull>
+						 <isNull property="findText">
+							WHERE (UPPER(subline_cd) LIKE UPPER(#findText2#)
+							OR UPPER(subline_name) LIKE UPPER(#findText2#))
+						 </isNull>
+                         <isEqual property="sortColumn" compareValue="sublineCd">
+                                ORDER BY subline_cd
+                         </isEqual>
+                          <isEqual property="sortColumn" compareValue="sublineName">
+                                ORDER BY subline_name
+                         </isEqual>
+		  				 <isNotNull property="sortColumn">
+                                 <isEqual property="ascDescFlg" compareValue="ASC">
+                                     ASC
+                                 </isEqual> 
+                                 <isEqual property="ascDescFlg" compareValue="DESC">
+                                     DESC
+                                 </isEqual>
+                         </isNotNull> 
+		  		   		) a,
+		          	   (SELECT count(*) count_ 
+		  		   		  FROM TABLE(GIACS138_PKG.get_subline_lov(#lineCd#,#issCd#))
+	  		   		     <isNotNull property="findText">
+							WHERE (UPPER(subline_cd) LIKE UPPER(#findText#)
+							OR UPPER(subline_name) LIKE UPPER(#findText#))
+						 </isNotNull>
+						 <isNull property="findText">
+							WHERE (UPPER(subline_cd) LIKE UPPER(#findText2#)
+							OR UPPER(subline_name) LIKE UPPER(#findText2#))
+						 </isNull>
+		  		   		) b
+               )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiacs138LineLOV" resultMap="lineLOVMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		          FROM (SELECT * 
+		  		   		  FROM TABLE(GIACS138_PKG.get_line_lov(#userId#))
+						 <isNotNull property="findText">
+							WHERE (UPPER(line_cd) LIKE UPPER(#findText#)
+							OR UPPER(line_name) LIKE UPPER(#findText#))
+						 </isNotNull>
+						 <isNull property="findText">
+							WHERE (UPPER(line_cd) LIKE UPPER(#findText2#)
+							OR UPPER(line_name) LIKE UPPER(#findText2#))
+						 </isNull>
+                         <isEqual property="sortColumn" compareValue="lineCd">
+                                ORDER BY line_cd
+                         </isEqual>
+                          <isEqual property="sortColumn" compareValue="lineName">
+                                ORDER BY line_name
+                         </isEqual>
+		  				 <isNotNull property="sortColumn">
+                                 <isEqual property="ascDescFlg" compareValue="ASC">
+                                     ASC
+                                 </isEqual> 
+                                 <isEqual property="ascDescFlg" compareValue="DESC">
+                                     DESC
+                                 </isEqual>
+                         </isNotNull> 
+		  		   		) a,
+		          	   (SELECT count(*) count_ 
+		  		   		  FROM TABLE(GIACS138_PKG.get_line_lov(#userId#))
+	  		   		     <isNotNull property="findText">
+							WHERE (UPPER(line_cd) LIKE UPPER(#findText#)
+							OR UPPER(line_name) LIKE UPPER(#findText#))
+						 </isNotNull>
+						 <isNull property="findText">
+							WHERE (UPPER(line_cd) LIKE UPPER(#findText2#)
+							OR UPPER(line_name) LIKE UPPER(#findText2#))
+						 </isNull>
+		  		   		) b
+               )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiacs138BranchLOV" resultMap="branchLOVMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		          FROM (SELECT * 
+		  		   		  FROM TABLE(GIACS138_PKG.get_branch_lov(#userId#))
+						 <isNotNull property="findText">
+							WHERE (UPPER(branch_cd) LIKE UPPER(#findText#)
+							OR UPPER(branch_name) LIKE UPPER(#findText#))
+						 </isNotNull>
+						 <isNull property="findText">
+							WHERE (UPPER(branch_cd) LIKE UPPER(#findText2#)
+							OR UPPER(branch_name) LIKE UPPER(#findText2#))
+						 </isNull>
+                         <isEqual property="sortColumn" compareValue="branchCd">
+                                ORDER BY branch_cd
+                         </isEqual>
+                          <isEqual property="sortColumn" compareValue="branchName">
+                                ORDER BY branch_name
+                         </isEqual>
+		  				 <isNotNull property="sortColumn">
+                                 <isEqual property="ascDescFlg" compareValue="ASC">
+                                     ASC
+                                 </isEqual> 
+                                 <isEqual property="ascDescFlg" compareValue="DESC">
+                                     DESC
+                                 </isEqual>
+                         </isNotNull> 
+		  		   		) a,
+		          	   (SELECT count(*) count_ 
+		  		   		  FROM TABLE(GIACS138_PKG.get_branch_lov(#userId#))
+	  		   		     <isNotNull property="findText">
+							WHERE (UPPER(branch_cd) LIKE UPPER(#findText#)
+							OR UPPER(branch_name) LIKE UPPER(#findText#))
+						 </isNotNull>
+						 <isNull property="findText">
+							WHERE (UPPER(branch_cd) LIKE UPPER(#findText2#)
+							OR UPPER(branch_name) LIKE UPPER(#findText2#))
+						 </isNull>
+		  		   		) b
+               )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="giacs138PopulatePolicy" parameterClass="map">
+		CALL GIACS138_PKG.populate_policy(#issCd#,#lineCd#,#sublineCd#,#fromDate#,#toDate#,#perBranch#,#userId#)
+	</procedure>
+	
+	<procedure id="giacs138PopulateDetails" parameterClass="map">
+		CALL GIACS138_PKG.populate_details(#userId#)
+	</procedure>
+	
+	<procedure id="giacs138PopulateSum" parameterClass="map">
+		CALL GIACS138_PKG.populate_sum(#userId#)
+	</procedure>
+	
+	<select id="getGiacs111LineLOV" resultMap="lineLOVMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		          FROM (SELECT * 
+		  		   		  FROM TABLE(GIACS111_PKG.get_line_lov(#userId#,#issCd#))
+						 <isNotNull property="findText">
+							WHERE (UPPER(line_cd) LIKE UPPER(#findText#)
+							OR UPPER(line_name) LIKE UPPER(#findText#))
+						 </isNotNull>
+						 <isNull property="findText">
+							WHERE (UPPER(line_cd) LIKE UPPER(#findText2#)
+							OR UPPER(line_name) LIKE UPPER(#findText2#))
+						 </isNull>
+                         <isEqual property="sortColumn" compareValue="lineCd">
+                                ORDER BY line_cd
+                         </isEqual>
+                          <isEqual property="sortColumn" compareValue="lineName">
+                                ORDER BY line_name
+                         </isEqual>
+		  				 <isNotNull property="sortColumn">
+                                 <isEqual property="ascDescFlg" compareValue="ASC">
+                                     ASC
+                                 </isEqual> 
+                                 <isEqual property="ascDescFlg" compareValue="DESC">
+                                     DESC
+                                 </isEqual>
+                         </isNotNull> 
+		  		   		) a,
+		          	   (SELECT count(*) count_ 
+		  		   		  FROM TABLE(GIACS111_PKG.get_line_lov(#userId#,#issCd#))
+	  		   		     <isNotNull property="findText">
+							WHERE (UPPER(line_cd) LIKE UPPER(#findText#)
+							OR UPPER(line_name) LIKE UPPER(#findText#))
+						 </isNotNull>
+						 <isNull property="findText">
+							WHERE (UPPER(line_cd) LIKE UPPER(#findText2#)
+							OR UPPER(line_name) LIKE UPPER(#findText2#))
+						 </isNull>
+		  		   		) b
+               )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiacs111BranchLOV" resultMap="branchLOVMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		          FROM (SELECT * 
+		  		   		  FROM TABLE(GIACS111_PKG.get_branch_lov(#userId#))
+						 <isNotNull property="findText">
+							WHERE (UPPER(branch_cd) LIKE UPPER(#findText#)
+							OR UPPER(branch_name) LIKE UPPER(#findText#))
+						 </isNotNull>
+						 <isNull property="findText">
+							WHERE (UPPER(branch_cd) LIKE UPPER(#findText2#)
+							OR UPPER(branch_name) LIKE UPPER(#findText2#))
+						 </isNull>
+                         <isEqual property="sortColumn" compareValue="branchCd">
+                                ORDER BY branch_cd
+                         </isEqual>
+                          <isEqual property="sortColumn" compareValue="branchName">
+                                ORDER BY branch_name
+                         </isEqual>
+		  				 <isNotNull property="sortColumn">
+                                 <isEqual property="ascDescFlg" compareValue="ASC">
+                                     ASC
+                                 </isEqual> 
+                                 <isEqual property="ascDescFlg" compareValue="DESC">
+                                     DESC
+                                 </isEqual>
+                         </isNotNull> 
+		  		   		) a,
+		          	   (SELECT count(*) count_ 
+		  		   		  FROM TABLE(GIACS111_PKG.get_branch_lov(#userId#))
+	  		   		     <isNotNull property="findText">
+							WHERE (UPPER(branch_cd) LIKE UPPER(#findText#)
+							OR UPPER(branch_name) LIKE UPPER(#findText#))
+						 </isNotNull>
+						 <isNull property="findText">
+							WHERE (UPPER(branch_cd) LIKE UPPER(#findText2#)
+							OR UPPER(branch_name) LIKE UPPER(#findText2#))
+						 </isNull>
+		  		   		) b
+               )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiacs151ReportLOV" resultMap="reportLOVMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		          FROM (SELECT * 
+		  		   		  FROM TABLE(GIACS151_PKG.get_report_lov)
+						 <isNotNull property="findText">
+							WHERE (UPPER(rep_cd) LIKE UPPER(#findText#)
+							OR UPPER(rep_title) LIKE UPPER(#findText#))
+						 </isNotNull>
+						 <isNull property="findText">
+							WHERE (UPPER(rep_cd) LIKE UPPER(#findText2#)
+							OR UPPER(rep_title) LIKE UPPER(#findText2#))
+						 </isNull>
+                         <isEqual property="sortColumn" compareValue="repCd">
+                                ORDER BY rep_cd
+                         </isEqual>
+                          <isEqual property="sortColumn" compareValue="repTitle">
+                                ORDER BY rep_title
+                         </isEqual>
+		  				 <isNotNull property="sortColumn">
+                                 <isEqual property="ascDescFlg" compareValue="ASC">
+                                     ASC
+                                 </isEqual> 
+                                 <isEqual property="ascDescFlg" compareValue="DESC">
+                                     DESC
+                                 </isEqual>
+                         </isNotNull> 
+		  		   		) a,
+		          	   (SELECT count(*) count_ 
+		  		   		  FROM TABLE(GIACS151_PKG.get_report_lov)
+	  		   		     <isNotNull property="findText">
+							WHERE (UPPER(rep_cd) LIKE UPPER(#findText#)
+							OR UPPER(rep_title) LIKE UPPER(#findText#))
+						 </isNotNull>
+						 <isNull property="findText">
+							WHERE (UPPER(rep_cd) LIKE UPPER(#findText2#)
+							OR UPPER(rep_title) LIKE UPPER(#findText2#))
+						 </isNull>
+		  		   		) b
+               )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiacs101SublineLOV" resultMap="sublineLOVMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		          FROM (SELECT * 
+		  		   		  FROM TABLE(GIACS101_PKG.get_subline_lov(#lineCd#))
+						 <isNotNull property="findText">
+							WHERE (UPPER(subline_cd) LIKE UPPER(#findText#)
+							OR UPPER(subline_name) LIKE UPPER(#findText#))
+						 </isNotNull>
+						 <isNull property="findText">
+							WHERE (UPPER(subline_cd) LIKE UPPER(#findText2#)
+							OR UPPER(subline_name) LIKE UPPER(#findText2#))
+						 </isNull>
+                         <isEqual property="sortColumn" compareValue="sublineCd">
+                                ORDER BY subline_cd
+                         </isEqual>
+                          <isEqual property="sortColumn" compareValue="sublineName">
+                                ORDER BY subline_name
+                         </isEqual>
+		  				 <isNotNull property="sortColumn">
+                                 <isEqual property="ascDescFlg" compareValue="ASC">
+                                     ASC
+                                 </isEqual> 
+                                 <isEqual property="ascDescFlg" compareValue="DESC">
+                                     DESC
+                                 </isEqual>
+                         </isNotNull> 
+		  		   		) a,
+		          	   (SELECT count(*) count_ 
+		  		   		  FROM TABLE(GIACS101_PKG.get_subline_lov(#lineCd#))
+	  		   		     <isNotNull property="findText">
+							WHERE (UPPER(subline_cd) LIKE UPPER(#findText#)
+							OR UPPER(subline_name) LIKE UPPER(#findText#))
+						 </isNotNull>
+						 <isNull property="findText">
+							WHERE (UPPER(subline_cd) LIKE UPPER(#findText2#)
+							OR UPPER(subline_name) LIKE UPPER(#findText2#))
+						 </isNull>
+		  		   		) b
+               )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiacs101LineLOV" resultMap="lineLOVMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		          FROM (SELECT * 
+		  		   		  FROM TABLE(GIACS101_PKG.get_line_lov(#userId#,#issCd#))
+						 <isNotNull property="findText">
+							WHERE (UPPER(line_cd) LIKE UPPER(#findText#)
+							OR UPPER(line_name) LIKE UPPER(#findText#))
+						 </isNotNull>
+						 <isNull property="findText">
+							WHERE (UPPER(line_cd) LIKE UPPER(#findText2#)
+							OR UPPER(line_name) LIKE UPPER(#findText2#))
+						 </isNull>
+                         <isEqual property="sortColumn" compareValue="lineCd">
+                                ORDER BY line_cd
+                         </isEqual>
+                          <isEqual property="sortColumn" compareValue="lineName">
+                                ORDER BY line_name
+                         </isEqual>
+		  				 <isNotNull property="sortColumn">
+                                 <isEqual property="ascDescFlg" compareValue="ASC">
+                                     ASC
+                                 </isEqual> 
+                                 <isEqual property="ascDescFlg" compareValue="DESC">
+                                     DESC
+                                 </isEqual>
+                         </isNotNull> 
+		  		   		) a,
+		          	   (SELECT count(*) count_ 
+		  		   		  FROM TABLE(GIACS101_PKG.get_line_lov(#userId#,#issCd#))
+	  		   		     <isNotNull property="findText">
+							WHERE (UPPER(line_cd) LIKE UPPER(#findText#)
+							OR UPPER(line_name) LIKE UPPER(#findText#))
+						 </isNotNull>
+						 <isNull property="findText">
+							WHERE (UPPER(line_cd) LIKE UPPER(#findText2#)
+							OR UPPER(line_name) LIKE UPPER(#findText2#))
+						 </isNull>
+		  		   		) b
+               )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiacs101BranchLOV" resultMap="branchLOVMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		          FROM (SELECT * 
+		  		   		  FROM TABLE(GIACS101_PKG.get_branch_lov(#userId#,#moduleId#))
+						 <isNotNull property="findText">
+							WHERE (UPPER(branch_cd) LIKE UPPER(#findText#)
+							OR UPPER(branch_name) LIKE UPPER(#findText#))
+						 </isNotNull>
+						 <isNull property="findText">
+							WHERE (UPPER(branch_cd) LIKE UPPER(#findText2#)
+							OR UPPER(branch_name) LIKE UPPER(#findText2#))
+						 </isNull>
+                         <isEqual property="sortColumn" compareValue="branchCd">
+                                ORDER BY branch_cd
+                         </isEqual>
+                          <isEqual property="sortColumn" compareValue="branchName">
+                                ORDER BY branch_name
+                         </isEqual>
+		  				 <isNotNull property="sortColumn">
+                                 <isEqual property="ascDescFlg" compareValue="ASC">
+                                     ASC
+                                 </isEqual> 
+                                 <isEqual property="ascDescFlg" compareValue="DESC">
+                                     DESC
+                                 </isEqual>
+                         </isNotNull> 
+		  		   		) a,
+		          	   (SELECT count(*) count_ 
+		  		   		  FROM TABLE(GIACS101_PKG.get_branch_lov(#userId#,#moduleId#))
+	  		   		     <isNotNull property="findText">
+							WHERE (UPPER(branch_cd) LIKE UPPER(#findText#)
+							OR UPPER(branch_name) LIKE UPPER(#findText#))
+						 </isNotNull>
+						 <isNull property="findText">
+							WHERE (UPPER(branch_cd) LIKE UPPER(#findText2#)
+							OR UPPER(branch_name) LIKE UPPER(#findText2#))
+						 </isNull>
+		  		   		) b
+               )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<!-- J. Diago for GIACS128 09.10.2013 -->
+	<procedure id="giacs128ExtractRecord" parameterClass="map">
+		CALL GIACS128_PKG.extract_records(#fromDate#,#toDate#,#moduleId#,#perBranch#,#userId#)
+	</procedure>
+	
+	<parameterMap class="java.util.HashMap" id="insertToProdTable">
+		<parameter property="fromDate"		jdbcType="DATE"			javaType="java.util.Date"		mode="IN"/>
+		<parameter property="toDate"		jdbcType="DATE"			javaType="java.util.Date"		mode="IN"/>
+		<parameter property="userId"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="message"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+	</parameterMap>
+	
+	<!-- added by kenneth L. for Accounting Production Reports 10.30.2013 -->
+	<procedure id="insertGiacProdExt" parameterMap="insertToProdTable">
+  		BEGIN
+  			pre_production_extract(?,?,?,?);
+  		END;
+  	</procedure>  
+  	
+	<procedure id="deleteGiacProdExt">
+  		BEGIN
+  			 DELETE FROM giac_production_ext;
+  		END;
+  	</procedure>  
+	<!-- end -->
+	
+	<resultMap class="java.util.HashMap" id="checkPrevExtResultMap">
+		<result column="v_from_date" 	    property="vFromDate"/>
+		<result column="v_to_date" 			property="vToDate"/>
+	</resultMap>
+	
+	<select id="checkPrevExt" resultMap="checkPrevExtResultMap">
+		SELECT * FROM TABLE(GIACS128_PKG.check_prev_ext(#userId#))		
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="branchCdLOVMap">
+		<result column="branch_cd"		property="branchCd" />
+		<result column="branch_name"	property="branchName" />
+	</resultMap>
+	
+	<select id="getGiacs128BranchLov" resultMap="branchLOVMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+					   b.count_, 
+					   a.* 
+				  FROM (SELECT * 
+						  FROM TABLE (giacs128_pkg.get_branch_lov(#userId#, #findText#))
+						  <isEqual property="sortColumn" compareValue="branchCd">
+								ORDER BY branch_cd
+						  </isEqual>
+						  <isEqual property="sortColumn" compareValue="branchName">
+								ORDER BY branch_name
+						  </isEqual>
+						  <isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+						  </isNotNull>
+						  ) a, 
+					   (SELECT count(*) count_ 
+						  FROM TABLE (giacs128_pkg.get_branch_lov(#userId#, #findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="lineCdLovMap" extends="BaseEntity.TableGridResultMap">
+		<result column="line_cd"		property="lineCd" />
+		<result column="line_name"		property="lineName" />
+	</resultMap>
+	
+	<select id="getGiacs128LineLov" resultMap="lineCdLovMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+					   b.count_, 
+					   a.* 
+				  FROM (SELECT * 
+						  FROM TABLE (giacs128_pkg.get_line_lov(#userId#, #findText#))
+						  <isEqual property="sortColumn" compareValue="lineCd">
+								ORDER BY line_cd
+						  </isEqual>
+						  <isEqual property="sortColumn" compareValue="lineName">
+								ORDER BY line_name
+						  </isEqual>
+						  <isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+						  </isNotNull>
+						  ) a, 
+					   (SELECT count(*) count_ 
+						  FROM TABLE (giacs128_pkg.get_line_lov(#userId#, #findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+</sqlMap>

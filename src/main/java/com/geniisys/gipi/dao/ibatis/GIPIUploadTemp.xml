@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIUploadTemp">
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIPIUploadTemp" type="com.geniisys.gipi.entity.GIPIUploadTemp"/>
+	
+	<resultMap id="GIPIUploadTempMap" class="GIPIUploadTemp">
+		<result column="upload_no" 				property="uploadNo" />
+		<result column="filename" 		   		property="filename" />
+		<result column="grouped_item_title" 	property="groupedItemTitle"/>
+		<result column="sex" 					property="sex"/>
+		<result column="civil_status" 			property="civilStatus"/>
+		<result column="date_of_birth" 			property="dateOfBirth"/>
+		<result column="age" 					property="age"/>
+		<result column="salary" 				property="salary"/>
+		<result column="salary_grade" 			property="salaryGrade"/>
+		<result column="amount_coverage" 		property="amountCoverage"/>
+		<result column="remarks" 				property="remarks"/>
+		<result column="user_id" 				property="userId"/>
+		<result column="last_update" 			property="lastUpdate"/>
+		<result column="upload_date" 			property="uploadDate"/>
+		<result column="control_cd" 			property="controlCd"/>
+		<result column="control_type_cd" 		property="controlTypeCd"/>
+		<result column="upload_seq_no" 			property="uploadSeqNo"/>
+		<result column="from_date" 				property="fromDate"/>
+		<result column="to_date" 				property="toDate"/>
+	</resultMap>
+	
+	<resultMap class="GIPIUploadTemp" id="GIPIUploadTempResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="UPLOAD_NO" 				property="uploadNo" />
+		<result column="FILENAME" 		   		property="filename" />
+		<result column="GROUPED_ITEM_TITLE" 	property="groupedItemTitle"/>
+		<result column="SEX" 					property="sex"/>
+		<result column="CIVIL_STATUS" 			property="civilStatus"/>
+		<result column="DATE_OF_BIRTH" 			property="dateOfBirth"/>
+		<result column="AGE" 					property="age"/>
+		<result column="SALARY" 				property="salary"/>
+		<result column="SALARY_GRADE" 			property="salaryGrade"/>
+		<result column="AMOUNT_COVERAGE" 		property="amountCoverage"/>
+		<result column="REMARKS" 				property="remarks"/>
+		<result column="USER_ID" 				property="userId"/>
+		<result column="LAST_UPDATE" 			property="lastUpdate"/>
+		<result column="UPLOAD_DATE" 			property="uploadDate"/>
+		<result column="CONTROL_CD" 			property="controlCd"/>
+		<result column="CONTROL_TYPE_CD" 		property="controlTypeCd"/>
+		<result column="UPLOAD_SEQ_NO" 			property="uploadSeqNo"/>
+		<result column="FROM_DATE" 				property="fromDate"/>
+		<result column="TO_DATE" 				property="toDate"/>
+	</resultMap>
+	
+  	<!--created by christian 04/29/2013-->
+  	<resultMap class="java.util.HashMap" id="uploadedEnrollees">
+		<result column="GROUPED_ITEM_NO" 		property="groupedItemNo" />
+		<result column="GROUPED_ITEM_TITLE" 	property="groupedItemTitle"/>
+		<result column="SEX" 					property="sex"/>
+		<result column="CIVIL_STATUS" 			property="civilStatus"/>
+		<result column="CIVIL_STATUS_DESC" 		property="civilStatusDesc"/>
+		<result column="DATE_OF_BIRTH" 			property="dateOfBirth"/>
+		<result column="AGE" 					property="age"/>
+		<result column="SALARY" 				property="salary"/>
+		<result column="SALARY_GRADE" 			property="salaryGrade"/>
+		<result column="AMOUNT_COVERAGE" 		property="amountCoverage"/>
+		<result column="REMARKS" 				property="remarks"/>
+		<result column="USER_ID" 				property="userId"/>
+		<result column="LAST_UPDATE" 			property="lastUpdate"/>
+		<result column="UPLOAD_DATE" 			property="uploadDate"/>
+		<result column="CONTROL_CD" 			property="controlCd"/>
+		<result column="CONTROL_TYPE_CD" 		property="controlTypeCd"/>
+		<result column="CONTROL_TYPE_DESC" 		property="controlTypeDesc"/>
+		<result column="FROM_DATE" 				property="fromDate"/>
+		<result column="TO_DATE" 				property="toDate"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="controlTypeCdListMap">
+		<result column="CONTROL_TYPE_CD" 		property="controlTypeCd"/>
+	</resultMap>
+
+	<procedure id="getGIPIUploadTemp" resultMap="GIPIUploadTempMap">
+		SELECT * FROM TABLE(GIPI_UPLOAD_TEMP_PKG.get_gipi_upload_temp)
+	</procedure>
+	
+	<insert id="setEnrolleeUpload" parameterClass="GIPIUploadTemp">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GIPI_UPLOAD_TEMP_PKG.set_gipi_upload_temp(
+					#uploadNo#,#filename#,#groupedItemTitle#,
+					#sex#,#civilStatus#,#dateOfBirth#,
+					#age#,#salary#,#salaryGrade#,
+					#amountCoverage#,#remarks#,#userId#,
+					#lastUpdate#,#uploadDate#,#controlCd#,
+					#controlTypeCd#,#uploadSeqNo#,#fromDate#,
+					#toDate#
+					);
+		END;
+	</insert>
+	
+	<insert id="setEnrolleeUploadPerils" parameterClass="GIPIUploadTemp">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GIPI_UPLOAD_TEMP_PKG.set_gipi_upload_temp_perils(
+					#uploadNo#,#filename#,#groupedItemTitle#,
+					#sex#,#civilStatus#,#dateOfBirth#,
+					#age#,#salary#,#salaryGrade#,
+					#amountCoverage#,#remarks#,#userId#,
+					#lastUpdate#,#uploadDate#,#controlCd#,
+					#controlTypeCd#,#uploadSeqNo#,#fromDate#,
+					#toDate#
+					);
+		END;
+	</insert>
+	
+	<select id="validateUploadFileEnrollee" parameterClass="java.lang.String" resultClass="java.lang.String">
+		SELECT GIPI_UPLOAD_TEMP_PKG.Validate_Upload_File(#fileName#) from dual
+	</select>
+	
+	<select id="getUploadNo" parameterClass="java.lang.String" resultClass="java.lang.String">
+		SELECT GIPI_UPLOAD_TEMP_PKG.get_upload_no(#fileName#) from dual
+	</select>
+	
+	<procedure id="insertValuesGIPIUploadTemp" parameterClass="java.lang.String">
+		BEGIN
+			GIPI_UPLOAD_TEMP_PKG.insert_values(#uploadNo#);
+		END;
+	</procedure>
+	
+	<select id="getGIPIUploadTempTG" resultMap="GIPIUploadTempResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(gipi_upload_temp_pkg.get_gipi_upload_temp_tg(#uploadNo#))
+						  <isNull property="sortColumn">
+							ORDER BY upload_seq_no <!-- control_cd ASC --> <!-- changed control_cd to upload_seq_no to order records based on the template - apollo cruz 04.16.2015 -->
+						  </isNull>
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="controlCd">
+								ORDER BY control_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="groupedItemTitle">
+								ORDER BY grouped_item_title
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="sex">
+								ORDER BY sex
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="civilStatus">
+								ORDER BY civil_status
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="dateOfBirth">
+								ORDER BY date_of_birth
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="fromDate">
+								ORDER BY from_date
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="toDate">
+								ORDER BY to_date
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="age">
+								ORDER BY age
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="salary">
+								ORDER BY salary
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="salaryGrade">
+								ORDER BY salary_grade
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="uploadDate">
+								ORDER BY upload_date
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="amountCoverage">
+								ORDER BY amount_coverage
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(gipi_upload_temp_pkg.get_gipi_upload_temp_tg(#uploadNo#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+		
+	<!--created by christian 04/29/2013-->	
+	<select id="getUploadedEnrollees" parameterClass="java.util.HashMap" resultMap="uploadedEnrollees">
+		SELECT * FROM TABLE(GIPI_UPLOAD_TEMP_PKG.get_gipi_uploaded_enrollees(#uploadNo#, #parId#, #itemNo#))
+	</select>
+	
+	<select id="getUploadCount" parameterClass="java.lang.Integer" resultClass="java.lang.Integer">
+		SELECT GIPI_UPLOAD_TEMP_PKG.get_upload_count(#uploadNo#)
+		  FROM DUAL
+	</select>
+	
+</sqlMap>	

@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="GIISPackageBenefit">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+
+	<typeAlias alias="GIISPackageBenefit"   type="com.geniisys.common.entity.GIISPackageBenefit"/>
+	<typeAlias alias="GIISPackageBenefitDtl" type="com.geniisys.common.entity.GIISPackageBenefitDtl"/>
+
+	<resultMap class="java.util.HashMap" id="lineLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="line_cd"			property="lineCd" />
+		<result column="line_name"			property="lineName" />
+	</resultMap>
+
+	<resultMap class="java.util.HashMap" id="sublineLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="subline_cd"			property="sublineCd" />
+		<result column="subline_name"	    property="sublineName" />
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="perilLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="peril_cd"			property="perilCd" />
+		<result column="peril_name"			property="perilName" />
+	</resultMap>
+
+	<resultMap class="java.util.HashMap" id="giiss120RecListMap" extends="BaseEntity.TableGridResultMap">
+		<result column="pack_ben_cd" 		property="packBenCd" />
+		<result column="package_cd" 		property="packageCd" />
+		<result column="line_cd" 			property="lineCd" />
+		<result column="subline_cd" 		property="sublineCd" />
+		<result column="peril_name" 		property="perilName" />
+		<result column="peril_cd" 			property="perilCd" />
+		<result column="prem_pct" 			property="premPct" />
+		<result column="prem_amt" 			property="premAmt" />
+		<result column="no_of_days" 		property="noOfDays" />
+		<result column="benefit" 			property="benefit" />
+		<result column="aggregate_sw" 		property="aggregateSw" />
+		<result column="total_prem_amt" 	property="totalPremAmt" />
+		<result column="remarks" 			property="remarks" />
+		<result column="user_id"			property="userId"/>
+		<result column="last_update"		property="lastUpdate"/>
+	</resultMap>
+	
+	<parameterMap class="GIISPackageBenefit" id="setGIISPackageBenefitMap">
+		<parameter property="userId"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="packBenCd"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="INOUT" />
+		<parameter property="packageCd"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="lineCd"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="sublineCd"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="userId"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+	</parameterMap>
+	
+	<select id="getGiiss120LineLOV" resultMap="lineLOVMap">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+			b.count_,
+			a.*
+			FROM (SELECT *
+			FROM TABLE(giiss120_pkg.get_giis_line_list(#findText#,#userId#))
+			<isNotNull property="sortColumn">
+				<isEqual property="sortColumn" compareValue="lineCd">
+					ORDER BY line_cd
+				</isEqual>
+				<isEqual property="sortColumn" compareValue="lineName">
+					ORDER BY line_name
+				</isEqual>
+				<isEqual property="ascDescFlg" compareValue="ASC">
+					ASC
+				</isEqual>
+				<isEqual property="ascDescFlg" compareValue="DESC">
+					DESC
+				</isEqual>
+			</isNotNull>
+			) a,
+			(SELECT count(*) count_
+			FROM TABLE(giiss120_pkg.get_giis_line_list(#findText#,#userId#))
+			) b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiiss120SublineLOV" resultMap="sublineLOVMap">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+			b.count_,
+			a.*
+			FROM (SELECT *
+			FROM TABLE(giiss120_pkg.get_giis_subline_list(#lineCd#,#findText#))
+			<isNotNull property="sortColumn">
+				<isEqual property="sortColumn" compareValue="sublineCd">
+					ORDER BY subline_cd
+				</isEqual>
+				<isEqual property="sortColumn" compareValue="sublineName">
+					ORDER BY subline_name
+				</isEqual>
+				<isEqual property="ascDescFlg" compareValue="ASC">
+					ASC
+				</isEqual>
+				<isEqual property="ascDescFlg" compareValue="DESC">
+					DESC
+				</isEqual>
+			</isNotNull>
+			) a,
+			(SELECT count(*) count_
+			FROM TABLE(giiss120_pkg.get_giis_subline_list(#lineCd#,#findText#))
+			) b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiiss120PerilLOV" resultMap="perilLOVMap">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+			b.count_,
+			a.*
+			FROM (SELECT *
+			FROM TABLE(giiss120_pkg.get_giis_peril_list(#lineCd#,#sublineCd#,#findText#))
+			<isNotNull property="sortColumn">
+				<isEqual property="sortColumn" compareValue="perilCd">
+					ORDER BY peril_cd
+				</isEqual>
+				<isEqual property="sortColumn" compareValue="perilName">
+					ORDER BY peril_name
+				</isEqual>
+				<isEqual property="ascDescFlg" compareValue="ASC">
+					ASC
+				</isEqual>
+				<isEqual property="ascDescFlg" compareValue="DESC">
+					DESC
+				</isEqual>
+			</isNotNull>
+			) a,
+			(SELECT count(*) count_
+			FROM TABLE(giiss120_pkg.get_giis_peril_list(#lineCd#,#sublineCd#,#findText#))
+			) b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiiss120RecList" resultMap="giiss120RecListMap">
+		SELECT * 
+			FROM (SELECT rownum rownum_,
+						 b.count_,
+						 a.*,
+						 (SELECT SUM(prem_amt) FROM TABLE (giiss120_pkg.get_rec_list (#lineCd#,#sublineCd#,#packageCd#,#packBenCd#,#perilName#,#mode#))) total_prem_amt
+					FROM (SELECT * 
+							FROM TABLE (giiss120_pkg.get_rec_list (#lineCd#,#sublineCd#,#packageCd#,#packBenCd#,#perilName#,#mode#))
+							<isNotNull property="filter">
+								WHERE 1=1
+								<isNotEmpty prepend="AND"  property="premPct">
+									prem_pct = #premPct#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="premAmt">
+									prem_amt = #premAmt#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="noOfDays">
+									no_of_days = #noOfDays#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="benefit">
+									benefit = #benefit#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="aggregateSw">
+									aggregate_sw = UPPER(#aggregateSw#)
+								</isNotEmpty>
+							</isNotNull>
+							<isEqual property="sortColumn" compareValue="packageCd">
+								ORDER BY package_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="perilName">
+								ORDER BY peril_name
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="premPct">
+								ORDER BY prem_pct
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="premAmt">
+								ORDER BY prem_amt
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="noOfDays">
+								ORDER BY no_of_days
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="benefit">
+								ORDER BY benefit
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="aggregateSw">
+								ORDER BY aggregate_sw
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>) a, 
+							(SELECT count(*) count_
+							   FROM TABLE (giiss120_pkg.get_rec_list (#lineCd#,#sublineCd#,#packageCd#,#packBenCd#,#perilName#,#mode#))
+								 <isNotNull property="filter">
+									WHERE 1=1
+									<isNotEmpty prepend="AND"  property="premPct">
+										prem_pct = #premPct#
+									</isNotEmpty>
+									<isNotEmpty prepend="AND"  property="premAmt">
+										prem_amt = #premAmt#
+									</isNotEmpty>
+									<isNotEmpty prepend="AND"  property="noOfDays">
+										no_of_days = #noOfDays#
+									</isNotEmpty>
+									<isNotEmpty prepend="AND"  property="benefit">
+										benefit = #benefit#
+									</isNotEmpty>
+									<isNotEmpty prepend="AND"  property="aggregateSw">
+										aggregate_sw = UPPER(#aggregateSw#)
+									</isNotEmpty>
+								</isNotNull>
+							 ) b)
+		WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiiss120AllRecList" resultMap="giiss120RecListMap">
+		SELECT '1' rownum_,
+			   '1' count_,
+			   '1' total_prem_amt,
+			   a.* 
+				FROM TABLE (giiss120_pkg.get_rec_list (#lineCd#,#sublineCd#,#packageCd#,#packBenCd#,#perilName#,'giisPackageBenefit')) a
+	</select>
+	
+ 	<procedure id="setGIISPackageBenefit" parameterMap="setGIISPackageBenefitMap">
+ 		BEGIN	
+ 			giis_users_pkg.app_user := ?;	     
+ 			giiss120_pkg.set_giis_package_benefit(?,?,?,?,?);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="setGIISPackageBenefitDtl" parameterClass="GIISPackageBenefitDtl">
+	    DECLARE
+	    	v_rec giis_package_benefit_dtl%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.pack_ben_cd := #packBenCd#;
+ 			v_rec.peril_cd := #perilCd#;
+ 			v_rec.benefit := #benefit#;
+ 			v_rec.prem_pct := #premPct#;
+ 			v_rec.aggregate_sw := #aggregateSw#;
+ 			v_rec.no_of_days := #noOfDays#;
+ 			v_rec.prem_amt := #premAmt#;
+ 			v_rec.remarks := #remarks#;
+ 			v_rec.user_id := #userId#;
+ 			
+ 			giiss120_pkg.set_giis_package_benefit_dtl(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<delete id="delGIISPackageBenefit" parameterClass="GIISPackageBenefit">
+		BEGIN
+ 			giiss120_pkg.del_giis_package_benefit(#packBenCd#);
+ 		END;
+ 	</delete>
+ 	
+ 	<delete id="delGIISPackageBenefitDtl" parameterClass="GIISPackageBenefitDtl">
+		BEGIN
+ 			giiss120_pkg.del_giis_package_benefit_dtl(#perilCd#,#packBenCd#);
+ 		END;
+ 	</delete>
+ 	
+ 	<procedure id="valAddGiiss120" parameterClass="java.util.Map">
+ 		BEGIN
+ 			giiss120_pkg.val_add_rec(#lineCd#,#sublineCd#,#recId#,#recId2#,#mode#);
+ 		END;
+ 	</procedure> 
+ 	
+ 	<procedure id="valDeleteGiiss120" parameterClass="java.util.Map">
+ 		BEGIN
+ 			giiss120_pkg.val_del_rec(#recId#);
+ 		END;
+ 	</procedure> 	 
+</sqlMap>

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIWOpenPolicy">
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIPIWOpenPolicyClass" type="com.geniisys.gipi.entity.GIPIWOpenPolicy"/>
+	
+	<resultMap class="GIPIWOpenPolicyClass" id="GIPIWOpenPolicyMap">
+		<result column="PAR_ID" 		property="parId"/>
+		<result column="LINE_CD" 		property="lineCd"/>
+		<result column="OP_SUBLINE_CD" 	property="opSublineCd"/>
+		<result column="OP_ISS_CD" 		property="opIssCd"/>
+		<result column="OP_ISSUE_YY" 	property="opIssueYy"/>
+		<result column="OP_POL_SEQNO" 	property="opPolSeqno"/>
+		<result column="OP_RENEW_NO" 	property="opRenewNo"/>
+		<result column="DECLTN_NO" 		property="decltnNo"/>
+		<result column="EFF_DATE"		property="effDate"/>
+		<result column="REF_OPEN_POL_NO" property="refOpenPolNo"/>
+		<result column="GIPI_WITEM_EXIST" property="gipiWItemExist"/>
+	</resultMap>
+		
+	<parameterMap class="map" id="validatePolicyDateMap">
+		<parameter property="lineCd" 		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="opSublineCd" 	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="opIssCd" 		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="opIssueYy" 	jdbcType="NUMBER"	javaType="java.lang.Integer"	mode="IN"/>
+		<parameter property="opPolSeqno" 	jdbcType="NUMBER"	javaType="java.lang.Integer"	mode="IN"/>
+		<parameter property="opRenewNo" 	jdbcType="NUMBER"	javaType="java.lang.Integer"	mode="IN"/>
+		<parameter property="effDate" 		jdbcType="DATE"		javaType="java.util.Date"		mode="IN"/>
+		<parameter property="expiryDate" 	jdbcType="DATE"		javaType="java.util.Date"		mode="IN"/>
+		<parameter property="vEffDate" 		jdbcType="DATE"		javaType="java.util.Date"		mode="OUT"/>
+		<parameter property="message1" 		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="message2" 		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="messageCode" 	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="isExistMapWOpenPolicy">
+	    <parameter property="parId"			    jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+	    <parameter property="exist"			    jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+	</parameterMap>
+	
+	<select id="getGipiWOpenPolicyDetails" resultMap="GIPIWOpenPolicyMap">
+		SELECT * FROM TABLE(Gipi_Wopen_Policy_Pkg.get_gipi_wopen_policy(#parId#))
+		 WHERE ROWNUM = 1
+	</select>
+	
+	<procedure id="saveOpenPolicyDetails" parameterClass="java.util.HashMap">
+		BEGIN
+			Gipi_Wopen_Policy_Pkg.set_gipi_wopen_policy(
+				#parId#, #lineCd#, #opSublineCd#,
+   				#opIssCd#, #opIssueYy#, #opPolSeqno#,
+   				#opRenewNo#, #decltnNo#, #effDate#);
+		END;	
+	</procedure>
+
+	<procedure id="isExistWOpenPolicy" parameterMap="isExistMapWOpenPolicy">
+		{ CALL Gipi_Wopen_Policy_Pkg.get_gipi_Wopen_Policy_exist(?, ?) }
+	</procedure>
+	
+	<procedure id="validatePolicyDate" parameterMap="validatePolicyDateMap">
+		{ CALL VALIDATE_POLICY_DATES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}
+	</procedure>
+	
+	<procedure id="saveOpenPolicy1" parameterClass="java.util.HashMap">
+		BEGIN
+			gipis002_save_open_policy1 (#parId#, #lineCd#, #opSublineCd#,
+   				#opIssCd#, #opIssueYy#, #opPolSeqno#,
+   				#opRenewNo#, #decltnNo#);
+		END;
+	</procedure>
+	
+	<procedure id="saveOpenPolicy2" parameterClass="java.util.HashMap">
+		BEGIN
+			gipis002_save_open_policy2 (#parId#, #lineCd#, #opSublineCd#,
+   				#opIssCd#, #opIssueYy#, #opPolSeqno#,
+   				#opRenewNo#, #decltnNo#);
+		END;
+	</procedure>
+	
+</sqlMap>

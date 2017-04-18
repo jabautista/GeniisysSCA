@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIACR078_COLUMN_DETAILS" language="groovy" pageWidth="950" pageHeight="752" columnWidth="950" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="Crosstab Data Text" isDefault="false" hAlign="Center"/>
+	<parameter name="P_DATE_FROM" class="java.util.Date"/>
+	<parameter name="P_DATE_TO" class="java.util.Date"/>
+	<parameter name="P_REP_TYPE" class="java.lang.String"/>
+	<parameter name="P_BRANCH_CD" class="java.lang.String"/>
+	<parameter name="P_INTM_NO" class="java.lang.Integer"/>
+	<parameter name="P_USER" class="java.lang.String"/>
+	<parameter name="P_BRANCH_INTM" class="java.lang.String"/>
+	<parameter name="P_POLICY_NO" class="java.lang.String"/>
+	<parameter name="P_OR_NO" class="java.lang.String"/>
+	<parameter name="P_AGE" class="java.lang.Integer"/>
+	<parameter name="P_CF_AMOUNT" class="java.math.BigDecimal"/>
+	<queryString>
+		<![CDATA[SELECT *
+  FROM TABLE(GIACR078_PKG.GET_ANALYSIS_COLUMN_DETAILS(
+	TO_DATE($P{P_DATE_FROM}),
+	TO_DATE($P{P_DATE_TO}),
+	$P{P_REP_TYPE},
+	$P{P_BRANCH_CD},
+	$P{P_INTM_NO},
+	$P{P_USER},
+	$P{P_BRANCH_INTM},
+	$P{P_POLICY_NO},
+	$P{P_OR_NO},
+	$P{P_AGE}))
+UNION
+SELECT TO_CHAR($P{P_BRANCH_INTM}), TO_CHAR($P{P_POLICY_NO}),
+       TO_CHAR($P{P_OR_NO}), $P{P_INTM_NO}, $P{P_AGE},
+	100, 'OTHER ACCOUNT', $P{P_CF_AMOUNT}
+  FROM DUAL]]>
+	</queryString>
+	<field name="BRANCH_INTM" class="java.lang.String"/>
+	<field name="POLICY_NO" class="java.lang.String"/>
+	<field name="OR_NO" class="java.lang.String"/>
+	<field name="INTM_NO" class="java.lang.Integer"/>
+	<field name="AGE" class="java.lang.Integer"/>
+	<field name="COLUMN_NO" class="java.lang.Integer"/>
+	<field name="COLUMN_TITLE" class="java.lang.String"/>
+	<field name="CF_AMOUNT" class="java.math.BigDecimal"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<summary>
+		<band height="12" splitType="Stretch">
+			<crosstab>
+				<reportElement x="0" y="0" width="950" height="12"/>
+				<rowGroup name="BRANCH_INTM" width="0">
+					<bucket>
+						<bucketExpression class="java.lang.String"><![CDATA[$F{BRANCH_INTM}]]></bucketExpression>
+					</bucket>
+					<crosstabRowHeader>
+						<cellContents backcolor="#F0F8FF" mode="Opaque"/>
+					</crosstabRowHeader>
+					<crosstabTotalRowHeader>
+						<cellContents/>
+					</crosstabTotalRowHeader>
+				</rowGroup>
+				<rowGroup name="OR_NO" width="0">
+					<bucket>
+						<bucketExpression class="java.lang.String"><![CDATA[$F{OR_NO}]]></bucketExpression>
+					</bucket>
+					<crosstabRowHeader>
+						<cellContents/>
+					</crosstabRowHeader>
+					<crosstabTotalRowHeader>
+						<cellContents/>
+					</crosstabTotalRowHeader>
+				</rowGroup>
+				<rowGroup name="POLICY_NO" width="0">
+					<bucket>
+						<bucketExpression class="java.lang.String"><![CDATA[$F{POLICY_NO}]]></bucketExpression>
+					</bucket>
+					<crosstabRowHeader>
+						<cellContents/>
+					</crosstabRowHeader>
+					<crosstabTotalRowHeader>
+						<cellContents/>
+					</crosstabTotalRowHeader>
+				</rowGroup>
+				<rowGroup name="INTM_NO" width="0">
+					<bucket>
+						<bucketExpression class="java.lang.String"><![CDATA[$F{INTM_NO}]]></bucketExpression>
+					</bucket>
+					<crosstabRowHeader>
+						<cellContents/>
+					</crosstabRowHeader>
+					<crosstabTotalRowHeader>
+						<cellContents/>
+					</crosstabTotalRowHeader>
+				</rowGroup>
+				<rowGroup name="AGE" width="0">
+					<bucket>
+						<bucketExpression class="java.lang.String"><![CDATA[$F{AGE}]]></bucketExpression>
+					</bucket>
+					<crosstabRowHeader>
+						<cellContents/>
+					</crosstabRowHeader>
+					<crosstabTotalRowHeader>
+						<cellContents/>
+					</crosstabTotalRowHeader>
+				</rowGroup>
+				<columnGroup name="COLUMN_NO" height="0">
+					<bucket>
+						<bucketExpression class="java.lang.Integer"><![CDATA[$F{COLUMN_NO}]]></bucketExpression>
+					</bucket>
+					<crosstabColumnHeader>
+						<cellContents backcolor="#F0F8FF" mode="Opaque"/>
+					</crosstabColumnHeader>
+					<crosstabTotalColumnHeader>
+						<cellContents/>
+					</crosstabTotalColumnHeader>
+				</columnGroup>
+				<measure name="CF_AMOUNTMeasure" class="java.math.BigDecimal">
+					<measureExpression><![CDATA[$F{CF_AMOUNT}]]></measureExpression>
+				</measure>
+				<crosstabCell width="73" height="11">
+					<cellContents>
+						<textField pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+							<reportElement style="Crosstab Data Text" x="0" y="0" width="68" height="11"/>
+							<textElement textAlignment="Right">
+								<font fontName="Arial" size="7"/>
+							</textElement>
+							<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{CF_AMOUNTMeasure}]]></textFieldExpression>
+						</textField>
+					</cellContents>
+				</crosstabCell>
+			</crosstab>
+		</band>
+	</summary>
+</jasperReport>

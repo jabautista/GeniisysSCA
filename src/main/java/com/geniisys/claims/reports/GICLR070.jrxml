@@ -1,0 +1,544 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GICLR070" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="9842dfa2-9001-45d7-a41e-980ad7792f20">
+	<property name="ireport.zoom" value="1.5000000000000004"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="720"/>
+	<parameter name="P_EVAL_ID" class="java.lang.Integer"/>
+	<parameter name="P_UPDATE_SW" class="java.lang.String">
+		<defaultValueExpression><![CDATA[null]]></defaultValueExpression>
+	</parameter>
+	<parameter name="P_CLAIM_NO" class="java.lang.String"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String">
+		<defaultValueExpression><![CDATA["C:\\GENIISYS_JASPER_REPORTS\\Geniisys\\src\\com\\geniisys\\claims\\reports\\"]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT *
+  FROM TABLE(populate_giclr070_pkg.populate_giclr070($P{P_EVAL_ID}))]]>
+	</queryString>
+	<field name="EVAL_NO" class="java.lang.String"/>
+	<field name="POLICY_NO" class="java.lang.String"/>
+	<field name="LOSS_DATE" class="java.sql.Timestamp"/>
+	<field name="ASSD_NO" class="java.lang.Integer"/>
+	<field name="CLAIM_ID" class="java.lang.Integer"/>
+	<field name="ITEM_NO" class="java.lang.Integer"/>
+	<field name="EVAL_ID" class="java.lang.Integer"/>
+	<field name="SUBLINE_CD" class="java.lang.String"/>
+	<field name="ISS_CD" class="java.lang.String"/>
+	<field name="PLATE_NO" class="java.lang.String"/>
+	<field name="TP_SW" class="java.lang.String"/>
+	<field name="CSO_ID" class="java.lang.String"/>
+	<field name="EVAL_DATE" class="java.sql.Timestamp"/>
+	<field name="INSPECT_DATE" class="java.sql.Timestamp"/>
+	<field name="INSPECT_PLACE" class="java.lang.String"/>
+	<field name="VAT" class="java.math.BigDecimal"/>
+	<field name="DEDUCTIBLE" class="java.math.BigDecimal"/>
+	<field name="DEPRECIATION" class="java.math.BigDecimal"/>
+	<field name="REMARKS" class="java.lang.String"/>
+	<field name="ASSD_NAME" class="java.lang.String"/>
+	<field name="EVAL_NAME" class="java.lang.String"/>
+	<field name="TP_NAME" class="java.lang.String"/>
+	<field name="VEHICLE" class="java.lang.String"/>
+	<field name="SUM_NOF" class="java.lang.Integer"/>
+	<field name="SUM_DED_AMT" class="java.math.BigDecimal"/>
+	<field name="SUM_DISCOUNT_AMT" class="java.math.BigDecimal"/>
+	<field name="DED_RT" class="java.math.BigDecimal"/>
+	<field name="SUM_DEP_DED_AMT" class="java.math.BigDecimal"/>
+	<variable name="V_SUM_REPLACE_AMT" class="java.math.BigDecimal"/>
+	<variable name="V_SUM_REPAIR_AMT" class="java.math.BigDecimal"/>
+	<variable name="V_SUM_VAT" class="java.math.BigDecimal">
+		<variableExpression><![CDATA[]]></variableExpression>
+	</variable>
+	<variable name="V_COMPUTED_DEP" class="java.math.BigDecimal">
+		<variableExpression><![CDATA[$F{DED_RT}.equals(0) ?
+    ($F{SUM_DEP_DED_AMT} == null ? new BigDecimal(0) : $F{SUM_DEP_DED_AMT}) :
+    $F{DED_RT}.divide(new BigDecimal("100")).multiply(($F{SUM_DEP_DED_AMT} == null ? new BigDecimal(0) : $F{SUM_DEP_DED_AMT}))]]></variableExpression>
+	</variable>
+	<variable name="V_TOTAL_DED" class="java.math.BigDecimal">
+		<variableExpression><![CDATA[$F{SUM_DED_AMT}.add($F{SUM_DISCOUNT_AMT}).add($V{V_COMPUTED_DEP})]]></variableExpression>
+	</variable>
+	<variable name="V_TOTAL_NET_PARTICIPATION" class="java.math.BigDecimal">
+		<variableExpression><![CDATA[(($V{V_SUM_REPLACE_AMT} == null ? new BigDecimal(0) : $V{V_SUM_REPLACE_AMT}).add(($V{V_SUM_REPAIR_AMT} == null ? new BigDecimal(0) : $V{V_SUM_REPAIR_AMT})).add($V{V_SUM_VAT})).equals(null) ?
+    new BigDecimal(0) :
+    ($V{V_SUM_REPLACE_AMT} == null ? new BigDecimal(0) : $V{V_SUM_REPLACE_AMT}).add(($V{V_SUM_REPAIR_AMT} == null ? new BigDecimal(0) : $V{V_SUM_REPAIR_AMT})).add($V{V_SUM_VAT}).subtract($V{V_TOTAL_DED})]]></variableExpression>
+	</variable>
+	<variable name="V_TOTAL_EST_COST" class="java.math.BigDecimal">
+		<variableExpression><![CDATA[$V{V_SUM_REPLACE_AMT}.add($V{V_SUM_REPAIR_AMT}).add($V{V_SUM_VAT})]]></variableExpression>
+	</variable>
+	<background>
+		<band height="802" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="274" width="555" height="179" forecolor="#CCCCCC" uuid="41a54b4c-44d4-43e5-b241-18b3a934fee1">
+					<printWhenExpression><![CDATA[$F{EVAL_DATE}.equals(null)]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial Black" size="125" isBold="true"/>
+				</textElement>
+				<text><![CDATA[DRAFT]]></text>
+			</staticText>
+		</band>
+	</background>
+	<pageHeader>
+		<band height="202" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="28" width="555" height="18" uuid="6cc77f53-9577-4d8c-bf8a-2abcc343233c"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[MOTOR CAR CLAIMS UNIT]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="46" width="555" height="20" uuid="d3e45b5e-0eee-4fe6-bdd0-3d581a66242c"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="12" isBold="true" isUnderline="true"/>
+				</textElement>
+				<text><![CDATA[EVALUATION SHEET]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="337" y="0" width="59" height="17" uuid="5f25712d-4000-4151-8cbd-292c12eaa4f6"/>
+				<textElement>
+					<font fontName="Arial" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Eval No :]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="82" width="136" height="14" uuid="94e11477-883d-4577-80f9-a07a4ed8e60f"/>
+				<textElement>
+					<font fontName="Arial"/>
+				</textElement>
+				<text><![CDATA[DATE / PLACE INSPECTED]]></text>
+			</staticText>
+			<staticText>
+				<reportElement positionType="Float" x="0" y="106" width="136" height="14" uuid="a4ea41ca-f21b-449c-9c4e-c6d737a12745"/>
+				<textElement>
+					<font fontName="Arial"/>
+				</textElement>
+				<text><![CDATA[ASSURED]]></text>
+			</staticText>
+			<staticText>
+				<reportElement positionType="Float" x="0" y="130" width="136" height="14" uuid="8bf6beb1-879f-459d-8221-2da343e45752"/>
+				<textElement>
+					<font fontName="Arial"/>
+				</textElement>
+				<text><![CDATA[CLAIM NO.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement positionType="Float" x="0" y="154" width="136" height="14" uuid="739402a0-c5fa-49d7-bba9-aa32fae9e93c"/>
+				<textElement>
+					<font fontName="Arial"/>
+				</textElement>
+				<text><![CDATA[THIRD PARTY]]></text>
+			</staticText>
+			<staticText>
+				<reportElement positionType="Float" x="0" y="178" width="136" height="14" uuid="4123d0c3-0ef6-47d2-88cd-9e4ac7b5e2d1"/>
+				<textElement>
+					<font fontName="Arial"/>
+				</textElement>
+				<text><![CDATA[VEHICLE]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="149" y="82" width="406" height="14" uuid="ae8dfce5-2d04-440b-bccc-fc32e83b0f28"/>
+				<textElement>
+					<font fontName="Arial" size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new SimpleDateFormat("MMMMMMMMM d, yyyy").format($F{INSPECT_DATE})
++ " / " +
+($F{INSPECT_PLACE}.equals(null) ? "" : $F{INSPECT_PLACE})]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="149" y="106" width="406" height="14" uuid="45a880a2-f49e-44c6-a591-61a535ddb5f7"/>
+				<textElement>
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ASSD_NAME}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement positionType="Float" x="149" y="130" width="131" height="14" uuid="b995595c-15dc-4b2c-b435-428e6ccac41a"/>
+				<textElement>
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_CLAIM_NO}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="149" y="154" width="131" height="14" uuid="9756977e-b05d-4c54-8338-b374d6827e81"/>
+				<textElement>
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{TP_NAME}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement positionType="Float" x="149" y="178" width="131" height="14" uuid="a682c9ca-c347-4a49-a55a-e5c030d906f1"/>
+				<textElement>
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{VEHICLE}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement positionType="Float" x="296" y="130" width="84" height="14" uuid="6b16d867-520e-4476-a272-824e4e10c9fc"/>
+				<textElement>
+					<font fontName="Arial"/>
+				</textElement>
+				<text><![CDATA[POLICY NO.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement positionType="Float" x="296" y="154" width="84" height="14" uuid="dd4b2505-b791-49fb-8965-26584be44e79"/>
+				<textElement>
+					<font fontName="Arial"/>
+				</textElement>
+				<text><![CDATA[ACCIDENT DATE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement positionType="Float" x="296" y="178" width="84" height="14" uuid="b7f89ebd-10c6-4a6c-bd4e-2aa7bad38144"/>
+				<textElement>
+					<font fontName="Arial"/>
+				</textElement>
+				<text><![CDATA[PLATE NO.]]></text>
+			</staticText>
+			<textField pattern="MMMMM dd, yyyy" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="396" y="154" width="159" height="14" uuid="910886ec-5c33-44f5-b759-64ec9ff64ec2"/>
+				<textElement>
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{LOSS_DATE}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement positionType="Float" x="396" y="130" width="159" height="14" uuid="e1d76dbb-4d28-4a91-a25a-5b7a042dd228"/>
+				<textElement>
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{POLICY_NO}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement positionType="Float" x="396" y="178" width="159" height="14" uuid="ce165962-2d23-4717-80fc-ad2059e3e6b8"/>
+				<textElement>
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PLATE_NO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="396" y="0" width="159" height="17" uuid="17d6f862-c9ae-4571-abf7-10e8b3ac009c"/>
+				<textElement>
+					<font fontName="Arial" size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{EVAL_NO}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement positionType="Float" x="0" y="105" width="555" height="1" forecolor="#FFFFFF" uuid="d146c540-f7d6-472e-bace-fe9a480cded8"/>
+			</line>
+			<line>
+				<reportElement positionType="Float" x="0" y="128" width="555" height="1" forecolor="#FFFFFF" uuid="26bcb65d-3e89-4742-9175-dc8b55b57b19"/>
+			</line>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="388">
+			<break>
+				<reportElement x="0" y="0" width="555" height="1" uuid="6243daed-d0ec-4657-b3a2-76f738ca6d07"/>
+			</break>
+			<staticText>
+				<reportElement x="0" y="11" width="239" height="15" uuid="e68f275f-81d6-4e0f-90a9-f761d2bb2e69"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial"/>
+				</textElement>
+				<text><![CDATA[SCOPE OF WORK]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="239" y="11" width="158" height="15" uuid="8dfc3e57-a312-452c-8776-de64840154b2"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial"/>
+				</textElement>
+				<text><![CDATA[REPLACE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="397" y="11" width="158" height="15" uuid="5482ba92-fe98-4547-94d3-3df579532a85"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial"/>
+				</textElement>
+				<text><![CDATA[REPAIR]]></text>
+			</staticText>
+			<subreport>
+				<reportElement x="0" y="26" width="555" height="15" uuid="ff54d8cb-028f-4d28-9a9d-d697cb436915"/>
+				<subreportParameter name="P_UPDATE_SW">
+					<subreportParameterExpression><![CDATA[$P{P_UPDATE_SW}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_EVAL_ID">
+					<subreportParameterExpression><![CDATA[$P{P_EVAL_ID}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<returnValue subreportVariable="V_SUM_REPLACE_AMT" toVariable="V_SUM_REPLACE_AMT"/>
+				<returnValue subreportVariable="V_SUM_REPAIR_AMT" toVariable="V_SUM_REPAIR_AMT"/>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "GICLR070_SCOPE.jasper"]]></subreportExpression>
+			</subreport>
+			<staticText>
+				<reportElement positionType="Float" x="240" y="41" width="157" height="14" uuid="1f621079-1854-48af-8fc0-41f8ab004a36"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial"/>
+				</textElement>
+				<text><![CDATA[=========================]]></text>
+			</staticText>
+			<staticText>
+				<reportElement positionType="Float" x="398" y="41" width="157" height="14" uuid="1afb1f19-6e50-444d-9cb3-edb53d3301f0"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial"/>
+				</textElement>
+				<text><![CDATA[=========================]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" evaluationTime="Band" pattern="###,###,##0.00" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="240" y="55" width="156" height="15" uuid="ee2c1bae-190b-4df6-a903-77e572cf0c70"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{V_SUM_REPLACE_AMT} == null ? new BigDecimal(0) : $V{V_SUM_REPLACE_AMT}]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Band" pattern="###,###,##0.00" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="398" y="55" width="157" height="15" uuid="82bc573c-3bf5-4111-9b51-2420497ae5e9"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{V_SUM_REPAIR_AMT}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement positionType="Float" x="0" y="55" width="239" height="15" uuid="b3286ea7-97bf-40ba-9f77-291a40467c81"/>
+				<textElement>
+					<font fontName="Arial"/>
+				</textElement>
+				<text><![CDATA[TOTAL ESTIMATED COST]]></text>
+			</staticText>
+			<subreport>
+				<reportElement positionType="Float" x="0" y="80" width="555" height="15" uuid="aeed1c49-1f23-429e-b85b-27b297804806"/>
+				<subreportParameter name="P_UPDATE_SW">
+					<subreportParameterExpression><![CDATA[$P{P_UPDATE_SW}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_EVAL_ID">
+					<subreportParameterExpression><![CDATA[$P{P_EVAL_ID}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<returnValue subreportVariable="V_SUM_VAT" toVariable="V_SUM_VAT"/>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "GICLR070_VAT.jasper"]]></subreportExpression>
+			</subreport>
+			<staticText>
+				<reportElement positionType="Float" x="398" y="95" width="157" height="14" uuid="88b97ed5-8c35-45d6-a511-89ec368d9794"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial"/>
+				</textElement>
+				<text><![CDATA[=========================]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" evaluationTime="Band" pattern="###,###,##0.00" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="398" y="109" width="157" height="15" uuid="50b9c1cf-476f-44f6-956c-c78bafdacded"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$V{V_SUM_VAT}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement positionType="Float" x="0" y="109" width="239" height="15" uuid="d0740457-0923-4728-8cae-25b524e724b1"/>
+				<textElement>
+					<font fontName="Arial"/>
+				</textElement>
+				<text><![CDATA[TOTAL V.A.T.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement positionType="Float" x="0" y="180" width="100" height="15" uuid="551d9a8e-7549-4cf8-b437-4fbbc34a1ac1"/>
+				<textElement>
+					<font fontName="Arial"/>
+				</textElement>
+				<text><![CDATA[LESS: DEDUCTIBLE(]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement positionType="Float" x="100" y="180" width="18" height="15" uuid="3b6e9906-96ed-4239-9678-8e1dea002549"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUM_NOF}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement positionType="Float" x="123" y="180" width="110" height="15" uuid="38df7ca3-28bd-4aa0-aa94-dd44a8b5a9d6"/>
+				<textElement>
+					<font fontName="Arial"/>
+				</textElement>
+				<text><![CDATA[ACCIDENT/S               )]]></text>
+			</staticText>
+			<textField pattern="###,###,##0.00" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="257" y="180" width="139" height="15" uuid="fccad319-10d6-4d69-99c4-4f50068c14af"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUM_DED_AMT} == new BigDecimal(0) ? null : $F{SUM_DED_AMT}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement positionType="Float" x="0" y="205" width="100" height="15" uuid="fc5e2e51-2184-42e4-8129-62fa2e0c24bc"/>
+				<textElement>
+					<font fontName="Arial"/>
+				</textElement>
+				<text><![CDATA[DISCOUNT:]]></text>
+			</staticText>
+			<textField pattern="###,###,##0.00" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="257" y="205" width="139" height="15" uuid="57316b91-97ca-4e49-bdec-baa3c0a96531"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUM_DISCOUNT_AMT}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement positionType="Float" x="398" y="260" width="157" height="14" uuid="e561cc9c-5e6d-4874-b475-428b85a8c667"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial"/>
+				</textElement>
+				<text><![CDATA[=========================]]></text>
+			</staticText>
+			<textField pattern="###,###,##0.00" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="257" y="232" width="139" height="15" uuid="587929c3-4b07-490c-a618-dd3e1c3b00ba"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{V_COMPUTED_DEP} == new BigDecimal(0) ? null : $V{V_COMPUTED_DEP}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###,###,##0.00" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="398" y="232" width="157" height="15" uuid="545c6778-7b94-41e3-9e2d-79fc726a0f2c"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{V_TOTAL_DED}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement positionType="Float" x="0" y="155" width="239" height="15" uuid="15b9137f-febe-4154-9d2b-6320a36a9b39"/>
+				<textElement>
+					<font fontName="Arial"/>
+				</textElement>
+				<text><![CDATA[TOTAL ESTIMATED REPAIR COST]]></text>
+			</staticText>
+			<staticText>
+				<reportElement positionType="Float" x="398" y="141" width="157" height="14" uuid="d87b17d8-9b98-4876-9a25-24711bd051ce"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial"/>
+				</textElement>
+				<text><![CDATA[=========================]]></text>
+			</staticText>
+			<staticText>
+				<reportElement positionType="Float" x="0" y="274" width="240" height="15" uuid="e8cb51a0-0a2d-4a67-9952-ce818e3da107"/>
+				<textElement>
+					<font fontName="Arial"/>
+				</textElement>
+				<text><![CDATA[INSURER'S NET PARTICIPATION]]></text>
+			</staticText>
+			<staticText>
+				<reportElement positionType="Float" x="17" y="300" width="101" height="15" uuid="fe6a9b36-a88e-4854-ab2c-666d89498efa"/>
+				<textElement>
+					<font fontName="Arial"/>
+				</textElement>
+				<text><![CDATA[REMARKS: ]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="17" y="315" width="514" height="28" uuid="cdb446bc-c8d5-470e-9df3-11fc009953c4"/>
+				<textElement>
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{REMARKS}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement positionType="Float" x="51" y="354" width="138" height="15" uuid="1cd62f4a-ddac-44c6-b659-d47682d851ed"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{EVAL_NAME}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement positionType="Float" x="51" y="369" width="138" height="1" uuid="345faa6f-14b7-4ec2-be93-438c7175e03c"/>
+			</line>
+			<staticText>
+				<reportElement positionType="Float" x="51" y="370" width="138" height="18" uuid="44f1f9d6-effc-4e54-b317-aa3d91886b7b"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial"/>
+				</textElement>
+				<text><![CDATA[EVALUATOR]]></text>
+			</staticText>
+			<staticText>
+				<reportElement positionType="Float" x="337" y="370" width="138" height="18" uuid="ea6787ba-907a-456e-9444-28386dce151d"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial"/>
+				</textElement>
+				<text><![CDATA[DATE]]></text>
+			</staticText>
+			<line>
+				<reportElement positionType="Float" x="337" y="369" width="138" height="1" uuid="5bb688f8-d8a7-4ebe-9948-713e3cc3043c"/>
+			</line>
+			<textField pattern="MMMMM dd, yyyy" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="337" y="354" width="138" height="15" uuid="e9fbfd2b-8bef-46b3-a108-7cc06fab03fe"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{EVAL_DATE}]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report" pattern="###,###,##0.00" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="398" y="155" width="157" height="14" uuid="436270ef-9a09-420d-9668-baa94ab7c9e0"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[(($V{V_SUM_REPLACE_AMT} == null ? new BigDecimal(0) : $V{V_SUM_REPLACE_AMT}).add(($V{V_SUM_REPAIR_AMT} == null ? new BigDecimal(0) : $V{V_SUM_REPAIR_AMT})).add($V{V_SUM_VAT})).equals(null) ?
+    0 :
+    ($V{V_SUM_REPLACE_AMT} == null ? new BigDecimal(0) : $V{V_SUM_REPLACE_AMT}).add(($V{V_SUM_REPAIR_AMT} == null ? new BigDecimal(0) : $V{V_SUM_REPAIR_AMT})).add($V{V_SUM_VAT})]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report" pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="398" y="274" width="157" height="14" uuid="cf9884cc-7803-430d-b45c-ac8cb6a16083"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[(($V{V_SUM_REPLACE_AMT} == null ? new BigDecimal(0) : $V{V_SUM_REPLACE_AMT}).add(($V{V_SUM_REPAIR_AMT} == null ? new BigDecimal(0) : $V{V_SUM_REPAIR_AMT})).add($V{V_SUM_VAT})).equals(null) ?
+    new BigDecimal(0) :
+    ($V{V_SUM_REPLACE_AMT} == null ? new BigDecimal(0) : $V{V_SUM_REPLACE_AMT}).add(($V{V_SUM_REPAIR_AMT} == null ? new BigDecimal(0) : $V{V_SUM_REPAIR_AMT})).add($V{V_SUM_VAT}).subtract($V{V_TOTAL_DED})]]></textFieldExpression>
+			</textField>
+			<subreport>
+				<reportElement positionType="Float" x="0" y="370" width="538" height="15" isRemoveLineWhenBlank="true" uuid="74ce63bd-9276-429f-a790-298242e51874"/>
+				<subreportParameter name="SUBREPORT_DIR">
+					<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_UPDATE_SW">
+					<subreportParameterExpression><![CDATA[$P{P_UPDATE_SW}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_EVAL_ID">
+					<subreportParameterExpression><![CDATA[$P{P_EVAL_ID}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "GICLR070_REPAIR.jasper"]]></subreportExpression>
+			</subreport>
+			<textField isBlankWhenNull="true">
+				<reportElement positionType="Float" x="19" y="232" width="149" height="15" uuid="a6fa54be-d17f-4385-bfee-93c44c8ced67"/>
+				<textElement>
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA["DEPRECIATION(  " + $F{DED_RT}.toString() + "  % OF "]]></textFieldExpression>
+			</textField>
+			<textField pattern="###,###,##0.00;(###,###,##0.00)" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="168" y="232" width="53" height="15" uuid="89395b3e-0d99-4a6c-88b7-4590246a8648"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUM_DEP_DED_AMT}.equals(null) ?
+    0 :
+    $F{SUM_DEP_DED_AMT}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement positionType="Float" x="221" y="232" width="12" height="15" uuid="4451d5e4-3c2d-4d5b-a85e-48b847da74fd"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial"/>
+				</textElement>
+				<text><![CDATA[)]]></text>
+			</staticText>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="22">
+			<textField>
+				<reportElement x="216" y="2" width="80" height="20" uuid="d28f679a-a2bf-4441-b29d-7ba390588f67"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="296" y="2" width="40" height="20" uuid="619786e9-c041-48b8-af5c-f30c2b12a81d"/>
+				<textElement>
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>

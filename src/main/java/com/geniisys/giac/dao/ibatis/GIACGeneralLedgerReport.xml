@@ -1,0 +1,412 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIACGeneralLedgerReport">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	<parameterMap id="giacs503NewFormInstParamMap" class="map">
+		<parameter property="year"					jdbcType="NUMERIC"	javaType="java.lang.Integer"   mode="INOUT"/>
+		<parameter property="month"					jdbcType="NUMERIC"	javaType="java.lang.Integer"   mode="INOUT"/>
+		<parameter property="firstPostingDate"		jdbcType="NUMERIC"	javaType="java.lang.Integer"   mode="INOUT"/>
+	</parameterMap>
+	
+	<parameterMap id="giacs503PostSLParamMap" class="map">
+		<parameter property="year"					jdbcType="NUMERIC"	javaType="java.lang.Integer"   mode="IN"/>
+		<parameter property="month"					jdbcType="NUMERIC"	javaType="java.lang.Integer"   mode="IN"/>
+		<parameter property="firstPostingDate"		jdbcType="NUMERIC"	javaType="java.lang.Integer"   mode="IN"/>
+		<parameter property="message"				jdbcType="VARCHAR"	javaType="java.lang.String"    mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="getGiacs503NewFormInstance" parameterMap="giacs503NewFormInstParamMap">
+		{ CALL GIACS503_PKG.new_form_instance(?, ?, ?) }
+	</procedure>
+	
+	<procedure id="postGiacs503SL" parameterMap="giacs503PostSLParamMap">
+		{ CALL GIACS503_PKG.post_sl(?, ?, ?, ?) }
+	</procedure>
+	
+	<select id="validateGiacs503BeforePrint" parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+		SELECT GIACS503_PKG.validate_bef_print(#year#, #month#)
+		  FROM dual
+	</select>
+	
+	<procedure id="extractGiacs501" parameterClass="java.util.HashMap">
+		BEGIN
+		    giis_users_pkg.app_user := #userId#; <!-- Added by Jerome Bautista SR 21368 02.16.2016 -->
+		
+			EXTRACT_GIACS501(#userId#, #month#, #year#);
+		END;
+	</procedure>
+	
+	<select id="validatePayeeCdGiacs110" parameterClass="java.lang.String" resultClass="java.lang.String">
+		SELECT giacs110_pkg.validate_payee_cd_giacs110(#payeeCd#) FROM DUAL
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="giacs110TaxMap">
+		<result property="whtaxId" 		column="whtax_id"/>
+		<result property="birTaxCd" 	column="bir_tax_cd"/>
+		<result property="whtaxDesc" 	column="whtax_desc"/>
+		<result property="rowNum"		column="rownum_"/>
+		<result property="rowCount"		column="count_"/>
+	</resultMap>
+	
+	<select id="getTaxGiacs110LOV" resultMap="giacs110TaxMap">		
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(giacs110_pkg.get_tax_cd_giacs110_lov)
+		          		  <isNotNull property="findText">
+				         		WHERE (UPPER(whtax_id) LIKE #findText# 
+				         	 	   OR UPPER(bir_tax_cd) LIKE UPPER(#findText#)
+				         	 	   OR UPPER(whtax_desc) LIKE UPPER(#findText#)
+				         	   )
+				          </isNotNull>
+		          		  <isEqual property="sortColumn" compareValue="whtaxId">
+			              		ORDER BY whtax_id
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="birTaxCd">
+			              		ORDER BY bir_tax_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="whtaxDesc">
+			              		ORDER BY whtax_desc
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giacs110_pkg.get_tax_cd_giacs110_lov)
+		                  <isNotNull property="findText">
+				         		WHERE (UPPER(whtax_id) LIKE #findText# 
+				         	 	   OR UPPER(bir_tax_cd) LIKE UPPER(#findText#)
+				         	 	   OR UPPER(whtax_desc) LIKE UPPER(#findText#)
+				         	   )
+				          </isNotNull>
+				          ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+ 	</select>
+	
+	<select id="validateTaxCdGiacs110" resultClass="java.lang.String" parameterClass="java.lang.Integer">
+		SELECT giacs110_pkg.validate_tax_cd_giacs110(#whtaxId#) FROM DUAL
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="giacs110PayeeNoMap">
+		<result property="payeeNo" 		column="payee_no"/>
+		<result property="payeeName" 	column="payee_name"/>
+		<result property="rowNum"		column="rownum_"/>
+		<result property="rowCount"		column="count_"/>
+	</resultMap>
+	
+	<select id="getPayeeNoGiacs110LOV" resultMap="giacs110PayeeNoMap">		
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(giacs110_pkg.get_payee_no_giacs110_lov(#payeeClassCd#))
+		          		  <isNotNull property="findText">
+				         		WHERE (UPPER(payee_no) LIKE #findText# 
+				         	 	   OR UPPER(payee_name) LIKE UPPER(#findText#)
+				         	   )
+				          </isNotNull>
+		          		  <isEqual property="sortColumn" compareValue="payeeNo">
+			              		ORDER BY payee_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="payeeName">
+			              		ORDER BY payee_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giacs110_pkg.get_payee_no_giacs110_lov(#payeeClassCd#))
+		                  <isNotNull property="findText">
+				         		WHERE (UPPER(payee_no) LIKE #findText# 
+				         	 	   OR UPPER(payee_name) LIKE UPPER(#findText#)
+				         	   )
+				          </isNotNull>
+				          ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+ 	</select>
+ 	
+ 	<select id="validatePayeeNoGiacs110" resultClass="java.lang.String" parameterClass="java.util.HashMap">
+		SELECT giacs110_pkg.validate_payee_no_giacs110(#payeeNo#, #payeeClassCd#) FROM DUAL
+	</select>
+	
+	<procedure id="extractMotherAccounts" parameterClass="java.util.HashMap">
+		BEGIN
+			GIACS502_PKG.EXTRACT_MOTHER_ACCOUNTS(#userId#, #month#, #year#);
+		END;
+	</procedure>
+	
+	<procedure id="extractMotherAccountsDetail" parameterClass="java.util.HashMap">
+		BEGIN
+			GIACS502_PKG.EXTRACT_MOTHER_ACCOUNTS_DETAIL(#userId#, #month#, #year#);
+		END;
+	</procedure>
+	
+	<resultMap class="java.util.HashMap" id="giacBIRAlphalistMap"  extends="BaseEntity.TableGridResultMap">
+		<result column="REPORT_ID" 				property="reportId" />
+		<result column="REPORT_TITLE" 			property="reportTitle" />
+		<result column="ROWNUM_" 				property="rowNum" />
+		<result column="COUNT_" 				property="rowCount" />
+	</resultMap>
+
+	<select id="getBIRAlphalistMap" resultMap="giacBIRAlphalistMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, a.*
+		          FROM (SELECT * 
+		                  FROM TABLE (giacs115_pkg.get_giacs115_list(#repType#,#alpType#,#birFreqTagQuery#))
+		                  <isNotNull property="filter">
+				   		  	WHERE 1=1
+			   		  		<isNotEmpty prepend="AND" property="reportId">
+			   		  			UPPER(REPORT_ID) LIKE UPPER(#reportId#)
+			   		  		</isNotEmpty>
+			   		  		<isNotEmpty prepend="AND" property="reportTitle">
+			   		  			UPPER(REPORT_TITLE) LIKE UPPER(#reportTitle#)
+			   		  		</isNotEmpty>
+				   		  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="reportId">
+			              		ORDER BY REPORT_ID
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="reportTitle">
+			              		ORDER BY REPORT_TITLE
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>) a, 
+		               (SELECT count(*) count_
+		                  FROM TABLE (giacs115_pkg.get_giacs115_list(#repType#,#alpType#,#birFreqTagQuery#))
+		                  <isNotNull property="filter">
+				   		  	WHERE 1=1
+			   		  		<isNotEmpty prepend="AND" property="reportId">
+			   		  			UPPER(REPORT_ID) LIKE UPPER(#reportId#)
+			   		  		</isNotEmpty>
+			   		  		<isNotEmpty prepend="AND" property="reportTitle">
+			   		  			UPPER(REPORT_TITLE) LIKE UPPER(#reportTitle#)
+			   		  		</isNotEmpty>
+				   		  </isNotNull>
+				   		  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<select id="checkExtractGIACS115" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT giacs115_pkg.check_extract(#repType#, #alpType#, #reportId#, #birFreqTagQuery#, #month#, #mYear#, #yYear#, #userId#) FROM DUAL
+	</select>
+	
+	<parameterMap id="extractGIACS115Map" class="map">
+		<parameter property="reportId"			jdbcType="VARCHAR"	javaType="java.lang.String"   mode="IN"/>
+		<parameter property="repType"			jdbcType="VARCHAR"	javaType="java.lang.String"   mode="IN"/>
+		<parameter property="alpType"			jdbcType="VARCHAR"	javaType="java.lang.String"   mode="IN"/>
+		<parameter property="birFreqTagQuery"	jdbcType="VARCHAR"	javaType="java.lang.String"   mode="IN"/>
+		<parameter property="month"				jdbcType="INTEGER"	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="mYear"				jdbcType="INTEGER"	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="yYear"				jdbcType="INTEGER"	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="userId"			jdbcType="VARCHAR"	javaType="java.lang.String"   mode="IN"/>
+		<parameter property="count"				jdbcType="INTEGER"	javaType="java.lang.Integer"  mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="extractGIACS115" parameterMap="extractGIACS115Map">
+		BEGIN
+			giacs115_pkg.extract_giacs115(?, ?, ?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<resultMap id="generateCSVGIACS115Map" class="java.util.HashMap">
+		<result column="PAYEE_NAME"			property="PAYEE_NAME"/>
+		<result column="TIN"				property="TIN"/>
+		<result column="ATC_CODE"			property="ATC_CODE"/>
+		<result column="TAX_RATE"			property="TAX_RATE"/>
+		<result column="TAX_BASE"			property="TAX_BASE"/>
+		<result column="WHOLDING_TAX_AMT"	property="WHOLDING_TAX_AMT"/>
+	</resultMap>
+	
+	<select id="generateCSVGIACS115" parameterClass="java.util.HashMap" resultMap="generateCSVGIACS115Map">
+		SELECT *
+  	      FROM TABLE(giacs115_pkg.get_giacs115_csv_list(#reportId#, #month#, #mYear#, #yYear#,#userId#))
+	</select>
+	
+	<resultMap id="generateSAWTCSVGIACS115Map" class="java.util.HashMap">
+		<result column="PAYEE_NAME"			property="PAYEE_NAME"/>
+		<result column="TIN"				property="TIN"/>
+		<result column="ATC_CODE"			property="ATC_CODE"/>
+		<result column="TAX_RATE"			property="TAX_RATE"/>
+		<result column="BASE_AMOUNT"		property="BASE_AMOUNT"/>
+		<result column="CREDITABLE_AMT"	property="CREDITABLE_AMT"/>
+	</resultMap>
+	
+	<select id="generateSAWTCSVGIACS115" parameterClass="java.util.HashMap" resultMap="generateSAWTCSVGIACS115Map">
+		SELECT *
+  	      FROM TABLE(giacs115_pkg.get_giacs115_sawt_csv_list(#reportId#, #month#, #mYear#,#userId#))
+	</select>
+	
+	<resultMap id="generateDatMAPGIACS115Map" class="java.util.HashMap">
+		<result column="DAT_ROWS"		property="DAT_ROWS"/>
+	</resultMap>
+	
+	<select id="generateDatMAPGIACS115" resultMap="generateDatMAPGIACS115Map">
+		SELECT *
+  	      FROM TABLE(giacs115_pkg.get_giacs115_dat_map_list(#reportId#,#month#,#mYear#,#userId#))
+	</select>
+	
+	<select id="generateDATMAPAnnualGIACS115" resultMap="generateDatMAPGIACS115Map">
+		SELECT *
+  	      FROM TABLE(giacs115_pkg.get_giacs115_dat_map_ann_list(#reportId#,#yYear#,#birFreqTagQuery#,#userId#))
+	</select>
+	
+	<select id="generateDATSAWTGIACS115" resultMap="generateDatMAPGIACS115Map">
+		SELECT *
+  	      FROM TABLE(giacs115_pkg.get_giacs115_dat_sawt_list(#sawtForm#,#month#,#mYear#,#userId#))
+	</select>
+	
+	<parameterMap id="generateDATMAPDetailsMap" class="map">
+		<parameter property="reportId"	jdbcType="VARCHAR"	javaType="java.lang.String"   	mode="IN"/>
+		<parameter property="month"		jdbcType="NUMERIC"	javaType="java.lang.Integer"   	mode="IN"/>
+		<parameter property="mYear"		jdbcType="NUMERIC"	javaType="java.lang.Integer"   	mode="IN"/>
+		<parameter property="userId"	jdbcType="VARCHAR"	javaType="java.lang.String"    	mode="IN"/>
+		<parameter property="fileName"	jdbcType="VARCHAR"	javaType="java.lang.String"    	mode="OUT"/>
+		<parameter property="header"	jdbcType="VARCHAR"	javaType="java.lang.String"    	mode="OUT"/>
+		<parameter property="footer"	jdbcType="VARCHAR"	javaType="java.lang.String"    	mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="generateDATMAPDetails" parameterMap="generateDATMAPDetailsMap">
+		BEGIN
+			giacs115_pkg.get_giacs115_dat_map_details(?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<parameterMap id="generateDATMAPAnnualDetailsMap" class="map">
+		<parameter property="reportId"			jdbcType="VARCHAR"	javaType="java.lang.String"   	mode="IN"/>
+		<parameter property="yYear"				jdbcType="NUMERIC"	javaType="java.lang.Integer"   	mode="IN"/>
+		<parameter property="userId"			jdbcType="VARCHAR"	javaType="java.lang.String"   	mode="IN"/>
+		<parameter property="birFreqTagQuery"	jdbcType="VARCHAR"	javaType="java.lang.String"    	mode="IN"/>
+		<parameter property="amendedRtn"		jdbcType="VARCHAR"	javaType="java.lang.String"    	mode="IN"/>
+		<parameter property="noOfSheets"		jdbcType="NUMERIC"	javaType="java.lang.Integer"   	mode="IN"/>
+		<parameter property="fileName"			jdbcType="VARCHAR"	javaType="java.lang.String"    	mode="OUT"/>
+		<parameter property="header"			jdbcType="VARCHAR"	javaType="java.lang.String"    	mode="OUT"/>
+		<parameter property="footer"			jdbcType="VARCHAR"	javaType="java.lang.String"    	mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="generateDATMAPAnnualDetails" parameterMap="generateDATMAPAnnualDetailsMap">
+		BEGIN
+			giacs115_pkg.get_giacs115_dat_map_ann_dtls(?, ?, ?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<parameterMap id="generateDATSAWTDetailsMap" class="map">
+		<parameter property="sawtForm"	jdbcType="VARCHAR"	javaType="java.lang.String"   	mode="IN"/>
+		<parameter property="month"		jdbcType="NUMERIC"	javaType="java.lang.Integer"   	mode="IN"/>
+		<parameter property="mYear"		jdbcType="NUMERIC"	javaType="java.lang.Integer"   	mode="IN"/>
+		<parameter property="userId"	jdbcType="VARCHAR"	javaType="java.lang.String"    	mode="IN"/>
+		<parameter property="fileName"	jdbcType="VARCHAR"	javaType="java.lang.String"    	mode="OUT"/>
+		<parameter property="header"	jdbcType="VARCHAR"	javaType="java.lang.String"    	mode="OUT"/>
+		<parameter property="footer"	jdbcType="VARCHAR"	javaType="java.lang.String"    	mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="generateDATSAWTDetails" parameterMap="generateDATSAWTDetailsMap">
+		BEGIN
+			<!-- giacs115_pkg.get_giacs115_dat_map_details(?, ?, ?, ?, ?, ?, ?); replaced by code below robert SR 5473 03.16.16-->
+			giacs115_pkg.get_giacs115_dat_sawt_details(?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	<!-- added by robert SR 5473 03.14.16 -->
+	<resultMap id="generateCSVRLFSLSMap" class="java.util.HashMap">
+		<result column="ISSUING_SOURCE"		property="ISSUING_SOURCE"/>
+		<result column="PAYEE_NAME"			property="PAYEE_NAME"/>
+		<result column="TIN"				property="TIN"/>
+		<result column="FIRST_ADDRESS"		property="FIRST_ADDRESS"/>
+		<result column="SECOND_ADDRESS"		property="SECOND_ADDRESS"/>
+		<result column="TAX_EXEMPT"			property="TAX_EXEMPT"/>
+		<result column="ZERO_RATED"			property="ZERO_RATED"/>
+		<result column="TAXABLE"			property="TAXABLE"/>
+		<result column="OUTPUT_TAX"			property="OUTPUT_TAX"/>
+	</resultMap>
+	
+	<select id="generateCSVRLFSLS" parameterClass="java.util.HashMap" resultMap="generateCSVRLFSLSMap">
+		SELECT *
+  	      FROM TABLE(giacs115_pkg.generate_csv_rlf_sls(#month#, #mYear#,#userId#))
+	</select>
+	
+	<select id="generateDATRLFSLSRows" resultMap="generateDatMAPGIACS115Map">
+		SELECT *
+  	      FROM TABLE(giacs115_pkg.generate_dat_rlf_sls_list(#month#,#mYear#,#userId#))
+	</select>
+	
+	<parameterMap id="generateDATRLFSLSDetailsMap" class="map">
+		<parameter property="month"		jdbcType="NUMERIC"	javaType="java.lang.Integer"   	mode="IN"/>
+		<parameter property="mYear"		jdbcType="NUMERIC"	javaType="java.lang.Integer"   	mode="IN"/>
+		<parameter property="userId"	jdbcType="VARCHAR"	javaType="java.lang.String"    	mode="IN"/>
+		<parameter property="fileName"	jdbcType="VARCHAR"	javaType="java.lang.String"    	mode="OUT"/>
+		<parameter property="header"	jdbcType="VARCHAR"	javaType="java.lang.String"    	mode="OUT"/>
+		<parameter property="footer"	jdbcType="VARCHAR"	javaType="java.lang.String"    	mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="generateDATRLFSLSDetails" parameterMap="generateDATRLFSLSDetailsMap">
+		BEGIN
+			giacs115_pkg.generate_dat_rlf_sls_details(?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	<!-- end of codes by robert SR 5473 03.14.16 -->
+	
+	<!-- added by jet 12.08.2015 AP/AR Enhancement -->
+	<resultMap class="java.util.HashMap" id="ledgerListingResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="ledger_cd"		property="ledgerCd" />
+		<result column="ledger_desc" 	property="ledgerDesc" />
+	</resultMap>
+	
+	<select id="getGiacs342LedgerCdLOV" parameterClass="java.util.HashMap" resultMap="ledgerListingResultMap">
+		SELECT *
+			FROM TABLE(giacs342_pkg.get_gl_account_type(#findText#, #sortColumn#, #ascDescFlg#, #from#, #to#))
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="subLedgerListingResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="subledger_cd"		property="subLedgerCd" />
+		<result column="subledger_desc" 	property="subLedgerDesc" />
+	</resultMap>
+	
+	<select id="getGiacs342SubLedgerCdLOV" parameterClass="java.util.HashMap" resultMap="subLedgerListingResultMap">
+		SELECT *
+			FROM TABLE(giacs342_pkg.get_gl_subacct_type(#findText#, #ledgerCd#, #sortColumn#, #ascDescFlg#, #from#, #to#))
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="transactionListingResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="transaction_cd"		property="transactionCd" />
+		<result column="transaction_desc" 	property="transactionDesc" />
+	</resultMap>
+	
+	<select id="getGiacs342TransactionCdLOV" parameterClass="java.util.HashMap" resultMap="transactionListingResultMap">
+		SELECT *
+			FROM TABLE(giacs342_pkg.get_gl_trans_type(#findText#, #ledgerCd#, #subLedgerCd#, #sortColumn#, #ascDescFlg#, #from#, #to#))
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="slNameListingResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="sl_cd"		property="slCd" />
+		<result column="sl_name" 	property="slName" />
+	</resultMap>
+	
+	<select id="getGiacs342SlCdLOV" parameterClass="java.util.HashMap" resultMap="slNameListingResultMap">
+		SELECT *
+			FROM TABLE(giacs342_pkg.get_sl_name(#findText#, #ledgerCd#, #subLedgerCd#, #sortColumn#, #ascDescFlg#, #from#, #to#))
+	</select>
+	<!-- end -->
+	
+</sqlMap>

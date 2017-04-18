@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIPIR930" pageWidth="722" pageHeight="792" columnWidth="722" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="P_SCOPE" class="java.lang.Integer"/>
+	<parameter name="P_SUBLINE_CD" class="java.lang.String"/>
+	<parameter name="P_LINE_CD" class="java.lang.String"/>
+	<parameter name="P_ISS_CD" class="java.lang.String"/>
+	<parameter name="P_ISS_PARAM" class="java.lang.Integer"/>
+	<parameter name="P_USER_ID" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT   iss_name, subline_cd, SUM (a.total_si) total_si,
+         SUM (a.total_prem) total_prem, SUM (a.sum_reinsured) sum_reinsured,
+        SUM (a.share_premium) share_premium,SUM (a.ri_prem_vat) ri_prem_vat,
+         SUM (a.ri_comm_amt) ri_comm_amt, SUM (a.ri_comm_vat) ri_comm_vat,
+         SUM (a.ri_wholding_vat) ri_wholding_vat,
+         SUM (a.ri_premium_tax) ri_premium_tax, SUM (a.net_due) net_due
+FROM     (SELECT   policy_no, assd_name, iss_name, subline_cd, total_si,
+                   total_prem, SUM (sum_reinsured) sum_reinsured,  SUM (share_premium) share_premium, SUM (ri_prem_vat) ri_prem_vat,
+         SUM (ri_comm_amt) ri_comm_amt, SUM (ri_comm_vat) ri_comm_vat,
+         SUM (ri_wholding_vat) ri_wholding_vat,
+         SUM (ri_premium_tax) ri_premium_tax, SUM (net_due) net_due
+              FROM TABLE (gipir930_pkg.get_gipir930 ($P{P_SCOPE},$P{P_SUBLINE_CD},$P{P_LINE_CD},$P{P_ISS_CD},$P{P_ISS_PARAM},$P{P_USER_ID})
+                         )
+          GROUP BY subline_cd,
+                   assd_name,
+                   policy_no,
+                   total_si,
+                   total_prem,
+                   iss_name) a
+ --  WHERE a.iss_name = 'HEAD OFFICE' AND a.subline_cd = 'HULL'
+GROUP BY iss_name, subline_cd
+ORDER BY iss_name, subline_cd]]>
+	</queryString>
+	<field name="ISS_NAME" class="java.lang.String"/>
+	<field name="SUBLINE_CD" class="java.lang.String"/>
+	<field name="TOTAL_SI" class="java.math.BigDecimal"/>
+	<field name="TOTAL_PREM" class="java.math.BigDecimal"/>
+	<field name="SUM_REINSURED" class="java.math.BigDecimal"/>
+	<field name="SHARE_PREMIUM" class="java.math.BigDecimal"/>
+	<field name="RI_PREM_VAT" class="java.math.BigDecimal"/>
+	<field name="RI_COMM_AMT" class="java.math.BigDecimal"/>
+	<field name="RI_COMM_VAT" class="java.math.BigDecimal"/>
+	<field name="RI_WHOLDING_VAT" class="java.math.BigDecimal"/>
+	<field name="RI_PREMIUM_TAX" class="java.math.BigDecimal"/>
+	<field name="NET_DUE" class="java.math.BigDecimal"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="10">
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="0" y="0" width="81" height="10"/>
+				<textElement textAlignment="Right">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{TOTAL_SI}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="88" y="0" width="52" height="10"/>
+				<textElement textAlignment="Right">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{TOTAL_PREM}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="244" y="0" width="74" height="10"/>
+				<textElement textAlignment="Right">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{SUM_REINSURED}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="321" y="0" width="51" height="10"/>
+				<textElement textAlignment="Right">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{SHARE_PREMIUM}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="379" y="0" width="50" height="10"/>
+				<textElement textAlignment="Right">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{RI_PREM_VAT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="672" y="0" width="51" height="10"/>
+				<textElement textAlignment="Right">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{NET_DUE}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="614" y="0" width="51" height="10"/>
+				<textElement textAlignment="Right">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{RI_PREMIUM_TAX}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="556" y="0" width="51" height="10"/>
+				<textElement textAlignment="Right">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{RI_WHOLDING_VAT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="494" y="0" width="56" height="10"/>
+				<textElement textAlignment="Right">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{RI_COMM_VAT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="436" y="0" width="51" height="10"/>
+				<textElement textAlignment="Right">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{RI_COMM_AMT}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GIACGlTransactionTypes">
+
+	<typeAlias alias="giacGlTransactionTypes" type="com.geniisys.giac.entity.GIACGlTransactionTypes"/>
+
+	<resultMap class="giacGlTransactionTypes" id="giacGlTransactionTypesResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="ledgerCd" 		column="ledger_cd"/>
+		<result property="subLedgerCd" 		column="subledger_cd"/>
+		<result property="transactionCd" 	column="transaction_cd"/>
+		<result property="transactionDesc" 	column="transaction_desc"/>	
+		<result property="dspActiveTag" 	column="dsp_active_tag"/>
+		<result property="activeTag" 		column="active_tag"/>
+		<result property="remarks" 			column="remarks"/>
+		<result property="userId" 			column="user_id"/>
+		<result property="lastUpdate" 		column="last_update"/>
+	</resultMap>
+	
+	<select id="getGlTransactionTypes" resultMap="giacGlTransactionTypesResultMap">
+		SELECT * FROM TABLE(giacs341_pkg.get_gl_transaction_type(#ledgerCd#, #subLedgerCd#,
+			#transactionCd#,#transactionDesc#,#dspActiveTag#,#sortColumn#, #ascDescFlg#, #from#, #to#))
+	</select>
+
+	<procedure id="setGlTransactionTypes" parameterClass="map">
+	    DECLARE
+	    	v_rec giac_gl_transaction_types%ROWTYPE;
+ 		BEGIN		  
+ 			giis_users_pkg.app_user := #userId#;
+ 			   
+ 			v_rec.ledger_cd 	 	:= #ledgerCd#;
+ 			v_rec.subLedger_cd 	 	:= #subLedgerCd#;
+ 			v_rec.transaction_cd 	:= #transactionCd#;
+ 			v_rec.transaction_desc  := #transactionDesc#;
+ 			v_rec.active_tag 	 	:= #activeTag#;
+ 			v_rec.remarks 		 	:= #remarks#;
+ 			
+ 			giacs341_pkg.set_gl_transaction_type(#origTransactionCd#,#btnVal#,v_rec);
+ 		END;
+ 	</procedure>
+
+ 	<procedure id="valDelGlTransactionTypes" parameterClass="map">
+ 		BEGIN
+ 			giacs341_pkg.val_del_rec(#ledgerCd#,#subLedgerCd#,#transactionCd#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddGlTransactionTypes" parameterClass="map">
+ 		BEGIN
+ 			giacs341_pkg.val_add_rec(#ledgerCd#,#subLedgerCd#,#transactionCd#,#btnVal#);
+ 		END;
+ 	</procedure> 	
+ 	
+ 	<procedure id="valUpdGlTransactionTypes" parameterClass="map">
+ 		BEGIN
+ 			giacs341_pkg.val_upd_tran_rec(#ledgerCd#,#subLedgerCd#,#newTransactionCd#);
+ 		END;
+ 	</procedure>  		
+
+	<delete id="delGlTransactionTypes" parameterClass="map">
+		BEGIN
+ 			giacs341_pkg.del_gl_transaction_type(#ledgerCd#,#subLedgerCd#,#transactionCd#);
+ 		END;
+ 	</delete>
+</sqlMap>

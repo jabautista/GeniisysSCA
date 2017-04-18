@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GISMMessageTemplate">
+	
+	<typeAlias alias="gismMessageTemplate" type="com.geniisys.gism.entity.GISMMessageTemplate"/>
+  	
+	<resultMap class="gismMessageTemplate" id="gismMessageTemplateListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="message_cd"   property="messageCd"/>
+		<result column="message"      property="message"/>
+		<result column="message_type" property="messageType"/>
+		<result column="dsp_message_type" property="dspMessageType"/>
+		<result column="key_word"     property="keyWord"/>
+		<result column="remarks"      property="remarks"/>
+		<result column="user_id"      property="userId"/>
+		<result column="last_update"  property="lastUpdate"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="gismMessageTemplateReserveWordListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="message_cd"   property="messageCd"/>
+		<result column="reserve_word"      property="reserveWord"/>
+		<result column="reserve_desc" property="reserveDesc"/>
+		<result column="remarks"      property="remarks"/>
+	</resultMap>
+	
+	<select id="getGisms002RecList" resultMap="gismMessageTemplateListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(gisms002_pkg.get_rec_list)
+		  	      		  <isNotNull property="filter">
+							WHERE 1=1
+								<isNotEmpty prepend="AND"  property="messageCd">
+									UPPER(message_cd) LIKE UPPER(#messageCd#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="keyWord">
+									UPPER(key_word) LIKE UPPER(#keyWord#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="dspMessageType">
+									UPPER(dsp_message_type) LIKE UPPER(#dspMessageType#)
+								</isNotEmpty>
+						</isNotNull>		  	      
+		                  <isEqual property="sortColumn" compareValue="messageCd">
+			              		ORDER BY message_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="keyWord">
+			              		ORDER BY key_word
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="dspMessageType">
+			              		ORDER BY dsp_message_type
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="message">
+			              		ORDER BY message
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(gisms002_pkg.get_rec_list)
+		  	      		  <isNotNull property="filter">
+							WHERE 1=1
+								<isNotEmpty prepend="AND"  property="messageCd">
+									UPPER(message_cd) LIKE UPPER(#messageCd#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="keyWord">
+									UPPER(key_word) LIKE UPPER(#keyWord#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="dspMessageType">
+									UPPER(dsp_message_type) LIKE UPPER(#dspMessageType#)
+								</isNotEmpty>
+						</isNotNull>		                  
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+
+	<select id="getGisms002ReserveWordRecList" resultMap="gismMessageTemplateReserveWordListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(gisms002_pkg.get_reserve_word_rec_list(#messageCd#))
+		  	      		  <isNotNull property="filter">
+							WHERE 1=1
+								<isNotEmpty prepend="AND"  property="reserveWord">
+									UPPER(reserve_word) LIKE UPPER(#reserveWord#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="keyWord">
+									UPPER(reserve_desc) LIKE UPPER(#reserveDesc#)
+								</isNotEmpty>
+						</isNotNull>		  	      
+		                  <isEqual property="sortColumn" compareValue="reserveWord">
+			              		ORDER BY reserve_word
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="reserveDesc">
+			              		ORDER BY reserve_desc
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(gisms002_pkg.get_reserve_word_rec_list(#messageCd#))
+		  	      		  <isNotNull property="filter">
+							WHERE 1=1
+								<isNotEmpty prepend="AND"  property="reserveWord">
+									UPPER(reserve_word) LIKE UPPER(#reserveWord#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="keyWord">
+									UPPER(reserve_desc) LIKE UPPER(#reserveDesc#)
+								</isNotEmpty>
+						</isNotNull>		                  
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setMessageTemplate" parameterClass="gismMessageTemplate">
+	    DECLARE
+	    	v_rec gism_message_template%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.message_cd   := #messageCd#;
+ 			v_rec.message      := #message#;
+ 			v_rec.message_type := #messageType#;
+ 			v_rec.key_word     := #keyWord#;
+ 			v_rec.user_id 	   := #userId#;
+ 			v_rec.remarks      := #remarks#;
+ 			
+ 			gisms002_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteMessageTemplate" parameterClass="java.lang.String">
+ 		BEGIN
+ 			gisms002_pkg.val_del_rec(#recId#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddMessageTemplate" parameterClass="java.lang.String">
+ 		BEGIN
+ 			gisms002_pkg.val_add_rec(#recId#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delMessageTemplate" parameterClass="java.lang.String">
+		BEGIN
+ 			gisms002_pkg.del_rec(#messageCd#);
+ 		END;
+ 	</delete>
+</sqlMap>

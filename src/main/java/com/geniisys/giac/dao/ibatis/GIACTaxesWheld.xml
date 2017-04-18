@@ -1,0 +1,360 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIACTaxesWheld">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<resultMap class="com.geniisys.giac.entity.GIACTaxesWheld" id="GIACTaxesWheldMap">
+		<result column="GACC_TRAN_ID"			property="gaccTranId"/>
+		<result column="OR_PRINT_TAG"			property="orPrintTag"/>
+		<result column="ITEM_NO"				property="itemNo"/>
+		<result column="PAYEE_CLASS_CD"			property="payeeClassCd"/>
+		<result column="PAYEE_CD"				property="payeeCd"/>
+		<result column="SL_CD"					property="slCd"/>
+		<result column="INCOME_AMT"				property="incomeAmt"/>
+		<result column="WHOLDING_TAX_AMT"		property="wholdingTaxAmt"/>
+		<result column="REMARKS"				property="remarks"/>
+		<result column="GEN_TYPE"				property="genType"/>
+		<result column="GWTX_WHTAX_ID"			property="gwtxWhtaxId"/>
+		<result column="USER_ID"				property="userId"/>
+		<result column="LAST_UPDATE"			property="lastUpdate"/>
+		<result column="SL_TYPE_CD"				property="slTypeCd"/>
+		<result column="DSP_WHTAX_CODE"			property="whtaxCode"/>
+		<result column="DSP_BIR_TAX_CD"			property="birTaxCd"/>
+		<result column="DSP_PERCENT_RATE"		property="percentRate"/>
+		<result column="DSP_WHTAX_DESC"			property="whtaxDesc"/>
+		<result column="DSP_PAYEE_FIRST_NAME"	property="payeeFirstName"/>
+		<result column="DSP_PAYEE_MIDDLE_NAME"	property="payeeMiddleName"/>
+		<result column="DSP_PAYEE_LAST_NAME"	property="payeeLastName"/>
+		<result column="DRV_PAYEE_CD"			property="drvPayeeCd"/>
+		<result column="SL_NAME"				property="slName"/>
+	</resultMap>
+	<resultMap class="java.util.HashMap" id="GIACTaxesWheldMap2" extends="GIACTaxesWheldMap">
+		<result column="CLASS_DESC" 			property="classDesc"/>
+		<result column="MAX_ITEM_NO" 			property="maxItemNo"/>
+		<result column="TOTAL_INCOME_AMT" 		property="totalIncomeAmt"/>
+		<result column="TOTAL_WHOLDING_TAX_AMT" property="totalWHolding"/>
+		<result column="rownum_" 				property="rowNum" />
+		<result column="count_"					property="rowCount"/>
+	</resultMap>
+	
+	<resultMap id="PayeeClassListingMap" class="java.util.HashMap">
+		<result column="payee_class_cd" 		property="payeeClassCd"/>
+		<result column="class_desc" 			property="classDesc"/>
+		<result column="rownum_" 				property="rowNum" />
+		<result column="count_"					property="rowCount"/>
+	</resultMap>
+	
+	<resultMap id="WholdingTaxesCodeByBranchMap" class="java.util.HashMap">
+		<result column="GIBR_BRANCH_CD"		property="gibrBranchCd"/>
+		<result column="WHTAX_CODE"			property="whtaxCode"/>
+		<result column="BIR_TAX_CD"			property="birTaxCd"/>
+		<result column="PERCENT_RATE"		property="percentRate"/>
+		<result column="WHTAX_DESC"			property="whtaxDesc"/>
+		<result column="WHTAX_ID"			property="whtaxId"/>
+		<result column="rownum_" 			property="rowNum" />
+		<result column="count_"				property="rowCount"/>
+	</resultMap>
+	
+	<resultMap id="PayeesListingMap" class="java.util.HashMap">
+		<result column="payee_class_cd" 		property="payeeClassCd"/>
+		<result column="payee_no" 				property="payeeNo"/>
+		<result column="payee_first_name" 		property="payeeFirstName"/>
+		<result column="payee_middle_name" 		property="payeeMiddleName"/>
+		<result column="payee_last_name" 		property="payeeLastName"/>
+		<result column="rownum_" 				property="rowNum" />
+		<result column="count_"					property="rowCount"/>
+	</resultMap>
+	
+	<parameterMap class="map" id="giacs022PostFormsCommitParamMap">
+		<parameter property="gaccTranId"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="gaccBranchCd"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="gaccFundCd"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="varModuleName"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="tranSource"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="orFlag"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="message"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+	</parameterMap>
+	<!--Added by pjsantos 12/27/2016, GENQA 5898-->
+	<parameterMap class="map" id="saveBir2307HistoryparamMap">
+		<parameter property="gaccTranId"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="saveItems"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="appUser"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+	</parameterMap>
+	
+	<procedure id="getGIACTaxesWheld" parameterClass="java.lang.Integer" resultMap="GIACTaxesWheldMap">
+		SELECT * FROM TABLE(GIAC_TAXES_WHELD_PKG.get_giac_taxes_wheld(#gaccTranId#))
+	</procedure>
+	
+	<select id="getGIACTaxesWheld2" parameterClass="java.util.HashMap" resultMap="GIACTaxesWheldMap2">
+		SELECT *
+				  FROM (SELECT rownum rownum_, 
+				               b.count_, 
+				               a.*,
+				               (SELECT SUM(INCOME_AMT) FROM TABLE(GIAC_TAXES_WHELD_PKG.get_giac_taxes_wheld(#gaccTranId#))) TOTAL_INCOME_AMT,
+				               (SELECT SUM(WHOLDING_TAX_AMT) FROM TABLE(GIAC_TAXES_WHELD_PKG.get_giac_taxes_wheld(#gaccTranId#))) TOTAL_WHOLDING_TAX_AMT,
+				               (SELECT MAX(ITEM_NO) FROM TABLE(GIAC_TAXES_WHELD_PKG.get_giac_taxes_wheld(#gaccTranId#))) MAX_ITEM_NO
+				          FROM (SELECT * FROM TABLE(GIAC_TAXES_WHELD_PKG.get_giac_taxes_wheld(#gaccTranId#))
+				          		<isNotNull property="filter">
+										WHERE 1=1
+									<isNotEmpty prepend="AND"  property="itemNo">
+												ITEM_NO LIKE #itemNo#
+									</isNotEmpty>	
+									<isNotEmpty prepend="AND"  property="classDesc">
+												upper(CLASS_DESC) LIKE upper(#classDesc#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND"  property="drvPayeeCd">
+												upper(DRV_PAYEE_CD) LIKE upper(#drvPayeeCd#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND"  property="whtaxDesc">
+												upper(DSP_WHTAX_DESC) LIKE upper(#whtaxDesc#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND"  property="birTaxCd">
+												upper(DSP_BIR_TAX_CD) LIKE upper(#birTaxCd#)
+									</isNotEmpty>	
+									<isNotEmpty prepend="AND"  property="percentRate">
+												DSP_PERCENT_RATE LIKE #percentRate#
+									</isNotEmpty>	
+									<isNotEmpty prepend="AND"  property="slName">
+												upper(SL_NAME) LIKE upper(#slName#)
+									</isNotEmpty>	
+									<isNotEmpty prepend="AND"  property="incomeAmt">
+												INCOME_AMT LIKE #incomeAmt#
+									</isNotEmpty>	
+									<isNotEmpty prepend="AND"  property="wholdingTaxAmt">
+												WHOLDING_TAX_AMT LIKE #wholdingTaxAmt#
+									</isNotEmpty>	
+								</isNotNull>
+					            <isEqual property="sortColumn" compareValue="itemNo">
+				              		ORDER BY ITEM_NO
+					            </isEqual>
+					            <isEqual property="sortColumn" compareValue="classDesc">
+				              		ORDER BY CLASS_DESC
+					            </isEqual>
+					             <isEqual property="sortColumn" compareValue="drvPayeeCd">
+				              		ORDER BY DRV_PAYEE_CD
+					            </isEqual>
+					             <isEqual property="sortColumn" compareValue="whtaxDesc">
+				              		ORDER BY DSP_WHTAX_DESC
+					            </isEqual>
+					             <isEqual property="sortColumn" compareValue="birTaxCd">
+				              		ORDER BY DSP_BIR_TAX_CD
+					            </isEqual>
+					            <isEqual property="sortColumn" compareValue="percentRate">
+				              		ORDER BY DSP_PERCENT_RATE
+					            </isEqual>
+					            <isEqual property="sortColumn" compareValue="slName">
+				              		ORDER BY SL_NAME
+					            </isEqual>
+					            <isEqual property="sortColumn" compareValue="incomeAmt">
+				              		ORDER BY INCOME_AMT
+					            </isEqual>
+					            <isEqual property="sortColumn" compareValue="wholdingTaxAmt">
+				              		ORDER BY WHOLDING_TAX_AMT
+					            </isEqual>
+					            <isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              	 </isNotNull>) a,
+				               (SELECT count(*) count_
+				                 FROM TABLE(GIAC_TAXES_WHELD_PKG.get_giac_taxes_wheld(#gaccTranId#))
+					                 <isNotNull property="filter">
+											WHERE 1=1
+										<isNotEmpty prepend="AND"  property="itemNo">
+													ITEM_NO LIKE #itemNo#
+										</isNotEmpty>	
+										<isNotEmpty prepend="AND"  property="classDesc">
+													upper(CLASS_DESC) LIKE upper(#classDesc#)
+										</isNotEmpty>
+										<isNotEmpty prepend="AND"  property="drvPayeeCd">
+													upper(DRV_PAYEE_CD) LIKE upper(#drvPayeeCd#)
+										</isNotEmpty>
+										<isNotEmpty prepend="AND"  property="whtaxDesc">
+													upper(DSP_WHTAX_DESC) LIKE upper(#whtaxDesc#)
+										</isNotEmpty>
+										<isNotEmpty prepend="AND"  property="birTaxCd">
+													upper(DSP_BIR_TAX_CD) LIKE upper(#birTaxCd#)
+										</isNotEmpty>	
+										<isNotEmpty prepend="AND"  property="percentRate">
+													DSP_PERCENT_RATE LIKE #percentRate#
+										</isNotEmpty>	
+										<isNotEmpty prepend="AND"  property="slName">
+													upper(SL_NAME) LIKE upper(#slName#)
+										</isNotEmpty>	
+										<isNotEmpty prepend="AND"  property="incomeAmt">
+													INCOME_AMT LIKE #incomeAmt#
+										</isNotEmpty>	
+										<isNotEmpty prepend="AND"  property="wholdingTaxAmt">
+													WHOLDING_TAX_AMT LIKE #wholdingTaxAmt#
+										</isNotEmpty>	
+									</isNotNull>
+				                 ) b)
+      	 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getPayeeClassListLOV" resultMap="PayeeClassListingMap" parameterClass="java.util.HashMap">
+			SELECT *
+			  FROM (SELECT rownum rownum_, 
+			               b.count_, 
+			               a.*  
+			  	      FROM (SELECT * FROM TABLE(giis_payee_class_pkg.get_payee_class_list)
+			                  <isNotNull property="findText">
+					          WHERE (UPPER(payee_class_cd) LIKE UPPER(#findText#) 
+					         	 OR UPPER(class_desc) LIKE UPPER(#findText#)
+					         	 )
+					          </isNotNull>
+			                  <isEqual property="sortColumn" compareValue="payeeClassCd">
+				              		ORDER BY payee_class_cd
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="classDesc">
+				              		ORDER BY class_desc
+				              </isEqual>
+				          	  <isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              </isNotNull>
+			                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE(giis_payee_class_pkg.get_payee_class_list)
+			                  <isNotNull property="findText">
+					           WHERE (UPPER(payee_class_cd) LIKE UPPER(#findText#) 
+					         	 OR UPPER(class_desc) LIKE UPPER(#findText#)
+					         	 )
+					         </isNotNull>
+			                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<select id="getWhtaxCodeLOV" resultMap="WholdingTaxesCodeByBranchMap" parameterClass="java.util.HashMap">
+			SELECT *
+			  FROM (SELECT rownum rownum_, 
+			               b.count_, 
+			               a.*  
+			  	      FROM (SELECT * FROM TABLE(GIAC_WHOLDING_TAXES_PKG.get_whtax_code_listing(#gaccBranchCd#))
+			                  <isNotNull property="findText">
+					          WHERE (UPPER(GIBR_BRANCH_CD) LIKE UPPER(#findText#) 
+					         	 OR UPPER(WHTAX_CODE) LIKE UPPER(#findText#)
+					         	  OR UPPER(BIR_TAX_CD) LIKE UPPER(#findText#)
+					         	   OR UPPER(PERCENT_RATE) LIKE UPPER(#findText#)
+					         	    OR UPPER(WHTAX_DESC) LIKE UPPER(#findText#)
+					         	 )
+					          </isNotNull>
+				               <isEqual property="sortColumn" compareValue="whtaxCode">
+				              		ORDER BY WHTAX_CODE
+				              </isEqual>
+				               <isEqual property="sortColumn" compareValue="birTaxCd">
+				              		ORDER BY BIR_TAX_CD
+				              </isEqual>
+			                  <isEqual property="sortColumn" compareValue="percentRate">
+				              		ORDER BY PERCENT_RATE
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="whtaxDesc">
+				              		ORDER BY WHTAX_DESC
+				              </isEqual>
+				          	  <isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              </isNotNull>
+			                  ) a, 
+			               (SELECT count(*) count_ 
+			                 	FROM TABLE(GIAC_WHOLDING_TAXES_PKG.get_whtax_code_listing(#gaccBranchCd#))
+			                  <isNotNull property="findText">
+					          WHERE (UPPER(GIBR_BRANCH_CD) LIKE UPPER(#findText#) 
+					         	 OR UPPER(WHTAX_CODE) LIKE UPPER(#findText#)
+					         	  OR UPPER(BIR_TAX_CD) LIKE UPPER(#findText#)
+					         	   OR UPPER(PERCENT_RATE) LIKE UPPER(#findText#)
+					         	    OR UPPER(WHTAX_DESC) LIKE UPPER(#findText#)
+					         	 )
+					         </isNotNull>
+			                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<select id="getPayeeLOV" resultMap="PayeesListingMap" parameterClass="java.util.HashMap">
+		SELECT *
+			  FROM (SELECT rownum rownum_, 
+			               b.count_, 
+			               a.*  
+			  	      FROM (SELECT * FROM TABLE(GIIS_PAYEES_PKG.get_payees_list(#payeeClassCd#))
+			                  <isNotNull property="findText">
+					          WHERE (UPPER(payee_no) LIKE UPPER(#findText#) 
+					         	 OR UPPER(payee_last_name) LIKE UPPER(#findText#)
+					         	 )
+					          </isNotNull>
+			                  <isEqual property="sortColumn" compareValue="payeeNo">
+				              		ORDER BY payee_no
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="payeeLastName">
+				              		ORDER BY payee_last_name
+				              </isEqual>
+				          	  <isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              </isNotNull>
+			                  ) a, 
+			               (SELECT count(*) count_ 
+			                 	FROM TABLE(GIIS_PAYEES_PKG.get_payees_list(#payeeClassCd#))
+			                  <isNotNull property="findText">
+					           WHERE (UPPER(payee_no) LIKE UPPER(#findText#) 
+					         	 OR UPPER(payee_last_name) LIKE UPPER(#findText#)
+					         	 )
+					         </isNotNull>
+			                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<insert id="setGIACTaxesWheld" parameterClass="com.geniisys.giac.entity.GIACTaxesWheld">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			GIAC_TAXES_WHELD_PKG.set_giac_taxes_wheld(#gaccTranId#, #itemNo#, #payeeClassCd#, #payeeCd#,
+														#slCd#, #incomeAmt#, #wholdingTaxAmt#, #remarks#, 
+														#gwtxWhtaxId#, #slTypeCd#, #orPrintTag#, #genType#, 
+														#userId# <!-- USER : changed by shan 09.24.2014 -->, SYSDATE);
+		END;
+	</insert>
+	
+	<delete id="delGIACTaxesWheld" parameterClass="com.geniisys.giac.entity.GIACTaxesWheld">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			GIAC_TAXES_WHELD_PKG.del_giac_taxes_wheld(#gaccTranId#, #itemNo#, #payeeClassCd#, #payeeCd#);
+		END;
+	</delete>
+	
+	<procedure id="giacs022PostFormsCommit"	parameterMap="giacs022PostFormsCommitParamMap">
+		{ CALL GIAC_TAXES_WHELD_PKG.giacs022_post_forms_commit(?, ?, ?, ?, ?, ?, ?)}
+	</procedure>
+	
+	<procedure id="gicls032InsertIntoTaxesWheld">
+		BEGIN
+			gicls032_ins_into_taxes_wheld(#claimId#, #adviceId#, #payeeCd#, #payeeClassCd#, #adviceRate#, #tranId#, #userId#);
+		END;
+	</procedure>
+	<!--Added by pjsantos 12/27/2016, GENQA 5898-->
+	<insert id="saveBir2307History"	parameterMap="saveBir2307HistoryparamMap">
+		BEGIN
+		bir_2307_Hist(?, ?, ?);
+		END;
+	</insert>
+	
+</sqlMap>

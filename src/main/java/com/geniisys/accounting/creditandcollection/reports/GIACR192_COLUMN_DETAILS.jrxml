@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIACR192_COLUMN_DETAILS" language="groovy" pageWidth="90" pageHeight="752" columnWidth="90" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="3.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="Crosstab Data Text" isDefault="false" hAlign="Center"/>
+	<parameter name="P_BRANCH_CD" class="java.lang.String"/>
+	<parameter name="P_ASSD_NO" class="java.math.BigDecimal"/>
+	<parameter name="P_INC_OVERDUE" class="java.lang.String"/>
+	<parameter name="P_BAL_AMT_DUE" class="java.math.BigDecimal"/>
+	<parameter name="P_USER" class="java.lang.String"/>
+	<parameter name="P_INTM_TYPE" class="java.lang.String"/>
+	<parameter name="P_COLUMN_NO" class="java.math.BigDecimal"/>
+	<queryString>
+		<![CDATA[SELECT *
+  FROM TABLE (giacr192_pkg.get_column_details ($P{P_BRANCH_CD},
+                                               $P{P_ASSD_NO},
+                                               $P{P_INC_OVERDUE},
+                                               $P{P_BAL_AMT_DUE},
+                                               $P{P_INTM_TYPE},
+                                               $P{P_USER},
+                                               $P{P_COLUMN_NO}
+                                              )
+             )]]>
+	</queryString>
+	<field name="BRANCH_CD" class="java.lang.String"/>
+	<field name="ASSD_NO" class="java.math.BigDecimal"/>
+	<field name="ASSD_NAME" class="java.lang.String"/>
+	<field name="COL_NO" class="java.math.BigDecimal"/>
+	<field name="COLUMN_TITLE" class="java.lang.String"/>
+	<field name="INTMBAL" class="java.math.BigDecimal"/>
+	<field name="INTMPREM" class="java.math.BigDecimal"/>
+	<field name="INTMTAX" class="java.math.BigDecimal"/>
+	<variable name="V_INTMBAL" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{INTMBAL}]]></variableExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="11">
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="0" y="0" width="90" height="11"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{INTMBAL}== null ? new BigDecimal("0") : $F{INTMBAL}
+]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

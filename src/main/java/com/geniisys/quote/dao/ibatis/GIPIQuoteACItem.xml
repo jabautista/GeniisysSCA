@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIQuoteACItem">
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIPIQuoteACItemClass" type="com.geniisys.quote.entity.GIPIQuoteACItem" />
+	
+	<resultMap id="GIPIQuoteACItemResultMap" class="com.geniisys.quote.entity.GIPIQuoteACItem" >
+		<result column="QUOTE_ID" 				property="quoteId" />
+		<result column="ITEM_NO" 					property="itemNo" />
+		<result column="NO_OF_PERSONS" 	property="noOfPersons" />
+		<result column="POSITION_CD" 			property="positionCd" />
+		<result column="MONTHLY_SALARY" property="monthlySalary" />
+		<result column="SALARY_GRADE" 		property="salaryGrade" />
+		<result column="DESTINATION" 			property="destination" />
+		<result column="USER_ID" 					property="userId" />
+		<result column="LAST_UPDATE" 		property="lastUpdate" />
+		<result column="AGE" 							property="age" />
+		<result column="CIVIL_STATUS" 			property="civilStatus" />
+		<result column="DATE_OF_BIRTH" 	property="dateOfBirth" />
+		<result column="HEIGHT" 					property="height" />
+		<result column="SEX" 							property="sex" />
+		<result column="WEIGHT" 					property="weight" />
+		<result column="POSITION" 					property="dspOccupation" />
+	</resultMap>
+	
+	<select id="getGIPIQuoteACItemDetails"		resultMap="GIPIQuoteACItemResultMap">
+		SELECT 
+		    quote_id,       item_no,       							 no_of_persons,  
+		    position_cd,    ESCAPE_VALUE(position) position,         ESCAPE_VALUE(destination) destination,
+		    monthly_salary, ESCAPE_VALUE(salary_grade) salary_grade, date_of_birth, 
+		    age,            ESCAPE_VALUE(civil_status) civil_status, ESCAPE_VALUE(weight) weight,        
+		    sex,            ESCAPE_VALUE(height) height,             ESCAPE_VALUE(user_id) user_id,     
+		    last_update   
+		FROM TABLE(GIPI_QUOTE_ITEM_DTLS.get_gipi_quote_ac(#quoteId#, #itemNo#))
+	</select>
+	
+	<insert id="saveGIPIQuoteACItem" parameterClass="GIPIQuoteACItemClass">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			GIPI_QUOTE_ITEM_DTLS.set_gipi_quote_ac(
+				#quoteId#, #itemNo#, #noOfPersons#,
+				#positionCd#, #destination#, #monthlySalary#, 
+				#salaryGrade#, #dateOfBirth#, #civilStatus#, 
+				#age#, #weight#, #height#, #sex#);
+		END;
+	</insert>
+	
+</sqlMap>

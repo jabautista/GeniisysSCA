@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIQuoteItemAC">
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<resultMap id="GIPIQuoteItemAC" class="com.geniisys.gipi.entity.GIPIQuoteItemAC" >
+	
+		<result 	column="QUOTE_ID"				property="quoteId"				/>
+		<result 	column="ITEM_NO"				property="itemNo"				/>
+		<result   	column="NO_OF_PERSONS"			property="noOfPerson"			/>
+		<result 	column="POSITION_CD"			property="positionCd"			/>
+		<result 	column="MONTHLY_SALARY"			property="monthlySalary"		/>
+		<result   	column="SALARY_GRADE"			property="salaryGrade"			/>
+		<result 	column="DESTINATION"			property="destination"			/>
+		<result 	column="USER_ID"				property="userId"				/>
+		<result   	column="LAST_UPDATE"			property="lastUpdate"			/>
+		<result 	column="AC_CLASS_CD"			property="acClassCd"			/>
+		<result 	column="AGE"					property="age"					/>
+		<result   	column="CIVIL_STATUS"			property="civilStatus"			/>
+		<result 	column="DATE_OF_BIRTH"			property="dateOfBirth"			/>
+		<result 	column="GROUP_PRINT_SW"			property="groupPrintSw"			/>
+		<result   	column="HEIGHT"					property="height"				/>
+		<result 	column="LEVEL_CD"				property="levelCd"				/>
+		<result 	column="PARENT_LEVEL_CD"		property="parentLevelCd"		/>
+		<result   	column="SEX"					property="sex"					/>
+		<result 	column="WEIGHT"					property="weight"				/>
+		
+	</resultMap>
+	
+	<resultMap id="GIPIQuoteItemACSummary" class="com.geniisys.gipi.entity.GIPIQuoteItemAC" >
+		<result 	column="QUOTE_ID"				property="quoteId"				/>
+		<result 	column="ITEM_NO"				property="itemNo"				/>
+		<result   	column="NO_OF_PERSONS"			property="noOfPerson"			/>
+		<result 	column="POSITION_CD"			property="positionCd"			/>
+		<result 	column="POSITION"				property="position"				/>
+		<result 	column="DESTINATION"			property="destination"			/>
+		<result 	column="MONTHLY_SALARY"			property="monthlySalary"		/>
+		<result   	column="SALARY_GRADE"			property="salaryGrade"			/>
+		<result 	column="DATE_OF_BIRTH"			property="dateOfBirth"			/>
+		<result   	column="CIVIL_STATUS"			property="civilStatus"			/>
+		<result 	column="AGE"					property="age"					/>
+		<result 	column="WEIGHT"					property="weight"				/>		
+		<result   	column="HEIGHT"					property="height"				/>
+		<result   	column="SEX"					property="sex"					/>
+		<result 	column="USER_ID"				property="userId"				/>
+		<result   	column="LAST_UPDATE"			property="lastUpdate"			/>
+	</resultMap>
+	
+	
+	<select id="getGIPIQuoteItemAC"		resultMap="GIPIQuoteItemACSummary">
+		SELECT quote_id,      		 item_no,      		   no_of_persons,    
+		       position_cd, 		 position, 			   ESCAPE_VALUE(destination) destination, 
+		       monthly_salary,   	 salary_grade,		   ESCAPE_VALUE(weight) weight,
+		       date_of_birth, 		 civil_status, 	  	   ESCAPE_VALUE(height) height,
+		       age, 			     sex, 				   user_id, 		    last_update 
+		FROM TABLE (GIPI_QUOTE_ITEM_DTLS.get_gipi_quote_ac(#quoteId#, #itemNo#))
+	</select>
+	
+	<insert id="saveGIPIQuoteItemAC" parameterClass="com.geniisys.gipi.entity.GIPIQuoteItemAC">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			GIPI_QUOTE_ITEM_DTLS.set_gipi_quote_ac(
+				#quoteId#, #itemNo#, #noOfPerson#,
+				#positionCd#, #destination#, #monthlySalary#, 
+				#salaryGrade#, #dateOfBirth#, #civilStatus#, 
+				#age#, #weight#, #height#, #sex#);
+		END;
+	</insert>
+	
+<!-- delete quoteItemAC - 2010-04-23 rencela	-->
+	<procedure id="deleteGIPIQuoteItemAC">
+		BEGIN
+			GIPI_QUOTE_ITEM_DTLS.Del_gipi_quote_ac(#quoteId#, #itemNo#);
+		END;
+	</procedure>
+	
+</sqlMap>

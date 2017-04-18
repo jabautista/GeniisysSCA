@@ -1,0 +1,1 @@
+<span style="font-size: 10px; margin-right: 5px; width: 10%; float: right; height: 20px; line-height: 20px;"><label id="close" style="cursor: pointer; float: right;" onclick="hideOverlay();">Close</label></span>

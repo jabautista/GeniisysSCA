@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIWOpenPeril">
+	
+	<typeAlias alias="WOpenPeril" type="com.geniisys.gipi.entity.GIPIWOpenPeril" />
+	
+	<resultMap class="WOpenPeril" id="wopenPerilResultMap">
+		<result property="parId"			column="PAR_ID"/>
+		<result property="geogCd"			column="GEOG_CD"/>
+		<result property="perilCd"			column="PERIL_CD"/>		
+		<result property="perilName"		column="PERIL_NAME"/>
+		<result property="perilType"		column="PERIL_TYPE"/>
+		<result property="basicPerilCd"		column="BASC_PERL_CD"/>
+		<result property="premiumRate"		column="PREM_RATE"/>
+		<result property="remarks"			column="REMARKS"/>
+		<result property="recFlag"			column="REC_FLAG"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="wopenPerilTGMap" extends="wopenPerilResultMap">
+		<result column="peril_type" 		property="perilType" />
+		<result column="rownum_" 			property="rowNum" />
+		<result column="count_"				property="rowCount"/>
+	</resultMap>
+	
+	<parameterMap class="map" id="checkWOpenPerilParamMap">
+		<parameter property="parId" 		jdbcType="INT" 		javaType="java.lang.Integer" 	mode="IN" />
+		<parameter property="geogCd" 		jdbcType="INT" 		javaType="java.lang.Integer" 	mode="IN" />
+		<parameter property="lineCd" 		jdbcType="VARCHAR" 	javaType="java.lang.String" 	mode="IN" />
+		<parameter property="perilCd" 		jdbcType="INT" 		javaType="java.lang.Integer" 	mode="IN" />
+		<parameter property="message" 		jdbcType="VARCHAR" 	javaType="java.lang.String" 	mode="INOUT" />	
+	</parameterMap>	
+	
+	<select id="getGIPIWOpenPeril" resultMap="wopenPerilResultMap">
+		SELECT * FROM TABLE(GIPI_WOPEN_PERIL_PKG.get_gipi_wopen_peril(#parId#, #geogCd#, #lineCd#))
+	</select>
+	
+	<procedure id="saveGIPIWOpenPeril" parameterClass="WOpenPeril">
+		DECLARE
+			v_wopen_peril GIPI_WOPEN_PERIL%ROWTYPE;
+		BEGIN
+			v_wopen_peril.PAR_ID 	:= #parId#;
+			v_wopen_peril.GEOG_CD 	:= #geogCd#;
+			v_wopen_peril.LINE_CD 	:= #lineCd#;
+			v_wopen_peril.PERIL_CD 	:= #perilCd#;
+			v_wopen_peril.PREM_RATE	:= #premiumRate#;
+			v_wopen_peril.REMARKS 	:= #remarks#;
+			v_wopen_peril.USER_ID	:= #userId#;
+			
+			giis_users_pkg.app_user := #userId#;
+			GIPI_WOPEN_PERIL_PKG.set_gipi_wopen_peril(v_wopen_peril);
+		END;
+	</procedure>
+	
+	<procedure id="deleteAllGIPIWOpenPeril" parameterClass="java.util.HashMap">
+		BEGIN
+			GIPI_WOPEN_PERIL_PKG.del_all_gipi_wopen_peril(#parId#, #geogCd#, #lineCd#);
+		END;
+	</procedure>
+	
+	<procedure id="deleteGIPIWOpenPeril" parameterClass="java.util.HashMap">
+		BEGIN
+			GIPI_WOPEN_PERIL_PKG.del_gipi_wopen_peril(#parId#, #geogCd#, #lineCd#, #perilCd#);
+		END;
+	</procedure>
+	
+	<procedure id="checkWOpenPeril" parameterMap="checkWOpenPerilParamMap">
+		{ CALL CHECK_WOPEN_PERIL(?, ?, ?, ?, ?)}
+	</procedure>
+	
+	<select id="getGIPIWOpenPerilTG" resultMap="wopenPerilTGMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+		               b.count_,
+		               a.*
+		          FROM (SELECT * FROM TABLE(GIPI_WOPEN_PERIL_PKG.get_gipi_wopen_peril(#parId#, #geogCd#, #lineCd#))
+				 <isNotNull property="filter">
+					WHERE 1 = 1
+					<isNotEmpty prepend="AND"  property="perilName">
+						UPPER(peril_name) LIKE UPPER('%'||#perilName#||'%')
+					</isNotEmpty>
+					<isNotEmpty prepend="AND"  property="premiumRate">
+						prem_rate = #premiumRate#
+					</isNotEmpty>
+					<isNotEmpty prepend="AND"  property="remarks">
+						UPPER(remarks) LIKE upper('%'||#remarks#||'%')
+					</isNotEmpty>
+				 </isNotNull>
+		         <isNotNull property="sortColumn">
+		         <isEqual property="sortColumn" compareValue="perilName">
+		         		ORDER BY peril_name
+		         </isEqual>
+		         <isEqual property="sortColumn" compareValue="premiumRate">
+		         		ORDER BY prem_rate
+		         </isEqual>
+		         <isEqual property="sortColumn" compareValue="remarks">
+		         		ORDER BY remarks
+		         </isEqual>
+		         <isEqual property="ascDescFlg" compareValue="ASC">
+		         		ASC
+		         </isEqual>
+		         <isEqual property="ascDescFlg" compareValue="DESC">
+		         		DESC
+		         </isEqual>
+		         </isNotNull>) a,
+		    (SELECT count(*) count_
+		       FROM TABLE(GIPI_WOPEN_PERIL_PKG.get_gipi_wopen_peril(#parId#, #geogCd#, #lineCd#))
+		       <isNotNull property="filter">
+					WHERE 1 = 1
+					<isNotEmpty prepend="AND"  property="perilName">
+						UPPER(peril_name) LIKE UPPER('%'||#perilName#||'%')
+					</isNotEmpty>
+					<isNotEmpty prepend="AND"  property="premiumRate">
+						prem_rate = #premiumRate#
+					</isNotEmpty>
+					<isNotEmpty prepend="AND"  property="remarks">
+						UPPER(remarks) LIKE upper('%'||#remarks#||'%')
+					</isNotEmpty>
+				</isNotNull>) b)
+		WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+</sqlMap>
+	
+	

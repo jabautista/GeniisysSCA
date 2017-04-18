@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GIACInputVat">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIACInputVatClass" type="com.geniisys.giac.entity.GIACInputVat"/>
+	
+	<resultMap class="GIACInputVatClass" id="GIACInputVatResultMap">
+		<result column="gacc_tran_id" 	 		property="gaccTranId"/>
+		<result column="transaction_type" 		property="transactionType"/>
+		<result column="payee_no" 				property="payeeNo"/>
+		<result column="payee_class_cd" 		property="payeeClassCd"/>
+		<result column="reference_no" 		 	property="referenceNo"/>
+		<result column="base_amt" 			 	property="baseAmt"/>
+		<result column="input_vat_amt" 		 	property="inputVatAmt"/>
+		<result column="gl_acct_id" 			property="glAcctId"/>
+		<result column="vat_gl_acct_id" 		property="vatGlAcctId"/>
+		<result column="item_no" 				property="itemNo"/>
+		<result column="sl_cd" 					property="slCd"/>
+		<result column="or_print_tag" 		 	property="orPrintTag"/>
+		<result column="remarks" 			 	property="remarks"/>
+		<result column="user_id" 			 	property="userId"/>
+		<result column="last_update" 		 	property="lastUpdate"/>
+		<result column="cpi_rec_no" 			property="cpiRecNo"/>
+		<result column="cpi_branch_cd" 		 	property="cpiBranchCd"/>
+		<result column="vat_sl_cd" 				property="vatSlCd"/>
+		
+		<result column="gl_acct_category" 		property="glAcctCategory"/>
+		<result column="gl_control_acct" 		property="glControlAcct"/>
+		<result column="gl_sub_acct_1" 			property="glSubAcct1"/>
+		<result column="gl_sub_acct_2" 			property="glSubAcct2"/>
+		<result column="gl_sub_acct_3" 			property="glSubAcct3"/>
+		<result column="gl_sub_acct_4" 			property="glSubAcct4"/>
+		<result column="gl_sub_acct_5" 			property="glSubAcct5"/>
+		<result column="gl_sub_acct_6" 			property="glSubAcct6"/>
+		<result column="gl_sub_acct_7" 			property="glSubAcct7"/>
+		<result column="gl_acct_name" 			property="glAcctName"/>
+		<result column="gslt_sl_type_cd" 		property="gsltSlTypeCd"/>
+		<result column="dsp_sl_name" 			property="slName"/>
+		<result column="vat_sl_name" 			property="vatSlName"/>	
+		<result column="dsp_payee_name" 		property="dspPayeeName"/>
+		<result column="transaction_type_desc"  property="transactionTypeDesc"/>
+		<result column="payee_class_desc" 		property="payeeClassDesc"/>
+	</resultMap>
+	
+	<resultMap class="GIACInputVatClass" id="GIACInputVatResultMapTableGrid" extends = "GIACInputVatResultMap">
+	 	<result column="transaction_type_and_desc" 		property="transactionTypeAndDesc"/>
+		<result column="disb_amt" 		property="disbAmt"/>
+		<result column="rownum_"			property="rowNum"/>
+		<result column="count_"				property="rowCount"/>
+	</resultMap>
+	
+	<parameterMap class="map" id="updateGiacOpTextGIACS039Map">
+		<parameter property="userId"  		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="gaccTranId" 	jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="IN"/>
+		<parameter property="moduleName" 	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="vMsgAlert"  	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="aegParametersGIACS039Map">
+		<parameter property="userId"  		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="gaccTranId" 	jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="IN"/>
+		<parameter property="gaccBranchCd" 	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="gaccFundCd" 	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="moduleName" 	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="vatGlAcctId" 	jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="IN"/>
+		<parameter property="baseAmt" 		jdbcType="NUMBER"	javaType="java.math.BigDecimal" mode="IN"/>
+		<parameter property="vMsgAlert"  	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+	</parameterMap>
+	
+	<select id="getGIACInputVats" resultMap="GIACInputVatResultMap" parameterClass="java.util.HashMap">
+		SELECT * FROM TABLE(GIAC_INPUT_VAT_PKG.get_giac_input_vat(#gaccTranId#, #gaccFundCd#))
+	</select>
+	
+	<select id="getGIACInputVatsTableGrid" resultMap="GIACInputVatResultMapTableGrid" parameterClass="java.util.HashMap">
+		  SELECT *
+              FROM (SELECT rownum rownum_, 
+                           b.count_, 
+                           a.*,
+                           a.input_vat_amt + a.base_amt disb_amt,
+                           a.transaction_type ||' - ' || a.transaction_type_desc transaction_type_and_desc
+                      FROM (SELECT * 
+                              FROM TABLE (GIAC_INPUT_VAT_PKG.get_giac_input_vat(#gaccTranId#, #gaccFundCd#))
+                              	WHERE UPPER(transaction_type ||' - ' || transaction_type_desc) LIKE UPPER(NVL(#transactionTypeAndDesc#, (transaction_type ||' - ' || transaction_type_desc)))
+                              	  AND UPPER(payee_class_desc) LIKE UPPER(NVL(#payeeClassDesc#, payee_class_desc))
+                              	  AND UPPER(dsp_payee_name) LIKE UPPER(NVL(#dspPayeeName#, dsp_payee_name))
+                              	  AND UPPER(reference_no) LIKE UPPER(NVL(#referenceNo#, reference_no))
+                              	  AND UPPER(item_no) LIKE UPPER(NVL(#itemNo#, item_no))
+                              	  AND UPPER(NVL(vat_sl_name,'%')) LIKE UPPER(NVL(#vatSlName#, NVL(vat_sl_name,'%')))
+                              	  AND UPPER(input_vat_amt + base_amt) LIKE UPPER(NVL(#disbAmt#, (input_vat_amt + base_amt)))
+                              	  AND UPPER(base_amt) LIKE UPPER(NVL(#baseAmt#, base_amt))
+                              	  AND UPPER(input_vat_amt) LIKE UPPER(NVL(#inputVatAmt#, input_vat_amt))
+                              <isEqual property="sortColumn" compareValue="transactionTypeAndDesc">
+			              		ORDER BY (transaction_type ||' - ' || transaction_type_desc)
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="payeeClassDesc">
+				              	ORDER BY payee_class_desc
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="dspPayeeName">
+				              	ORDER BY dsp_payee_name
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="referenceNo">
+				              	ORDER BY reference_no
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="itemNo">
+				              	ORDER BY item_no
+				              </isEqual>
+				               <isEqual property="sortColumn" compareValue="vatSlName">
+				              	ORDER BY vat_sl_name
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="disbAmt">
+				              	ORDER BY (input_vat_amt + base_amt)
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="baseAmt">
+				              	ORDER BY base_amt
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="inputVatAmt">
+				              	ORDER BY input_vat_amt
+				              </isEqual>
+				              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	  </isNotNull>) a, 
+                           (SELECT count(*) count_ 
+                              FROM TABLE (GIAC_INPUT_VAT_PKG.get_giac_input_vat(#gaccTranId#, #gaccFundCd#))
+                              WHERE UPPER(transaction_type ||' - ' || transaction_type_desc) LIKE UPPER(NVL(#transactionTypeAndDesc#, (transaction_type ||' - ' || transaction_type_desc)))
+                              	  AND UPPER(payee_class_desc) LIKE UPPER(NVL(#payeeClassDesc#, payee_class_desc))
+                              	  AND UPPER(dsp_payee_name) LIKE UPPER(NVL(#dspPayeeName#, dsp_payee_name))
+                              	  AND UPPER(reference_no) LIKE UPPER(NVL(#referenceNo#, reference_no))
+                              	  AND UPPER(item_no) LIKE UPPER(NVL(#itemNo#, item_no))
+                              	  AND UPPER(NVL(vat_sl_name,'%')) LIKE UPPER(NVL(#vatSlName#, NVL(vat_sl_name,'%')))
+                              	  AND UPPER(input_vat_amt + base_amt) LIKE UPPER(NVL(#disbAmt#, (input_vat_amt + base_amt)))
+                              	  AND UPPER(base_amt) LIKE UPPER(NVL(#baseAmt#, base_amt))
+                              	  AND UPPER(input_vat_amt) LIKE UPPER(NVL(#inputVatAmt#, input_vat_amt))) b )
+                     WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<delete id="delGIACInputVat" parameterClass="GIACInputVatClass">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GIAC_INPUT_VAT_PKG.del_giac_input_vat(#gaccTranId#, #transactionType#,
+				#payeeNo#, #payeeClassCd#, #referenceNo#);
+		END;
+	</delete>
+	
+	<insert id="setGIACInputVat" parameterClass="GIACInputVatClass">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GIAC_INPUT_VAT_PKG.set_giac_input_vat(
+				#gaccTranId#, #transactionType#, #payeeNo#, 
+				#payeeClassCd#, #referenceNo#, #baseAmt#,
+				#inputVatAmt#, #glAcctId#, #vatGlAcctId#,
+				#itemNo#, #slCd#, #orPrintTag#,
+				#remarks#, #userId#, #lastUpdate#,
+				#cpiRecNo#, #cpiBranchCd#, #vatSlCd#
+				);
+		END;
+	</insert>
+	
+	<procedure id="updateGiacOpTextGIACS039" parameterMap="updateGiacOpTextGIACS039Map">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			GIAC_INPUT_VAT_PKG.update_giac_op_text(?, ?, ?);
+		END;	
+	</procedure>
+	
+	<procedure id="aegParametersGIACS039" parameterMap="aegParametersGIACS039Map">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			GIAC_INPUT_VAT_PKG.aeg_parameters(?, ?, ?, ?, ?, ?, ?);
+		END;	
+	</procedure>
+	
+</sqlMap>

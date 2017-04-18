@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISPerilGroup">
+	
+	<typeAlias alias="giisPerilGroup" type="com.geniisys.common.entity.GIISPerilGroup"/>
+      
+	<resultMap class="giisPerilGroup" id="giisPerilGroupListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="line_cd"     	property="lineCd"/>
+		<result column="peril_grp_cd"  	property="perilGrpCd"/>
+		<result column="peril_grp_desc" property="perilGrpDesc"/>
+		<result column="user_id"     	property="userId"/>
+		<result column="remarks"     	property="remarks"/>
+		<result column="last_update" 	property="lastUpdate"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="Giiss213LineLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="lineCd" 		column="line_cd"/>
+		<result property="lineName" 	column="line_name"/>			
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="Giiss213PerilLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="perilCd" 		column="peril_cd"/>
+		<result property="perilName" 	column="peril_name"/>			
+	</resultMap>
+	
+	<resultMap class="com.geniisys.common.entity.GIISPerilGroupDtl" id="giisPerilGroupDtlListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="line_cd"     	property="lineCd"/>
+		<result column="peril_grp_cd"  	property="perilGrpCd"/>
+		<result column="peril_grp_desc" property="perilGrpDesc"/>
+		<result column="peril_cd"  		property="perilCd"/>
+		<result column="peril_name" 	property="perilName"/>
+		<result column="user_id"     	property="userId"/>
+		<result column="remarks"     	property="remarks"/>
+		<result column="last_update" 	property="lastUpdate"/>
+	</resultMap>
+	
+	<select id="getGiiss213LineLOV" resultMap="Giiss213LineLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIISS213_PKG.get_line_rec_list(#moduleId#, #userId#))		                 
+		                  	<isNull property="findText">
+				                 WHERE UPPER(line_cd) LIKE UPPER(#searchString#)				                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(line_cd) LIKE UPPER(#findText#)
+		                			OR UPPER(line_name) LIKE UPPER(#findText#)				         		
+			             	</isNotNull>		             
+			              	<isEqual property="sortColumn" compareValue="lineCd">
+			              		ORDER BY line_cd
+			              	</isEqual>	
+			              	<isEqual property="sortColumn" compareValue="lineName">
+			              		ORDER BY line_name
+			              	</isEqual>			              		                      
+			          	  	<isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	</isNotNull>
+		                  ) a, 
+		               (SELECT count (*) count_ 
+		                  FROM TABLE(GIISS213_PKG.get_line_rec_list(#moduleId#, #userId#))		                 
+		                  	<isNull property="findText">
+				                 WHERE UPPER(line_cd) LIKE UPPER(#searchString#)				                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(line_cd) LIKE UPPER(#findText#)	
+		                			OR UPPER(line_name) LIKE UPPER(#findText#)			  				         		
+			             	</isNotNull>		
+			             	) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiiss213PerilLOV" resultMap="Giiss213PerilLOVResultMap">		 
+		SELECT *
+		  FROM (SELECT ROWNUM rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIISS213_PKG.get_peril_rec_list(#lineCd#))
+		         WHERE 1 = 1
+		        	<isNotNull property="notIn">
+						AND peril_cd NOT IN ($notIn$)
+					</isNotNull>
+					<isNotNull property="findText">
+	                  	<isNotEmpty prepend="AND"  property="findText">
+							(peril_cd LIKE (#findText#)
+		                			OR UPPER(peril_name) LIKE UPPER(#findText#))
+						</isNotEmpty>
+					</isNotNull>
+					<isNull property="findText">
+				         AND peril_cd LIKE (#searchString#)			                      		
+			        </isNull> 
+					<isEqual property="sortColumn" compareValue="perilCd">
+			         	ORDER BY peril_cd
+		            </isEqual>
+	                <isEqual property="sortColumn" compareValue="perilName">
+		            	ORDER BY peril_name
+		            </isEqual>
+		            <isNotNull property="sortColumn">
+	              		<isEqual property="ascDescFlg" compareValue="ASC">
+	              			ASC
+	              		</isEqual>
+	              		<isEqual property="ascDescFlg" compareValue="DESC">
+	              			DESC
+	              		</isEqual>
+		            </isNotNull>
+		          ) a,
+	              (SELECT count(*) count_
+		          	 FROM TABLE (GIISS213_PKG.get_peril_rec_list(#lineCd#))
+		          	WHERE 1 = 1 
+		           	<isNotNull property="notIn">
+						AND peril_cd NOT IN ($notIn$)
+					</isNotNull>
+					<isNotNull property="findText">
+	                  	<isNotEmpty prepend="AND"  property="findText">
+							(peril_cd LIKE (#findText#)
+		                			OR UPPER(peril_name) LIKE UPPER(#findText#))
+						</isNotEmpty>
+					</isNotNull>
+					<isNull property="findText">
+				         AND peril_cd LIKE (#searchString#)			                      		
+			        </isNull> 
+				  )b) 
+		    	WHERE rownum_ BETWEEN #from# AND #to# 	
+  	</select>
+  	
+	<select id="getGiiss213RecList" resultMap="giisPerilGroupListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(GIISS213_PKG.get_rec_list(#lineCd#))
+		  	      		  <isNotNull property="filter">
+							WHERE 1=1
+								<isNotEmpty prepend="AND"  property="perilGrpCd">
+									peril_grp_cd = #perilGrpCd#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="perilGrpDesc">
+									upper(peril_grp_desc) LIKE upper(#perilGrpDesc#)
+								</isNotEmpty>
+						</isNotNull>
+		                  <isEqual property="sortColumn" compareValue="perilGrpCd">
+			              		ORDER BY peril_grp_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="perilGrpDesc">
+			              		ORDER BY peril_grp_desc
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GIISS213_PKG.get_rec_list(#lineCd#))
+		                  <isNotNull property="filter">
+							WHERE 1=1
+								<isNotEmpty prepend="AND"  property="perilGrpCd">
+									peril_grp_cd = #perilGrpCd#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="perilGrpDesc">
+									upper(peril_grp_desc) LIKE upper(#perilGrpDesc#)
+								</isNotEmpty>
+						</isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	 
+	 <select id="getGiiss213PerilRecList" resultMap="giisPerilGroupDtlListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(GIISS213_PKG.get_attached_peril_rec_list(#lineCd#, #perilGrpCd#))
+		  	      		  <isNotNull property="filter">
+							WHERE 1=1
+								<isNotEmpty prepend="AND"  property="perilCd">
+									peril_cd = #perilCd#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="perilName">
+									upper(peril_name) LIKE upper(#perilName#)
+								</isNotEmpty>
+						 </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="perilCd">
+			              		ORDER BY peril_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="perilName">
+			              		ORDER BY peril_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GIISS213_PKG.get_attached_peril_rec_list(#lineCd#, #perilGrpCd#))
+		                  <isNotNull property="filter">
+							WHERE 1=1
+								<isNotEmpty prepend="AND"  property="perilCd">
+									peril_cd = #perilCd#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="perilGrpDesc">
+									upper(peril_name) LIKE upper(#perilName#)
+								</isNotEmpty>
+						</isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	 
+	<procedure id="setPerilGroup" parameterClass="giisPerilGroup">
+	    DECLARE
+	    	v_rec giis_peril_group%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.line_cd := #lineCd#;
+ 			v_rec.peril_grp_cd := #perilGrpCd#;
+ 			v_rec.peril_grp_desc := #perilGrpDesc#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			GIISS213_PKG.set_rec(v_rec);
+ 		END;
+ 	</procedure> 
+ 	
+ 	<procedure id="setPerilGroupDtl" parameterClass="com.geniisys.common.entity.GIISPerilGroupDtl">
+	    DECLARE
+	    	v_rec giis_peril_group_dtl%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.line_cd := #lineCd#;
+ 			v_rec.peril_grp_cd := #perilGrpCd#;
+ 			v_rec.peril_cd := #perilCd#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			GIISS213_PKG.set_peril_rec(v_rec);
+ 		END;
+ 	</procedure> 
+ 	
+ 	<procedure id="valDeletePerilGroup" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			GIISS213_PKG.val_del_rec(#lineCd#, #perilGrpCd#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddPerilGroup" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			GIISS213_PKG.val_add_rec(#lineCd#, #perilGrpCd#);
+ 		END;
+ 	</procedure>	
+ 	
+	<delete id="delPerilGroup" parameterClass="giisPerilGroup">
+		BEGIN
+ 			GIISS213_PKG.del_rec(#lineCd#, #perilGrpCd#);
+ 		END;
+ 	</delete> 
+ 	
+ 	<delete id="delPerilGroupDtl" parameterClass="com.geniisys.common.entity.GIISPerilGroupDtl">
+		BEGIN
+ 			GIISS213_PKG.del_peril_rec(#lineCd#, #perilGrpCd#, #perilCd#);
+ 		END;
+ 	</delete> 
+</sqlMap>

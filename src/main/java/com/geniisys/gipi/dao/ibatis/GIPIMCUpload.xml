@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIMCUpload">
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIPIMCUpload" type="com.geniisys.gipi.entity.GIPIMCUpload"/>
+	
+	<resultMap id="GIPIMCUploadMap" class="GIPIMCUpload">
+		<result column="UPLOAD_NO" 		property="uploadNo" />
+		<result column="FILENAME" 		property="fileName" />
+		<result column="UPLOAD_DATE" 	property="uploadDate" />
+		<result column="USER_ID" 		property="userId" />
+		<result column="LAST_UPDATE" 	property="lastUpdate" />
+		<result column="ITEM_NO" 		property="itemNo" />
+		<result column="MOTOR_NO" 		property="motorNo" />
+		<result column="SERIAL_NO" 		property="serialNo" />
+		<result column="PLATE_NO" 		property="plateNo" />
+		<result column="CREATE_DATE" 	property="createDate" />
+		<result column="CREATE_USER" 	property="createUser" />
+	</resultMap>
+
+	<select id="validateUploadFile" parameterClass="java.lang.String" resultClass="java.lang.String">
+		SELECT Validate_Upload_File(#fileName#) from dual
+	</select>
+	
+	<select id="getGipiMCUpload" resultMap="GIPIMCUploadMap">
+		SELECT * FROM TABLE(GIPI_MC_UPLOAD_PKG.get_gipi_mc_upload(#fileName#))
+	</select>
+	
+	<insert id="setGipiMCUpload" parameterClass="GIPIMCUpload">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			Gipi_MC_Upload_Pkg.set_gipi_mc_upload (#fileName#, #itemNo#,
+												   #motorNo#,  #serialNo#, #plateNo#,
+												   #itemTitle#, #sublineTypeCd#, #userId#);
+		END;
+	</insert>
+	
+	<select id="getNextUploadNo" resultClass="java.lang.Integer">
+		SELECT GIPI_MC_UPLOAD_SEQ_NO.NEXTVAL FROM DUAL
+	</select>
+	
+	<insert id="setGipiMCUpload1" parameterClass="GIPIMCUpload">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			Gipi_MC_Upload_Pkg.set_gipi_mc_upload1 (#uploadNo#, #fileName#, #itemNo#,
+												   #motorNo#,  #serialNo#, #plateNo#,
+												   #itemTitle#, #sublineTypeCd#, #userId#);
+		END;
+	</insert>
+
+</sqlMap>

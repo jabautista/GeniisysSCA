@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIPIR039C_SHARE_TSI" language="groovy" pageWidth="990" pageHeight="842" columnWidth="990" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="Crosstab Data Text" isDefault="false" hAlign="Center"/>
+	<parameter name="P_ITEM_GRP" class="java.lang.String"/>
+	<parameter name="P_COLUMN" class="java.lang.String"/>
+	<parameter name="P_TABLE" class="java.lang.String"/>
+	<parameter name="AS_OF_SW" class="java.lang.String"/>
+	<parameter name="P_ZONE_TYPE" class="java.lang.String"/>
+	<parameter name="P_AS_OF" class="java.lang.String"/>
+	<parameter name="P_DATE" class="java.lang.String"/>
+	<parameter name="P_FROM_DATE" class="java.lang.String"/>
+	<parameter name="P_TO_DATE" class="java.lang.String"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String">
+		<defaultValueExpression><![CDATA["G:\\Geniisys_Workspace\\GeniisysReports\\src\\com\\geniisys\\underwriting\\statistical\\reports\\"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="P_USER_ID" class="java.lang.String"/>
+	<parameter name="P_TRTY_TYPE_CD" class="java.lang.String"/>
+	<parameter name="P_PRINT_SW" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT   SUM (bldg_total_tsi) bldg_total_tsi,
+         SUM (bldg_total_prem) bldg_total_prem,
+         SUM (cont_total_tsi) cont_total_tsi,
+         SUM (cont_total_prem) cont_total_prem,
+         SUM (loss_total_tsi) loss_total_tsi,
+         SUM (loss_total_prem) loss_total_prem,
+         SUM(bldg_total_tsi+cont_total_tsi+loss_total_tsi) total_tsi,
+         SUM(bldg_total_prem+cont_total_prem+loss_total_prem) total_prem
+    FROM (SELECT DECODE (fi_item_grp, 'B', total_tsi, 0) bldg_total_tsi,
+                 DECODE (fi_item_grp, 'B', total_prem, 0) bldg_total_prem,
+                 DECODE (fi_item_grp, 'C', total_tsi, 0) cont_total_tsi,
+                 DECODE (fi_item_grp, 'C', total_prem, 0) cont_total_prem,
+                 DECODE (fi_item_grp, 'L', total_tsi, 0) loss_total_tsi,
+                 DECODE (fi_item_grp, 'L', total_prem, 0) loss_total_prem
+            FROM TABLE
+                    (gipir039e_pkg.get_gipir039c_dtls
+                                                ($P{AS_OF_SW},
+                                                  TRUNC(TO_DATE($P{P_AS_OF}, 'MM-DD-RRRR')),
+                                                  TRUNC(TO_DATE ($P{P_FROM_DATE}, 'MM-DD-RRRR')),
+                                                  TRUNC(TO_DATE ($P{P_TO_DATE}, 'MM-DD-RRRR')),
+                                                  $P{P_ZONE_TYPE},
+                                                  $P{P_USER_ID},
+                                                  $P{P_PRINT_SW},
+                                                  $P{P_TRTY_TYPE_CD}
+                                                )
+                    ))]]>
+	</queryString>
+	<field name="BLDG_TOTAL_TSI" class="java.math.BigDecimal"/>
+	<field name="BLDG_TOTAL_PREM" class="java.math.BigDecimal"/>
+	<field name="CONT_TOTAL_TSI" class="java.math.BigDecimal"/>
+	<field name="CONT_TOTAL_PREM" class="java.math.BigDecimal"/>
+	<field name="LOSS_TOTAL_TSI" class="java.math.BigDecimal"/>
+	<field name="LOSS_TOTAL_PREM" class="java.math.BigDecimal"/>
+	<field name="TOTAL_TSI" class="java.math.BigDecimal"/>
+	<field name="TOTAL_PREM" class="java.math.BigDecimal"/>
+	<summary>
+		<band height="12">
+			<textField pattern="#,##0.00;(-#,##0.00)">
+				<reportElement x="0" y="0" width="75" height="11"/>
+				<textElement textAlignment="Right">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{BLDG_TOTAL_TSI}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(-#,##0.00)">
+				<reportElement x="85" y="0" width="75" height="11"/>
+				<textElement textAlignment="Right">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{BLDG_TOTAL_PREM}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(-#,##0.00)">
+				<reportElement x="164" y="0" width="75" height="11"/>
+				<textElement textAlignment="Right">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{CONT_TOTAL_TSI}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(-#,##0.00)">
+				<reportElement x="249" y="0" width="75" height="11"/>
+				<textElement textAlignment="Right">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{CONT_TOTAL_PREM}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(-#,##0.00)">
+				<reportElement x="328" y="0" width="75" height="11"/>
+				<textElement textAlignment="Right">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{LOSS_TOTAL_TSI}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(-#,##0.00)">
+				<reportElement x="413" y="0" width="75" height="11"/>
+				<textElement textAlignment="Right">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{LOSS_TOTAL_PREM}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(-#,##0.00)">
+				<reportElement x="493" y="0" width="75" height="11"/>
+				<textElement textAlignment="Right">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{TOTAL_TSI}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(-#,##0.00)">
+				<reportElement x="578" y="0" width="75" height="11"/>
+				<textElement textAlignment="Right">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{TOTAL_PREM}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

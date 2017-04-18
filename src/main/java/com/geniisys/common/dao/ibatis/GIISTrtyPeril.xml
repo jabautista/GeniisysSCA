@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISTrtyPeril">
+    <typeAlias alias="giisTrtyPeril" type="com.geniisys.common.entity.GIISTrtyPeril"/>
+    
+    <resultMap class="giisTrtyPeril" id="giisTrtyPerilListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="line_cd"        	property="lineCd"/>
+		<result column="trty_seq_no"     	property="trtySeqNo"/>
+		<result column="peril_cd"     		property="perilCd"/>
+		<result column="dsp_peril_name"     property="dspPerilName"/>
+		<result column="trty_com_rt"     	property="trtyComRt"/>
+		<result column="prof_comm_rt"     	property="profCommRt"/>
+		<result column="remarks"     		property="remarks"/>
+		<result column="user_id"     		property="userId"/>
+		<result column="last_update" 		property="lastUpdate"/>
+	</resultMap>
+	
+    <select id="getA6401RecList" resultMap="giisTrtyPerilListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giris007_pkg.get_a6401_list(#lineCd#, #trtyYy#, #shareCd#, #perilCd#, #dspPerilName#, #trtyComRt#, #profCommRt#))
+		                  <isEqual property="sortColumn" compareValue="perilCd">
+			              		ORDER BY peril_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="dspPerilName">
+			              		ORDER BY dsp_peril_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="trtyComRt">
+			              		ORDER BY trty_com_rt
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="profCommRt">
+			              		ORDER BY prof_comm_rt
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giris007_pkg.get_a6401_list(#lineCd#, #trtyYy#, #shareCd#, #perilCd#, #dspPerilName#, #trtyComRt#, #profCommRt#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+    <resultMap id="getA6401PerilCdRMap" class="java.util.HashMap"  extends="BaseEntity.TableGridResultMap">
+	  	<result column="peril_cd"		property="perilCd"/>
+	  	<result column="peril_sname"	property="perilSname"/>
+	  	<result column="peril_name"		property="perilName"/>
+	  	<result column="peril_type"		property="perilType"/>
+  	</resultMap>
+  	
+    <select id="getA6401PerilCd" resultMap="getA6401PerilCdRMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+					   b.count_, 
+					   a.* 
+				  FROM (SELECT * 
+						  FROM TABLE (giris007_pkg.get_a6401_peril_lov(#lineCd#, #findText#))
+						  <isEqual property="sortColumn" compareValue="perilCd">
+								ORDER BY peril_cd
+						  </isEqual>
+						  <isEqual property="sortColumn" compareValue="perilSname">
+								ORDER BY peril_sname
+						  </isEqual>
+						  <isEqual property="sortColumn" compareValue="perilName">
+								ORDER BY peril_name
+						  </isEqual>
+						  <isEqual property="sortColumn" compareValue="perilType">
+								ORDER BY peril_type
+						  </isEqual>
+						  <isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+						  </isNotNull>
+						  ) a, 
+					   (SELECT count(*) count_ 
+						  FROM TABLE (giris007_pkg.get_a6401_peril_lov(#lineCd#, #findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+    <procedure id="valAddA6401Rec" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giris007_pkg.val_add_a6401_rec(#lineCd#, #trtyYy#, #shareCd#, #perilCd#);
+ 		END;
+ 	</procedure>
+ 	
+    <procedure id="setA6401" parameterClass="giisTrtyPeril">
+	    DECLARE
+	    	v_rec giis_trty_peril%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.line_cd := #lineCd#;
+ 			v_rec.trty_seq_no := #trtySeqNo#;
+ 			v_rec.peril_cd := #perilCd#;
+ 			v_rec.trty_com_rt := #trtyComRt#;
+ 			v_rec.prof_comm_rt := #profCommRt#;
+ 			v_rec.remarks := #remarks#;
+ 			v_rec.user_id := #userId#;
+ 			
+ 			giris007_pkg.set_a6401_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+    <delete id="delA6401" parameterClass="giisTrtyPeril">
+		BEGIN
+ 			giris007_pkg.del_a6401_rec(#lineCd#, #trtySeqNo#, #perilCd#);
+ 		END;
+ 	</delete>
+ 	
+    <select id="getA6401IncAllRecList" resultMap="giisTrtyPerilListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giris007_pkg.get_a6401incall_list(#lineCd#, #trtyYy#, #shareCd#, #perilCd#, #userId#))
+		                  <isEqual property="sortColumn" compareValue="perilCd">
+			              		ORDER BY peril_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="dspPerilName">
+			              		ORDER BY dsp_peril_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="trtyComRt">
+			              		ORDER BY trty_com_rt
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="profCommRt">
+			              		ORDER BY prof_comm_rt
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giris007_pkg.get_a6401incall_list(#lineCd#, #trtyYy#, #shareCd#, #perilCd#, #userId#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+    <resultMap class="giisTrtyPeril" id="giisTrtyPerilListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="line_cd"        	property="lineCd"/>
+		<result column="trty_seq_no"     	property="trtySeqNo"/>
+		<result column="peril_cd"     		property="perilCd"/>
+		<result column="dsp_peril_name"     property="dspPerilName"/>
+		<result column="trty_com_rt"     	property="trtyComRt"/>
+		<result column="prof_comm_rt"     	property="profCommRt"/>
+		<result column="remarks"     		property="remarks"/>
+		<result column="user_id"     		property="userId"/>
+		<result column="last_update" 		property="lastUpdate"/>
+	</resultMap>
+	
+    <select id="getTrtyPerilXolRecList" resultMap="giisTrtyPerilListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giris007_pkg.get_trtyperilxol_list(#lineCd#, #xolYy#, #xolSeqNo#, #shareCd#, #perilCd#, #dspPerilName#, #trtyComRt#, #profCommRt#))
+		                  <isEqual property="sortColumn" compareValue="perilCd">
+			              		ORDER BY peril_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="dspPerilName">
+			              		ORDER BY dsp_peril_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="trtyComRt">
+			              		ORDER BY trty_com_rt
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="profCommRt">
+			              		ORDER BY prof_comm_rt
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giris007_pkg.get_trtyperilxol_list(#lineCd#, #xolYy#, #xolSeqNo#, #shareCd#, #perilCd#, #dspPerilName#, #trtyComRt#, #profCommRt#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+    <procedure id="valAddTrtyPerilXolRec" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giris007_pkg.val_add_trtyperilxol_rec(#lineCd#, #xolYy#, #xolSeqNo#, #perilCd#);
+ 		END;
+ 	</procedure>
+ 	
+    <procedure id="setTrtyPerilXol" parameterClass="giisTrtyPeril">
+	    DECLARE
+	    	v_rec giis_trty_peril%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.line_cd := #lineCd#;
+ 			v_rec.trty_seq_no := #trtySeqNo#;
+ 			v_rec.peril_cd := #perilCd#;
+ 			v_rec.trty_com_rt := #trtyComRt#;
+ 			v_rec.prof_comm_rt := #profCommRt#;
+ 			v_rec.remarks := #remarks#;
+ 			v_rec.user_id := #userId#;
+ 			
+ 			giris007_pkg.set_a6401_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+    <delete id="delTrtyPerilXol" parameterClass="giisTrtyPeril">
+		BEGIN
+ 			giris007_pkg.del_a6401_rec(#lineCd#, #trtySeqNo#, #perilCd#);
+ 		END;
+ 	</delete>
+ 	
+ 	<resultMap id="allPerilsMap" class="java.util.HashMap">
+	  	<result column="peril_cd"		property="perilCd"/>
+	  	<result column="peril_sname"	property="perilSname"/>
+	  	<result column="peril_name"		property="perilName"/>
+	  	<result column="peril_type"		property="perilType"/>
+  	</resultMap>
+ 	
+ 	<select id="getAllTreatyPerils" resultMap="allPerilsMap">
+ 		SELECT *
+  		  FROM TABLE(giris007_pkg.get_a6401_peril_lov(#lineCd#, NULL))
+ 	     WHERE peril_cd NOT IN (SELECT peril_cd
+                                  FROM giis_trty_peril
+                       		     WHERE line_cd = #lineCd#
+                         		   AND trty_seq_no = #trtySeqNo#
+                         		  <isNotEmpty property="notInDeleted">
+                         		   AND peril_cd NOT IN $notInDeleted$
+                         		  </isNotEmpty>)
+		<isNotEmpty property="notIn">
+   		   AND peril_cd NOT IN $notIn$
+		</isNotEmpty>
+ 	</select>
+ 	
+ 	<!-- nieko 02142017, SR 23828 -->
+ 	<procedure id="valAddTrtyPerilXolRec2" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giris007_pkg.val_add_trtyperilxol_rec2(#lineCd#, #xolYy#, #xolSeqNo#, #perilCd#, #shareCd#);
+ 		END;
+ 	</procedure>
+ 	<!-- nieko 02142017 end -->
+</sqlMap>

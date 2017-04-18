@@ -1,0 +1,477 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report name" pageWidth="990" pageHeight="792" columnWidth="960" leftMargin="10" rightMargin="20" topMargin="10" bottomMargin="20">
+	<property name="ireport.zoom" value="3.3000000000000127"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="p_direct" class="java.lang.Integer">
+		<parameterDescription><![CDATA[]]></parameterDescription>
+	</parameter>
+	<parameter name="p_ri" class="java.lang.Integer"/>
+	<parameter name="p_iss_param" class="java.lang.Integer"/>
+	<parameter name="p_iss_cd" class="java.lang.String"/>
+	<parameter name="p_line_cd" class="java.lang.String"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String">
+		<defaultValueExpression><![CDATA["C:\\GENIISYS_JASPER_REPORTS’\\Geniisys\\src\\com\\geniisys\\underwriting\\production\\reports\\"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="P_USER_ID" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT * FROM TABLE (CPI.GIPIR924C_PKG.POPULATE_GIPIR924C($P{p_direct}, $P{p_ri}, $P{p_iss_param}, $P{p_iss_cd}, $P{p_line_cd}, $P{P_USER_ID}))
+	ORDER BY dist_flag, rv_meaning, line_name, subline_name, pol_endrsmnt]]>
+	</queryString>
+	<field name="DIST_FLAG" class="java.lang.String"/>
+	<field name="RV_MEANING" class="java.lang.String"/>
+	<field name="LINE_NAME" class="java.lang.String"/>
+	<field name="SUBLINE_NAME" class="java.lang.String"/>
+	<field name="POL_ENDRSMNT" class="java.lang.String"/>
+	<field name="ISSUE_DATE" class="java.sql.Timestamp"/>
+	<field name="INCEPT_DATE" class="java.sql.Timestamp"/>
+	<field name="ASSD_NAME" class="java.lang.String"/>
+	<field name="TSI_AMT" class="java.math.BigDecimal"/>
+	<field name="PREM_AMT" class="java.math.BigDecimal"/>
+	<field name="POLICY_ID" class="java.math.BigDecimal"/>
+	<field name="EXISTING" class="java.lang.String"/>
+	<variable name="sum_tsi_amt" class="java.math.BigDecimal" resetType="Group" resetGroup="G_SUBLINE" calculation="Sum">
+		<variableExpression><![CDATA[$F{TSI_AMT}]]></variableExpression>
+	</variable>
+	<variable name="sum_prem_amt" class="java.math.BigDecimal" resetType="Group" resetGroup="G_SUBLINE" calculation="Sum">
+		<variableExpression><![CDATA[$F{PREM_AMT}]]></variableExpression>
+	</variable>
+	<variable name="sum_tsi_sub" class="java.math.BigDecimal" resetType="Group" resetGroup="G_LINE" calculation="Sum">
+		<variableExpression><![CDATA[$F{TSI_AMT}]]></variableExpression>
+	</variable>
+	<variable name="sum_prem_sub" class="java.math.BigDecimal" resetType="Group" resetGroup="G_LINE" calculation="Sum">
+		<variableExpression><![CDATA[$F{PREM_AMT}]]></variableExpression>
+	</variable>
+	<variable name="sum_tsi_line" class="java.math.BigDecimal" resetType="Group" resetGroup="G_1" calculation="Sum">
+		<variableExpression><![CDATA[$F{TSI_AMT}]]></variableExpression>
+	</variable>
+	<variable name="tsi_gtotal" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{TSI_AMT}]]></variableExpression>
+	</variable>
+	<variable name="sum_prem_line" class="java.math.BigDecimal" resetType="Group" resetGroup="G_1" calculation="Sum">
+		<variableExpression><![CDATA[$F{PREM_AMT}]]></variableExpression>
+	</variable>
+	<variable name="prem_gtotal" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{PREM_AMT}]]></variableExpression>
+	</variable>
+	<group name="G_1" isReprintHeaderOnEachPage="true">
+		<groupExpression><![CDATA[$F{RV_MEANING}]]></groupExpression>
+		<groupHeader>
+			<band height="13">
+				<textField isStretchWithOverflow="true">
+					<reportElement x="23" y="0" width="167" height="13"/>
+					<textElement>
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{RV_MEANING}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="25">
+				<textField pattern="#,##0.00;(#,##0.00)">
+					<reportElement x="569" y="0" width="100" height="13"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{sum_tsi_line}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true">
+					<reportElement x="501" y="0" width="60" height="13" isPrintWhenDetailOverflows="true"/>
+					<textElement>
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{RV_MEANING}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="474" y="0" width="27" height="13"/>
+					<textElement>
+						<font size="8"/>
+					</textElement>
+					<text><![CDATA[Totals]]></text>
+				</staticText>
+				<textField pattern="#,##0.00;(#,##0.00)">
+					<reportElement x="674" y="0" width="100" height="13"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isUnderline="false"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{sum_prem_line}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="561" y="0" width="3" height="13"/>
+					<textElement>
+						<font size="8"/>
+					</textElement>
+					<text><![CDATA[:]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="569" y="13" width="100" height="12"/>
+					<textElement textAlignment="Center">
+						<font size="8"/>
+					</textElement>
+					<text><![CDATA[-------------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="674" y="13" width="100" height="12"/>
+					<textElement textAlignment="Center">
+						<font size="8"/>
+					</textElement>
+					<text><![CDATA[-------------------------------------]]></text>
+				</staticText>
+			</band>
+		</groupFooter>
+	</group>
+	<group name="G_LINE" isReprintHeaderOnEachPage="true">
+		<groupExpression><![CDATA[$F{LINE_NAME}]]></groupExpression>
+		<groupHeader>
+			<band height="13">
+				<textField>
+					<reportElement x="57" y="0" width="133" height="13" isPrintWhenDetailOverflows="true"/>
+					<textElement>
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{LINE_NAME}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="23" y="0" width="34" height="13"/>
+					<textElement>
+						<font size="8"/>
+					</textElement>
+					<text><![CDATA[Line       :]]></text>
+				</staticText>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="25">
+				<staticText>
+					<reportElement x="474" y="0" width="80" height="13"/>
+					<textElement>
+						<font size="8"/>
+					</textElement>
+					<text><![CDATA[Line Totals          :]]></text>
+				</staticText>
+				<textField pattern="#,##0.00;(#,##0.00)">
+					<reportElement x="569" y="0" width="100" height="13"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{sum_tsi_sub}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;(#,##0.00)">
+					<reportElement x="674" y="0" width="100" height="13"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{sum_prem_sub}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="674" y="13" width="100" height="12"/>
+					<textElement textAlignment="Center">
+						<font size="8"/>
+					</textElement>
+					<text><![CDATA[-------------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="569" y="13" width="100" height="12"/>
+					<textElement textAlignment="Center">
+						<font size="8"/>
+					</textElement>
+					<text><![CDATA[-------------------------------------]]></text>
+				</staticText>
+			</band>
+		</groupFooter>
+	</group>
+	<group name="G_SUBLINE" isReprintHeaderOnEachPage="true">
+		<groupExpression><![CDATA[$F{SUBLINE_NAME}]]></groupExpression>
+		<groupHeader>
+			<band height="13">
+				<staticText>
+					<reportElement x="23" y="0" width="34" height="13"/>
+					<textElement>
+						<font size="8"/>
+					</textElement>
+					<text><![CDATA[Subline  :]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true">
+					<reportElement x="57" y="0" width="133" height="13"/>
+					<textElement>
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{SUBLINE_NAME}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="37">
+				<staticText>
+					<reportElement x="474" y="12" width="80" height="13"/>
+					<textElement>
+						<font size="8"/>
+					</textElement>
+					<text><![CDATA[Subline Totals     :]]></text>
+				</staticText>
+				<textField pattern="#,##0.00;(#,##0.00)">
+					<reportElement x="569" y="12" width="100" height="13"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{sum_tsi_amt}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;(#,##0.00)">
+					<reportElement x="674" y="12" width="100" height="13"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{sum_prem_amt}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="569" y="0" width="100" height="12"/>
+					<textElement textAlignment="Center">
+						<font size="8"/>
+					</textElement>
+					<text><![CDATA[-------------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="569" y="25" width="100" height="12"/>
+					<textElement textAlignment="Center">
+						<font size="8"/>
+					</textElement>
+					<text><![CDATA[-------------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="674" y="0" width="100" height="12"/>
+					<textElement textAlignment="Center">
+						<font size="8"/>
+					</textElement>
+					<text><![CDATA[-------------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="674" y="25" width="100" height="12"/>
+					<textElement textAlignment="Center">
+						<font size="8"/>
+					</textElement>
+					<text><![CDATA[-------------------------------------]]></text>
+				</staticText>
+			</band>
+		</groupFooter>
+	</group>
+	<pageHeader>
+		<band height="55" splitType="Stretch">
+			<subreport>
+				<reportElement x="0" y="0" width="960" height="44"/>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression class="java.lang.String"><![CDATA[$P{SUBREPORT_DIR} + "GIPIR924C_header.jasper"]]></subreportExpression>
+			</subreport>
+			<textField>
+				<reportElement positionType="Float" x="901" y="13" width="47" height="13"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement positionType="Float" x="948" y="13" width="12" height="13"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="24" splitType="Stretch">
+			<staticText>
+				<reportElement x="459" y="0" width="50" height="12"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Issue Date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="514" y="0" width="50" height="12"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Incept Date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="569" y="0" width="100" height="12"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[TSI Amount]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="674" y="0" width="100" height="12"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Premium Amount]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="23" y="0" width="167" height="12"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Policy/Endorsement]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="195" y="0" width="258" height="12"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Assured Name]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="0" width="18" height="12"/>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[P]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="12" width="18" height="12"/>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[-----]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="23" y="12" width="167" height="12"/>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[-------------------------------------------------------------]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="195" y="12" width="258" height="12"/>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[-----------------------------------------------------------------------------------------------]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="459" y="12" width="50" height="12"/>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[---------------------]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="514" y="12" width="50" height="12"/>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[---------------------]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="569" y="12" width="100" height="12"/>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[-------------------------------------]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="674" y="12" width="100" height="12"/>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[-------------------------------------]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="13" splitType="Stretch">
+			<textField isStretchWithOverflow="true">
+				<reportElement x="23" y="0" width="167" height="13" isPrintWhenDetailOverflows="true"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{POL_ENDRSMNT}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="0" width="18" height="13">
+					<printWhenExpression><![CDATA[new Boolean ($F{EXISTING}.equals("N") ? false : true)]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[P]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="193" y="0" width="260" height="13" isPrintWhenDetailOverflows="true"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{ASSD_NAME}]]></textFieldExpression>
+			</textField>
+			<textField pattern="MM-dd-yyyy">
+				<reportElement x="459" y="0" width="50" height="13"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.util.Date"><![CDATA[$F{ISSUE_DATE}]]></textFieldExpression>
+			</textField>
+			<textField pattern="MM-dd-yyyy">
+				<reportElement x="514" y="0" width="50" height="13"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.util.Date"><![CDATA[$F{INCEPT_DATE}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(#,##0.00)">
+				<reportElement x="569" y="0" width="100" height="13"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{TSI_AMT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(#,##0.00)">
+				<reportElement x="674" y="0" width="100" height="13"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{PREM_AMT}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<summary>
+		<band height="27" splitType="Stretch">
+			<staticText>
+				<reportElement x="674" y="13" width="100" height="13" isPrintWhenDetailOverflows="true"/>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[======================]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="569" y="13" width="100" height="13" isPrintWhenDetailOverflows="true"/>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[======================]]></text>
+			</staticText>
+			<textField pattern="#,##0.00;(#,##0.00)">
+				<reportElement x="569" y="0" width="100" height="13"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{tsi_gtotal}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(#,##0.00)">
+				<reportElement x="674" y="0" width="100" height="13"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isUnderline="false"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{prem_gtotal}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="474" y="0" width="81" height="13"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Grand Totals       :]]></text>
+			</staticText>
+		</band>
+	</summary>
+</jasperReport>

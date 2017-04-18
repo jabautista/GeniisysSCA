@@ -1,0 +1,19 @@
+DROP TRIGGER CPI.TRG1_GAPPD;
+
+CREATE OR REPLACE TRIGGER CPI.TRG1_GAPPD
+BEFORE INSERT
+ON CPI.GIIN_ASSD_PROD_POL_DTL FOR EACH ROW
+DECLARE
+BEGIN
+  DECLARE
+    p_rec    NUMBER(9);
+  BEGIN
+    SELECT   assd_prod_pol_dtl_s.NEXTVAL
+      INTO   p_rec
+      FROM   dual;
+    :NEW.record_id  :=  NVL(p_rec,1);
+  END;
+END;
+/
+
+

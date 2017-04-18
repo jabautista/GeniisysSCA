@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISPerilClass">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+
+	<typeAlias alias="GIISPerilClassClass" type="com.geniisys.giis.entity.GIISPerilClass" />
+
+	<resultMap class="GIISPerilClassClass" id="tbgGIISPerilClass" extends="BaseEntity.TableGridResultMap">
+		<result property="classCd" 		column="CLASS_CD" />
+		<result property="classDesc" 	column="CLASS_DESC" />
+		<result property="userId" 		column="USER_ID" />
+		<result property="lastUpdate" 	column="LAST_UPDATE" />
+		<result property="remarks" 		column="REMARKS" />
+		<result property="cpiRecNo" 	column="CPI_REC_NO" />
+		<result property="cpiBranchCd" 	column="CPI_BRANCH_CD" />
+	</resultMap>
+	
+	<resultMap class="GIISPerilClassClass" id="tbgGIISPerilClassDetails" extends="BaseEntity.TableGridResultMap">
+		<result property="classCd" 		column="CLASS_CD" />
+		<result property="lineCd" 		column="LINE_CD" />
+		<result property="lineName" 	column="LINE_NAME"/>
+		<result property="perilCd" 		column="PERIL_CD" />
+		<result property="perilSname" 	column="PERIL_SNAME"/>
+		<result property="perilName" 	column="PERIL_NAME"/>
+		<result property="userId" 		column="USER_ID" />
+		<result property="lastUpdate" 	column="LAST_UPDATE" />
+		<result property="remarks" 		column="REMARKS" />
+		<result property="cpiRecNo" 	column="CPI_REC_NO" />
+		<result property="cpiBranchCd" 	column="CPI_BRANCH_CD" />
+	</resultMap>
+	
+	<resultMap class="GIISPerilClassClass" id="getAllPerilsPerClassDetailsMap">
+		<result property="classCd" 		column="CLASS_CD" />
+		<result property="lineCd" 		column="LINE_CD" />
+		<result property="lineName" 	column="LINE_NAME"/>
+		<result property="perilCd" 		column="PERIL_CD" />
+		<result property="perilSname" 	column="PERIL_SNAME"/>
+		<result property="perilName" 	column="PERIL_NAME"/>
+		<result property="userId" 		column="USER_ID" />
+		<result property="lastUpdate" 	column="LAST_UPDATE" />
+		<result property="remarks" 		column="REMARKS" />
+		<result property="cpiRecNo" 	column="CPI_REC_NO" />
+		<result property="cpiBranchCd" 	column="CPI_BRANCH_CD" />
+	</resultMap>
+	
+	<resultMap class="GIISPerilClassClass" id="tbgGIISPerilLOV" extends="BaseEntity.TableGridResultMap">
+		<result property="lineCd" 		column="LINE_CD" />
+		<result property="perilCd" 		column="PERIL_CD" />
+		<result property="perilSname" 	column="PERIL_SNAME"/>
+		<result property="perilName" 	column="PERIL_NAME"/>
+	</resultMap>
+	
+	<resultMap id="giiss062LineLOVMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result column="LINE_CD" 			property="lineCd"/>
+		<result column="LINE_NAME"			property="lineName"/>
+	</resultMap>
+	
+	<select id="getPerilsPerClass" resultMap="tbgGIISPerilClass" parameterClass="map">
+		SELECT *
+			  FROM (SELECT rownum rownum_, 
+			               b.count_, a.*
+			          FROM (SELECT *
+			          		  FROM TABLE (giiss062_pkg.get_giis_class_list)
+			          		  <isNotNull property="filter">
+									WHERE 1=1
+									<isNotEmpty prepend="AND"  property="classCd">
+										UPPER(CLASS_CD) LIKE UPPER(#classCd#)
+									</isNotEmpty>	
+									<isNotEmpty prepend="AND"  property="classDesc">
+										UPPER(CLASS_DESC) LIKE UPPER(#classDesc#)
+									</isNotEmpty>	 
+							   </isNotNull>
+			          		   <isEqual property="sortColumn" compareValue="classCd">
+			          		   	ORDER BY class_cd
+			          		   </isEqual>
+			          		   <isEqual property="sortColumn" compareValue="classDesc">
+			          		    ORDER BY class_desc
+			          		   </isEqual>
+			          		   <isNotNull property="sortColumn">
+			              	   		<isEqual property="ascDescFlg" compareValue="ASC">
+			              				ASC
+			              			</isEqual>
+			              			<isEqual property="ascDescFlg" compareValue="DESC">
+			              				DESC
+			              			</isEqual>
+			              	   </isNotNull>) a,
+			        (SELECT count(*) count_
+			           FROM TABLE (giiss062_pkg.get_giis_class_list)
+			           <isNotNull property="filter">
+							WHERE 1=1
+							<isNotEmpty prepend="AND"  property="classCd">
+								UPPER(CLASS_CD) LIKE UPPER(#classCd#)
+							</isNotEmpty>	
+							<isNotEmpty prepend="AND"  property="classDesc">
+								UPPER(CLASS_DESC) LIKE UPPER(#classDesc#)
+							</isNotEmpty>	 
+					   </isNotNull>
+			           ) b)
+			  WHERE rownum_ BETWEEN #from# AND #to#           		    
+	</select>
+	<select id="getPerilsPerClassDetails" resultMap="tbgGIISPerilClassDetails" parameterClass="map">
+		SELECT *
+  			FROM (SELECT rownum rownum_, b.count_, a.*
+          		FROM (SELECT *
+                	  FROM TABLE (giiss062_pkg.get_giis_peril_class_list (#classCd#,#moduleId#,#appUser#))
+               	 			<isNotNull property="filter">
+								WHERE 1=1
+								<isNotEmpty prepend="AND"  property="lineCd">
+									UPPER(LINE_CD) LIKE UPPER(#lineCd#)
+								</isNotEmpty>	
+								<isNotEmpty prepend="AND"  property="lineName">
+									UPPER(LINE_NAME) LIKE UPPER(#lineName#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="perilSname">
+									UPPER(PERIL_SNAME) LIKE UPPER(#perilSname#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="perilName">
+									UPPER(PERIL_NAME) LIKE UPPER(#perilName#)
+								</isNotEmpty>
+						   	</isNotNull>
+			          	    <isEqual property="sortColumn" compareValue="lineCd">
+			          		  ORDER BY LINE_CD
+			          	    </isEqual>
+			          	    <isEqual property="sortColumn" compareValue="lineName">
+			          		  ORDER BY LINE_NAME
+			          	    </isEqual>
+			          	    <isEqual property="sortColumn" compareValue="perilSname">
+			          		  ORDER BY PERIL_SNAME
+			          	    </isEqual>
+			          	    <isEqual property="sortColumn" compareValue="perilName">
+			          		  ORDER BY PERIL_NAME
+			          	    </isEqual>
+			          	    <isEqual property="sortColumn" compareValue="remarks">
+			          		  ORDER BY REMARKS
+			          	    </isEqual>
+			          		<isNotNull property="sortColumn">
+				              	<isEqual property="ascDescFlg" compareValue="ASC">
+				              	  ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              	  DESC
+				              	</isEqual>
+			              	</isNotNull>) a,
+               		(SELECT COUNT (*) count_
+                  		FROM TABLE (giiss062_pkg.get_giis_peril_class_list (#classCd#,#moduleId#,#appUser#))
+                  		<isNotNull property="filter">
+							WHERE 1=1
+							<isNotEmpty prepend="AND"  property="lineCd">
+								UPPER(LINE_CD) LIKE UPPER(#lineCd#)
+							</isNotEmpty>	
+							<isNotEmpty prepend="AND"  property="lineName">
+								UPPER(LINE_NAME) LIKE UPPER(#lineName#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="perilSname">
+								UPPER(PERIL_SNAME) LIKE UPPER(#perilSname#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="perilName">
+								UPPER(PERIL_NAME) LIKE UPPER(#perilName#)
+							</isNotEmpty>
+					   	</isNotNull>
+                  		) b)
+                  	  WHERE rownum_ BETWEEN #from# AND #to#       	
+	</select>
+	<select id="getGiisPerilCdNameLOV" resultMap="tbgGIISPerilLOV" parameterClass="map">
+		SELECT *
+  			FROM (SELECT rownum rownum_, b.count_, a.*
+          		FROM (SELECT *
+                	  FROM TABLE (giiss062_pkg.get_giis_peril_sname_name (#lineCd#))
+	                	  	<isNotNull property="findText">
+								 WHERE (UPPER(PERIL_CD) LIKE UPPER(#findText#) 
+									 	OR UPPER(PERIL_SNAME) LIKE UPPER(#findText#)
+									 	OR UPPER(PERIL_NAME) LIKE UPPER(#findText#))
+						 	</isNotNull>
+			          	    <isEqual property="sortColumn" compareValue="perilCd">
+			          		 	ORDER BY peril_cd
+			          	    </isEqual>
+			          	    <isEqual property="sortColumn" compareValue="perilSname">
+			          		  	ORDER BY peril_sname
+			          	    </isEqual>
+			          	    <isEqual property="sortColumn" compareValue="perilName">
+			          		  	ORDER BY peril_name
+			          	    </isEqual>
+			          		<isNotNull property="sortColumn">
+				              	<isEqual property="ascDescFlg" compareValue="ASC">
+				              	  	ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              	 	 DESC
+				              	</isEqual>
+			              	</isNotNull>) a,
+               		(SELECT COUNT (*) count_
+                  		FROM TABLE (giiss062_pkg.get_giis_peril_sname_name (#lineCd#))
+                  			<isNotNull property="findText">
+								 WHERE (UPPER(PERIL_CD) LIKE UPPER(#findText#) 
+									 	OR UPPER(PERIL_SNAME) LIKE UPPER(#findText#)
+									 	OR UPPER(PERIL_NAME) LIKE UPPER(#findText#))
+						 	</isNotNull>
+                  		) b)
+                  	  WHERE rownum_ BETWEEN #from# AND #to#     	
+	</select>
+	
+	<select id="getGIISS062LineLOV"	resultMap="giiss062LineLOVMap"> <!-- added by steven 5/30/2013 -->  	
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+					   b.count_, 
+					   a.* 
+				  FROM (SELECT * 
+				  		FROM TABLE(GIISS062_PKG.get_giis_line_list(#moduleId#,#userId#))
+						 <isNotNull property="findText">
+							 WHERE (UPPER(line_cd) LIKE UPPER(#findText#) 
+								 OR UPPER(line_name) LIKE UPPER(#findText#))
+						 </isNotNull>
+						  <isEqual property="sortColumn" compareValue="lineCd">
+								ORDER BY line_cd
+						  </isEqual>
+						  <isEqual property="sortColumn" compareValue="lineName">
+								ORDER BY line_name
+						  </isEqual> 
+						  <isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+						  </isNotNull>
+						  ) a, 
+					   (SELECT count(*) count_ 
+						  FROM TABLE(GIISS062_PKG.get_giis_line_list(#moduleId#,#userId#))
+						 <isNotNull property="findText">
+							 WHERE (UPPER(line_cd) LIKE UPPER(#findText#) 
+								 OR UPPER(line_name) LIKE UPPER(#findText#))
+						 </isNotNull>
+						  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select >
+	<select id="getAllPerilsPerClassDetails" resultMap="getAllPerilsPerClassDetailsMap">
+		SELECT * FROM TABLE (giiss062_pkg.get_giis_peril_class_list (#classCd#,#moduleId#,#appUser#))
+	</select>
+	<delete id="delGIISPerilClass" parameterClass="GIISPerilClassClass">
+  		BEGIN
+  			giis_users_pkg.app_user := #appUser#;
+  			giiss062_pkg.delete_giis_peril_class(#classCd#, #lineCd#,#perilCd#);
+  		END;
+  	</delete>
+  	<procedure id="setGIISPerilClass" parameterClass="GIISPerilClassClass">
+		DECLARE
+		  v_peril_class GIIS_PERIL_CLASS%ROWTYPE;
+		BEGIN
+		  giis_users_pkg.app_user := #appUser#;
+		  	
+		  v_peril_class.class_cd := #classCd#;
+		  v_peril_class.line_cd := #lineCd#;
+		  v_peril_class.peril_cd := #perilCd#;
+		  v_peril_class.remarks := #remarks#;
+		  
+		  giiss062_pkg.set_giis_peril_class(v_peril_class);
+		END;
+	</procedure>
+</sqlMap>

@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="GICLAdvsPla">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+
+	<typeAlias alias="GICLAdvsPlaClass" type="com.geniisys.gicl.entity.GICLAdvsPla"/>
+	
+	<resultMap class="GICLAdvsPlaClass" id="GICLAdvsPlaResultMap">
+		<result column="pla_id"          		 property="plaId"/>        
+		<result column="claim_id"                property="claimId"/>      
+		<result column="grp_seq_no"              property="grpSeqNo"/>     
+		<result column="ri_cd"                   property="riCd"/>         
+		<result column="line_cd"                 property="lineCd"/>       
+		<result column="la_yy"                   property="laYy"/>         
+		<result column="pla_seq_no"              property="plaSeqNo"/>     
+		<result column="user_id"                 property="userId"/> 
+		<result column="last_update"             property="lastUpdate"/> 
+		<result column="share_type"              property="shareType"/>    
+		<result column="peril_cd"                property="perilCd"/>      
+		<result column="loss_shr_amt"            property="lossShrAmt"/>
+		<result column="exp_shr_amt"             property="expShrAmt"/> 
+		<result column="pla_title"               property="plaTitle"/>     
+		<result column="pla_header"              property="plaHeader"/>    
+		<result column="pla_footer"              property="plaFooter"/>    
+		<result column="print_sw"                property="printSw"/>      
+		<result column="cpi_rec_no"              property="cpiRecNo"/>     
+		<result column="cpi_branch_cd"           property="cpiBranchCd"/>  
+		<result column="item_no"                 property="itemNo"/>       
+		<result column="cancel_tag"              property="cancelTag"/>    
+		<result column="res_pla_id"              property="resPlaId"/>     
+		<result column="pla_date"                property="plaDate"/>      
+		<result column="grouped_item_no"         property="groupedItemNo"/>
+		<result column="dsp_ri_name"			 property="dspRiName"/> 
+	</resultMap>
+	
+	<resultMap class="GICLAdvsPlaClass" id="GICLAdvsPlaResultMapGrid" extends="GICLAdvsPlaResultMap">
+		<result column="rownum_"					property="rowNum"/>
+	    <result column="count_"						property="rowCount"/>
+	</resultMap>
+
+	<select id="getGiclAdvsPlaGrid" resultMap="GICLAdvsPlaResultMapGrid">
+		SELECT *
+			  FROM (SELECT rownum rownum_, 
+			               b.count_, a.*
+			          FROM (SELECT * 
+			                  FROM TABLE (GICL_ADVS_PLA_PKG.get_gicl_advs_pla(
+												#claimId#, #clmResHistId#,
+												#grpSeqNo#, #shareType#
+												))
+								<isEqual property="sortColumn" compareValue="lineCd laYy plaSeqNo">
+			              		ORDER BY line_cd
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>, la_yy
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>, pla_seq_no
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="dspRiName">
+			              		ORDER BY dsp_ri_name
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="lossShrAmt">
+			              		ORDER BY loss_shr_amt
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="expShrAmt">
+			              		ORDER BY exp_shr_amt
+				              </isEqual>
+				              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	  </isNotNull>		
+			                  ) a, 
+			               (SELECT count(*) count_
+			                  FROM TABLE (GICL_ADVS_PLA_PKG.get_gicl_advs_pla(
+												#claimId#, #clmResHistId#,
+												#grpSeqNo#, #shareType#
+												))		                  	
+			                  ) b) 
+			 WHERE rownum_ BETWEEN #from# AND #to#			
+	</select>
+	
+	<procedure id="cancelPLA">
+		BEGIN
+			giis_users_pkg.app_user := #userId#; 
+			GICL_ADVS_PLA_PKG.cancel_pla(#claimId#, #resPlaId#);
+		END;	
+	</procedure>
+	
+	<procedure id="clmPlaGrp1">
+		BEGIN
+			giis_users_pkg.app_user := #userId#; 
+			GICL_ADVS_PLA_PKG.clm_pla_grp1(#histId#, #claimId#, #lineCd#, #clmYy#);
+		END;
+	</procedure>
+	
+	<procedure id="clmPlaGrp1A">
+		BEGIN
+			giis_users_pkg.app_user := #userId#; 
+			GICL_ADVS_PLA_PKG.clm_pla_grp1A(#histId#, #claimId#, #lineCd#, #clmYy#);
+		END;
+	</procedure>
+	
+	<procedure id="generatePLA">
+		BEGIN
+			giis_users_pkg.app_user := #userId#; 
+			GICL_ADVS_PLA_PKG.generate_pla(#claimId#, #histSeqNo#, #groupedItemNo#, #itemNo#, #perilCd#);
+		END;
+	</procedure>
+	
+	<procedure id="updatePrintSwPla">
+		BEGIN
+			giis_users_pkg.app_user := #userId#; 
+			GICL_ADVS_PLA_PKG.update_print_sw_pla(#claimId#, #riCd#, #plaSeqNo#, #lineCd#, #laYy#);
+		END;
+	</procedure>
+	
+	<procedure id="updatePrintSwPla2">
+		BEGIN
+			giis_users_pkg.app_user := #userId#; 
+			GICL_ADVS_PLA_PKG.update_print_sw_pla(#claimId#, #grpSeqNo#, #riCd#, #plaSeqNo#, #lineCd#, #laYy#);
+		END;
+	</procedure>
+	
+	<insert id="setGiclAdvsPla" parameterClass="GICLAdvsPlaClass">
+		BEGIN
+			giis_users_pkg.app_user := #userId#; 
+			GICL_ADVS_PLA_PKG.set_gicl_advs_pla(
+				#plaId#, #claimId#, #grpSeqNo#,     
+                #riCd#, #lineCd#, #laYy#,          
+                #plaSeqNo#, #userId#, #lastUpdate#,   
+                #shareType#, #perilCd#, #lossShrAmt#,   
+                #expShrAmt#, #plaTitle#, #plaHeader#,     
+                #plaFooter#, #printSw#, #cpiRecNo#,    
+                #cpiBranchCd#, #itemNo#, #cancelTag#,     
+                #resPlaId#, #plaDate#, #groupedItemNo#
+				);
+		END;	
+	</insert>
+	
+	<select id="getAllPlaDetails" parameterClass="java.util.HashMap" resultMap="GICLAdvsPlaResultMap">
+		SELECT * FROM TABLE(GICL_ADVS_PLA_PKG.get_gicl_advs_pla(#claimId#, #clmResHistId#, #grpSeqNo#, #shareType#))
+	</select>
+	
+</sqlMap>	

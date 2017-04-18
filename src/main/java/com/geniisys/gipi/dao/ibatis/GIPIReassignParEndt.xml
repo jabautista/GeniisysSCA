@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GIPIReassignParEndt">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	<typeAlias alias="GIPIReassignParEndt" type="com.geniisys.gipi.entity.GIPIReassignParEndt"/>
+	
+	<resultMap class="GIPIReassignParEndt" id="GIPIReassignParEndtMap" extends="BaseEntity.TableGridResultMap">
+		<result column="par_id" 			property="parId"/>
+		<result column="pack_par_id" 		property="packParId"/>
+		<result column="line_cd" 			property="lineCd"/>
+		<result column="iss_cd" 			property="issCd"/>
+		<result column="par_yy" 			property="parYY"/>
+		<result column="par_seq_no" 		property="parSeqNo"/>
+		<result column="quote_seq_no" 		property="quoteSeqNo"/>
+		<result column="assd_no" 			property="assdNo"/>
+		<result column="assign_sw" 			property="assignSw"/>
+		<result column="underwriter" 		property="underwriter"/>
+		<result column="remarks" 			property="remarks"/>
+		<result column="par_status" 		property="parStatus"/>
+		<result column="par_type" 			property="parType"/>
+		<result column="assd_name" 			property="assdName"/>
+		<result column="parstat_date" 		property="parstatDate"/>
+		<result column="pack_pol_flag" 		property="packPolFlag"/>
+	</resultMap>
+	
+	<resultMap id="GIPIReassignParEndtLOVMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result column="USER_ID" 		property="userId"/>
+		<result column="USER_GRP" 		property="userGrp"/>
+		<result column="USER_NAME"		property="userName"/>
+	</resultMap>
+	
+	<parameterMap class="map" id="createTransferWorkflowMap">
+		<parameter property="moduleId"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="underwriter"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="userId"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="parId"			jdbcType="VARCHAR"		javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="lineCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="issCd"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="parYY"			jdbcType="VARCHAR"		javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="parSeqNo"		jdbcType="VARCHAR"		javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="quoteSeqNo"	jdbcType="VARCHAR"		javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="msg"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="INOUT" />
+	</parameterMap>
+	
+	<select id="getReassignParEndtListing" resultMap="GIPIReassignParEndtMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*
+		          FROM (SELECT * 
+		          			FROM TABLE(gipi_reassign_endt_pkg.get_reassign_par_endt(#userId#))
+		          		<isNotNull property="filter">
+							WHERE 1=1
+							<isNotEmpty prepend="AND"  property="lineCd">
+								UPPER(line_cd) LIKE UPPER(#lineCd#)
+							</isNotEmpty>	
+							<isNotEmpty prepend="AND"  property="issCd">
+								UPPER(iss_cd) LIKE UPPER(#issCd#)
+							</isNotEmpty>	
+							<isNotEmpty prepend="AND"  property="parYY">
+								par_yy LIKE #parYY#
+							</isNotEmpty>	
+							<isNotEmpty prepend="AND"  property="parSeqNo">
+								par_seq_no LIKE #parSeqNo#
+							</isNotEmpty>	
+							<isNotEmpty prepend="AND"  property="quoteSeqNo">
+								quote_seq_no LIKE #quoteSeqNo#
+							</isNotEmpty>	
+							<isNotEmpty prepend="AND"  property="assdName">
+								UPPER(assd_name) LIKE UPPER(#assdName#)
+							</isNotEmpty>	
+							<isNotEmpty prepend="AND"  property="underwriter">
+								UPPER(underwriter) LIKE UPPER(#underwriter#)
+							</isNotEmpty>	
+						</isNotNull>
+			            <isEqual property="sortColumn" compareValue="parNo">
+		              		ORDER BY line_cd
+		              			<isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	 </isNotNull>,
+		              	 iss_cd
+		              	 <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	 </isNotNull>,
+		              	 par_yy
+		              	 <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	 </isNotNull>,
+		              	 par_seq_no
+		              	 <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	 </isNotNull>,quote_seq_no
+			            </isEqual>
+			             <isEqual property="sortColumn" compareValue="assdName">
+		              		ORDER BY assd_name
+			            </isEqual>
+			             <isEqual property="sortColumn" compareValue="underwriter">
+		              		ORDER BY underwriter
+			            </isEqual>
+			              <isEqual property="sortColumn" compareValue="parstatDate">
+		              		ORDER BY parstat_date
+			            </isEqual>
+			             <isEqual property="sortColumn" compareValue="remarks">
+		              		ORDER BY remarks
+			            </isEqual>
+			            <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	 </isNotNull>) a,
+		               (SELECT count(*) count_
+		                FROM TABLE(gipi_reassign_endt_pkg.get_reassign_par_endt(#userId#))
+                      		<isNotNull property="filter">
+								WHERE 1=1
+								<isNotEmpty prepend="AND"  property="lineCd">
+									UPPER(line_cd) LIKE UPPER(#lineCd#)
+								</isNotEmpty>	
+								<isNotEmpty prepend="AND"  property="issCd">
+									UPPER(iss_cd) LIKE UPPER(#issCd#)
+								</isNotEmpty>	
+								<isNotEmpty prepend="AND"  property="parYY">
+									par_yy LIKE #parYY#
+								</isNotEmpty>	
+								<isNotEmpty prepend="AND"  property="parSeqNo">
+									par_seq_no LIKE #parSeqNo#
+								</isNotEmpty>	
+								<isNotEmpty prepend="AND"  property="quoteSeqNo">
+									quote_seq_no LIKE #quoteSeqNo#
+								</isNotEmpty>	
+								<isNotEmpty prepend="AND"  property="assdName">
+									UPPER(assd_name) LIKE UPPER(#assdName#)
+								</isNotEmpty>	
+								<isNotEmpty prepend="AND"  property="underwriter">
+									UPPER(underwriter) LIKE UPPER(#underwriter#)
+								</isNotEmpty>	
+							</isNotNull>) b)
+               WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+		
+	<select id="getReassignParEndtLOV" resultMap="GIPIReassignParEndtLOVMap">
+		SELECT *
+		      FROM (SELECT rownum rownum_, 
+                          b.count_, 
+                          a.*
+                     FROM (SELECT * 
+                                 FROM TABLE(gipi_reassign_policy_pkg.get_reassign_par_policy_LOV(#lineCd#, #issCd#))
+                            		<isNotNull property="findText">
+                                 	WHERE UPPER(USER_ID) like UPPER(#findText#)
+                                 		OR USER_Grp like #findText#
+                                 		OR UPPER(USER_NAME) like UPPER(#findText#)
+                                	</isNotNull>
+                                <isEqual property="sortColumn" compareValue="userId">
+				              		ORDER BY USER_ID
+					            </isEqual>
+					             <isEqual property="sortColumn" compareValue="userGrp">
+				              		ORDER BY USER_GRP
+					            </isEqual>
+					             <isEqual property="sortColumn" compareValue="userName">
+				              		ORDER BY USER_NAME
+					            </isEqual>
+					            <isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              	 </isNotNull>) a,
+                          (SELECT count(*) count_
+                           FROM TABLE(gipi_reassign_policy_pkg.get_reassign_par_policy_LOV(#lineCd#, #issCd#))
+                      	         <isNotNull property="findText">
+                                	WHERE UPPER(USER_ID) like UPPER(#findText#)
+                                		OR USER_Grp like #findText#
+                                		OR UPPER(USER_NAME) like UPPER(#findText#)
+                                </isNotNull>) b)
+               WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	<select id="checkUserGIPIS057" resultClass="String">
+		SELECT gipi_reassign_endt_pkg.check_user(#userId#, #underwriter#) FROM DUAL
+	</select>
+	<procedure id="saveReassignParEndt">
+		BEGIN
+			gipi_reassign_endt_pkg.set_gipis_reassign_parlist(#underwriter#,
+																#remarks#,
+																#parId#,
+																#parStatus#,
+																#lineCd#);
+		END;
+	</procedure>
+	
+	<procedure id="createTransferWorkflow" parameterMap="createTransferWorkflowMap">
+		BEGIN
+			gipi_reassign_endt_pkg.CREATE_TRANSFER_WORKFLOW_REC(?,
+																?,
+																?,
+																?,
+																?,
+																?,
+																?,
+																?,
+																?,
+																?);
+		END;
+	</procedure>
+</sqlMap>

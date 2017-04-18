@@ -1,0 +1,1013 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIGenerateStatisticalReports">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<resultMap class="java.util.HashMap" id="gipis901SublineMap" extends="BaseEntity.TableGridResultMap">
+		<result property="lineCd" 		column="LINE_CD"/>
+		<result property="sublineCd"	column="SUBLINE_CD"/>
+		<result property="sublineName"	column="SUBLINE_NAME"/>
+	</resultMap>
+	
+	<select id="getGIPIS901lineCds" resultClass="java.util.HashMap">
+		SELECT GIISP.V('LINE_CODE_FI') line_cd_fi, GIISP.V('LINE_CODE_MC') line_cd_mc
+		  FROM DUAL
+	</select>
+	
+	<!-- start Statistical tab -->
+	
+	<select id="getGipis901MnSublineLOV" resultMap="gipis901SublineMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		  		  FROM  (SELECT * FROM TABLE(GIPIS901_PKG.get_mn_subline_lov)
+			  		  		<isNotNull property="findText">
+			  		  			<!-- edited by MarkS 02/22/2017 SR5850 -->
+			  		  			WHERE UPPER(subline_name) LIKE UPPER(#findText#)
+			  		  			<!-- end SR5850 -->
+			  		  		</isNotNull>
+			  		  		<isEqual property="sortColumn" compareValue="lineCd">
+	                                 ORDER BY line_cd
+	                        </isEqual>
+			  		  		<isEqual property="sortColumn" compareValue="sublineCd">
+	                                 ORDER BY subline_cd
+	                        </isEqual>
+	                        <isEqual property="sortColumn" compareValue="sublineName">
+	                                 ORDER BY subline_name
+	                        </isEqual>
+	                        <isNotNull property="sortColumn">
+	                             <isEqual property="ascDescFlg" compareValue="ASC">
+	                                 ASC
+	                             </isEqual>
+	                             <isEqual property="ascDescFlg" compareValue="DESC">
+	                                 DESC
+	                             </isEqual>
+	                        </isNotNull>
+		  		  		) a,
+		  		  		(SELECT count(*) count_ FROM TABLE(GIPIS901_PKG.get_mn_subline_lov)
+			  		  		<isNotNull property="findText">
+			  		  		<!-- edited by MarkS 02/22/2017 SR5850 -->
+			  		  			WHERE UPPER(subline_name) LIKE UPPER(#findText#)
+			  		  		<!-- end SR5850 -->
+			  		  		</isNotNull>
+		  		  		) b
+		  )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="gipis901VesselMap" extends="BaseEntity.TableGridResultMap">
+		<result property="vesselCd"		column="VESSEL_CD"/>
+		<result property="vesselName"	column="VESSEL_NAME"/>
+	</resultMap>
+	
+	<select id="getGipis901MnVesselLOV" resultMap="gipis901VesselMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		  		  FROM  (SELECT * FROM TABLE(GIPIS901_PKG.get_mn_vessel_lov)
+			  		  		<isNotNull property="findText">
+			  		  		<!-- Added by MarkS 02/22/2017 SR5850 -->
+			  		  			WHERE UPPER(vessel_name) LIKE UPPER(#findText#)
+			  		  		<!-- end SR5850 -->
+			  		  		</isNotNull>
+			  		  		<isEqual property="sortColumn" compareValue="vesselCd">
+	                                 ORDER BY vessel_cd
+	                        </isEqual>
+	                        <isEqual property="sortColumn" compareValue="vesselName">
+	                                 ORDER BY vessel_name
+	                        </isEqual>
+	                        <isNotNull property="sortColumn">
+	                             <isEqual property="ascDescFlg" compareValue="ASC">
+	                                 ASC
+	                             </isEqual>
+	                             <isEqual property="ascDescFlg" compareValue="DESC">
+	                                 DESC
+	                             </isEqual>
+	                        </isNotNull>
+		  		  		) a,
+		  		  		(SELECT count(*) count_ FROM TABLE(GIPIS901_PKG.get_mn_vessel_lov)
+			  		  		<!-- Added by MarkS 02/22/2017 SR5850 -->
+			  		  			WHERE UPPER(vessel_name) LIKE UPPER(#findText#)
+			  		  		<!-- end SR5850 -->
+		  		  		) b
+		  )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<parameterMap class="java.util.HashMap" id="getRecCountStatTabMap">
+		<parameter property="statChoice"		jdbcType="VARCHAR"	javaType="java.lang.String" mode="IN"/>
+		<parameter property="subline"			jdbcType="VARCHAR"	javaType="java.lang.String" mode="IN"/>
+		<parameter property="vessel"			jdbcType="VARCHAR"	javaType="java.lang.String" mode="IN"/>
+		<parameter property="cargoClassCd"		jdbcType="VARCHAR"	javaType="java.lang.String" mode="IN"/>
+		<parameter property="fromDate"			jdbcType="VARCHAR"	javaType="java.lang.String" mode="IN"/>
+		<parameter property="toDate"			jdbcType="VARCHAR"	javaType="java.lang.String" mode="IN"/>
+		<parameter property="userId"			jdbcType="VARCHAR"	javaType="java.lang.String" mode="IN"/>
+		<parameter property="extractId"			jdbcType="INTEGER"	javaType="java.lang.Integer" mode="OUT"/>
+		<parameter property="recCnt"			jdbcType="INTEGER"	javaType="java.lang.Integer" mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="getRecCountStatTab" parameterMap="getRecCountStatTabMap" resultClass="java.lang.Integer">
+		CALL GIPIS901_PKG.GET_REC_CNT_STAT_TAB(?, ?, ?, ?, ?, ?, ?, ?, ?)
+	</procedure>
+	<!-- end Statistical tab -->
+	
+	<!-- start Motor Stat tab -->
+	<parameterMap class="java.util.HashMap" id="extractRecordsMotorStatMap">
+		<parameter property="motorStatType"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="zoneType"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="dateParam"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="printType"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="dateType"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="vIssCd"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="dateFrom"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="dateTo"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="year"				jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="appUser"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="msg"				jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="extractRecordsMotorStat" parameterMap="extractRecordsMotorStatMap">
+		CALL GIPIS901_PKG.extract_records_motor_stat(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)		
+	</procedure>
+	
+	<select id="chkExistingRecMotorStat" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT GIPIS901_PKG.CHK_EXISTING_RECORD_MOTOR_STAT(#motorStatType#, #printType#, #userId#) FROM DUAL
+	</select>
+	<!-- end Motor Stat tab -->
+	
+	<!-- start Fire Stat tab -->
+	<parameterMap class="java.util.HashMap" id="extractFireStatMap">
+		<parameter property="fireStat"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="dateRb"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="pDate"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="dateFrom"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="dateTo"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="asOfDate"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="busCd"			jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="IN"/>
+		<parameter property="zone"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="zoneType"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="riskCnt"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="inclEndt"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="inclExp"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="perilType"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="userId"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="cnt"			jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="extractFireStat" parameterMap="extractFireStatMap">
+		CALL GIPIS901_FIRESTAT_PKG.extract_fire_stat(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)<!-- changed package name : edgar 04/01/2015 -->
+	</procedure>
+	
+	<resultMap class="java.util.HashMap" id="fireTariffMasterMap" extends="BaseEntity.TableGridResultMap">
+		<result property="tarfCd"		column="TARF_CD"/>
+		<result property="tarfDesc"		column="TARF_DESC"/>
+	</resultMap>
+	
+	<select id="getFireTariffMaster" resultMap="fireTariffMasterMap" parameterClass="java.util.HashMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		  		  FROM  (SELECT * FROM TABLE(GIPIS901_FIRESTAT_PKG.POPULATE_FIRE_TARIFF_MASTER(#userId#, #asOfSw#, #zoneType#)) <!-- edgar 03/20/2015 -->
+			  		  		<isNotNull property="filter">
+			  		  			WHERE 1=1
+			  		  			<isNotEmpty prepend="AND" property="tarfCd">
+			  		  				UPPER(tarf_cd) LIKE UPPER(#tarfCd#)
+			  		  			</isNotEmpty>
+			  		  			<isNotEmpty prepend="AND" property="tarfDesc">
+			  		  				UPPER(tarf_desc) LIKE UPPER(#tarfDesc#)
+			  		  			</isNotEmpty>
+			  		  		</isNotNull>
+			  		  		<isEqual property="sortColumn" compareValue="tarfCd">
+	                                 ORDER BY tarf_cd
+	                        </isEqual>
+	                        <isEqual property="sortColumn" compareValue="tarfDesc">
+	                                 ORDER BY tarf_desc
+	                        </isEqual>
+	                        <isNotNull property="sortColumn">
+	                             <isEqual property="ascDescFlg" compareValue="ASC">
+	                                 ASC
+	                             </isEqual>
+	                             <isEqual property="ascDescFlg" compareValue="DESC">
+	                                 DESC
+	                             </isEqual>
+	                        </isNotNull>
+		  		  		) a,
+		  		  		(SELECT count(*) count_ FROM TABLE(GIPIS901_FIRESTAT_PKG.POPULATE_FIRE_TARIFF_MASTER(#userId#, #asOfSw#, #zoneType#))
+			  		  		<isNotNull property="filter">
+			  		  			WHERE 1=1
+			  		  			<isNotEmpty prepend="AND" property="tarfCd">
+			  		  				UPPER(tarf_cd) LIKE UPPER(#tarfCd#)
+			  		  			</isNotEmpty>
+			  		  			<isNotEmpty prepend="AND" property="tarfDesc">
+			  		  				UPPER(tarf_desc) LIKE UPPER(#tarfDesc#)
+			  		  			</isNotEmpty>
+			  		  		</isNotNull>
+		  		  		) b
+		  )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="fireTariffDetailMap" extends="BaseEntity.TableGridResultMap">
+		<result property="policyNo"		column="POLICY_NO"/>
+		<result property="assdNo"		column="ASSD_NO"/>
+		<result property="assdName"		column="ASSD_NAME"/>
+		<result property="tarfCd"		column="TARF_CD"/>
+		<result property="tsiAmt"		column="TSI_AMT"/>
+		<result property="premAmt"		column="PREM_AMT"/>
+		<result property="userId"		column="USER_ID"/>
+	</resultMap>
+	
+	<select id="getFireTariffDetail" resultMap="fireTariffDetailMap" parameterClass="java.util.HashMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		  		  FROM  (SELECT * FROM TABLE(GIPIS901_FIRESTAT_PKG.POPULATE_FIRE_TARIFF_DETAIL(#userId#, #asOfSw#, #tarfCd#, #zoneType#))
+			  		  		<isNotNull property="filter">
+			  		  			WHERE 1=1
+			  		  			<isNotEmpty prepend="AND" property="policyNo">
+			  		  				UPPER(policy_no) LIKE UPPER(#policyNo#)
+			  		  			</isNotEmpty>
+			  		  			<isNotEmpty prepend="AND" property="assdName">
+			  		  				UPPER(assd_name) LIKE UPPER(#assdName#)
+			  		  			</isNotEmpty>
+			  		  		</isNotNull>
+			  		  		<isEqual property="sortColumn" compareValue="policyNo">
+	                                 ORDER BY policy_no
+	                        </isEqual>
+	                        <isEqual property="sortColumn" compareValue="assdName">
+	                                 ORDER BY assd_name
+	                        </isEqual>
+			  		  		<isEqual property="sortColumn" compareValue="tsiAmt">
+	                                 ORDER BY tsi_amt
+	                        </isEqual>
+	                        <isEqual property="sortColumn" compareValue="premAmt">
+	                                 ORDER BY prem_amt
+	                        </isEqual>
+	                        <isNotNull property="sortColumn">
+	                             <isEqual property="ascDescFlg" compareValue="ASC">
+	                                 ASC
+	                             </isEqual>
+	                             <isEqual property="ascDescFlg" compareValue="DESC">
+	                                 DESC
+	                             </isEqual>
+	                        </isNotNull>
+		  		  		) a,
+		  		  		(SELECT count(*) count_ FROM TABLE(GIPIS901_FIRESTAT_PKG.POPULATE_FIRE_TARIFF_DETAIL(#userId#, #asOfSw#, #tarfCd#, #zoneType#))
+			  		  		<isNotNull property="filter">
+			  		  			WHERE 1=1
+			  		  			<isNotEmpty prepend="AND" property="policyNo">
+			  		  				UPPER(policy_no) LIKE UPPER(#policyNo#)
+			  		  			</isNotEmpty>
+			  		  			<isNotEmpty prepend="AND" property="assdName">
+			  		  				UPPER(assd_name) LIKE UPPER(#assdName#)
+			  		  			</isNotEmpty>
+			  		  		</isNotNull>
+		  		  		) b
+		  )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="computeFireTariffTotalsMap">
+		<result property="sumTsiAmt"	column="SUM_TSI_AMT"/>
+		<result property="sumPremAmt"	column="SUM_PREM_AMT"/>
+	</resultMap>
+	
+	<select id="computeFireTariffTotals" resultMap="computeFireTariffTotalsMap" parameterClass="java.util.HashMap">
+		SELECT SUM(tsi_amt) sum_tsi_amt, SUM(prem_amt) sum_prem_amt
+		  FROM TABLE(GIPIS901_FIRESTAT_PKG.POPULATE_FIRE_TARIFF_DETAIL(#userId#, #asOfSw#, #tarfCd#, #zoneType#))
+	</select>
+	
+	<select id="getTrtyTypeCdGipis901" resultClass="java.lang.String" parameterClass="java.lang.String">
+		<!--SELECT rv_low_value
+		  FROM cg_ref_codes
+		 WHERE rv_domain = 'GIIS_CA_TRTY_TYPE.TRTY_TYPE_CD'
+		   AND 'TOTAL '||upper(rv_meaning) = UPPER(#commitAccumDistShare#) :replaced with codes below : edgar 04/16/2015-->
+		SELECT trty_type_cd
+		  FROM giis_ca_trty_type
+		 WHERE 'TOTAL ' || UPPER (TRTY_LNAME) = UPPER (#commitAccumDistShare#)		   
+	</select>
+	
+			
+	<resultMap class="java.util.HashMap" id="fireZoneMasterMap" extends="BaseEntity.TableGridResultMap">
+		<result property="shareCd"		column="SHARE_CD"/>
+		<result property="shareName"	column="SHARE_NAME"/>
+		<result property="lineName"		column="LINE_NAME"/><!-- edgar 03/20/2015 -->
+		<result property="shareTsiAmt"	column="SHARE_TSI_AMT"/>
+		<result property="sharePremAmt"	column="SHARE_PREM_AMT"/>
+		<result property="asOfSw"		column="AS_OF_SW"/>
+	</resultMap>
+	
+	<select id="getFireZoneMaster" resultMap="fireZoneMasterMap" parameterClass="java.util.HashMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		  		  FROM  (SELECT * FROM TABLE(GIPIS901_FIRESTAT_PKG.POPULATE_FIRE_ZONE_MASTER(#userId#, #asOfSw#, #lineCdFi#, #zoneType# )) <!--  jhing 03.19.2015 added zoneType  -->
+			  		  		<isNotNull property="filter">
+			  		  			WHERE 1=1
+			  		  			<isNotEmpty prepend="AND" property="shareName">
+			  		  				UPPER(share_name) LIKE UPPER(#shareName#)
+			  		  			</isNotEmpty>
+			  		  		</isNotNull>
+			  		  		<isEqual property="sortColumn" compareValue="shareName">
+	                                 ORDER BY share_name
+	                        </isEqual>
+	                        <isEqual property="sortColumn" compareValue="lineName">
+	                                 ORDER BY line_name
+	                        </isEqual>
+			  		  		<isEqual property="sortColumn" compareValue="shareTsiAmt">
+	                                 ORDER BY share_tsi_amt
+	                        </isEqual>
+			  		  		<isEqual property="sortColumn" compareValue="sharePremAmt">
+	                                 ORDER BY share_prem_amt
+	                        </isEqual>
+	                        <isNotNull property="sortColumn">
+	                             <isEqual property="ascDescFlg" compareValue="ASC">
+	                                 ASC
+	                             </isEqual>
+	                             <isEqual property="ascDescFlg" compareValue="DESC">
+	                                 DESC
+	                             </isEqual>
+	                        </isNotNull>
+		  		  		) a,
+		  		  		(SELECT count(*) count_ FROM TABLE(GIPIS901_FIRESTAT_PKG.POPULATE_FIRE_ZONE_MASTER(#userId#, #asOfSw#, #lineCdFi# , #zoneType# ))
+			  		  		<isNotNull property="filter">
+			  		  			WHERE 1=1
+			  		  			<isNotEmpty prepend="AND" property="shareName">
+			  		  				UPPER(share_name) LIKE UPPER(#shareName#)
+			  		  			</isNotEmpty>
+			  		  		</isNotNull>
+		  		  		) b
+		  )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+		
+	<select id="computeFireZoneMasterTotals" resultMap="computeFireTariffTotalsMap" parameterClass="java.util.HashMap">
+		SELECT SUM(share_tsi_amt) sum_tsi_amt, SUM(share_prem_amt) sum_prem_amt
+		  FROM TABLE(GIPIS901_FIRESTAT_PKG.POPULATE_FIRE_ZONE_MASTER(#userId#, #asOfSw#, #lineCdFi#, #zoneType#)) <!--  jhing added zoneType 03.19.2015 -->
+	</select>
+	
+	
+	<resultMap class="java.util.HashMap" id="fireZoneDetailMap" extends="BaseEntity.TableGridResultMap">
+		<result property="policyNo"		column="POLICY_NO"/>
+		<result property="shareCd"		column="SHARE_CD"/>
+		<result property="shareName"	column="SHARE_NAME"/>
+		<result property="assdName"		column="ASSD_NAME"/>
+		<result property="shareTsiAmt"	column="SHARE_TSI_AMT"/>
+		<result property="sharePremAmt"	column="SHARE_PREM_AMT"/>
+		<result property="asOfSw"		column="AS_OF_SW"/>
+		<result property="userId"		column="USER_ID"/>
+	</resultMap>
+	
+	<select id="getFireZoneDetail" resultMap="fireZoneDetailMap" parameterClass="java.util.HashMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		  		  FROM  (SELECT * FROM TABLE(GIPIS901_FIRESTAT_PKG.POPULATE_FIRE_ZONE_DETAIL(#userId#, #asOfSw#, #lineCdFi#, #shareCd#, #lineCdFi#, #zoneType#))
+			  		  		<isNotNull property="filter">
+			  		  			WHERE 1=1
+			  		  			<isNotEmpty prepend="AND" property="policyNo">
+			  		  				UPPER(policy_no) LIKE UPPER(#policyNo#)
+			  		  			</isNotEmpty>
+			  		  			<isNotEmpty prepend="AND" property="assdName">
+			  		  				UPPER(assd_name) LIKE UPPER(#assdName#)
+			  		  			</isNotEmpty>
+			  		  		</isNotNull>
+			  		  		<isEqual property="sortColumn" compareValue="policyNo">
+	                                 ORDER BY policy_no
+	                        </isEqual>
+	                        <isEqual property="sortColumn" compareValue="assdName">
+	                                 ORDER BY assd_name
+	                        </isEqual>
+			  		  		<isEqual property="sortColumn" compareValue="shareTsiAmt">
+	                                 ORDER BY share_tsi_amt
+	                        </isEqual>
+	                        <isEqual property="sortColumn" compareValue="sharePremAmt">
+	                                 ORDER BY share_prem_amt
+	                        </isEqual>
+	                        <isNotNull property="sortColumn">
+	                             <isEqual property="ascDescFlg" compareValue="ASC">
+	                                 ASC
+	                             </isEqual>
+	                             <isEqual property="ascDescFlg" compareValue="DESC">
+	                                 DESC
+	                             </isEqual>
+	                        </isNotNull>
+		  		  		) a,
+		  		  		(SELECT count(*) count_ FROM TABLE(GIPIS901_FIRESTAT_PKG.POPULATE_FIRE_ZONE_DETAIL(#userId#, #asOfSw#, #lineCdFi#, #shareCd#, #lineCdFi#, #zoneType#))
+			  		  		<isNotNull property="filter">
+			  		  			WHERE 1=1
+			  		  			<isNotEmpty prepend="AND" property="policyNo">
+			  		  				UPPER(policy_no) LIKE UPPER(#policyNo#)
+			  		  			</isNotEmpty>
+			  		  			<isNotEmpty prepend="AND" property="assdName">
+			  		  				UPPER(assd_name) LIKE UPPER(#assdName#)
+			  		  			</isNotEmpty>
+			  		  		</isNotNull>
+		  		  		) b
+		  )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="computeFireZoneDetailTotals" resultMap="computeFireTariffTotalsMap" parameterClass="java.util.HashMap">
+		SELECT SUM(share_tsi_amt) sum_tsi_amt, SUM(share_prem_amt) sum_prem_amt
+		  FROM TABLE(GIPIS901_FIRESTAT_PKG.POPULATE_FIRE_ZONE_DETAIL(#userId#, #asOfSw#, #lineCdFi#, #shareCd#, #lineCdFi#, #zoneType#))
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="fireCommAccumMasterMap" extends="BaseEntity.TableGridResultMap">
+		<result property="zoneGroup"		column="ZONE_GROUP"/>
+		<result property="nbtZoneGrp"		column="NBT_ZONE_GRP"/>
+		<result property="shareCd"			column="SHARE_CD"/>
+		<result property="distShare"		column="DIST_SHARE"/>
+		<result property="shareType"		column="SHARE_TYPE"/> <!-- edgar 03/20/2015 -->
+		<result property="acctTrtyType"		column="ACCT_TRTY_TYPE"/> <!-- edgar 03/20/2015 -->
+	</resultMap>
+	
+	<select id="getFireCommAccumMaster" resultMap="fireCommAccumMasterMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		  		  FROM  (SELECT * FROM TABLE(GIPIS901_FIRESTAT_PKG.POPULATE_FIRE_COM_ACCUM_MASTER(#asOfSw#, #zoneType#, #userId#))<!-- edgar 04/01/2015 -->
+			  		  		<isNotNull property="filter">
+			  		  			WHERE 1=1
+			  		  			<isNotEmpty prepend="AND" property="nbtZoneGrp">
+			  		  				UPPER(nbt_zone_grp) LIKE UPPER(#nbtZoneGrp#)
+			  		  			</isNotEmpty>
+			  		  			<isNotEmpty prepend="AND" property="distShare">
+			  		  				UPPER(dist_share) LIKE UPPER(#distShare#)
+			  		  			</isNotEmpty>
+			  		  		</isNotNull>
+			  		  	  <isNull property="sortColumn">
+								ORDER BY zone_group , share_type, dist_share 
+						  </isNull>
+			  		  		<isEqual property="sortColumn" compareValue="nbtZoneGrp">
+	                                 ORDER BY nbt_zone_grp
+	                        </isEqual>
+	                        <isEqual property="sortColumn" compareValue="distShare">
+	                                 ORDER BY dist_share
+	                        </isEqual>
+	                        <isNotNull property="sortColumn">
+	                             <isEqual property="ascDescFlg" compareValue="ASC">
+	                                 ASC
+	                             </isEqual>
+	                             <isEqual property="ascDescFlg" compareValue="DESC">
+	                                 DESC
+	                             </isEqual>
+	                        </isNotNull>
+		  		  		) a,
+		  		  		(SELECT count(*) count_ FROM TABLE(GIPIS901_FIRESTAT_PKG.POPULATE_FIRE_COM_ACCUM_MASTER(#asOfSw#, #zoneType#, #userId#))<!-- edgar 04/01/2015 -->
+			  		  		<isNotNull property="filter">
+			  		  			WHERE 1=1
+			  		  			<isNotEmpty prepend="AND" property="nbtZoneGrp">
+			  		  				UPPER(nbt_zone_grp) LIKE UPPER(#nbtZoneGrp#)
+			  		  			</isNotEmpty>
+			  		  			<isNotEmpty prepend="AND" property="distShare">
+			  		  				UPPER(dist_share) LIKE UPPER(#distShare#)
+			  		  			</isNotEmpty>
+			  		  		</isNotNull>
+		  		  		) b
+		  )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="fireCommAccumDetailMap" extends="BaseEntity.TableGridResultMap">
+		<result property="zoneGroup"		column="ZONE_GROUP"/>
+		<result property="zoneType"			column="ZONE_TYPE"/>
+		<result property="zoneNo"			column="ZONE_NO"/>
+		<result property="shareCd"			column="SHARE_CD"/>
+		<result property="asOfSw"			column="AS_OF_SW"/>
+		<result property="policyNo"			column="POLICY_NO"/>
+		<result property="lineCd"			column="LINE_CD"/>
+		<result property="sublineCd"		column="SUBLINE_CD"/>
+		<result property="issCd"			column="ISS_CD"/>
+		<result property="issueYy"			column="ISSUE_YY"/>
+		<result property="polSeqNo"			column="POL_SEQ_NO"/>
+		<result property="renewNo"			column="RENEW_NO"/>
+		<result property="tsiAmtB"			column="TSI_AMT_B"/>
+		<result property="premAmtB"			column="PREM_AMT_B"/>
+		<result property="tsiAmtC"			column="TSI_AMT_C"/>
+		<result property="premAmtC"			column="PREM_AMT_C"/>
+		<result property="tsiAmtL"			column="TSI_AMT_L"/>
+		<result property="premAmtL"			column="PREM_AMT_L"/>
+	</resultMap>
+	
+	<select id="getFireCommAccumDetail" resultMap="fireCommAccumDetailMap" parameterClass="java.util.HashMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		  		  FROM  (SELECT * FROM TABLE(GIPIS901_FIRESTAT_PKG.POPULATE_FIRE_COM_ACCUM_DETAIL(#zone#, #asOfSw#, #zoneGrp#, #nbtZoneGrp#, #zoneType#, #shareCd#, #userId#, #shareType#, #acctTrtyType# ))
+			  		  		<isNotNull property="filter">
+			  		  			WHERE 1=1
+			  		  			<isNotEmpty prepend="AND" property="zoneNo">
+			  		  				zone_no = #zoneNo#
+			  		  			</isNotEmpty>
+			  		  			<isNotEmpty prepend="AND" property="policyNo">
+			  		  				UPPER(policy_no) LIKE UPPER(#policyNo#)
+			  		  			</isNotEmpty>
+			  		  		</isNotNull>
+			  		  		<isEqual property="sortColumn" compareValue="zoneNo">
+	                                 ORDER BY zone_no
+	                        </isEqual>
+	                        <isEqual property="sortColumn" compareValue="policyNo">
+	                                 ORDER BY policy_no
+	                        </isEqual>
+	                        <isEqual property="sortColumn" compareValue="tsiAmtB">
+	                                 ORDER BY tsi_amt_b
+	                        </isEqual>
+	                        <isEqual property="sortColumn" compareValue="premAmtB">
+	                                 ORDER BY prem_amt_b
+	                        </isEqual>
+	                        <isEqual property="sortColumn" compareValue="tsiAmtC">
+	                                 ORDER BY tsi_amt_c
+	                        </isEqual>
+	                        <isEqual property="sortColumn" compareValue="premAmtC">
+	                                 ORDER BY prem_amt_c
+	                        </isEqual>
+	                        <isEqual property="sortColumn" compareValue="tsiAmtL">
+	                                 ORDER BY tsi_amt_l
+	                        </isEqual>
+	                        <isEqual property="sortColumn" compareValue="premAmtL">
+	                                 ORDER BY prem_amt_l
+	                        </isEqual>
+	                        <isNotNull property="sortColumn">
+	                             <isEqual property="ascDescFlg" compareValue="ASC">
+	                                 ASC
+	                             </isEqual>
+	                             <isEqual property="ascDescFlg" compareValue="DESC">
+	                                 DESC
+	                             </isEqual>
+	                        </isNotNull>
+		  		  		) a,
+		  		  		(SELECT count(*) count_ FROM TABLE(GIPIS901_FIRESTAT_PKG.POPULATE_FIRE_COM_ACCUM_DETAIL(#zone#, #asOfSw#, #zoneGrp#, #nbtZoneGrp#, #zoneType#, #shareCd#, #userId#, #shareType#, #acctTrtyType#))
+			  		  		<isNotNull property="filter">
+			  		  			WHERE 1=1
+			  		  			<isNotEmpty prepend="AND" property="zoneNo">
+			  		  				zone_no = #zoneNo#
+			  		  			</isNotEmpty>
+			  		  			<isNotEmpty prepend="AND" property="policyNo">
+			  		  				UPPER(policy_no) LIKE UPPER(#policyNo#)
+			  		  			</isNotEmpty>
+			  		  		</isNotNull>
+		  		  		) b
+		  )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="fireCommAccumTotalsMap">
+		<result property="sumTsiAmtB"		column="SUM_TSI_AMT_B"/>
+		<result property="sumPremAmtB"		column="SUM_PREM_AMT_B"/>
+		<result property="sumTsiAmtC"		column="SUM_TSI_AMT_C"/>
+		<result property="sumPremAmtC"		column="SUM_PREM_AMT_C"/>
+		<result property="sumTsiAmtL"		column="SUM_TSI_AMT_L"/>
+		<result property="sumPremAmtL"		column="SUM_PREM_AMT_L"/>
+	</resultMap>
+	
+
+	<select id="computeFireCommAccumTotals"	resultMap="fireCommAccumTotalsMap" parameterClass="java.util.HashMap">
+		SELECT SUM(tsi_amt_b) sum_tsi_amt_b, SUM(prem_amt_b) sum_prem_amt_b, 
+		       SUM(tsi_amt_c) sum_tsi_amt_c, SUM(prem_amt_c) sum_prem_amt_c,
+			   SUM(tsi_amt_l) sum_tsi_amt_l, SUM(prem_amt_l) sum_prem_amt_l
+		  FROM TABLE(GIPIS901_FIRESTAT_PKG.POPULATE_FIRE_COM_ACCUM_DETAIL(#zone#, #asOfSw#, #zoneGrp#, #nbtZoneGrp#, #zoneType#, #shareCd#, #userId#, #shareType#, #acctTrtyType#))
+	</select>
+
+	
+
+	<select id="getTrtyNameGipis901" resultClass="java.lang.String" parameterClass="java.lang.String">
+		<!-- SELECT 'TOTAL '||upper(rv_meaning)
+		  FROM cg_ref_codes
+		 WHERE rv_domain = 'GIIS_CA_TRTY_TYPE.TRTY_TYPE_CD'
+		   AND 'TOTAL '||upper(rv_meaning) = UPPER(#commitAccumDistShare#) : replaced with codes below : edgar 04/16/2015-->
+		SELECT 'TOTAL ' || UPPER (TRTY_LNAME)
+		  FROM giis_ca_trty_type
+		 WHERE 'TOTAL ' || UPPER (TRTY_LNAME) = UPPER (#commitAccumDistShare#)
+	</select>
+	
+	<select id="countFireStatExt" resultClass="java.lang.Integer" parameterClass="java.util.HashMap">
+		SELECT COUNT(*)
+		 <dynamic prepend="FROM">
+		 	<isNotNull property="tableName">
+		 		$tableName$
+		 	</isNotNull>
+		 	<isNull property="tableName">
+		 		DUAL
+		 	</isNull>
+		 </dynamic>
+	</select>
+	<!-- end Fire Stat tab -->
+	
+	<!-- start Risk Profile tab -->
+	<resultMap class="java.util.HashMap" id="gipis901LineMap" extends="BaseEntity.TableGridResultMap">
+		<result property="lineCd" 		column="LINE_CD"/>
+		<result property="lineName"		column="LINE_NAME"/>
+		<result property="menuLineCd"	column="MENU_LINE_CD"/>	<!-- Gzelle 07292015 SR4136,4196,4285,4271 -->
+	</resultMap>	
+	
+	<select id="getGipis901AllLinesLOV" resultMap="gipis901LineMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		  		  FROM  (SELECT * FROM TABLE(GIPIS901_PKG.GET_RISK_LINE_LOV(#credBranch#, #userId#))
+			  		  		<isNotNull property="findText">
+			  		  			WHERE UPPER(line_name) = UPPER(#findText#)
+			  		  			   OR UPPER(line_cd) = UPPER(#findText#)
+			  		  		</isNotNull>
+			  		  		<isEqual property="sortColumn" compareValue="lineCd">
+	                                 ORDER BY line_cd
+	                        </isEqual>
+	                        <isEqual property="sortColumn" compareValue="lineName">
+	                                 ORDER BY line_name
+	                        </isEqual>
+	                        <isNotNull property="sortColumn">
+	                             <isEqual property="ascDescFlg" compareValue="ASC">
+	                                 ASC
+	                             </isEqual>
+	                             <isEqual property="ascDescFlg" compareValue="DESC">
+	                                 DESC
+	                             </isEqual>
+	                        </isNotNull>
+		  		  		) a,
+		  		  		(SELECT count(*) count_ FROM TABLE(GIPIS901_PKG.GET_RISK_LINE_LOV(#credBranch#, #userId#))
+			  		  		<isNotNull property="findText">
+			  		  			WHERE UPPER(line_name) = UPPER(#findText#)
+			  		  			   OR UPPER(line_cd) = UPPER(#findText#)
+			  		  		</isNotNull>
+		  		  		) b
+		  )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="gipis901CredBranchMap" extends="BaseEntity.TableGridResultMap">
+		<result property="issCd" 		column="ISS_CD"/>
+		<result property="issName"		column="ISS_NAME"/>
+	</resultMap>	
+	
+	<select id="getGipis901CredBranchLOV" resultMap="gipis901CredBranchMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		  		  FROM  (SELECT * FROM TABLE(GIPIS901_PKG.GET_RISK_ISS_LOV(#lineCd#, #userId#))
+			  		  		<isNotNull property="findText">
+			  		  			WHERE UPPER(iss_name) = UPPER(#findText#)
+			  		  			   OR UPPER(iss_cd) = UPPER(#findText#)
+			  		  		</isNotNull>
+			  		  		<isEqual property="sortColumn" compareValue="issCd">
+	                                 ORDER BY iss_cd
+	                        </isEqual>
+	                        <isEqual property="sortColumn" compareValue="issName">
+	                                 ORDER BY iss_name
+	                        </isEqual>
+	                        <isNotNull property="sortColumn">
+	                             <isEqual property="ascDescFlg" compareValue="ASC">
+	                                 ASC
+	                             </isEqual>
+	                             <isEqual property="ascDescFlg" compareValue="DESC">
+	                                 DESC
+	                             </isEqual>
+	                        </isNotNull>
+		  		  		) a,
+		  		  		(SELECT count(*) count_ FROM TABLE(GIPIS901_PKG.GET_RISK_ISS_LOV(#lineCd#, #userId#))
+			  		  		<isNotNull property="findText">
+			  		  			WHERE UPPER(iss_name) = UPPER(#findText#)
+			  		  			   OR UPPER(iss_cd) = UPPER(#findText#)
+			  		  		</isNotNull>
+		  		  		) b
+		  )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="riskProfileMasterMap" extends="BaseEntity.TableGridResultMap">
+		<result property="lineCd"		column="LINE_CD"/>
+		<result property="lineName"		column="LINE_NAME"/>
+		<result property="sublineCd"	column="SUBLINE_CD"/>
+		<result property="sublineName"	column="SUBLINE_NAME"/>
+		<result property="issCd"		column="ISS_CD"/>
+		<result property="issName"		column="ISS_NAME"/>
+		<result property="dateFrom"		column="DATE_FROM"/>
+		<result property="dateTo"		column="DATE_TO"/>
+		<result property="allLineTag"	column="ALL_LINE_TAG"/>
+		<result property="userId"		column="USER_ID"/>
+		<!-- Gzelle 03252015 -->
+		<result property="paramDateRB"		column="PARAM_DATE"/>
+		<result property="incEndt"			column="INC_ENDT"/>
+		<result property="incExpired"		column="INC_EXPIRED"/>
+		<result property="credBranchParam"	column="CRED_BRANCH_PARAM"/>
+		<result property="menuLineCd"		column="MENU_LINE_CD"/>	<!-- Gzelle 07292015 SR4136,4196,4285,4271-->
+	</resultMap>
+	
+	<select id="getRiskProfileMaster" resultMap="riskProfileMasterMap"	parameterClass="java.util.HashMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		  		  FROM  (SELECT * FROM TABLE(GIPIS901_PKG.POPULATE_RISK_PROFILE_MASTER(#ctrlLineCd#, #issCd#, #userId#))
+			  		  		<isNotNull property="filter">
+			  		  			WHERE 1=1
+			  		  			<isNotEmpty prepend="AND" property="lineCd">
+			  		  				UPPER(line_cd) LIKE UPPER(#lineCd#)
+			  		  			</isNotEmpty>
+			  		  			<isNotEmpty prepend="AND" property="lineName">
+			  		  				UPPER(line_name) LIKE UPPER(#lineName#)
+			  		  			</isNotEmpty>
+			  		  			<isNotEmpty prepend="AND" property="sublineCd">
+			  		  				UPPER(subline_cd) LIKE UPPER(#sublineCd#)
+			  		  			</isNotEmpty>
+			  		  			<isNotEmpty prepend="AND" property="sublineName">
+			  		  				UPPER(subline_name) LIKE UPPER(#sublineName#)
+			  		  			</isNotEmpty>
+			  		  			<isNotEmpty prepend="AND" property="issCd">
+			  		  				UPPER(iss_cd) LIKE UPPER(#issCd#)
+			  		  			</isNotEmpty>
+			  		  			<isNotEmpty prepend="AND" property="issName">
+			  		  				UPPER(iss_name) LIKE UPPER(#issName#)
+			  		  			</isNotEmpty>
+			  		  			<isNotEmpty prepend="AND" property="dateFrom">
+			  		  				TRUNC(date_from) = TRUNC(TO_DATE(#dateFrom#, 'MM-DD-RRRR'))
+			  		  			</isNotEmpty>
+			  		  			<isNotEmpty prepend="AND" property="dateTo">
+			  		  				TRUNC(date_to) = TRUNC(TO_DATE(#dateTo#, 'MM-DD-RRRR'))
+			  		  			</isNotEmpty>
+			  		  		</isNotNull>
+			  		  		<isEqual property="sortColumn" compareValue="lineCd">
+	                                 ORDER BY line_cd
+	                        </isEqual>
+	                        <isEqual property="sortColumn" compareValue="lineName">
+	                                 ORDER BY line_name
+	                        </isEqual>
+	                        <isEqual property="sortColumn" compareValue="sublineCd">
+	                                 ORDER BY subline_cd
+	                        </isEqual>
+	                        <isEqual property="sortColumn" compareValue="sublineName">
+	                                 ORDER BY subline_name
+	                        </isEqual>
+			  		  		<isEqual property="sortColumn" compareValue="issCd">
+	                                 ORDER BY iss_cd
+	                        </isEqual>
+	                        <isEqual property="sortColumn" compareValue="issName">
+	                                 ORDER BY iss_name
+	                        </isEqual>
+	                        <isEqual property="sortColumn" compareValue="dateFrom">
+	                                 ORDER BY date_from
+	                        </isEqual>
+	                        <isEqual property="sortColumn" compareValue="dateTo">
+	                                 ORDER BY date_to
+	                        </isEqual>
+	                        <isNotNull property="sortColumn">
+	                             <isEqual property="ascDescFlg" compareValue="ASC">
+	                                 ASC
+	                             </isEqual>
+	                             <isEqual property="ascDescFlg" compareValue="DESC">
+	                                 DESC
+	                             </isEqual>
+	                        </isNotNull>
+		  		  		) a,
+		  		  		(SELECT count(*) count_ FROM TABLE(GIPIS901_PKG.POPULATE_RISK_PROFILE_MASTER(#ctrlLineCd#, #issCd#, #userId#))
+			  		  		<isNotNull property="filter">
+			  		  			WHERE 1=1
+			  		  			<isNotEmpty prepend="AND" property="lineCd">
+			  		  				UPPER(line_cd) LIKE UPPER(#lineCd#)
+			  		  			</isNotEmpty>
+			  		  			<isNotEmpty prepend="AND" property="lineName">
+			  		  				UPPER(line_name) LIKE UPPER(#lineName#)
+			  		  			</isNotEmpty>
+			  		  			<isNotEmpty prepend="AND" property="sublineCd">
+			  		  				UPPER(subline_cd) LIKE UPPER(#sublineCd#)
+			  		  			</isNotEmpty>
+			  		  			<isNotEmpty prepend="AND" property="sublineName">
+			  		  				UPPER(subline_name) LIKE UPPER(#sublineName#)
+			  		  			</isNotEmpty>
+			  		  			<isNotEmpty prepend="AND" property="issCd">
+			  		  				UPPER(iss_cd) LIKE UPPER(#issCd#)
+			  		  			</isNotEmpty>
+			  		  			<isNotEmpty prepend="AND" property="issName">
+			  		  				UPPER(iss_name) LIKE UPPER(#issName#)
+			  		  			</isNotEmpty>
+			  		  			<isNotEmpty prepend="AND" property="dateFrom">
+			  		  				TRUNC(date_from) = TRUNC(TO_DATE(#dateFrom#, 'MM-DD-RRRR'))
+			  		  			</isNotEmpty>
+			  		  			<isNotEmpty prepend="AND" property="dateTo">
+			  		  				TRUNC(date_to) = TRUNC(TO_DATE(#dateTo#, 'MM-DD-RRRR'))
+			  		  			</isNotEmpty>
+			  		  		</isNotNull>
+		  		  		) b
+		  )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="riskProfileDetailMap" extends="BaseEntity.TableGridResultMap">
+		<result property="lineCd"			column="LINE_CD"/>
+		<result property="sublineCd"		column="SUBLINE_CD"/>
+		<result property="prevLineCd"		column="LINE_CD"/>
+		<result property="prevSublineCd"	column="SUBLINE_CD"/>
+		<result property="dateFrom"			column="DATE_FROM"/>
+		<result property="dateTo"			column="DATE_TO"/>
+		<result property="rangeFrom"		column="RANGE_FROM"/>
+		<result property="rangeTo"			column="RANGE_TO"/>
+		<result property="policyCnt"		column="POLICY_CNT"/>
+		<result property="netRetention"		column="NET_RETENTION"/>
+		<result property="quotaShare"		column="QUOTA_SHARE"/>
+		<result property="treaty"			column="TREATY"/>
+		<result property="facultative"		column="FACULTATIVE"/>
+		<result property="allLineTag"		column="ALL_LINE_TAG"/>
+		<result property="userId"			column="USER_ID"/>
+		<result property="minRangeFrom"		column="MIN_RANGE_FROM"/>
+		<result property="maxRangeTo"		column="MAX_RANGE_TO"/>
+		<result property="recCount"			column="REC_COUNT"/>
+	</resultMap>
+	
+	<select id="getRiskProfileDetail" resultMap="riskProfileDetailMap"	parameterClass="java.util.HashMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		  		  FROM  (SELECT * FROM TABLE(GIPIS901_PKG.POPULATE_RISK_PROFILE_DETAIL(#lineCd#, #sublineCd#, #dateFrom#, #dateTo#, #allLineTag#, #userId#))
+			  		  		<isNotNull property="filter">
+			  		  			WHERE 1=1
+			  		  			<isNotEmpty prepend="AND" property="rangeFrom">
+			  		  				range_from = #rangeFrom#
+			  		  			</isNotEmpty>
+			  		  			<isNotEmpty prepend="AND" property="rangeTo">
+			  		  				range_to = #rangeTo#
+			  		  			</isNotEmpty>
+			  		  		</isNotNull>
+			  		  		<isEqual property="sortColumn" compareValue="rangeFrom">
+	                                 ORDER BY range_from
+	                        </isEqual>
+	                        <isEqual property="sortColumn" compareValue="rangeTo">
+	                                 ORDER BY range_to
+	                        </isEqual>
+	                        <isNotNull property="sortColumn">
+	                             <isEqual property="ascDescFlg" compareValue="ASC">
+	                                 ASC
+	                             </isEqual>
+	                             <isEqual property="ascDescFlg" compareValue="DESC">
+	                                 DESC
+	                             </isEqual>
+	                        </isNotNull>
+		  		  		) a,
+		  		  		(SELECT count(*) count_ FROM TABLE(GIPIS901_PKG.POPULATE_RISK_PROFILE_DETAIL(#lineCd#, #sublineCd#, #dateFrom#, #dateTo#, #allLineTag#, #userId#))
+			  		  		<isNotNull property="filter">
+			  		  			WHERE 1=1
+			  		  			<isNotEmpty prepend="AND" property="rangeFrom">
+			  		  				range_from = #rangeFrom#
+			  		  			</isNotEmpty>
+			  		  			<isNotEmpty prepend="AND" property="rangeTo">
+			  		  				range_to = #rangeTo#
+			  		  			</isNotEmpty>
+			  		  		</isNotNull>
+		  		  		) b
+		  )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="chkRiskExtRecords" resultClass="java.lang.String" parameterClass="java.util.HashMap">
+		SELECT '1' exist
+          FROM gipi_risk_profile
+     	 WHERE line_cd              = #lineCd#
+       	   AND NVL(subline_cd,'XX') = NVL(#sublineCd#,'XX')
+           AND user_id              = #userId#
+           AND date_from            = TO_DATE(#dateFrom#, 'MM-DD-RRRR')
+           AND date_to              = TO_DATE(#dateTo#, 'MM-DD-RRRR')
+           AND all_line_tag         = #allLineTag#
+	       AND NVL(policy_count,0) != 0
+	       AND ( (#byTarf#  != 'Y')
+	           OR (#lineCd# = GIISP.V('LINE_CODE_FI') 
+	               AND #byTarf# = 'Y' 
+	               AND tarf_cd IS NOT NULL)
+	            )
+	     AND ROWNUM                 = 1
+	</select> 
+	
+	<select id="getTreatyCountGipis901" resultClass="java.lang.Integer" parameterClass="java.util.HashMap">
+		SELECT GIPIS901_PKG.GET_TREATY_COUNT(#lineCd#, TO_DATE(#startingDate#, 'MM-DD-RRRR'), TO_DATE(#endDate#, 'MM-DD-RRRR'), #byTarf#, #userId#) 
+          FROM DUAL
+	</select>
+	
+	<procedure id="extractRiskProfile" parameterClass="java.util.HashMap">
+		CALL GIPIS901_PKG.extract_risk_profile(#lineCd#, #sublineCd#, TO_DATE(#dateFrom#, 'MM-DD-RRRR'), TO_DATE(#dateTo#, 'MM-DD-RRRR'), #allLineTag#,
+												#paramDate#, #byTarf#, #credBranch#, #inclEndt#, #inclExp#, #userId#)
+	</procedure>
+	
+	<parameterMap class="java.util.HashMap" id="riskSaveGipis901Map">
+		<parameter property="userId"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>		<!-- Gzelle 07292015 SR4136,4196,4285,4271 -->
+		<parameter property="lineCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="lineName"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="sublineCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="sublineName"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="dateFrom"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="dateTo"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="rangeFrom"		jdbcType="NUMERIC"		javaType="java.math.BigDecimal"	mode="IN"/>
+		<parameter property="rangeTo"		jdbcType="NUMERIC"		javaType="java.math.BigDecimal"	mode="IN"/>
+		<parameter property="allLineTag"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="userId"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="recordStatus"	jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="IN"/>
+		<parameter property="prevLineCd"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="prevSublineCd"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="paramDateRB"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>		<!-- start Gzelle 03232015 -->
+		<parameter property="incEndt"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="incExpired"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>	
+		<parameter property="credBranchParam"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>		
+		<parameter property="userResponse"	jdbcType="VARCHAR"	javaType="java.lang.String"			mode="IN"/>		<!-- 04012015 -->
+		<parameter property="prevAllLineTag" 	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="isAddFromUpdate" 	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>		<!-- end 04072015 -->
+	</parameterMap>
+	
+	<procedure id="saveRiskProfileGipis901" parameterMap="riskSaveGipis901Map">
+		BEGIN
+			GIIS_USERS_PKG.app_user := ?;	<!-- Gzelle 07292015 SR4136,4196,4285,4271 -->
+			GIPIS901_PKG.risk_save(?, ?, ?, ?, TO_DATE(?, 'MM-DD-RRRR'), TO_DATE(?, 'MM-DD-RRRR'), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);	<!-- Gzelle 03232015 -->
+		END;
+	</procedure>
+	
+	<delete id="deleteRiskProfile1" parameterClass="java.util.HashMap">
+		DELETE FROM GIPI_RISK_PROFILE
+		 WHERE UPPER(line_cd) = UPPER(#lineCd#)
+		   AND UPPER(subline_cd) IS NULL
+		   AND TRUNC(date_from) = TRUNC(TO_DATE(#dateFrom#, 'MM-DD-RRRR'))
+		   AND TRUNC(date_to) = TRUNC(TO_DATE(#dateTo#, 'MM-DD-RRRR'))
+		   AND UPPER(all_line_tag) = UPPER(#allLineTag#)
+		   AND UPPER(user_id) = UPPER(#userId#)
+		   $cond$
+	</delete>
+	
+	<delete id="deleteRiskProfile2" parameterClass="java.util.HashMap">
+		DELETE FROM GIPI_RISK_PROFILE
+		 WHERE UPPER(line_cd) = UPPER(#lineCd#)
+		   AND UPPER(subline_cd) = UPPER(#sublineCd#)
+		   AND TRUNC(date_from) = TRUNC(TO_DATE(#dateFrom#, 'MM-DD-RRRR'))
+		   AND TRUNC(date_to) = TRUNC(TO_DATE(#dateTo#, 'MM-DD-RRRR'))
+		   AND UPPER(all_line_tag) = UPPER(#allLineTag#)
+		   AND UPPER(user_id) = UPPER(#userId#)
+		   $cond$
+	</delete>
+	
+	<delete id="deleteRiskProfilePrevRecs" parameterClass="java.util.HashMap">
+		CALL gipis901_pkg.delete_risk_profile_prev_recs(#allLineTag#, #userId#)
+	</delete>
+	
+	<!-- end Risk Profile tab -->
+	<!-- added edgar 03/20/2015 -->
+	<procedure id="checkFireStat" parameterMap="extractFireStatMap">
+		CALL GIPIS901_FIRESTAT_PKG.check_fire_stat(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	</procedure>
+	
+	<!-- added edgar 04/27/2015 FULL WEB SR 4322-->
+	<parameterMap class="java.util.HashMap" id="validateFireStatMap">
+		<parameter property="fireStat"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="dateRb"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="pDate"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="dateFrom"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="dateTo"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="asOfDate"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="busCd"			jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="IN"/>
+		<parameter property="zone"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="zoneType"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="riskCnt"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="inclEndt"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="inclExp"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="perilType"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="userId"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="msgAlert"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+	</parameterMap>	
+	
+	<procedure id="validateBeforeExtract" parameterMap="validateFireStatMap">
+		CALL GIPIS901_FIRESTAT_PKG.validate_before_extract(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	</procedure>	
+	<!-- ended edgar 04/27/2015 FULL WEB SR 4322-->
+		
+	<!-- Gzelle 03262015 -->
+	<parameterMap class="java.util.HashMap" id="valRecParamMap">
+		<parameter property="lineCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="sublineCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="allLineTag"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="userId"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="msg"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="valBeforeSave" parameterMap="valRecParamMap">
+		CALL GIPIS901_PKG.val_before_save(?, ?, ?, ?, ?)
+	</procedure>
+
+	<procedure id="valAddUpdRec" parameterMap="valRecParamMap">
+		CALL GIPIS901_PKG.val_add_upd_rec(?, ?, ?, ?, ?)
+	</procedure>	
+	
+	<delete id="deleteRiskProfileRange" parameterClass="java.util.HashMap">
+		DELETE FROM GIPI_RISK_PROFILE
+		 WHERE UPPER(line_cd) = UPPER(#lineCd#)
+		   AND (subline_cd = NVL(#sublineCd#, subline_cd)
+                 OR subline_cd IS NULL)
+		   AND UPPER(all_line_tag) = UPPER(#allLineTag#)
+		   AND UPPER(user_id) = UPPER(#userId#)
+		   AND range_from = #rangeFrom#
+   		   AND range_to = #rangeTo#
+	</delete>
+
+	<delete id="deleteRelatedTableItem" parameterClass="java.util.HashMap">
+		DELETE FROM GIPI_RISK_PROFILE_ITEM
+		 WHERE UPPER(line_cd) = UPPER(#lineCd#)
+		   AND (subline_cd = NVL(#sublineCd#, subline_cd)
+                 OR subline_cd IS NULL)
+		   AND UPPER(all_line_tag) = UPPER(#allLineTag#)
+		   AND UPPER(user_id) = UPPER(#userId#)	
+	</delete>	
+	
+	<delete id="deleteRelatedTableDtl" parameterClass="java.util.HashMap">	
+			DELETE FROM GIPI_RISK_PROFILE_DTL
+		 WHERE UPPER(line_cd) = UPPER(#lineCd#)
+		   AND (subline_cd = NVL(#sublineCd#, subline_cd)
+                 OR subline_cd IS NULL)
+		   AND UPPER(all_line_tag) = UPPER(#allLineTag#)
+		   AND UPPER(user_id) = UPPER(#userId#)	
+	</delete>		   
+</sqlMap>

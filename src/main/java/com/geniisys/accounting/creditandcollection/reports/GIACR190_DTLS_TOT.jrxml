@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIACR190_DTLS_TOT" language="groovy" columnCount="12" pageWidth="415" pageHeight="25" columnWidth="34" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="Crosstab Data Text" isDefault="false" hAlign="Center"/>
+	<parameter name="P_BAL_AMT_DUE" class="java.math.BigDecimal"/>
+	<parameter name="P_BRANCH_CD" class="java.lang.String"/>
+	<parameter name="P_INC_OVERDUE" class="java.lang.String"/>
+	<parameter name="P_INTM_NO" class="java.lang.String"/>
+	<parameter name="P_INTM_TYPE" class="java.lang.String"/>
+	<parameter name="P_MONTH" class="java.lang.String"/>
+	<parameter name="P_USER" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT * FROM table(giacr190_pkg.get_giacr190_details($P{P_BAL_AMT_DUE}, $P{P_BRANCH_CD}, $P{P_INC_OVERDUE}, $P{P_INTM_NO}, $P{P_INTM_TYPE}, $P{P_MONTH}, $P{P_USER}))]]>
+	</queryString>
+	<field name="COLUMN_TITLE" class="java.lang.String"/>
+	<field name="COL_NO" class="java.math.BigDecimal"/>
+	<field name="INTM_TYPE" class="java.lang.String"/>
+	<field name="BRANCH_CD" class="java.lang.String"/>
+	<field name="INTMBAL" class="java.math.BigDecimal"/>
+	<field name="INTMPREM" class="java.math.BigDecimal"/>
+	<field name="INTMTAX" class="java.math.BigDecimal"/>
+	<field name="INTM_NO" class="java.math.BigDecimal"/>
+	<field name="INTM_NAME" class="java.lang.String"/>
+	<variable name="V_GT_COL" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{INTMBAL}]]></variableExpression>
+	</variable>
+	<summary>
+		<band height="25" splitType="Stretch">
+			<crosstab>
+				<reportElement x="0" y="0" width="415" height="25"/>
+				<rowGroup name="INTM_NO" width="0" totalPosition="End">
+					<bucket>
+						<bucketExpression class="java.math.BigDecimal"><![CDATA[$F{INTM_NO}]]></bucketExpression>
+					</bucket>
+					<crosstabRowHeader>
+						<cellContents backcolor="#F0F8FF" mode="Opaque"/>
+					</crosstabRowHeader>
+					<crosstabTotalRowHeader>
+						<cellContents backcolor="#BFE1FF" mode="Opaque"/>
+					</crosstabTotalRowHeader>
+				</rowGroup>
+				<columnGroup name="COL_NO" height="0">
+					<bucket>
+						<bucketExpression class="java.math.BigDecimal"><![CDATA[$F{COL_NO}]]></bucketExpression>
+					</bucket>
+					<crosstabColumnHeader>
+						<cellContents backcolor="#F0F8FF" mode="Opaque"/>
+					</crosstabColumnHeader>
+					<crosstabTotalColumnHeader>
+						<cellContents/>
+					</crosstabTotalColumnHeader>
+				</columnGroup>
+				<measure name="INTMBALMeasure" class="java.math.BigDecimal" calculation="Sum">
+					<measureExpression><![CDATA[$F{INTMBAL}]]></measureExpression>
+				</measure>
+				<crosstabCell width="82" height="0">
+					<cellContents/>
+				</crosstabCell>
+				<crosstabCell width="82" height="23" rowTotalGroup="INTM_NO">
+					<cellContents backcolor="#FFFFFF" mode="Opaque">
+						<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+							<reportElement style="Crosstab Data Text" x="0" y="6" width="82" height="11" isPrintWhenDetailOverflows="true"/>
+							<textElement textAlignment="Right">
+								<font fontName="SansSerif" size="7"/>
+							</textElement>
+							<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{INTMBALMeasure} == null ? 0:$V{INTMBALMeasure}]]></textFieldExpression>
+						</textField>
+						<staticText>
+							<reportElement style="Crosstab Data Text" x="0" y="0" width="82" height="6"/>
+							<textElement textAlignment="Right">
+								<font fontName="SansSerif" size="4"/>
+							</textElement>
+							<text><![CDATA[-----------------------------------------------------------]]></text>
+						</staticText>
+						<staticText>
+							<reportElement style="Crosstab Data Text" x="0" y="17" width="82" height="6"/>
+							<textElement textAlignment="Right">
+								<font fontName="SansSerif" size="4"/>
+							</textElement>
+							<text><![CDATA[==================================]]></text>
+						</staticText>
+					</cellContents>
+				</crosstabCell>
+			</crosstab>
+		</band>
+	</summary>
+</jasperReport>

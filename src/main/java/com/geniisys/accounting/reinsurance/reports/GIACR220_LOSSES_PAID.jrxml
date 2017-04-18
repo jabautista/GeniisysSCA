@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIACR220_LOSSES_PAID" language="groovy" pageWidth="612" pageHeight="792" columnWidth="612" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="1.3310000000000006"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="P_LINE_CD" class="java.lang.String"/>
+	<parameter name="P_TRTY_YY" class="java.lang.Integer"/>
+	<parameter name="P_RI_CD" class="java.lang.Integer"/>
+	<parameter name="P_PROC_QTR" class="java.lang.Integer"/>
+	<parameter name="P_SHARE_CD" class="java.lang.Integer"/>
+	<parameter name="P_PROC_YEAR" class="java.lang.Integer"/>
+	<parameter name="P_PREMIUM_CEDED_AMT" class="java.math.BigDecimal"/>
+	<parameter name="P_DR_CR_TAG_3" class="java.lang.String"/>
+	<parameter name="P_LOSS_PAID_BRK" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT *
+  FROM TABLE(giacr220_pkg.get_subreport4($P{P_LINE_CD}, $P{P_TRTY_YY}, $P{P_SHARE_CD}, $P{P_RI_CD}, $P{P_PROC_YEAR}, $P{P_PROC_QTR}))]]>
+	</queryString>
+	<field name="LINE_CD" class="java.lang.String"/>
+	<field name="TRTY_YY" class="java.math.BigDecimal"/>
+	<field name="SHARE_CD" class="java.math.BigDecimal"/>
+	<field name="RI_CD" class="java.math.BigDecimal"/>
+	<field name="PROC_YEAR" class="java.math.BigDecimal"/>
+	<field name="PROC_QTR" class="java.math.BigDecimal"/>
+	<field name="PERIL_CD" class="java.math.BigDecimal"/>
+	<field name="PERIL_NAME" class="java.lang.String"/>
+	<field name="PREMIUM_AMT" class="java.math.BigDecimal"/>
+	<field name="COMMISSION_AMT" class="java.math.BigDecimal"/>
+	<field name="TRTY_COMM_RT" class="java.math.BigDecimal"/>
+	<field name="LOSS_PAID_AMT" class="java.math.BigDecimal"/>
+	<field name="LOSS_EXP_AMT" class="java.math.BigDecimal"/>
+	<field name="TREATY_SEQ_NO" class="java.math.BigDecimal"/>
+	<detail>
+		<band height="15">
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="343" y="1" width="100" height="13">
+					<printWhenExpression><![CDATA[!$P{P_LOSS_PAID_BRK}.equals("N") ? true : (    ($P{P_DR_CR_TAG_3}.equals( "D" ) && ($P{P_PREMIUM_CEDED_AMT}.compareTo(new BigDecimal("0")) >= 0) )
+                                            || ($P{P_DR_CR_TAG_3}.equals( "C" ) && ($P{P_PREMIUM_CEDED_AMT}.compareTo(new BigDecimal("0")) < 0) )
+                                           ) ? true : false]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{LOSS_PAID_AMT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="453" y="1" width="100" height="13">
+					<printWhenExpression><![CDATA[($P{P_DR_CR_TAG_3}.equals( "C" ) && ($P{P_PREMIUM_CEDED_AMT}.compareTo(new BigDecimal("0")) >= 0) )
+|| ($P{P_DR_CR_TAG_3}.equals( "D" ) && ($P{P_PREMIUM_CEDED_AMT}.compareTo(new BigDecimal("0")) < 0) )]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{LOSS_PAID_AMT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="">
+				<reportElement x="100" y="1" width="216" height="13"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{PERIL_NAME}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

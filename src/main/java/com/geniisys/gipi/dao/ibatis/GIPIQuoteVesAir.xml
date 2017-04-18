@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIQuoteVesAir">
+	
+	<typeAlias alias="QuoteVesAir" type="com.geniisys.gipi.entity.GIPIQuoteVesAir" />
+	
+	<resultMap class="QuoteVesAir" id="quoteVesAirResultMap">
+		<result property="quoteId"		column="QUOTE_ID"/>
+		<result property="vesselCd"		column="VESSEL_CD"/>
+		<result property="vesselName"	column="VESSEL_NAME"/>
+		<result property="vesselFlag"	column="VESSEL_FLAG"/>
+		<result property="vesselType"	column="VESSEL_TYPE"/>
+		<result property="recFlag"		column="REC_FLAG"/>
+		<result property = "rowNum" column = "rownum_" />
+		<result property="rowCount" column = "count_" />
+	</resultMap>
+	
+	<resultMap class="QuoteVesAir" id="quoteVesAirResultMap2">
+		<result property="quoteId"		column="QUOTE_ID"/>
+		<result property="vesselCd"		column="VESSEL_CD"/>
+		<result property="vesselName"	column="VESSEL_NAME"/>
+		<result property="vesselFlag"	column="VESSEL_FLAG"/>
+		<result property="vesselType"	column="VESSEL_TYPE"/>
+		<result property="recFlag"		column="REC_FLAG"/>
+	</resultMap>
+	
+	<parameterMap class="map" 			id="isGIPIQuoteVesairExistMap">
+	    <parameter property="quoteId"	jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+	    <parameter property="exist"		jdbcType="VARCHAR" 	javaType="java.lang.String"   mode="OUT"/>
+	</parameterMap>
+
+	<select id="getGIPIQuoteVesAir" parameterClass = "java.lang.Integer" resultMap="quoteVesAirResultMap2"> <!-- change by steve 11/8/2012 from:java.util.Map   to:java.lang.Integer  -->
+		SELECT * FROM TABLE(GIPI_QUOTE_VES_AIR_PKG.get_gipi_quote_ves_air(#quoteId#))
+	</select>
+	
+	<select id="getGIPIQuoteVesAir2" parameterClass="java.util.HashMap"   resultMap="quoteVesAirResultMap">
+			SELECT *
+			  FROM (SELECT rownum rownum_, 
+			               b.count_, a.*
+			          FROM (SELECT * 
+			          			FROM TABLE(GIPI_QUOTE_VES_AIR_PKG.get_gipi_quote_ves_air(#quoteId#))
+			          				WHERE UPPER(NVL(VESSEL_NAME,'*')) LIKE UPPER(NVL(#vesselName#, NVL(VESSEL_NAME,'*')))
+                              		AND UPPER(NVL(VESSEL_TYPE,'*')) LIKE UPPER(NVL(#vesselType#, NVL(VESSEL_TYPE,'*')))
+				            <isEqual property="sortColumn" compareValue="vesselName">
+			              		ORDER BY vessel_name
+				            </isEqual>
+				            <isEqual property="sortColumn" compareValue="vesselType">
+			              		ORDER BY vessel_type
+				            </isEqual>
+				            <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	 </isNotNull>) a, 
+			               (SELECT count(*) count_
+			                  FROM TABLE (GIPI_QUOTE_VES_AIR_PKG.get_gipi_quote_ves_air(#quoteId#))
+			                  	WHERE UPPER(NVL(VESSEL_NAME,'*')) LIKE UPPER(NVL(#vesselName#, NVL(VESSEL_NAME,'*')))
+                              		AND UPPER(NVL(VESSEL_TYPE,'*')) LIKE UPPER(NVL(#vesselType#, NVL(VESSEL_TYPE,'*')))) b) 
+			 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<procedure id="deleteAllGIPIQuoteVesAir">
+		BEGIN
+			GIPI_QUOTE_VES_AIR_PKG.del_all_gipi_quote_ves_air(#quoteId#);
+		END;			
+	</procedure>
+	
+	<procedure id="deleteGIPIQuoteVesAir" parameterClass="java.util.HashMap">
+		BEGIN
+			GIPI_QUOTE_VES_AIR_PKG.del_gipi_quote_ves_air(#quoteId#, #vesselCd#);
+		END;
+	</procedure>
+	
+	<procedure id="saveGIPIQuoteVesAir" parameterClass="QuoteVesAir">
+		DECLARE
+			carrier	GIPI_QUOTE_VES_AIR%ROWTYPE;
+		BEGIN
+			carrier.QUOTE_ID    := #quoteId#;
+			carrier.VESSEL_CD := #vesselCd#;
+			carrier.REC_FLAG  := #recFlag#;
+			
+			GIPI_QUOTE_VES_AIR_PKG.set_gipi_quote_ves_air(carrier);
+		END;
+	</procedure>
+	
+	<procedure id="checkIfGIPIQuoteVesAirExist" parameterMap="isGIPIQuoteVesairExistMap">
+		{ CALL GIPI_QUOTE_VES_AIR_PKG.check_if_quote_ves_air_exist(?, ?) }
+	</procedure>
+	
+	<select id="checkIfGIPIQuoteVesAirExist2" parameterClass="java.lang.Integer" resultClass="java.lang.Integer">
+		SELECT DISTINCT 1
+          FROM gipi_quote_ves_air
+       WHERE quote_id = #quoteId#
+	</select>
+
+</sqlMap>

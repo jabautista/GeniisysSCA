@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap>
+	<typeAlias alias="GIXXOpenPeril" type="com.geniisys.gixx.entity.GIXXOpenPeril" />
+	
+	<resultMap id="getGIXXOpenPerilMap" class="GIXXOpenPeril" extends="BaseEntity.TableGridResultMap">
+		<result column="EXTRACT_ID"			property="extractId" />
+		<result column="GEOG_CD"			property="geogCd" />
+		<result column="LINE_CD"			property="lineCd" />
+		<result column="PERIL_CD"			property="perilCd" />
+		<result column="PREM_RATE"			property="premRate" />
+		<result column="REC_FLAG"			property="recFlag" />
+		<result column="REMARKS"			property="remarks" />
+		<result column="POLICY_ID"			property="policyId" />
+		<result column="WITH_INVOICE_TAG"	property="withInvoiceTag" />
+		<result column="PERIL_NAME"			property="perilName" />
+		<result column="PERIL_TYPE"			property="perilType" />
+	</resultMap>
+	
+	<select id="getGIXXOpenPerilList" resultMap="getGIXXOpenPerilMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, b.count_, a.*
+		  		  FROM (SELECT * FROM TABLE(gixx_open_peril_pkg.get_open_peril_list(#extractId#, #geogCd#))) a,
+		  		  	   (SELECT count(*) count_ FROM TABLE(gixx_open_peril_pkg.get_open_peril_list(#extractId#, #geogCd#))) b)
+		 WHERE rownum_ BETWEEN NVL(#from#,rownum_) AND NVL(#to#,rownum_)
+	</select>
+</sqlMap>

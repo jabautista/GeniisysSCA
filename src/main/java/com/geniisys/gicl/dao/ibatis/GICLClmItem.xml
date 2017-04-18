@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GICLClmItem">
+	
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<update id="updGiclClmItem" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			gicl_clm_item_pkg.upd_gicl_clm_item(#itemDesc#, #itemDesc2#, #claimId#, #itemNo#);
+		END;
+	</update>
+	
+	<parameterMap class="map" id="clearClmItemPerilMap">
+		<parameter property="userId"	    	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN" />
+		<parameter property="claimId"	    	jdbcType="NUMBER"	javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="lineCd"	    	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN" />
+		<parameter property="dspLossDate"	    jdbcType="DATE"		javaType="java.util.Date"		mode="IN" />
+		<parameter property="msgAlert"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT" />
+	</parameterMap>
+	
+	<procedure id="clearClmItemPeril" parameterMap="clearClmItemPerilMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			gicl_clm_item_pkg.clear_item_peril(?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<resultMap class="java.util.HashMap" id="currencyListResultMap">
+		<result column="main_currency_cd" 		property="mainCurrencyCd" />
+        <result column="currency_desc" 			property="currencyDesc" />
+        <result column="currency_rt" 			property="currencyRt" />
+        <result column="item_no" 				property="itemNo" />
+        <result column="item_title" 			property="itemTitle" />
+		<result column="rownum_" 				property="rowNum" />
+		<result column="count_" 				property="rowCount" />
+	</resultMap>
+	
+	<select id="getGiclClmItemCurrencyLOV" resultMap="currencyListResultMap" >
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+		               b.count_,
+		               a.* 
+		          FROM (SELECT * FROM TABLE(gicl_clm_item_pkg.get_currency_list(#claimId#))    
+				         <isNotNull property="findText">
+				         WHERE (UPPER(main_currency_cd) LIKE UPPER(#findText#)
+				         	 OR UPPER(currency_desc) LIKE UPPER(#findText#)
+				         	 OR UPPER(currency_rt) LIKE UPPER(#findText#)
+				         	 OR UPPER(item_no) LIKE UPPER(#findText#)
+				         	 OR UPPER(item_title) LIKE UPPER(#findText#)
+				         	 )
+				         </isNotNull>
+			          	  <isNotNull property="sortColumn">
+				          	  <isEqual property="sortColumn" compareValue="mainCurrencyCd">
+				              		ORDER BY main_currency_cd
+				              </isEqual>
+			                  <isEqual property="sortColumn" compareValue="currencyDesc">
+				              		ORDER BY currency_desc
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="currencyRt">
+				              		ORDER BY currency_rt
+				              </isEqual>	
+				              <isEqual property="sortColumn" compareValue="itemNo">
+				              		ORDER BY item_no
+				              </isEqual>	
+				              <isEqual property="sortColumn" compareValue="itemTitle">
+				              		ORDER BY item_title
+				              </isEqual>	
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(gicl_clm_item_pkg.get_currency_list(#claimId#))
+		                 <isNotNull property="findText">
+				         WHERE (UPPER(main_currency_cd) LIKE UPPER(#findText#) 
+				         	 OR UPPER(currency_desc) LIKE UPPER(#findText#)
+				         	 OR UPPER(currency_rt) LIKE UPPER(#findText#)
+				         	 OR UPPER(item_no) LIKE UPPER(#findText#)
+				         	 OR UPPER(item_title) LIKE UPPER(#findText#)
+				         	 )
+				         </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="otherLinesGicls260Map">
+		<result column="item_no" 				property="itemNo" />
+        <result column="item_title" 			property="itemTitle" />
+        <result column="other_info" 			property="otherInfo" />
+        <result column="currency_cd" 			property="currencyCd" />
+        <result column="dsp_currency_desc"		property="nbtCurrencyDesc" /> <!-- benjo 09.08.2015 GENQA-SR-4874 nbt_currency_desc -> dsp_currency_desc -->
+        <result column="currency_rate"			property="currencyRate" />
+        <result column="loss_date"				property="lossDate" />
+        <result column="gicl_item_peril_exist" 	property="giclItemPerilExist" 	nullValue="N"/>
+		<result column="rownum_" 				property="rowNum" />
+		<result column="count_" 				property="rowCount" />
+	</resultMap>
+	
+	<select id="getOtherLinesDtlGicls260" resultMap="otherLinesGicls260Map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(gicl_clm_item_pkg.get_gicl_clm_item_gicls260(#claimId#))   
+		          			<isNotNull property="filter">
+						      WHERE 1=1
+						      	<isNotEmpty prepend="AND" property="itemNo">
+              					  item_no LIKE #itemNo#
+              			        </isNotEmpty>
+              			        <isNotEmpty prepend="AND" property="itemTitle">
+              					  UPPER(item_title) LIKE UPPER(#itemTitle#)
+              			        </isNotEmpty>
+              			        <isNotEmpty prepend="AND" property="dspCurrencyDesc">
+              					  UPPER(dsp_currency_desc) LIKE UPPER(#dspCurrencyDesc#)
+              			        </isNotEmpty>
+              			        <isNotEmpty prepend="AND" property="currencyRate">
+              					  currency_rate LIKE #currencyRate#
+              			        </isNotEmpty>
+                   		  	</isNotNull>
+		          			<isEqual property="sortColumn" compareValue="itemNo">
+			            		ORDER BY item_no
+			          		</isEqual>  
+			          		<isEqual property="sortColumn" compareValue="itemTitle">
+			            		ORDER BY item_title
+			          		</isEqual>  
+			          		<isEqual property="sortColumn" compareValue="dspCurrencyDesc">
+			            		ORDER BY dsp_currency_desc
+			          		</isEqual>
+			          		<isEqual property="sortColumn" compareValue="currencyRate">
+			            		ORDER BY currency_rate
+			          		</isEqual>       
+			           		<isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	</isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(gicl_clm_item_pkg.get_gicl_clm_item_gicls260(#claimId#))
+		                  	<isNotNull property="filter">
+						      WHERE 1=1
+						      	<isNotEmpty prepend="AND" property="itemNo">
+              					  item_no LIKE #itemNo#
+              			        </isNotEmpty>
+              			        <isNotEmpty prepend="AND" property="itemTitle">
+              					  UPPER(item_title) LIKE UPPER(#itemTitle#)
+              			        </isNotEmpty>
+              			        <isNotEmpty prepend="AND" property="dspCurrencyDesc">
+              					  UPPER(dsp_currency_desc) LIKE UPPER(#dspCurrencyDesc#)
+              			        </isNotEmpty>
+              			        <isNotEmpty prepend="AND" property="currencyRate">
+              					  currency_rate LIKE #currencyRate#
+              			        </isNotEmpty>
+                   		  	</isNotNull>) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+</sqlMap>

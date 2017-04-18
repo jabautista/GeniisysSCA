@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIACR328_BRANCH_TOTAL" language="groovy" pageWidth="842" pageHeight="595" columnWidth="842" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="Crosstab Data Text" isDefault="false" hAlign="Center"/>
+	<parameter name="P_USER_ID" class="java.lang.String"/>
+	<parameter name="P_ISS_CD" class="java.lang.String"/>
+	<parameter name="P_FROM_DATE" class="java.lang.String"/>
+	<parameter name="P_TO_DATE" class="java.lang.String"/>
+	<parameter name="P_DATE" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[select * from table(giacr328_pkg.GET_COLUMN_DETAILS($P{P_USER_ID},
+$P{P_ISS_CD},
+TO_DATE($P{P_FROM_DATE}, 'MM-DD-YYYY'),
+TO_DATE($P{P_TO_DATE}, 'MM-DD-YYYY')))]]>
+	</queryString>
+	<field name="PREM_AMT" class="java.math.BigDecimal"/>
+	<field name="INTM_NO" class="java.math.BigDecimal"/>
+	<field name="LINE_CD" class="java.lang.String"/>
+	<field name="REF_INTM_CD" class="java.lang.String"/>
+	<field name="INVOICE_NO" class="java.lang.String"/>
+	<field name="POLICY_NO" class="java.lang.String"/>
+	<field name="ISS_CD" class="java.lang.String"/>
+	<field name="EFF_DATE" class="java.sql.Timestamp"/>
+	<field name="INCEPT_DATE" class="java.sql.Timestamp"/>
+	<field name="AGE" class="java.math.BigDecimal"/>
+	<field name="GROSS_PREM_AMT" class="java.math.BigDecimal"/>
+	<field name="ISS_NAME" class="java.lang.String"/>
+	<field name="INTM_NAME" class="java.lang.String"/>
+	<field name="LINE_NAME" class="java.lang.String"/>
+	<field name="COLUMN_TITLE" class="java.lang.String"/>
+	<field name="PREM" class="java.math.BigDecimal"/>
+	<summary>
+		<band height="13" splitType="Stretch">
+			<crosstab>
+				<reportElement x="0" y="0" width="842" height="12"/>
+				<rowGroup name="ISS_NAME" width="0" totalPosition="End">
+					<bucket>
+						<bucketExpression class="java.lang.String"><![CDATA[$F{ISS_NAME}]]></bucketExpression>
+					</bucket>
+					<crosstabRowHeader>
+						<cellContents backcolor="#FFFFFF" mode="Opaque"/>
+					</crosstabRowHeader>
+					<crosstabTotalRowHeader>
+						<cellContents/>
+					</crosstabTotalRowHeader>
+				</rowGroup>
+				<rowGroup name="INTM_NAME" width="0" totalPosition="End">
+					<bucket>
+						<bucketExpression class="java.lang.String"><![CDATA[$F{INTM_NAME}]]></bucketExpression>
+					</bucket>
+					<crosstabRowHeader>
+						<cellContents backcolor="#FFFFFF" mode="Opaque"/>
+					</crosstabRowHeader>
+					<crosstabTotalRowHeader>
+						<cellContents/>
+					</crosstabTotalRowHeader>
+				</rowGroup>
+				<rowGroup name="LINE_CD" width="0">
+					<bucket>
+						<bucketExpression class="java.lang.String"><![CDATA[$F{LINE_CD}]]></bucketExpression>
+					</bucket>
+					<crosstabRowHeader>
+						<cellContents/>
+					</crosstabRowHeader>
+					<crosstabTotalRowHeader>
+						<cellContents/>
+					</crosstabTotalRowHeader>
+				</rowGroup>
+				<rowGroup name="POLICY_NO" width="0">
+					<bucket>
+						<bucketExpression class="java.lang.String"><![CDATA[$F{POLICY_NO}]]></bucketExpression>
+					</bucket>
+					<crosstabRowHeader>
+						<cellContents/>
+					</crosstabRowHeader>
+					<crosstabTotalRowHeader>
+						<cellContents/>
+					</crosstabTotalRowHeader>
+				</rowGroup>
+				<columnGroup name="COLUMN_TITLE" height="0">
+					<bucket>
+						<bucketExpression class="java.lang.String"><![CDATA[$F{COLUMN_TITLE}]]></bucketExpression>
+					</bucket>
+					<crosstabColumnHeader>
+						<cellContents backcolor="#FFFFFF" mode="Opaque"/>
+					</crosstabColumnHeader>
+					<crosstabTotalColumnHeader>
+						<cellContents/>
+					</crosstabTotalColumnHeader>
+				</columnGroup>
+				<measure name="PREM_AMTMeasure" class="java.math.BigDecimal">
+					<measureExpression><![CDATA[$F{PREM_AMT}]]></measureExpression>
+				</measure>
+				<measure name="SUM_PER_BRANCH" class="java.math.BigDecimal" calculation="Sum">
+					<measureExpression><![CDATA[$F{PREM_AMT}]]></measureExpression>
+				</measure>
+				<crosstabCell width="84" height="0">
+					<cellContents/>
+				</crosstabCell>
+				<crosstabCell width="84" height="18" rowTotalGroup="INTM_NAME">
+					<cellContents backcolor="#FFFFFF" mode="Opaque">
+						<textField isStretchWithOverflow="true" pattern="#,##0.00">
+							<reportElement style="Crosstab Data Text" x="0" y="7" width="80" height="11">
+								<printWhenExpression><![CDATA[$V{ISS_NAME} != null]]></printWhenExpression>
+							</reportElement>
+							<textElement textAlignment="Right">
+								<font fontName="SansSerif" size="7"/>
+							</textElement>
+							<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{SUM_PER_BRANCH} == null ? 0 : $V{SUM_PER_BRANCH}]]></textFieldExpression>
+						</textField>
+						<staticText>
+							<reportElement x="0" y="0" width="80" height="7">
+								<printWhenExpression><![CDATA[$V{ISS_NAME} != null]]></printWhenExpression>
+							</reportElement>
+							<textElement textAlignment="Right" verticalAlignment="Middle">
+								<font fontName="SansSerif" size="6"/>
+							</textElement>
+							<text><![CDATA[---------------------------------------------------	]]></text>
+						</staticText>
+					</cellContents>
+				</crosstabCell>
+				<crosstabCell width="84" height="0" rowTotalGroup="ISS_NAME">
+					<cellContents backcolor="#FFFFFF" mode="Opaque"/>
+				</crosstabCell>
+			</crosstab>
+		</band>
+	</summary>
+</jasperReport>

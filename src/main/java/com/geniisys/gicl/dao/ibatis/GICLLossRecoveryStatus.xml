@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GICLLossRecoveryStatus">
+
+	<resultMap class="java.util.HashMap" id="RecoveryStatusResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="claimId" 			column="claim_id"/>
+		<result property="recoveryId" 		column="recovery_id"/>
+		<result property="recoveryNo" 		column="recovery_no"/>
+		<result property="claimNo" 			column="claim_no"/>
+		<result property="lossCategory"  	column="loss_category"/>
+		<result property="recoveryStatus"   column="recovery_status"/>
+		<result property="policyNo" 		column="policy_no"/>
+		<result property="assuredName" 		column="assured_name"/>
+		<result property="dspLossDate" 		column="loss_date"/>
+		<result property="clmFileDate" 		column="clm_file_date"/>
+		<result property="lawyerCd" 		column="lawyer_cd"/> 
+		<result property="lawyer" 			column="lawyer"/>
+		<result property="tpItemDesc" 		column="tp_item_desc"/>
+		<result property="recoverableAmt" 	column="recoverable_amt"/>
+		<result property="recoveredAmtR" 	column="recovered_amt_r"/>
+		<result property="plateNo"  		column="plate_no"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="RecoveryDetailResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="payorClassCd"  	column="payor_class_cd"/>
+		<result property="payeeClassDesc"  	column="payee_class_desc"/>
+		<result property="payorCd"  		column="payor_cd"/>
+		<result property="payeeName"  		column="payee_name"/>
+		<result property="recoveredAmtP"  	column="recovered_amt_p"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="RecoveryHistoryResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="recHistNo" 	column="rec_hist_no"/> 
+		<result property="recStatCd" 	column="rec_stat_cd"/>
+		<result property="recStatDesc" 	column="rec_stat_desc"/>
+		<result property="remarks" 		column="remarks"/>
+		<result property="userId" 		column="user_id"/>
+		<result property="lastUpdate"  	column="last_update"/>
+	</resultMap>
+	
+	<select id="getRecoveryStatus" resultMap="RecoveryStatusResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+		               b.count_, a.*
+		          FROM (SELECT * 
+		                  FROM TABLE (GICLS269_PKG.get_recovery_status
+		                  				(#lineCd#, #issCd#, #appUser#, #recStatusType#,#dateBy#,#dateAsOf#,#dateFrom#,#dateTo#))
+		                  	<isNotNull property="filter">
+								WHERE 1 = 1 
+									<isNotEmpty prepend="AND" property="recoveryNo">
+										UPPER(recovery_no) LIKE UPPER(#recoveryNo#)
+									</isNotEmpty>
+	 								<isNotEmpty prepend="AND" property="claimNo">
+										UPPER(claim_no) LIKE UPPER(#claimNo#)
+									</isNotEmpty>	
+									<isNotEmpty prepend="AND" property="lossCategory">
+										UPPER(loss_category) LIKE UPPER(#lossCategory#)
+									</isNotEmpty>
+	 								<isNotEmpty prepend="AND" property="recoveryStatus">
+										UPPER(recovery_status) LIKE UPPER(#recoveryStatus#)
+									</isNotEmpty>																																								
+							</isNotNull>					
+							<isEqual property="sortColumn" compareValue="claimNo">
+			              		ORDER BY claim_no
+				            </isEqual>
+				            <isEqual property="sortColumn" compareValue="recoveryNo">
+			              		ORDER BY recovery_no
+				            </isEqual>
+				        	<isEqual property="sortColumn" compareValue="lossCategory">
+			              		ORDER BY loss_category
+				            </isEqual>
+				            <isEqual property="sortColumn" compareValue="recoveryStatus">
+			              		ORDER BY recovery_status
+				            </isEqual>																	
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>
+							) a, 
+		               (SELECT count(*) count_
+		                  FROM TABLE (GICLS269_PKG.get_recovery_status
+		                  				(#lineCd#, #issCd#, #appUser#, #recStatusType#,#dateBy#,#dateAsOf#,#dateFrom#,#dateTo#))
+		                 <isNotNull property="filter">
+								WHERE 1 = 1 
+									<isNotEmpty prepend="AND" property="recoveryNo">
+										UPPER(recovery_no) LIKE UPPER(#recoveryNo#)
+									</isNotEmpty>
+	 								<isNotEmpty prepend="AND" property="claimNo">
+										UPPER(claim_no) LIKE UPPER(#claimNo#)
+									</isNotEmpty>	
+									<isNotEmpty prepend="AND" property="lossCategory">
+										UPPER(loss_category) LIKE UPPER(#lossCategory#)
+									</isNotEmpty>
+	 								<isNotEmpty prepend="AND" property="recoveryStatus">
+										UPPER(recovery_status) LIKE UPPER(#recoveryStatus#)
+									</isNotEmpty>																																								
+							</isNotNull>
+							) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+		
+	<select id="getRecoveryDetails" resultMap="RecoveryDetailResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+		               b.count_, a.*
+		          FROM (SELECT * 
+		                  FROM TABLE (GICLS269_PKG.get_recovery_details(#claimId#, #recoveryId#))
+		                  	<isNotNull property="filter">
+								WHERE 1 = 1 
+									<isNotEmpty prepend="AND" property="payorClassCd">
+										UPPER(payor_class_cd) LIKE UPPER(#payorClassCd#)
+									</isNotEmpty>
+	 								<isNotEmpty prepend="AND" property="payeeClassDesc">
+										UPPER(payee_class_desc) LIKE UPPER(#payeeClassDesc#)
+									</isNotEmpty>	
+									<isNotEmpty prepend="AND" property="payorCd">
+										UPPER(payor_cd) LIKE UPPER(#payorCd#)
+									</isNotEmpty>
+	 								<isNotEmpty prepend="AND" property="payeeName">
+										UPPER(payee_name) LIKE UPPER(#payeeName#)
+									</isNotEmpty>																																								
+							</isNotNull>					
+							<isEqual property="sortColumn" compareValue="payorClassCd payeeClassDesc">
+								ORDER BY payor_class_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="payorCd payeeName">
+								ORDER BY payor_cd
+							</isEqual>	
+							<isEqual property="sortColumn" compareValue="recoveredAmtP">
+								ORDER BY recovered_amt_p
+							</isEqual>																		
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>
+							) a, 
+		               (SELECT count(*) count_
+		                  FROM TABLE (GICLS269_PKG.get_recovery_details(#claimId#, #recoveryId#))
+		                  <isNotNull property="filter">
+								WHERE 1 = 1 
+									<isNotEmpty prepend="AND" property="payorClassCd">
+										UPPER(payor_class_cd) LIKE UPPER(#payorClassCd#)
+									</isNotEmpty>
+	 								<isNotEmpty prepend="AND" property="payeeClassDesc">
+										UPPER(payee_class_desc) LIKE UPPER(#payeeClassDesc#)
+									</isNotEmpty>	
+									<isNotEmpty prepend="AND" property="payorCd">
+										UPPER(payor_cd) LIKE UPPER(#payorCd#)
+									</isNotEmpty>
+	 								<isNotEmpty prepend="AND" property="payeeName">
+										UPPER(payee_name) LIKE UPPER(#payeeName#)
+									</isNotEmpty>																																								
+							</isNotNull>
+							) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getRecoveryHistory" resultMap="RecoveryHistoryResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, a.*
+		          FROM (SELECT * 
+		                  FROM TABLE (GICLS269_PKG.get_recovery_history(#recoveryId#))
+		                  	<isNotNull property="filter">
+								WHERE 1 = 1 
+									<isNotEmpty prepend="AND" property="recHistNo">
+										UPPER(rec_hist_no) LIKE UPPER(#recHistNo#)
+									</isNotEmpty>
+	 								<isNotEmpty prepend="AND" property="recStatCd">
+										UPPER(rec_stat_cd) LIKE UPPER(#recStatCd#)
+									</isNotEmpty>	
+									<isNotEmpty prepend="AND" property="recStatDesc">
+										UPPER(rec_stat_desc) LIKE UPPER(#recStatDesc#)
+									</isNotEmpty>
+	 								<isNotEmpty prepend="AND" property="remarks">
+										UPPER(remarks) LIKE UPPER(#remarks#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="userId">
+										UPPER(user_id) LIKE UPPER(#userId#)
+									</isNotEmpty>																																								
+							</isNotNull>					
+							<isEqual property="sortColumn" compareValue="recHistNo">
+								ORDER BY rec_hist_no
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="recStatCd recStatDesc">
+								ORDER BY rec_stat_cd
+							</isEqual>	
+							<isEqual property="sortColumn" compareValue="remarks">
+								ORDER BY remarks
+							</isEqual>	
+							<isEqual property="sortColumn" compareValue="userId">
+								ORDER BY user_id
+							</isEqual>		
+							<isEqual property="sortColumn" compareValue="lastUpdate">
+								ORDER BY last_update
+							</isEqual>																			
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>
+							) a, 
+		               (SELECT count(*) count_
+		                  FROM TABLE (GICLS269_PKG.get_recovery_history(#recoveryId#))
+		                  <isNotNull property="filter">
+								WHERE 1 = 1 
+									<isNotEmpty prepend="AND" property="recHistNo">
+										UPPER(rec_hist_no) LIKE UPPER(#recHistNo#)
+									</isNotEmpty>
+	 								<isNotEmpty prepend="AND" property="recStatCd">
+										UPPER(rec_stat_cd) LIKE UPPER(#recStatCd#)
+									</isNotEmpty>	
+									<isNotEmpty prepend="AND" property="recStatDesc">
+										UPPER(rec_stat_desc) LIKE UPPER(#recStatDesc#)
+									</isNotEmpty>
+	 								<isNotEmpty prepend="AND" property="remarks">
+										UPPER(remarks) LIKE UPPER(#remarks#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="userId">
+										UPPER(user_id) LIKE UPPER(#userId#)
+									</isNotEmpty>																																								
+							</isNotNull>
+							) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+</sqlMap>

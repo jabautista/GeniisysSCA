@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISInspector">
+	
+	<typeAlias alias="giisInsp" type="com.geniisys.common.entity.GIISInspector"/>
+
+	<resultMap class="com.geniisys.common.entity.GIISInspector" id="inspectorListingMap">
+  		<result column="insp_cd"			property="inspCd"/>
+  		<result column="insp_name"			property="inspName"/>
+  	</resultMap>
+  	
+  	<resultMap class="java.util.HashMap" id="inspectorLOVMap"  extends="BaseEntity.TableGridResultMap"> 
+  		<result column="insp_cd"			property="inspCd"/>
+  		<result column="insp_name"			property="inspName"/>
+  	</resultMap>
+  	
+  	<select id="getInspectorListing" resultMap="inspectorListingMap">
+		SELECT * FROM TABLE(GIIS_INSPECTOR_PKG.get_inspector_list)
+			WHERE UPPER(insp_name) LIKE #keyword#
+	</select>
+	
+	<select id="getInspectorLOV" resultMap="inspectorLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+		  			b.count_,
+		  			a.*
+		  		  FROM (SELECT * 
+		  		          FROM TABLE(GIIS_INSPECTOR_PKG.get_inspector_list)
+		  		          <isNotNull property="findText"> <!-- added by steven 12/11/2012 -->
+		                  	WHERE UPPER(insp_cd) LIKE UPPER(#findText#)
+		                  	OR UPPER(insp_name) LIKE UPPER(#findText#)
+		                  </isNotNull>
+			  		     <isEqual property="sortColumn" compareValue="inspCd">
+			  		     	ORDER BY insp_cd
+			  		     </isEqual>     
+			  		     <isEqual property="sortColumn" compareValue="inspName">
+			  		     	ORDER BY insp_name
+			  		     </isEqual>
+			  		     <isNotNull property="sortColumn">
+			  		     	<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+			  		     </isNotNull>
+		  		  	 ) a,
+		  		  (SELECT COUNT(*) count_
+		  		     FROM TABLE(GIIS_INSPECTOR_PKG.get_inspector_list)
+		  		      <isNotNull property="findText"> <!-- added by steven 12/11/2012 -->
+		                  	WHERE UPPER(insp_cd) LIKE UPPER(#findText#)
+		                  	OR UPPER(insp_name) LIKE UPPER(#findText#)
+	                  </isNotNull>
+		                  ) b
+		  ) WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+
+	<resultMap class="java.util.HashMap" id="getGiiss169ListMap"  extends="BaseEntity.TableGridResultMap"> 
+  		<result column="INSP_CD"			property="inspCd"/>
+  		<result column="INSP_NAME"			property="inspName"/>
+  		<result column="REMARKS"			property="remarks"/>
+  		<result column="USER_ID"			property="userId"/>
+  		<result column="LAST_UPDATE"		property="lastUpdate"/>
+  	</resultMap>
+  	
+  	<select id="getGiiss169List" resultMap="getGiiss169ListMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, b.count_, a.*
+		  		  FROM (SELECT * 
+		  		          FROM TABLE(giiss169_pkg.get_inspector_list)
+		  		          <isNotNull property="filter">
+						      WHERE 1=1
+              			        <isNotEmpty prepend="AND" property="inspCd">
+              					  UPPER(insp_cd) LIKE UPPER(#inspCd#)
+              			        </isNotEmpty>
+              			        <isNotEmpty prepend="AND" property="inspName">
+              					  UPPER(insp_name) LIKE UPPER(#inspName#)
+              			        </isNotEmpty>
+                   		  </isNotNull>
+			  		     <isEqual property="sortColumn" compareValue="inspCd">
+			  		     	ORDER BY insp_cd
+			  		     </isEqual>     
+			  		     <isEqual property="sortColumn" compareValue="inspName">
+			  		     	ORDER BY insp_name
+			  		     </isEqual>
+			  		     <isNotNull property="sortColumn">
+			  		     	<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+			  		     </isNotNull>
+		  		  	 ) a,
+		  		  (SELECT COUNT(*) count_
+		  		     FROM TABLE(giiss169_pkg.get_inspector_list)
+		  		      <isNotNull property="filter">
+						      WHERE 1=1
+              			        <isNotEmpty prepend="AND" property="inspCd">
+              					  UPPER(insp_cd) LIKE UPPER(#inspCd#)
+              			        </isNotEmpty>
+              			        <isNotEmpty prepend="AND" property="inspName">
+              					  UPPER(insp_name) LIKE UPPER(#inspName#)
+              			        </isNotEmpty>
+                   		  </isNotNull>
+		                  ) b
+		  ) WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="setInsp" parameterClass="giisInsp">
+	    DECLARE
+	    	v_rec giis_inspector%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.insp_cd := #inspCd#;
+ 			v_rec.insp_name := #inspName#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			giiss169_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteInsp" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss169_pkg.val_del_rec(#recId#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddInsp" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss169_pkg.val_add_rec(#inspName#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delInsp" parameterClass="java.lang.Integer">
+		BEGIN
+ 			giiss169_pkg.del_rec(#inspCd#);
+ 		END;
+ 	</delete>
+ 	
+ 	<resultMap id="getInspNameListGiiss169Map" class="com.geniisys.common.entity.GIISInspector" >
+	  	<result column="INSP_NAME"			property="inspName"			jdbcType="VARCHAR" />
+  	</resultMap>
+ 	
+ 	<select id="getInspNameListGiiss169" resultMap="getInspNameListGiiss169Map">
+ 		SELECT insp_name FROM TABLE(giiss169_pkg.get_inspector_list)
+ 	</select>
+ 	
+</sqlMap>

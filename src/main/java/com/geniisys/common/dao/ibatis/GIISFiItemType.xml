@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISFIItemType">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIISFIItemType" type="com.geniisys.fire.entity.GIISFIItemType"/>
+	
+	<resultMap class="GIISFIItemType" id="GIISFIItemTypeLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="frItemType"		column="FR_ITEM_TYPE" />
+		<result property="frItemTypeDs"	column="FR_ITM_TP_DS" />
+	</resultMap>
+	
+	<select id="getFireItemTypeLOV" resultMap="GIISFIItemTypeLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giis_fire_item_type_pkg.get_fire_item_type_list)
+						  <isNotNull property="findText">
+		                  	WHERE UPPER(FR_ITM_TP_DS) LIKE UPPER(#findText#)
+		                  </isNotNull>
+					   )a,
+					   (SELECT COUNT(*) count_
+						  FROM TABLE(giis_fire_item_type_pkg.get_fire_item_type_list)
+						  <isNotNull property="findText">
+		                  	WHERE UPPER(FR_ITM_TP_DS) LIKE UPPER(#findText#)
+		                  </isNotNull>
+		                  ) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="giiss012FiItemTypeResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="fr_item_type" property="frItemType" />
+		<result column="fr_itm_tp_ds" property="frItemTypeDs" />
+		<result column="fi_itm_grp_desc" property="fiItmGrpDesc" />
+		<result column="main_itm_typ" property="mainItmType" />
+		<result column="remarks" property="remarks" />
+		<result column="user_id" property="userId" />
+		<result column="last_update" property="lastUpdate" />
+		<result column="fi_item_grp" property="fiItemGrp" />
+		<result column="cpi_rec_no" property="cpiRecNo" />
+	</resultMap>
+	
+	<select id="getGiiss012FiItemType" resultMap="giiss012FiItemTypeResultMap" parameterClass="java.util.HashMap">
+		SELECT *
+  		  FROM (SELECT rownum rownum_,b.count_,a.*
+          		  FROM (SELECT * FROM TABLE(giiss012_pkg.get_fi_item_type)
+          		  <isNotNull property="filter">
+			      	WHERE 1=1
+           			<isNotEmpty prepend="AND" property="frItemType">
+           			  UPPER(fr_item_type) LIKE UPPER(#frItemType#)
+           			</isNotEmpty>
+           			<isNotEmpty prepend="AND" property="frItemTypeDs">
+           			  UPPER(fr_itm_tp_ds) LIKE UPPER(#frItemTypeDs#)
+           			</isNotEmpty>
+           			<isNotEmpty prepend="AND" property="fiItmGrpDesc">
+           			  UPPER(fi_itm_grp_desc) LIKE UPPER(#fiItmGrpDesc#)
+           			</isNotEmpty>
+                  </isNotNull>
+          		  <isNotNull property="sortColumn">
+					<isEqual property="sortColumn" compareValue="frItemType">
+						ORDER BY fr_item_type
+					</isEqual>
+					<isEqual property="sortColumn" compareValue="frItemTypeDs">
+						ORDER BY fr_itm_tp_ds
+					</isEqual>
+					<isEqual property="sortColumn" compareValue="fiItmGrpDesc">
+						ORDER BY fi_itm_grp_desc
+					</isEqual>
+					<isEqual property="ascDescFlg" compareValue="ASC">
+						ASC
+					</isEqual>
+					<isEqual property="ascDescFlg" compareValue="DESC">
+						DESC
+					</isEqual>
+				  </isNotNull>) a,
+               (SELECT count(*) count_ FROM TABLE(giiss012_pkg.get_fi_item_type)
+               <isNotNull property="filter">
+			      	WHERE 1=1
+           			<isNotEmpty prepend="AND" property="frItemType">
+           			  UPPER(fr_item_type) LIKE UPPER(#frItemType#)
+           			</isNotEmpty>
+           			<isNotEmpty prepend="AND" property="frItemTypeDs">
+           			  UPPER(fr_itm_tp_ds) LIKE UPPER(#frItemTypeDs#)
+           			</isNotEmpty>
+           			<isNotEmpty prepend="AND" property="fiItmGrpDesc">
+           			  UPPER(fi_itm_grp_desc) LIKE UPPER(#fiItmGrpDesc#)
+           			</isNotEmpty>
+                  </isNotNull>) b)
+ 		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="giiss012FiItemGrpResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="rv_low_value" property="rvLowValue" />
+		<result column="rv_meaning" property="rvMeaning" />
+	</resultMap>
+	
+	<select id="getGiiss012FiItemGrpLov" resultMap="giiss012FiItemGrpResultMap" parameterClass="java.util.HashMap">
+		SELECT *
+  		  FROM (SELECT rownum rownum_,b.count_,a.*
+          		  FROM (SELECT * FROM TABLE(giiss012_pkg.get_fi_item_grp_lov)
+          		  WHERE 1=1
+              		<isNotEmpty prepend="AND" property="findText">
+              			   (UPPER(rv_low_value) LIKE UPPER(NVL(#findText#, rv_low_value))
+              			   OR UPPER(rv_meaning) LIKE UPPER(NVL(#findText#, rv_meaning)))
+              		</isNotEmpty>
+              		<isNotEmpty prepend="AND" property="filterText">
+              			(UPPER(rv_low_value) LIKE UPPER(NVL(#filterText#, rv_low_value))
+              			   OR UPPER(rv_meaning) LIKE UPPER(NVL(#filterText#, rv_meaning)))
+              		</isNotEmpty>
+                      <isEqual property="sortColumn" compareValue="rvLowValue">
+                        ORDER BY rv_low_value
+                    </isEqual>
+                    <isEqual property="sortColumn" compareValue="rvMeaning">
+                        ORDER BY rv_meaning
+                    </isEqual>
+                    <isNotNull property="sortColumn">
+                        <isEqual property="ascDescFlg" compareValue="ASC">
+                          ASC
+                        </isEqual>
+                        <isEqual property="ascDescFlg" compareValue="DESC">
+                          DESC
+                        </isEqual>
+                    </isNotNull>) a,
+               (SELECT count(*) count_ FROM TABLE(giiss012_pkg.get_fi_item_grp_lov)
+               WHERE 1=1
+              		<isNotEmpty prepend="AND" property="findText">
+              			   (UPPER(rv_low_value) LIKE UPPER(NVL(#findText#, rv_low_value))
+              			   OR UPPER(rv_meaning) LIKE UPPER(NVL(#findText#, rv_meaning)))
+              		</isNotEmpty>
+              		<isNotEmpty prepend="AND" property="filterText">
+              			(UPPER(rv_low_value) LIKE UPPER(NVL(#filterText#, rv_low_value))
+              			   OR UPPER(rv_meaning) LIKE UPPER(NVL(#filterText#, rv_meaning)))
+              		</isNotEmpty>) b)
+ 		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="giiss012ValAddRec" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss012_pkg.val_add_rec(#frItemType#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="giiss012ValDelRec" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss012_pkg.val_del_rec(#frItemType#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="giiss012SetRec" parameterClass="GIISFIItemType">
+	    DECLARE
+	    	v_rec giis_fi_item_type%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.fr_item_type := #frItemType#;
+			v_rec.fr_itm_tp_ds := #frItemTypeDs#;
+			v_rec.main_itm_typ := #mainItmType#;
+			v_rec.remarks := #remarks#;
+			v_rec.user_id := #userId#;
+			v_rec.fi_item_grp := #fiItemGrp#;
+ 			
+ 			giiss012_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<delete id="giiss012DelRec" parameterClass="java.lang.String">
+		BEGIN
+ 			giiss012_pkg.del_rec(#frItemType#);
+ 		END;
+ 	</delete>
+	
+</sqlMap>

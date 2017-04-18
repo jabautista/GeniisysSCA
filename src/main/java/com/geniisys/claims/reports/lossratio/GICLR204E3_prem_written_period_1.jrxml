@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GICLR204E3_prem_written_period_1" language="groovy" pageWidth="792" pageHeight="612" orientation="Landscape" columnWidth="792" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="1e49fe3b-ed01-4f91-a7cd-bb7569f5f3f1">
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="706"/>
+	<property name="ireport.y" value="30"/>
+	<parameter name="P_SESSION_ID" class="java.lang.String"/>
+	<parameter name="P_CURR_START_DATE" class="java.lang.String"/>
+	<parameter name="P_CURR_END_DATE" class="java.lang.String"/>
+	<parameter name="P_PRNT_DATE" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[select * from table (GICLR204E3_PKG.populate_prem_writn_priod
+	(
+	$P{P_SESSION_ID},
+	$P{P_CURR_START_DATE},
+	$P{P_CURR_END_DATE},
+	$P{P_PRNT_DATE}
+	)
+)]]>
+	</queryString>
+	<field name="ASSD_NO" class="java.math.BigDecimal"/>
+	<field name="POLICY_NO" class="java.lang.String"/>
+	<field name="ENDT_ISS_CD" class="java.lang.String"/>
+	<field name="ENDT_YY" class="java.math.BigDecimal"/>
+	<field name="ENDT_SEQ_NO" class="java.math.BigDecimal"/>
+	<field name="INCEPT_DATE" class="java.sql.Timestamp"/>
+	<field name="EXPIRY_DATE" class="java.sql.Timestamp"/>
+	<field name="TSI_AMT" class="java.math.BigDecimal"/>
+	<field name="SUM_PREM_AMT" class="java.math.BigDecimal"/>
+	<field name="ASSD_NAME" class="java.lang.String"/>
+	<field name="POLICY_ID" class="java.math.BigDecimal"/>
+	<field name="HEADER_DATE" class="java.lang.String"/>
+	<field name="V_DATE" class="java.lang.String"/>
+	<field name="TRANSACTION_MONTH" class="java.lang.String"/>
+	<variable name="SUM_PREM_AMT_Total" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUM_PREM_AMT}]]></variableExpression>
+	</variable>
+	<variable name="SUM_PREM_AMT_Assured" class="java.math.BigDecimal" resetType="Group" resetGroup="ASSURED" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUM_PREM_AMT}]]></variableExpression>
+	</variable>
+	<variable name="SUM_PREM_AMT_Month" class="java.math.BigDecimal" resetType="Group" resetGroup="MONTH">
+		<variableExpression><![CDATA[$F{SUM_PREM_AMT}]]></variableExpression>
+	</variable>
+	<group name="ASSURED">
+		<groupExpression><![CDATA[$F{ASSD_NO}]]></groupExpression>
+		<groupFooter>
+			<band height="32">
+				<staticText>
+					<reportElement x="661" y="0" width="75" height="11" uuid="bdb57832-4edc-4315-b0f7-e7782b4e42db"/>
+					<textElement textAlignment="Right">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[--------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="581" y="11" width="75" height="11" uuid="ea523934-63cf-4b60-a708-3b3a2863c9cc"/>
+					<textElement>
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[Sub Totals  : ]]></text>
+				</staticText>
+				<textField pattern="#,##0.00;-#,##0.00">
+					<reportElement x="661" y="11" width="75" height="11" uuid="5be31cdb-7d10-4c1d-9c52-5e8e82c9e997"/>
+					<textElement textAlignment="Right">
+						<font size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{SUM_PREM_AMT_Assured}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<group name="MONTH">
+		<groupExpression><![CDATA[$F{TRANSACTION_MONTH}]]></groupExpression>
+		<groupFooter>
+			<band height="24">
+				<staticText>
+					<reportElement x="661" y="2" width="75" height="11" uuid="25504882-9bf3-477d-b67b-5e90f150ffa6"/>
+					<textElement textAlignment="Right">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[--------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="581" y="13" width="75" height="11" uuid="94e025b8-4b9e-401f-a079-7012d4cecb50"/>
+					<textElement>
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[Total Per Month  : ]]></text>
+				</staticText>
+				<textField pattern="#,##0.00;-#,##0.00">
+					<reportElement x="661" y="13" width="75" height="11" uuid="315df504-9db5-4766-b35b-6b15678ad798"/>
+					<textElement textAlignment="Right">
+						<font size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{SUM_PREM_AMT_Month}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<columnHeader>
+		<band height="42" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="20" width="200" height="11" uuid="cd568c05-60b2-472a-90bd-46363de65c00"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[Assured]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="525" y="20" width="60" height="11" uuid="12b659ca-fc0f-46a0-9394-2e271d1575db">
+					<printWhenExpression><![CDATA[$P{P_PRNT_DATE}.equals('3')]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[Acct Ent Date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="588" y="20" width="70" height="11" uuid="f1d61ba0-1422-4d24-b8cb-14da1010aaa0"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[TSI Amount]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="0" y="0" width="736" height="11" uuid="c9137152-8595-4563-b05b-38713ede214e"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{HEADER_DATE}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="661" y="31" width="75" height="11" uuid="fae1b524-1385-437c-b93e-f26338f3750a"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[--------------------------------]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="661" y="20" width="75" height="11" uuid="9eabe9b7-7570-4e2d-bf32-965c7946b613"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[Premium  Amount]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="525" y="20" width="60" height="11" uuid="e08f35ba-8c91-47d3-bb24-b725d63a5c19">
+					<printWhenExpression><![CDATA[$P{P_PRNT_DATE}.equals('1')]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[Issue Date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="525" y="31" width="60" height="11" uuid="dc25cdbc-902f-4fe3-a287-449c9c63b0eb"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[--------------------------------]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="588" y="31" width="70" height="11" uuid="e0d70dc1-6afb-4444-954e-c8491649f42a"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[--------------------------------]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="399" y="20" width="60" height="11" uuid="7087ddd7-f521-485e-bf52-580ac73531cf"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[Incept Date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="286" y="20" width="110" height="11" uuid="397ba363-6f44-40a0-9195-d4a5678c158e"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[Policy]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="462" y="31" width="60" height="11" uuid="8724dab9-97e5-4b74-baa4-984999ff861e"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[--------------------------------]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="525" y="20" width="60" height="11" uuid="4f0e5a4a-41c3-4c01-be29-796dd86fd96c">
+					<printWhenExpression><![CDATA[$P{P_PRNT_DATE}.equals('4')]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[Booking Date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="203" y="20" width="80" height="11" uuid="7371a31d-c863-4f56-b15a-a5d16cc4d0a3"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[Transaction Date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="31" width="200" height="11" uuid="0d9e4e54-f392-4ef0-8561-f688b34d97c6"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[----------------------------------------------------------------------------------------------------------------------------------------------------------------------------]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="462" y="20" width="60" height="11" uuid="4e390d48-f046-4077-9c87-85b6138e1eb6"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[Expiry Date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="203" y="31" width="80" height="11" uuid="48c0bc73-9a49-4658-9106-b452af3adeca"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[--------------------------------]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="399" y="31" width="60" height="11" uuid="17761090-8246-4bce-a7a4-fed760ee9b66"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[--------------------------------]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="286" y="31" width="110" height="11" uuid="ca291973-d9f8-4514-826a-8681b4df73fc"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[-------------------------------------------]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="11" splitType="Stretch">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement isPrintRepeatedValues="false" x="0" y="0" width="30" height="11" uuid="268cfab2-f310-4e4c-9a98-cae1522495ae"/>
+				<textElement>
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ASSD_NO}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement isPrintRepeatedValues="false" x="30" y="0" width="170" height="11" uuid="0b8b55c5-21ad-49cf-a0d2-cd80c2fb0c40"/>
+				<textElement>
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" - ".concat($F{ASSD_NAME})]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="203" y="0" width="80" height="11" uuid="1ca07ea9-f5d6-46dd-9d66-5a839f51fb1e"/>
+				<textElement>
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{TRANSACTION_MONTH}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="286" y="0" width="110" height="11" uuid="3b7af865-1610-4b17-98df-7a529d691407"/>
+				<textElement>
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{POLICY_NO}]]></textFieldExpression>
+			</textField>
+			<textField pattern="MM-dd-yyyy" isBlankWhenNull="true">
+				<reportElement x="399" y="0" width="60" height="11" uuid="7178e78f-288d-4709-a2d7-aa8ab5ac5e07"/>
+				<textElement>
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{INCEPT_DATE}]]></textFieldExpression>
+			</textField>
+			<textField pattern="MM-dd-yyyy" isBlankWhenNull="true">
+				<reportElement x="462" y="0" width="60" height="11" uuid="ea1b9593-ad95-4d54-9291-48884ff99d96"/>
+				<textElement>
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{EXPIRY_DATE}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="525" y="0" width="60" height="11" uuid="be17c454-1656-4fb0-843c-df9c90f0ca37"/>
+				<textElement>
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{V_DATE}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement x="588" y="0" width="70" height="11" uuid="aee76a3c-6e64-4c1b-8d1f-2222437d2af8"/>
+				<textElement textAlignment="Right">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{TSI_AMT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement x="661" y="0" width="75" height="11" uuid="40e32ccd-61f7-41de-8038-a0019d6f32c1"/>
+				<textElement textAlignment="Right">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUM_PREM_AMT}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<summary>
+		<band height="33" splitType="Stretch">
+			<staticText>
+				<reportElement x="661" y="22" width="75" height="11" uuid="de9634ca-9376-465d-8026-88caee453c45"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[======================]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="581" y="11" width="75" height="11" uuid="14f652a8-f954-4d24-b280-37f47a3c64d4"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[Grand Totals  : ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="661" y="0" width="75" height="11" uuid="0991b2db-cde3-4f4c-b523-f76bc266dd66"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[--------------------------------]]></text>
+			</staticText>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="661" y="11" width="75" height="11" uuid="7560c49e-c185-451a-848d-d2f93019b3cf"/>
+				<textElement textAlignment="Right">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_PREM_AMT_Total}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

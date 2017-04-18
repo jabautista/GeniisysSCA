@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GIACJournalEntry">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	<resultMap class="java.util.HashMap" id="tranYearLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="tran_year"		property="tranYear" />
+	</resultMap>
+	<resultMap class="java.util.HashMap" id="tranMonthLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="tran_year"		property="tranYear" />
+		<result column="tran_mm"		property="tranMonth" />
+	</resultMap>
+	<resultMap class="java.util.HashMap" id="getModuleIdMap">
+		<result column="module_id"		property="moduleId" />
+		<result column="gen_type"		property="genType" />
+		<result column="msg"			property="msg" />
+	</resultMap>
+	
+	<parameterMap class="map" id="closeMonthYearMap">
+		<parameter property="tranYear"		jdbcType="NUMBER"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="tranMonth"		jdbcType="NUMBER"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="glNo"			jdbcType="NUMBER"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="financeEnd"	jdbcType="NUMBER"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="fiscalEnd"		jdbcType="NUMBER"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="msg"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="INOUT" />
+	</parameterMap>
+	
+	<parameterMap class="map" id="confirmCloseMonthYearMap">
+		<parameter property="tranYear"		jdbcType="NUMBER"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="tranMonth"		jdbcType="NUMBER"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="glNo"			jdbcType="NUMBER"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="financeEnd"	jdbcType="NUMBER"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="fiscalEnd"		jdbcType="NUMBER"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="genType"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="moduleId"		jdbcType="NUMBER"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="userId"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="msg"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="INOUT" />
+	</parameterMap>
+	<select id="getTranYearLOV" resultMap="tranYearLOVMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT *
+		                  FROM TABLE(GIACS411_PKG.get_tran_year_lov)              
+				          	  <isNotNull property="findText">
+			                  	WHERE UPPER(tran_year) LIKE UPPER(#findText#)
+			             	  </isNotNull>
+			             	  <isNull property="findText">
+			                  	WHERE UPPER(tran_year) LIKE UPPER(#findText2#)
+			             	  </isNull>
+							  <isNotNull property="sortColumn">
+							  	<isEqual property="sortColumn" compareValue="tranYear">
+							  		ORDER BY tran_year
+							  	</isEqual>
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">	
+									DESC
+								</isEqual>
+							  </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GIACS411_PKG.get_tran_year_lov)           
+			                  <isNotNull property="findText">
+			                  	WHERE UPPER(tran_year) LIKE UPPER(#findText#)
+			             	  </isNotNull>
+			             	  <isNull property="findText">
+			                  	WHERE UPPER(tran_year) LIKE UPPER(#findText2#)
+			             	  </isNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#		  
+	</select>
+	
+	<select id="getTranMonthLOV" resultMap="tranMonthLOVMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT *
+		                  FROM TABLE(GIACS411_PKG.get_tran_mm_lov(#tranYear#))              
+				          	  <isNotNull property="findText">
+			                  	WHERE UPPER(tran_year) LIKE UPPER(#findText#)
+			                  	OR UPPER(tran_mm) LIKE UPPER(#findText#)
+			             	  </isNotNull>
+			             	  <isNull property="findText">
+			                  	WHERE UPPER(tran_year) LIKE UPPER(#findText2#)
+			                  	OR UPPER(tran_mm) LIKE UPPER(#findText2#)
+			             	  </isNull>
+							  <isNotNull property="sortColumn">
+							  	<isEqual property="sortColumn" compareValue="tranMonth">
+							  		ORDER BY tran_mm
+							  	</isEqual>
+							  	<isEqual property="sortColumn" compareValue="tranYear">
+							  		ORDER BY tran_year
+							  	</isEqual>
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">	
+									DESC
+								</isEqual>
+							  </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GIACS411_PKG.get_tran_mm_lov(#tranYear#))              
+			                 <isNotNull property="findText">
+			                  	WHERE UPPER(tran_year) LIKE UPPER(#findText#)
+			                  	OR UPPER(tran_mm) LIKE UPPER(#findText#)
+			             	  </isNotNull>
+			             	  <isNull property="findText">
+			                  	WHERE UPPER(tran_year) LIKE UPPER(#findText2#)
+			                  	OR UPPER(tran_mm) LIKE UPPER(#findText2#)
+			             	  </isNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#		  
+	</select>
+	
+	<select id="getGLNo" resultClass="String">
+		SELECT GIACS411_PKG.get_gl_no FROM dual
+	</select>
+	
+	<select id="getFinanceEnd" resultClass="String">
+		SELECT GIACS411_PKG.get_finance_end FROM dual
+	</select>
+	
+	<select id="getFiscalEnd" resultClass="String">
+		SELECT GIACS411_PKG.get_fiscal_end FROM dual
+	</select>
+	
+	<select id="getModuleId" resultMap="getModuleIdMap">
+		SELECT * FROM TABLE(GIACS411_PKG.cye_get_module_id)
+	</select>
+	
+	<procedure id="closeMonthYear" parameterMap="closeMonthYearMap">
+		BEGIN
+			GIACS411_PKG.close_mm_yr(?,?,?,?,?,?);
+		END;
+	</procedure>
+	
+	<procedure id="confirmCloseMonthYear" parameterMap="confirmCloseMonthYearMap">
+		BEGIN
+			GIACS411_PKG.confirm_close_mm_yr(?,?,?,?,?,?,?,?,?);
+		END;
+	</procedure>
+</sqlMap>

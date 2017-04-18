@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap>
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIPIBeneficiary" type="com.geniisys.gipi.entity.GIPIBeneficiary"/>
+	
+	<resultMap class="GIPIBeneficiary" id="gipiBeneficiariesMap">
+		<result property="policyId" 			column="policy_id"/>
+		<result property="age" 					column="age"/>
+		<result property="sex" 					column="sex"/>
+		<result property="relation" 			column="relation"/>
+		<result property="adultSw" 				column="adult_sw"/>
+		<result property="deleteSw" 			column="delete_sw"/>
+		<result property="positionCd" 			column="position_cd"/>
+		<result property="civilStatus" 			column="civil_status"/>
+		<result property="dateOfBirth" 			column="date_of_birth"/>
+        <result property="beneficiaryNo" 		column="beneficiary_no"/>
+        <result property="beneficiaryName" 		column="beneficiary_name"/>
+        <result property="beneficiaryAddr" 		column="beneficiary_addr"/>
+        <result property="cpiBranchCd" 			column="cpi_branch_cd"/>
+        <result property="arcExtData" 			column="arc_ext_data"/>
+        <result property="cpiRecNo" 			column="cpi_rec_no"/>
+        <result property="remarks" 				column="remarks"/>
+		
+		<result property="position" 			column="position"/>
+		<result property="meanSex" 				column="mean_sex"/>
+		<result property="meanCivilStatus"	 	column="mean_civil_status"/>
+		<result property="rowNum"				column="rownum_"/>
+		<result property="rowCount"				column="count_"/>
+	</resultMap>
+	
+	<resultMap class="GIPIBeneficiary" id="getGIPIBeneficiaryResultMap">
+		<result property="policyId" 			column="POLICY_ID" />
+		<result property="itemNo"				column="ITEM_NO" />
+		<result property="age" 					column="AGE" />
+		<result property="sex" 					column="SEX" />
+		<result property="relation" 			column="RELATION" />
+		<result property="adultSw" 				column="ADULT_SW" />
+		<result property="deleteSw" 			column="DELETE_SW" />
+		<result property="positionCd" 			column="POSITION_CD" />
+		<result property="civilStatus" 			column="CIVIL_STATUS" />
+		<result property="dateOfBirth" 			column="DATE_OF_BIRTH" />
+        <result property="beneficiaryNo" 		column="BENEFICIARY_NO" />
+        <result property="beneficiaryName" 		column="BENEFICIARY_NAME" />
+        <result property="beneficiaryAddr" 		column="BENEFICIARY_ADDR" />
+        <result property="cpiBranchCd" 			column="CPI_BRANCH_CD" />
+        <result property="arcExtData" 			column="ARC_EXT_DATA" />
+        <result property="cpiRecNo" 			column="CPI_REC_NO" />
+        <result property="remarks" 				column="REMARKS" />
+	</resultMap>
+	
+	<select id="getGipiBeneficiaries" resultMap="gipiBeneficiariesMap" parameterClass="java.util.HashMap">
+		SELECT *       
+                FROM (SELECT rownum rownum_ ,b.count_,a.*     
+                        FROM (SELECT * FROM TABLE(gipi_beneficiary_pkg.get_gipi_beneficiaries(#policyId#,#itemNo#))) a,
+	               		   (SELECT count(*) count_ FROM TABLE(gipi_beneficiary_pkg.get_gipi_beneficiaries(#policyId#,#itemNo#))) b)         
+	          WHERE rownum_ BETWEEN NVL(#from#,rownum_) AND NVL(#to#,rownum_)
+	</select>
+	
+	<select id="getGIPIBeneficiary" resultMap="getGIPIBeneficiaryResultMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM TABLE(gipi_beneficiary_pkg.get_gipi_beneficiary(#parId#, #itemNo#, #benNo#))
+	</select>
+
+</sqlMap>

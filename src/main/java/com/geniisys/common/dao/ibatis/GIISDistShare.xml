@@ -1,0 +1,412 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GIISDistShare">
+	
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+
+	<typeAlias alias="GIISDistShareClass" type="com.geniisys.common.entity.GIISDistShare"/>
+
+	<resultMap class="GIISDistShareClass" id="GIISDistShareResultMap">
+		<result column="line_cd" 			property="lineCd"/>
+    	<result column="share_cd" 			property="shareCd"/>
+    	<result column="trty_yy" 			property="trtyYy"/>
+    	<result column="trty_sw" 			property="trtySw"/>
+    	<result column="share_type" 		property="shareType"/>
+    	<result column="old_trty_seq_no" 	property="oldTrtySeqNo"/>
+    	<result column="ccall_limit" 		property="ccallLimit"/>
+    	<result column="inxs_amt" 			property="inxsAmt"/>
+    	<result column="est_prem_inc" 		property="estPremInc"/>
+    	<result column="underlying" 		property="underlying"/>
+    	<result column="dep_prem" 			property="depPrem"/>
+    	<result column="profcomp_type" 		property="profcompType"/>
+    	<result column="exc_loss_rt" 		property="excLossRt"/>
+    	<result column="uw_trty_type" 		property="uwTrtyType"/>
+    	<result column="trty_cd" 			property="trtyCd"/>
+    	<result column="prtfolio_sw" 		property="prtfolioSw"/>
+    	<result column="acct_trty_type" 	property="acctTrtyType"/>
+    	<result column="eff_date" 			property="effDate"/>
+    	<result column="expiry_date" 		property="expiryDate"/>
+    	<result column="no_of_lines" 		property="noOfLines"/>
+    	<result column="tot_shr_pct" 		property="totShrPct"/>
+    	<result column="trty_name" 			property="trtyName"/>
+    	<result column="trty_limit" 		property="trtyLimit"/>
+    	<result column="qs_shr_pct" 		property="qsShrPct"/>
+    	<result column="prem_adj_rt" 		property="premAdjRt"/>
+    	<result column="reinstatement" 		property="reinstatement"/>
+    	<result column="share_trty_type" 	property="shareTrtyType"/>
+    	<result column="funds_held_pct" 	property="fundsHeldPct"/>
+    	<result column="user_id" 			property="userId"/>
+    	<result column="last_update" 		property="lastUpdate"/>
+    	<result column="remarks" 			property="remarks"/>
+    	<result column="cpi_rec_no" 		property="cpiRecNo"/>
+    	<result column="cpi_branch_cd" 		property="cpiBranchCd"/>
+    	<result column="loss_prtfolio_pct" 	property="lossPrtfolioPct"/>
+    	<result column="prem_prtfolio_pct" 	property="premPrtfolioPct"/>
+    	<result column="xol_id" 			property="xolId"/>
+    	<result column="reinstatement_limit" 	property="reinstatementLimit"/>
+    	<result column="xol_allowed_amount" property="xolAllowedAmount"/>
+    	<result column="xol_base_amount" 	property="xolBaseAmount"/>
+    	<result column="xol_reserve_amount" property="xolReserveAmount"/>
+    	<result column="xol_allocated_amount" 	property="xolAllocatedAmount"/>
+    	<result column="layer_no" 			property="layerNo"/>
+    	<result column="xol_aggregate_sum" 	property="xolAggregateSum"/>
+    	<result column="xol_prem_mindep" 	property="xolPremMindep"/>
+    	<result column="xol_prem_rate" 		property="xolPremRate"/>
+    	<result column="xol_ded" 			property="xolDed"/>
+	</resultMap>
+
+	<resultMap class="GIISDistShareClass" id="GIISDistShareResultMap" extends="BaseEntity.TableGridResultMap">
+  		<result column="trty_cd" 			property="trtyCd"/>
+  		<result column="trty_name" 			property="trtyName"/>
+  		<result column="trty_yy" 			property="trtyYy"/>
+  		<result column="line_cd" 			property="lineCd"/>
+  		<result column="share_cd" 			property="shareCd"/>
+  		<result column="share_type" 		property="shareType"/>
+  		<result column="eff_date" 			property="effDate"/>
+  		<result column="expiry_date" 		property="expiryDate"/>
+  		<result column="user_id"			property="userId"/>
+  		<result column="remarks"			property="remarks"/>
+  		<result column="last_update"		property="lastUpdate"/>
+  	</resultMap>  
+
+	<select id="getDistTreatyLOV" resultMap="GIISDistShareResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIIS_DIST_SHARE_PKG.get_giuws013_dist_treaty_lov(#policyId#, #lineCd#, #findText#))
+		                  <isNotNull property="notIn">
+		                     WHERE share_cd NOT IN ($notIn$)
+		                  </isNotNull> 
+		                  <isEqual property="sortColumn" compareValue="trtyCd">
+			              		ORDER BY trty_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="trtyName">
+			              		ORDER BY trty_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="trtyYy">
+			              		ORDER BY trty_yy
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIIS_DIST_SHARE_PKG.get_giuws013_dist_treaty_lov(#policyId#, #lineCd#, #findText#))
+		                <isNotNull property="notIn">
+		                     WHERE share_cd NOT IN ($notIn$)
+		                </isNotNull>
+		               ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getDistShareLOV" resultMap="GIISDistShareResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIIS_DIST_SHARE_PKG.get_giuws013_dist_share_lov(#nbtLineCd#, #lineCd#, #findText#))
+		                  <isNotNull property="notIn">
+		                     WHERE share_cd NOT IN ($notIn$)
+		                  </isNotNull> 
+		                  <isEqual property="sortColumn" compareValue="trtyCd">
+			              		ORDER BY trty_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="trtyName">
+			              		ORDER BY trty_name
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIIS_DIST_SHARE_PKG.get_giuws013_dist_share_lov(#nbtLineCd#, #lineCd#, #findText#))
+		                <isNotNull property="notIn">
+		                     WHERE share_cd NOT IN ($notIn$)
+		                </isNotNull>
+		               ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getDistTreatyLOV2" resultMap="GIISDistShareResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIIS_DIST_SHARE_PKG.get_giuws016_dist_treaty_lov(#policyId#, #lineCd#, #findText#))
+		                  <isNotNull property="notIn">
+		                     WHERE share_cd NOT IN ($notIn$)
+		                  </isNotNull> 
+		                  <isEqual property="sortColumn" compareValue="shareCd">
+			              		ORDER BY share_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="trtyName">
+			              		ORDER BY trty_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="trtyYy">
+			              		ORDER BY trty_yy
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIIS_DIST_SHARE_PKG.get_giuws016_dist_treaty_lov(#policyId#, #lineCd#, #findText#))
+		                <isNotNull property="notIn">
+		                    WHERE share_cd NOT IN ($notIn$)
+		                 </isNotNull>) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getDistShareLOV2" resultMap="GIISDistShareResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIIS_DIST_SHARE_PKG.get_giuws016_dist_share_lov(#nbtLineCd#, #lineCd#, #findText#))
+		                  <isNotNull property="notIn">
+		                     WHERE share_cd NOT IN ($notIn$)
+		                  </isNotNull> 
+		                  <isEqual property="sortColumn" compareValue="shareCd">
+			              		ORDER BY share_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="trtyName">
+			              		ORDER BY trty_name
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIIS_DIST_SHARE_PKG.get_giuws016_dist_share_lov(#nbtLineCd#, #lineCd#, #findText#))
+		                <isNotNull property="notIn">
+		                     WHERE share_cd NOT IN ($notIn$)
+		                </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getBatchDistTreatyLOV" resultMap="GIISDistShareResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIIS_DIST_SHARE_PKG.get_dist_treaty_list2(#lineCd#, #sublineCd#, #issCd#, #issueYy#, #polSeqNo#, #renewNo#))
+		                WHERE UPPER(trty_name) LIKE NVL(UPPER(#findText#), '%')  
+		                  <isNotNull property="notIn">
+		                     AND share_cd NOT IN ($notIn$)
+		                  </isNotNull> 
+		                  <isEqual property="sortColumn" compareValue="shareCd">
+			              		ORDER BY share_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="trtyName">
+			              		ORDER BY trty_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="trtyYy">
+			              		ORDER BY trty_yy
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIIS_DIST_SHARE_PKG.get_dist_treaty_list2(#lineCd#, #sublineCd#, #issCd#, #issueYy#, #polSeqNo#, #renewNo#))
+		                WHERE UPPER(trty_name) LIKE NVL(UPPER(#findText#), '%')  
+		                <isNotNull property="notIn">
+		                     AND share_cd NOT IN ($notIn$)
+		                </isNotNull>
+		                 ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getBatchDistShareLOV" resultMap="GIISDistShareResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIIS_DIST_SHARE_PKG.get_dist_share_list2(#lineCd#))
+		                WHERE UPPER(trty_name) LIKE NVL(UPPER(#findText#), '%')  
+		                  <isNotNull property="notIn">
+		                   AND share_cd NOT IN ($notIn$)
+		                  </isNotNull> 
+		                  <isEqual property="sortColumn" compareValue="shareCd">
+			              		ORDER BY share_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="trtyName">
+			              		ORDER BY trty_name
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIIS_DIST_SHARE_PKG.get_dist_share_list2(#lineCd#))
+                     	WHERE UPPER(trty_name) LIKE NVL(UPPER(#findText#), '%')  
+		                <isNotNull property="notIn">
+		                  AND share_cd NOT IN ($notIn$)
+		                </isNotNull>
+                     	) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>		
+	
+	<resultMap id="getGiacs220DistShareListMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result column="TRTY_NAME"			property="treatyName" />
+		<result column="TRTY_YY"			property="treatyYy" />
+		<result column="LINE_CD"			property="lineCd" />
+		<result column="LINE_NAME"			property="lineName" />
+		<result column="SHARE_CD"			property="shareCd" />
+		<result column="SHARE_TYPE"			property="shareType" />
+		<result column="MAIN_PROC_YEAR"		property="year" />
+		<result column="MAIN_PROC_QTR"		property="qtr" />
+		<result column="MAIN_PROC_QTR_STR"	property="qtrStr" />
+	</resultMap> 
+	<select id="getGiacs220DistShareList" resultMap="getGiacs220DistShareListMap">
+		SELECT *
+  		  FROM (SELECT ROWNUM rownum_, b.count_, a.*
+  		  		  FROM (SELECT * FROM TABLE(GIIS_DIST_SHARE_PKG.get_dist_share_list3)
+						WHERE 1 = 1
+						<isNotNull property="filter">
+						 	<isNotEmpty prepend="AND" property="lineCd">
+						 		UPPER(line_cd) LIKE UPPER(#lineCd#)
+						 	</isNotEmpty>
+						 	<isNotEmpty prepend="AND" property="treatyYy">
+						 		LPAD(trty_yy,2,0) = LPAD(#treatyYy#,2,0)
+						 	</isNotEmpty>
+						 	<isNotEmpty prepend="AND" property="shareCd">
+						 		LPAD(share_cd,3,0) = LPAD(#shareCd#,3,0)
+						 	</isNotEmpty>
+						 	<isNotEmpty prepend="AND" property="treatyName">
+						 		UPPER(trty_name) LIKE UPPER(#treatyName#)
+						 	</isNotEmpty>
+						 	<isNotEmpty prepend="AND" property="year">
+						 		main_proc_year = #year#
+						 	</isNotEmpty>
+						 	<isNotEmpty prepend="AND" property="qtrStr">
+						 		UPPER(main_proc_qtr_str) LIKE UPPER(#qtrStr#)
+						 	</isNotEmpty>
+						</isNotNull>
+	            	<isNotNull property="sortColumn">
+		            	<isEqual property="sortColumn" compareValue="lineCd treatyYy shareCd treatyName">
+	              			ORDER BY line_cd || '-'|| LPAD(trty_yy,2,0) ||'-'|| LPAD(share_cd,3,0) ||'-'|| trty_name
+		            	</isEqual>
+		            	<isEqual property="sortColumn" compareValue="year">
+	              			ORDER BY main_proc_year
+		            	</isEqual>
+		            	<isEqual property="sortColumn" compareValue="qtrStr">
+	              			ORDER BY main_proc_qtr
+		            	</isEqual>
+              			<isEqual property="ascDescFlg" compareValue="ASC">
+              				ASC
+              			</isEqual>
+              			<isEqual property="ascDescFlg" compareValue="DESC">
+              				DESC
+              			</isEqual>
+              		</isNotNull>) a,
+              (SELECT count(*) count_
+	          	 FROM TABLE(GIIS_DIST_SHARE_PKG.get_dist_share_list3)
+				WHERE 1 = 1
+						<isNotNull property="filter">
+						 	<isNotEmpty prepend="AND" property="lineCd">
+						 		UPPER(line_cd) LIKE UPPER(#lineCd#)
+						 	</isNotEmpty>
+						 	<isNotEmpty prepend="AND" property="treatyYy">
+						 		LPAD(trty_yy,2,0) = LPAD(#treatyYy#,2,0)
+						 	</isNotEmpty>
+						 	<isNotEmpty prepend="AND" property="shareCd">
+						 		LPAD(share_cd,3,0) = LPAD(#shareCd#,3,0)
+						 	</isNotEmpty>
+						 	<isNotEmpty prepend="AND" property="treatyName">
+						 		UPPER(trty_name) LIKE UPPER(#treatyName#)
+						 	</isNotEmpty>
+						 	<isNotEmpty prepend="AND" property="year">
+						 		main_proc_year = #year#
+						 	</isNotEmpty>
+						 	<isNotEmpty prepend="AND" property="qtrStr">
+						 		UPPER(main_proc_qtr_str) LIKE UPPER(#qtrStr#)
+						 	</isNotEmpty>
+						</isNotNull>
+				)b) 
+	    	WHERE rownum_ BETWEEN #from# AND #to# 	
+	</select>
+	
+	<resultMap id="getGiris007DistShareRecListRM" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+  		<result column="line_cd" 			property="lineCd"/>
+  		<result column="trty_yy" 			property="trtyYy"/>
+  		<result column="share_cd" 			property="shareCd"/>
+  		<result column="trty_name" 			property="trtyName"/>
+  		<result column="eff_date" 			property="effDate"/>
+  		<result column="expiry_date" 		property="expiryDate"/>
+  	</resultMap>  
+  	
+	<select id="getGiris007DistShareRecList" resultMap="getGiris007DistShareRecListRM">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giris007_pkg.get_distshare_list(#lineCd#, #trtyYy#, #shareCd#, #trtyName#, #userId#, #effDate#, #expiryDate#))
+		                  <isEqual property="sortColumn" compareValue="lineCd trtyYy shareCd">
+			              		ORDER BY line_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="trtyName">
+			              		ORDER BY trty_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="effDate">
+			              		ORDER BY TO_DATE(eff_date, 'mm-dd-yyyy')
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="expiryDate">
+			              		ORDER BY TO_DATE(expiry_date, 'mm-dd-yyyy')
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giris007_pkg.get_distshare_list(#lineCd#, #trtyYy#, #shareCd#, #trtyName#, #userId#, #effDate#, #expiryDate#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+</sqlMap>

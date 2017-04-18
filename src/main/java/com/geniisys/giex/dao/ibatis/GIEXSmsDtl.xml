@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIEXSmsDtl">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIEXSmsDtl" type="com.geniisys.giex.entity.GIEXSmsDtl"/>
+	
+	<resultMap class="GIEXSmsDtl" id="giexSmsDtlMap" extends="BaseEntity.TableGridResultMap">
+		<result property="policyId"					column="POLICY_ID" />
+		<result property="cellphoneNo"				column="CELLPHONE_NO" />
+		<result property="message"					column="MESSAGE" />
+		<result property="dateReceived"				column="DATE_RECEIVED" />
+		<result property="dateSent"					column="DATE_SENT" />
+		<result property="dateCreated"				column="DATE_CREATED" />
+		<result property="userId"					column="USER_ID" />
+		<result property="lastUpdate"				column="LAST_UPDATE" />
+		<result property="recipientSender"			column="RECIPIENT_SENDER" />
+		<result property="msgId"					column="MSG_ID" />
+		<result property="dtlId"					column="DTL_ID" />
+		<result property="messageType"				column="MESSAGE_TYPE" />
+		<result property="messageStatus"			column="MESSAGE_STATUS" />
+		<result property="dspDateCreated"			column="DSP_DATE_CREATED" />
+		<result property="dspDateSent"				column="DSP_DATE_SENT" />
+		<result property="dspDateReceived"			column="DSP_DATE_RECEIVED" />
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="SMSPolicyDtlsMap" extends="BaseEntity.TableGridResultMap">
+		<result property="issCd"					column="ISS_CD" />
+		<result property="premSeqNo"				column="PREM_SEQ_NO" />
+		<result property="dueDate"					column="DUE_DATE" />
+		<result property="balanceDue"				column="BALANCE_DUE" />
+		<result property="invoiceNo"				column="INVOICE_NO" />
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="SMSClaimDtlsMap" extends="BaseEntity.TableGridResultMap">
+		<result property="issCd"					column="ISS_CD" />
+		<result property="claimYy"					column="CLM_YY" />
+		<result property="claimSeqNo"				column="CLM_SEQ_NO" />
+		<result property="lossResAmt"				column="LOSS_RES_AMT" />
+		<result property="lossPdAmt"				column="LOSS_PD_AMT" />
+		<result property="clmFileDate"				column="CLM_FILE_DATE" />
+		<result property="clmStatDesc"				column="CLM_STAT_DESC" />
+		<result property="claimNo"					column="CLAIM_NO" />
+	</resultMap>
+	
+	<parameterMap class="map" id="smsAssuredMap">
+		<parameter property="policyId"	jdbcType="NUMBER"	javaType="java.lang.Integer"	mode="IN"/>
+		<parameter property="assdNo"	jdbcType="NUMBER"	javaType="java.lang.Integer"	mode="IN"/>
+		<parameter property="assdCpNo"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="msgCount"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="smsIntmMap">
+		<parameter property="policyId"	jdbcType="NUMBER"	javaType="java.lang.Integer"	mode="IN"/>
+		<parameter property="intmNo"	jdbcType="NUMBER"	javaType="java.lang.Integer"	mode="IN"/>
+		<parameter property="intmCpNo"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="msgCount"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+	</parameterMap>
+	
+	<select id="getMessageDtls" resultMap="giexSmsDtlMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIEX_SMS_DTL_PKG.get_giex_sms_dtl(#policyId#))
+		                  <isEqual property="sortColumn" compareValue="recipientSender">
+			              		ORDER BY recipient_sender
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="cellphoneNo">
+			              		ORDER BY cellphone_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="messageStatus">
+			              		ORDER BY message_status
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIEX_SMS_DTL_PKG.get_giex_sms_dtl(#policyId#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getSMSPolicyDtls" resultMap="SMSPolicyDtlsMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIEX_SMS_DTL_PKG.get_policy_details(#lineCd#, #sublineCd#, #issCd#, #issueYy#, #polSeqNo#, #renewNo#))
+		                  <isEqual property="sortColumn" compareValue="balanceDue">
+			              		ORDER BY balance_due
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="dueDate">
+			              		ORDER BY due_date
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="issCd premSeqNo">
+			              		ORDER BY iss_cd, prem_seq_no
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIEX_SMS_DTL_PKG.get_policy_details(#lineCd#, #sublineCd#, #issCd#, #issueYy#, #polSeqNo#, #renewNo#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getSMSClaimDtls" resultMap="SMSClaimDtlsMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIEX_SMS_DTL_PKG.get_claim_details(#lineCd#, #sublineCd#, #issCd#, #issueYy#, #polSeqNo#, #renewNo#))
+		                  <isEqual property="sortColumn" compareValue="issCd claimYy claimSeqNo">
+			              		ORDER BY iss_cd, clm_yy, clm_seq_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="lossResAmt">
+			              		ORDER BY loss_res_amt
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="lossPdAmt">
+			              		ORDER BY loss_pd_amt
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="clmFileDate">
+			              		ORDER BY clm_file_date
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="clmStatDesc">
+			              		ORDER BY clm_stat_desc
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIEX_SMS_DTL_PKG.get_claim_details(#lineCd#, #sublineCd#, #issCd#, #issueYy#, #polSeqNo#, #renewNo#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="checkSMSAssured" parameterMap="smsAssuredMap">
+		CALL GIEX_SMS_DTL_PKG.check_sms_assured(?, ?, ?, ?)
+	</procedure>
+	
+	<procedure id="checkSMSIntm" parameterMap="smsIntmMap">
+		CALL GIEX_SMS_DTL_PKG.check_sms_intm(?, ?, ?, ?)
+	</procedure>
+	
+	<procedure id="updateSMSTags" parameterClass="java.util.HashMap">
+		CALL GIEX_SMS_DTL_PKG.update_sms_tags(#policyId#, #assdSms#, #intmSms#)
+	</procedure>
+		
+	<procedure id="saveSMSRenewal" parameterClass="java.util.HashMap">
+		CALL GIEX_SMS_DTL_PKG.save_sms_renewal(#policyId#, #renewFlag#, #remarks#)
+	</procedure>
+	
+	<insert id="generateSMS" parameterClass="java.lang.String">
+		BEGIN
+			GIIS_USERS_PKG.app_user := #userId#;
+			GIEX_SMS_DTL_PKG.generate_sms(#userId#);
+		END;
+	</insert>
+	
+</sqlMap>

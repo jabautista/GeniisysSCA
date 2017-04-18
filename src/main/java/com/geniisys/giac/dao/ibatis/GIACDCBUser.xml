@@ -1,0 +1,419 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIACDCBUser">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<resultMap class="com.geniisys.giac.entity.GIACDCBUser" id="GIACDCBUser">
+		<result column="GIBR_FUND_CD" 		property="gibrFundCd"></result>
+		<result column="GIBR_BRANCH_CD" 	property="gibrBranchCd"></result>
+		<result column="CASHIER_CD" 		property="cashierCd"></result>
+		<result column="DCB_USER_ID" 		property="dcbUserId"></result>
+	</resultMap>
+	
+	<resultMap class="com.geniisys.giac.entity.GIACDCBUser" id="validUserMap">
+		<result column="valid_tag" 			property="validTag" />
+		<result column="effectivity_dt" 	property="effectivityDt"/>
+		<result column="expiry_dt" 			property="expiryDt"/>
+	</resultMap>
+	
+	<parameterMap class="map" id="validUserParamMap">
+		<parameter property="fundCd" 		jdbcType="VARCHAR"		javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="branchCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="appUser"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+	</parameterMap>
+
+	<procedure id="getDCBCashierCd" resultMap="GIACDCBUser">
+		SELECT * FROM TABLE(giac_dcb_users_pkg.get_cashier_cd(#fundCd#, #branchCd#, #appUser#))
+	</procedure>
+	
+	<!-- added 'DISTINCT' to avoid 'too many rows' error -->
+	<!-- pol cruz. 10.14.2013 -->
+	<procedure id="getValidUserInfo" parameterMap="validUserParamMap" resultMap="validUserMap">
+		SELECT DISTINCT * FROM TABLE(GIAC_DCB_USERS_PKG.get_valid_user_info(? , ?, ?))
+	</procedure>
+	
+	<select id="checkIfDcbUserExists" resultClass="java.lang.String">
+		SELECT GIAC_DCB_USERS_PKG.check_if_user_exists(#userId#) FROM DUAL
+	</select>
+	
+<!-- GIACS319 : shan 12.06.2013 -->
+	<resultMap class="java.util.HashMap" id="giacs319CompanyLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="GFUN_FUND_CD"	property="gfunFundCd"/>
+		<result column="FUND_DESC"		property="fundDesc"/>
+		<result column="BRANCH_CD"		property="branchCd"/>
+		<result column="BRANCH_NAME"	property="branchName"/>
+	</resultMap>
+	
+	<select id="getGiacs319CompanyLOV" resultMap="giacs319CompanyLOVMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIACS319_PKG.GET_COMPANY_LOV(#userId#))
+		                  <isNotNull property="findText">
+			              		WHERE UPPER(gfun_fund_cd) like upper(#findText#) 
+			              		   OR UPPER(fund_desc) like upper(#findText#)
+			              		   OR UPPER(branch_cd) like upper(#findText#)
+			              		   OR UPPER(branch_name) like upper(#findText#)
+			              </isNotNull>
+			              <isNull property="findText">
+			              		WHERE UPPER(gfun_fund_cd) like upper(#searchString#) 
+			              		   OR UPPER(fund_desc) like upper(#searchString#)
+			              		   OR UPPER(branch_cd) like upper(#searchString#)
+			              		   OR UPPER(branch_name) like upper(#searchString#)
+			              </isNull>
+			              <isNotNull property="sortColumn">
+			          	  	  <isEqual property="sortColumn" compareValue="gfunFundCd">
+				              		ORDER BY gfun_fund_cd
+				              </isEqual>
+			                  <isEqual property="sortColumn" compareValue="fundDesc">
+				              		ORDER BY fund_desc
+				              </isEqual>	
+			                  <isEqual property="sortColumn" compareValue="branchCd">
+				              		ORDER BY branch_cd
+				              </isEqual>	
+			                  <isEqual property="sortColumn" compareValue="branchName">
+				              		ORDER BY branch_name
+				              </isEqual>	
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (GIACS319_PKG.GET_COMPANY_LOV(#userId#))
+				                  <isNotNull property="findText">
+					              		WHERE UPPER(gfun_fund_cd) like upper(#findText#) 
+					              		   OR UPPER(fund_desc) like upper(#findText#)
+					              		   OR UPPER(branch_cd) like upper(#findText#)
+					              		   OR UPPER(branch_name) like upper(#findText#)
+					              </isNotNull>
+					              <isNull property="findText">
+					              		WHERE UPPER(gfun_fund_cd) like upper(#searchString#) 
+					              		   OR UPPER(fund_desc) like upper(#searchString#)
+					              		   OR UPPER(branch_cd) like upper(#searchString#)
+					              		   OR UPPER(branch_name) like upper(#searchString#)
+					              </isNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+
+	<resultMap class="java.util.HashMap" id="giacs319DcbUserLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="DCB_USER_ID"		property="dcbUserId"/>
+		<result column="DCB_USER_NAME"		property="dcbUserName"/>
+	</resultMap>
+	
+	<select id="getGiacs319DcbUserLOV" resultMap="giacs319DcbUserLOVMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIACS319_PKG.GET_DCB_USER_LOV)
+		                  <isNotNull property="findText">
+		              		   WHERE UPPER(dcb_user_id) like upper(#findText#)
+		              		      OR UPPER(dcb_user_name) like upper(#findText#)
+			              </isNotNull>
+			              <isNull property="findText">
+		              		   WHERE UPPER(dcb_user_id) like upper(#searchString#)
+		              		      OR UPPER(dcb_user_name) like upper(#searchString#)
+			              </isNull>
+			              <isNotNull property="sortColumn">
+			                  <isEqual property="sortColumn" compareValue="dcbUserId">
+				              		ORDER BY dcb_user_id
+				              </isEqual>	
+			                  <isEqual property="sortColumn" compareValue="dcbUserName">
+				              		ORDER BY dcb_user_name
+				              </isEqual>	
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (GIACS319_PKG.GET_DCB_USER_LOV)
+			                  <isNotNull property="findText">
+			              		   WHERE UPPER(dcb_user_id) like upper(#findText#)
+			              		      OR UPPER(dcb_user_name) like upper(#findText#)
+				              </isNotNull>
+				              <isNull property="findText">
+			              		   WHERE UPPER(dcb_user_id) like upper(#searchString#)
+			              		      OR UPPER(dcb_user_name) like upper(#searchString#)
+				              </isNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	
+	<resultMap class="java.util.HashMap" id="giacs319BankLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="BANK_CD"		property="bankCd"/>
+		<result column="BANK_NAME"		property="bankName"/>
+	</resultMap>
+	
+	<select id="getGiacs319BankLOV" resultMap="giacs319BankLOVMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIACS319_PKG.GET_BANK_LOV)
+		                  <isNotNull property="findText">
+			             		WHERE UPPER(bank_cd) like upper(#findText#)
+			              		   OR UPPER(bank_name) like upper(#findText#)
+			              </isNotNull>
+			              <isNull property="findText">
+			              		WHERE UPPER(bank_cd) like upper(#searchString#)
+			              		   OR UPPER(bank_name) like upper(#searchString#)
+			              </isNull>
+			              <isNotNull property="sortColumn">
+			                  <isEqual property="sortColumn" compareValue="bankCd">
+				              		ORDER BY bank_cd
+				              </isEqual>	
+			                  <isEqual property="sortColumn" compareValue="bankName">
+				              		ORDER BY bank_name
+				              </isEqual>	
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (GIACS319_PKG.GET_BANK_LOV)
+			                  <isNotNull property="findText">
+				             		WHERE UPPER(bank_cd) like upper(#findText#)
+				              		   OR UPPER(bank_name) like upper(#findText#)
+				              </isNotNull>
+				              <isNull property="findText">
+				              		WHERE UPPER(bank_cd) like upper(#searchString#)
+				              		   OR UPPER(bank_name) like upper(#searchString#)
+				              </isNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="giacs319BankAcctLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="BANK_ACCT_CD"	property="bankAcctCd"/>
+		<result column="BANK_ACCT_NO"	property="bankAcctNo"/>
+		<result column="BRANCH_CD"		property="branchCd"/>
+		<result column="BANK_ACCT_TYPE"	property="bankAcctType"/>
+	</resultMap>
+	
+	<select id="getGiacs319BankAcctLOV" resultMap="giacs319BankAcctLOVMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIACS319_PKG.GET_BANK_ACCT_LOV(#bankCd#))
+		                  <isNotNull property="findText">
+			              		WHERE UPPER(bank_acct_cd) like upper(#findText#) 
+			              		   OR UPPER(bank_acct_no) like upper(#findText#)
+			              </isNotNull>
+			              <isNull property="findText">
+			              		WHERE UPPER(bank_acct_cd) like upper(#searchString#) 
+			              		   OR UPPER(bank_acct_no) like upper(#searchString#)
+			              </isNull>
+			              <isNotNull property="sortColumn">
+			          	  	  <isEqual property="sortColumn" compareValue="bankAcctCd">
+				              		ORDER BY bank_acct_cd
+				              </isEqual>
+			                  <isEqual property="sortColumn" compareValue="bankAcctNo">
+				              		ORDER BY bank_acct_no
+				              </isEqual>	
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (GIACS319_PKG.GET_BANK_ACCT_LOV(#bankCd#))
+			                  <isNotNull property="findText">
+				              		WHERE UPPER(bank_acct_cd) like upper(#findText#) 
+				              		   OR UPPER(bank_acct_no) like upper(#findText#)
+				              </isNotNull>
+				              <isNull property="findText">
+				              		WHERE UPPER(bank_acct_cd) like upper(#searchString#) 
+				              		   OR UPPER(bank_acct_no) like upper(#searchString#)
+				              </isNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="com.geniisys.giac.entity.GIACDCBUser" id="giacs319ResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="GIBR_FUND_CD" 		property="gibrFundCd"/>
+		<result column="GIBR_BRANCH_CD" 	property="gibrBranchCd"/>
+		<result column="CASHIER_CD" 		property="cashierCd"/>
+		<result column="DCB_USER_ID" 		property="dcbUserId"/>
+		<result column="DCB_USER_NAME"	 	property="dcbUserName"/>
+		<result column="PRINT_NAME" 		property="printName"/>
+		<result column="EFFECTIVITY_DT"		property="effectivityDt"/>
+		<result column="EXPIRY_DT"	 		property="expiryDt"/>
+		<result column="VALID_TAG" 			property="validTag"/>
+		<result column="BANK_CD" 			property="bankCd"/>
+		<result column="BANK_NAME"	 		property="bankName"/>
+		<result column="BANK_ACCT_CD" 		property="bankAcctCd"/>
+		<result column="BANK_ACCT_NO" 		property="bankAcctNo"/>
+		<result column="REMARKS"	 		property="remarks"/>
+		<result column="USER_ID"	 		property="userId"/>
+		<result column="LAST_UPDATE" 		property="lastUpdate"/>
+	</resultMap>
+	
+	<select id="getGiacs319RecList" resultMap="giacs319ResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giacs319_pkg.get_rec_list(#gfunFundCd#, #branchCd#))
+		  	      		  <isNotNull property="filter">
+		  	      		  	WHERE 1=1
+		  	      		  		<isNotEmpty prepend="AND" property="cashierCd">
+		  	      		  			cashier_cd = #cashierCd#
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="dcbUserId">
+		  	      		  			UPPER(dcb_user_id) LIKE UPPER(#dcbUserId#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="dcbUserName">
+		  	      		  			UPPER(dcb_user_name) LIKE UPPER(#dcbUserName#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="printName">
+		  	      		  			UPPER(print_name) LIKE UPPER(#printName#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="effectivityDt">
+		  	      		  			TRUNC(effectivity_dt) = TO_DATE(#effectivityDt#, 'MM-DD-YYYY')
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="expiryDt">
+		  	      		  			TRUNC(expiry_dt) = TO_DATE(#expiryDt#, 'MM-DD-YYYY')
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="validTag">
+		  	      		  			UPPER(NVL(valid_tag, 'No')) LIKE UPPER(NVL(#validTag#, NVL(valid_tag, 'No')))
+		  	      		  		</isNotEmpty>
+		  	      		  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="cashierCd">
+			              		ORDER BY cashier_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="dcbUserId dcbUserName">
+			              		ORDER BY dcb_user_id
+				              		<isNotNull property="sortColumn">
+					              		<isEqual property="ascDescFlg" compareValue="ASC">
+					              			ASC
+					              		</isEqual>
+					              		<isEqual property="ascDescFlg" compareValue="DESC">
+					              			DESC
+					              		</isEqual>
+					              </isNotNull>
+				              , dcb_user_name
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="printName">
+			              		ORDER BY print_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="effectivityDt">
+			              		ORDER BY effectivity_dt
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="expiryDt">
+			              		ORDER BY expiry_dt
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="validTag">
+			              		ORDER BY valid_tag
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giacs319_pkg.get_rec_list(#gfunFundCd#, #branchCd#))
+		  	      		  <isNotNull property="filter">
+		  	      		  	WHERE 1=1
+		  	      		  		<isNotEmpty prepend="AND" property="cashierCd">
+		  	      		  			cashier_cd = #cashierCd#
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="dcbUserId">
+		  	      		  			UPPER(dcb_user_id) LIKE UPPER(#dcbUserId#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="dcbUserName">
+		  	      		  			UPPER(dcb_user_name) LIKE UPPER(#dcbUserName#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="printName">
+		  	      		  			UPPER(print_name) LIKE UPPER(#printName#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="effectivityDt">
+		  	      		  			TRUNC(effectivity_dt) = TO_DATE(#effectivityDt#, 'MM-DD-YYYY')
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="expiryDt">
+		  	      		  			TRUNC(expiry_dt) = TO_DATE(#expiryDt#, 'MM-DD-YYYY')
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="validTag">
+		  	      		  			UPPER(valid_tag) LIKE UPPER(#validTag#)
+		  	      		  		</isNotEmpty>
+		  	      		  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setDCBUser" parameterClass="com.geniisys.giac.entity.GIACDCBUser">
+	    DECLARE
+	    	v_rec GIAC_DCB_USERS%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.gibr_fund_cd 		:= #gibrFundCd#;
+ 			v_rec.gibr_branch_cd 	:= #gibrBranchCd#;
+ 			v_rec.cashier_cd 		:= #cashierCd#;
+ 			v_rec.dcb_user_id 		:= #dcbUserId#;
+ 			v_rec.print_name 		:= #printName#;
+ 			v_rec.effectivity_dt	:= #effectivityDt#;
+ 			v_rec.expiry_dt 		:= #expiryDt#;
+ 			v_rec.valid_tag 		:= #validTag#;
+ 			v_rec.bank_cd	 		:= #bankCd#;
+ 			v_rec.bank_acct_cd 		:= #bankAcctCd#;
+ 			v_rec.user_id 			:= #userId#;
+ 			v_rec.remarks 			:= #remarks#;
+ 			
+ 			giacs319_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteDCBUser" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giacs319_pkg.val_del_rec(#gibrFundCd#, #gibrBranchCd#, #cashierCd#, #dcbUserId#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddDCBUser" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giacs319_pkg.val_add_rec(#gibrFundCd#, #gibrBranchCd#, #cashierCd#, #dcbUserId#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delDCBUser" parameterClass="java.util.HashMap">
+		BEGIN
+ 			giacs319_pkg.del_rec(#gibrFundCd#, #gibrBranchCd#, #cashierCd#, #dcbUserId#);
+ 		END;
+ 	</delete>
+	
+<!-- end GIACS319 -->
+	
+</sqlMap>

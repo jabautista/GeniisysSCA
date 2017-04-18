@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISMortgagee">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIISMortgagee" type="com.geniisys.common.entity.GIISMortgagee"/>
+	
+	<resultMap id="GIISMortgageeLOVMap" class="GIISMortgagee" extends="BaseEntity.TableGridResultMap">
+		<result property="mortgCd" 		column="MORTG_CD" />
+		<result property="mortgName"	column="MORTG_NAME" />
+	</resultMap>
+	
+	<!-- kenneth SR 5483 05.23.2016-->
+	<resultMap id="GIISMortgageeLOVMap1" class="GIISMortgagee" extends="BaseEntity.TableGridResultMap">
+		<result property="mortgCd" 		column="MORTG_CD" />
+		<result property="mortgName"	column="MORTG_NAME" />
+		<result property="deleteSw"		column="DELETE_SW" />
+	</resultMap>
+	
+	<select id="getMortgageeLOV" resultMap="GIISMortgageeLOVMap1" parameterClass="java.util.HashMap"> <!--changed result map: kenneth SR 5483 05.23.2016-->
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giis_mortgagee_pkg.get_mortgagee_list1(#parId#, #itemNo#, #issCd#, #findText#))
+						  	<isNotNull property="notIn">
+						  		WHERE mortg_cd NOT IN $notIn$
+						  	</isNotNull>
+						  	<isNull property="sortColumn">
+								ORDER BY mortg_name ASC
+						  	</isNull>
+						  	<isEqual property="sortColumn" compareValue="mortgCd">
+								ORDER BY mortg_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="mortgName">
+								ORDER BY mortg_name
+							</isEqual>
+						  	<isNotNull property="sortColumn">							
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+						  	</isNotNull>
+						  ) a,
+					   (SELECT COUNT(*) count_
+						  FROM TABLE(giis_mortgagee_pkg.get_mortgagee_list1(#parId#, #itemNo#, #issCd#, #findText#))
+						  <isNotNull property="notIn">
+						  		WHERE mortg_cd NOT IN $notIn$
+						  	</isNotNull>) b)
+				  WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getMortgageeLOVGipis165" resultMap="GIISMortgageeLOVMap">
+		SELECT * 
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE(giis_mortgagee_pkg.get_mortgagee_gipis165(#issCd#,#mortgName#,#keyword#))
+		                 <!-- WHERE UPPER(mortg_name) LIKE NVL('%'||UPPER(#mortgName#)||'%','%') -->
+		                  <isNotNull property="notIn">
+		                  		WHERE mortg_name NOT IN $notIn$
+		                  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="mortgCd">
+			              		ORDER BY mortg_cd
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="mortgName">
+			              		ORDER BY mortg_name
+			              </isEqual>		
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giis_mortgagee_pkg.get_mortgagee_gipis165(#issCd#,#mortgName#,#keyword#))
+		                	<!-- WHERE UPPER(mortg_name) LIKE NVL('%'||UPPER(#mortgName#)||'%','%') -->
+		                    <isNotNull property="notIn">
+		                  		WHERE mortg_name NOT IN $notIn$
+		                  	</isNotNull>) b
+		                ) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+</sqlMap>

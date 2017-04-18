@@ -1,0 +1,10 @@
+DROP TRIGGER CPI.TRG_USERS_SEC_UPDATE;
+
+CREATE OR REPLACE TRIGGER CPI.TRG_USERS_SEC_UPDATE
+AFTER UPDATE ON CPI.GIIS_USERS FOR EACH ROW
+BEGIN
+    UPDATE users SET username = :NEW.user_id, password = :NEW.password where username = :OLD.user_id;
+END;
+/
+
+

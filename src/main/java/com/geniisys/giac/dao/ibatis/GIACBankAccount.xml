@@ -1,0 +1,541 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIACBankAccount">
+	
+	<typeAlias alias="giacBankAccount" type="com.geniisys.giac.entity.GIACBankAccounts"/>
+	
+	<resultMap class="giacBankAccount" id="giacBankLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="bankCd" column="bank_cd"/>
+		<result property="bankName" column="bank_name"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="GIACS054BankLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result property="bankCd" 		column="BANK_CD"/>
+		<result property="bankAcctCd" 	column="BANK_ACCT_CD"/>
+		<result property="bankAcctNo" 	column="BANK_ACCT_NO"/>
+		<result property="bankSName" 	column="PK_DUMMY"/>
+	</resultMap>
+	
+	<resultMap id="giacBankLOVResultMap2" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result column="BANK_NAME"		property="bankName" />
+		<result column="BANK_SNAME"		property="bankSname" />
+		<result column="BANK_CD"		property="bankCd" />
+	</resultMap>
+	
+	<select id="getGiacBankLOV" resultMap="giacBankLOVResultMap">
+		SELECT *
+  		  FROM (SELECT ROWNUM rownum_, 
+	               	   b.count_, 
+	              	   a.* 
+	          	  FROM (SELECT * FROM TABLE(giacs303_pkg.get_bank_lov(#findText#))
+         	 		<isNotNull property="sortColumn">
+	          			<isEqual property="sortColumn" compareValue="bankCd">
+	          				ORDER BY bank_cd
+	          			</isEqual>
+	          			<isEqual property="sortColumn" compareValue="bankName">
+	          				ORDER BY bank_name
+	          			</isEqual>
+	          			<isEqual property="ascDescFlg" compareValue="ASC">
+	          				ASC
+	          			</isEqual>
+	          			<isEqual property="ascDescFlg" compareValue="DESC">
+	          				DESC
+	          			</isEqual>
+	          		</isNotNull>
+          	   	) a,
+              (SELECT count(*) count_
+	          	 FROM TABLE(giacs303_pkg.get_bank_lov(#findText#))
+	            )b) 
+	    	WHERE rownum_ BETWEEN #from# AND #to# 
+	</select>
+	
+	<select id="getGiacBankLOV2" resultMap="giacBankLOVResultMap2">
+	  	SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+  		 				  FROM TABLE(giacs312_pkg.get_giac_bank_lov(#findText#))
+		                  <isEqual property="sortColumn" compareValue="bankSname">
+			              		ORDER BY bank_sname
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="bankName">
+			              		ORDER BY bank_name
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_
+  		  					FROM TABLE(giacs312_pkg.get_giac_bank_lov(#findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#  		  
+  	</select>
+	
+	<resultMap class="giacBankAccount" id="giacBankAcctLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="bankAcctCd" column="bank_acct_cd"/>
+		<result property="bankAcctNo" column="bank_acct_no"/>
+		<result property="branchCd" column="branch_cd"/>
+		<result property="bankAcctType" column="bank_acct_type"/>
+	</resultMap>
+	
+	<select id="getGiacBankAcctLOV" resultMap="giacBankAcctLOVResultMap">
+		SELECT *
+  		  FROM (SELECT ROWNUM rownum_, 
+	               	   b.count_, 
+	              	   a.* 
+	          	  FROM (SELECT * FROM TABLE(giacs303_pkg.get_bank_acct_lov(#bankCd#, #findText#))
+         	 		<isNotNull property="sortColumn">
+	          			<isEqual property="sortColumn" compareValue="bankAcctCd">
+	          				ORDER BY bank_acct_cd
+	          			</isEqual>
+	          			<isEqual property="sortColumn" compareValue="bankAcctNo">
+	          				ORDER BY bank_acct_no
+	          			</isEqual>
+	          			<isEqual property="ascDescFlg" compareValue="ASC">
+	          				ASC
+	          			</isEqual>
+	          			<isEqual property="ascDescFlg" compareValue="DESC">
+	          				DESC
+	          			</isEqual>
+	          		</isNotNull>
+          	   	) a,
+              (SELECT count(*) count_
+	          	 FROM TABLE(giacs303_pkg.get_bank_acct_lov(#bankCd#, #findText#))
+	            )b) 
+	    	WHERE rownum_ BETWEEN #from# AND #to# 
+	</select>	
+	
+	<select id="getGIACS054BankLOV" resultMap="GIACS054BankLOVMap">
+		SELECT *
+  		  FROM (SELECT ROWNUM rownum_, 
+	               	   b.count_, 
+	              	   a.* 
+	          	  FROM (SELECT * FROM TABLE(giac_bank_accounts_pkg.get_giacs054_bank_lov(#fundCd#, #branchCd#))
+				<isNotNull property="findText">
+                 WHERE UPPER(pk_dummy) LIKE UPPER(#findText#)
+                 </isNotNull>
+         	 		<isNotNull property="sortColumn">
+	          			<isEqual property="sortColumn" compareValue="bankCd">
+	          				ORDER BY bank_cd
+	          			</isEqual>
+	          			<isEqual property="sortColumn" compareValue="bankAcctCd">
+	          				ORDER BY bank_acct_cd
+	          			</isEqual>
+	          			<isEqual property="sortColumn" compareValue="bankAcctNo">
+	          				ORDER BY bank_acct_no
+	          			</isEqual>
+	          			<isEqual property="sortColumn" compareValue="bankSName">
+	          				ORDER BY pk_dummy
+	          			</isEqual>
+	          			<isEqual property="ascDescFlg" compareValue="ASC">
+	          				ASC
+	          			</isEqual>
+	          			<isEqual property="ascDescFlg" compareValue="DESC">
+	          				DESC
+	          			</isEqual>
+	          		</isNotNull>
+          	   	) a,
+              (SELECT count(*) count_
+	          	 FROM TABLE(giac_bank_accounts_pkg.get_giacs054_bank_lov(#fundCd#, #branchCd#))
+	          <isNotNull property="findText">
+                WHERE UPPER(pk_dummy) LIKE UPPER(#findText#)
+               </isNotNull>
+	            )b) 
+	    	WHERE rownum_ BETWEEN #from# AND #to# 
+	</select>	
+	
+	<resultMap class="giacBankAccount" id="giacBankAccountListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="bank_cd"     		property="bankCd"/>
+		<result column="bank_acct_cd" 		property="bankAcctCd"/>
+		<result column="dsp_bank_sname"  	property="dspBankSname"/>
+		<result column="dsp_bank_name"  	property="dspBankName"/>
+		<result column="branch_bank" 		property="branchBank"/>
+		<result column="bank_acct_no"  		property="bankAcctNo"/>
+		<result column="branch_cd"  		property="branchCd"/>
+		<result column="dsp_branch_name"  	property="dspBranchName"/>
+		<result column="bank_account_flag" 	property="bankAcctFlag"/>
+		<result column="dsp_bank_account_flag" 	property="dspBankAcctFlag"/>
+		<result column="bank_acct_type"  	property="bankAcctType"/>
+		<result column="dsp_bank_acct_type" property="dspBankAcctType"/>
+		<result column="opening_date"  		property="strOpeningDate"/>
+		<result column="closing_date"  		property="strClosingDate"/>
+		<result column="gl_acct_id"         property="glAcctId"/>
+		<result column="sl_cd"          	property="slCd"/>
+		<result column="dsp_sl_type_name"       property="dspSlTypeName"/>
+		<result column="dsp_gl_acct_category"   property="dspGlAcctCategory"/>
+		<result column="dsp_gl_control_acct"    property="dspGlControlAcct"/>
+		<result column="dsp_gl_sub_acct_1"      property="dspGlSubAcct1"/>
+		<result column="dsp_gl_sub_acct_2"      property="dspGlSubAcct2"/>
+		<result column="dsp_gl_sub_acct_3"      property="dspGlSubAcct3"/>
+		<result column="dsp_gl_sub_acct_4"      property="dspGlSubAcct4"/>
+		<result column="dsp_gl_sub_acct_5"      property="dspGlSubAcct5"/>
+		<result column="dsp_gl_sub_acct_6"      property="dspGlSubAcct6"/>
+		<result column="dsp_gl_sub_acct_7"      property="dspGlSubAcct7"/>
+		<result column="dsp_gl_acct_name"       property="dspGlAcctName"/>
+		<result column="user_id"     		property="userId"/>
+		<result column="last_update" 		property="lastUpdate"/>
+		<result column="remarks"     		property="remarks"/>
+	</resultMap>
+	
+	<resultMap id="Giacs312GlAcctCodeLOVMap" class="java.util.HashMap"  extends="BaseEntity.TableGridResultMap">
+		<result column="gl_acct_category" 		property="glAcctCategory"/>
+		<result column="gl_control_acct" 		property="glControlAcct"/>
+		<result column="gl_sub_acct_1" 			property="glSubAcct1"/>
+		<result column="gl_sub_acct_2" 			property="glSubAcct2"/>
+		<result column="gl_sub_acct_3" 			property="glSubAcct3"/>
+		<result column="gl_sub_acct_4" 			property="glSubAcct4"/>
+		<result column="gl_sub_acct_5" 			property="glSubAcct5"/>
+		<result column="gl_sub_acct_6" 			property="glSubAcct6"/>
+		<result column="gl_sub_acct_7" 			property="glSubAcct7"/>
+		<result column="gl_acct_name" 			property="glAcctName"/>
+		<result column="gl_acct_id" 			property="glAcctId"/>
+		<result column="gslt_sl_type_cd" 		property="gsltSlTypeCd"/>
+		<result column="sl_type_name" 			property="dspSlTypeName"/>
+	</resultMap>
+	
+	<resultMap id="Giacs318GlAcctCodeLOVMap" class="java.util.HashMap"  extends="BaseEntity.TableGridResultMap">
+		<result column="gl_acct_category" 		property="glAcctCategory"/>
+		<result column="gl_control_acct" 		property="glControlAcct"/>
+		<result column="gl_sub_acct_1" 			property="glSubAcct1"/>
+		<result column="gl_sub_acct_2" 			property="glSubAcct2"/>
+		<result column="gl_sub_acct_3" 			property="glSubAcct3"/>
+		<result column="gl_sub_acct_4" 			property="glSubAcct4"/>
+		<result column="gl_sub_acct_5" 			property="glSubAcct5"/>
+		<result column="gl_sub_acct_6" 			property="glSubAcct6"/>
+		<result column="gl_sub_acct_7" 			property="glSubAcct7"/>
+		<result column="gl_acct_name" 			property="glAcctName"/>
+		<result column="gl_acct_id" 			property="glAcctId"/>
+		<result column="gslt_sl_type_cd" 		property="gsltSlTypeCd"/>
+		<result column="sl_type_name" 			property="dspSlTypeName"/>
+	</resultMap>
+	
+	<select id="getGiacs312GlAcctCodeLOV" resultMap="Giacs312GlAcctCodeLOVMap">
+		SELECT *
+			  FROM (SELECT rownum rownum_, 
+			               b.count_, 
+			               a.* 
+			          FROM (SELECT * FROM TABLE(giacs312_pkg.get_gl_acct_lov(#findText#)) 
+						<isEqual property="sortColumn" compareValue="glAcctCategory glControlAcct glSubAcct1 glSubAcct2 glSubAcct3 glSubAcct4 glSubAcct5 glSubAcct6 glSubAcct7">
+			          		ORDER BY gl_acct_category
+			          		<isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_control_acct
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_1
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_2
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_3
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_4
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_5
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_6
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_7
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="glAcctName">
+			          		ORDER BY gl_acct_name
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="gsltSlTypeCd">
+			          		ORDER BY gslt_sl_type_cd
+			          	</isEqual>
+			          	<isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	</isNotNull>
+		              	)a,
+			               (SELECT count(*) count_ 
+			                  FROM TABLE(giacs312_pkg.get_gl_acct_lov(#findText#))) b) 
+		WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiacs312RecList" resultMap="giacBankAccountListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giacs312_pkg.get_rec_list(#userId#, #bankAcctCd#, #dspBankSname#, #dspBankName#, #branchBank#, #bankAcctNo#))
+		                  <isEqual property="sortColumn" compareValue="bankAcctCd">
+			              		ORDER BY TO_NUMBER(bank_acct_cd)
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="dspBankSname">
+			              		ORDER BY dsp_bank_sname
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="dspBankName">
+			              		ORDER BY dsp_bank_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="branchBank">
+			              		ORDER BY branch_bank
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="bankAcctNo">
+			              		ORDER BY bank_acct_no
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giacs312_pkg.get_rec_list(#userId#, #bankAcctCd#, #dspBankSname#, #dspBankName#, #branchBank#, #bankAcctNo#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setBankAccount" parameterClass="giacBankAccount">
+	    DECLARE
+	    	v_rec giac_bank_accounts%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.bank_cd := #bankCd#;
+ 			v_rec.bank_acct_cd := #bankAcctCd#;
+ 			v_rec.branch_bank := #branchBank#;
+ 			v_rec.bank_acct_no := #bankAcctNo#;
+ 			v_rec.branch_cd := #branchCd#;
+ 			v_rec.bank_acct_type := #bankAcctType#;
+ 			v_rec.bank_account_flag := #bankAcctFlag#;
+ 			v_rec.opening_date := TO_DATE(#strOpeningDate#, 'MM-DD-YYYY');
+ 			v_rec.closing_date := TO_DATE(#strClosingDate#, 'MM-DD-YYYY');
+ 			v_rec.gl_acct_id := #glAcctId#;
+ 			v_rec.sl_cd := #slCd#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			giacs312_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteBankAccount" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giacs312_pkg.val_del_rec(#bankCd#, #bankAcctCd#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddBankAccount" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giacs312_pkg.val_add_rec(#bankAcctCd#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delBankAccount" parameterClass="giacBankAccount">
+		BEGIN
+ 			giacs312_pkg.del_rec(#bankCd#, #bankAcctCd#);
+ 		END;
+ 	</delete>	
+ 	
+	<select id="getGiacs318GlAcctCodeLOV" resultMap="Giacs318GlAcctCodeLOVMap">
+		SELECT *
+			  FROM (SELECT rownum rownum_, 
+			               b.count_, 
+			               a.* 
+			          FROM (SELECT * FROM TABLE(giacs318_pkg.get_gl_acct_lov(#findText#)) 
+						<isEqual property="sortColumn" compareValue="glAcctCategory glControlAcct glSubAcct1 glSubAcct2 glSubAcct3 glSubAcct4 glSubAcct5 glSubAcct6 glSubAcct7">
+			          		ORDER BY gl_acct_category
+			          		<isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_control_acct
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_1
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_2
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_3
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_4
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_5
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_6
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_7
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="glAcctName">
+			          		ORDER BY gl_acct_name
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="gsltSlTypeCd">
+			          		ORDER BY gslt_sl_type_cd
+			          	</isEqual>
+			          	<isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	</isNotNull>
+		              	)a,
+			               (SELECT count(*) count_ 
+			                  FROM TABLE(giacs318_pkg.get_gl_acct_lov(#findText#))) b) 
+		WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGIACS035BankAcctCdLOV" resultMap="giacBankAcctLOVResultMap"> <!-- dren 07.16.2015 : SR 0017729 - Added GIACS035BankAcctCdLOV - Start -->
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giac_bank_accounts_pkg.GET_GIACS035_BANK_ACCOUNT_LOV(#search#,#bankCd#))
+		                 <isNotNull property="findText">
+					         WHERE (UPPER(bank_acct_no) LIKE (#findText#))
+				         </isNotNull>          
+			          	  <isNotNull property="sortColumn">
+				              <isEqual property="sortColumn" compareValue="bankAcctCd">
+				              		ORDER BY BANK_ACCT_CD
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="bankAcctNo">
+				              		ORDER BY BANK_ACCT_NO
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="bankAcctType">
+				              		ORDER BY bank_acct_type
+				              </isEqual>				 
+			                  <isEqual property="sortColumn" compareValue="branchCd">
+				              		ORDER BY branch_cd
+				              </isEqual>				                           				              
+				          	  <isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              </isNotNull>
+				          </isNotNull>    
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (giac_bank_accounts_pkg.GET_GIACS035_BANK_ACCOUNT_LOV(#search#,#bankCd#))
+			              <isNotNull property="findText">
+					          WHERE (UPPER(bank_acct_no) LIKE (#findText#))
+				          </isNotNull> 
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>	<!-- dren 07.16.2015 : SR 0017729 - Added GIACS035BankAcctCdLOV - End -->
+
+</sqlMap>

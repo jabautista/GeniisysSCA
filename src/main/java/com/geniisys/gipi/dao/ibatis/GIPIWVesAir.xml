@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIWVesAir">
+	
+	<typeAlias alias="WVesAir" type="com.geniisys.gipi.entity.GIPIWVesAir"/>
+	
+	
+	<resultMap class="WVesAir" id="wvesAirResultMap">
+		<result property="parId"		column="PAR_ID"/>
+		<result property="vesselCd"		column="VESSEL_CD"/>
+		<result property="vesselName"	column="VESSEL_NAME"/>
+		<result property="vesselFlag"	column="VESSEL_FLAG"/>
+		<result property="vesselType"	column="VESSEL_TYPE"/>
+		<result property="recFlag"		column="REC_FLAG"/>
+	</resultMap>
+	
+	<resultMap class="WVesAir" id="wvesAirTableGridResultMap" extends="wvesAirResultMap">
+		<result property="rowNum" 		column="rownum_" />
+		<result property="rowCount"		column="count_" />
+	</resultMap>
+	
+	<resultMap class="GIISVessel" id="GIPISCarInfoLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="vesselCd"		column="VESSEL_CD" />
+		<result property="vesselName"	column="VESSEL_NAME" />
+		<result property="vesselFlag"	column="VESSEL_FLAG" />
+		<result property="plateNo"		column="VESSEL_PLATE_NO" />
+		<result property="motorNo"		column="VESSEL_MOTOR_NO" />
+		<result property="serialNo"		column="VESSEL_SERIAL_NO"/>
+		<result property="vesselType"	column="VESSEL_TYPE"/>
+	</resultMap>
+	
+	<select id="getGIPIWVesAir" resultMap="wvesAirResultMap" >
+		SELECT par_id,		vessel_cd,		vessel_name,
+			   vessel_flag, vessel_type,	rec_flag
+		  FROM TABLE(GIPI_WVES_AIR_PKG.get_gipi_wves_air(#parId#))
+	</select>
+	
+	<select id="getGIPIWVesAir2" resultMap="wvesAirTableGridResultMap">
+		 SELECT *
+              FROM (SELECT rownum rownum_, b.count_, a.*
+              FROM (SELECT *
+						  FROM TABLE(GIPI_WVES_AIR_PKG.get_gipi_wves_air(#parId#))
+						 WHERE UPPER (NVL (vessel_name, '*')) LIKE UPPER (NVL (#vesselName#, NVL (vessel_name, '*')))
+						   AND UPPER (NVL (vessel_type, '*')) LIKE UPPER (NVL (#vesselType#, NVL (vessel_type, '*')))
+				            <isEqual property="sortColumn" compareValue="vesselName">
+			              		ORDER BY vessel_name
+				            </isEqual>
+				            <isEqual property="sortColumn" compareValue="vesselType">
+			              		ORDER BY vessel_type
+				            </isEqual>
+				            <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	 </isNotNull>) a, 
+			               (SELECT count(*) count_
+			                  FROM TABLE(GIPI_WVES_AIR_PKG.get_gipi_wves_air(#parId#))
+						 WHERE UPPER (NVL (vessel_name, '*')) LIKE UPPER (NVL (#vesselName#, NVL (vessel_name, '*')))
+						   AND UPPER (NVL (vessel_type, '*')) LIKE UPPER (NVL (#vesselType#, NVL (vessel_type, '*')))) b) 
+			 WHERE rownum_ BETWEEN #from# AND #to#	
+			 <!-- commented out by jeffdojello 04232013 -->
+			 <!--SELECT *
+                  FROM TABLE
+                          (GIPI_WVES_AIR_PKG.get_gipi_wves_air(#parId#))
+                            <isNotNull property="filter">
+                                   WHERE 1=1
+                                <isNotEmpty prepend="AND"  property="vesselName">
+                                            VESSEL_NAME LIKE upper(#vesselName#)
+                                </isNotEmpty>
+                                 <isNotEmpty prepend="AND"  property="vesselType">
+                                            VESSEL_TYPE LIKE upper(#vesselType#)
+                                </isNotEmpty>
+                            </isNotNull>
+                            <isEqual property="sortColumn" compareValue="vesselName">
+                                  ORDER BY VESSEL_NAME
+                            </isEqual>
+                            <isEqual property="sortColumn" compareValue="vesselType">
+                                  ORDER BY VESSEL_TYPE
+                            </isEqual>
+                          <isNotNull property="sortColumn">
+                                  <isEqual property="ascDescFlg" compareValue="ASC">
+                                      ASC
+                                  </isEqual>
+                                  <isEqual property="ascDescFlg" compareValue="DESC">
+                                      DESC
+                                  </isEqual>
+                               </isNotNull>  
+                               ) a,
+               (SELECT COUNT (*) count_
+                  FROM TABLE
+                          (GIPI_WVES_AIR_PKG.get_gipi_wves_air(#parId#))
+                           <isNotNull property="filter">
+                                   WHERE 1=1
+                                <isNotEmpty prepend="AND"  property="vesselName">
+                                            VESSEL_NAME LIKE upper(#vesselName#)
+                                </isNotEmpty>
+                                 <isNotEmpty prepend="AND"  property="vesselFlag">
+                                            VESSEL_FLAG LIKE upper(#vesselFlag#)
+                                </isNotEmpty>
+                            </isNotNull>) b)
+            WHERE rownum_ BETWEEN #from# AND #to#-->
+	</select>
+	
+	<select id="getCarInfoLOV" resultMap="GIPISCarInfoLOVResultMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+		  			   b.count_,
+		  			   a.*
+		  		  FROM (SELECT *
+		  		  		  FROM TABLE (GIIS_VESSEL_PKG.get_vessel_list5(#findText#))
+		  		  		  <isNotNull property="notIn">
+		                  		WHERE VESSEL_CD NOT IN $notIn$
+		                  </isNotNull>
+		  		  		  <isEqual property="sortColumn" compareValue="vesselName">
+		  		  		  		ORDER BY vessel_name
+		  		  		  </isEqual>
+		  		  		  <isEqual property="sortColumn" compareValue="vesselType">
+		  		  		  		ORDER BY vessel_type
+		  		  		  </isEqual>
+		  		  		  <isEqual property="sortColumn" compareValue="plateNo">
+		  		  		  		ORDER BY vessel_plate_no
+		  		  		  </isEqual>
+		  		  		  <isEqual property="sortColumn" compareValue="motorNo">
+		  		  		  		ORDER BY vessel_motor_no
+		  		  		  </isEqual>
+		  		  		   <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		  		  		  ) a,
+		  		  		(SELECT count(*) count_
+		  		  		   FROM TABLE (giis_vessel_pkg.get_vessel_list5(#findText#))
+		  		  		   <isNotNull property="notIn">
+		                  		WHERE VESSEL_CD NOT IN $notIn$
+		                   </isNotNull>
+		  		  		  ) b)
+		WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	 
+	<procedure id="deleteAllGIPIWVesAir">
+		BEGIN
+			GIPI_WVES_AIR_PKG.del_all_gipi_wves_air(#parId#);
+		END;			
+	</procedure>
+	
+	<procedure id="deleteGIPIWVesAir" parameterClass="java.util.HashMap">
+		BEGIN
+			GIPI_WVES_AIR_PKG.del_gipi_wves_air(#parId#, #vesselCd#);
+		END;
+	</procedure>
+	
+	<procedure id="saveGIPIWVesAir" parameterClass="WVesAir">
+		DECLARE
+			carrier	GIPI_WVES_AIR%ROWTYPE;
+		BEGIN
+			carrier.PAR_ID    := #parId#;
+			carrier.VESSEL_CD := #vesselCd#;
+			carrier.REC_FLAG  := #recFlag#;
+			carrier.USER_ID	  := #userId#;
+			
+			giis_users_pkg.app_user := #userId#;
+			GIPI_WVES_AIR_PKG.set_gipi_wves_air(carrier);
+		END;
+	</procedure>
+
+	<procedure id="valMultiVessel" parameterClass="java.lang.Integer">
+		BEGIN
+			GIPI_WVES_AIR_PKG.VAL_MULTIVESSEL(#parId#);
+		END;
+	</procedure>
+
+    <select id="checkUserPerIssCdAcctg3" resultClass="java.lang.String" parameterClass="java.util.HashMap"> <!-- Added by Jerome 08.31.2016 SR 5623 -->
+		SELECT check_user_per_iss_cd_acctg2(#lineCd#, #issCd#, #moduleId#, #userId#) FROM dual
+	</select>
+</sqlMap>

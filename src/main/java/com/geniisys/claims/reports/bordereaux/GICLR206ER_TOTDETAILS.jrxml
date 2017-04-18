@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GICLR206ER_TRTY_DETAIL" language="groovy" columnCount="16" pageWidth="990" pageHeight="18" columnWidth="61" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="Crosstab Data Text" isDefault="false" hAlign="Center"/>
+	<parameter name="P_SESSION_ID" class="java.lang.String"/>
+	<parameter name="P_CLAIM_ID" class="java.lang.Integer"/>
+	<parameter name="P_BUSS_SOURCE" class="java.lang.String"/>
+	<parameter name="P_ISS_CD" class="java.lang.String"/>
+	<parameter name="P_LINE_CD" class="java.lang.String"/>
+	<parameter name="P_LOSS_YEAR" class="java.lang.Integer"/>
+	<parameter name="P_BRDRX_RECORD_ID" class="java.math.BigDecimal"/>
+	<parameter name="P_SUBLINE_CD" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT DISTINCT a.* FROM TABLE(GICLR206ER_PKG.GET_GICLR206ER_TREATY_DETAIL($P{P_SESSION_ID},$P{P_CLAIM_ID},$P{P_BUSS_SOURCE},$P{P_ISS_CD},$P{P_LINE_CD},$P{P_LOSS_YEAR},$P{P_BRDRX_RECORD_ID},$P{P_SUBLINE_CD})) a]]>
+	</queryString>
+	<field name="TREATY_NAME" class="java.lang.String"/>
+	<field name="GRP_SEQ_NO" class="java.math.BigDecimal"/>
+	<field name="PAID_LOSSES" class="java.math.BigDecimal"/>
+	<field name="PAID_LOSSES3" class="java.math.BigDecimal"/>
+	<field name="RI_NAME" class="java.lang.String"/>
+	<field name="BRDRX_RECORD_ID" class="java.math.BigDecimal"/>
+	<summary>
+		<band height="17">
+			<crosstab>
+				<reportElement x="0" y="0" width="990" height="17"/>
+				<rowGroup name="BRDRX_RECORD_ID" width="0" totalPosition="End">
+					<bucket>
+						<bucketExpression class="java.math.BigDecimal"><![CDATA[$F{BRDRX_RECORD_ID}]]></bucketExpression>
+					</bucket>
+					<crosstabRowHeader>
+						<cellContents backcolor="#FFFFFF" mode="Opaque"/>
+					</crosstabRowHeader>
+					<crosstabTotalRowHeader>
+						<cellContents backcolor="#FFFFFF" mode="Opaque"/>
+					</crosstabTotalRowHeader>
+				</rowGroup>
+				<columnGroup name="GRP_SEQ_NO" height="0">
+					<bucket>
+						<bucketExpression class="java.math.BigDecimal"><![CDATA[$F{GRP_SEQ_NO}]]></bucketExpression>
+					</bucket>
+					<crosstabColumnHeader>
+						<cellContents backcolor="#FFFFFF" mode="Opaque"/>
+					</crosstabColumnHeader>
+					<crosstabTotalColumnHeader>
+						<cellContents/>
+					</crosstabTotalColumnHeader>
+				</columnGroup>
+				<measure name="PAID_LOSSESMeasure" class="java.math.BigDecimal" calculation="Sum">
+					<measureExpression><![CDATA[$F{PAID_LOSSES}]]></measureExpression>
+				</measure>
+				<crosstabCell width="64" height="0">
+					<cellContents/>
+				</crosstabCell>
+				<crosstabCell width="64" height="16" rowTotalGroup="BRDRX_RECORD_ID">
+					<cellContents backcolor="#FFFFFF" mode="Opaque">
+						<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+							<reportElement style="Crosstab Data Text" x="0" y="5" width="64" height="11">
+								<printWhenExpression><![CDATA[($V{GRP_SEQ_NO}=="1" || $V{PAID_LOSSESMeasure} == 0) ? false:true]]></printWhenExpression>
+							</reportElement>
+							<textElement textAlignment="Right" verticalAlignment="Middle">
+								<font fontName="Arial" size="7"/>
+							</textElement>
+							<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{PAID_LOSSESMeasure}]]></textFieldExpression>
+						</textField>
+						<staticText>
+							<reportElement style="Crosstab Data Text" x="0" y="0" width="64" height="6"/>
+							<textElement textAlignment="Right" verticalAlignment="Middle">
+								<font fontName="Arial" size="4"/>
+							</textElement>
+							<text><![CDATA[--------------------------------------------]]></text>
+						</staticText>
+					</cellContents>
+				</crosstabCell>
+			</crosstab>
+		</band>
+	</summary>
+</jasperReport>

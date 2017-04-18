@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIRefNoHist">
+
+	<resultMap id="refNoHistTGMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result column="ACCT_ISS_CD"		property="acctIssCd"/>
+		<result column="BRANCH_CD"			property="branchCd"/>
+		<result column="REF_NO"				property="refNo"/>
+		<result column="MOD_NO"				property="modNo"/>
+		<result column="USER_ID"			property="dspUserId"/>
+		<result column="LAST_UPDATE"		property="lastUpdate"/>
+		<result column="REMARKS"			property="remarks"/>
+		<result column="BANK_REF_NO"		property="bankRefNo"/>
+	</resultMap>
+	
+	<resultMap id="refNoHistCSVMap" class="java.util.HashMap">
+		<result column="ACCT_ISS_CD"		property="ACCT_ISS_CD"/>
+		<result column="BRANCH_CD"			property="BRANCH_CD"/>
+		<result column="REF_NO"				property="REF_NO"/>
+		<result column="MOD_NO"				property="MOD_NO"/>
+		<result column="USER_ID"			property="USER_ID"/>
+		<result column="LAST_UPDATE"		property="LAST_UPDATE"/>
+		<result column="REMARKS"			property="REMARKS"/>
+		<result column="BANK_REF_NO"		property="BANK_REF_NO"/>
+	</resultMap>
+	
+	<resultMap id="bancBranchMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result column="BRANCH_CD"			property="branchCd"/>
+		<result column="BRANCH_DESC"		property="branchDesc"/>
+		<result column="AREA_DESC"			property="areaDesc"/>
+	</resultMap>
+	
+	<parameterMap id="generateBankRefNoMap" class="java.util.HashMap">
+		<parameter property="acctIssCd"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="branchCd"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="refNo"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="moduleId"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="userId"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+	</parameterMap>
+	
+	<select id="getRefNoHistListByUser" resultMap="refNoHistTGMap">
+		SELECT *
+          FROM (SELECT ROWNUM rownum_,
+            		   b.count_,
+            		   a.*
+                  FROM (SELECT *
+                          FROM TABLE(GIPI_REF_NO_HIST_PKG.get_ref_no_hist_list_by_user(#userId#, #acctIssCd#, #branchCd#, #refNo#,
+                          																#modNo#, #remarks#, #lastUpdate#))
+                          	<isEqual property="sortColumn" compareValue="acctIssCd">
+								ORDER BY acct_iss_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="branchCd">
+								ORDER BY branch_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="refNo">
+								ORDER BY ref_no
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="modNo">
+								ORDER BY mod_no
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="remarks">
+								ORDER BY remarks
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="dspUserId">
+								ORDER BY user_id
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="lastUpdate">
+								ORDER BY last_update
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>) a,
+               (SELECT COUNT(*) count_
+                  FROM TABLE(GIPI_REF_NO_HIST_PKG.get_ref_no_hist_list_by_user(#userId#, #acctIssCd#, #branchCd#, #refNo#,
+                          														#modNo#, #remarks#, #lastUpdate#))) b)
+          WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGIUTS035BancBranchLOV" resultMap="bancBranchMap">
+		SELECT *
+          FROM (SELECT ROWNUM rownum_,
+            		   b.count_,
+            		   a.*
+                  FROM (SELECT *
+                          FROM TABLE(GIIS_BANC_BRANCH_PKG.get_giuts035_banc_branch_list)
+                        <isNotNull property="findText">
+                         WHERE TO_CHAR(branch_cd) LIKE TO_CHAR(#findText#)
+                            OR UPPER(branch_desc) LIKE UPPER(#findText#)
+                            OR UPPER(area_desc) LIKE UPPER(#findText#)
+                        </isNotNull>
+                            <isEqual property="sortColumn" compareValue="branchCd">
+								ORDER BY branch_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="branchDesc">
+								ORDER BY branch_desc
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="areaDesc">
+								ORDER BY area_desc
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>) a,
+               (SELECT COUNT(*) count_
+                  FROM TABLE(GIIS_BANC_BRANCH_PKG.get_giuts035_banc_branch_list)
+                 <isNotNull property="findText">
+                 WHERE TO_CHAR(branch_cd) LIKE TO_CHAR(#findText#)
+                    OR UPPER(branch_desc) LIKE UPPER(#findText#)
+                    OR UPPER(area_desc) LIKE UPPER(#findText#)
+                </isNotNull>
+                 ) b)
+          WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="giuts035GenerateBankRefNo" parameterMap="generateBankRefNoMap">
+		CALL generate_ref_no_web(?, ?, ?, ?, ?)
+	</procedure>
+	
+	<select id="getModNo" parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+		SELECT GIPI_REF_NO_HIST_PKG.get_mod_no(#acctIssCd#, #branchCd#, #refNo#)
+		  FROM DUAL
+	</select>
+	
+	<select id="getUnusedRefNo" parameterClass="java.util.HashMap" resultMap="refNoHistCSVMap">
+		SELECT *
+  	      FROM TABLE(GIPI_REF_NO_HIST_PKG.get_unused_ref_no(#userId#, #range#, #exactDate#, #asOfDate#, #fromDate#, #toDate#))
+	</select>
+	
+</sqlMap>

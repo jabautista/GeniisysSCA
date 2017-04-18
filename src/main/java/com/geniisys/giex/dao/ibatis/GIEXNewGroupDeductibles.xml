@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIEXNewGroupDeductibles">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+
+	<typeAlias alias="GIEXNewGroupDeductiblesClass" type="com.geniisys.giex.entity.GIEXNewGroupDeductibles" />
+	
+	<resultMap class="java.util.HashMap" id="populateDeductiblesGIEXS007Map" extends="BaseEntity.TableGridResultMap">
+		<result property="policyId"			column="POLICY_ID" />
+		<result property="itemNo"			column="ITEM_NO" />
+		<result property="perilCd"			column="PERIL_CD" />
+		<result property="dedDeductibleCd"	column="DED_DEDUCTIBLE_CD" />
+		<result property="lineCd"			column="LINE_CD" />
+		<result property="sublineCd"		column="SUBLINE_CD" />
+		<result property="deductibleRt"		column="DEDUCTIBLE_RT" />
+		<result property="deductibleAmt"	column="DEDUCTIBLE_AMT" />
+		<result property="deductibleLocalAmt"	column="DEDUCTIBLE_LOCAL_AMT" /><!-- added by joanne 06.05.14 -->
+		<result property="dspPerilName"		column="DSP_PERIL_NAME" />
+		<result property="deductibleText"	column="DEDUCTIBLE_TEXT" />
+		<result property="dedType"			column="DED_TYPE" />
+		<result property="itemTitle"		column="ITEM_TITLE" />
+		<result property="deductibleTitle"	column="DEDUCTIBLE_TITLE" />
+	</resultMap>
+	
+	<select id="populateDeductiblesGIEXS007" resultMap="populateDeductiblesGIEXS007Map" parameterClass="java.util.HashMap">		
+	    SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIEX_NEW_GROUP_DEDUCTIBLES_PKG.POPULATE_DEDUCTIBLES(#policyId#))
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIEX_NEW_GROUP_DEDUCTIBLES_PKG.POPULATE_DEDUCTIBLES(#policyId#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="setNewGroupDeductibles" parameterClass="GIEXNewGroupDeductiblesClass">
+		BEGIN
+			GIEX_NEW_GROUP_DEDUCTIBLES_PKG.set_deductibles_dtls(
+				#policyId#,
+				#itemNo#,
+				#perilCd#,
+				#dedDeductibleCd#,
+				#lineCd#,
+				#sublineCd#,
+				#deductibleRt#,
+				#deductibleLocalAmt#<!-- #deductibleAmt# joanne 06.06.14-->
+			);
+		END;
+	</procedure>
+	
+	<delete id="deleteNewGroupDeductibles" parameterClass="java.util.HashMap">
+		DELETE FROM GIEX_NEW_GROUP_DEDUCTIBLES
+		  WHERE policy_id = #policyId#
+		    AND item_no = #itemNo#
+		    AND peril_cd = #perilCd#
+		    AND ded_deductible_cd = #dedDeductibleCd#
+	</delete>
+	
+	<delete id="deleteGiexNewGroupDeductibles" parameterClass="java.util.HashMap">
+		DELETE FROM GIEX_NEW_GROUP_DEDUCTIBLES
+		  WHERE policy_id = #policyId#
+	</delete>
+	
+	<select id="valIfDeductibleExists" resultClass="java.lang.Integer">
+		SELECT giex_new_group_deductibles_pkg.val_if_deductible_exists(#policyId#, #itemNo#, #perilCd#, #dedDeductibleCd#) FROM DUAL
+	</select>
+	
+	<procedure id="insertNewGroupDeductibles">	
+	    BEGIN
+			giex_new_group_deductibles_pkg.ins_new_group_deductibles(#policyId#);
+		END;
+	</procedure>
+	
+	<procedure id="populateExpiryDeductibles" parameterClass="java.util.HashMap">	
+	    BEGIN
+			giis_users_pkg.app_user := #userId#;
+			populate_expiry_deductible(#policyId#, #summarySw#);
+		END;
+	</procedure>
+	
+	<!-- added by joanne 04.15.14 -->
+	<select id="countTsiDed" resultClass="java.lang.String">
+  		SELECT giex_new_group_deductibles_pkg.count_tsi_ded (#policyId#) from dual
+  	</select>
+  	
+  	<!-- added by joanne 04.15.14 -->
+  	<procedure id="updateTsiDeductibles" parameterClass="java.util.HashMap">	
+	    BEGIN
+			giis_users_pkg.app_user := #userId#;
+			giex_new_group_deductibles_pkg.update_deductibles (#policyId#);
+		END;
+	</procedure>
+	
+	<!-- added by joanne 06.06.14 -->
+	<select id="getDeductibleCurrency" resultClass="java.lang.String">
+  		SELECT giex_new_group_deductibles_pkg.get_deductible_currency (#policyId#) from dual
+  	</select>
+</sqlMap>

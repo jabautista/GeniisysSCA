@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISMCSublineType">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIISMCSublineType" type="com.geniisys.common.entity.GIISMCSublineType"/>
+	
+	<resultMap class="GIISMCSublineType" id="GIISMCSublineTypeLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="sublineTypeCd"		column="subline_type_cd" />
+		<result property="sublineTypeDesc"	column="subline_type_desc" />
+	</resultMap>
+	
+	<select id="getSublineTypeLOV" resultMap="GIISMCSublineTypeLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giis_mc_subline_type_pkg.get_sublinetype_list(#sublineCd#))
+						  <isNotNull property="findText">
+		                  	WHERE UPPER(subline_type_desc) LIKE UPPER(#findText#)
+		                  </isNotNull>
+					   )a,
+					   (SELECT COUNT(*) count_
+						  FROM TABLE(giis_mc_subline_type_pkg.get_sublinetype_list(#sublineCd#))
+						  <isNotNull property="findText">
+		                  	WHERE UPPER(subline_type_desc) LIKE UPPER(#findText#)
+		                  </isNotNull>
+		                  ) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="giiss056MCSublineTypeResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="subline_cd" property="sublineCd" />
+		<result column="subline_type_cd" property="sublineTypeCd" />
+		<result column="subline_type_desc" property="sublineTypeDesc" />
+		<result column="remarks" property="remarks" />
+		<result column="user_id" property="userId" />
+		<result column="last_update" property="lastUpdate" />
+	</resultMap>
+	
+	<select id="getGiiss056MCSublineType" resultMap="giiss056MCSublineTypeResultMap" parameterClass="java.util.HashMap">
+		SELECT *
+  		  FROM (SELECT rownum rownum_,b.count_,a.*
+          		  FROM (SELECT * FROM TABLE(giiss056_pkg.get_main)
+          		  <isNotNull property="filter">
+			      	WHERE 1=1
+           			<isNotEmpty prepend="AND" property="sublineCd">
+           			  UPPER(subline_cd) LIKE UPPER(#sublineCd#)
+           			</isNotEmpty>
+           			<isNotEmpty prepend="AND" property="sublineTypeCd">
+           			  UPPER(subline_type_cd) LIKE UPPER(#sublineTypeCd#)
+           			</isNotEmpty>
+           			<isNotEmpty prepend="AND" property="sublineTypeDesc">
+           			  UPPER(subline_type_desc) LIKE UPPER(#sublineTypeDesc#)
+           			</isNotEmpty>
+                  </isNotNull>
+          		  <isNotNull property="sortColumn">
+					<isEqual property="sortColumn" compareValue="sublineCd">
+						ORDER BY subline_cd
+					</isEqual>
+					<isEqual property="sortColumn" compareValue="sublineTypeCd">
+						ORDER BY subline_type_cd
+					</isEqual>
+					<isEqual property="sortColumn" compareValue="sublineTypeDesc">
+						ORDER BY subline_type_desc
+					</isEqual>
+					<isEqual property="ascDescFlg" compareValue="ASC">
+						ASC
+					</isEqual>
+					<isEqual property="ascDescFlg" compareValue="DESC">
+						DESC
+					</isEqual>
+				  </isNotNull>) a,
+               (SELECT count(*) count_ FROM TABLE(giiss056_pkg.get_main)
+               <isNotNull property="filter">
+			      	WHERE 1=1
+           			<isNotEmpty prepend="AND" property="sublineCd">
+           			  UPPER(subline_cd) LIKE UPPER(#sublineCd#)
+           			</isNotEmpty>
+           			<isNotEmpty prepend="AND" property="sublineTypeCd">
+           			  UPPER(subline_type_cd) LIKE UPPER(#sublineTypeCd#)
+           			</isNotEmpty>
+           			<isNotEmpty prepend="AND" property="sublineTypeDesc">
+           			  UPPER(subline_type_desc) LIKE UPPER(#sublineTypeDesc#)
+           			</isNotEmpty>
+                  </isNotNull>) b)
+ 		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="giiss056SublineCdLovResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="subline_cd" property="sublineCd" />
+		<result column="subline_name" property="sublineName" />
+	</resultMap>
+	
+	<select id="getGiiss056SublineCdLov" resultMap="giiss056SublineCdLovResultMap" parameterClass="java.util.HashMap">
+		SELECT *
+  		  FROM (SELECT rownum rownum_,b.count_,a.*
+          		  FROM (SELECT * FROM TABLE(giiss056_pkg.get_subline_lov)
+          		  WHERE 1 = 1
+          		  <isNotEmpty prepend="AND" property="findText">
+              			   (UPPER(subline_cd) LIKE UPPER(NVL(#findText#, subline_cd))
+              			   OR UPPER(subline_name) LIKE UPPER(NVL(#findText#, subline_name)))
+              		</isNotEmpty>
+              		<isNotEmpty prepend="AND" property="filterText">
+              			(UPPER(subline_cd) LIKE UPPER(NVL(#filterText#, subline_cd))
+              			   OR UPPER(subline_name) LIKE UPPER(NVL(#filterText#, subline_name)))
+              		</isNotEmpty>
+          		  <isNotNull property="sortColumn">
+					<isEqual property="sortColumn" compareValue="sublineCd">
+						ORDER BY subline_cd
+					</isEqual>
+					<isEqual property="sortColumn" compareValue="sublineName">
+						ORDER BY subline_name
+					</isEqual>
+					<isEqual property="ascDescFlg" compareValue="ASC">
+						ASC
+					</isEqual>
+					<isEqual property="ascDescFlg" compareValue="DESC">
+						DESC
+					</isEqual>
+				  </isNotNull>) a,
+               (SELECT count(*) count_ FROM TABLE(giiss056_pkg.get_subline_lov)
+               WHERE 1 = 1
+               <isNotEmpty prepend="AND" property="findText">
+              			   (UPPER(subline_cd) LIKE UPPER(NVL(#findText#, subline_cd))
+              			   OR UPPER(subline_name) LIKE UPPER(NVL(#findText#, subline_name)))
+              		</isNotEmpty>
+              		<isNotEmpty prepend="AND" property="filterText">
+              			(UPPER(subline_cd) LIKE UPPER(NVL(#filterText#, subline_cd))
+              			   OR UPPER(subline_name) LIKE UPPER(NVL(#filterText#, subline_name)))
+              		</isNotEmpty>) b)
+ 		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="giiss056ValSublineTypeCd" parameterClass="map">
+ 		BEGIN
+ 			giiss056_pkg.val_add_rec(#sublineCd#, #oldSublineTypeCd#, #newSublineTypeCd#, #pAction#, #oldSublineTypeDesc#, #newSublineTypeDesc#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="giiss056SaveRec" parameterClass="GIISMCSublineType">
+	    DECLARE
+	    	v_rec giis_mc_subline_type%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.subline_cd := #sublineCd#;
+			v_rec.subline_type_cd := #sublineTypeCd#;
+			v_rec.subline_type_desc := #sublineTypeDesc#;
+			v_rec.user_id := #userId#;
+			v_rec.remarks := #remarks#;
+ 			
+ 			giiss056_pkg.save_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="giiss056ValDelRec" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss056_pkg.val_del_rec(#sublineTypeCd#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="giiss056DelRec" parameterClass="map">
+ 		BEGIN
+ 			giiss056_pkg.del_rec(#sublineCd#, #sublineTypeCd#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<select id="getGiiss106SublineTypeLOV" resultMap="GIISMCSublineTypeLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giis_mc_subline_type_pkg.get_sublinetype_list(#sublineCd#))
+						  <isNotNull property="findText">
+		                  	WHERE UPPER(subline_type_desc) LIKE UPPER(#findText#)
+		                  	   OR UPPER(subline_type_cd) LIKE UPPER(#findText#)
+		                  </isNotNull>
+		                  <isNull property="findText">
+		                  	WHERE UPPER(subline_type_desc) LIKE UPPER(NVL(#searchString#, subline_type_desc))
+		                  	   OR UPPER(subline_type_cd) LIKE UPPER(NVL(#searchString#, subline_type_desc))
+		                  </isNull>
+		                  <isEqual property="sortColumn" compareValue="sublineTypeCd">
+			              		ORDER BY subline_type_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="sublineTypeDesc">
+			              		ORDER BY subline_type_desc
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+					   )a,
+					   (SELECT COUNT(*) count_
+						  FROM TABLE(giis_mc_subline_type_pkg.get_sublinetype_list(#sublineCd#))
+						  <isNotNull property="findText">
+		                  	WHERE UPPER(subline_type_desc) LIKE UPPER(#findText#)
+		                  	   OR UPPER(subline_type_cd) LIKE UPPER(#findText#)
+		                  </isNotNull>
+		                  <isNull property="findText">
+		                  	WHERE UPPER(subline_type_desc) LIKE UPPER(NVL(#searchString#, subline_type_desc))
+		                  	   OR UPPER(subline_type_cd) LIKE UPPER(NVL(#searchString#, subline_type_desc))
+		                  </isNull>
+		                  ) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+</sqlMap>

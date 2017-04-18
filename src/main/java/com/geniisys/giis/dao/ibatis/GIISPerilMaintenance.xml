@@ -1,0 +1,806 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISPerilMaintenance">
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24"/>
+	    <property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="giisPerilMaintenance" type="com.geniisys.giis.entity.GIISPeril"/>
+	
+	<resultMap id="GIISLineMap" class="com.geniisys.common.entity.GIISLine" >  
+	   	<result column="LINE_CD"		property="lineCd"/>	
+	   	<result column="LINE_NAME"		property="lineName"/>	
+	   	<result column="MENU_LINE_CD"	property="menuLineCd"/>
+	   	<result property="rowNum"		column="ROWNUM_"/>
+		<result property="rowCount"		column="COUNT_"/>
+  	</resultMap>
+  	
+  	<resultMap id="GIISZoneLOVMap" class="com.geniisys.common.entity.CGRefCodes" >  
+	   	<result column="RV_LOW_VALUE"	property="rvLowValue"/>	
+	   	<result column="RV_MEANING"		property="rvMeaning"/>
+	   	<result property="rowNum"		column="ROWNUM_"/>
+		<result property="rowCount"		column="COUNT_"/>
+  	</resultMap>
+  	
+  	<resultMap id="GIISPerilManagementMap" class="giisPerilMaintenance">  
+	   	<result column="LINE_CD"			property="lineCd"/>	
+	   	<result column="PERIL_CD"			property="perilCd"/>
+	   	<result column="SEQUENCE"			property="sequence"/>	
+	   	<result column="PERIL_SNAME"		property="perilSname"/>	
+	   	<result column="PERIL_NAME"			property="perilName"/>	
+	   	<result column="PERIL_TYPE"			property="perilType"/>	
+	   	<result column="SUBLINE_CD"			property="sublineCd"/>
+	   	<result column="RI_COMM_RT"			property="riCommRt"/>
+	   	<result column="PRT_FLAG"			property="prtFlag"/>		
+	   	<result column="BASC_PERL_CD"		property="bascPerlCd"/>
+	   	<result column="PROF_COMM_TAG"		property="profCommTag"/>	
+	   	<result column="PERIL_LNAME"		property="perilLname"/>	
+	   	<result column="REMARKS"			property="remarks"/>
+	   	<result column="ZONE_TYPE"			property="zoneType"/>	
+	   	<result column="EVAL_SW"			property="evalSw"/>
+	   	<result column="DEFAULT_TAG"		property="defaultTag"/>
+	   	<result column="DEFAULT_RATE"		property="defaultRate"/>
+	   	<result column="DEFAULT_TSI"		property="defaultTsi"/>
+	   	<result column="LAST_UPDATE"		property="lastUpdate"/>
+	   	<result column="USER_ID"			property="userId"/>	
+	   	<result column="EQ_ZONE_TYPE"		property="eqZoneType"/>	<!-- edgar 03/10/2015 -->									
+	   	<result property="rowNum"			column="ROWNUM_"/>
+		<result property="rowCount"			column="COUNT_"/>
+  	</resultMap>
+  	
+  	<resultMap class="com.geniisys.common.entity.GIISPerilTariff" id="GIISTariffMap">
+  		<result column="TARF_CD"			property="tarfCd"/>	
+	   	<result column="TARF_DESC"			property="tarfDesc"/>	
+	   	<result property="rowNum"			column="ROWNUM_"/>
+		<result property="rowCount"			column="COUNT_"/>
+  	</resultMap>
+  	
+  	<resultMap id="GIISPerilMaintenanceLOVmap" class="com.geniisys.common.entity.GIISSubline" extends="BaseEntity.TableGridResultMap">
+		<result property="sublineCd"			column="SUBLINE_CD"/>
+		<result property="sublineName"			column="SUBLINE_NAME"/>
+		<result property="rowNum"				column="ROWNUM_"/>
+		<result property="rowCount"				column="COUNT_"/>
+	</resultMap>
+	
+	<resultMap id="GIISWarrClaMap" class="com.geniisys.common.entity.GIISPerilClauses" >  
+	   	<result column="MAIN_WC_CD"			property="mainWcCd"/>	
+	   	<result column="WC_TITLE"			property="wcTitle"/>									
+	   	<result property="rowNum"			column="ROWNUM_"/>
+		<result property="rowCount"			column="COUNT_"/>
+  	</resultMap>
+	
+  	<select id="getPerilMaintenanceDisplay" resultMap ="GIISLineMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIISS003_PKG.get_giis_line_list(#userId#))          
+		          		<isNotNull property="filter">
+							WHERE 1=1
+								<isNotEmpty prepend="AND"  property="lineCd">
+									upper(line_cd) LIKE upper(#lineCd#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="lineName">
+									upper(line_name) LIKE upper(#lineName#)
+								</isNotEmpty>
+						</isNotNull>
+		          		<isEqual property="sortColumn" compareValue="lineCd">
+			            	ORDER BY line_cd
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="lineName">
+			            	ORDER BY line_name
+			            </isEqual>
+			            <isNotNull property="sortColumn">
+			            	<isEqual property="ascDescFlg" compareValue="ASC">
+			              		ASC
+			              	</isEqual>
+			              	<isEqual property="ascDescFlg" compareValue="DESC">
+			              		DESC
+			              	</isEqual>
+			            </isNotNull>)a,
+			              (SELECT count(*) count_ 
+		                  	 FROM TABLE(GIISS003_PKG.get_giis_line_list(#userId#))
+		                  	 <!-- added by: kenneth L. 05.23.2013 to handle filter issues-->
+		                  	 <isNotNull property="filter">
+								WHERE 1=1
+									<isNotEmpty prepend="AND"  property="lineCd">
+										upper(line_cd) LIKE upper(#lineCd#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND"  property="lineName">
+										upper(line_name) LIKE upper(#lineName#)
+									</isNotEmpty>
+							</isNotNull>) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+  	  	
+  	<select id="getGIISPerilGIISS003" resultMap="GIISPerilManagementMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIISS003_PKG.get_peril_listGiiss003(#lineCd#))
+		                  <isNotNull property="filter">
+							WHERE 1=1
+								<isNotEmpty prepend="AND"  property="sequence">
+									upper(sequence) LIKE upper(#sequence#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="perilCd">
+									upper(peril_cd) LIKE upper(#perilCd#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="perilSname">
+									upper(peril_sname) LIKE upper(#perilSname#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="perilName">
+									upper(peril_name) LIKE upper(#perilName#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="perilType">
+									upper(peril_type) LIKE upper(#perilType#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="sublineCd">
+									upper(subline_cd) LIKE upper(#sublineCd#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="riCommRt">
+									upper(ri_comm_rt) LIKE upper(#riCommRt#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="prtFlag">
+									upper(prt_flag) LIKE upper(#prtFlag#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="bascPerlCd">
+									upper(basc_perl_cd) LIKE upper(#bascPerlCd#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="profCommTag">
+									upper(prof_comm_tag) LIKE upper(#profCommTag#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="perilLname">
+									upper(peril_lname) LIKE upper(#perilLname#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="defaultTag">
+									upper(default_tag) LIKE upper(#defaultTag#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="defaultRate">
+									upper(default_rate) LIKE upper(#defaultRate#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="defaultTsi">
+									upper(default_tsi) LIKE upper(#defaultTsi#)
+								</isNotEmpty>
+						</isNotNull>
+		                  <isEqual property="sortColumn" compareValue="sequence">
+			              		ORDER BY sequence
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="perilCd">
+			              		ORDER BY peril_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="perilSname">
+			              		ORDER BY peril_sname
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="perilName">
+			              		ORDER BY peril_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="perilType">
+			              		ORDER BY peril_type
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="sublineCd">
+			              		ORDER BY subline_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="riCommRt">
+			              		ORDER BY ri_comm_rt
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="prtFlag">
+			              		ORDER BY prt_flag
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="bascPerlCd">
+			              		ORDER BY basc_perl_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="profCommTag">
+			              		ORDER BY prof_comm_tag
+			              </isEqual>
+						  <isEqual property="sortColumn" compareValue="perilLname">
+			              		ORDER BY peril_lname
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="zoneType">
+			              		ORDER BY zone_type
+			              </isEqual>
+						  <isEqual property="sortColumn" compareValue="evalSw">
+			              		ORDER BY eval_sw
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="defaultTag">
+			              		ORDER BY default_tag
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="defaultRate">
+			              		ORDER BY default_rate
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="defaultTsi">
+			              		ORDER BY default_tsi
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull> ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIISS003_PKG.get_peril_listGiiss003(#lineCd#))
+		                  <isNotNull property="filter">
+								WHERE 1=1
+								<isNotEmpty prepend="AND"  property="sequence">
+									upper(sequence) LIKE upper(#sequence#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="perilCd">
+									upper(peril_cd) LIKE upper(#perilCd#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="perilSname">
+									upper(peril_sname) LIKE upper(#perilSname#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="perilName">
+									upper(peril_name) LIKE upper(#perilName#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="perilType">
+									upper(peril_type) LIKE upper(#perilType#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="sublineCd">
+									upper(subline_cd) LIKE upper(#sublineCd#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="riCommRt">
+									upper(ri_comm_rt) LIKE upper(#riCommRt#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="prtFlag">
+									upper(prt_flag) LIKE upper(#prtFlag#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="bascPerlCd">
+									upper(basc_perl_cd) LIKE upper(#bascPerlCd#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="profCommTag">
+									upper(prof_comm_tag) LIKE upper(#profCommTag#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="perilLname">
+									upper(peril_lname) LIKE upper(#perilLname#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="defaultTag">
+									upper(default_tag) LIKE upper(#defaultTag#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="defaultRate">
+									upper(default_rate) LIKE upper(#defaultRate#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="defaultTsi">
+									upper(default_tsi) LIKE upper(#defaultTsi#)
+								</isNotEmpty>
+							</isNotNull>	
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap id="getAllGIISPerilGIISS003ResultMap" class="giisPerilMaintenance">  
+	   	<result column="LINE_CD"			property="lineCd"/>	
+	   	<result column="PERIL_CD"			property="perilCd"/>
+	   	<result column="SEQUENCE"			property="sequence"/>	
+	   	<result column="PERIL_SNAME"		property="perilSname"/>	
+	   	<result column="PERIL_NAME"			property="perilName"/>	
+	   	<result column="PERIL_TYPE"			property="perilType"/>	
+	   	<result column="SUBLINE_CD"			property="sublineCd"/>
+	   	<result column="RI_COMM_RT"			property="riCommRt"/>
+	   	<result column="PRT_FLAG"			property="prtFlag"/>		
+	   	<result column="BASC_PERL_CD"		property="bascPerlCd"/>
+	   	<result column="PROF_COMM_TAG"		property="profCommTag"/>	
+	   	<result column="PERIL_LNAME"		property="perilLname"/>	
+	   	<result column="REMARKS"			property="remarks"/>
+	   	<result column="ZONE_TYPE"			property="zoneType"/>	
+	   	<result column="EVAL_SW"			property="evalSw"/>
+	   	<result column="DEFAULT_TAG"		property="defaultTag"/>
+	   	<result column="DEFAULT_RATE"		property="defaultRate"/>
+	   	<result column="DEFAULT_TSI"		property="defaultTsi"/>
+	   	<result column="LAST_UPDATE"		property="lastUpdate"/>
+	   	<result column="USER_ID"			property="userId"/>
+  	</resultMap>
+	
+	<select id="getAllGIISPerilGIISS003" resultMap="getAllGIISPerilGIISS003ResultMap">
+		SELECT * FROM TABLE(GIISS003_PKG.get_peril_listGiiss003(#lineCd#))
+	</select>
+	
+	<select id="getSublineCdLOV" resultMap="GIISPerilMaintenanceLOVmap" parameterClass="java.util.HashMap">		 
+		SELECT *
+		  FROM (SELECT ROWNUM rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIISS003_PKG.get_giis_subline_list(#lineCd#, #sublineName#))
+		          	<isNotNull property="findText">
+						WHERE 1=1
+							<isNotEmpty prepend="AND"  property="findText">
+								(subline_cd LIKE upper(#findText#) OR
+									subline_name LIKE upper(#findText#))
+							</isNotEmpty>
+					</isNotNull>
+		            <isEqual property="sortColumn" compareValue="sublineCd">
+	              		ORDER BY subline_cd
+		            </isEqual>
+		            <isEqual property="sortColumn" compareValue="sublineName">
+	              		ORDER BY subline_name
+		            </isEqual>
+		            <isNotNull property="sortColumn">
+	              		<isEqual property="ascDescFlg" compareValue="ASC">
+	              			ASC
+	              		</isEqual>
+	              		<isEqual property="ascDescFlg" compareValue="DESC">
+	              			DESC
+	              		</isEqual>
+	              	</isNotNull>) a,
+	              (SELECT count(*) count_
+		          	FROM TABLE (GIISS003_PKG.get_giis_subline_list(#lineCd#, #sublineName#))
+		            	<isNotNull property="findText">
+							WHERE 1=1
+								<isNotEmpty prepend="AND"  property="findText">
+									(subline_cd LIKE upper(#findText#) OR
+										subline_name LIKE upper(#findText#))
+								</isNotEmpty>
+						</isNotNull>)b) 
+		    	WHERE rownum_ BETWEEN #from# AND #to# 	
+  	</select>
+  	
+  	<select id="getBasicPerilCdLOV" resultMap="GIISPerilManagementMap" parameterClass="java.util.HashMap">		 
+		SELECT *
+		  FROM (SELECT ROWNUM rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIISS003_PKG.get_basic_peril_cd_list(#lineCd#, #perilName#))
+		          	<isNotNull property="findText">
+						WHERE 1=1
+							<isNotEmpty prepend="AND"  property="findText">
+								(peril_cd LIKE upper(#findText#) OR
+									peril_name LIKE upper(#findText#))
+							</isNotEmpty>
+					</isNotNull>
+		            <isEqual property="sortColumn" compareValue="perilCd">
+	              		ORDER BY peril_cd
+		            </isEqual>
+		            <isEqual property="sortColumn" compareValue="perilName">
+	              		ORDER BY peril_name
+		            </isEqual>
+		            <isNotNull property="sortColumn">
+	              		<isEqual property="ascDescFlg" compareValue="ASC">
+	              			ASC
+	              		</isEqual>
+	              		<isEqual property="ascDescFlg" compareValue="DESC">
+	              			DESC
+	              		</isEqual>
+	              	</isNotNull>) a,
+	              (SELECT count(*) count_
+		          	FROM TABLE (GIISS003_PKG.get_basic_peril_cd_list(#lineCd#, #perilName#))
+		            	<isNotNull property="findText">
+							WHERE 1=1
+								<isNotEmpty prepend="AND"  property="findText">
+									(peril_cd LIKE upper(#findText#) OR
+										peril_name LIKE upper(#findText#))
+								</isNotEmpty>
+						</isNotNull>)b) 
+		    	WHERE rownum_ BETWEEN #from# AND #to# 	
+  	</select>
+  	
+  	<select id="getZoneTypeFiLOV" resultMap="GIISZoneLOVMap" parameterClass="java.util.HashMap">		 
+		SELECT *
+		  FROM (SELECT ROWNUM rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIISS003_PKG.get_giis_zone_type_fi_list(#rvMeaning#))
+		          	<isNotNull property="findText">
+						WHERE 1=1
+							<isNotEmpty prepend="AND"  property="findText">
+								(rv_low_value LIKE upper(#findText#) OR
+									rv_meaning LIKE upper(#findText#))
+							</isNotEmpty>
+					</isNotNull>
+		            <isEqual property="sortColumn" compareValue="rvLowValue">
+	              		ORDER BY rv_low_value
+		            </isEqual>
+		            <isEqual property="sortColumn" compareValue="rvMeaning">
+	              		ORDER BY rv_meaning
+		            </isEqual>
+		            <isNotNull property="sortColumn">
+	              		<isEqual property="ascDescFlg" compareValue="ASC">
+	              			ASC
+	              		</isEqual>
+	              		<isEqual property="ascDescFlg" compareValue="DESC">
+	              			DESC
+	              		</isEqual>
+	              	</isNotNull>) a,
+	              (SELECT count(*) count_
+		          	FROM TABLE (GIISS003_PKG.get_giis_zone_type_fi_list(#rvMeaning#))
+		            	<isNotNull property="findText">
+							WHERE 1=1
+								<isNotEmpty prepend="AND"  property="findText">
+									(rv_low_value LIKE upper(#findText#) OR
+									rv_meaning LIKE upper(#findText#))
+								</isNotEmpty>
+						</isNotNull>)b) 
+		    	WHERE rownum_ BETWEEN #from# AND #to# 	
+  	</select>
+  	
+  	<select id="getZoneTypeMcLOV" resultMap="GIISZoneLOVMap" parameterClass="java.util.HashMap">		 
+		SELECT *
+		  FROM (SELECT ROWNUM rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIISS003_PKG.get_giis_zone_type_mc_list(#rvMeaning#))
+		          	<isNotNull property="findText">
+						WHERE 1=1
+							<isNotEmpty prepend="AND"  property="findText">
+								(rv_low_value LIKE upper(#findText#) OR
+									rv_meaning LIKE upper(#findText#))
+							</isNotEmpty>
+					</isNotNull>
+		            <isEqual property="sortColumn" compareValue="rvLowValue">
+	              		ORDER BY rv_low_value
+		            </isEqual>
+		            <isEqual property="sortColumn" compareValue="rvMeaning">
+	              		ORDER BY rv_meaning
+		            </isEqual>
+		            <isNotNull property="sortColumn">
+	              		<isEqual property="ascDescFlg" compareValue="ASC">
+	              			ASC
+	              		</isEqual>
+	              		<isEqual property="ascDescFlg" compareValue="DESC">
+	              			DESC
+	              		</isEqual>
+	              	</isNotNull>) a,
+	              (SELECT count(*) count_
+		          	FROM TABLE (GIISS003_PKG.get_giis_zone_type_mc_list(#rvMeaning#))
+		            	<isNotNull property="findText">
+							WHERE 1=1
+								<isNotEmpty prepend="AND"  property="findText">
+									(rv_low_value LIKE upper(#findText#) OR
+									rv_meaning LIKE upper(#findText#))
+								</isNotEmpty>
+						</isNotNull>)b) 
+		    	WHERE rownum_ BETWEEN #from# AND #to# 	
+  	</select>
+  	
+	<insert id="setPerilMaintenance" parameterClass="giisPerilMaintenance">	
+		DECLARE
+  			v_peril   giis_peril%ROWTYPE;
+		BEGIN
+		  giis_users_pkg.app_user := #appUser#;
+		  	
+		  v_peril.line_cd := #lineCd#;
+		  v_peril.peril_cd := #perilCd#;
+		  v_peril.sequence := #sequence#;
+		  v_peril.peril_sname := #perilSname#;
+		  v_peril.peril_name := #perilName#; 
+		  v_peril.peril_type := #perilType#;
+		  v_peril.subline_cd := #sublineCd#;
+		  v_peril.ri_comm_rt := nvl(#strRiCommRt#,#riCommRt#); <!-- added by robert 01.03.2014 -->
+		  <isNotNull property="bascPerlCd">
+		  	v_peril.basc_line_cd := #lineCd#;
+		  </isNotNull>		  
+		  v_peril.basc_perl_cd := #bascPerlCd#;
+		  v_peril.prof_comm_tag := #profCommTag#; 
+		  v_peril.peril_lname := #perilLname#;
+		  v_peril.remarks := #remarks#;
+		  v_peril.prt_flag := #prtFlag#;
+		  v_peril.zone_type := #zoneType#;
+		  v_peril.eq_zone_type := nvl(#eqZoneType#,' '); <!-- added edgar 03/10/2015 -->
+		  v_peril.eval_sw := #evalSw#;
+		  v_peril.default_tag := #defaultTag#;
+		  v_peril.default_rate := #defaultRate#; 
+		  v_peril.default_tsi := #defaultTsi#;
+		  v_peril.user_id := #appUser#;
+		  
+		  GIISS003_PKG.insert_update_peril(v_peril);
+		END;
+	</insert>
+	
+	<delete id="deleteInPerilMaintenance" parameterClass="giisPerilMaintenance">
+		BEGIN
+			GIISS003_PKG.delete_peril(#lineCd#, #perilCd#);
+		END;
+	</delete>
+	
+	<procedure id="validateDeletePeril2" parameterClass="java.util.HashMap">
+		BEGIN
+			GIISS003_PKG.validate_delete_peril2(#lineCd#, #perilCd#);
+		END;
+	</procedure>
+	
+	<select id="validateDeletePeril" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+  		SELECT GIISS003_PKG.validate_delete_peril(#lineCd#, #perilCd#) FROM DUAL
+  	</select>
+	
+	<select id="validateAddPeril" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT GIISS003_PKG.peril_is_exist(#lineCd#, #perilCd#) FROM DUAL
+	</select>
+	
+	<select id="validatePerilSname" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT GIISS003_PKG.peril_sname_exist(#lineCd#, #perilSname#) FROM DUAL
+	</select>
+	
+	<select id="validatePerilName" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT GIISS003_PKG.peril_name_exist(#lineCd#, #perilName#) FROM DUAL
+	</select>
+  
+  	<select id="getGIISWarrClauses" resultMap="GIISWarrClaMap">
+		SELECT *
+		  FROM (SELECT ROWNUM rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE (GIISS003_PKG.get_giis_warr_cla(#lineCd#, #perilCd#))
+		                  <isNotNull property="filter">
+							WHERE 1=1
+								<isNotEmpty prepend="AND"  property="mainWcCd">
+									upper(main_wc_cd) LIKE upper(#mainWcCd#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="wcTitle">
+									upper(wc_title) LIKE upper(#wcTitle#)
+								</isNotEmpty>
+						</isNotNull>
+		                  <isEqual property="sortColumn" compareValue="mainWcCd">
+			              		ORDER BY main_wc_cd
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="wcTitle">
+			              		ORDER BY wc_title
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIISS003_PKG.get_giis_warr_cla(#lineCd#, #perilCd#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getWarrClaLOV" resultMap="GIISWarrClaMap" parameterClass="java.util.HashMap">		 
+		SELECT *
+		  FROM (SELECT ROWNUM rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIISS003_PKG.get_giis_warrcla_list(#lineCd#, #perilCd#, #mainWcCd#, #wcTitle#))
+		          WHERE 1 = 1 <!-- marco - 05.02.2013 - prevent sql exception -->
+		             <isNotNull property="notIn">
+					  	AND main_wc_cd NOT IN ($notIn$)
+					 </isNotNull>
+					 <isNotNull property="findText">
+		                  	<isNotEmpty prepend="AND"  property="findText">
+								(main_wc_cd LIKE upper(#findText#) OR
+									wc_title LIKE upper(#findText#))
+							</isNotEmpty>
+					</isNotNull>
+					<isEqual property="sortColumn" compareValue="mainWcCd">
+			              		ORDER BY main_wc_cd
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="wcTitle">
+			              		ORDER BY wc_title
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		          ) a,
+	              (SELECT count(*) count_
+		          	FROM TABLE (GIISS003_PKG.get_giis_warrcla_list(#lineCd#, #perilCd#, #mainWcCd#, #wcTitle#))
+		          	WHERE 1 = 1 <!-- marco - 05.02.2013 - prevent sql exception -->
+		            <isNotNull property="notIn">
+					  		AND main_wc_cd NOT IN ($notIn$)
+					 </isNotNull>
+					 <isNotNull property="findText">
+		                  	<isNotEmpty prepend="AND"  property="findText">
+								(main_wc_cd LIKE upper(#findText#) OR
+									wc_title LIKE upper(#findText#))
+							</isNotEmpty>
+					</isNotNull>
+						)b) 
+		    	WHERE rownum_ BETWEEN #from# AND #to# 	
+  	</select>
+  	
+  	<insert id="setWarrCla" parameterClass="com.geniisys.common.entity.GIISPerilClauses">
+  		DECLARE
+  		  v_warrcla   giis_peril_clauses%ROWTYPE;
+		BEGIN
+		  giis_users_pkg.app_user := #appUser#;
+		  	
+		  v_warrcla.line_cd := #lineCd#;
+		  v_warrcla.peril_cd := #perilCd#;
+		  v_warrcla.main_wc_cd := #mainWcCd#;
+		  v_warrcla.user_id := #appUser#;
+		  
+		  giiss003_pkg.set_warrcla (v_warrcla);
+		END;
+  	</insert>
+  	
+  	<delete id="deleteWarrCla" parameterClass="com.geniisys.common.entity.GIISPerilClauses">
+		BEGIN
+			GIISS003_PKG.delete_warrcla(#lineCd#, #perilCd#, #mainWcCd#);
+		END;
+	</delete>
+	
+  	<select id="getGIISTariff" resultMap="GIISTariffMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE (GIISS003_PKG.get_tariff(#lineCd#, #perilCd#))
+		                  <isNotNull property="filter">
+							WHERE 1=1
+								<isNotEmpty prepend="AND"  property="tarfCd">
+									upper(tarf_cd) LIKE upper(#tarfCd#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="tarfDesc">
+									upper(tarf_desc) LIKE upper(#tarfDesc#)
+								</isNotEmpty>
+						</isNotNull>
+		                  <isEqual property="sortColumn" compareValue="tarfCd">
+			              		ORDER BY tarf_cd
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="tarfDesc">
+			              		ORDER BY tarf_desc
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIISS003_PKG.get_tariff(#lineCd#, #perilCd#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+  	<select id="getTariffLOV" resultMap="GIISTariffMap" parameterClass="java.util.HashMap">		 
+		SELECT *
+		  FROM (SELECT ROWNUM rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIISS003_PKG.get_giis_tariff_list(#lineCd#, #perilCd#, #tarfCd#, #tarfDesc#))
+		          <isNotNull property="notIn">
+					  	WHERE tarf_cd NOT IN ($notIn$)
+					 </isNotNull>
+		          	<isNotNull property="findText">
+		                  	<isNotEmpty prepend="AND"  property="findText">
+								(tarf_cd LIKE upper(#findText#) OR
+									tarf_desc LIKE upper(#findText#))
+							</isNotEmpty>
+					</isNotNull>
+		            <isEqual property="sortColumn" compareValue="tarfCd">
+	              		ORDER BY tarf_cd
+		            </isEqual>
+		            <isEqual property="sortColumn" compareValue="tarfDesc">
+	              		ORDER BY tarf_desc
+		            </isEqual>
+		            <isNotNull property="sortColumn">
+	              		<isEqual property="ascDescFlg" compareValue="ASC">
+	              			ASC
+	              		</isEqual>
+	              		<isEqual property="ascDescFlg" compareValue="DESC">
+	              			DESC
+	              		</isEqual>
+	              	</isNotNull>) a,
+	              (SELECT count(*) count_
+		          	FROM TABLE (GIISS003_PKG.get_giis_tariff_list(#lineCd#, #perilCd#, #tarfCd#, #tarfDesc#))
+		            	<isNotNull property="notIn">
+					  	WHERE tarf_cd NOT IN ($notIn$)
+					 </isNotNull>
+		          	<isNotNull property="findText">
+		                  	<isNotEmpty prepend="AND"  property="findText">
+								(tarf_cd LIKE upper(#findText#) OR
+									tarf_desc LIKE upper(#findText#))
+							</isNotEmpty>
+					</isNotNull>)b) 
+		    	WHERE rownum_ BETWEEN #from# AND #to# 	
+  	</select>
+  	
+  	<insert id="setTariff" parameterClass="com.geniisys.common.entity.GIISPerilTariff">
+  		DECLARE
+  		  v_tariff   giis_peril_tariff%ROWTYPE;
+		BEGIN
+		  giis_users_pkg.app_user := #appUser#;
+		  	
+		  v_tariff.line_cd := #lineCd#;
+		  v_tariff.peril_cd := #perilCd#;
+		  v_tariff.tarf_cd := #tarfCd#;
+		  v_tariff.user_id := #appUser#;
+		  
+		  giiss003_pkg.set_tariff (v_tariff);
+		END;
+  	</insert>
+  	
+  	<delete id="deleteTariff" parameterClass="com.geniisys.common.entity.GIISPerilTariff">
+		BEGIN
+			GIISS003_PKG.delete_tariff(#lineCd#, #perilCd#, #tarfCd#);
+		END;
+	</delete>
+	
+	<select id="validateDeleteTariff" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+  		SELECT GIISS003_PKG.validate_delete_tariff(#lineCd#, #perilCd#, #tarfCd#) FROM DUAL
+  	</select>
+  	
+  	<select id="validateDefaultTsi" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+  		SELECT GIISS003_PKG.check_default_tsi(#lineCd#, #perilCd#, #defaultTsi#, #bascPerlCd#) FROM DUAL
+  	</select>
+  	
+  	<select id="getSublineCdName" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+  		SELECT GIISS003_PKG.get_sublinecd_name(#lineCd#, #sublineCd#) FROM DUAL
+  	</select>
+  	
+  	<select id="getBasicPerilCdName" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+  		SELECT GIISS003_PKG.get_basicperilcd_name(#lineCd#, #bascPerlCd#) FROM DUAL
+  	</select>
+  	
+  	<select id="getZoneNameFiName" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+  		SELECT GIISS003_PKG.get_zonenamefi_name(#zoneType#) FROM DUAL
+  	</select>
+  	
+  	<select id="getZoneNameMcName" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+  		SELECT GIISS003_PKG.get_zonenamemc_name(#zoneType#) FROM DUAL
+  	</select>
+  	
+  	<select id="checkAvailableWarrcla" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+  		SELECT GIISS003_PKG.check_available_warrcla(#lineCd#) FROM DUAL
+  	</select>
+
+  	<select id="validateSublineName" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+  		SELECT GIISS003_PKG.validate_subline(#lineCd#, #sublineName#) FROM DUAL
+  	</select>
+  	
+  	<select id="validateFiList" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+  		SELECT GIISS003_PKG.validate_fi_list(#rvMeaning#) FROM DUAL
+  	</select>
+  	
+  	<select id="validateMcList" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+  		SELECT GIISS003_PKG.validate_mc_list(#rvMeaning#) FROM DUAL
+  	</select>
+  	
+  	<!-- edgar 03/10/2015 -->
+  	<select id="getEqZoneTypeFiLOV" resultMap="GIISZoneLOVMap" parameterClass="java.util.HashMap">		 
+		SELECT *
+		  FROM (SELECT ROWNUM rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIISS003_PKG.get_giis_eqzone_type_fi_list(#rvMeaning#))
+		          	<isNotNull property="findText">
+						WHERE 1=1
+							<isNotEmpty prepend="AND"  property="findText">
+								(rv_low_value LIKE upper(#findText#) OR
+									rv_meaning LIKE upper(#findText#))
+							</isNotEmpty>
+					</isNotNull>
+		            <isEqual property="sortColumn" compareValue="rvLowValue">
+	              		ORDER BY rv_low_value
+		            </isEqual>
+		            <isEqual property="sortColumn" compareValue="rvMeaning">
+	              		ORDER BY rv_meaning
+		            </isEqual>
+		            <isNotNull property="sortColumn">
+	              		<isEqual property="ascDescFlg" compareValue="ASC">
+	              			ASC
+	              		</isEqual>
+	              		<isEqual property="ascDescFlg" compareValue="DESC">
+	              			DESC
+	              		</isEqual>
+	              	</isNotNull>) a,
+	              (SELECT count(*) count_
+		          	FROM TABLE (GIISS003_PKG.get_giis_zone_type_fi_list(#rvMeaning#))
+		            	<isNotNull property="findText">
+							WHERE 1=1
+								<isNotEmpty prepend="AND"  property="findText">
+									(rv_low_value LIKE upper(#findText#) OR
+									rv_meaning LIKE upper(#findText#))
+								</isNotEmpty>
+						</isNotNull>)b) 
+		    	WHERE rownum_ BETWEEN #from# AND #to# 	
+  	</select>
+</sqlMap>

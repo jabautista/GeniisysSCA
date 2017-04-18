@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GICLR200B" language="groovy" pageWidth="990" pageHeight="792" columnWidth="960" leftMargin="15" rightMargin="15" topMargin="20" bottomMargin="20" uuid="425543f6-78ee-43c4-99d5-dba07b776b6a">
+	<property name="ireport.zoom" value="1.2100000000000033"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="P_SESSION_ID" class="java.lang.Integer"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="P_AS_OF_DT" class="java.lang.String"/>
+	<parameter name="P_RI_CD" class="java.lang.Integer"/>
+	<queryString>
+		<![CDATA[SELECT a.*, B.SUM_OS_DS SUM_OS_DS, B.SUM_PD_DS SUM_PD_DS, B.SUM_TOTAL_DS SUM_TOTAL_DS
+  FROM (SELECT * FROM TABLE(GICLR200B_PKG.get_report_details($P{P_SESSION_ID}, TO_DATE($P{P_AS_OF_DT}, 'mm-dd-yyyy'), $P{P_RI_CD}))) a,
+       (SELECT DISTINCT catastrophic_cd,
+	       SUM(os_ds) SUM_OS_DS, SUM(PD_DS) SUM_PD_DS, SUM(TOTAL_DS) SUM_TOTAL_DS
+	  FROM TABLE(GICLR200B_PKG.get_report_details($P{P_SESSION_ID}, TO_DATE($P{P_AS_OF_DT}, 'mm-dd-yyyy'), $P{P_RI_CD}))
+	 GROUP BY catastrophic_cd) B
+ WHERE a.catastrophic_cd = b.catastrophic_cd
+ ORDER BY a.catastrophic_cd, share_type, grp_seq_no]]>
+	</queryString>
+	<field name="CATASTROPHIC_CD" class="java.lang.Integer"/>
+	<field name="CATASTROPHIC_DESC" class="java.lang.String"/>
+	<field name="GRP_SEQ_NO" class="java.math.BigDecimal"/>
+	<field name="SHARE_TYPE" class="java.lang.String"/>
+	<field name="LINE_CD" class="java.lang.String"/>
+	<field name="LINE_NAME" class="java.lang.String"/>
+	<field name="TRTY_NAME" class="java.lang.String"/>
+	<field name="OS_DS" class="java.math.BigDecimal"/>
+	<field name="PD_DS" class="java.math.BigDecimal"/>
+	<field name="TOTAL_DS" class="java.math.BigDecimal"/>
+	<field name="RI_CD" class="java.lang.Integer"/>
+	<field name="RI_SNAME" class="java.lang.String"/>
+	<field name="SHR_RI_PCT" class="java.math.BigDecimal"/>
+	<field name="SHARE_PCT" class="java.lang.String"/>
+	<field name="OS_RIDS" class="java.math.BigDecimal"/>
+	<field name="PD_RIDS" class="java.math.BigDecimal"/>
+	<field name="TOTAL_RIDS" class="java.math.BigDecimal"/>
+	<field name="COMPANY_NAME" class="java.lang.String"/>
+	<field name="COMPANY_ADDRESS" class="java.lang.String"/>
+	<field name="CF_DATE" class="java.lang.String"/>
+	<field name="CF_TITLE" class="java.lang.String"/>
+	<field name="SUM_OS_DS" class="java.math.BigDecimal"/>
+	<field name="SUM_PD_DS" class="java.math.BigDecimal"/>
+	<field name="SUM_TOTAL_DS" class="java.math.BigDecimal"/>
+	<group name="CATASTROPHIC_CD_GROUP" keepTogether="true">
+		<groupExpression><![CDATA[$F{CATASTROPHIC_CD}]]></groupExpression>
+		<groupHeader>
+			<band height="27" splitType="Prevent">
+				<staticText>
+					<reportElement x="0" y="0" width="572" height="13" uuid="f558516c-e3aa-400f-a3c3-ca761ac2c988"/>
+					<textElement>
+						<font size="8"/>
+					</textElement>
+					<text><![CDATA[SUMMARY OF LOSSES PAID AND OUTSTANDING TO XOL TREATY]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="0" y="14" width="76" height="13" uuid="043a6dd7-1798-4f90-b43f-59f9446fc4ac"/>
+					<textElement>
+						<font size="8"/>
+					</textElement>
+					<text><![CDATA[Catastrophic Event]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="76" y="14" width="5" height="13" uuid="7a4f37fc-608d-4953-9161-b83b010e3509"/>
+					<textElement>
+						<font size="8"/>
+					</textElement>
+					<text><![CDATA[:]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true">
+					<reportElement x="81" y="14" width="491" height="13" uuid="8f785871-7c6c-456a-8d37-39b2467a698d"/>
+					<textElement>
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{CATASTROPHIC_DESC}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="56" splitType="Prevent">
+				<subreport>
+					<reportElement x="329" y="32" width="630" height="24" uuid="ab50f138-ecf4-4437-b0e2-c4abdabc374e"/>
+					<subreportParameter name="P_RI_CD">
+						<subreportParameterExpression><![CDATA[$F{RI_CD}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="P_SESSION_ID">
+						<subreportParameterExpression><![CDATA[$P{P_SESSION_ID}]]></subreportParameterExpression>
+					</subreportParameter>
+					<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "GICLR200B_REMITTANCE.jasper"]]></subreportExpression>
+				</subreport>
+			</band>
+		</groupFooter>
+	</group>
+	<group name="LINE_GROUP" isStartNewPage="true" keepTogether="true">
+		<groupExpression><![CDATA[$F{LINE_CD}]]></groupExpression>
+		<groupHeader>
+			<band height="98" splitType="Prevent">
+				<subreport>
+					<reportElement x="0" y="13" width="959" height="85" uuid="33a7c875-24a9-497c-a74a-d9cd450539ba"/>
+					<subreportParameter name="SUBREPORT_DIR">
+						<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="P_LINE_CD">
+						<subreportParameterExpression><![CDATA[$F{LINE_CD}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="P_RI_CD">
+						<subreportParameterExpression><![CDATA[$P{P_RI_CD}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="P_AS_OF_DT">
+						<subreportParameterExpression><![CDATA[$P{P_AS_OF_DT}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="P_SESSION_ID">
+						<subreportParameterExpression><![CDATA[$P{P_SESSION_ID}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="P_CATASTROPHIC_CD">
+						<subreportParameterExpression><![CDATA[$F{CATASTROPHIC_CD}]]></subreportParameterExpression>
+					</subreportParameter>
+					<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "GICLR200B_subreport1.jasper"]]></subreportExpression>
+				</subreport>
+				<staticText>
+					<reportElement x="0" y="0" width="76" height="13" uuid="22af2024-735a-43ad-bb0f-14734e71c839"/>
+					<textElement>
+						<font size="8"/>
+					</textElement>
+					<text><![CDATA[Line Name]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="76" y="0" width="5" height="13" uuid="73d8bde8-73cf-48f9-975b-f1960adc9c93"/>
+					<textElement>
+						<font size="8"/>
+					</textElement>
+					<text><![CDATA[:]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true">
+					<reportElement x="81" y="0" width="491" height="13" uuid="b6356d54-435b-40d5-9823-7450c5a4830f"/>
+					<textElement>
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{LINE_NAME}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<pageHeader>
+		<band height="66" splitType="Prevent">
+			<staticText>
+				<reportElement x="0" y="0" width="48" height="13" uuid="e5f34e90-d954-41a7-8b44-d5a53f5f3700"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[RUN DATE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="859" y="1" width="100" height="13" uuid="eb78e1ca-ca3b-4693-af49-a28d9a57435c"/>
+				<textElement textAlignment="Right">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<text><![CDATA[GICLR200B]]></text>
+			</staticText>
+			<textField pattern="MM-dd-yyyy">
+				<reportElement x="53" y="0" width="53" height="13" uuid="5e87d71b-c198-4622-90dd-8abf01c4fc81"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="13" width="48" height="13" uuid="a3372359-01cd-4975-9535-beec86eff2c7"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[RUN TIME]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="48" y="0" width="5" height="13" uuid="dcea882b-f5cf-428c-9714-d639733d191d"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<textField pattern="h:mm:ss a">
+				<reportElement x="53" y="13" width="53" height="13" uuid="c1571165-24eb-414b-af9a-24e51a79b7d3"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="130" y="15" width="705" height="13" uuid="79795320-217b-48a4-b124-ec1cb2e102cd"/>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COMPANY_ADDRESS}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="130" y="39" width="705" height="13" uuid="b1370537-f89e-4a84-85d2-9fd627a1090e"/>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CF_TITLE}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="130" y="0" width="705" height="13" uuid="d9ab5074-ff5c-4c7e-b608-2572c0225e71"/>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COMPANY_NAME}]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="930" y="14" width="29" height="13" uuid="d9dcefab-a741-4ad6-be3b-2b72d15bc0e9"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="859" y="14" width="71" height="13" uuid="97ad6a78-0080-42bb-aaae-f1229bfb0990"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="48" y="13" width="5" height="13" uuid="6a44fb32-f942-45c9-a04b-d2ca90921b76"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="130" y="53" width="705" height="13" uuid="cc65a5f2-c480-41c8-b963-73aad6b76f04"/>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CF_DATE}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+</jasperReport>

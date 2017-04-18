@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap>
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIPIQuoteItemMN" type="com.geniisys.gipi.entity.GIPIQuoteItemMN" />
+	
+	<resultMap id="GIPIQuoteItemMNMap" class="GIPIQuoteItemMN">
+		<result column="QUOTE_ID" 			property="quoteId" />
+		<result column="ITEM_NO" 			property="itemNo" />
+		<result column="GEOG_CD" 			property="geogCd" />
+		<result column="GEOG_DESC" 			property="geogDesc" />
+		<result column="VESSEL_CD" 			property="vesselCd" />
+		<result column="VESSEL_NAME" 		property="vesselName" />
+		<result column="CARGO_CLASS_CD" 	property="cargoClassCd" />
+		<result column="CARGO_CLASS_DESC" 	property="cargoClassDesc" />
+		<result column="CARGO_TYPE" 		property="cargoType" />
+		<result column="CARGO_TYPE_DESC" 	property="cargoTypeDesc" />
+		<result column="PACK_METHOD" 		property="packMethod" />
+		<result column="BL_AWB" 			property="blAwb" />
+		<result column="TRANSHIP_ORIGIN"	property="transhipOrigin" />
+		<result column="TRANSHIP_DESTINATION" property="transhipDestination" />
+		<result column="VOYAGE_NO" 			property="voyageNo" />
+		<result column="LC_NO" 				property="lcNo" />
+		<result column="ETD" 				property="etd" />
+		<result column="ETA" 				property="eta" />
+		<result column="PRINT_TAG" 			property="printTag" />
+		<result column="ORIGIN" 			property="origin" />
+		<result column="DESTN" 				property="destn" />
+		<result column="USER_ID" 			property="userId" />
+		<result column="LAST_UPDATE" 		property="lastUpdate" />
+	</resultMap>
+	
+	<select id="getGIPIQuoteItemMNDetails" resultMap="GIPIQuoteItemMNMap" parameterClass="java.util.HashMap">
+		SELECT * FROM TABLE(Gipi_Quote_Item_Dtls.Get_Gipi_Quote_MN(#quoteId#, #itemNo#))
+	</select>
+	
+	<procedure id="saveGIPIQuoteItemMN" parameterClass="GIPIQuoteItemMN">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			Gipi_Quote_Item_Dtls.Set_Gipi_Quote_MN(
+				#quoteId#,
+				#itemNo#,
+				#geogCd#,
+				#vesselCd#,
+				#cargoClassCd#,
+				#cargoType#,
+				#packMethod#,
+				#blAwb#,
+				#transhipOrigin#,
+				#transhipDestination#,
+				#voyageNo#,
+				#lcNo#,
+				#etd#,
+				#eta#,
+				#printTag#,
+				#origin#,
+				#destn#);
+		END;
+	</procedure>
+	
+	<procedure id="deleteGIPIQuoteItemMN">
+		BEGIN
+			GIPI_QUOTE_ITEM_DTLS.Del_gipi_quote_mn(#quoteId#, #itemNo#);
+		END;
+	</procedure>
+	
+</sqlMap>

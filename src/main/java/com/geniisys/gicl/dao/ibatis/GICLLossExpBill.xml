@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GICLLossExpBill">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GICLLossExpBill" type="com.geniisys.gicl.entity.GICLLossExpBill"/>
+	
+	<resultMap class="GICLLossExpBill" 	id="GICLLossExpBillResultMap">
+		<result property="claimId"			column="CLAIM_ID"/>
+		<result property="claimLossId"		column="CLAIM_LOSS_ID"/>
+		<result property="payeeClassCd"		column="PAYEE_CLASS_CD"/>
+		<result property="dspPayeeClass"	column="DSP_PAYEE_CLASS"/>
+		<result property="payeeCd"			column="PAYEE_CD"/>
+		<result property="dspPayee"			column="DSP_PAYEE"/>
+		<result property="docType"			column="DOC_TYPE"/>
+		<result property="docTypeDesc"		column="DOC_TYPE_DESC"/>
+		<result property="docNumber"		column="DOC_NUMBER"/>
+		<result property="amount"			column="AMOUNT"/>
+		<result property="remarks"			column="REMARKS"/>
+		<result property="userId"			column="USER_ID"/>
+		<result property="lastUpdate"		column="LAST_UPDATE"/>
+		<result property="billDate"			column="BILL_DATE"/>
+	</resultMap>
+	
+	<resultMap id="GICLLossExpBillGridResultMap" class="GICLLossExpBill" extends="GICLLossExpBillResultMap">
+  		<result property="rowNum"				column="ROWNUM_"/>
+		<result property="rowCount"				column="COUNT_"/>
+  	</resultMap>
+  	
+  	<select id="getGiclLossExpBillTableGrid" resultMap="GICLLossExpBillGridResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GICL_LOSS_EXP_BILL_PKG.get_gicl_loss_exp_bill_list(#claimId#, #clmLossId#))
+		                <isNotNull property="filter">
+							WHERE 1=1
+							<isNotEmpty prepend="AND" property="docTypeDesc">
+							  UPPER(doc_type_desc) LIKE UPPER(#docTypeDesc#)
+						    </isNotEmpty>
+						    <isNotEmpty prepend="AND" property="dspPayeeClass">
+							  UPPER(dsp_payee_class) LIKE UPPER(#dspPayeeClass#)
+						    </isNotEmpty>
+						    <isNotEmpty prepend="AND" property="dspPayee">
+							  UPPER(dsp_payee) LIKE UPPER(#dspPayee#)
+						    </isNotEmpty>
+						    <isNotEmpty prepend="AND" property="billDate">
+							  bill_date LIKE #billDate#
+						    </isNotEmpty>
+						    <isNotEmpty prepend="AND" property="docNumber">
+							  doc_number LIKE #docNumber#
+						    </isNotEmpty>
+						    <isNotEmpty prepend="AND" property="amount">
+							  amount LIKE #amount#
+						    </isNotEmpty>
+						</isNotNull>
+		                <isEqual property="sortColumn" compareValue="docTypeDesc">
+			            	ORDER BY doc_type_desc
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="billDate">
+			            	ORDER BY bill_date
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="docNumber">
+			            	ORDER BY doc_number
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="amount">
+			            	ORDER BY amount
+			          	</isEqual>
+		                <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	</isNotNull>) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GICL_LOSS_EXP_BILL_PKG.get_gicl_loss_exp_bill_list(#claimId#, #clmLossId#))
+		                  <isNotNull property="filter">
+							WHERE 1=1
+							<isNotEmpty prepend="AND" property="docTypeDesc">
+							  UPPER(doc_type_desc) LIKE UPPER(#docTypeDesc#)
+						    </isNotEmpty>
+						    <isNotEmpty prepend="AND" property="dspPayeeClass">
+							  UPPER(dsp_payee_class) LIKE UPPER(#dspPayeeClass#)
+						    </isNotEmpty>
+						    <isNotEmpty prepend="AND" property="dspPayee">
+							  UPPER(dsp_payee) LIKE UPPER(#dspPayee#)
+						    </isNotEmpty>
+						    <isNotEmpty prepend="AND" property="billDate">
+							  bill_date LIKE #billDate#
+						    </isNotEmpty>
+						    <isNotEmpty prepend="AND" property="docNumber">
+							  doc_number LIKE #docNumber#
+						    </isNotEmpty>
+						    <isNotEmpty prepend="AND" property="amount">
+							  amount LIKE #amount#
+						    </isNotEmpty>
+						  </isNotNull>) b)
+	</select>
+  	
+
+	<procedure id="deleteGiclLossExpBill" parameterClass="GICLLossExpBill">
+		BEGIN
+			DELETE FROM GICL_LOSS_EXP_BILL 
+             WHERE claim_id = #claimId# 
+             AND claim_loss_id = #claimLossId#;
+		END;
+	</procedure>
+	
+	<procedure id="deleteGiclLossExpBill2" parameterClass="GICLLossExpBill">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+		    GICL_LOSS_EXP_BILL_PKG.delete_gicl_loss_exp_bill
+		    	(#claimId#, 	#claimLossId#, 	#payeeClassCd#, 
+		         #payeeCd#, 	#docType#,     	#docNumber#);
+		END;
+	</procedure>
+	
+	<procedure id="setGiclLossExpBill" parameterClass="GICLLossExpBill">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+		    GICL_LOSS_EXP_BILL_PKG.set_gicl_loss_exp_bill
+		    	(#claimId#,   	#claimLossId#, 	#payeeClassCd#,	 #payeeCd#, 	#docType#,     
+		    	 #docNumber#, 	#amount#,      	#remarks#,	     #billDate#, 	#userId#);
+		END;
+	</procedure>
+	
+	<parameterMap id="chkGiclLossExpBIllMap" class="map">  <!--Added by: Jerome Bautista 05.28.2015 SR 3646-->
+  	    <parameter property="payeeClassCd"	  jdbcType="INTEGER" 			 mode="IN"/>
+  	    <parameter property="payeeCd"		  jdbcType="INTEGER" 			 mode="IN"/>
+  	    <parameter property="docType"		  jdbcType="INTEGER" 			 mode="IN"/>
+  	    <parameter property="docNumber"		  jdbcType="INTEGER" 			 mode="IN"/>
+  	    <parameter property="message"		  jdbcType="VARCHAR" 			 mode="OUT"/>
+  	    <parameter property="counter"		  jdbcType="INTEGER" 			 mode="OUT"/>
+  	</parameterMap>
+  	  	
+	<procedure id="chkGiclLossExpBIll" parameterMap="chkGiclLossExpBIllMap">
+		BEGIN 
+			GICL_LOSS_EXP_BILL_PKG.chk_gicl_loss_exp_bill(?,?,?,?,?,?);
+		END;
+	</procedure>
+</sqlMap>

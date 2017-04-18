@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIACParameters">
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+
+	<typeAlias alias="GIACParameters" type="com.geniisys.giac.entity.GIACParameter"/>
+	
+	<resultMap id="GIACParametersVMap" class="GIACParameters">
+		<result property="paramValueV" column="PARAM_VALUE_V" />
+	</resultMap>
+	
+	<resultMap id="GIACParametersNMap" class="java.lang.Integer">
+		<result property="paramValueN" column="PARAM_VALUE_N" />
+	</resultMap>
+	
+	<resultMap class="com.geniisys.giac.entity.GIACParameter" id="GIACParameterMap">
+		<result column="param_type" 			property="paramType" />
+		<result column="param_name" 			property="paramName" />
+		<result column="param_value_n" 			property="paramValueN" />
+		<result column="param_value_v" 			property="paramValueV" />
+		<result column="param_value_d" 			property="paramValueD" />
+	</resultMap>
+	
+	<select id="getGIACParamValueV" resultMap="GIACParametersVMap">
+		SELECT GIAC_PARAMETERS_PKG.v(#paramName#) PARAM_VALUE_V FROM DUAL
+	</select>
+	  
+	<procedure id="getGIACParamValueV2" resultClass="java.lang.String" parameterClass="java.util.HashMap">
+		SELECT GIAC_PARAMETERS_PKG.v(#paramName#) PARAM_VALUE_V FROM DUAL
+	</procedure>
+	<procedure id="getGIACParamValueV3" resultClass="java.lang.String" >
+		SELECT GIAC_PARAMETERS_PKG.v(#paramName#) PARAM_VALUE_V FROM DUAL
+	</procedure>
+	
+	<procedure id="getGIACParamValueN" resultMap="GIACParametersNMap">
+		SELECT GIAC_PARAMETERS_PKG.n(#paramName#) PARAM_VALUE_N FROM DUAL
+	</procedure>
+	
+	<select id="getGIACParamValueN2" resultClass="java.lang.String">
+		SELECT GIAC_PARAMETERS_PKG.n(#paramName#) PARAM_VALUE_N FROM DUAL
+	</select>
+	
+	<procedure id="getGIACParamValues" resultMap="GIACParameterMap">
+		SELECT * FROM TABLE(GIAC_PARAMETERS_PKG.get_parameter_values(#paramName#))
+	</procedure>
+	
+	<select id="getGlobalBranchCdByUserId" resultClass="java.lang.String">
+		SELECT GIAC_PARAMETERS_PKG.get_branch_cd_by_user_id(#paramName#) PARAM_VALUE_N FROM DUAL
+	</select>
+	
+	<procedure id="toggleOrFlagSw" parameterClass="java.lang.Integer">
+		{CALL GIAC_PARAMETERS_PKG.toggle_or_flag_sw(#paramName#) }
+	</procedure>
+	
+<!-- GIACS301 : shan 11.25.2013 -->
+	<resultMap class="java.util.HashMap" id="giacs301ParamTypeLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="rv_low_value"	property="rvLowValue"/>
+		<result column="rv_meaning"		property="rvMeaning"/>
+	</resultMap>
+	
+	<select id="getGIACS301ParamTypeLOV" resultMap="giacs301ParamTypeLOVMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIACS301_PKG.GET_PARAM_TYPE_LOV)
+		                  <isNotNull property="findText">
+			              		WHERE rv_low_value LIKE UPPER(#findText#)  OR rv_meaning LIKE UPPER(#findText#)
+			              </isNotNull>
+			              <isNull property="findText">
+			              		WHERE rv_low_value LIKE UPPER(#searchString#) OR rv_meaning LIKE UPPER(#searchString#)
+			              </isNull>
+			              <isNotNull property="sortColumn">
+			          	  	  <isEqual property="sortColumn" compareValue="rvLowValue">
+				              		ORDER BY rv_low_value
+				              </isEqual>
+			                  <isEqual property="sortColumn" compareValue="rvMeaning">
+				              		ORDER BY rv_meaning
+				              </isEqual>	
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (GIACS301_PKG.GET_PARAM_TYPE_LOV)
+		                  <isNotNull property="findText">
+			              		WHERE rv_low_value LIKE UPPER(#findText#)  OR rv_meaning LIKE UPPER(#findText#)
+			              </isNotNull>
+			              <isNull property="findText">
+			              		WHERE rv_low_value LIKE UPPER(#searchString#) OR rv_meaning LIKE UPPER(#searchString#)
+			              </isNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+		
+	<resultMap class="GIACParameters" id="giacs301ResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="param_name"     	property="paramName"/>
+		<result column="param_type"  		property="paramType"/>
+		<result column="mean_param_type"  	property="meanParamType"/>
+		<result column="param_value_d"     	property="paramValueD"/>
+		<result column="dsp_param_value_d"  property="dspParamValueD"/>
+		<result column="param_value_n"  	property="paramValueN2"/>
+		<result column="param_value_v"  	property="paramValueV"/>
+		<result column="user_id"     		property="userId"/>
+		<result column="last_update" 		property="lastUpdate"/>
+		<result column="remarks"     		property="remarks"/>
+	</resultMap>
+	
+	<select id="getGiacs301RecList" resultMap="giacs301ResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giacs301_pkg.get_rec_list(#paramName#))
+		  	      		  <isNotNull property="filter">
+		  	      		  	WHERE 1=1
+		  	      		  		<isNotEmpty prepend="AND" property="paramType">
+		  	      		  			(UPPER(param_type) LIKE UPPER(#paramType#)
+		  	      		  			 OR UPPER(mean_param_type) LIKE UPPER(#paramType#))
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="paramValueN2">
+		  	      		  			param_value_n = #paramValueN2#
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="paramValueV">
+		  	      		  			UPPER(param_value_v) LIKE UPPER(#paramValueV#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="dspParamValueD">
+		  	      		  			TRUNC(param_value_d) = TO_DATE(#dspParamValueD#, 'MM-DD-YYYY')
+		  	      		  		</isNotEmpty>
+		  	      		  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="paramName">
+			              		ORDER BY param_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="paramType meanParamType">
+			              		ORDER BY param_type
+			              		 <isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              </isNotNull>, mean_param_type
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="dspParamValueD">
+			              		ORDER BY dsp_param_value_d
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="paramValueN2">
+			              		ORDER BY param_value_n
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="paramValueV">
+			              		ORDER BY param_value_v
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giacs301_pkg.get_rec_list(#paramName#))
+		  	      		  <isNotNull property="filter">
+		  	      		  	WHERE 1=1
+		  	      		  		<isNotEmpty prepend="AND" property="paramType">
+		  	      		  			(UPPER(param_type) LIKE UPPER(#paramType#)
+		  	      		  			 OR UPPER(mean_param_type) LIKE UPPER(#paramType#))
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="paramValueN2">
+		  	      		  			param_value_n = #paramValueN2#
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="paramValueV">
+		  	      		  			UPPER(param_value_v) LIKE UPPER(#paramValueV#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="dspParamValueD">
+		  	      		  			TRUNC(param_value_d) = TO_DATE(#dspParamValueD#, 'MM-DD-YYYY')
+		  	      		  		</isNotEmpty>
+		  	      		  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setAcctgParameters" parameterClass="GIACParameters">
+	    DECLARE
+	    	v_rec GIAC_PARAMETERS%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.param_name 	:= #paramName#;
+ 			v_rec.param_type 	:= #paramType#;
+ 			v_rec.param_value_d := #paramValueD#;
+ 			v_rec.param_value_n := #paramValueN2#;
+ 			v_rec.param_value_v := #paramValueV#;
+ 			v_rec.user_id 		:= #userId#;
+ 			v_rec.remarks 		:= #remarks#;
+ 			
+ 			giacs301_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteAcctgParameters" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giacs301_pkg.val_del_rec(#paramName#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddAcctgParameters" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giacs301_pkg.val_add_rec(#paramName#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delAcctgParameters" parameterClass="java.lang.String">
+		BEGIN
+ 			giacs301_pkg.del_rec(#paramName#);
+ 		END;
+ 	</delete>
+<!-- end GIACS301 : shan 11.25.2013 -->
+	
+	<!-- john 10.23.2014 -->
+	<procedure id="getGIACParamValueN3" resultClass="java.math.BigDecimal">
+		SELECT GIAC_PARAMETERS_PKG.n(#paramName#) PARAM_VALUE_N FROM DUAL
+	</procedure>
+
+</sqlMap>

@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIPIR037" language="groovy" pageWidth="1152" pageHeight="752" columnWidth="1152" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="4.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="test" isDefault="false" mode="Transparent" forecolor="#000000" backcolor="#FFFFFF" fill="Solid" markup="styled" pattern="" fontSize="9" isBold="false">
+		<pen lineWidth="1.0"/>
+		<box topPadding="0" leftPadding="0" bottomPadding="7" rightPadding="9">
+			<pen lineWidth="1.5"/>
+			<topPen lineWidth="1.5"/>
+			<leftPen lineWidth="1.5"/>
+			<bottomPen lineWidth="1.5"/>
+			<rightPen lineWidth="1.5"/>
+		</box>
+	</style>
+	<style name="style1" isDefault="false">
+		<box>
+			<pen lineWidth="0.5"/>
+			<topPen lineWidth="0.5"/>
+			<leftPen lineWidth="0.5"/>
+			<bottomPen lineWidth="0.5"/>
+			<rightPen lineWidth="0.5"/>
+		</box>
+	</style>
+	<style name="Crosstab Data Text" isDefault="false" hAlign="Center"/>
+	<parameter name="P_AS_OF_SW" class="java.lang.String"/>
+	<parameter name="P_BUS_CD" class="java.lang.String"/>
+	<parameter name="P_EXPIRED_AS_OF" class="java.lang.String"/>
+	<parameter name="P_PERIOD_END" class="java.lang.String"/>
+	<parameter name="P_PERIOD_START" class="java.lang.String"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["C:\\ALAIZA\\GIPIR037\\"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="P_USER" class="java.lang.String"/>
+	<parameter name="P_ZONETYPE" class="java.lang.String"/>
+	<parameter name="P_ZONE_CLASS" class="java.lang.String"/>
+	<parameter name="P_FROM" class="java.lang.Integer"/>
+	<parameter name="P_TO" class="java.lang.Integer"/>
+	<queryString>
+		<![CDATA[SELECT *
+  FROM (SELECT ROWNUM row_num, a.*
+          FROM (SELECT   zone_share_cd, zone_line_cd,
+                         SUM (zone_share_tsi_amt) share_tsi_amt,
+                         SUM (zone_share_prem_amt) cp_zone_share_prem
+                    FROM TABLE
+                            (gipir037a_pkg.get_gipir037a_q3_2_b
+                                                            ($P{P_AS_OF_SW},
+                                                             $P{P_BUS_CD},
+                                                             $P{P_EXPIRED_AS_OF},
+                                                             $P{P_PERIOD_END},
+                                                             $P{P_PERIOD_START},
+                                                             $P{P_USER},
+                                                             $P{P_ZONETYPE}
+                                                            )
+                            )
+                GROUP BY zone_line_cd, zone_share_cd
+                ORDER BY zone_share_cd) a)
+ WHERE row_num BETWEEN $P{P_FROM} AND $P{P_TO}]]>
+	</queryString>
+	<field name="ROW_NUM" class="java.math.BigDecimal"/>
+	<field name="ZONE_SHARE_CD" class="java.math.BigDecimal"/>
+	<field name="ZONE_LINE_CD" class="java.lang.String"/>
+	<field name="SHARE_TSI_AMT" class="java.math.BigDecimal"/>
+	<field name="CP_ZONE_SHARE_PREM" class="java.math.BigDecimal"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<summary>
+		<band height="12">
+			<crosstab>
+				<reportElement x="0" y="0" width="1152" height="12"/>
+				<crosstabDataset isDataPreSorted="true"/>
+				<rowGroup name="1" width="0" totalPosition="End">
+					<bucket>
+						<bucketExpression class="java.lang.String"><![CDATA[1]]></bucketExpression>
+					</bucket>
+					<crosstabRowHeader>
+						<cellContents backcolor="#F0F8FF" mode="Opaque">
+							<box>
+								<pen lineWidth="0.5" lineStyle="Solid" lineColor="#FFFFFF"/>
+							</box>
+						</cellContents>
+					</crosstabRowHeader>
+					<crosstabTotalRowHeader>
+						<cellContents backcolor="#BFE1FF" mode="Opaque">
+							<box>
+								<pen lineWidth="0.5" lineStyle="Solid" lineColor="#FFFFFF"/>
+							</box>
+						</cellContents>
+					</crosstabTotalRowHeader>
+				</rowGroup>
+				<columnGroup name="ZONE_SHARE_CD" height="0" totalPosition="End">
+					<bucket>
+						<bucketExpression class="java.lang.String"><![CDATA[$F{ZONE_SHARE_CD}]]></bucketExpression>
+					</bucket>
+					<crosstabColumnHeader>
+						<cellContents backcolor="#F0F8FF" mode="Opaque">
+							<box>
+								<pen lineWidth="0.5" lineStyle="Solid" lineColor="#FFFFFF"/>
+							</box>
+						</cellContents>
+					</crosstabColumnHeader>
+					<crosstabTotalColumnHeader>
+						<cellContents backcolor="#BFE1FF" mode="Opaque">
+							<box>
+								<pen lineWidth="0.5" lineStyle="Solid" lineColor="#FFFFFF"/>
+							</box>
+						</cellContents>
+					</crosstabTotalColumnHeader>
+				</columnGroup>
+				<measure name="SHARE_TSI_AMTMeasure" class="java.math.BigDecimal" calculation="Sum">
+					<measureExpression><![CDATA[$F{SHARE_TSI_AMT}]]></measureExpression>
+				</measure>
+				<measure name="CP_ZONE_SHARE_PREMMeasure" class="java.math.BigDecimal" calculation="Sum">
+					<measureExpression><![CDATA[$F{CP_ZONE_SHARE_PREM}]]></measureExpression>
+				</measure>
+				<crosstabCell width="187" height="26">
+					<cellContents>
+						<box>
+							<pen lineWidth="0.5" lineStyle="Solid" lineColor="#FFFFFF"/>
+						</box>
+						<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+							<reportElement style="Crosstab Data Text" positionType="Float" x="91" y="9" width="90" height="11"/>
+							<textElement textAlignment="Right">
+								<font fontName="Arial" size="7"/>
+							</textElement>
+							<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{CP_ZONE_SHARE_PREMMeasure}]]></textFieldExpression>
+						</textField>
+						<staticText>
+							<reportElement style="Crosstab Data Text" positionType="Float" x="0" y="0" width="90" height="9"/>
+							<textElement textAlignment="Right">
+								<font fontName="Arial" size="7"/>
+							</textElement>
+							<text><![CDATA[---------------------------------]]></text>
+						</staticText>
+						<staticText>
+							<reportElement style="Crosstab Data Text" positionType="Float" x="91" y="0" width="90" height="9"/>
+							<textElement textAlignment="Right">
+								<font fontName="Arial" size="7"/>
+							</textElement>
+							<text><![CDATA[----------------------------------]]></text>
+						</staticText>
+						<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+							<reportElement style="Crosstab Data Text" positionType="Float" x="0" y="9" width="90" height="11"/>
+							<textElement textAlignment="Right">
+								<font fontName="Arial" size="7"/>
+							</textElement>
+							<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{SHARE_TSI_AMTMeasure}]]></textFieldExpression>
+						</textField>
+					</cellContents>
+				</crosstabCell>
+				<crosstabCell width="0" height="26" columnTotalGroup="ZONE_SHARE_CD">
+					<cellContents backcolor="#FFFFFF" mode="Opaque">
+						<box>
+							<pen lineWidth="0.5" lineStyle="Solid" lineColor="#FFFFFF"/>
+						</box>
+					</cellContents>
+				</crosstabCell>
+				<crosstabCell width="187" height="0" rowTotalGroup="1">
+					<cellContents backcolor="#FFFFFF" mode="Opaque">
+						<box>
+							<pen lineWidth="0.5" lineStyle="Solid" lineColor="#FFFFFF"/>
+						</box>
+					</cellContents>
+				</crosstabCell>
+				<crosstabCell width="0" height="0" rowTotalGroup="1" columnTotalGroup="ZONE_SHARE_CD">
+					<cellContents backcolor="#FFFFFF" mode="Opaque">
+						<box>
+							<pen lineWidth="0.5" lineStyle="Solid" lineColor="#FFFFFF"/>
+						</box>
+					</cellContents>
+				</crosstabCell>
+			</crosstab>
+		</band>
+	</summary>
+</jasperReport>

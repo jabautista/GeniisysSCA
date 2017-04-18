@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISMortgagee">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<resultMap id="GIISMortgageeResult" class="com.geniisys.giis.entity.GIISMortgagee" extends="BaseEntity.TableGridResultMap">
+		<result property="mortgCd" 		column="MORTG_CD" />
+		<result property="mortgName"	column="MORTG_NAME" />
+		<result property="mailAddr1"	column="MAIL_ADDR1" />
+		<result property="mailAddr2"	column="MAIL_ADDR2" />
+		<result property="mailAddr3"	column="MAIL_ADDR3" />
+		<result property="designation"	column="DESIGNATION" />
+		<result property="tin"			column="TIN" />
+		<result property="contactPers"	column="CONTACT_PERS" />
+		<result property="remarks"		column="REMARKS" />
+		<result property="userId"		column="USER_ID" />
+		<result property="lastUpdate"   column="LAST_UPDATE" />
+		<result property="mortgageeId"  column="MORTGAGEE_ID" />
+	</resultMap>
+	
+ 	<resultMap id="GIISISSourceListing" class="com.geniisys.giis.entity.GIISMortgagee" extends="BaseEntity.TableGridResultMap">
+  		<result column="ISS_CD"				property="issCd"			jdbcType="VARCHAR" />
+  		<result column="ISS_NAME"			property="issName"			jdbcType="VARCHAR" />  
+  	</resultMap>
+  
+  	<select id="getGIIS105SourceList" resultMap ="GIISISSourceListing">
+  		SELECT *
+		  FROM (SELECT rownum rownum_, b.count_, a.* 
+		          FROM (SELECT iss_cd, iss_name 
+		          		  FROM TABLE(GIISS105_PKG.get_mortgagee_source_list(#appUser#))
+		          		  <isNotNull property="filter">
+		          		  	WHERE 1 = 1
+		          		  	  	<isNotEmpty prepend="AND" property="issCd">
+		          		  			UPPER(iss_cd) LIKE UPPER(#issCd#)
+		          		  	  	</isNotEmpty>
+		          		  	  	<isNotEmpty prepend="AND" property="issName">
+		          		  			UPPER(iss_name) LIKE UPPER(#issName#)
+		          		  	  	</isNotEmpty>
+		          		  </isNotNull>
+		          		  <isEqual property="sortColumn" compareValue="issCd">
+			              		ORDER BY iss_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="issName">
+			              		ORDER BY iss_name
+			              </isEqual> 
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIISS105_PKG.get_mortgagee_source_list(#appUser#))
+		                  <isNotNull property="filter">
+		          		  	WHERE 1 = 1
+		          		  	  	<isNotEmpty prepend="AND" property="issCd">
+		          		  			UPPER(iss_cd) LIKE UPPER(#issCd#)
+		          		  	  	</isNotEmpty>
+		          		  	  	<isNotEmpty prepend="AND" property="issName">
+		          		  			UPPER(iss_name) LIKE UPPER(#issName#)
+		          		  	  	</isNotEmpty>
+		          		  </isNotNull>
+		                ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+	
+	<select id="getGIISS105MortgageeList" resultMap="GIISMortgageeResult" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, b.count_, a.*
+				  FROM (SELECT *
+						  FROM TABLE(GIISS105_PKG.get_mortgagee_list_by_iss_cd(#issCd#))
+						  	<isNotNull property="filter">
+						  	  WHERE 1 = 1
+						  		<isNotEmpty prepend="AND" property="mortgCd">
+						  			UPPER(mortg_cd) LIKE UPPER(#mortgCd#)
+						  		</isNotEmpty>
+						  		<isNotEmpty prepend="AND" property="mortgName">
+						  			UPPER(mortg_name) LIKE UPPER(#mortgName#)
+						  		</isNotEmpty>
+						  		<isNotEmpty prepend="AND" property="mailAddr1">
+						  			UPPER(mail_addr1) LIKE UPPER(#mailAddr1#)
+						  		</isNotEmpty>
+						  		<isNotEmpty prepend="AND" property="mailAddr2">
+						  			UPPER(mail_addr2) LIKE UPPER(#mailAddr2#)
+						  		</isNotEmpty>
+						  		<isNotEmpty prepend="AND" property="mailAddr3">
+						  			UPPER(mail_addr3) LIKE UPPER(#mailAddr3#)
+						  		</isNotEmpty>
+						  		<isNotEmpty prepend="AND" property="designation">
+						  			UPPER(designation) LIKE UPPER(#designation#)
+						  		</isNotEmpty>
+						  		<isNotEmpty prepend="AND" property="tin">
+						  			UPPER(tin) LIKE UPPER(#tin#)
+						  		</isNotEmpty>
+						  		<isNotEmpty prepend="AND" property="contactPers">
+						  			UPPER(contact_pers) LIKE UPPER(#contactPers#)
+						  		</isNotEmpty>
+						  		<isNotEmpty prepend="AND" property="remarks">
+						  			UPPER(remarks) LIKE UPPER(#remarks#)
+						  		</isNotEmpty>
+						  	</isNotNull>
+						  	<isEqual property="sortColumn" compareValue="mortgCd">
+								ORDER BY mortg_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="mortgName">
+								ORDER BY mortg_name
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="mailAddr1">
+								ORDER BY mail_addr1
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="mailAddr2">
+								ORDER BY mail_addr2
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="mailAddr3">
+								ORDER BY mail_addr3
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="designation">
+								ORDER BY designation
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="tin">
+								ORDER BY tin
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="contactPers">
+								ORDER BY contact_pers
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="remarks">
+								ORDER BY remarks
+							</isEqual>
+						  	<isNotNull property="sortColumn">							
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+						  	</isNotNull>
+						  ) a,
+					   (SELECT COUNT(*) count_
+						  FROM TABLE(GIISS105_PKG.get_mortgagee_list_by_iss_cd(#issCd#))
+						  	<isNotNull property="filter">
+						  	  WHERE 1 = 1
+						  		<isNotEmpty prepend="AND" property="mortgCd">
+						  			UPPER(mortg_cd) LIKE UPPER(#mortgCd#)
+						  		</isNotEmpty>
+						  		<isNotEmpty prepend="AND" property="mortgName">
+						  			UPPER(mortg_name) LIKE UPPER(#mortgName#)
+						  		</isNotEmpty>
+						  		<isNotEmpty prepend="AND" property="mailAddr1">
+						  			UPPER(mail_addr1) LIKE UPPER(#mailAddr1#)
+						  		</isNotEmpty>
+						  		<isNotEmpty prepend="AND" property="mailAddr2">
+						  			UPPER(mail_addr2) LIKE UPPER(#mailAddr2#)
+						  		</isNotEmpty>
+						  		<isNotEmpty prepend="AND" property="mailAddr3">
+						  			UPPER(mail_addr3) LIKE UPPER(#mailAddr3#)
+						  		</isNotEmpty>
+						  		<isNotEmpty prepend="AND" property="designation">
+						  			UPPER(designation) LIKE UPPER(#designation#)
+						  		</isNotEmpty>
+						  		<isNotEmpty prepend="AND" property="tin">
+						  			UPPER(tin) LIKE UPPER(#tin#)
+						  		</isNotEmpty>
+						  		<isNotEmpty prepend="AND" property="contactPers">
+						  			UPPER(contact_pers) LIKE UPPER(#contactPers#)
+						  		</isNotEmpty>
+						  		<isNotEmpty prepend="AND" property="remarks">
+						  			UPPER(remarks) LIKE UPPER(#remarks#)
+						  		</isNotEmpty>
+						  	</isNotNull>
+						) b)
+				  WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="validateDeleteMortgagee" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT GIISS105_PKG.validate_delete_mortgagee(#issCd#,#mortgCd#) FROM DUAL
+	</select>
+	
+	<select id="validateAddMortgageeCd" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT GIISS105_PKG.validate_add_mortgagee_cd(#issCd#,#mortgCd#) FROM DUAL
+	</select>
+	
+	<select id="validateAddMortgageeName" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT GIISS105_PKG.validate_add_mortgagee_name(#issCd#,#mortgName#) FROM DUAL
+	</select>
+	
+  	<delete id="deleteGiisMortgagee" parameterClass="com.geniisys.giis.entity.GIISMortgagee">
+  		BEGIN
+  			GIISS105_PKG.delete_giis_mortgagee(#issCd#,#mortgCd#);
+  		END;
+  	</delete>
+  	
+  	<procedure id="setGiisMortgagee" parameterClass="com.geniisys.giis.entity.GIISMortgagee">
+		DECLARE
+		  v_mortgagee GIIS_MORTGAGEE%ROWTYPE;
+		BEGIN
+		  giis_users_pkg.app_user := #appUser#;
+		  		 
+		  v_mortgagee.iss_cd 		:= #issCd#;
+		  v_mortgagee.mortg_cd    	:= #mortgCd#;
+		  v_mortgagee.mortg_name   	:= #mortgName#;
+          v_mortgagee.mail_addr1  	:= #mailAddr1#;
+          v_mortgagee.mail_addr2  	:= #mailAddr2#;
+          v_mortgagee.mail_addr3  	:= #mailAddr3#;
+          v_mortgagee.designation  	:= #designation#;
+          v_mortgagee.tin  			:= #tin#;
+          v_mortgagee.contact_pers  := #contactPers#;
+          v_mortgagee.remarks    	:= #remarks#;
+          v_mortgagee.user_id 		:= #appUser#;
+		  
+		  GIISS105_PKG.set_giis_mortgagee(v_mortgagee);
+		END;
+	</procedure>
+  		
+
+</sqlMap>

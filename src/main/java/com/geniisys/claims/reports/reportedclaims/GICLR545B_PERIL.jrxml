@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GICLR545B_PERIL" language="groovy" pageWidth="950" pageHeight="842" columnWidth="950" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="9861c053-2596-457c-9af4-dc3299c5b684">
+	<property name="ireport.zoom" value="1.610510000000001"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="style1" fontName="Arial" fontSize="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false"/>
+	<parameter name="P_CLAIM_ID" class="java.math.BigDecimal"/>
+	<parameter name="P_LOSS_EXP" class="java.lang.String"/>
+	<parameter name="P_CLM_STAT_CD" class="java.lang.String"/>
+	<parameter name="P_USER_ID" class="java.lang.String"/>
+	<parameter name="P_CLM_STAT_TYPE" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="P_START_DT" class="java.util.Date">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="P_END_DT" class="java.util.Date">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT * FROM TABLE (GICLR545B_PKG.GET_PERIL_RECORD(
+$P{P_CLAIM_ID},
+$P{P_LOSS_EXP},
+$P{P_CLM_STAT_CD},
+$P{P_USER_ID},
+$P{P_CLM_STAT_TYPE},
+$P{P_START_DT},
+$P{P_END_DT}))
+ORDER BY CLM_STAT_CD]]>
+	</queryString>
+	<field name="CLAIM_ID" class="java.math.BigDecimal"/>
+	<field name="PERIL_CD" class="java.math.BigDecimal"/>
+	<field name="LOSS_AMT" class="java.math.BigDecimal"/>
+	<field name="RETENTION" class="java.math.BigDecimal"/>
+	<field name="TREATY" class="java.math.BigDecimal"/>
+	<field name="XOL" class="java.math.BigDecimal"/>
+	<field name="FACUL" class="java.math.BigDecimal"/>
+	<field name="CLM_STAT_DESC" class="java.lang.String"/>
+	<field name="CLM_STAT_CD" class="java.lang.String"/>
+	<variable name="V_LOSS_AMT" class="java.math.BigDecimal" resetType="Group" resetGroup="CGP_CLM_STAT_CD" calculation="Sum">
+		<variableExpression><![CDATA[$F{LOSS_AMT}]]></variableExpression>
+	</variable>
+	<variable name="V_RETENTION" class="java.math.BigDecimal" resetType="Group" resetGroup="CGP_CLM_STAT_CD" calculation="Sum">
+		<variableExpression><![CDATA[$F{RETENTION}]]></variableExpression>
+	</variable>
+	<variable name="V_TREATY" class="java.math.BigDecimal" resetType="Group" resetGroup="CGP_CLM_STAT_CD" calculation="Sum">
+		<variableExpression><![CDATA[$F{TREATY}]]></variableExpression>
+	</variable>
+	<variable name="V_XOL" class="java.math.BigDecimal" resetType="Group" resetGroup="CGP_CLM_STAT_CD" calculation="Sum">
+		<variableExpression><![CDATA[$F{XOL}]]></variableExpression>
+	</variable>
+	<variable name="V_FACUL" class="java.math.BigDecimal" resetType="Group" resetGroup="CGP_CLM_STAT_CD" calculation="Sum">
+		<variableExpression><![CDATA[$F{FACUL}]]></variableExpression>
+	</variable>
+	<variable name="V_COUNT" class="java.math.BigDecimal" resetType="Group" resetGroup="CGP_CLM_STAT_CD" calculation="Count">
+		<variableExpression><![CDATA[$F{CLAIM_ID}]]></variableExpression>
+	</variable>
+	<variable name="V_LOSS_AMOUNT" class="java.math.BigDecimal">
+		<variableExpression><![CDATA[$V{V_RETENTION}+$V{V_TREATY}+$V{V_XOL}+$V{V_FACUL}]]></variableExpression>
+	</variable>
+	<group name="CGP_CLM_STAT_CD">
+		<groupExpression><![CDATA[$F{CLM_STAT_CD}]]></groupExpression>
+	</group>
+	<group name="GRP_CLAIM_ID">
+		<groupExpression><![CDATA[$F{CLAIM_ID}]]></groupExpression>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="11">
+			<textField isStretchWithOverflow="true" evaluationTime="Group" evaluationGroup="CGP_CLM_STAT_CD" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement style="style1" isPrintRepeatedValues="false" x="0" y="0" width="70" height="11" isRemoveLineWhenBlank="true" printWhenGroupChanges="CGP_CLM_STAT_CD" uuid="9755555b-7f5a-4ca5-965b-ecfda4d1b0c3">
+					<printWhenExpression><![CDATA[new Boolean($V{V_COUNT}.intValue()==1)]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$V{V_LOSS_AMOUNT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" evaluationTime="Group" evaluationGroup="CGP_CLM_STAT_CD" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement style="style1" x="70" y="0" width="70" height="11" printWhenGroupChanges="CGP_CLM_STAT_CD" uuid="f382dc57-85f1-4bb2-8dff-e3237afce8f3">
+					<printWhenExpression><![CDATA[new Boolean($V{V_COUNT}.intValue()==1)]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$V{V_RETENTION}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" evaluationTime="Group" evaluationGroup="CGP_CLM_STAT_CD" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement style="style1" x="140" y="0" width="70" height="11" printWhenGroupChanges="CGP_CLM_STAT_CD" uuid="6450c89b-e8ea-4104-b44e-20c0814e4cdf">
+					<printWhenExpression><![CDATA[new Boolean($V{V_COUNT}.intValue()==1)]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$V{V_TREATY}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" evaluationTime="Group" evaluationGroup="CGP_CLM_STAT_CD" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement style="style1" x="210" y="0" width="87" height="11" printWhenGroupChanges="CGP_CLM_STAT_CD" uuid="b2d31999-69b9-4140-bd82-171b2807926f">
+					<printWhenExpression><![CDATA[new Boolean($V{V_COUNT}.intValue()==1)]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$V{V_XOL}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" evaluationTime="Group" evaluationGroup="CGP_CLM_STAT_CD" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement style="style1" x="297" y="0" width="70" height="11" printWhenGroupChanges="CGP_CLM_STAT_CD" uuid="0abacf73-7b5a-4356-97b1-4c4a7c476516">
+					<printWhenExpression><![CDATA[new Boolean($V{V_COUNT}.intValue()==1)]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$V{V_FACUL}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

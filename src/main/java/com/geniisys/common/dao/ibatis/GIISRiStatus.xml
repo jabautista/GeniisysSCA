@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISRiStatus">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>	
+	
+	<typeAlias alias="GIISRiStatus" type="com.geniisys.common.entity.GIISRiStatus"/>
+
+	<resultMap class="GIISRiStatus" id="GIISRiStatusResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="statusCd"		column="status_cd"/>
+		<result property="statusDesc" 		column="status_desc"/>
+	</resultMap>
+	
+	<select id="getRiStatusLOV" resultMap="GIISRiStatusResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIIS_RI_STATUS_PKG.get_ri_status_lov)		                 
+		                  	<isNull property="findText">
+				                 WHERE UPPER(status_cd) LIKE UPPER(#searchString#)
+				                 OR UPPER(status_desc) LIKE UPPER(#searchString#)					                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(status_cd) LIKE UPPER(#findText#)
+				                 OR UPPER(status_desc) LIKE UPPER(#findText#)				  				         		
+			             	</isNotNull>		             
+			              	<isEqual property="sortColumn" compareValue="statusCd">
+			              		ORDER BY status_cd
+			              	</isEqual>	
+			              	<isEqual property="sortColumn" compareValue="statusDesc">
+			              		ORDER BY status_desc
+			              	</isEqual>			              		                      
+			          	  	<isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	</isNotNull>
+		                  ) a, 
+		               (SELECT count (*) count_ 
+		                  FROM TABLE(GIIS_RI_STATUS_PKG.get_ri_status_lov)		                 
+		                  	<isNull property="findText">
+				                 WHERE UPPER(status_cd) LIKE UPPER(#searchString#)
+				                 OR UPPER(status_desc) LIKE UPPER(#searchString#)					                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(status_cd) LIKE UPPER(#findText#)
+				                 OR UPPER(status_desc) LIKE UPPER(#findText#)				  				         		
+			             	</isNotNull>	
+			             	) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="GIISRiStatus" id="giisRiStatusListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="status_cd"   property="statusCd"/>
+		<result column="status_desc" property="statusDesc"/>
+		<result column="user_id"     property="userId"/>
+		<result column="last_update" property="lastUpdate"/>
+		<result column="remarks"     property="remarks"/>
+	</resultMap>
+	
+	<select id="getGiiss073RecList" resultMap="giisRiStatusListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss073_pkg.get_rec_list(#statusCd#, #statusDesc#))
+		                  <isEqual property="sortColumn" compareValue="statusCd">
+			              		ORDER BY status_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="statusDesc">
+			              		ORDER BY status_desc
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss073_pkg.get_rec_list(#statusCd#, #statusDesc#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setRiStatus" parameterClass="GIISRiStatus">
+	    DECLARE
+	    	v_rec giis_ri_status%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.status_cd 	:= #statusCd#;
+ 			v_rec.status_desc 	:= #statusDesc#;
+ 			v_rec.user_id 		:= #userId#;
+ 			v_rec.remarks 		:= #remarks#;
+ 			
+ 			giiss073_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteRiStatus" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss073_pkg.val_del_rec(#recId#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddRiStatus" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss073_pkg.val_add_rec(#recId#, #recDesc#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delRiStatus" parameterClass="java.lang.String">
+		BEGIN
+ 			giiss073_pkg.del_rec(#statusCd#);
+ 		END;
+ 	</delete>
+</sqlMap>

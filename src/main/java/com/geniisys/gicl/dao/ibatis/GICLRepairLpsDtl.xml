@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GICLRepairLpsDtl">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GICLRepairLpsDtl" type="com.geniisys.gicl.entity.GICLRepairLpsDtl"/>
+	
+	<resultMap class="GICLRepairLpsDtl" id="gicls070LPSMap">
+		<result property="evalId" column="eval_id"/>
+		<result property="lossExpCd" column="loss_exp_cd"/>
+		<result property="tinsmithType" column="tinsmith_type"/>
+		<result property="tinsmithTypeDesc" column="tinsmith_type_desc"/>
+		<result property="itemNo" column="item_no"/>
+		<result property="updateSw" column="update_sw"/>
+		<result property="tinsmithRepairCd" column="tinsmith_repair_cd"/>
+		<result property="tinsmithAmount" column="tinsmith_amount"/>
+		<result property="paintingsRepairCd" column="paintings_repair_cd"/>
+		<result property="paintingsAmount" column="paintings_amount"/>
+		<result property="dspLossDesc" column="dsp_loss_desc"/>
+		<result property="totalAmount" column="total_Amount"/>
+		<result column="rownum_" 	property="rowNum" />
+		<result column="count_"		property="rowCount"/>
+	</resultMap>
+	
+	<select id="getGicls070LpsRepairDetailsList" resultMap="gicls070LPSMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (gicl_repair_lps_dtl_pkg.get_repair_lps_dtl_list(#evalId#))
+		                  <isEqual property="sortColumn" compareValue="itemNo">
+			              		ORDER BY item_no
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="dspLossDesc">
+			              		ORDER BY dsp_loss_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="tinsmithTypeDesc">
+			              		ORDER BY tinsmith_type_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="tinsmithAmount">
+			              		ORDER BY tinsmith_amount
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="paintingsAmount">
+			              		ORDER BY paintings_amount
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="totalAmount">
+			              		ORDER BY total_amount
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (gicl_repair_lps_dtl_pkg.get_repair_lps_dtl_list(#evalId#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="vehiclePartsMap">
+		<result property="lossExpCd" column="loss_exp_cd"/>
+		<result property="dspLossDesc" column="dsp_loss_desc"/>
+		<result column="rownum_" 	property="rowNum" />
+		<result column="count_"		property="rowCount"/>
+	</resultMap>
+	
+	<select id="getVehiclePartsListLOV" resultMap="vehiclePartsMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (gicl_repair_lps_dtl_pkg.get_vehicle_parts_list(#evalId#,#findText#))
+		                  <isNotNull property="notIn">
+						  		WHERE loss_Exp_Cd NOT IN $notIn$
+						  	</isNotNull>
+		                  <isEqual property="sortColumn" compareValue="dspLossDesc">
+			              		ORDER BY dsp_loss_desc
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (gicl_repair_lps_dtl_pkg.get_vehicle_parts_list(#evalId#,#findText#))
+			             		<isNotNull property="notIn">
+							  		WHERE loss_Exp_Cd NOT IN $notIn$
+							  	</isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getTinsmithAmount" parameterClass="map" resultClass="String">
+		SELECT gicl_repair_lps_dtl_pkg.get_tinsmith_amount(#tinsmithType#,#lossExpCd#) FROM DUAL
+	</select>
+	<select id="getPaintingsAmount" parameterClass="String" resultClass="String">
+		SELECT gicl_repair_lps_dtl_pkg.get_paintings_amount(#lossExpCd#) FROM DUAL
+	</select>
+	
+	<procedure id="saveGiclRepairLpsDtl" parameterClass="GICLRepairLpsDtl">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			gicl_repair_lps_dtl_pkg.save_gicl_repair_lps_dtl(#evalMasterId#,#evalId#,#lossExpCd#,#amount#,#tinsmithType#,#repairCd#,#itemNo#,
+				#masterReportType#
+			);
+		END; 
+	</procedure>
+	
+	<procedure id="deleteGiclRepairLpsDtl" parameterClass="GICLRepairLpsDtl">
+		BEGIN
+			gicl_repair_lps_dtl_pkg.del_repair_lps_dtl(#evalId#,#lossExpCd#);
+		END;
+	</procedure>
+	
+	<procedure id="deleteByRepCd" parameterClass="GICLRepairLpsDtl">
+		BEGIN
+			gicl_repair_lps_dtl_pkg.del_by_rep_cd(#evalId#,#lossExpCd#,#repairCd#,#itemNo#);
+		END;
+	</procedure>
+	
+</sqlMap>	

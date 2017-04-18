@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIACPdcReplace">
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+
+	<typeAlias alias="GIACPdcReplace" type="com.geniisys.giac.entity.GIACPdcReplace" />
+	
+	<resultMap class="GIACPdcReplace" id="giacPdcReplaceResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="item_no"			property="itemNo" />
+		<result column="pay_mode"			property="payMode" />
+		<result column="bank_cd"			property="bankCd" />
+		<result column="bank_sname"			property="bankSname" />
+		<result column="bank_name"			property="bankName" />
+		<result column="check_no"			property="checkNo" />
+		<result column="check_class"		property="checkClass" />
+		<result column="check_class_desc"	property="checkClassDesc" />
+		<result column="check_date"			property="checkDate" />
+		<result column="amount"				property="amount" />
+		<result column="currency_cd"		property="currencyCd" />
+		<result column="currency_desc"		property="currencyDesc" />
+		<result column="gross_amt"			property="grossAmt" />
+		<result column="commission_amt"		property="commissionAmt" />
+		<result column="vat_amt"			property="vatAmt"/>
+		<result column="ref_no"				property="refNo" />
+	</resultMap>
+
+	<select id="getPdcRepDtls" parameterClass="java.util.HashMap" resultMap="giacPdcReplaceResultMap">
+		SELECT /*+ NO_CPU_COSTING */ * 
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		          		  FROM TABLE(GIAC_PDC_REPLACE_PKG.get_giac_pdc_replace(#pdcId#))) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GIAC_PDC_REPLACE_PKG.get_giac_pdc_replace(#pdcId#))) b
+		         WHERE UPPER(NVL(pay_mode, ' ')) LIKE #filter.payMode#
+		           AND UPPER(NVL(bank_sname, ' ')) LIKE #filter.bankSname#
+		           AND UPPER(NVL(check_class, ' ')) LIKE #filter.checkClass#
+		           AND UPPER(NVL(check_date, SYSDATE)) LIKE #filter.checkDate#
+		           AND amount LIKE #filter.amount#
+		           AND UPPER(NVL(currency_cd, 0)) LIKE #filter.currencyCd#
+		           AND NVL(ref_no, ' ') LIKE #filter.refNo#)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+
+	<!-- added sorting kenneth 12.02.2015 -->
+	<select id="getGIACPdcReplaceListing" parameterClass="java.util.HashMap" resultMap="giacPdcReplaceResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		          		  FROM TABLE(GIAC_PDC_REPLACE_PKG.get_giac_pdc_replace(#pdcId#))
+		          		  <isEqual property="sortColumn" compareValue="itemNo">
+			              		ORDER BY item_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="payMode">
+			              		ORDER BY pay_mode
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="bankName">
+			              		ORDER BY bank_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="checkClassDesc">
+			              		ORDER BY check_class_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="checkNo">
+			              		ORDER BY check_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="checkDate">
+			              		ORDER BY TO_DATE(check_date,'MM-DD-YYYY')
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="amount">
+			              		ORDER BY amount
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="currencyDesc">
+			              		ORDER BY currency_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="refNo">
+			              		ORDER BY ref_no
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GIAC_PDC_REPLACE_PKG.get_giac_pdc_replace(#pdcId#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+
+	<insert id="insertGiacPdcReplace" parameterClass="GIACPdcReplace">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			GIAC_PDC_REPLACE_PKG.insert_giac_pdc_replace(#pdcId#, #itemNo#, #payMode#, #bankCd#, #checkClass#, #checkNo#,
+														 #checkDate#, #amount#, #currencyCd#, #grossAmt#, #commissionAmt#, #vatAmt#,
+														 #refNo#);
+		END;
+	</insert>
+</sqlMap>

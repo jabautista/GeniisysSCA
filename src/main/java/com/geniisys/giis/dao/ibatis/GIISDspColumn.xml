@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISDspColumn">
+    
+    <typeAlias alias="giisDspColumn" type="com.geniisys.giis.entity.GIISDspColumn"/>
+    
+    <resultMap class="giisDspColumn" id="giisDspColumnListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="dsp_col_id"        			property="dspColId"/>
+		<result column="table_name"        			property="tableName"/>
+		<result column="old_table_name"        		property="oldTableName"/>
+		<result column="column_name"        		property="columnName"/>
+		<result column="old_column_name"        	property="oldColumnName"/>
+		<result column="user_id"     				property="userId"/>
+		<result column="database_tag"               property="databaseTag"/>
+		<result column="last_update" 				property="lastUpdate"/>
+	</resultMap>
+    
+    <select id="getGiisDspColumnRecList" resultMap="giisDspColumnListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss167_pkg.get_giisdspcolumn_list(#dspColId#, #tableName#, #columnName#))
+		                  <isEqual property="sortColumn" compareValue="tableName">
+			              		ORDER BY table_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="columnName">
+			              		ORDER BY column_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss167_pkg.get_giisdspcolumn_list(#dspColId#, #tableName#, #columnName#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+    <resultMap class="java.util.HashMap" id="columnLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="col_id"		property="colId" />
+		<result column="col_name"	property="colName" />
+	</resultMap>
+	
+    <select id="getGiiss167Column" resultMap="columnLOVMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+					   b.count_, 
+					   a.* 
+				  FROM (SELECT * 
+						  FROM TABLE (giiss167_pkg.get_column_lov(#findText#))
+						  <isEqual property="sortColumn" compareValue="colId">
+								ORDER BY col_id
+						  </isEqual>
+						  <isEqual property="sortColumn" compareValue="colName">
+								ORDER BY col_name
+						  </isEqual>
+						  <isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+						  </isNotNull>
+						  ) a, 
+					   (SELECT count(*) count_ 
+						  FROM TABLE (giiss167_pkg.get_column_lov(#findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+    <resultMap class="java.util.HashMap" id="tableNameLovMap" extends="BaseEntity.TableGridResultMap">
+		<result column="table_name"	property="tableName" />
+	</resultMap>
+	
+    <select id="getGiiss167TableNameLov" resultMap="tableNameLovMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+					   b.count_, 
+					   a.* 
+				  FROM (SELECT * 
+						  FROM TABLE (giiss167_pkg.get_tablename_lov(#findText#, #columnName#))
+						  <isEqual property="sortColumn" compareValue="tableName">
+								ORDER BY table_name
+						  </isEqual>
+						  <isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+						  </isNotNull>
+						  ) a, 
+					   (SELECT count(*) count_ 
+						  FROM TABLE (giiss167_pkg.get_tablename_lov(#findText#, #columnName#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+    <resultMap class="java.util.HashMap" id="columnNameLovMap" extends="BaseEntity.TableGridResultMap">
+		<result column="column_name"	property="columnName" />
+	</resultMap>
+	
+    <select id="getGiiss167ColumnNameLov" resultMap="columnNameLovMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+					   b.count_, 
+					   a.* 
+				  FROM (SELECT * 
+						  FROM TABLE (giiss167_pkg.get_columnname_lov(#findText#, #tableName#, #dspColId#))
+						  <isEqual property="sortColumn" compareValue="columnName">
+								ORDER BY column_name
+						  </isEqual>
+						  <isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+						  </isNotNull>
+						  ) a, 
+					   (SELECT count(*) count_ 
+						  FROM TABLE (giiss167_pkg.get_columnname_lov(#findText#, #tableName#, #dspColId#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+    <procedure id="valAddDspColumn" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss167_pkg.val_add_rec(#dspColId#, #tableName#, #columnName#);
+ 		END;
+ 	</procedure> 
+    
+    <procedure id="setDspColumn" parameterClass="giisDspColumn">
+	    DECLARE
+	    	v_rec giis_dsp_column%ROWTYPE;
+	    	v_old_table_name giis_dsp_column.table_name%TYPE;
+	    	v_old_column_name giis_dsp_column.column_name%TYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.dsp_col_id := #dspColId#;
+ 			v_rec.table_name := #tableName#;
+ 			v_old_table_name := #oldTableName#;
+ 			v_rec.column_name := #columnName#;
+ 			v_old_column_name := #oldColumnName#;
+ 			v_rec.user_id := #userId#;
+ 			
+ 			giiss167_pkg.set_rec(v_rec, v_old_table_name, v_old_column_name);
+ 		END;
+ 	</procedure>
+ 	
+    <delete id="delDspColumn" parameterClass="giisDspColumn">
+		BEGIN
+ 			giiss167_pkg.del_rec(#dspColId#, #tableName#, #columnName#);
+ 		END;
+ 	</delete>
+    
+</sqlMap>

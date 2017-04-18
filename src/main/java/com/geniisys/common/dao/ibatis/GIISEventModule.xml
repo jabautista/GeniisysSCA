@@ -1,0 +1,426 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISEventModule">
+	
+	<typeAlias alias="GIISEventModule" type="com.geniisys.common.entity.GIISEventModule"/>
+	
+	<!-- Comment by pol cruz 01.03.2014 -->
+	<!-- <resultMap class="GIISEventModuleClass" id="GIISEventModuleResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="eventCd" 			column="EVENT_CD"/>
+		<result property="moduleId" 		column="MODULE_ID"/>
+		<result property="moduleDesc" 		column="MODULE_DESC"/>
+		<result property="accptModId" 		column="ACCPT_MOD_ID"/>
+		<result property="accptModDesc" 	column="ACCPT_MOD_DESC"/>
+	</resultMap>
+	
+	<select id="getGIISEventModuleListing" resultMap="GIISEventModuleResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIIS_EVENT_MODULES_PKG.get_giis_event_module_listing(#eventCd#))
+		                  <isEqual property="sortColumn" compareValue="eventCd">
+			              		ORDER BY event_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="eventDesc">
+			              		ORDER BY event_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="eventTypeDesc">
+			              		ORDER BY event_type
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="receiverTag">
+			              		ORDER BY receiver_tag
+			              </isEqual>			              
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIIS_EVENT_MODULES_PKG.get_giis_event_module_listing(#eventCd#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select> -->
+	
+	<resultMap class="java.util.HashMap" id="giiss168EventsLovResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="eventCd" 			column="event_cd"/>
+		<result property="eventDesc" 		column="event_desc"/>
+		<result property="receiverTag" 		column="receiver_tag"/>
+	</resultMap>
+	
+	<select id="getGiiss168EventsLov" resultMap="giiss168EventsLovResultMap" parameterClass="java.util.HashMap">
+		SELECT *
+  		  FROM (SELECT rownum rownum_,b.count_,a.*
+          		  FROM (SELECT * FROM TABLE(GIISS168_PKG.get_events_lov)
+          		  <isNotNull property="findText">
+				  	WHERE 1=1
+		  			<isNotEmpty prepend="AND"  property="findText">
+		  				TO_CHAR(event_cd) LIKE #findText#
+		  				OR UPPER(event_desc) LIKE UPPER(#findText#)
+		  			</isNotEmpty>
+				  </isNotNull>
+          		  <isNotNull property="sortColumn">
+					<isEqual property="sortColumn" compareValue="eventCd">
+						ORDER BY event_cd
+					</isEqual>
+					<isEqual property="sortColumn" compareValue="eventDesc">
+						ORDER BY event_desc
+					</isEqual>
+					<isEqual property="ascDescFlg" compareValue="ASC">
+						ASC
+					</isEqual>
+					<isEqual property="ascDescFlg" compareValue="DESC">
+						DESC
+					</isEqual>
+				  </isNotNull>) a,
+               (SELECT count(*) count_ FROM TABLE(GIISS168_PKG.get_events_lov)
+             	<isNotNull property="findText">
+				  	WHERE 1=1
+		  			<isNotEmpty prepend="AND"  property="findText">
+		  				TO_CHAR(event_cd) LIKE #findText#
+		  				OR UPPER(event_desc) LIKE UPPER(#findText#)
+		  			</isNotEmpty>
+				  </isNotNull>
+               ) b)
+ 		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="giiss168EventModuleResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="event_mod_cd" property="eventModCd"/>
+		<result column="event_cd" property="eventCd"/>
+		<result column="module_id" property="moduleId"/>
+		<result column="module_desc" property="moduleDesc"/>
+		<result column="user_id" property="userId"/>
+		<result column="last_update" property="lastUpdate"/>
+		<result column="accpt_mod_id" property="accptModId"/>
+		<result column="accpt_mod_desc" property="accptModDesc"/>
+	</resultMap>
+	
+	<select id="getGiiss168EventModules" resultMap="giiss168EventModuleResultMap" parameterClass="java.util.HashMap">
+		SELECT *
+  		  FROM (SELECT rownum rownum_,b.count_,a.*
+          		  FROM (SELECT * FROM TABLE(GIISS168_PKG.get_giis_event_modules(#eventCd#))
+          		  <isNotNull property="filter">
+			      	WHERE 1=1
+           			<isNotEmpty prepend="AND" property="moduleId">
+           			  UPPER(module_id) LIKE UPPER(#moduleId#)
+           			</isNotEmpty>
+           			<isNotEmpty prepend="AND" property="moduleDesc">
+           			  UPPER(module_desc) LIKE UPPER(#moduleDesc#)
+           			</isNotEmpty>
+           			<isNotEmpty prepend="AND" property="accptModId">
+           			  UPPER(accpt_mod_id) LIKE UPPER(#accptModId#)
+           			</isNotEmpty>
+           			<isNotEmpty prepend="AND" property="accptModDesc">
+           			  UPPER(accpt_mod_desc) LIKE UPPER(#accptModDesc#)
+           			</isNotEmpty>
+                  </isNotNull>
+          		  <isNotNull property="sortColumn">
+					<isEqual property="sortColumn" compareValue="moduleId">
+						ORDER BY module_id
+					</isEqual>
+					<isEqual property="sortColumn" compareValue="moduleDesc">
+						ORDER BY module_desc
+					</isEqual>
+					<isEqual property="sortColumn" compareValue="accptModId">
+						ORDER BY accpt_mod_id
+					</isEqual>
+					<isEqual property="sortColumn" compareValue="accptModDesc">
+						ORDER BY accpt_mod_desc
+					</isEqual>
+					<isEqual property="ascDescFlg" compareValue="ASC">
+						ASC
+					</isEqual>
+					<isEqual property="ascDescFlg" compareValue="DESC">
+						DESC
+					</isEqual>
+				  </isNotNull>) a,
+               (SELECT count(*) count_ FROM TABLE(GIISS168_PKG.get_giis_event_modules(#eventCd#))
+               <isNotNull property="filter">
+			      	WHERE 1=1
+           			<isNotEmpty prepend="AND" property="moduleId">
+           			  UPPER(module_id) LIKE UPPER(#moduleId#)
+           			</isNotEmpty>
+           			<isNotEmpty prepend="AND" property="moduleDesc">
+           			  UPPER(module_desc) LIKE UPPER(#moduleDesc#)
+           			</isNotEmpty>
+           			<isNotEmpty prepend="AND" property="accptModId">
+           			  UPPER(accpt_mod_id) LIKE UPPER(#accptModId#)
+           			</isNotEmpty>
+           			<isNotEmpty prepend="AND" property="accptModDesc">
+           			  UPPER(accpt_mod_desc) LIKE UPPER(#accptModDesc#)
+           			</isNotEmpty>
+                  </isNotNull>) b)
+ 		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="giis168ModuleLovResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="module_id" property="moduleId"/>
+		<result column="module_desc" property="moduleDesc"/>
+	</resultMap>
+	
+	<select id="getGiis168ModuleLov" resultMap="giis168ModuleLovResultMap" parameterClass="java.util.HashMap">
+		SELECT *
+  		  FROM (SELECT rownum rownum_,b.count_,a.*
+          		  FROM (SELECT * FROM TABLE(GIISS168_PKG.get_module_lov)
+          		  <isNotNull property="findText">
+				  	WHERE 1=1
+				  	<isNotEmpty prepend="AND"  property="selectedModules">
+				  		module_id NOT IN $selectedModules$
+				  	</isNotEmpty>
+		  			<isNotEmpty prepend="AND"  property="findText">
+		  				UPPER(module_id) LIKE UPPER(#findText#)
+		  				OR UPPER(module_desc) LIKE UPPER(#findText#)
+		  			</isNotEmpty>
+				  </isNotNull>
+          		  <isNotNull property="sortColumn">
+					<isEqual property="sortColumn" compareValue="moduleId">
+						ORDER BY module_id
+					</isEqual>
+					<isEqual property="sortColumn" compareValue="moduleDesc">
+						ORDER BY module_desc
+					</isEqual>
+					<isEqual property="ascDescFlg" compareValue="ASC">
+						ASC
+					</isEqual>
+					<isEqual property="ascDescFlg" compareValue="DESC">
+						DESC
+					</isEqual>
+				  </isNotNull>) a,
+               (SELECT count(*) count_ FROM TABLE(GIISS168_PKG.get_module_lov)
+             	<isNotNull property="findText">
+				  	WHERE 1=1
+				  	<isNotEmpty prepend="AND"  property="selectedModules">
+				  		module_id NOT IN $selectedModules$
+				  	</isNotEmpty>
+		  			<isNotEmpty prepend="AND"  property="findText">
+		  				UPPER(module_id) LIKE UPPER(#findText#)
+		  				OR UPPER(module_desc) LIKE UPPER(#findText#)
+		  			</isNotEmpty>
+				  </isNotNull>
+               ) b)
+ 		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiiss168SelectedModules" resultClass="java.lang.String" parameterClass="java.lang.String">
+		SELECT giiss168_pkg.get_selected_modules(#eventCd#) from DUAL
+	</select>
+	
+	<procedure id="saveGiiss168EventModules" parameterClass="GIISEventModule">
+	    DECLARE
+	    	v_rec giis_event_modules%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.event_mod_cd := #eventModCd#;
+			v_rec.event_cd := #eventCd#;
+			v_rec.module_id := #moduleId#;
+			v_rec.user_id := #userId#;
+			v_rec.last_update := #lastUpdate#;
+			v_rec.accpt_mod_id := #accptModId#;
+ 			
+ 			giiss168_pkg.save_event_modules(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<resultMap class="java.util.HashMap" id="giiss168PassingUserResultMap" extends="BaseEntity.TableGridResultMap">
+ 		<result column="event_mod_cd" property="eventModCd"/>
+		<result column="passing_userid" property="passingUserid"/>
+		<result column="user_name" property="userName"/>
+	</resultMap>
+	
+	<select id="getGiiss168PassingUser" resultMap="giiss168PassingUserResultMap" parameterClass="java.util.HashMap">
+		SELECT *
+  		  FROM (SELECT rownum rownum_,b.count_,a.*
+          		  FROM (SELECT * FROM TABLE(GIISS168_PKG.get_passing_user(#eventModCd#))
+          		  <isNotNull property="sortColumn">
+					<isEqual property="sortColumn" compareValue="passingUserid">
+						ORDER BY passing_userid
+					</isEqual>
+					<isEqual property="sortColumn" compareValue="userName">
+						ORDER BY user_name
+					</isEqual>
+					<isEqual property="ascDescFlg" compareValue="ASC">
+						ASC
+					</isEqual>
+					<isEqual property="ascDescFlg" compareValue="DESC">
+						DESC
+					</isEqual>
+				  </isNotNull>) a,
+               (SELECT count(*) count_ FROM TABLE(GIISS168_PKG.get_passing_user(#eventModCd#))
+               ) b)
+ 		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="giiss168ReceivingUserResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="passing_userid" property="passingUserid" />
+		<result column="userid" property="userid" />
+		<result column="user_name" property="userName" />
+		<result column="active_tag" property="activeTag" />
+		<result column="event_user_mod" property="eventUserMod" />
+	</resultMap>
+	
+	<select id="getGiiss168ReceivingUser" resultMap="giiss168ReceivingUserResultMap" parameterClass="java.util.HashMap">
+		SELECT *
+  		  FROM (SELECT rownum rownum_,b.count_,a.*
+          		  FROM (SELECT * FROM TABLE(GIISS168_PKG.get_receiving_user(#eventModCd#, #passingUserid#))
+          		  <isNotNull property="sortColumn">
+					<isEqual property="sortColumn" compareValue="userid">
+						ORDER BY userid
+					</isEqual>
+					<isEqual property="sortColumn" compareValue="userName">
+						ORDER BY user_name
+					</isEqual>
+					<isEqual property="ascDescFlg" compareValue="ASC">
+						ASC
+					</isEqual>
+					<isEqual property="ascDescFlg" compareValue="DESC">
+						DESC
+					</isEqual>
+				  </isNotNull>) a,
+               (SELECT count(*) count_ FROM TABLE(GIISS168_PKG.get_receiving_user(#eventModCd#, #passingUserid#))
+               <isNotNull property="filter">
+			      	WHERE 1=1
+           			<isNotEmpty prepend="AND" property="eventCd">
+           			  industry_cd = #eventCd#
+           			</isNotEmpty>
+                  </isNotNull>) b)
+ 		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="giiss168PassingUserLovResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="userId" 			column="user_id"/>
+		<result property="userName" 		column="user_name"/>
+	</resultMap>
+	
+	<select id="getGiiss168PassingUserLov" resultMap="giiss168PassingUserLovResultMap" parameterClass="java.util.HashMap">
+		SELECT *
+  		  FROM (SELECT rownum rownum_,b.count_,a.*
+          		  FROM (SELECT * FROM TABLE(GIISS168_PKG.get_passing_user_lov(#eventModCd#))
+          		  <isNotNull property="findText">
+				  	WHERE 1=1
+				  	<isNotEmpty prepend="AND"  property="selectedPassingUsers">
+				  		user_id NOT IN $selectedPassingUsers$
+					</isNotEmpty>
+		  			<isNotEmpty prepend="AND"  property="findText">
+		  				UPPER(user_id) LIKE UPPER(#findText#)
+		  				OR UPPER(user_name) LIKE UPPER(#findText#)
+		  			</isNotEmpty>
+				  </isNotNull>
+          		  <isNotNull property="sortColumn">
+					<isEqual property="sortColumn" compareValue="userId">
+						ORDER BY user_id
+					</isEqual>
+					<isEqual property="sortColumn" compareValue="userName">
+						ORDER BY user_name
+					</isEqual>
+					<isEqual property="ascDescFlg" compareValue="ASC">
+						ASC
+					</isEqual>
+					<isEqual property="ascDescFlg" compareValue="DESC">
+						DESC
+					</isEqual>
+				  </isNotNull>) a,
+               (SELECT count(*) count_ FROM TABLE(GIISS168_PKG.get_passing_user_lov(#eventModCd#))
+             	<isNotNull property="findText">
+				  	WHERE 1=1
+				  	<isNotEmpty prepend="AND"  property="selectedPassingUsers">
+				  		user_id NOT IN $selectedPassingUsers$
+					</isNotEmpty>
+		  			<isNotEmpty prepend="AND"  property="findText">
+		  				UPPER(user_id) LIKE UPPER(#findText#)
+		  				OR UPPER(user_name) LIKE UPPER(#findText#)
+		  			</isNotEmpty>
+				  </isNotNull>
+               ) b)
+ 		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiiss168ReceivingUserLov" resultMap="giiss168PassingUserLovResultMap" parameterClass="java.util.HashMap">
+		SELECT *
+  		  FROM (SELECT rownum rownum_,b.count_,a.*
+          		  FROM (SELECT * FROM TABLE(GIISS168_PKG.get_event_user_lov(#eventModCd#, #passingUserid#))
+          		  WHERE 1=1
+				  	<isNotEmpty prepend="AND"  property="selectedReceivingUsers">
+				  		user_id NOT IN $selectedReceivingUsers$
+					</isNotEmpty>
+          		  <isNotNull property="findText">
+		  			<isNotEmpty prepend="AND"  property="findText">
+		  				(UPPER(user_id) LIKE UPPER(#findText#)
+		  				OR UPPER(user_name) LIKE UPPER(#findText#))
+		  			</isNotEmpty>
+				  </isNotNull>
+          		  <isNotNull property="sortColumn">
+					<isEqual property="sortColumn" compareValue="userId">
+						ORDER BY user_id
+					</isEqual>
+					<isEqual property="sortColumn" compareValue="userName">
+						ORDER BY user_name
+					</isEqual>
+					<isEqual property="ascDescFlg" compareValue="ASC">
+						ASC
+					</isEqual>
+					<isEqual property="ascDescFlg" compareValue="DESC">
+						DESC
+					</isEqual>
+				  </isNotNull>) a,
+               (SELECT count(*) count_ FROM TABLE(GIISS168_PKG.get_event_user_lov(#eventModCd#, #passingUserid#))
+               WHERE 1=1
+				  	<isNotEmpty prepend="AND"  property="selectedReceivingUsers">
+				  		user_id NOT IN $selectedReceivingUsers$
+					</isNotEmpty>
+             	<isNotNull property="findText">
+		  			<isNotEmpty prepend="AND"  property="findText">
+		  				(UPPER(user_id) LIKE UPPER(#findText#)
+		  				OR UPPER(user_name) LIKE UPPER(#findText#))
+		  			</isNotEmpty>
+				  </isNotNull>
+               ) b)
+ 		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiiss168SelectedPassingUsers" resultClass="java.lang.String" parameterClass="java.util.HashMap">
+		SELECT giiss168_pkg.get_selected_passing_users(#eventModCd#, #passingUserid#) from DUAL
+	</select>
+	
+	<select id="getGiiss168SelectedReceivingUsers" resultClass="java.lang.String" parameterClass="java.util.HashMap">
+		SELECT giiss168_pkg.get_selected_receiving_users(#eventModCd#, #passingUserid#) from DUAL
+	</select>
+	
+	<parameterMap id="setGiiss168PassingUsersParamMap" class="map">
+	    <parameter property="eventUserMod"	jdbcType="VARCHAR"	javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="eventModCd"	jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+		<parameter property="userId"		jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+		<parameter property="passingUserid"	jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+	</parameterMap>
+	
+	<procedure id="setGiiss168PassingUsers" parameterMap="setGiiss168PassingUsersParamMap">
+			CALL GIISS168_PKG.set_passing_users(?, ?, ?, ?)
+	</procedure>
+	
+	<parameterMap id="setGiiss168ReceivingUsersParamMap" class="map">
+	    <parameter property="eventUserMod"	jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+		<parameter property="eventModCd"	jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+		<parameter property="userid"		jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+		<parameter property="userId"		jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+		<parameter property="passingUserid"	jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+	</parameterMap>
+	
+	<procedure id="setGiiss168ReceivingUsers" parameterMap="setGiiss168ReceivingUsersParamMap">
+			CALL GIISS168_PKG.set_receiving_users(?, ?, ?, ?, ?)
+	</procedure>
+	
+	<procedure id="valDelGiiss168PassingUsers" parameterClass="java.util.HashMap">
+			CALL GIISS168_PKG.val_del_passing_users(#eventModCd#, #passingUserid#)
+	</procedure>
+	
+	<procedure id="deleteGiiss168ReceivingUsers" parameterClass="java.lang.String">
+			CALL GIISS168_PKG.delete_receiving_users(#eventUserMod#)
+	</procedure>
+		
+</sqlMap>

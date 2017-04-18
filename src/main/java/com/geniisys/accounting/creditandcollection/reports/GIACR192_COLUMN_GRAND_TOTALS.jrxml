@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIACR192_COLUMN_GRAND_TOTALS" language="groovy" pageWidth="182" pageHeight="752" columnWidth="182" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="3.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="Crosstab Data Text" isDefault="false" hAlign="Center"/>
+	<parameter name="P_BRANCH_CD" class="java.lang.String"/>
+	<parameter name="P_ASSD_NO" class="java.lang.String"/>
+	<parameter name="P_INC_OVERDUE" class="java.lang.String"/>
+	<parameter name="P_BAL_AMT_DUE" class="java.math.BigDecimal"/>
+	<parameter name="P_USER" class="java.lang.String"/>
+	<parameter name="P_INTM_TYPE" class="java.lang.String"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String">
+		<defaultValueExpression><![CDATA["D:\\GENWEB\\GeniisysReports\\src\\com\\geniisys\\accounting\\creditandcollection\\reports\\"]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT DISTINCT col_title column_title, col_no column_no,
+                (SELECT SUM (intmbal)
+                   FROM TABLE (giacr192_pkg.get_column_details
+                                                              ($P{P_BRANCH_CD},
+                                                               $P{P_ASSD_NO},
+                                                               $P{P_INC_OVERDUE},
+                                                               $P{P_BAL_AMT_DUE},
+                                                               $P{P_INTM_TYPE},
+                                                               $P{P_USER},
+                                                               col_no
+                                                              )
+                              )) intmbal
+           FROM giac_soa_title
+          WHERE rep_cd = 1
+       ORDER BY col_no]]>
+	</queryString>
+	<field name="COLUMN_TITLE" class="java.lang.String"/>
+	<field name="COLUMN_NO" class="java.math.BigDecimal"/>
+	<field name="INTMBAL" class="java.math.BigDecimal"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="11">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="0" y="0" width="90" height="11" isPrintWhenDetailOverflows="true"/>
+				<textElement textAlignment="Right">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{COLUMN_TITLE}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="92" y="0" width="90" height="11"/>
+				<textElement textAlignment="Right">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{INTMBAL} == null ? new BigDecimal("0") : $F{INTMBAL}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

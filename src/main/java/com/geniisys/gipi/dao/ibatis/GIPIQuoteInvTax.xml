@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIQuoteInvTax">
+
+  <cacheModel id="oneDayClient" type="MEMORY">
+    <flushInterval hours="24"/>
+    <property name="reference-type" value="WEAK"/>
+  </cacheModel>
+  
+  <resultMap id="GIPIQuoteInvTax" class="com.geniisys.gipi.entity.GIPIQuoteInvTax" >
+  	<result column="LINE_CD"				property="lineCd"				jdbcType="VARCHAR2"	/>
+  	<result column="ISS_CD"					property="issCd"				jdbcType="VARCHAR2"	/>
+  	<result column="QUOTE_INV_NO"			property="quoteInvNo"			jdbcType="NUMBER"	/>
+  	<result column="TAX_CD"					property="taxCd"				jdbcType="NUMBER"	/>
+  	<result column="TAX_ID"					property="taxId"				jdbcType="NUMBER"	/>
+  	<result column="TAX_AMT"				property="taxAmt"				jdbcType="NUMBER"	/>
+  	<result column="RATE"					property="rate"					jdbcType="NUMBER"	/>
+  	<result column="FIXED_TAX_ALLOCATION"	property="fixedTaxAllocation"	jdbcType="VARCHAR2"	/>
+  	<result column="ITEM_GRP"				property="itemGrp"				jdbcType="NUMBER"	/>
+  	<result column="TAX_ALLOCATION"			property="taxAllocation"		jdbcType="VARCHAR2"	/>  
+  </resultMap>
+  
+  <resultMap id="GIPIQuoteInvTaxResultMap" class="com.geniisys.gipi.entity.GIPIQuoteInvTax" >
+  	<result column="LINE_CD"				property="lineCd"				jdbcType="VARCHAR2"	/>
+  	<result column="ISS_CD"					property="issCd"				jdbcType="VARCHAR2"	/>
+  	<result column="QUOTE_INV_NO"			property="quoteInvNo"			jdbcType="NUMBER"	/>
+  	<result column="TAX_CD"					property="taxCd"				jdbcType="NUMBER"	/>
+  	<result column="TAX_DESC"				property="taxDescription"	    jdbcType="VARCHAR2"	/>
+  	<result column="TAX_ID"					property="taxId"				jdbcType="NUMBER"	/>
+  	<result column="TAX_AMT"				property="taxAmt"				jdbcType="NUMBER"	/>
+  	<result column="RATE"					property="rate"					jdbcType="NUMBER"	/>
+  	<result column="FIXED_TAX_ALLOC"		property="fixedTaxAllocation"	jdbcType="VARCHAR2"	/>
+  	<result column="ITEM_GRP"				property="itemGrp"				jdbcType="NUMBER"	/>
+  	<result column="TAX_ALLOCATION"			property="taxAllocation"		jdbcType="VARCHAR2"	/>
+  	<result column="PRIMARY_SW"				property="primarySw"			jdbcType="VARCHAR2"	/>    
+  </resultMap>
+  
+  <select id="getGIPIQuoteInvTax" resultMap="GIPIQuoteInvTax" parameterClass="java.util.HashMap">
+  	SELECT * 
+  	  FROM gipi_quote_invtax 
+  	 WHERE quote_inv_no = #quoteInvNo#
+  	   AND line_cd = #lineCd#
+  	   AND iss_cd = #issCd#
+  </select>
+  
+  <select id="getGIPIQuoteInvTax2" resultMap="GIPIQuoteInvTax" parameterClass="java.util.HashMap">
+  	SELECT * 
+  	  FROM gipi_quote_invtax 
+  	 WHERE quote_inv_no = #quoteInvNo#
+  	   AND iss_cd = #issCd#
+  </select>  
+  
+<!--  SELECT * FROM gipi_quote_invtax  	 WHERE quote_inv_no = #quoteInvNo# 	   AND line_cd = #lineCd#  	   and iss_cd = #issCd#-->
+  
+  <procedure id="saveGIPIQuoteInvTax" parameterClass="com.geniisys.gipi.entity.GIPIQuoteInvTax">
+  	DECLARE
+		invTax GIPI_QUOTE_INVTAX%ROWTYPE;
+	BEGIN
+		invtax.LINE_CD 				:= #lineCd#;
+		invtax.ISS_CD 				:= #issCd#;
+		invtax.QUOTE_INV_NO 		:= #quoteInvNo#;
+		invtax.TAX_CD 				:= #taxCd#;
+		invTax.TAX_ID 				:= #taxId#;
+		invTax.TAX_AMT 				:= #taxAmt#;
+		invTax.RATE 				:= #rate#;
+		invTax.FIXED_TAX_ALLOCATION := #fixedTaxAllocation#;
+		invTax.ITEM_GRP 			:= #itemGrp#;
+		invTax.TAX_ALLOCATION 		:= #taxAllocation#;
+		Gipi_Quote_Inv_Pkg.Set_Gipi_Quote_Invtax(invTax);
+	END;
+  </procedure>
+  
+  <!-- DELETE FROM GIPI_QUOTE_INVTAX WHERE QUOTE_INV_NO = #quoteInvNo# AND ISS_CD = #issCd#-->
+  
+  <delete id="deleteInvTax"		parameterClass="java.util.HashMap">
+	DELETE FROM GIPI_QUOTE_INVTAX
+		  WHERE quote_inv_no = #quoteInvNo#
+		  	AND tax_cd		 = #taxCd#
+	        AND iss_cd		 = #issCd#
+  </delete>
+  
+  <select id="getGIPIQuoteInvTaxList" resultMap="GIPIQuoteInvTaxResultMap" parameterClass="java.util.HashMap">
+	SELECT * FROM TABLE(GIPI_QUOTE_INVTAX_PKG.get_gipi_quote_invtax(#quoteInvNo#, #issCd#))
+  </select>
+  
+</sqlMap>

@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPICAUpload">
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIPICAUpload" type="com.geniisys.gipi.entity.GIPICAUpload"/>
+	
+	<select id="validateUploadPropertyFloater" parameterClass="java.lang.String" resultClass="java.lang.String">
+		SELECT gipi_ca_upload_pkg.validate_ca_upload(#fileName#) from dual
+	</select>
+	
+	<select id="getCaNextUploadNo" resultClass="java.lang.Integer">
+		SELECT GIPI_CA_UPLOAD_SEQ_NO.NEXTVAL FROM DUAL
+	</select>
+	
+	<insert id="setGipiAcUpload" parameterClass="GIPICAUpload">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			gipi_ca_upload_pkg.set_gipi_ca_upload (#uploadNo#, #fileName#, #userId#);
+		END;
+	</insert>
+	
+	<insert id="setGipiAcErrorLog" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			gipi_ca_upload_pkg.set_gipi_ca_upload_error (#uploadNo#, #fileName#, #userId#, #itemNo#, #itemTitle#,
+                   										  	#currencyCd#, #currencyRt#, #itemDesc#, #itemDesc2#,
+                   											#locationCd#, #regionCd#, #location#, #limitOfLiability#,
+                   											#interestOnPremises#, #sectionOrHazardInfo#,
+                   											#conveyanceInfo#, #propertyNoType#, #propertyNo#, 
+                   											#dedDeductibleCd#, #remarks#);
+		END;
+	</insert>
+
+	<resultMap id="caErrorLogMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result column="UPLOAD_NO"		property="uploadNo" />
+		<result column="FILENAME"		property="fileName" />
+		<result column="ITEM_NO"		property="itemNo" />
+		<result column="ITEM_TITLE"		property="itemTitle" />
+		<result column="LOCATION"		property="location" />
+		<result column="USER_ID"		property="userId" />
+		<result column="DATE_UPLOADED"	property="dateUploaded" />
+		<result column="REMARKS"		property="remarks" />
+	</resultMap>
+                       
+	<select id="getCaErrorLog" resultMap="caErrorLogMap"> 
+    	SELECT *
+	    	FROM (SELECT rownum rownum_, 
+	               b.count_, 
+	               a.*  
+	  	      FROM (SELECT * FROM TABLE(gipi_ca_upload_pkg.get_gipi_ca_error_log_list)
+	  	      		<isNotNull property="filter">
+						WHERE 1=1
+							<isNotEmpty prepend="AND"  property="uploadNo">
+								upload_no = #uploadNo#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="fileName">
+								upper(filename) LIKE upper(#fileName#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="itemNo">
+								item_no = #itemNo#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="itemTitle">
+								upper(item_title) LIKE upper(#itemTitle#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="location">
+								upper(location) LIKE upper(#location#)
+							</isNotEmpty>
+					</isNotNull>
+	                <isEqual property="sortColumn" compareValue="uploadNo">
+	              		ORDER BY upload_no
+	              	</isEqual>
+		            <isEqual property="sortColumn" compareValue="fileName">
+		              		ORDER BY filename
+		            </isEqual>
+		            <isEqual property="sortColumn" compareValue="itemNo">
+		              		ORDER BY item_no
+		            </isEqual>
+		            <isEqual property="sortColumn" compareValue="itemTitle">
+		              		ORDER BY item_title
+		            </isEqual>
+		            <isEqual property="sortColumn" compareValue="location">
+		              		ORDER BY location
+		            </isEqual>
+	          	  	<isNotNull property="sortColumn">
+	              		<isEqual property="ascDescFlg" compareValue="ASC">
+	              			ASC
+	              		</isEqual>
+	              		<isEqual property="ascDescFlg" compareValue="DESC">
+	              			DESC
+	              		</isEqual>
+	              	</isNotNull>
+	                  ) a, 
+	               (SELECT count(*) count_ 
+	                  FROM TABLE(gipi_ca_upload_pkg.get_gipi_ca_error_log_list)
+	                  <isNotNull property="filter">
+					  	WHERE 1=1
+							<isNotEmpty prepend="AND"  property="uploadNo">
+								upload_no = #uploadNo#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="fileName">
+								upper(filename) LIKE upper(#fileName#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="itemNo">
+								item_no = #itemNo#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="itemTitle">
+								upper(item_title) LIKE upper(#itemTitle#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="location">
+								upper(location) LIKE upper(#location#)
+							</isNotEmpty>
+					  </isNotNull>
+	                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+</sqlMap>

@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GICLAdvice">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GICLAdvLineAmtClass" type="com.geniisys.gicl.entity.GICLAdvLineAmt"/>
+	
+	<select id="getRangeTo" parameterClass="java.util.HashMap" resultClass="java.math.BigDecimal">
+		SELECT GICL_ADV_LINE_AMT_PKG.get_range_to(#userId#, #lineCd#, #issCd#) FROM DUAL
+	</select>
+	
+<!-- GICLS182 : shan 11.26.2013 -->	
+	<resultMap class="java.util.HashMap" id="gicls182UserLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="user_id"		property="userId"/>
+		<result column="user_name"		property="userName"/>
+	</resultMap>
+	
+	<select id="getGICLS182UserLOV" resultMap="gicls182UserLOVMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GICLS182_PKG.GET_USER_LOV)
+		                  <isNotNull property="findText">
+			              		WHERE user_id LIKE UPPER(#findText#)  OR user_name LIKE UPPER(#findText#)
+			              </isNotNull>
+			              <isNull property="findText">
+			              		WHERE user_id LIKE UPPER(#searchString#) OR user_name LIKE UPPER(#searchString#)
+			              </isNull>
+			              <isNotNull property="sortColumn">
+			          	  	  <isEqual property="sortColumn" compareValue="userId">
+				              		ORDER BY user_id
+				              </isEqual>
+			                  <isEqual property="sortColumn" compareValue="userName">
+				              		ORDER BY user_name
+				              </isEqual>	
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (GICLS182_PKG.GET_USER_LOV)
+		                  <isNotNull property="findText">
+			              		WHERE user_id LIKE UPPER(#findText#)  OR user_name LIKE UPPER(#findText#)
+			              </isNotNull>
+			              <isNull property="findText">
+			              		WHERE user_id LIKE UPPER(#searchString#) OR user_name LIKE UPPER(#searchString#)
+			              </isNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="gicls182IssLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="iss_cd"			property="issCd"/>
+		<result column="iss_name"		property="issName"/>
+	</resultMap>
+	
+	<select id="getGICLS182IssLOV" resultMap="gicls182IssLOVMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GICLS182_PKG.GET_ISS_LOV(#selectedUser#))
+		                  <isNotNull property="findText">
+			              		WHERE iss_cd LIKE UPPER(#findText#)  OR iss_name LIKE UPPER(#findText#)
+			              </isNotNull>
+			              <isNull property="findText">
+			              		WHERE iss_cd LIKE UPPER(#searchString#) OR iss_name LIKE UPPER(#searchString#)
+			              </isNull>
+			              <isNotNull property="sortColumn">
+			          	  	  <isEqual property="sortColumn" compareValue="issCd">
+				              		ORDER BY iss_cd
+				              </isEqual>
+			                  <isEqual property="sortColumn" compareValue="issName">
+				              		ORDER BY iss_name
+				              </isEqual>	
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (GICLS182_PKG.GET_ISS_LOV(#selectedUser#))
+		                  <isNotNull property="findText">
+			              		WHERE iss_cd LIKE UPPER(#findText#)  OR iss_name LIKE UPPER(#findText#)
+			              </isNotNull>
+			              <isNull property="findText">
+			              		WHERE iss_cd LIKE UPPER(#searchString#) OR iss_name LIKE UPPER(#searchString#)
+			              </isNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="GICLAdvLineAmtClass" id="gicls182ResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="adv_user"		property="advUser"/>
+		<result column="iss_cd"			property="issCd"/>
+		<result column="line_cd"		property="lineCd"/>
+		<result column="line_name"		property="lineName"/>
+		<result column="all_amt_sw"		property="allAmtSw"/>
+		<result column="range_to"		property="rangeTo"/>
+		<result column="all_res_amt_sw"	property="allResAmtSw"/>
+		<result column="res_range_to"	property="resRangeTo"/>
+		<result column="user_id"		property="userId"/>
+		<result column="last_update"	property="lastUpdate"/>
+	</resultMap>
+	
+	<select id="getGicls182RecList" resultMap="gicls182ResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(GICLS182_PKG.GET_REC_LIST(#advUser#, #issCd#, #appUser#))
+		  	      		  <isNotNull property="filter">
+		  	      		  	WHERE 1=1
+		  	      		  		<isNotEmpty prepend="AND" property="lineCd">
+		  	      		  			UPPER(line_cd) LIKE UPPER(NVL(#lineCd#, '%'))
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="lineName">
+		  	      		  			UPPER(line_name) LIKE UPPER(NVL(#lineName#, '%'))
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="allAmtSw">
+		  	      		  			UPPER (NVL(all_amt_sw, 'N')) LIKE UPPER (NVL (#allAmtSw#, NVL(#allAmtSw#, 'N')))
+		  	      		  		</isNotEmpty>	
+		  	      		  		<isNotEmpty prepend="AND" property="allResAmtSw">
+		  	      		  			UPPER (NVL(all_res_amt_sw, 'N')) LIKE UPPER (NVL (#allResAmtSw#, NVL(#allResAmtSw#, 'N')))
+		  	      		  		</isNotEmpty>	
+		  	      		  		<isNotEmpty prepend="AND" property="userId">
+		  	      		  			UPPER(user_id) LIKE UPPER(#userId#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="rangeTo">
+		  	      		  			range_to = #rangeTo#
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="resRangeTo">
+		  	      		  			res_range_to = #resRangeTo#
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="lastUpdate">
+		  	      		  			TO_DATE(last_update, 'MM-DD-YYYY') LIKE TO_DATE(#lastUpdate#, 'MM-DD-YYYY')
+		  	      		  		</isNotEmpty>
+		  	      		  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="allAmtSw">
+			              		ORDER BY all_amt_sw
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="allResAmtSw">
+			              		ORDER BY all_res_amt_sw
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="lineCd lineName">
+			              		ORDER BY line_cd
+				              		<isNotNull property="sortColumn">
+					              		<isEqual property="ascDescFlg" compareValue="ASC">
+					              			ASC
+					              		</isEqual>
+					              		<isEqual property="ascDescFlg" compareValue="DESC">
+					              			DESC
+					              		</isEqual>
+						              </isNotNull>, 
+					              	line_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="rangeTo">
+			              		ORDER BY range_to
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="resRangeTo">
+			              		ORDER BY res_range_to
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="userId">
+			              		ORDER BY user_id
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="lastUpdate">
+			              		ORDER BY last_update
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GICLS182_PKG.GET_REC_LIST(#advUser#, #issCd#, #appUser#))
+		  	      		  <isNotNull property="filter">
+		  	      		  	WHERE 1=1
+		  	      		  		<isNotEmpty prepend="AND" property="lineCd">
+		  	      		  			UPPER(line_cd) LIKE UPPER(NVL(#lineCd#, '%'))
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="lineName">
+		  	      		  			UPPER(line_name) LIKE UPPER(NVL(#lineName#, '%'))
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="allAmtSw">
+		  	      		  			UPPER (NVL(all_amt_sw, 'N')) LIKE UPPER (NVL (#allAmtSw#, NVL(#allAmtSw#, 'N')))
+		  	      		  		</isNotEmpty>	
+		  	      		  		<isNotEmpty prepend="AND" property="allResAmtSw">
+		  	      		  			UPPER (NVL(all_res_amt_sw, 'N')) LIKE UPPER (NVL (#allResAmtSw#, NVL(#allResAmtSw#, 'N')))
+		  	      		  		</isNotEmpty>		  	  
+		  	      		  		<isNotEmpty prepend="AND" property="userId">
+		  	      		  			UPPER(user_id) LIKE UPPER(#userId#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="rangeTo">
+		  	      		  			range_to = #rangeTo#
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="resRangeTo">
+		  	      		  			res_range_to = #resRangeTo#
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="lastUpdate">
+		  	      		  			TO_DATE(last_update, 'MM-DD-YYYY') LIKE TO_DATE(#lastUpdate#, 'MM-DD-YYYY')
+		  	      		  		</isNotEmpty>
+		  	      		  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setAdvLineAmt" parameterClass="GICLAdvLineAmtClass">
+	    DECLARE
+	    	v_rec gicl_adv_line_amt%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.adv_user 			:= #advUser#;
+ 			v_rec.iss_cd			:= #issCd#;
+ 			v_rec.line_cd 			:= #lineCd#;
+ 			v_rec.all_amt_sw 		:= #allAmtSw#;
+ 			v_rec.range_to 			:= #rangeTo#;
+ 			v_rec.all_res_amt_sw 	:= #allResAmtSw#;
+ 			v_rec.res_range_to 		:= #resRangeTo#;
+ 			v_rec.user_id := #userId#;
+ 			
+ 			gicls182_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+<!-- end GICLS182 : shan -->	
+	
+</sqlMap>	

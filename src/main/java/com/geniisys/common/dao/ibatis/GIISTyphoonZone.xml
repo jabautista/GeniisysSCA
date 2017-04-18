@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISTyphoonZone">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIISTyphoonZoneClass" type="com.geniisys.common.entity.GIISTyphoonZone"/>
+	
+	<resultMap id="GIISTyphoonZoneLOVResultMap" class="com.geniisys.common.entity.GIISTyphoonZone" extends="BaseEntity.TableGridResultMap">
+		<result property="typhoonZone" 		column="TYPHOON_ZONE" />
+		<result property="typhoonZoneDesc" 	column="TYPHOON_ZONE_DESC" />
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="GIISTyphoonZoneResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="typhoonZone" 		column="typhoon_zone"/>
+		<result property="typhoonZoneDesc" 	column="typhoon_zone_desc"/>		
+		<result property="userId" 			column="user_id"/>	
+		<result property="lastUpdate" 		column="last_update"/>	
+		<result property="remarks" 			column="remarks"/>	
+		<result property="zoneGrp" 			column="zone_grp"/>		
+		<result property="zoneGrpDesc" 		column="zone_grp_desc"/>		
+	</resultMap> 
+	
+	<resultMap class="java.util.HashMap" id="ZoneGroupLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="zoneGrp" 		column="zone_grp"/>
+		<result property="zoneGrpDesc" 	column="zone_grp_desc"/>			
+	</resultMap>
+	
+	<select id="getTyphoonZoneLOV" resultMap="GIISTyphoonZoneLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+		  		  	   b.count_,
+		  		  	   a.*
+		  		  FROM (SELECT *
+		  		  		  FROM TABLE(giis_typhoon_zone_pkg.get_typhoon_zone_listing(#findText#))
+		  		  		  <isEqual property="sortColumn" compareValue="typhoonZoneDesc">
+		  		  		  	ORDER typhoon_zone_desc
+		  		  		  </isEqual>
+		  		  		  <isNotNull property="sortColumn">
+		  		  		  	<isEqual property="ascDescFlag" compareValue="ASC">
+		  		  		  		ASC
+		  		  		  	</isEqual>
+		  		  		  	<isEqual property="ascDescFlag" compareValue="DESC">
+		  		  		  		DESC
+		  		  		  	</isEqual>
+		  		  		  </isNotNull>
+		  		  		  ) a,
+		  		  	   (SELECT count(*) count_
+		  		  	      FROM TABLE(giis_typhoon_zone_pkg.get_typhoon_zone_listing(#findText#))) b)
+		  		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="showTyphoonZoneMaintenance" resultMap="GIISTyphoonZoneResultMap">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+						 b.count_, 
+						 a.*
+					FROM (SELECT *
+							FROM TABLE (GIISS052_PKG.show_typhoon_zone)		
+							<isNotNull property="filter">
+								WHERE 1 = 1 
+	 								<isNotEmpty prepend="AND" property="typhoonZone">
+										UPPER(typhoon_zone) LIKE UPPER(#typhoonZone#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="typhoonZoneDesc">
+										UPPER(typhoon_zone_desc) LIKE UPPER(#typhoonZoneDesc#)
+									</isNotEmpty>	
+									<isNotEmpty prepend="AND" property="zoneGrp">
+										UPPER(zone_grp) LIKE UPPER(#zoneGrp#)
+									</isNotEmpty>	
+									<isNotEmpty prepend="AND" property="zoneGrpDesc">
+										UPPER(zone_grp_desc) LIKE UPPER(#zoneGrpDesc#)
+									</isNotEmpty>																								
+							</isNotNull>					
+							<isEqual property="sortColumn" compareValue="typhoonZone">
+								ORDER BY typhoon_zone
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="typhoonZoneDesc">
+								ORDER BY typhoon_zone_desc
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="zoneGrp zoneGrpDesc">
+								ORDER BY zone_grp
+							</isEqual>							
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>
+						) a,
+						(SELECT count(*) count_
+						   FROM TABLE (GIISS052_PKG.show_typhoon_zone)						 		
+							<isNotNull property="filter">
+								WHERE 1 = 1 
+	 								<isNotEmpty prepend="AND" property="typhoonZone">
+										UPPER(typhoon_zone) LIKE UPPER(#typhoonZone#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="typhoonZoneDesc">
+										UPPER(typhoon_zone_desc) LIKE UPPER(#typhoonZoneDesc#)
+									</isNotEmpty>	
+									<isNotEmpty prepend="AND" property="zoneGrp">
+										UPPER(zone_grp) LIKE UPPER(#zoneGrp#)
+									</isNotEmpty>	
+									<isNotEmpty prepend="AND" property="zoneGrpDesc">
+										UPPER(zone_grp_desc) LIKE UPPER(#zoneGrpDesc#)
+									</isNotEmpty>																								
+							</isNotNull>							  
+						   ) b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="validateTyphoonZoneInput" resultClass="java.lang.String">
+		SELECT GIISS052_PKG.validate_typhoon_zone_input(#txtField#,#inputString#)FROM dual							
+	</select>
+	
+	<select id="validateDeleteTyphoonZone" resultClass="java.lang.String">
+		SELECT GIISS052_PKG.validate_delete_typhoon_zone(#typhoonZone#)FROM dual							
+	</select>
+	
+	<select id="showZoneGroupLOV" resultMap="ZoneGroupLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIISS052_PKG.show_zone_group_lOV)		                 
+		                  	<isNull property="findText">
+				                 WHERE UPPER(zone_grp) LIKE UPPER(#searchString#)
+				                 OR UPPER(zone_grp_desc) LIKE UPPER(#searchString#)					                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(zone_grp) LIKE UPPER(#findText#)
+				                 OR UPPER(zone_grp_desc) LIKE UPPER(#findText#)				  				         		
+			             	</isNotNull>		             
+			              	<isEqual property="sortColumn" compareValue="zoneGrp">
+			              		ORDER BY zone_grp
+			              	</isEqual>	
+			              	<isEqual property="sortColumn" compareValue="zoneGrpDesc">
+			              		ORDER BY zone_grp_desc
+			              	</isEqual>			              		                      
+			          	  	<isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	</isNotNull>
+		                  ) a, 
+		               (SELECT count (*) count_ 
+		                  FROM TABLE(GIISS052_PKG.show_zone_group_lOV)		                 
+		                  	<isNull property="findText">
+				                 WHERE UPPER(zone_grp) LIKE UPPER(#searchString#)
+				                 OR UPPER(zone_grp_desc) LIKE UPPER(#searchString#)					                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(zone_grp) LIKE UPPER(#findText#)
+				                 OR UPPER(zone_grp_desc) LIKE UPPER(#findText#)				  				         		
+			             	</isNotNull>		
+			             	) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<insert id="setTyphoonZone" parameterClass="GIISTyphoonZoneClass">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;						
+			GIISS052_PKG.set_typhoon_zone(
+				#typhoonZone#, #zoneGrp#,
+				#typhoonZoneDesc#,#remarks#);
+		END;	
+	</insert>	
+	
+	<delete id="deleteInTyphoonZone" parameterClass="GIISTyphoonZoneClass">
+		BEGIN
+			GIISS052_PKG.delete_in_typhoon_zone(#typhoonZone#);
+		END;
+	</delete>	
+	
+	<select id="getTyphoonZoneLOV2" resultMap="GIISTyphoonZoneLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+		  		  	   b.count_,
+		  		  	   a.*
+		  		  FROM (SELECT *
+		  		  		  FROM TABLE(giis_typhoon_zone_pkg.get_typhoon_zone_listing(#findText#))
+						  <isNull property="findText">
+		                  	WHERE UPPER(typhoon_zone) LIKE UPPER(NVL(#searchString#, typhoon_zone))
+		                  	   OR UPPER(typhoon_zone_desc) LIKE UPPER(NVL(#searchString#, typhoon_zone_desc))
+		                  </isNull>
+		  		  		  <isEqual property="sortColumn" compareValue="typhoonZoneDesc">
+		  		  		  	ORDER typhoon_zone_desc
+		  		  		  </isEqual>
+		  		  		  <isNotNull property="sortColumn">
+		  		  		  	<isEqual property="ascDescFlag" compareValue="ASC">
+		  		  		  		ASC
+		  		  		  	</isEqual>
+		  		  		  	<isEqual property="ascDescFlag" compareValue="DESC">
+		  		  		  		DESC
+		  		  		  	</isEqual>
+		  		  		  </isNotNull>
+		  		  		  ) a,
+		  		  	   (SELECT count(*) count_
+		  		  	      FROM TABLE(giis_typhoon_zone_pkg.get_typhoon_zone_listing(#findText#))
+						  <isNull property="findText">
+		                  	WHERE UPPER(typhoon_zone) LIKE UPPER(NVL(#searchString#, typhoon_zone))
+		                  	   OR UPPER(typhoon_zone_desc) LIKE UPPER(NVL(#searchString#, typhoon_zone_desc))
+		                  </isNull>
+		                ) b)
+		  		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiiss007TyphoonZoneLOV" resultMap="GIISTyphoonZoneLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIISS007_PKG.get_typhoon_zone_lov)		                 
+		                  	<isNull property="findText">
+				                 WHERE UPPER(typhoon_zone) LIKE UPPER(#searchString#)
+				                 OR UPPER(typhoon_zone_desc) LIKE UPPER(#searchString#)					                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(typhoon_zone) LIKE UPPER(#findText#)
+				                 OR UPPER(typhoon_zone_desc) LIKE UPPER(#findText#)				  				         		
+			             	</isNotNull>		             
+			              	<isEqual property="sortColumn" compareValue="typhoonZone">
+			              		ORDER BY typhoon_zone
+			              	</isEqual>	
+			              	<isEqual property="sortColumn" compareValue="typhoonZoneDesc">
+			              		ORDER BY typhoon_zone_desc
+			              	</isEqual>			              		                      
+			          	  	<isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	</isNotNull>
+		                  ) a, 
+		               (SELECT count (*) count_ 
+		                  FROM TABLE(GIISS007_PKG.get_typhoon_zone_lov)		                 
+		                  	<isNull property="findText">
+				                 WHERE UPPER(typhoon_zone) LIKE UPPER(#searchString#)
+				                 OR UPPER(typhoon_zone_desc) LIKE UPPER(#searchString#)					                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(typhoon_zone) LIKE UPPER(#findText#)
+				                 OR UPPER(typhoon_zone_desc) LIKE UPPER(#findText#)				  				         		
+			             	</isNotNull>		
+			             	) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+</sqlMap>

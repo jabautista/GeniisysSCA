@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap>
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIPIItmPerilGroupedClass" type="com.geniisys.gipi.entity.GIPIItmPerilGrouped"/>
+	
+	<resultMap class="GIPIItmPerilGroupedClass" id="itmPerilGroupedMap">
+		<result property="itemNo" 			column="item_no"/>
+		<result property="lineCd" 			column="line_cd"/>
+		<result property="premRt" 			column="prem_rt"/>
+		<result property="tsiAmt" 			column="tsi_amt"/>
+		<result property="baseAmt" 			column="base_amt"/>
+		<result property="perilCd" 			column="peril_cd"/>
+		<result property="recFlag" 			column="rec_flag"/>
+		<result property="premAmt" 			column="prem_amt"/>
+		<result property="policyId" 		column="policy_id"/>
+		<result property="noOfDays" 		column="no_of_days"/>
+		<result property="annTsiAmt" 		column="ann_tsi_amt"/>
+		<result property="riCommAmt" 		column="ri_comm_amt"/>
+		<result property="annPremAmt" 		column="ann_prem_amt"/>
+		<result property="aggregateSw" 		column="aggregate_sw"/>
+		<result property="riCommRate" 		column="ri_comm_rate"/>
+		<result property="groupedItemNo" 	column="grouped_item_no"/>
+		<result property="perilName" 		column="peril_name"/>
+		<result property="sumTsiAmt" 		column="sum_tsi_amt"/>
+		<result property="sumPremAmt"		column="sum_prem_amt"/>
+		
+		<result property="rowNum"			column="rownum_"/>
+		<result property="rowCount"			column="count_"/>
+
+	</resultMap>
+	
+	<resultMap class="GIPIItmPerilGroupedClass" id="polItmPerilGroupedMap">
+		<result property="itemNo" 			column="item_no"/>
+		<result property="lineCd" 			column="line_cd"/>
+		<result property="premRt" 			column="prem_rt"/>
+		<result property="tsiAmt" 			column="tsi_amt"/>
+		<result property="baseAmt" 			column="base_amt"/>
+		<result property="perilCd" 			column="peril_cd"/>
+		<result property="recFlag" 			column="rec_flag"/>
+		<result property="premAmt" 			column="prem_amt"/>
+		<result property="policyId" 		column="policy_id"/>
+		<result property="noOfDays" 		column="no_of_days"/>
+		<result property="annTsiAmt" 		column="ann_tsi_amt"/>
+		<result property="riCommAmt" 		column="ri_comm_amt"/>
+		<result property="annPremAmt" 		column="ann_prem_amt"/>
+		<result property="aggregateSw" 		column="aggregate_sw"/>
+		<result property="riCommRate" 		column="ri_comm_rate"/>
+		<result property="groupedItemNo" 	column="grouped_item_no"/>
+		<result property="perilName" 		column="peril_name"/>
+		<result property="perilType"		column="peril_type"/>
+	</resultMap>
+	
+	<select id="getItmPerilGroupedList" resultMap="itmPerilGroupedMap" parameterClass="java.util.HashMap">
+		SELECT *       
+                FROM (SELECT rownum rownum_ ,b.count_,a.*
+                        FROM (SELECT * FROM TABLE(gipi_itmperil_grouped_pkg.get_itmperil_grouped(#policyId#,#itemNo#,#groupedItemNo#))) a,
+	               		   (SELECT count(*) count_ FROM TABLE(gipi_itmperil_grouped_pkg.get_itmperil_grouped(#policyId#,#itemNo#,#groupedItemNo#))) b)
+	          WHERE rownum_ BETWEEN NVL(#from#,rownum_) AND NVL(#to#,rownum_)
+	</select>
+	
+	<select id="getPolItmGroupedPerils" resultMap="polItmPerilGroupedMap" parameterClass="java.lang.Integer">
+		SELECT * 
+		  FROM TABLE(GIPI_ITMPERIL_GROUPED_PKG.get_pol_itmperil_grouped(#parId#))
+	</select>
+</sqlMap>

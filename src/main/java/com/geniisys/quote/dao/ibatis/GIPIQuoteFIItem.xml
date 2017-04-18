@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIQuoteFIItem">
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIPIQuoteFIItemClass" type="com.geniisys.quote.entity.GIPIQuoteFIItem" />
+	
+	<resultMap id="GIPIQuoteFIItemMap" class="GIPIQuoteFIItemClass" >
+		<result column="ITEM_NO" property="itemNo" />
+		<result column="DISTRICT_NO" property="districtNo" />
+		<result column="EQ_ZONE" property="eqZone" />
+		<result column="TARF_CD" property="tarfCd" />
+		<result column="BLOCK_NO" property="blockNo" />
+		<result column="FR_ITEM_TYPE" property="frItemType" />
+		<result column="LOC_RISK1" property="locRisk1" />
+		<result column="LOC_RISK2" property="locRisk2" />
+		<result column="LOC_RISK3" property="locRisk3" />
+		<result column="TARIFF_ZONE" property="tariffZone" />
+		<result column="TYPHOON_ZONE" property="typhoonZone" />
+		<result column="CONSTRUCTION_CD" property="constructionCd" />
+		<result column="CONSTRUCTION_REMARKS" property="constructionRemarks" />
+		<result column="FRONT" property="front" />
+		<result column="RIGHT" property="right" />
+		<result column="LEFT" property="left" />
+		<result column="REAR" property="rear" />
+		<result column="OCCUPANCY_CD" property="occupancyCd" />
+		<result column="OCCUPANCY_REMARKS" property="occupancyRemarks" />
+		<result column="FLOOD_ZONE" property="floodZone" />
+		<result column="ASSIGNEE" property="assignee" />
+		<result column="BLOCK_ID" property="blockId" />
+		<result column="USER_ID" property="userId" />
+		<result column="LAST_UPDATE" property="lastUpdate" />
+		<result column="RISK_CD" property="riskCd" />	
+		<result column="DSP_PROVINCE" property="dspProvince" />
+		<result column="DSP_CITY" property="dspCity" />
+		<result column="DSP_BLOCK_NO" property="dspBlockNo" />
+		<result column="DSP_DISTRICT_DESC" property="dspDistrictDesc" />
+		<result column="DSP_FR_ITEM_TYPE" property="dspFrItemType" />
+		<result column="DSP_CONSTRUCTION_CD" property="dspConstructionCd" />
+		<result column="DSP_OCCUPANCY_CD" property="dspOccupancyCd" />
+		<result column="DSP_RISK" property="dspRisk" />
+		<result column="NBT_FROM_DT" property="nbtFromDt" />
+		<result column="NBT_TO_DT" property="nbtToDt" />
+		<result column="DSP_TARIFF_ZONE" property="dspTariffZone" />
+		<result column="DSP_EQ_ZONE" property="dspEqZone" />
+		<result column="DSP_TYPHOON_ZONE" property="dspTyphoonZone" />
+		<result column="DSP_FLOOD_ZONE" property="dspFloodZone" />
+		<result column="LATITUDE" property="latitude"/> <!-- Added by MarkS 02/08/2017 SR5918 -->
+		<result column="LONGITUDE" property="longitude"/> <!-- Added by MarkS 02/08/2017 SR5918 -->
+	</resultMap>
+	
+	<procedure id="getGIPIQuoteFIItemDetails" resultMap="GIPIQuoteFIItemMap" parameterClass="java.util.HashMap">
+		SELECT 
+			item_no item_no,                             ESCAPE_VALUE(assignee) assignee,            block_id block_id,            
+		    ESCAPE_VALUE(risk_cd) risk_cd,               ESCAPE_VALUE(tarf_cd) tarf_cd,              ESCAPE_VALUE(construction_remarks) construction_remarks,
+		    ESCAPE_VALUE(front) front,                   ESCAPE_VALUE(right) right,                 
+		    ESCAPE_VALUE(left) left,                     ESCAPE_VALUE(rear) rear,                    ESCAPE_VALUE(occupancy_remarks) occupancy_remarks,    
+		    ESCAPE_VALUE(user_id) user_id,               last_update last_update,                    ESCAPE_VALUE(dsp_district_desc) dsp_district_desc,
+		    ESCAPE_VALUE(loc_risk1) loc_risk1,           ESCAPE_VALUE(loc_risk2) loc_risk2,          ESCAPE_VALUE(loc_risk3) loc_risk3,                  
+		    ESCAPE_VALUE(block_no) block_no,             ESCAPE_VALUE(district_no) district_no,  
+		    ESCAPE_VALUE(eq_zone) eq_zone,               ESCAPE_VALUE(dsp_eq_zone) dsp_eq_zone,      ESCAPE_VALUE(fr_item_type) fr_item_type,    
+		    ESCAPE_VALUE(dsp_risk) dsp_risk,             ESCAPE_VALUE(typhoon_zone) typhoon_zone,    ESCAPE_VALUE(dsp_typhoon_zone) dsp_typhoon_zone,
+		    ESCAPE_VALUE(flood_zone) flood_zone,         ESCAPE_VALUE(dsp_flood_zone) dsp_flood_zone,ESCAPE_VALUE(dsp_occupancy_cd) dsp_occupancy_cd,
+		    ESCAPE_VALUE(occupancy_cd) occupancy_cd,     ESCAPE_VALUE(tariff_zone) tariff_zone,      ESCAPE_VALUE(dsp_tariff_zone) dsp_tariff_zone,
+		    ESCAPE_VALUE(construction_cd)construction_cd,ESCAPE_VALUE(dsp_construction_cd) dsp_construction_cd,    
+		    ESCAPE_VALUE(dsp_province) dsp_province,     ESCAPE_VALUE(dsp_city) dsp_city,            ESCAPE_VALUE(dsp_district_desc) dsp_district_desc,        
+		    ESCAPE_VALUE(dsp_block_no) dsp_block_no,     ESCAPE_VALUE(dsp_fr_item_type) dsp_fr_item_type,       
+		    nbt_from_dt nbt_from_dt,                     nbt_to_dt nbt_to_dt,
+		    ESCAPE_VALUE(latitude) latitude,     ESCAPE_VALUE(longitude) longitude <!-- Added by MarkS 02/08/2017 SR5918 -->
+		FROM TABLE(gipi_quote_item_dtls.get_gipi_quote_fi2(#quoteId#, #itemNo#))
+	</procedure>
+	
+	<insert id="saveGIPIQuoteFIItem"  parameterClass="GIPIQuoteFIItemClass">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			Gipi_Quote_Item_Dtls.Set_gipi_quote_fi(#quoteId#, #itemNo#, #assignee#,
+			#frItemType#, #blockId#, #districtNo#, #blockNo#, #riskCd#, #eqZone#,
+			#typhoonZone#, #floodZone#, #tarfCd#, #tariffZone#, #constructionCd#,
+			#constructionRemarks#, #userId#, #lastUpdate#, #front#, #right#, #left#,
+			#rear#, #locRisk1#, #locRisk2#, #locRisk3#, #occupancyCd#, #occupancyRemarks#, 
+			#dateFrom#, #dateTo#,#latitude#,#longitude#); <!-- Added by MarkS 02/08/2017 SR5918 -->
+		END;		
+	</insert>	
+	
+</sqlMap>

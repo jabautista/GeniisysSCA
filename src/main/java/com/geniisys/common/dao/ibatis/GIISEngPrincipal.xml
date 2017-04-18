@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISEngPrincipal">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIISEngPrincipal" type="com.geniisys.common.entity.GIISEngPrincipal"/>
+	
+	<!-- for GIISS068 -->
+	<resultMap class="GIISEngPrincipal" id="giisEngPrincipalListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="PRINCIPAL_ID"   		property="principalId"/>
+		<result column="PRINCIPAL_CD" 			property="principalCd"/>
+		<result column="PRINCIPAL_NAME" 		property="principalName"/>
+		<result column="PRINCIPAL_TYPE"			property="principalType"/>
+		<result column="PRINCIPAL_TYPE_MEAN"	property="principalTypeMean"/>
+		<result column="SUBLINE_CD"	 			property="sublineCd"/>
+		<result column="SUBLINE_NAME"	 		property="sublineName"/>
+		<result column="ADDRESS1"	 			property="address1"/>
+		<result column="ADDRESS2"	 			property="address2"/>
+		<result column="ADDRESS3" 				property="address3"/>
+		<result column="USER_ID"     			property="userId"/>
+		<result column="LAST_UPDATE" 			property="lastUpdate"/>
+		<result column="REMARKS"     			property="remarks"/>
+	</resultMap>
+	
+	<select id="getGiiss068RecList" resultMap="giisEngPrincipalListResultMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss068_pkg.get_rec_list(#principalId#, #principalCd#, #principalName#, #principalType#, #sublineCd#))
+		                  <isNotNull property="filter">
+		                	WHERE 1 = 1
+		                	<isNotEmpty prepend="AND" property="principalTypeMean">
+								UPPER(principal_type_mean) LIKE UPPER(#principalTypeMean#)
+							</isNotEmpty>
+		                  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="principalId">
+			              		ORDER BY principal_id
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="principalCd principalName">
+			              		ORDER BY principal_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="principalType principalTypeMean">
+			              		ORDER BY principal_type
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="sublineCd">
+			              		ORDER BY subline_cd
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss068_pkg.get_rec_list(#principalId#, #principalCd#, #principalName#, #principalType#, #sublineCd#))
+		                  <isNotNull property="filter">
+		                	WHERE 1 = 1
+		                	<isNotEmpty prepend="AND" property="principalTypeMean">
+								UPPER(principal_type_mean) LIKE UPPER(#principalTypeMean#)
+							</isNotEmpty>
+		                  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setEngPrincipal" parameterClass="GIISEngPrincipal">
+	    DECLARE
+	    	v_rec giis_eng_principal%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.principal_id 		:= #principalId#;
+ 			v_rec.principal_cd 		:= #principalCd#;
+ 			v_rec.principal_name 	:= #principalName#;
+ 			v_rec.principal_type	:= #principalType#;
+ 			v_rec.subline_cd 		:= #sublineCd#;
+ 			v_rec.address1 			:= #address1#;
+ 			v_rec.address2 			:= #address2#;
+ 			v_rec.address3 			:= #address3#; 			
+ 			v_rec.user_id 			:= #userId#;
+ 			v_rec.remarks 			:= #remarks#;
+ 			
+ 			giiss068_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteEngPrincipal" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss068_pkg.val_del_rec(#principalCd#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddEngPrincipal" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss068_pkg.val_add_rec(#principalCd#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delEngPrincipal" parameterClass="GIISEngPrincipal">
+		BEGIN
+ 			giiss068_pkg.del_rec(#principalCd#);
+ 		END;
+ 	</delete>
+ 	
+ 	<resultMap class="java.util.HashMap" id="sublineLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="subline_cd"		property="sublineCd" />
+		<result column="subline_name"	property="sublineName" />
+	</resultMap>
+	<select id="getGiiss068SublineLOV" resultMap="sublineLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(giiss068_pkg.get_giiss068_subline_lov)
+		                  <isNull property="findText">
+                             WHERE UPPER(subline_cd) LIKE UPPER(#filterText#)
+                                OR UPPER(subline_name) LIKE UPPER(#filterText#)
+                          </isNull>
+                          <isNotNull property="findText">
+                             WHERE UPPER(subline_cd) LIKE UPPER(#findText#)
+                                OR UPPER(subline_name) LIKE UPPER(#findText#)
+                          </isNotNull>            
+		                  <isEqual property="sortColumn" compareValue="sublineCd">
+			              		ORDER BY subline_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="sublineName">
+			              		ORDER BY subline_name
+			              </isEqual>			                      
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*)  count_ 
+		                  FROM (SELECT * FROM TABLE (giiss068_pkg.get_giiss068_subline_lov)
+		                  		<isNull property="findText">
+                             WHERE UPPER(subline_cd) LIKE UPPER(#filterText#)
+                                OR UPPER(subline_name) LIKE UPPER(#filterText#)
+                          </isNull>
+                          <isNotNull property="findText">
+                             WHERE UPPER(subline_cd) LIKE UPPER(#findText#)
+                                OR UPPER(subline_name) LIKE UPPER(#findText#)
+                          </isNotNull>         )) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+</sqlMap>

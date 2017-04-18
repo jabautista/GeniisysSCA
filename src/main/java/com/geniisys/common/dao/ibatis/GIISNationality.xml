@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISNationality">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIISNationalityClass" type="com.geniisys.common.entity.GIISNationality"/>
+	
+	<resultMap class="GIISNationalityClass" id="GIISNationalityLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result property="nationalityCd" column="nationality_cd"/>
+		<result property="nationalityDesc" column="nationality_desc"/>
+	</resultMap>
+	
+	<select id="getNationalityLOV" resultMap="GIISNationalityLOVMap" >
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giis_nationality_pkg.get_nationality_list(#findText#))
+						   <isNull property="sortColumn">
+							ORDER BY nationality_cd ASC
+						  </isNull>
+						  <isNotNull property="sortColumn">			
+							<isEqual property="sortColumn" compareValue="nationalityCd">
+								ORDER BY nationality_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="nationalityDesc">
+								ORDER BY nationality_desc
+							</isEqual>							
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(giis_nationality_pkg.get_nationality_list(#findText#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+
+	<resultMap class="GIISNationalityClass" id="giisNationalityListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="nationality_cd"     property="nationalityCd"/>
+		<result column="nationality_desc"  property="nationalityDesc"/>
+		<result column="user_id"     property="userId"/>
+		<result column="last_update" property="lastUpdate"/>
+		<result column="remarks"     property="remarks"/>
+	</resultMap>
+	
+	<select id="getGicls184RecList" resultMap="giisNationalityListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(gicls184_pkg.get_rec_list(#nationalityCd#, #nationalityDesc#))
+		                  <isEqual property="sortColumn" compareValue="nationalityCd">
+			              		ORDER BY nationality_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="nationalityDesc">
+			              		ORDER BY nationality_desc
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(gicls184_pkg.get_rec_list(#nationalityCd#, #nationalityDesc#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setNationality" parameterClass="GIISNationalityClass">
+	    DECLARE
+	    	v_rec giis_nationality%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.nationality_cd := #nationalityCd#;
+ 			v_rec.nationality_desc := #nationalityDesc#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			gicls184_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteNationality" parameterClass="java.lang.String">
+ 		BEGIN
+ 			gicls184_pkg.val_del_rec(#recId#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddNationality" parameterClass="java.lang.String">
+ 		BEGIN
+ 			gicls184_pkg.val_add_rec(#recId#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delNationality" parameterClass="java.lang.String">
+		BEGIN
+ 			gicls184_pkg.del_rec(#nationalityCd#);
+ 		END;
+ 	</delete>	
+</sqlMap>	

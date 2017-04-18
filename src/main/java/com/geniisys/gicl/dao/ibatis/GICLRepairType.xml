@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GICLRepairType">
+	
+	<typeAlias alias="giclRepairType" type="com.geniisys.gicl.entity.GICLRepairType"/>
+  	
+	<resultMap class="giclRepairType" id="giclRepairTypeListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="repair_cd" property="repairCode"/>
+		<result column="repair_desc" property="repairDesc"/>
+		<result column="required"	 property="required"/>
+		<result column="user_id"     property="userId"/>
+		<result column="last_update" property="lastUpdate"/>
+		<result column="remarks"     property="remarks"/>
+	</resultMap>
+	
+	<select id="getGicls172RecList" resultMap="giclRepairTypeListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(gicls172_pkg.get_rec_list(#repairCode#, #repairDesc#))
+		                  <isEqual property="sortColumn" compareValue="repairCode">
+			              		ORDER BY repair_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="repairDesc">
+			              		ORDER BY repair_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="required">
+			              		ORDER BY required
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(gicls172_pkg.get_rec_list(#repairCode#, #repairDesc#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setRepairType" parameterClass="giclRepairType">
+	    DECLARE
+	    	v_rec gicl_repair_type%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.repair_cd := #repairCode#;
+ 			v_rec.repair_desc := #repairDesc#;
+ 			v_rec.required := #required#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			gicls172_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddRepairType" parameterClass="java.lang.String">
+ 		BEGIN
+ 			gicls172_pkg.val_add_rec(#recId#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delRepairType" parameterClass="java.lang.String">
+		BEGIN
+ 			gicls172_pkg.del_rec(#repairCode#);
+ 		END;
+ 	</delete>
+ 	
+ 	<!-- shan 08.19.2014 -->
+ 	<procedure id="valDelRepairType" parameterClass="java.lang.String">
+ 		BEGIN
+ 			gicls172_pkg.val_del_rec(#recId#);
+ 		END;
+ 	</procedure> 
+</sqlMap>

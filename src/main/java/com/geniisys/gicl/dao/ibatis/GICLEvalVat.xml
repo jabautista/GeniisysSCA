@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GICLEvalVat">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GICLEvalVat" type="com.geniisys.gicl.entity.GICLEvalVat"/>
+	
+	<resultMap class="GICLEvalVat" id="GICLEvalVatMap">
+		<result property="evalId" column="eval_id"/>
+		<result property="payeeTypeCd" column="payee_type_cd"/>
+		<result property="payeeCd" column="payee_cd"/>
+		<result property="applyTo" column="apply_to"/>
+		<result property="vatAmt" column="vat_amt"/>
+		<result property="vatRate" column="vat_rate"/>
+		<result property="baseAmt" column="base_amt"/>
+		<result property="withVat" column="with_vat"/>
+		<result property="paytPayeeTypeCd" column="payt_payee_type_cd"/>
+		<result property="paytPayeeCd" column="payt_payee_cd"/>
+		<result property="netTag" column="net_Tag"/>
+		<result property="lessDed" column="less_Ded"/>
+		<result property="lessDep" column="less_dep"/>
+	</resultMap>
+	
+	<resultMap class="GICLEvalVat" id="evalVatListingMap" extends="GICLEvalVatMap">
+		<result property="dspCompany" column="dsp_company"/>
+		<result property="dspPartLabor" column="dsp_part_labor"/>
+		<result column="rownum_" 	property="rowNum" />
+		<result column="count_"		property="rowCount"/>
+	</resultMap>
+	
+	<resultMap class="GICLEvalVat" id="evalVatListingMap2" extends="GICLEvalVatMap">
+		<result property="dspCompany" column="dsp_company"/>
+		<result property="dspPartLabor" column="dsp_part_labor"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="evalVatComMap" >
+		<result property="dspCompany" column="dsp_company"/>
+		<result property="payeeCd" column="payee_cd"/>
+		<result property="payeeTypeCd" column="payee_type_cd"/>
+		<result column="rownum_" 	property="rowNum" />
+		<result column="count_"		property="rowCount"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="evalVatLaborPartMap" >
+		<result property="dspPartLabor" column="dsp_part_labor"/>
+		<result property="applyTo" column="apply_to"/>
+		<result property="withVat" column="with_vat"/>
+		<result property="baseAmt" column="base_amt"/>
+		<result column="rownum_" 	property="rowNum" />
+		<result column="count_"		property="rowCount"/>
+	</resultMap>
+	
+	<select id="getEvalVatComLOV" resultMap="evalVatComMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (gicl_eval_vat_pkg.get_vat_com_lov(#evalId#,#findText#))
+			              <isEqual property="sortColumn" compareValue="dspCompany">
+			              		ORDER BY dsp_company
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (gicl_eval_vat_pkg.get_vat_com_lov(#evalId#,#findText#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getEvalVatPartLaborLOV" resultMap="evalVatLaborPartMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (gicl_eval_vat_pkg.get_vat_part_labor_lov(#evalId#,#payeeTypeCd#,#payeeCd#,#findText#))
+			              <isEqual property="sortColumn" compareValue="dspPartLabor">
+			              		ORDER BY dsp_part_labor
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="baseAmt">
+			              		ORDER BY base_amt
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (gicl_eval_vat_pkg.get_vat_part_labor_lov(#evalId#,#payeeTypeCd#,#payeeCd#,#findText#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>		
+	
+	<select id="getMcEvalVatListing" resultMap="evalVatListingMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (gicl_eval_vat_pkg.get_mc_eval_vat_listing(#evalId#))
+		                  <isEqual property="sortColumn" compareValue="dspCompany">
+			              		ORDER BY dsp_company
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="dspPartLabor">
+			              		ORDER BY dsp_part_labor
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="baseAmt">
+			              		ORDER BY base_amt
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="vatRate">
+			              		ORDER BY vat_rate
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="vatAmt">
+			              		ORDER BY vat_amt
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (gicl_eval_vat_pkg.get_mc_eval_vat_listing(#evalId#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<select id="getAllMcEvalListing" parameterClass="Integer" resultMap="evalVatListingMap2">
+		SELECT * FROM TABLE(gicl_eval_vat_pkg.get_mc_eval_vat_listing(#evalId#))
+	</select>
+	
+	<parameterMap class="java.util.HashMap" id="validateEvalComMap">
+		<parameter property="evalId" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="payeeTypeCd"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="payeeCd" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="dspPartLabor"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="baseAmt" 			jdbcType="NUMERIC" 	javaType="java.math.BigDecimal"  mode="OUT"/>
+		<parameter property="vatRate" 			jdbcType="NUMERIC" 	javaType="java.math.BigDecimal"  mode="OUT"/>
+		<parameter property="vatAmt" 			jdbcType="NUMERIC" 	javaType="java.math.BigDecimal"  mode="OUT"/>
+		<parameter property="applyTo"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="allowLaborLov"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+	</parameterMap>
+	
+	<parameterMap class="java.util.HashMap" id="validateEvalPartLAborMap">
+		<parameter property="evalId" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="payeeTypeCd"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="payeeCd" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="applyTo"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="baseAmt" 			jdbcType="NUMERIC" 	javaType="java.math.BigDecimal"  mode="OUT"/>
+		<parameter property="vatRate" 			jdbcType="NUMERIC" 	javaType="java.math.BigDecimal"  mode="OUT"/>
+		<parameter property="vatAmt" 			jdbcType="NUMERIC" 	javaType="java.math.BigDecimal"  mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="validateEvalCom" parameterMap="validateEvalComMap">
+		BEGIN
+			gicl_eval_vat_pkg.validate_eval_vat_com(?,?,?,?,?,?,?,?,?);
+		END;
+	</procedure>
+	
+	<procedure id="validateEvalPartLabor" parameterMap="validateEvalPartLAborMap">
+		BEGIN
+			gicl_eval_vat_pkg.validate_eval_part_labor(?,?,?,?,?,?,?);
+		END;
+	</procedure>
+	
+	<parameterMap id="validateDedMap" class="java.util.HashMap"> 
+		<parameter property="evalId" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="payeeTypeCd"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="payeeCd" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="lessDed"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="applyTo"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="baseAmt" 			jdbcType="NUMERIC" 	javaType="java.math.BigDecimal"  mode="OUT"/>
+		<parameter property="vatAmt" 			jdbcType="NUMERIC" 	javaType="java.math.BigDecimal"  mode="OUT"/>
+		<parameter property="message"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="validateLessDeductibles" parameterMap="validateDedMap">
+		BEGIN
+			gicl_eval_vat_pkg.validate_less_deductible(?,?,?,?,?,?,?,?);
+		END;
+	</procedure>
+	
+	<parameterMap id="validateDepMap" class="java.util.HashMap"> 
+		<parameter property="evalId" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="payeeTypeCd"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="payeeCd" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="lessDep"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="applyTo"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="baseAmt" 			jdbcType="NUMERIC" 	javaType="java.math.BigDecimal"  mode="OUT"/>
+		<parameter property="vatAmt" 			jdbcType="NUMERIC" 	javaType="java.math.BigDecimal"  mode="OUT"/>
+		<parameter property="message"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="validateLessDepreciation" parameterMap="validateDepMap">
+		BEGIN
+			gicl_eval_vat_pkg.validate_less_depreciation(?,?,?,?,?,?,?,?);
+		END;
+	</procedure>
+	
+	<select id="checkEnableCreateVat" resultClass="String">
+		SELECT gicl_eval_vat_pkg.check_enable_create_vat(#evalId#) from dual
+	</select>
+	
+	<procedure id="getReplaceAmt" parameterClass="map">
+		CALL get_replace_amt(#evalId#,#userId#)
+	</procedure>
+	
+	<procedure id="getRepairAmt" parameterClass="map">
+		CALL get_repair_amt(#evalId#,#userId#)
+	</procedure>
+	
+	<procedure id="setEvalVatDetail" parameterClass="GICLEvalVat">
+		BEGIN
+			GIIS_USERs_PKG.app_user := #userId#;
+			gicl_eval_vat_pkg.set_gicl_eval_vat(#evalId#,#payeeTypeCd#,#payeeCd#,#applyTo#,#vatAmt#,#vatRate#,
+				#baseAmt#,#withVat#,#paytPayeeTypeCd#,#paytPayeeCd#,#netTag#,#lessDed#,#lessDep#	
+			);
+		END;
+	</procedure>
+	
+	<procedure id="delEvalVatDetail" parameterClass="GICLEvalVat">
+		BEGIN
+			GIIS_USERs_PKG.app_user := #userId#;
+			gicl_eval_vat_pkg.del_gicl_eval_vat(#evalId#,#payeeTypeCd#,#payeeCd#);
+		END;
+	</procedure>
+	
+	
+	<parameterMap id="createVatDetailsMap" class="java.util.HashMap"> 
+		<parameter property="userId"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="evalId" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="vTotalVat" 			jdbcType="NUMERIC" 	javaType="java.math.BigDecimal"  mode="OUT"/>
+		<parameter property="vTotalLabor" 			jdbcType="NUMERIC" 	javaType="java.math.BigDecimal"  mode="OUT"/>
+		<parameter property="vTotalPart" 			jdbcType="NUMERIC" 	javaType="java.math.BigDecimal"  mode="OUT"/>
+		<parameter property="vChange1"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="createVatDetails" parameterMap="createVatDetailsMap">
+		BEGIN
+			GIIS_USERs_PKG.app_user := ?;
+			gicl_eval_vat_pkg.create_vat_details(?,?,?,?,?);
+		END;
+	</procedure>
+	
+	<procedure id="createVatDetails2" parameterClass="GICLEvalVat">
+		BEGIN
+			GIIS_USERs_PKG.app_user := #userId#;
+			gicl_eval_vat_pkg.create_vat_details2(#evalId#,#payeeTypeCd#,#payeeCd#,#applyTo#,#lessDed#,#lessDep#);
+		END;
+	</procedure>
+	
+	<procedure id="createVatDetails3" parameterClass="map">
+		BEGIN
+			GIIS_USERs_PKG.app_user := #userId#;
+			gicl_eval_vat_pkg.create_vat_details3(#evalId#,#vTotalVat#,#vTotalLabor#,#vTotalPart#,#vChange1#);
+		END;
+	</procedure>
+	
+	<select id="checkGiclEvalVatExist" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT GICL_EVAL_VAT_PKG.check_gicl_eval_vat_exist(#evalId#) FROM dual
+	</select>
+	
+	<procedure id="deleteAllEvalVat" parameterClass="java.util.HashMap">
+		BEGIN
+			GIIS_USERS_PKG.app_user := #userId#;
+			DELETE GICL_EVAL_VAT
+ 			 WHERE eval_id = #evalId#; 
+		END;
+	</procedure>
+	
+	<select id="countEvalVat" parameterClass="Integer" resultClass="Integer" >
+		SELECT COUNT(EVAL_ID)
+		  FROM GICL_EVAL_VAT
+		 WHERE EVAL_ID = #evalId#;
+	</select>
+</sqlMap>	

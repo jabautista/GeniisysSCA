@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISPolicyType">
+    
+    <typeAlias alias="giisPolicyType" type="com.geniisys.common.entity.GIISPolicyType"/>
+    
+    <resultMap class="giisPolicyType" id="giisPolicyTypeListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="line_cd"        property="lineCd"/>
+		<result column="type_cd"  	    property="typeCd"/>
+		<result column="type_desc"     	property="typeDesc"/>
+		<result column="user_id"     	property="userId"/>
+		<result column="last_update" 	property="lastUpdate"/>
+		<result column="remarks"     	property="remarks"/>
+	</resultMap>
+	
+    <select id="getGiiss091RecList" resultMap="giisPolicyTypeListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss091_pkg.get_rec_list(#lineCd#, #typeCd#, #typeDesc#, #userId#))
+		                  <isEqual property="sortColumn" compareValue="lineCd">
+			              		ORDER BY line_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="typeCd">
+			              		ORDER BY type_cd
+			              </isEqual>
+			               <isEqual property="sortColumn" compareValue="typeDesc">
+			              		ORDER BY type_desc
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss091_pkg.get_rec_list(#lineCd#, #typeCd#, #typeDesc#, #userId#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+    <procedure id="valAddPolicyType" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss091_pkg.val_add_rec(#lineCd#, #typeCd#, #typeDesc#);
+ 		END;
+ 	</procedure> 
+ 	
+    <procedure id="valDelPolicyType" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss091_pkg.val_del_rec(#lineCd#, #typeCd#);
+ 		END;
+ 	</procedure>
+ 	
+    <procedure id="setPolicyType" parameterClass="giisPolicyType">
+	    DECLARE
+	    	v_rec giis_policy_type%ROWTYPE;
+	    	v_dummy_line_cd giis_line.line_cd%TYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.line_cd := #lineCd#;
+ 			v_rec.type_cd := #typeCd#;
+ 			v_rec.type_desc := #typeDesc#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			v_dummy_line_cd := #dummyLineCd#;
+ 			
+ 			giiss091_pkg.set_rec(v_rec, v_dummy_line_cd);
+ 		END;
+ 	</procedure>
+ 	
+    <delete id="delPolicyType" parameterClass="giisPolicyType">
+		BEGIN
+ 			giiss091_pkg.del_rec(#lineCd#, #typeCd#);
+ 		END;
+ 	</delete>
+ 	
+    <procedure id="valTypeDesc" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss091_pkg.val_type_desc(#typeDesc#);
+ 		END;
+ 	</procedure>
+ 	
+    <select id="getAllLineCdTypeCd" resultMap="giisPolicyTypeListResultMap">
+	   SELECT *
+         FROM (SELECT ROWNUM rownum_, b.count_, a.*
+                 FROM (SELECT *
+                         FROM TABLE (giiss091_pkg.get_all_line_type_cd)) a,
+                      (SELECT COUNT (*) count_
+                         FROM TABLE (giiss091_pkg.get_all_line_type_cd)) b)
+	</select>
+	
+    <select id="getAllTypeDesc" resultMap="giisPolicyTypeListResultMap">
+	   SELECT *
+         FROM (SELECT ROWNUM rownum_, b.count_, a.*
+                 FROM (SELECT *
+                         FROM TABLE (giiss091_pkg.get_all_type_desc)) a,
+                      (SELECT COUNT (*) count_
+                         FROM TABLE (giiss091_pkg.get_all_type_desc)) b)
+	</select>
+</sqlMap>

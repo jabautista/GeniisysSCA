@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISReinsurerType">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIISReinsurerType" type="com.geniisys.common.entity.GIISReinsurerType"/>
+	
+	<resultMap id="GIISReinsurerTypeResultMap" class="com.geniisys.common.entity.GIISReinsurerType">
+		<result property="riTypeDesc"	column="RI_TYPE_DESC"/>
+	  	<result property="rowNum"		column="ROWNUM_"/>
+		<result property="rowCount"		column="COUNT_"/>
+	</resultMap>	
+	
+	<resultMap class="GIISReinsurerType" id="GIISReinsurerTypeLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="riType"		column="ri_type"/>
+		<result property="riTypeDesc" 	column="ri_type_desc"/>
+	</resultMap>
+	
+	<!-- fons 10/22/2013 -->
+	<resultMap class="GIISReinsurerType" id="giisReinsurerTypeListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="ri_type"     	property="riType"/>	
+		<result column="ri_type_desc"   property="riTypeDesc"/>
+		<result column="remarks"     	property="remarks"/>
+		<result column="user_id"     	property="userId"/>
+		<result column="last_update"    property="lastUpdate"/>
+	</resultMap>
+	
+	<select id="getGIISReinsurerTypeLOV" resultMap="GIISReinsurerTypeResultMap">
+		SELECT *
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		          FROM (SELECT ri_type_desc
+						  FROM GIIS_REINSURER_TYPE
+						 ORDER BY ri_type) a,
+					   (SELECT count(*) count_
+						  FROM GIIS_REINSURER_TYPE
+						 ORDER BY ri_type) b 
+				)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="validateRiTypeDesc" parameterClass="java.lang.String" resultClass="java.lang.String">
+		SELECT 'Y' isExist 
+		  FROM GIIS_REINSURER_TYPE 
+		 WHERE ri_type_desc = #riTypeDesc#
+	</select>
+	
+	<select id="getRiTypeLOV" resultMap="GIISReinsurerTypeLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIIS_REINSURER_TYPE_PKG.get_ri_type_lov)		                 
+		                  	<isNull property="findText">
+				                 WHERE UPPER(ri_type) LIKE UPPER(#searchString#)
+				                 OR UPPER(ri_type_desc) LIKE UPPER(#searchString#)					                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(ri_type) LIKE UPPER(#findText#)
+				                 OR UPPER(ri_type_desc) LIKE UPPER(#findText#)				  				         		
+			             	</isNotNull>		             
+			              	<isEqual property="sortColumn" compareValue="riType">
+			              		ORDER BY ri_type
+			              	</isEqual>	
+			              	<isEqual property="sortColumn" compareValue="riTypeDesc">
+			              		ORDER BY ri_type_desc
+			              	</isEqual>			              		                      
+			          	  	<isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	</isNotNull>
+		                  ) a, 
+		               (SELECT count (*) count_ 
+		                  FROM TABLE(GIIS_REINSURER_TYPE_PKG.get_ri_type_lov)		                 
+		                  	<isNull property="findText">
+				                 WHERE UPPER(ri_type) LIKE UPPER(#searchString#)
+				                 OR UPPER(ri_type_desc) LIKE UPPER(#searchString#)					                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(ri_type) LIKE UPPER(#findText#)
+				                 OR UPPER(ri_type_desc) LIKE UPPER(#findText#)				  				         		
+			             	</isNotNull>	
+			             	) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiiss025RecList" resultMap="giisReinsurerTypeListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss025_pkg.get_rec_list(#riType#, #riTypeDesc#))
+		                  <isEqual property="sortColumn" compareValue="riType">
+			              		ORDER BY ri_type
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="riTypeDesc">
+			              		ORDER BY ri_type_desc
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss025_pkg.get_rec_list(#riType#, #riTypeDesc#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setReinsurerType" parameterClass="GIISReinsurerType">
+	    DECLARE
+	    	v_rec giis_reinsurer_type%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.ri_type := #riType#;
+ 			v_rec.ri_type_desc := #riTypeDesc#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			giiss025_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteReinsurerType" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss025_pkg.val_del_rec(#recId#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddReinsurerType" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss025_pkg.val_add_rec(#recId#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delReinsurerType" parameterClass="java.lang.String">
+		BEGIN
+ 			giiss025_pkg.del_rec(#riType#);
+ 		END;
+ 	</delete>
+</sqlMap>

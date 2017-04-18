@@ -1,0 +1,463 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GIUTS023BeneficiaryInfo">
+	
+	<resultMap class="java.util.HashMap" id="giuts023PolicyInformationLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="parId" 				column="par_id" />
+		<result property="assdNo" 				column="assd_no" />
+		<result property="policyId" 			column="policy_id" />
+		<result property="lineCd" 				column="line_cd" />
+		<result property="sublineCd" 			column="subline_cd" />
+		<result property="issCd" 				column="iss_cd" />
+		<result property="issueYy" 				column="issue_yy" />
+		<result property="polSeqNo" 			column="pol_seq_no" />
+		<result property="renewNo" 				column="renew_no" />
+		<result property="endtIssCd" 			column="endt_iss_cd" />
+		<result property="nEndtIssCd" 			column="n_endt_iss_cd" />
+		<result property="endtYy" 				column="endt_yy" />
+		<result property="nEndtYy"	 			column="n_endt_yy" />
+		<result property="endtSeqNo" 			column="endt_seq_no" />
+		<result property="nEndtSeqNo" 			column="n_endt_seq_no" />
+		<result property="assdName" 			column="assd_name" />
+		<result property="policyNo" 			column="policy_no" />
+		<result property="endorsementNo"		column="endorsement_no" />
+	</resultMap>
+	
+	<select id="getGIUTS023PolicyInformationLOV" resultMap="giuts023PolicyInformationLOVResultMap">
+		SELECT *
+            FROM (SELECT ROWNUM rownum_, b.count_, a.*
+                  FROM (SELECT *
+                          FROM TABLE(GIUTS023_PKG.get_policy_info_lov(#lineCd# , #sublineCd#, #issCd#, #issueYy#, #polSeqNo#, #renewNo#, #userId#))
+                          <isNotNull property="filter">
+                          	WHERE 1 = 1
+                          		<isNotEmpty prepend="AND" property="policyNo">
+									UPPER(policy_no) LIKE UPPER(#policyNo#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="endorsementNo">
+									UPPER(endorsement_no) LIKE UPPER(#endorsementNo#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="assdName">
+									UPPER(assd_name) LIKE UPPER(#assdName#)
+								</isNotEmpty>
+                          </isNotNull>
+                            <isEqual property="sortColumn" compareValue="policyNo">
+                                     ORDER BY policy_no
+                            </isEqual>
+                            <isEqual property="sortColumn" compareValue="endorsementNo">
+                                     ORDER BY endorsement_no
+                            </isEqual>
+                            <isEqual property="sortColumn" compareValue="assdName">
+                                     ORDER BY assd_name
+                            </isEqual>
+                            <isNotNull property="sortColumn">
+                                 <isEqual property="ascDescFlg" compareValue="ASC">
+                                     ASC
+                                 </isEqual>
+                                 <isEqual property="ascDescFlg" compareValue="DESC">
+                                     DESC
+                                 </isEqual>
+                            </isNotNull>) a,
+               (SELECT COUNT (*) count_
+                  FROM TABLE
+                          (GIUTS023_PKG.get_policy_info_lov(#lineCd# , #sublineCd#, #issCd#, #issueYy#, #polSeqNo#, #renewNo#, #userId#))
+                          <isNotNull property="filter">
+                          	WHERE 1 = 1
+                          		<isNotEmpty prepend="AND" property="policyNo">
+									UPPER(policy_no) LIKE UPPER(#policyNo#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="endorsementNo">
+									UPPER(endorsement_no) LIKE UPPER(#endorsementNo#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="assdName">
+									UPPER(assd_name) LIKE UPPER(#assdName#)
+								</isNotEmpty>
+                          </isNotNull>
+                          ) b)
+          WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="giuts023ItemInfoResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="policyId" 			column="policy_id" />
+		<result property="itemNo" 				column="item_no" />
+		<result property="itemTitle" 			column="item_title" />
+		<result property="itemDesc" 			column="item_desc" />
+		<result property="updateSw" 			column="update_sw" />
+	</resultMap>
+	
+	<select id="populateGIUTS023ItemInfoTableGrid" resultMap="giuts023ItemInfoResultMap">
+		SELECT *
+            FROM (SELECT ROWNUM rownum_, b.count_, a.*
+                  FROM (SELECT *
+                          FROM TABLE(GIUTS023_PKG.get_item_info(#policyId#))
+                          <isNotNull property="filter">
+                          	WHERE 1 = 1
+                          		<isNotEmpty prepend="AND" property="itemNo">
+									item_no = #itemNo#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="itemTitle">
+									UPPER(item_title) LIKE UPPER(#itemTitle#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="itemDesc">
+									UPPER(item_desc) LIKE UPPER(#itemDesc#)
+								</isNotEmpty>
+                          </isNotNull>
+                            <isEqual property="sortColumn" compareValue="itemNo">
+                                     ORDER BY item_no
+                            </isEqual>
+                            <isEqual property="sortColumn" compareValue="itemTitle">
+                                     ORDER BY item_title
+                            </isEqual>
+                            <isEqual property="sortColumn" compareValue="itemDesc">
+                                     ORDER BY item_desc
+                            </isEqual>
+                            <isNotNull property="sortColumn">
+                                 <isEqual property="ascDescFlg" compareValue="ASC">
+                                     ASC
+                                 </isEqual>
+                                 <isEqual property="ascDescFlg" compareValue="DESC">
+                                     DESC
+                                 </isEqual>
+                            </isNotNull>) a,
+               (SELECT COUNT (*) count_
+                  FROM TABLE
+                          (GIUTS023_PKG.get_item_info(#policyId#))
+                          <isNotNull property="filter">
+                          	WHERE 1 = 1
+                          		<isNotEmpty prepend="AND" property="itemNo">
+									item_no = #itemNo#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="itemTitle">
+									UPPER(item_title) LIKE UPPER(#itemTitle#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="itemDesc">
+									UPPER(item_desc) LIKE UPPER(#itemDesc#)
+								</isNotEmpty>
+                          </isNotNull>
+                          ) b)
+          WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="giuts023GroupedItemsInfoResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="groupedItemNo" 			column="grouped_item_no" />
+		<result property="groupedItemTitle"			column="grouped_item_title" />
+		<result property="sex"			 			column="sex" />
+		<result property="age"			 			column="age" />
+		<result property="dateOfBirth"	 			column="date_of_birth" />
+		<result property="civilStatus" 				column="civil_status" />
+		<result property="amountCoverage" 			column="amount_coverage" />
+		<result property="position"	 				column="position" />
+		<result property="salary"		 			column="salary" />
+		<result property="salaryGrade" 				column="salary_grade" />
+		<result property="sublineCd"	 			column="subline_cd" />
+		<result property="lineCd"	 				column="line_cd" />
+		<result property="positionCd"	 			column="position_cd" />
+		<result property="policyId"	 				column="policy_id" />
+		<result property="itemNo"		 			column="item_no" />
+		<result property="includeTag"		 		column="include_tag" />
+	</resultMap>
+	
+	<select id="populateGIUTS023GroupedItemsInfoTableGrid" resultMap="giuts023GroupedItemsInfoResultMap">
+		SELECT *
+            FROM (SELECT ROWNUM rownum_, b.count_, a.*
+                  FROM (SELECT *
+                          FROM TABLE(GIUTS023_PKG.get_grouped_items_info(#itemNo#, #policyId#))
+                         <isNotNull property="filter">
+                          	WHERE 1 = 1
+                          		<isNotEmpty prepend="AND" property="groupedItemNo">
+									grouped_item_no = #groupedItemNo#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="groupedItemTitle">
+									UPPER(grouped_item_title) LIKE UPPER(#groupedItemTitle#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="sex">
+									UPPER(sex) LIKE UPPER(#sex#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="age">
+									age = #age#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="dateOfBirth">
+									date_of_birth = TO_DATE(#dateOfBirth#, 'mm-dd-yyyy')
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="civilStatus">
+									UPPER(civil_status) LIKE UPPER(#civilStatus#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="amountCoverage">
+									amount_coverage = #amountCoverage#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="position">
+									UPPER(position) LIKE UPPER(#position#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="salary">
+									salary = #salary#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="salaryGrade">
+									UPPER(salary_grade) LIKE UPPER(#salaryGrade#)
+								</isNotEmpty>
+                          </isNotNull>
+                            <isEqual property="sortColumn" compareValue="groupedItemNo">
+                                     ORDER BY grouped_item_no
+                            </isEqual>
+                            <isEqual property="sortColumn" compareValue="groupedItemTitle">
+                                     ORDER BY grouped_item_title
+                            </isEqual>
+                            <isEqual property="sortColumn" compareValue="sex">
+                                     ORDER BY sex
+                            </isEqual>
+                            <isEqual property="sortColumn" compareValue="age">
+                                     ORDER BY age
+                            </isEqual>
+                            <isEqual property="sortColumn" compareValue="dateOfBirth">
+                                     ORDER BY date_of_birth
+                            </isEqual>
+                            <isEqual property="sortColumn" compareValue="civilStatus">
+                                     ORDER BY civil_status
+                            </isEqual>
+                            <isEqual property="sortColumn" compareValue="amountCoverage">
+                                     ORDER BY amount_coverage
+                            </isEqual>
+                            <isEqual property="sortColumn" compareValue="position">
+                                     ORDER BY position
+                            </isEqual>
+                            <isEqual property="sortColumn" compareValue="salary">
+                                     ORDER BY salary
+                            </isEqual>
+                            <isEqual property="sortColumn" compareValue="salaryGrade">
+                                     ORDER BY salary_grade
+                            </isEqual>
+                            <isNotNull property="sortColumn">
+                                 <isEqual property="ascDescFlg" compareValue="ASC">
+                                     ASC
+                                 </isEqual>
+                                 <isEqual property="ascDescFlg" compareValue="DESC">
+                                     DESC
+                                 </isEqual>
+                            </isNotNull>) a,
+               (SELECT COUNT (*) count_
+                  FROM TABLE
+                          (GIUTS023_PKG.get_grouped_items_info(#itemNo#, #policyId#))
+                         <isNotNull property="filter">
+                          	WHERE 1 = 1
+                          		<isNotEmpty prepend="AND" property="groupedItemNo">
+									grouped_item_no = #groupedItemNo#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="groupedItemTitle">
+									UPPER(grouped_item_title) LIKE UPPER(#groupedItemTitle#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="sex">
+									UPPER(sex) LIKE UPPER(#sex#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="age">
+									age = #age#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="dateOfBirth">
+									date_of_birth = TO_DATE(#dateOfBirth#, 'mm-dd-yyyy')
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="civilStatus">
+									UPPER(civil_status) LIKE UPPER(#civilStatus#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="amountCoverage">
+									amount_coverage = #amountCoverage#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="position">
+									UPPER(position) LIKE UPPER(#position#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="salary">
+									salary = #salary#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="salaryGrade">
+									UPPER(salary_grade) LIKE UPPER(#salaryGrade#)
+								</isNotEmpty>
+                          </isNotNull>
+                          ) b)
+          WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="giuts023GroupedItemsResultMap">
+		<result property="groupedItemNo" 			column="grouped_item_no" />
+		<result property="groupedItemTitle"			column="grouped_item_title" />
+	</resultMap>
+	
+	<select id="giuts023GetGroupedItems" resultMap = "giuts023GroupedItemsResultMap">
+		SELECT * FROM TABLE(GIUTS023_PKG.get_grouped_items(#itemNo#, #policyId#))
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="giuts023BeneficiaryNoResultMap">
+		<result property="beneficiaryNo" 			column="beneficiary_no" />
+	</resultMap>
+	
+	<select id="giuts023GetBeneficiaryNos" resultMap = "giuts023BeneficiaryNoResultMap">
+		SELECT * FROM TABLE(GIUTS023_PKG.get_beneficiary_nos(#policyId#, #itemNo#, #groupedItemNo#))
+	</select>
+	
+	<!-- <select id="GIUTS023ValidateGroupedItemNo" resultClass="java.lang.String" >
+		SELECT GIUTS023_PKG.validate_grouped_item_no(#policyId#, #itemNo#, #groupedItemNo#) FROM DUAL
+	</select> -->
+	
+	<select id="GIUTS023ValidateBeneficiaryNo" resultClass="java.lang.String" >
+		SELECT GIUTS023_PKG.validate_beneficiary_no(#policyId#, #itemNo#, #groupedItemNo#, #beneficiaryNo#) FROM DUAL
+	</select>
+	
+	<typeAlias alias="GIPIGroupedItems" type="com.geniisys.gipi.entity.GIPIGroupedItems"/>
+	
+	<insert id="GIUTS023AddUpdateGroupedItems" parameterClass="GIPIGroupedItems">
+		BEGIN
+			GIIS_USERS_PKG.app_user := #userId#;
+			GIUTS023_PKG.save_grouped_items(
+				#groupedItemNo#, #groupedItemTitle#, #sex#, #age#, #dateOfBirth#,
+				#civilStatus#, #amountCoverage#, #salary#, #salaryGrade#, #sublineCd#,
+				#lineCd#, #includeTag#, #positionCd#, #policyId#, #itemNo#
+			);
+		END;
+	</insert>
+	
+	<delete id="GIUTS023DeleteGroupedItems" parameterClass="GIPIGroupedItems">
+		BEGIN
+			GIIS_USERS_PKG.app_user := #userId#;
+			GIUTS023_PKG.delete_grouped_items(#policyId#, #itemNo#, #groupedItemNo#);
+		END;
+	</delete>
+	
+	<delete id="GIUTS023DeleteAllBeneficiary" parameterClass="GIPIGroupedItems">
+		BEGIN
+			GIIS_USERS_PKG.app_user := #userId#;
+			GIUTS023_PKG.delete_all_beneficiary(#policyId#, #itemNo#, #groupedItemNo#);
+		END;
+	</delete>
+	
+	<typeAlias alias="GIPIGrpItemsBeneficiary" type="com.geniisys.gipi.entity.GIPIGrpItemsBeneficiary" />
+	
+	<insert id="GIUTS023AddUpdateBeneficiary" parameterClass="GIPIGrpItemsBeneficiary" >
+		BEGIN
+			GIIS_USERS_PKG.app_user := #userId#;
+			GIUTS023_PKG.save_beneficiary(
+				#policyId#, #itemNo#, #groupedItemNo#, #beneficiaryNo#,
+				#beneficiaryName#, #relation#, #sex#, #civilStatus#,
+				#dateOfBirth#, #age#, #beneficiaryAddr#
+			);
+		END;
+	</insert> 
+	
+	<delete id="GIUTS023DeleteBeneficiary" parameterClass="GIPIGrpItemsBeneficiary">
+		BEGIN
+			GIIS_USERS_PKG.app_user := #userId#;
+			GIUTS023_PKG.delete_beneficiary(#policyId#, #itemNo#, #groupedItemNo#, #beneficiaryNo#);
+		END;
+	</delete>
+	
+	<resultMap class="java.util.HashMap" id="giuts023BeneficiaryResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="beneficiaryNo" 	column="beneficiary_no" />
+		<result property="beneficiaryName"	column="beneficiary_name" />
+		<result property="relation" 		column="relation" />
+		<result property="sex" 				column="sex" />
+		<result property="civilStatus" 		column="civil_status" />
+		<result property="dateOfBirth" 		column="date_of_birth" />
+		<result property="age" 				column="age" />
+		<result property="beneficiaryAddr" 	column="beneficiary_addr" />
+		<result property="policyId" 		column="policy_id" />
+		<result property="itemNo" 			column="item_no" />
+		<result property="groupedItemNo" 	column="grouped_item_no" />
+	</resultMap>
+	
+	<select id="populateGIUTS023beneficiaryInfoTableGrid" resultMap="giuts023BeneficiaryResultMap">
+		SELECT *
+            FROM (SELECT ROWNUM rownum_, b.count_, a.*
+                  FROM (SELECT *
+                          FROM TABLE(GIUTS023_PKG.get_beneficiary(#policyId#, #itemNo#, #groupedItemNo#))
+                          <isNotNull property="filter">
+                          	WHERE 1 = 1
+                          		<isNotEmpty prepend="AND" property="beneficiaryNo">
+									beneficiary_no = #beneficiaryNo#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="beneficiaryName">
+									UPPER(beneficiary_name) LIKE UPPER(#beneficiaryName#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="relation">
+									UPPER(relation) LIKE UPPER(#relation#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="sex">
+									UPPER(sex) LIKE UPPER(#sex#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="age">
+									age = #age#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="dateOfBirth">
+									date_of_birth = TO_DATE(#dateOfBirth#, 'mm-dd-yyyy')
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="civilStatus">
+									UPPER(civil_status) LIKE UPPER(#civilStatus#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="beneficiaryAddr">
+									UPPER(beneficiary_addr) LIKE UPPER(#beneficiaryAddr#)
+								</isNotEmpty>
+                          </isNotNull>
+                            <isEqual property="sortColumn" compareValue="beneficiaryNo">
+                                     ORDER BY beneficiary_no
+                            </isEqual>
+                            <isEqual property="sortColumn" compareValue="beneficiaryName">
+                                     ORDER BY beneficiary_name
+                            </isEqual>
+                            <isEqual property="sortColumn" compareValue="relation">
+                                     ORDER BY relation
+                            </isEqual>
+                            <isEqual property="sortColumn" compareValue="sex">
+                                     ORDER BY sex
+                            </isEqual>
+                            <isEqual property="sortColumn" compareValue="age">
+                                     ORDER BY age
+                            </isEqual>
+                            <isEqual property="sortColumn" compareValue="dateOfBirth">
+                                     ORDER BY date_of_birth
+                            </isEqual>
+                            <isEqual property="sortColumn" compareValue="civilStatus">
+                                     ORDER BY civil_status
+                            </isEqual>
+                            <isEqual property="sortColumn" compareValue="beneficiaryAddr">
+                                     ORDER BY beneficiary_addr
+                            </isEqual>
+                            <isNotNull property="sortColumn">
+                                 <isEqual property="ascDescFlg" compareValue="ASC">
+                                     ASC
+                                 </isEqual>
+                                 <isEqual property="ascDescFlg" compareValue="DESC">
+                                     DESC
+                                 </isEqual>
+                            </isNotNull>) a,
+               (SELECT COUNT (*) count_
+                  FROM TABLE
+                          (GIUTS023_PKG.get_beneficiary(#policyId#, #itemNo#, #groupedItemNo#))
+                          <isNotNull property="filter">
+                          	WHERE 1 = 1
+                          		<isNotEmpty prepend="AND" property="beneficiaryNo">
+									beneficiary_no = #beneficiaryNo#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="beneficiaryName">
+									UPPER(beneficiary_name) LIKE UPPER(#beneficiaryName#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="relation">
+									UPPER(relation) LIKE UPPER(#relation#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="sex">
+									UPPER(sex) LIKE UPPER(#sex#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="age">
+									age = #age#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="dateOfBirth">
+									date_of_birth = TO_DATE(#dateOfBirth#, 'mm-dd-yyyy')
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="civilStatus">
+									UPPER(civil_status) LIKE UPPER(#civilStatus#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="beneficiaryAddr">
+									UPPER(beneficiary_addr) LIKE UPPER(#beneficiaryAddr#)
+								</isNotEmpty>
+                          </isNotNull>
+                          ) b)
+          WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="GIUTS023ShowOtherCert" resultClass="java.lang.String" >
+		SELECT GIUTS023_PKG.show_other_cert(#lineCd#) FROM DUAL
+	</select>
+	
+</sqlMap>

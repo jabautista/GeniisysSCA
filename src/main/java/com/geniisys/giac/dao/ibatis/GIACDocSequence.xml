@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIACDocSequence">
+	
+	<typeAlias alias="giacDocSequence" type="com.geniisys.giac.entity.GIACDocSequence"/>
+  	
+	<resultMap class="giacDocSequence" id="giacDocSequenceResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="fund_cd"    	property="fundCd"/>
+		<result column="branch_cd"    	property="branchCd"/>
+		<result column="doc_name"    	property="docName"/>
+		<result column="doc_seq_no"    	property="docSeqNo"/>
+		<result column="doc_pref_suf" 	property="docPrefSuf"/>
+		<result column="approved_series" property="approvedSeries"/>
+		<result column="user_id"     	property="userId"/>
+		<result column="last_update" 	property="lastUpdate"/>
+		<result column="remarks"     	property="remarks"/>
+	</resultMap>
+	
+	<select id="getGiacs322RecList" resultMap="giacDocSequenceResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giacs322_pkg.get_rec_list(#fundCd#,#branchCd#))
+		  	      <isNotNull property="filter">
+		  	      	WHERE 1 = 1 
+		  	      		<isNotEmpty prepend="AND" property="docName">
+                        	UPPER(doc_name) LIKE UPPER(#docName#)
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="docSeqNo">
+                        	doc_seq_no = #docSeqNo#
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="docPrefSuf">
+                            UPPER(doc_pref_suf) LIKE UPPER(#docPrefSuf#)
+                        </isNotEmpty>
+		  	      </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="docName">
+			              		ORDER BY doc_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="docSeqNo">
+			              		ORDER BY doc_seq_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="docPrefSuf">
+			              		ORDER BY doc_pref_suf
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giacs322_pkg.get_rec_list(#fundCd#,#branchCd#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setDocSequence" parameterClass="giacDocSequence">
+	    DECLARE
+	    	v_rec giac_doc_sequence%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.fund_cd := #fundCd#;
+ 			v_rec.branch_cd := #branchCd#;
+ 			v_rec.doc_name := #docName#;
+ 			v_rec.doc_seq_no := #docSeqNo#;
+ 			v_rec.doc_pref_suf := #docPrefSuf#;
+ 			v_rec.approved_series := #approvedSeries#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			giacs322_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<select id="valDeleteDocSequence" resultClass="java.lang.String">
+		SELECT giacs322_pkg.val_del_rec(#repCd#)FROM dual							
+	</select>
+	
+	<select id="valAddDocSequence" resultClass="java.lang.String">
+		SELECT giacs322_pkg.val_add_rec(#fundCd#,#branchCd#,#docName#) FROM dual					
+	</select>
+ 	
+	<delete id="delDocSequence" parameterClass="giacDocSequence">
+		BEGIN
+ 			giacs322_pkg.del_rec(#fundCd#,#branchCd#,#docName#);
+ 		END;
+ 	</delete>
+ 	
+ 	<resultMap class="java.util.HashMap" id="giacs322CompanyLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result property="fundCd" 			column="fund_cd" />
+		<result property="fundDesc" 		column="fund_desc" />
+		<result property="rowNum" 			column="rownum_"/>
+		<result property="rowCount" 		column="count_"/>
+	</resultMap>
+	
+	<select id="getGiacs322CompanyLOV" resultMap="giacs322CompanyLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giacs322_pkg.get_giacs322_company_lov(#search#))
+		                 <isNotNull property="findText">
+					         WHERE (UPPER(fund_cd) LIKE UPPER(#findText#)
+					         	 OR UPPER(fund_desc) LIKE UPPER(#findText#)
+					         	 )
+				         </isNotNull>          
+			          	  <isNotNull property="sortColumn">
+			                  <isEqual property="sortColumn" compareValue="fundCd">
+				              		ORDER BY fund_cd
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="fundDesc">
+				              		ORDER BY fund_desc
+				              </isEqual>
+				          	  <isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              </isNotNull>
+				          </isNotNull>    
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (giacs322_pkg.get_giacs322_company_lov(#search#))
+			              <isNotNull property="findText">
+					          WHERE (UPPER(fund_cd) LIKE UPPER(#findText#)
+					         	 OR UPPER(fund_desc) LIKE UPPER(#findText#)
+					         	 )
+				          </isNotNull> 
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="giacs322BranchLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result property="branchCd" 		column="branch_cd" />
+		<result property="branchName" 		column="branch_name" />
+		<result property="rowNum" 			column="rownum_"/>
+		<result property="rowCount" 		column="count_"/>
+	</resultMap>
+	
+	<select id="getGiacs322BranchLOV" resultMap="giacs322BranchLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giacs322_pkg.get_giacs322_branch_lov(#fundCd#, #search#, #userId#))
+		                 <isNotNull property="findText">
+					         WHERE (UPPER(branch_cd) LIKE UPPER(#findText#)
+					         	 OR UPPER(branch_name) LIKE UPPER(#findText#)
+					         	 )
+				         </isNotNull>          
+			          	  <isNotNull property="sortColumn">
+			                  <isEqual property="sortColumn" compareValue="branchCd">
+				              		ORDER BY branch_cd
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="branchName">
+				              		ORDER BY branch_name
+				              </isEqual>
+				          	  <isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              </isNotNull>
+				          </isNotNull>    
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (giacs322_pkg.get_giacs322_branch_lov(#fundCd#, #search#, #userId#))
+			              <isNotNull property="findText">
+					          WHERE (UPPER(branch_cd) LIKE UPPER(#findText#)
+					         	 OR UPPER(branch_name) LIKE UPPER(#findText#)
+					         	 )
+				          </isNotNull> 
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+</sqlMap>

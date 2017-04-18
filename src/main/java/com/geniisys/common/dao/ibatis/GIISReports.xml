@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISReports">
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIISReports" type="com.geniisys.common.entity.GIISReports" />
+	
+	<resultMap id="ReportVersionMap" class="GIISReports">
+		<result property="reportId"		column="REPORT_ID" />
+		<result property="reportTitle"	column="REPORT_TITLE" />
+		<result property="lineCd"		column="LINE_CD" />
+		<result property="version"		column="VERSION" />
+	</resultMap>
+	
+	<resultMap id="GIEXS006ReportsResultMap" class="GIISReports" extends="BaseEntity.TableGridResultMap">
+		<result property="reportId"		column="REPORT_ID" />
+		<result property="reportTitle"	column="REPORT_TITLE" />
+  		<result property="rowNum"		column="ROWNUM_"/>
+		<result property="rowCount"		column="COUNT_"/>
+	</resultMap>
+	
+	<select id="getReportVersion" parameterClass="java.lang.String" resultClass="java.lang.String">
+		SELECT GIIS_REPORTS_PKG.get_report_version(#reportId#) FROM DUAL
+	</select>
+	
+	<select id="getReportVersion2" resultClass="java.lang.String">
+		SELECT GIIS_REPORTS_PKG.get_report_version(#reportId#, #lineCd#) FROM DUAL
+	</select>	
+	
+	<select id="getReportsPerLineCd" resultMap="ReportVersionMap">
+		SELECT * FROM TABLE(GIIS_REPORTS_PKG.get_reports_per_line_cd(#lineCd#))
+	</select>
+	
+	<select id="getReportsListing" resultMap="ReportVersionMap">
+		SELECT * FROM TABLE(GIIS_REPORTS_PKG.get_reports_listing)
+	</select>
+	
+	<select id="getReportsListing2" resultMap="ReportVersionMap">
+		SELECT * FROM TABLE(GIIS_REPORTS_PKG.get_reports_listing2(#lineCd#))
+	</select>
+	
+	<select id="getReportDesname2" parameterClass="java.lang.String" resultClass="java.lang.String">
+		SELECT GIIS_REPORTS_PKG.get_report_desname2(#reportId#) FROM DUAL
+	</select>
+
+	<procedure id="getGIEXS006Reports" resultMap="GIEXS006ReportsResultMap">
+  		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(giis_reports_pkg.get_giexs006_reports(#reportTitle#))
+		          <isEqual property="sortColumn" compareValue="reportTitle">
+		          		ORDER BY report_title
+		          </isEqual>
+		          <isNotNull property="sortColumn">
+			          <isEqual property="ascDescFlg" compareValue="ASC">
+			         		ASC
+			         </isEqual>
+			         <isEqual property="ascDescFlg" compareValue="DESC">
+			         		DESC
+			         </isEqual>
+		          </isNotNull>
+		          ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giis_reports_pkg.get_giexs006_reports(#reportTitle#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</procedure>
+
+	<select id="getGicls201Reports" resultClass="java.util.HashMap">
+		SELECT report_id, INITCAP(report_title) report_title
+		  FROM GIIS_REPORTS
+		 WHERE report_id IN ('GICLR201','GICLR201A','GICLR202')
+	</select>
+	
+	<select id="validateReportId" resultClass="java.lang.String" parameterClass="java.lang.String">
+		SELECT 'Y' exist
+		  FROM GIIS_REPORTS
+		 WHERE report_id = #reportId#
+	</select>
+	
+	<!-- for GIISS090 - Reports Maintenance -->
+	<resultMap id="giisReportsListResultMap" class="GIISReports" extends="BaseEntity.TableGridResultMap">
+		<result property="reportId"				column="REPORT_ID" />
+		<result property="reportTitle"			column="REPORT_TITLE" />
+		<result property="lineCd"				column="LINE_CD" />
+		<result property="prevLineCd"			column="LINE_CD"/> <!-- added by John Daniel 04.07.2016 for updating line cd -->
+		<result property="sublineCd"			column="SUBLINE_CD" />
+		<result property="reportType"			column="REPORT_TYPE" />
+		<result property="reportDesc"			column="REPORT_DESC" />
+		<result property="destype"				column="DESTYPE" />
+		<result property="desname"				column="DESNAME" />
+		<result property="desformat"			column="DESFORMAT" />
+		<result property="paramform"			column="PARAMFORM" />
+		<result property="copies"				column="COPIES" />
+		<result property="reportMode"			column="REPORT_MODE" />
+		<result property="orientation"			column="ORIENTATION" />
+		<result property="background"			column="BACKGROUND" />
+		<result property="generationFrequency"	column="GENERATION_FREQUENCY" />
+		<result property="eisTag"				column="EIS_TAG" />
+		<result property="docType"				column="DOC_TYPE" />
+		<result property="moduleTag"			column="MODULE_TAG" />
+		<result property="documentTag"			column="DOCUMENT_TAG" />
+		<result property="version"				column="VERSION" />
+		<result property="birTag"				column="BIR_TAG" />
+		<result property="birFormType"			column="BIR_FORM_TYPE" />
+		<result property="birFreqTag"			column="BIR_FREQ_TAG" />
+		<result property="pagesize"				column="PAGESIZE" />
+		<result property="addSource"			column="ADD_SOURCE" />
+		<result property="birWithReport"		column="BIR_WITH_REPORT" />
+		<result property="disableFileSw"		column="DISABLE_FILE_SW" />
+		<result property="csvFileSw"			column="CSV_FILE_SW" />
+		<result property="remarks"				column="REMARKS" />
+		<result property="userId"				column="USER_ID" />
+		<result property="lastUpdate"			column="LAST_UPDATE" />
+	</resultMap>
+	
+	<select id="getGiiss090RecList" resultMap="giisReportsListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss090_pkg.get_rec_list(#reportId#, #reportTitle#))
+		  	      		  <isNotNull property="filter">
+		  	      		 WHERE 1 = 1
+		  	      		  	<isNotEmpty prepend="AND" property="reportId">
+	                        	UPPER(report_id) LIKE UPPER(#reportId#)
+	                        </isNotEmpty>
+	                        <isNotEmpty prepend="AND" property="reportTitle">
+	                        	UPPER(report_title) LIKE UPPER(#reportTitle#)
+	                        </isNotEmpty>
+	                        <isNotEmpty prepend="AND" property="lineCd">
+	                        	UPPER(line_cd) LIKE UPPER(#lineCd#)
+	                        </isNotEmpty>
+	                        <isNotEmpty prepend="AND" property="sublineCd">
+	                        	UPPER(subline_cd) LIKE UPPER(#sublineCd#)
+	                        </isNotEmpty>
+		  	      		  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="reportId">
+			              		ORDER BY report_id
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="reportTitle">
+			              		ORDER BY report_title
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="lineCd">
+			              		ORDER BY line_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="sublineCd">
+			              		ORDER BY subline_cd
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss090_pkg.get_rec_list(#reportId#, #reportTitle#))
+		                  <isNotNull property="filter">
+		  	      		 WHERE 1 = 1
+		  	      		  	<isNotEmpty prepend="AND" property="reportId">
+	                        	UPPER(report_id) LIKE UPPER(#reportId#)
+	                        </isNotEmpty>
+	                        <isNotEmpty prepend="AND" property="reportTitle">
+	                        	UPPER(report_title) LIKE UPPER(#reportTitle#)
+	                        </isNotEmpty>
+	                        <isNotEmpty prepend="AND" property="lineCd">
+	                        	UPPER(line_cd) LIKE UPPER(#lineCd#)
+	                        </isNotEmpty>
+	                        <isNotEmpty prepend="AND" property="sublineCd">
+	                        	UPPER(subline_cd) LIKE UPPER(#sublineCd#)
+	                        </isNotEmpty>
+		  	      		  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<procedure id="setReport" parameterClass="GIISReports">
+	    DECLARE
+	    	v_rec giis_reports%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.report_id 			:= #reportId#;
+ 			v_rec.report_title 			:= #reportTitle#;
+ 			
+ 			v_rec.line_cd 				:= #lineCd#;
+ 			v_rec.subline_cd 			:= #sublineCd#;
+ 			v_rec.report_type 			:= #reportType#;
+ 			v_rec.report_desc 			:= #reportDesc#;
+ 			v_rec.destype 				:= #destype#;
+ 			v_rec.desname 				:= #desname#;
+ 			v_rec.desformat 			:= #desformat#;
+ 			v_rec.paramform 			:= #paramform#;
+ 			v_rec.copies 				:= #copies#;
+ 			v_rec.report_mode 			:= #reportMode#;
+ 			v_rec.orientation 			:= #orientation#;
+ 			v_rec.background 			:= #background#;
+ 			v_rec.generation_frequency 	:= #generationFrequency#;
+ 			v_rec.eis_tag 				:= #eisTag#;
+ 			v_rec.doc_type 				:= #docType#;
+ 			v_rec.module_tag 			:= #moduleTag#;
+ 			v_rec.document_tag 			:= #documentTag#;
+ 			v_rec.version 				:= #version#;
+ 			v_rec.bir_tag 				:= #birTag#;
+ 			v_rec.bir_form_type 		:= #birFormType#;
+ 			v_rec.bir_freq_tag 			:= #birFreqTag#;
+ 			v_rec.pagesize 				:= #pagesize#;
+ 			v_rec.add_source 			:= #addSource#;
+ 			v_rec.bir_with_report 		:= #birWithReport#;
+ 			v_rec.disable_file_sw 		:= #disableFileSw#;
+ 			v_rec.csv_file_sw 			:= #csvFileSw#;
+ 			
+ 			v_rec.user_id 				:= #userId#;
+ 			v_rec.remarks 				:= #remarks#;
+ 			
+ 			giiss090_pkg.set_rec(v_rec, #prevLineCd#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteReport" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss090_pkg.val_del_rec(#recId#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddReport" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss090_pkg.val_add_rec(#recId#, #recDesc#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delReport" parameterClass="java.lang.String">
+		BEGIN
+ 			giiss090_pkg.del_rec(#reportId#);
+ 		END;
+ 	</delete>
+</sqlMap>

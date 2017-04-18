@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIACR190B" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="ireport.zoom" value="1.6105100000000019"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="310"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String">
+		<defaultValueExpression><![CDATA["C:\\Documents and Settings\\cpi\\Desktop\\GIACR190b\\"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="P_INTM_NO" class="java.lang.Integer"/>
+	<parameter name="P_AGING_ID" class="java.lang.Integer"/>
+	<parameter name="P_USER_ID" class="java.lang.String"/>
+	<parameter name="P_AGING_LIST" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT a.*, b.total_balance_amt
+  FROM (select *
+  	  FROM table(giacr190b_pkg.populate_giacr190b1($P{P_INTM_NO}, $P{P_AGING_ID}, $P{P_USER_ID}, $P{P_AGING_LIST}))
+	 where rownum=1) a,
+	(select sum(v_balance_amt_due) total_balance_amt
+  	   from table(giacr190b_pkg.populate_giacr190b1($P{P_INTM_NO}, $P{P_AGING_ID}, $P{P_USER_ID}, $P{P_AGING_LIST}))) b
+ ORDER BY policy_no]]>
+	</queryString>
+	<field name="INCEPT_DATE" class="java.lang.String"/>
+	<field name="EXPIRY_DATE" class="java.lang.String"/>
+	<field name="POLICY_NO" class="java.lang.String"/>
+	<field name="V_DATE" class="java.sql.Timestamp"/>
+	<field name="V_INVOICE" class="java.lang.String"/>
+	<field name="V_PROPERTY1" class="java.lang.String"/>
+	<field name="V_SIGNATORY1" class="java.lang.String"/>
+	<field name="V_DESIGNATION1" class="java.lang.String"/>
+	<field name="V_INTM_NO1" class="java.math.BigDecimal"/>
+	<field name="V_USER1" class="java.lang.String"/>
+	<field name="V_INTM_NAME1" class="java.lang.String"/>
+	<field name="V_INTM_ADDRESS1" class="java.lang.String"/>
+	<field name="V_INTM_ADDRESS2" class="java.lang.String"/>
+	<field name="V_INTM_ADDRESS3" class="java.lang.String"/>
+	<field name="V_INTERMEDIARY_NAME" class="java.lang.String"/>
+	<field name="V_INTERMEDIARY_NO" class="java.math.BigDecimal"/>
+	<field name="V_POLICY" class="java.lang.String"/>
+	<field name="V_POLICY_NO" class="java.lang.String"/>
+	<field name="V_ENDT_NO" class="java.lang.String"/>
+	<field name="V_ISS_CD" class="java.lang.String"/>
+	<field name="V_PREM_SEQ_NO" class="java.math.BigDecimal"/>
+	<field name="V_PREM_BAL_DUE" class="java.math.BigDecimal"/>
+	<field name="V_TAX_BAL_DUE" class="java.math.BigDecimal"/>
+	<field name="V_BALANCE_AMT_DUE" class="java.math.BigDecimal"/>
+	<field name="V_INST_NO" class="java.math.BigDecimal"/>
+	<field name="TOTAL_BALANCE_AMT" class="java.math.BigDecimal"/>
+	<variable name="SUMBALANCE_PERASSDNO" class="java.math.BigDecimal" resetType="Group" resetGroup="G_ASSD_NO" calculation="System">
+		<variableExpression><![CDATA[]]></variableExpression>
+		<initialValueExpression><![CDATA[]]></initialValueExpression>
+	</variable>
+	<variable name="V_INTM_NO1_1" class="java.math.BigDecimal" resetType="Group" resetGroup="G_ASSD_NO" calculation="Sum">
+		<variableExpression><![CDATA[$F{V_INTM_NO1}]]></variableExpression>
+	</variable>
+	<variable name="V_SUM_BALANCE_ALL" class="java.math.BigDecimal" calculation="Sum"/>
+	<group name="G_ASSD_NO">
+		<groupExpression><![CDATA[$F{INCEPT_DATE}]]></groupExpression>
+		<groupHeader>
+			<band height="14">
+				<staticText>
+					<reportElement x="-2" y="-40" width="158" height="11"/>
+					<textElement textAlignment="Center">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[POLICY TERM]]></text>
+				</staticText>
+				<subreport>
+					<reportElement x="2" y="2" width="553" height="11"/>
+					<subreportParameter name="SUBREPORT_DIR">
+						<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="P_INTM_NO">
+						<subreportParameterExpression><![CDATA[$P{P_INTM_NO}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="P_AGING_LIST">
+						<subreportParameterExpression><![CDATA[$P{P_AGING_LIST}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="P_AGING_ID">
+						<subreportParameterExpression><![CDATA[$P{P_AGING_ID}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="P_USER_ID">
+						<subreportParameterExpression><![CDATA[$P{P_USER_ID}]]></subreportParameterExpression>
+					</subreportParameter>
+					<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					<returnValue subreportVariable="SUMBALANCE_AMT_DUEPERPOLICY" toVariable="SUMBALANCE_PERASSDNO"/>
+					<returnValue subreportVariable="V_SUM_BALANCE_ALL" toVariable="V_SUM_BALANCE_ALL"/>
+					<subreportExpression class="java.lang.String"><![CDATA[$P{SUBREPORT_DIR} + "GIACR190B_GPOLICYNO.jasper"]]></subreportExpression>
+				</subreport>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="356">
+				<staticText>
+					<reportElement x="2" y="66" width="205" height="11"/>
+					<textElement>
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[METROPOLITAN INSURANCE CO., INC.]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="101" y="173" width="11" height="20"/>
+					<textElement>
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[/]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="57" y="213" width="44" height="20"/>
+					<textElement>
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[NOTE :]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="102" y="213" width="327" height="22"/>
+					<textElement>
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[IF payment has been made, please clarify with our CASHIER,
+MS. Sally Melencio, or ASST. CASHIER Ms. Mylen Balboa]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="302" y="235" width="15" height="11"/>
+					<textElement>
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[)]]></text>
+				</staticText>
+				<textField>
+					<reportElement x="2" y="111" width="100" height="20"/>
+					<textElement>
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{V_SIGNATORY1}.equals(null) ? "________________________" : $F{V_SIGNATORY1}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="2" y="131" width="100" height="20"/>
+					<textElement>
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{V_DESIGNATION1}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="60" y="173" width="41" height="20"/>
+					<textElement>
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{V_USER1}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="112" y="173" width="100" height="20"/>
+					<textElement>
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_INTM_NO1_1}]]></textFieldExpression>
+				</textField>
+				<textField pattern="MMMMM dd, yyyy">
+					<reportElement x="202" y="235" width="100" height="11"/>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression class="java.sql.Timestamp"><![CDATA[$F{V_DATE}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" evaluationTime="Band" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+					<reportElement x="456" y="11" width="100" height="11"/>
+					<textElement textAlignment="Right">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{TOTAL_BALANCE_AMT}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="437" y="11" width="18" height="11"/>
+					<textElement>
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[PHP]]></text>
+				</staticText>
+				<line>
+					<reportElement x="456" y="7" width="100" height="1"/>
+					<graphicElement>
+						<pen lineWidth="1.0" lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="456" y="4" width="100" height="1"/>
+					<graphicElement>
+						<pen lineWidth="1.0" lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<staticText>
+					<reportElement x="101" y="246" width="326" height="22"/>
+					<textElement>
+						<font size="7"/>
+					</textElement>
+					<text><![CDATA[For your convenience, you may deposit the amount due in any
+Bank of Commerce branch (Acct. #0185-02294-3) or Equitable
+PCIBank branch (Acct. # 1472-00657-2) for credit to Metropolitan
+Insurance Co. Please keep an extra copy of the deposit slip as
+your temporary receipt. Our official receipt wil be maid to you
+as soon as you advise us of your deposit.
+]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="102" y="235" width="100" height="11"/>
+					<textElement>
+						<font size="7"/>
+					</textElement>
+					<text><![CDATA[(Excluding payment made after]]></text>
+				</staticText>
+			</band>
+		</groupFooter>
+	</group>
+	<pageHeader>
+		<band height="71">
+			<staticText>
+				<reportElement x="1" y="4" width="554" height="11"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[STATEMENT OF ACCOUNT]]></text>
+			</staticText>
+			<textField pattern="MMMMM dd, yyyy">
+				<reportElement x="455" y="24" width="100" height="11"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.sql.Timestamp"><![CDATA[$F{V_DATE}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="1" y="24" width="100" height="11"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{V_INTM_NAME1}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="1" y="35" width="100" height="11"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{V_INTM_ADDRESS1}.equals(null) ? "________________________" :$F{V_INTM_ADDRESS1}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="1" y="46" width="100" height="11"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{V_INTM_ADDRESS2}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="1" y="57" width="100" height="11"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{V_INTM_ADDRESS3}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="70">
+			<frame>
+				<reportElement x="1" y="13" width="155" height="46"/>
+			</frame>
+			<frame>
+				<reportElement x="195" y="11" width="100" height="48"/>
+			</frame>
+			<frame>
+				<reportElement x="328" y="11" width="100" height="48"/>
+			</frame>
+			<frame>
+				<reportElement x="455" y="11" width="100" height="48"/>
+			</frame>
+			<line>
+				<reportElement x="0" y="12" width="156" height="1"/>
+			</line>
+			<line>
+				<reportElement x="0" y="58" width="156" height="1"/>
+			</line>
+			<line>
+				<reportElement x="195" y="12" width="100" height="1"/>
+			</line>
+			<line>
+				<reportElement x="195" y="57" width="100" height="1"/>
+			</line>
+			<line>
+				<reportElement x="328" y="12" width="100" height="1"/>
+			</line>
+			<line>
+				<reportElement x="328" y="57" width="100" height="1"/>
+			</line>
+			<line>
+				<reportElement x="455" y="12" width="100" height="1"/>
+			</line>
+			<line>
+				<reportElement x="455" y="57" width="100" height="1"/>
+			</line>
+			<staticText>
+				<reportElement x="195" y="30" width="100" height="11"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[POLICY NO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="328" y="30" width="100" height="11"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[INVOICE
+NO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="455" y="30" width="100" height="11"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[GROSS
+AMOUNT]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+</jasperReport>

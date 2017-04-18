@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GIRIPackBinderHdr">
+	
+	<cacheModel type="memory" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+
+	<typeAlias alias="GIRIPackBinderHdrClass" type="com.geniisys.giri.pack.entity.GIRIPackBinderHdr"/>
+	
+	<resultMap class="GIRIPackBinderHdrClass" id="GIRIPackBinderHdrResultMap">
+		<result column="pack_policy_id" 		property="packPolicyId"/>
+		<result column="pack_binder_id" 		property="packBinderId"/>
+		<result column="line_cd" 				property="lineCd"/>
+		<result column="binder_yy" 				property="binderYy"/>
+		<result column="binder_seq_no" 			property="binderSeqNo"/>
+		<result column="ri_cd" 					property="riCd"/>
+		<result column="ri_tsi_amt" 			property="riTsiAmt"/>
+		<result column="ri_prem_amt" 			property="riPremAmt"/>
+		<result column="ri_shr_pct" 			property="riShrPct"/>
+		<result column="ri_comm_rt" 			property="riCommRt"/>
+		<result column="ri_comm_amt" 			property="riCommAmt"/>
+		<result column="prem_tax" 				property="premTax"/>
+		<result column="ri_prem_vat" 			property="riPremVat"/>
+		<result column="ri_comm_vat" 			property="riCommVat"/>
+		<result column="ri_wholding_vat" 		property="riWholdingVat"/>
+		<result column="reverse_tag" 			property="reverseTag"/>
+		<result column="accept_by" 				property="acceptBy"/>
+		<result column="accept_date" 			property="acceptDate"/>
+		<result column="attention" 				property="attention"/>
+		<result column="remarks" 				property="remarks"/>
+		<result column="user_id" 				property="userId"/>
+		<result column="last_update" 			property="lastUpdate"/>
+		<result column="currency_cd" 			property="currencyCd"/>
+		<result column="currency_rt" 			property="currencyRt"/>
+		<result column="tsi_amt" 				property="tsiAmt"/>
+		<result column="binder_date" 			property="binderDate"/>
+		<result column="as_no" 					property="asNo"/>
+		<result column="prem_amt" 				property="premAmt"/>
+		<result column="dsp_pack_binder_no" 	property="dspPackBinderNo"/>
+	</resultMap>
+
+	<resultMap class="GIRIPackBinderHdrClass" id="GIRIPackBinderHdrResultMapGrid" extends="GIRIPackBinderHdrResultMap">
+		<result property="rowNum"				column="rownum_"/>
+		<result property="rowCount"				column="count_"/>
+	</resultMap>
+
+	<select id="getGiriPackbinderHdrGrid" resultMap="GIRIPackBinderHdrResultMapGrid">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT pack_policy_id, pack_binder_id, ri_cd, ri_tsi_amt, 
+                       		   ri_prem_amt, ri_shr_pct, ri_comm_rt, ri_comm_amt, 
+                        	   prem_tax, ri_prem_vat, ri_comm_vat, ri_wholding_vat,
+                        	   reverse_tag,  user_id, last_update, currency_cd, 
+                        	   currency_rt, tsi_amt, binder_date,  prem_amt, 
+                               line_cd, binder_yy, binder_seq_no, ESCAPE_VALUE(accept_by) accept_by, accept_date,
+                               ESCAPE_VALUE(as_no) as_no, ESCAPE_VALUE(attention) attention, ESCAPE_VALUE(remarks) remarks,
+                               dsp_pack_binder_no
+		                  FROM TABLE (GIRI_PACK_BINDER_HDR_PKG.get_giri_pack_binder_hdr(#packPolicyId#))
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIRI_PACK_BINDER_HDR_PKG.get_giri_pack_binder_hdr(#packPolicyId#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+
+	<insert id="setGiriPackbinderHdr" parameterClass="GIRIPackBinderHdrClass">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GIRI_PACK_BINDER_HDR_PKG.set_giri_pack_binder_hdr(
+					#packPolicyId#, #packBinderId#, #lineCd#,
+                    #binderYy#, #binderSeqNo#, #riCd#,
+                    #riTsiAmt#, #riPremAmt#, #riShrPct#,
+                    #riCommRt#, #riCommAmt#, #premTax#,
+                    #riPremVat#, #riCommVat#, #riWholdingVat#,
+                    #reverseTag#, #acceptBy#, #acceptDate#,
+                    #attention#, #remarks#, #userId#,
+                    #lastUpdate#, #currencyCd#, #currencyRt#,
+                    #tsiAmt#, #binderDate#, #asNo#,
+                    #premAmt#
+					);
+		END;
+	</insert>
+
+</sqlMap>

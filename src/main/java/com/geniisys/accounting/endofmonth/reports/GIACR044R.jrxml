@@ -1,0 +1,323 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIACR044R" language="groovy" pageWidth="990" pageHeight="792" columnWidth="950" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="569"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="P_MM" class="java.lang.Integer">
+		<parameterDescription><![CDATA[]]></parameterDescription>
+	</parameter>
+	<parameter name="P_YEAR" class="java.lang.Integer"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="P_BRANCH_CD" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT * FROM TABLE (giacr044r_pkg.get_report($P{P_MM},$P{P_YEAR},$P{P_BRANCH_CD}))
+ORDER BY tran_class_name, gl_acct]]>
+	</queryString>
+	<field name="COMPANY_NAME" class="java.lang.String"/>
+	<field name="COMPANY_ADDRESS" class="java.lang.String"/>
+	<field name="CF_DATE" class="java.lang.String"/>
+	<field name="GL_ACCT_ID" class="java.math.BigDecimal"/>
+	<field name="GL_ACCT" class="java.lang.String"/>
+	<field name="GL_ACCT_NAME" class="java.lang.String"/>
+	<field name="DEBIT_AMT" class="java.math.BigDecimal"/>
+	<field name="CREDIT_AMT" class="java.math.BigDecimal"/>
+	<field name="TRAN_CLASS" class="java.lang.String"/>
+	<field name="TRAN_CLASS_NAME" class="java.lang.String"/>
+	<field name="HEADER_FLAG" class="java.lang.String"/>
+	<variable name="V_DEBIT_AMT" class="java.math.BigDecimal" resetType="Group" resetGroup="TRAN_CLASS_GRP" calculation="Sum">
+		<variableExpression><![CDATA[$F{DEBIT_AMT}]]></variableExpression>
+	</variable>
+	<variable name="V_CREDIT_AMT" class="java.math.BigDecimal" resetType="Group" resetGroup="TRAN_CLASS_GRP" calculation="Sum">
+		<variableExpression><![CDATA[$F{CREDIT_AMT}]]></variableExpression>
+	</variable>
+	<variable name="V_GRAND_DEBIT_AMT" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{DEBIT_AMT}]]></variableExpression>
+	</variable>
+	<variable name="V_GRAND_CREDIT_AMT" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CREDIT_AMT}]]></variableExpression>
+	</variable>
+	<group name="TRAN_CLASS_GRP" isStartNewPage="true">
+		<groupExpression><![CDATA[$F{TRAN_CLASS}]]></groupExpression>
+		<groupHeader>
+			<band height="14">
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement x="19" y="0" width="263" height="11"/>
+					<textElement>
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{TRAN_CLASS_NAME}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="23">
+				<printWhenExpression><![CDATA[$F{HEADER_FLAG} == 'Y' ? false : true]]></printWhenExpression>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+					<reportElement x="664" y="11" width="130" height="11"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_DEBIT_AMT}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+					<reportElement x="805" y="11" width="130" height="11"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_CREDIT_AMT}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="616" y="11" width="39" height="11"/>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[Total  :]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="664" y="0" width="130" height="11"/>
+					<textElement textAlignment="Right">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[-----------------------------------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="805" y="0" width="130" height="11"/>
+					<textElement textAlignment="Right">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[-----------------------------------------------------------]]></text>
+				</staticText>
+			</band>
+		</groupFooter>
+	</group>
+	<pageHeader>
+		<band height="66">
+			<staticText>
+				<reportElement x="0" y="0" width="40" height="11"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[RUNDATE :]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="11" width="40" height="11"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[RUNTIME  :]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" pattern="MM-dd-yyyy" isBlankWhenNull="true">
+				<reportElement x="40" y="0" width="100" height="11"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.util.Date"><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="h:mm:ss a" isBlankWhenNull="true">
+				<reportElement x="40" y="11" width="100" height="11"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.util.Date"><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="814" y="0" width="125" height="11"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[GIACR044  ]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="140" y="0" width="674" height="11"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{COMPANY_NAME}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="140" y="11" width="674" height="11"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{COMPANY_ADDRESS}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="33" width="950" height="11"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[Reversing Entries (24th Method)]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="0" y="44" width="950" height="11"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{CF_DATE}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" evaluationTime="Page" isBlankWhenNull="true">
+				<reportElement x="814" y="11" width="115" height="11"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["Page    "+$V{PAGE_NUMBER}+"     of    "]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" evaluationTime="Report" isBlankWhenNull="true">
+				<reportElement x="929" y="11" width="17" height="11"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="23">
+			<printWhenExpression><![CDATA[$F{HEADER_FLAG} == 'Y' ? false : true]]></printWhenExpression>
+			<staticText>
+				<reportElement x="148" y="11" width="507" height="11"/>
+				<textElement textAlignment="Left">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="805" y="11" width="130" height="11"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[-------------------------------------------------------------------------]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="148" y="0" width="507" height="11"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[GL Account Name]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="664" y="11" width="130" height="11"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[-------------------------------------------------------------------------]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="19" y="11" width="121" height="11"/>
+				<textElement textAlignment="Left">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[--------------------------------------------------------------------------]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="664" y="0" width="130" height="11"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[Debit Amount]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="805" y="0" width="130" height="11"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[Credit Amount]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="19" y="0" width="121" height="11"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[GL Account]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="11">
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="805" y="0" width="130" height="11"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{CREDIT_AMT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="664" y="0" width="130" height="11"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{DEBIT_AMT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="148" y="0" width="507" height="11"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{GL_ACCT_NAME}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="19" y="0" width="121" height="11"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{GL_ACCT}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<summary>
+		<band height="33">
+			<printWhenExpression><![CDATA[$F{HEADER_FLAG} == 'Y' ? false : true]]></printWhenExpression>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="664" y="11" width="130" height="11"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_GRAND_DEBIT_AMT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="805" y="11" width="130" height="11"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_GRAND_CREDIT_AMT}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="594" y="11" width="61" height="11"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[Grand Total  :]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="664" y="22" width="130" height="11"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[==========================================]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="805" y="22" width="130" height="11"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[==========================================]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="805" y="0" width="130" height="11"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[-----------------------------------------------------------]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="664" y="0" width="130" height="11"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[-----------------------------------------------------------]]></text>
+			</staticText>
+		</band>
+	</summary>
+</jasperReport>

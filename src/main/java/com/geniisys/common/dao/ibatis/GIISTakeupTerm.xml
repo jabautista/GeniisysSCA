@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISTakeupTerm">
+	<typeAlias alias="GIISTakeupTermClass" type="com.geniisys.common.entity.GIISTakeupTerm"/>
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<!-- GIISS211 : shan 10.30.2013 -->
+	<resultMap class="GIISTakeupTermClass" id="giiss211ResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="takeup_term"     	property="takeupTerm"/>
+		<result column="takeup_term_desc"  	property="takeupTermDesc"/>
+		<result column="no_of_takeup"     	property="noOfTakeup"/>
+		<result column="yearly_tag"  		property="yearlyTag"/>
+		<result column="user_id"     		property="userId"/>
+		<result column="last_update" 		property="lastUpdate"/>
+		<result column="remarks"     		property="remarks"/>
+	</resultMap>
+	
+	<select id="getGiiss211RecList" resultMap="giiss211ResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss211_pkg.get_rec_list(#takeupTerm#, #takeupTermDesc#, #yearlyTag#))
+		  	      		  <isNotNull property="filter">
+		  	      		  	WHERE 1=1
+		  	      		  		<isNotEmpty prepend="AND" property="noOfTakeup">
+		  	      		  			no_of_takeup = #noOfTakeup#
+		  	      		  		</isNotEmpty>
+		  	      		  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="takeupTerm">
+			              		ORDER BY takeup_term
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="takeupTermDesc">
+			              		ORDER BY takeup_term_desc
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="noOfTakeup">
+			              		ORDER BY no_of_takeup
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="yearlyTag">
+			              		ORDER BY yearly_tag
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss211_pkg.get_rec_list(#takeupTerm#, #takeupTermDesc#, #yearlyTag#))
+		  	      		  <isNotNull property="filter">
+		  	      		  	WHERE 1=1
+		  	      		  		<isNotEmpty prepend="AND" property="noOfTakeup">
+		  	      		  			no_of_takeup = #noOfTakeup#
+		  	      		  		</isNotEmpty>
+		  	      		  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setTakeupTerm" parameterClass="GIISTakeupTermClass">
+	    DECLARE
+	    	v_rec GIIS_TAKEUP_TERM%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.takeup_term := #takeupTerm#;
+ 			v_rec.takeup_term_desc := #takeupTermDesc#;
+ 			v_rec.no_of_takeup := #noOfTakeup#;
+ 			v_rec.yearly_tag := #yearlyTag#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			giiss211_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteTakeupTerm" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss211_pkg.val_del_rec(#takeupTerm#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddTakeupTerm" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss211_pkg.val_add_rec(#takeupTerm#, #takeupTermDesc#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delTakeupTerm" parameterClass="java.lang.String">
+		BEGIN
+ 			giiss211_pkg.del_rec(#takeupTerm#);
+ 		END;
+ 	</delete>
+<!-- end GIISS211 : shan 10.30.2013 -->
+
+</sqlMap>

@@ -1,0 +1,12 @@
+DROP TRIGGER CPI.TRGR_RISKS;
+
+CREATE OR REPLACE TRIGGER CPI.TRGR_RISKS
+BEFORE INSERT OR UPDATE
+ON CPI.GIIS_RISKS FOR EACH ROW
+BEGIN
+       :NEW.user_id    := NVL (giis_users_pkg.app_user, USER);
+       :NEW.last_update := SYSDATE;
+END;
+/
+
+

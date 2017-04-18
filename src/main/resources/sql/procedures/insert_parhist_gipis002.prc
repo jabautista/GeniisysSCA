@@ -1,0 +1,13 @@
+DROP PROCEDURE CPI.INSERT_PARHIST_GIPIS002;
+
+CREATE OR REPLACE PROCEDURE CPI.Insert_Parhist_Gipis002
+  (b240_par_id IN NUMBER,
+   CG$CTRL_CGU$USER IN VARCHAR2) IS
+BEGIN
+  INSERT INTO GIPI_PARHIST
+              (par_id,user_id,parstat_date,entry_source,parstat_cd)
+       VALUES (b240_par_id,CG$CTRL_CGU$USER,SYSDATE,NULL,'3');
+END;
+/
+
+

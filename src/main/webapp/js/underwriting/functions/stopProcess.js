@@ -1,0 +1,3 @@
+function stopProcess(){
+	return false;
+}

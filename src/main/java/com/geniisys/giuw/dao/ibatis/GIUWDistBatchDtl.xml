@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIUWDistBatchDtl">
+	
+	<typeAlias alias="GIUWDistBatchDtl" type="com.geniisys.giuw.entity.GIUWDistBatchDtl"/>
+	
+	<resultMap class="GIUWDistBatchDtl" id="getGiuwBatchDistDtlMap">
+		<result property="batchId" 		column="BATCH_ID"/>
+		<result property="lineCd" 		column="LINE_CD"/>
+		<result property="shareCd" 		column="SHARE_CD"/>
+		<result property="distSpct" 	column="DIST_SPCT"/>
+		<result property="cpiRecNo" 	column="CPI_REC_NO"/>
+		<result property="cpiBranchCd" 	column="CPI_BRANCH_CD"/>
+		<result property="arcExtData" 	column="ARC_EXT_DATA"/>
+		<result property="dspTrtyCd" 	column="DSP_TRTY_CD"/>
+		<result property="dspTrtyName" 	column="DSP_TRTY_NAME"/>
+		<result property="dspTrtySw"	column="DSP_TRTY_SW"/>
+	</resultMap>
+	
+	<parameterMap class="map" id="checkRiShareMap">
+		<parameter property="batchId"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="vFaculSw"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="INOUT"/>
+	</parameterMap>
+	
+	<select id="getGiuwDistBatchDtl" resultMap="getGiuwBatchDistDtlMap" parameterClass="java.util.HashMap">
+		SELECT * FROM TABLE(GIUW_DIST_BATCH_DTL_PKG.get_giuw_dist_batch_dtl(#batchId#, #lineCd#))
+	</select>
+	
+	<procedure id="setGiuwDistBatchDtl" parameterClass="GIUWDistBatchDtl">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			GIUW_DIST_BATCH_DTL_PKG.set_giuw_dist_batch_dtl(#batchId#, #lineCd#, #shareCd#, #distSpct#); 
+		END;
+	</procedure>
+		
+	<procedure id="delGiuwDistBatchDtl" parameterClass="GIUWDistBatchDtl">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			GIUW_DIST_BATCH_DTL_PKG.del_giuw_dist_batch_dtl(#batchId#, #lineCd#, #shareCd#); 
+		END;
+	</procedure>
+	
+	<procedure id="checkRiShare" parameterMap="checkRiShareMap">
+		BEGIN
+			 GIUW_DIST_BATCH_DTL_PKG.check_ri_share(?, ?);
+		END;
+	</procedure>
+	
+	<!-- shan 08.11.2014 -->
+	<update id="updateBatchFlag1" parameterClass="java.lang.Integer">
+		UPDATE giuw_dist_batch
+		   SET batch_flag = 1
+		 WHERE batch_id = #batchId#
+	</update>
+	<!-- end 08.11.2014 -->
+</sqlMap>

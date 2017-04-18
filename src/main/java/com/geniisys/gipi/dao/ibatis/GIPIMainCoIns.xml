@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIMainCoIns">
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference_type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIPIMainCoIns" type="com.geniisys.gipi.entity.GIPIMainCoIns"/>
+	
+	<resultMap class="GIPIMainCoIns" id="gipiMainCoInsMap">
+		<result column="par_id"				property="parId"/>
+		<result column="prem_amt"			property="premAmt"/>
+		<result column="tsi_amt"			property="tsiAmt"/>
+	</resultMap>
+	
+	<resultMap class="GIPIMainCoIns" id="policyMainCoInsMap">
+		<result property="policyId" 	column="policy_id"/>
+		<result property="parId" 		column="par_id"/>
+		<result property="premAmt" 		column="prem_amt"/>
+		<result property="tsiAmt" 		column="tsi_amt"/>
+	</resultMap>
+	
+	<select id="getGIPIMainCoIns" resultMap="gipiMainCoInsMap">
+		SELECT * FROM TABLE(GIPI_MAIN_CO_INS_PKG.get_gipi_main_co_ins(#parId#))
+	</select>
+	
+	<procedure id="saveGipiMainCoIns" parameterClass="map">
+		BEGIN
+			GIPI_MAIN_CO_INS_PKG.save_gipi_main_co_ins(#parId#, #premAmt#, #tsiAmt#, #userId#);
+		END;
+	</procedure>
+	
+	<select id="getPolicyMainCoIns" resultMap="policyMainCoInsMap" parameterClass="java.lang.Integer">
+		SELECT * FROM TABLE (gipi_main_co_ins_pkg.get_policy_main_co_ins (#policyId#))
+	</select>
+
+<!-- GIPIS154 : shan 10.21.2013 -->
+	<select id="limitEntryGIPIS154" resultClass="java.lang.String" parameterClass="java.util.HashMap">
+		SELECT gipi_main_co_ins_pkg.limit_entry_gipis154 (#globalPackParId#, #parId#) FROM DUAL
+	</select>
+<!-- end GIPIS154 : shan 10.21.2013 -->
+</sqlMap>

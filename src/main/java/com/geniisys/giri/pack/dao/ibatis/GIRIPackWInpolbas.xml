@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIRIPackWInpolbas">
+	<cacheModel type="memory" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIRIPackWInPolbasClass" type="com.geniisys.giri.entity.GIRIPackWInPolbas"/>
+	<resultMap class="GIRIPackWInPolbasClass" id="giriWInPolbasResultMap">
+		<result column="pack_accept_no" 				property="packAcceptNo" />
+		<result column="pack_par_id" 				property="packParId" />
+		<result column="ri_cd" 					property="riCd" />
+		<result column="accept_date" 			property="acceptDate" />
+		<result column="ri_policy_no" 			property="riPolicyNo" />
+		<result column="ri_endt_no" 			property="riEndtNo" />
+		<result column="ri_binder_no" 			property="riBinderNo" />
+		<result column="writer_cd" 				property="writerCd" />
+		<result column="offer_date" 			property="offerDate" />
+		<result column="accept_by" 				property="acceptBy" />
+		<result column="orig_tsi_amt" 			property="origTsiAmt" />
+		<result column="orig_prem_amt" 			property="origPremAmt" />
+		<result column="remarks" 				property="remarks" />
+		<result column="ref_accept_no" 			property="refAcceptNo" />
+		<result column="ri_sname" property="riSName" />
+		<result column="ri_sname2" property="riSName2" />
+	</resultMap>
+	
+	
+	<parameterMap class="map" id="copyPackPolWInpolbasMap">
+		<parameter property="userId" 			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="packParId"			jdbcType="INTEGER" 	javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="packPolicyId" 		jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="issCd" 			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+	</parameterMap>
+	
+	<procedure id="copyPackPolWInpolbas" parameterMap="copyPackPolWInpolbasMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			giri_pack_winpolbas_pkg.copy_pack_pol_winpolbas(?, ?, ?);
+		END;
+	</procedure>
+	
+	
+	<procedure id="setGIRIPackWInPolbas" parameterClass="GIRIPackWInPolbasClass" >
+		
+		DECLARE
+			pack_winpolbas giri_pack_winpolbas%ROWTYPE;
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			pack_winpolbas.pack_accept_no		:= #packAcceptNo#;
+			pack_winpolbas.pack_par_id	:= #packParId#;
+			pack_winpolbas.accept_by	:= #acceptBy#;
+			pack_winpolbas.orig_tsi_amt	:= #origTsiAmt#;
+			pack_winpolbas.accept_date		:= TO_DATE(#acceptDate#, 'mm-dd-yyyy');
+			pack_winpolbas.offer_date			:= TO_DATE(#offerDate#, 'mm-dd-yyyy');
+			pack_winpolbas.orig_prem_amt			:=  #origPremAmt#;
+			pack_winpolbas.ref_accept_no		:= #refAcceptNo#;
+			pack_winpolbas.remarks		:= #remarks#;
+			pack_winpolbas.ri_binder_no		:= #riBinderNo#;
+			pack_winpolbas.ri_cd		:= #riCd#;
+			pack_winpolbas.ri_endt_no		:= #riEndtNo#;
+			pack_winpolbas.ri_policy_no		:= #riPolicyNo#;
+			pack_winpolbas.writer_cd		:= #writerCd#;
+		<!-- 	
+  			 -->
+			giri_pack_winpolbas_pkg.save_pack_winpolbas(pack_winpolbas);
+		END;
+	</procedure>
+	
+	<select id="getNewPackAcceptNo" resultClass="Integer">
+		 SELECT PACK_WINPOLBAS_ACCEPT_NO_S.NEXTVAL
+  			  FROM DUAL
+	</select>
+	
+	<procedure id="giris005aPackWInPolbasPostInsert" parameterClass="Integer">
+		BEGIN
+			giri_pack_winpolbas_pkg.giris005a_post_insert(#packParId#);
+		END;	
+	</procedure>
+	
+	<procedure id="giris005aPackWInPolbasPostUpdate" parameterClass="GIRIPackWInPolbasClass">
+		BEGIN
+			giri_pack_winpolbas_pkg.giris005a_post_update(#packParId#, #riCd#,
+				TO_DATE(#acceptDate#, 'MM/DD/YYYY'), #riPolicyNo#, #riEndtNo#, #riBinderNo#, #writerCd#, TO_DATE(#offerDate#, 'MM/DD/YYYY'), 
+				#acceptBy#, #origTsiAmt#, #origPremAmt#, #remarks#,
+				#refAcceptNo#);
+		END;		
+		
+	</procedure>
+	
+	<select id="getGiriPackWInPolbas" resultMap="giriWInPolbasResultMap">
+		SELECT * FROM TABLE(giri_pack_winpolbas_pkg.get_giri_pack_winpolbas(#packParId#))
+	</select>
+</sqlMap>	

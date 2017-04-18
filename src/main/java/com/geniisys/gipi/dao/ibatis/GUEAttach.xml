@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GUEAttach">
+
+	<typeAlias alias="GUEAttachClass" type="com.geniisys.gipi.entity.GUEAttach"/>
+
+	<resultMap class="GUEAttachClass" id="GUEAttachResultMap">
+		<result property="tranId" column="tran_id"/>
+		<result property="itemNo" column="item_no"/>
+		<result property="filePath" column="file_path"/>
+		<result property="fileName" column="file_name"/>
+		<result property="remarks" column="remarks"/>
+	</resultMap>
+
+	<procedure id="setGUEAttach" parameterClass="GUEAttachClass">
+		DECLARE	
+		  v_attach GUE_ATTACH%ROWTYPE;
+		BEGIN
+		  giis_users_pkg.app_user := #appUser#;
+		  		  
+		  v_attach.tran_id := #tranId#;
+		  v_attach.item_no := #itemNo#;
+		  v_attach.file_name := #filePath# || '/' || #fileName#;
+		  v_attach.remarks := #remarks#;
+		  
+		  gue_attach_pkg.set_gue_attach(v_attach);
+		END;
+	</procedure>
+	
+	<procedure id="delGUEAttach" parameterClass="GUEAttachClass">
+		BEGIN
+			gue_attach_pkg.del_gue_attach(#tranId#, #itemNo#);
+		END;
+	</procedure>
+	
+	<procedure id="getGUEAttachListing" resultMap="GUEAttachResultMap">
+		SELECT * FROM TABLE(gue_attach_pkg.get_gue_attach_listing(#tranId#))
+	</procedure>
+
+</sqlMap>

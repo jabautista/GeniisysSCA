@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GIISIndustryGroup">
+    <typeAlias alias="giisIndustryGroup" type="com.geniisys.common.entity.GIISIndustryGroup"/>
+    
+    <resultMap class="giisIndustryGroup" id="giisIndustryGroupListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="ind_grp_cd"     	property="indGrpCd"/>
+		<result column="ind_grp_nm"     	property="indGrpNm"/>
+		<result column="remarks"     		property="remarks"/>
+		<result column="user_id"     		property="userId"/>
+		<result column="last_update" 		property="lastUpdate"/>
+    </resultMap>
+    
+    <select id="getGiiss205RecList" resultMap="giisIndustryGroupListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss205_pkg.get_rec_list(#indGrpCd#, #indGrpNm#))
+		                  <isEqual property="sortColumn" compareValue="indGrpCd">
+			              		ORDER BY ind_grp_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="indGrpNm">
+			              		ORDER BY ind_grp_nm
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss205_pkg.get_rec_list(#indGrpCd#, #indGrpNm#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+    <procedure id="valAddIndustryGroup" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss205_pkg.val_add_rec(#indGrpCd#, #indGrpNm#);
+ 		END;
+ 	</procedure>
+ 	
+    <procedure id="valDelIndustryGroup" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss205_pkg.val_del_rec(#indGrpCd#);
+ 		END;
+ 	</procedure>
+ 	
+    <procedure id="setIndustryGroup" parameterClass="giisIndustryGroup">
+	    DECLARE
+	    	v_rec giis_industry_group%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.ind_grp_cd := #indGrpCd#;
+ 			v_rec.ind_grp_nm := #indGrpNm#;
+ 			v_rec.remarks := #remarks#;
+ 			v_rec.user_id := #userId#;
+ 			
+ 			giiss205_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+    <delete id="delIndustryGroup" parameterClass="giisIndustryGroup">
+		BEGIN
+ 			giiss205_pkg.del_rec(#indGrpCd#);
+ 		END;
+ 	</delete>
+</sqlMap>

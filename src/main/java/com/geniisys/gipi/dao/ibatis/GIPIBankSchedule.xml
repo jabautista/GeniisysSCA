@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIBankSchedule">
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIPIBankScheduleClass" type="com.geniisys.gipi.entity.GIPIBankSchedule"/>
+	
+	<resultMap class="GIPIBankScheduleClass" id="bankCollectionMap">
+	
+		<result property="policyId" 		column="policy_id"/>
+		<result property="bankItemNo" 		column="bank_item_no"/>
+		<result property="bank" 			column="bank"/>
+		<result property="cashInVault" 		column="cash_in_vault"/>
+		<result property="cashInTransit" 	column="cash_in_transit"/>
+		<result property="bankLineCd" 		column="bank_line_cd"/>
+		<result property="bankSublineCd" 	column="bank_subline_cd"/>
+		<result property="bankIssCd" 		column="bank_iss_cd"/>
+		<result property="bankIssueYy" 		column="bank_issue_yy"/>
+		<result property="bankPolSeqNo" 	column="bank_pol_seq_no"/>
+		<result property="bankEndtSeqNo" 	column="bank_endt_seq_no"/>
+		<result property="bankRenewNo" 		column="bank_renew_no"/>
+		<result property="bankEffDate" 		column="bank_eff_date"/>
+		<result property="bankAddress" 		column="bank_address"/>
+		<result property="rowNum"			column="rownum_"/>
+		<result property="rowCount"			column="count_"/>
+		
+	</resultMap>
+	
+	<select id="getBankCollections" resultMap="bankCollectionMap" parameterClass="java.util.HashMap">
+		SELECT *       
+	  		  FROM (SELECT rownum rownum_ ,b.count_,a.*     
+	          		  FROM (SELECT * FROM TABLE(GIPI_BANK_SCHEDULE_PKG.get_bank_collection_list(#policyId#))
+  					<isEqual property="sortColumn" compareValue="bankItemNo"> 
+						ORDER BY bank_item_no
+					</isEqual>
+					<isEqual property="sortColumn" compareValue="bank"> 
+						ORDER BY bank
+					</isEqual>
+					<isEqual property="sortColumn" compareValue="cashInVault"> 
+						ORDER BY cash_in_vault
+					</isEqual>
+					<isEqual property="sortColumn" compareValue="cashInTransit"> 
+						ORDER BY cash_in_transit
+					</isEqual>
+					<isNotNull property="sortColumn">
+						<isEqual property="ascDescFlg" compareValue="ASC">
+							ASC
+						</isEqual>
+						<isEqual property="ascDescFlg" compareValue="DESC">
+							DESC
+						</isEqual>
+					</isNotNull>) a,
+	               		   (SELECT count(*) count_ FROM TABLE(GIPI_BANK_SCHEDULE_PKG.get_bank_collection_list(#policyId#))) b)
+	          WHERE rownum_ BETWEEN NVL(#from#,rownum_) AND NVL(#to#,rownum_)
+	</select>
+	
+</sqlMap>

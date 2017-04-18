@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GICLR044_VAT_ADV" pageWidth="300" pageHeight="200" columnWidth="300" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="Courier New" isDefault="false" fontName="Courier New" fontSize="10" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfFontName="Courier"/>
+	<parameter name="P_BATCH_CSR_ID" class="java.lang.Integer"/>
+	<queryString>
+		<![CDATA[SELECT SUM(b.tax_amt * DECODE(a.currency_cd,GIACP.N('CURRENCY_CD'),1,c.currency_cd,1,NVL(c.orig_curr_rate,c.convert_rate)) * -1) b_tax_amt
+      ,d.batch_csr_id
+  FROM GICL_CLM_LOSS_EXP a
+      ,GICL_LOSS_EXP_TAX b
+      ,GICL_ADVICE c
+      ,GICL_BATCH_CSR d
+ WHERE a.claim_id = b.claim_id
+   AND a.clm_loss_id = b.clm_loss_id
+   AND a.claim_id = c.claim_id
+   AND a.advice_id = c.advice_id
+   AND b.tax_type = 'I'
+   AND b.adv_tag = 'Y'
+   AND c.batch_csr_id = d.batch_csr_id
+   AND d.batch_csr_id = $P{P_BATCH_CSR_ID}
+ GROUP BY d.batch_csr_id]]>
+	</queryString>
+	<field name="B_TAX_AMT" class="java.math.BigDecimal"/>
+	<field name="BATCH_CSR_ID" class="java.lang.Integer"/>
+	<variable name="V_SUM_TAX_AMT" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{B_TAX_AMT}]]></variableExpression>
+	</variable>
+	<detail>
+		<band height="15" splitType="Stretch">
+			<staticText>
+				<reportElement style="Courier New" x="0" y="0" width="180" height="12"/>
+				<textElement markup="none"/>
+				<text><![CDATA[Input VAT (inclusive)]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement style="Courier New" x="190" y="0" width="110" height="12" isRemoveLineWhenBlank="true"/>
+				<textElement/>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{B_TAX_AMT}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

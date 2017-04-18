@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIWItmperlBeneficiary">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIPIWItmperlBeneficiary" type="com.geniisys.gipi.entity.GIPIWItmperlBeneficiary"/>
+	
+	<resultMap class="GIPIWItmperlBeneficiary" id="GIPIWItmperlBeneficiaryMap">
+		<result column="par_id" 				property="parId"/>
+		<result column="item_no" 				property="itemNo"/>
+		<result column="grouped_item_no" 		property="groupedItemNo"/>
+		<result column="beneficiary_no" 		property="beneficiaryNo"/>
+		<result column="line_cd" 				property="lineCd"/>
+		<result column="peril_cd" 				property="perilCd"/>
+		<result column="rec_flag" 				property="recFlag"/>
+		<result column="prem_rt" 				property="premRt"/>
+		<result column="tsi_amt" 				property="tsiAmt"/>
+		<result column="prem_amt" 				property="premAmt"/>
+		<result column="ann_tsi_amt" 			property="annTsiAmt"/>
+		<result column="ann_prem_amt" 			property="annPremAmt"/>
+		<result column="peril_name" 			property="perilName"/>
+	</resultMap>
+	
+	<resultMap class="GIPIWItmperlBeneficiary" id="ItmperlBenByItemGrpItmTableGridResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="PAR_ID" 				property="parId"/>
+		<result column="ITEM_NO" 				property="itemNo"/>
+		<result column="GROUPED_ITEM_NO" 		property="groupedItemNo"/>
+		<result column="BENEFICIARY_NO" 		property="beneficiaryNo"/>
+		<result column="LINE_CD" 				property="lineCd"/>
+		<result column="PERIL_CD" 				property="perilCd"/>
+		<result column="REC_FLAG" 				property="recFlag"/>
+		<result column="PREM_RT" 				property="premRt"/>
+		<result column="TSI_AMT" 				property="tsiAmt"/>
+		<result column="PREM_AMT" 				property="premAmt"/>
+		<result column="ANN_TSI_AMT" 			property="annTsiAmt"/>
+		<result column="ANN_PREM_AMT" 			property="annPremAmt"/>
+		<result column="PERIL_NAME" 			property="perilName"/>
+	</resultMap>
+	
+	<procedure id="getGIPIWItmperlBeneficiary" resultMap="GIPIWItmperlBeneficiaryMap">
+		SELECT * FROM TABLE(GIPI_WITMPERL_BENEFICIARY_PKG.get_gipi_witmperl_benificiary(#parId#,#itemNo#))
+	</procedure>
+	
+	<procedure id="getGIPIWItmperlBeneficiary2" resultMap="GIPIWItmperlBeneficiaryMap">
+		SELECT * FROM TABLE(GIPI_WITMPERL_BENEFICIARY_PKG.get_gipi_witmperl_benificiary2(#parId#))
+	</procedure>
+	
+	<insert id="setGIPIWItmperlBeneficiary" parameterClass="com.geniisys.gipi.entity.GIPIWItmperlBeneficiary">
+		BEGIN
+			GIPI_WITMPERL_BENEFICIARY_PKG.set_gipi_witmperl_benificiary(
+					#parId#,#itemNo#,#groupedItemNo#,#beneficiaryNo#,
+					#lineCd#,#perilCd#,#recFlag#,#premRt#,
+					#tsiAmt#,#premAmt#,#annTsiAmt#,#annPremAmt#
+					);
+		END;
+	</insert>
+	
+	<procedure id="delGIPIWItmperlBeneficiary" parameterClass="java.util.HashMap">
+		BEGIN
+			GIPI_WITMPERL_BENEFICIARY_PKG.del_gipi_witmperl_benificiary(#parId#,#itemNo#);
+		END;
+	</procedure>
+	
+	<select id="getItmperlBeneficiaryTableGrid" resultMap="ItmperlBenByItemGrpItmTableGridResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(gipi_witmperl_beneficiary_pkg.get_gipi_witmperl_ben_tg(#parId#, #itemNo#, #groupedItemNo#, #beneficiaryNo#, #perilName#))
+						  <isNull property="sortColumn">
+							ORDER BY peril_name ASC
+						  </isNull>
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="perilName">
+								ORDER BY peril_name
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="tsiAmt">
+								ORDER BY tsi_amt
+							</isEqual>				
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(gipi_witmperl_beneficiary_pkg.get_gipi_witmperl_ben_tg(#parId#, #itemNo#, #groupedItemNo#, #beneficiaryNo#, #perilName#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="delGIPIWItmperlBeneficiaryGrpItemNo" parameterClass="java.util.HashMap">
+		BEGIN
+			gipi_witmperl_beneficiary_pkg.del_gipi_witmperl_beneficiary(#parId#, #itemNo#, #groupedItemNo#);
+		END;
+	</procedure>
+	
+	<procedure id="delGIPIWItmperlBeneficiaryGrpItemNoBenNo" parameterClass="java.util.HashMap">
+		BEGIN
+			gipi_witmperl_beneficiary_pkg.del_gipi_witmperl_beneficiary(#parId#, #itemNo#, #groupedItemNo#, #beneficiaryNo#);
+		END;
+	</procedure>
+	
+	<procedure id="delGIPIWItmperlBeneficiaryGrpItemNoBenNoPerilCd" parameterClass="java.util.HashMap">
+		BEGIN
+			gipi_witmperl_beneficiary_pkg.del_gipi_witmperl_beneficiary(#parId#, #itemNo#, #groupedItemNo#, #beneficiaryNo#, #perilCd#);
+		END;
+	</procedure>
+	
+	<select id="getGrpPerilTableGrid" resultMap="ItmperlBenByItemGrpItmTableGridResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(GIPI_WITMPERL_BENEFICIARY_PKG.get_witmperl_ben_listing(#parId#, #itemNo#, #groupedItemNo#, #beneficiaryNo#,
+						  																	#tsiAmt#, #perilName#))
+						<isEqual property="sortColumn" compareValue="perilName">
+		              		ORDER BY peril_name
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="tsiAmt">
+		              		ORDER BY tsi_amt
+			            </isEqual>
+			            <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	</isNotNull>) a, 
+						(SELECT COUNT(*) count_
+						   FROM TABLE(GIPI_WITMPERL_BENEFICIARY_PKG.get_witmperl_ben_listing(#parId#, #itemNo#, #groupedItemNo#, #beneficiaryNo#,
+						   																	#tsiAmt#, #perilName#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+</sqlMap>	
+

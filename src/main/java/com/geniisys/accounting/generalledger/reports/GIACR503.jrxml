@@ -1,0 +1,627 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIACR503" language="groovy" pageWidth="950" pageHeight="612" columnWidth="910" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="ireport.zoom" value="1.771561000000017"/>
+	<property name="ireport.x" value="772"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="P_TRAN_MM" class="java.lang.Integer"/>
+	<parameter name="P_TRAN_YEAR" class="java.lang.Integer"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["D:\\KRIS\\GIACS503\\"]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT b.*, a.cs_beg_credit, a.cs_beg_debit, a.cs_trans_credit, a.cs_trans_debit, a.cs_end_credit, a.cs_end_debit
+  FROM (SELECT get_gl_acct_no_gl_acct_id,
+               gl_acct_name,
+               SUM(beg_credit) cs_beg_credit,
+               SUM(beg_debit) cs_beg_debit,
+               SUM(trans_credit) cs_trans_credit,
+               SUM(trans_debit) cs_trans_debit,
+               SUM(end_credit) cs_end_credit,
+               SUM(end_debit) cs_end_debit
+          FROM TABLE(GIACR503_PKG.get_trial_balance($P{P_TRAN_MM}, $P{P_TRAN_YEAR}))
+         GROUP BY get_gl_acct_no_gl_acct_id, gl_acct_name
+         ORDER BY get_gl_acct_no_gl_acct_id) a,
+       (SELECT *
+          FROM TABLE(GIACR503_PKG.get_trial_balance($P{P_TRAN_MM}, $P{P_TRAN_YEAR})) ) b
+ WHERE a.get_gl_acct_no_gl_acct_id = b.get_gl_acct_no_gl_acct_id
+ ORDER BY a.get_gl_acct_no_gl_acct_id, sl_cd]]>
+	</queryString>
+	<field name="GET_GL_ACCT_NO_GL_ACCT_ID" class="java.lang.String"/>
+	<field name="GL_ACCT_NAME" class="java.lang.String"/>
+	<field name="SL_CD" class="java.math.BigDecimal"/>
+	<field name="SL_NAME" class="java.lang.String"/>
+	<field name="BEG_DEBIT" class="java.math.BigDecimal"/>
+	<field name="BEG_CREDIT" class="java.math.BigDecimal"/>
+	<field name="TRANS_DEBIT" class="java.math.BigDecimal"/>
+	<field name="TRANS_CREDIT" class="java.math.BigDecimal"/>
+	<field name="END_DEBIT" class="java.math.BigDecimal"/>
+	<field name="END_CREDIT" class="java.math.BigDecimal"/>
+	<field name="CF_COMPANY_NAME" class="java.lang.String"/>
+	<field name="CF_COMPANY_ADD" class="java.lang.String"/>
+	<field name="CF_1" class="java.sql.Timestamp"/>
+	<field name="CF_AS_OF" class="java.lang.String"/>
+	<field name="CS_BEG_CREDIT" class="java.math.BigDecimal"/>
+	<field name="CS_BEG_DEBIT" class="java.math.BigDecimal"/>
+	<field name="CS_TRANS_CREDIT" class="java.math.BigDecimal"/>
+	<field name="CS_TRANS_DEBIT" class="java.math.BigDecimal"/>
+	<field name="CS_END_CREDIT" class="java.math.BigDecimal"/>
+	<field name="CS_END_DEBIT" class="java.math.BigDecimal"/>
+	<variable name="V_TOT_BEG_DEBIT" class="java.math.BigDecimal" incrementType="Group" incrementGroup="G_GL" calculation="Sum">
+		<variableExpression><![CDATA[$F{CS_BEG_DEBIT}]]></variableExpression>
+	</variable>
+	<variable name="V_TOT_BEG_CREDIT" class="java.math.BigDecimal" incrementType="Group" incrementGroup="G_GL" calculation="Sum">
+		<variableExpression><![CDATA[$F{CS_BEG_CREDIT}]]></variableExpression>
+	</variable>
+	<variable name="V_TOT_TRANS_DEBIT" class="java.math.BigDecimal" incrementType="Group" incrementGroup="G_GL" calculation="Sum">
+		<variableExpression><![CDATA[$F{CS_TRANS_DEBIT}]]></variableExpression>
+	</variable>
+	<variable name="V_TOT_TRANS_CREDIT" class="java.math.BigDecimal" incrementType="Group" incrementGroup="G_GL" calculation="Sum">
+		<variableExpression><![CDATA[$F{CS_TRANS_CREDIT}]]></variableExpression>
+	</variable>
+	<variable name="V_TOT_END_DEBIT" class="java.math.BigDecimal" incrementType="Group" incrementGroup="G_GL" calculation="Sum">
+		<variableExpression><![CDATA[$F{CS_END_DEBIT}]]></variableExpression>
+	</variable>
+	<variable name="V_TOT_END_CREDIT" class="java.math.BigDecimal" incrementType="Group" incrementGroup="G_GL" calculation="Sum">
+		<variableExpression><![CDATA[$F{CS_END_CREDIT}]]></variableExpression>
+	</variable>
+	<group name="G_GL">
+		<groupExpression><![CDATA[$F{GET_GL_ACCT_NO_GL_ACCT_ID}]]></groupExpression>
+		<groupHeader>
+			<band height="14">
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement isPrintRepeatedValues="false" x="0" y="0" width="100" height="12"/>
+					<textElement>
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{GET_GL_ACCT_NO_GL_ACCT_ID}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement isPrintRepeatedValues="false" x="107" y="0" width="140" height="12"/>
+					<textElement>
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{GL_ACCT_NAME}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)">
+					<reportElement x="457" y="0" width="70" height="12"/>
+					<textElement textAlignment="Right">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{CS_BEG_DEBIT}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)">
+					<reportElement x="533" y="0" width="70" height="12"/>
+					<textElement textAlignment="Right">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{CS_BEG_CREDIT}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)">
+					<reportElement x="611" y="0" width="70" height="12"/>
+					<textElement textAlignment="Right">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{CS_TRANS_DEBIT}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)">
+					<reportElement x="686" y="0" width="70" height="12"/>
+					<textElement textAlignment="Right">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{CS_TRANS_CREDIT}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)">
+					<reportElement x="765" y="0" width="70" height="12"/>
+					<textElement textAlignment="Right">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{CS_END_DEBIT}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)">
+					<reportElement x="840" y="0" width="70" height="12"/>
+					<textElement textAlignment="Right">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{CS_END_CREDIT}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<group name="G_SL_CD">
+		<groupExpression><![CDATA[$F{SL_CD}]]></groupExpression>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band height="67">
+			<textField isStretchWithOverflow="true">
+				<reportElement x="220" y="0" width="467" height="12"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{CF_COMPANY_NAME}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="220" y="12" width="467" height="12"/>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{CF_COMPANY_ADD}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="220" y="33" width="467" height="12"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Trial Balance - Posting Accounts]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="220" y="45" width="467" height="12"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{CF_AS_OF}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="0" width="55" height="12"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[RUN DATE:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="12" width="55" height="12"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[RUN TIME:]]></text>
+			</staticText>
+			<textField pattern="MM-dd-yyyy">
+				<reportElement x="55" y="0" width="100" height="12"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.util.Date"><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField pattern="h:mm:ss a">
+				<reportElement x="55" y="12" width="100" height="12"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.util.Date"><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="811" y="0" width="100" height="12"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[GIACR503]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="791" y="12" width="80" height="12"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="871" y="12" width="40" height="12"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="26" splitType="Stretch">
+			<staticText>
+				<reportElement x="254" y="11" width="48" height="11"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[SL Code]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="308" y="11" width="144" height="11"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[SL Name]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="107" y="11" width="140" height="11"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Account Name]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="10" width="100" height="12"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[GL Acct. No.]]></text>
+			</staticText>
+			<line>
+				<reportElement x="0" y="22" width="98" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="107" y="22" width="140" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="254" y="22" width="48" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="308" y="22" width="144" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement x="458" y="0" width="145" height="11"/>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Beginning Balance]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="458" y="11" width="70" height="11"/>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Debit]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="533" y="11" width="70" height="11"/>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Credit]]></text>
+			</staticText>
+			<line>
+				<reportElement x="460" y="22" width="67" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement x="611" y="11" width="70" height="11"/>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Debit]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="686" y="11" width="70" height="11"/>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Credit]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="612" y="0" width="144" height="11"/>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Transaction for the Month]]></text>
+			</staticText>
+			<line>
+				<reportElement x="612" y="22" width="70" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement x="765" y="11" width="70" height="11"/>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Debit]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="840" y="11" width="70" height="11"/>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Credit]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="765" y="0" width="145" height="11"/>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Ending Balance]]></text>
+			</staticText>
+			<line>
+				<reportElement x="765" y="22" width="70" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="533" y="22" width="68" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="687" y="22" width="70" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="841" y="22" width="70" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="12">
+			<printWhenExpression><![CDATA[!( $F{BEG_DEBIT}.equals( $F{CS_BEG_DEBIT} ) && $F{BEG_CREDIT}.equals( $F{CS_BEG_CREDIT} ) &&
+   $F{TRANS_DEBIT}.equals( $F{CS_TRANS_DEBIT} ) && $F{TRANS_CREDIT}.equals( $F{CS_TRANS_CREDIT} ) &&
+   $F{END_DEBIT}.equals( $F{CS_END_DEBIT} ) && $F{END_CREDIT}.equals( $F{CS_END_CREDIT} )
+)]]></printWhenExpression>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="308" y="0" width="143" height="12"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{SL_NAME}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="254" y="0" width="48" height="12"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{SL_CD}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)">
+				<reportElement x="457" y="0" width="70" height="12">
+					<printWhenExpression><![CDATA[!( $F{BEG_DEBIT}.equals( $F{CS_BEG_DEBIT} ) && $F{BEG_CREDIT}.equals( $F{CS_BEG_CREDIT} ) &&
+   $F{TRANS_DEBIT}.equals( $F{CS_TRANS_DEBIT} ) && $F{TRANS_CREDIT}.equals( $F{CS_TRANS_CREDIT} ) &&
+   $F{END_DEBIT}.equals( $F{CS_END_DEBIT} ) && $F{END_CREDIT}.equals( $F{CS_END_CREDIT} )
+)]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{BEG_DEBIT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)">
+				<reportElement x="533" y="0" width="70" height="12">
+					<printWhenExpression><![CDATA[!( $F{BEG_DEBIT}.equals( $F{CS_BEG_DEBIT} ) && $F{BEG_CREDIT}.equals( $F{CS_BEG_CREDIT} ) &&
+   $F{TRANS_DEBIT}.equals( $F{CS_TRANS_DEBIT} ) && $F{TRANS_CREDIT}.equals( $F{CS_TRANS_CREDIT} ) &&
+   $F{END_DEBIT}.equals( $F{CS_END_DEBIT} ) && $F{END_CREDIT}.equals( $F{CS_END_CREDIT} )
+)]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{BEG_CREDIT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)">
+				<reportElement x="611" y="0" width="70" height="12">
+					<printWhenExpression><![CDATA[!( $F{BEG_DEBIT}.equals( $F{CS_BEG_DEBIT} ) && $F{BEG_CREDIT}.equals( $F{CS_BEG_CREDIT} ) &&
+   $F{TRANS_DEBIT}.equals( $F{CS_TRANS_DEBIT} ) && $F{TRANS_CREDIT}.equals( $F{CS_TRANS_CREDIT} ) &&
+   $F{END_DEBIT}.equals( $F{CS_END_DEBIT} ) && $F{END_CREDIT}.equals( $F{CS_END_CREDIT} )
+)]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{TRANS_DEBIT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)">
+				<reportElement x="686" y="0" width="70" height="12">
+					<printWhenExpression><![CDATA[!( $F{BEG_DEBIT}.equals( $F{CS_BEG_DEBIT} ) && $F{BEG_CREDIT}.equals( $F{CS_BEG_CREDIT} ) &&
+   $F{TRANS_DEBIT}.equals( $F{CS_TRANS_DEBIT} ) && $F{TRANS_CREDIT}.equals( $F{CS_TRANS_CREDIT} ) &&
+   $F{END_DEBIT}.equals( $F{CS_END_DEBIT} ) && $F{END_CREDIT}.equals( $F{CS_END_CREDIT} )
+)]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{TRANS_CREDIT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)">
+				<reportElement x="765" y="0" width="70" height="12">
+					<printWhenExpression><![CDATA[!( $F{BEG_DEBIT}.equals( $F{CS_BEG_DEBIT} ) && $F{BEG_CREDIT}.equals( $F{CS_BEG_CREDIT} ) &&
+   $F{TRANS_DEBIT}.equals( $F{CS_TRANS_DEBIT} ) && $F{TRANS_CREDIT}.equals( $F{CS_TRANS_CREDIT} ) &&
+   $F{END_DEBIT}.equals( $F{CS_END_DEBIT} ) && $F{END_CREDIT}.equals( $F{CS_END_CREDIT} )
+)]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{END_DEBIT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)">
+				<reportElement x="840" y="0" width="70" height="12">
+					<printWhenExpression><![CDATA[!( $F{BEG_DEBIT}.equals( $F{CS_BEG_DEBIT} ) && $F{BEG_CREDIT}.equals( $F{CS_BEG_CREDIT} ) &&
+   $F{TRANS_DEBIT}.equals( $F{CS_TRANS_DEBIT} ) && $F{TRANS_CREDIT}.equals( $F{CS_TRANS_CREDIT} ) &&
+   $F{END_DEBIT}.equals( $F{CS_END_DEBIT} ) && $F{END_CREDIT}.equals( $F{CS_END_CREDIT} )
+)]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{END_CREDIT}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<summary>
+		<band height="34">
+			<staticText>
+				<reportElement x="364" y="10" width="88" height="15"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Grand Totals :]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)">
+				<reportElement x="457" y="10" width="70" height="15"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_TOT_BEG_DEBIT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(#,##0.00)">
+				<reportElement x="533" y="10" width="70" height="15"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_TOT_BEG_CREDIT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(#,##0.00)">
+				<reportElement x="611" y="10" width="70" height="15"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_TOT_TRANS_DEBIT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(#,##0.00)">
+				<reportElement x="686" y="10" width="70" height="15"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_TOT_TRANS_CREDIT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(#,##0.00)">
+				<reportElement x="765" y="10" width="70" height="15"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_TOT_END_DEBIT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(#,##0.00)">
+				<reportElement x="840" y="10" width="70" height="15"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_TOT_END_CREDIT}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="457" y="7" width="70" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="458" y="27" width="70" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="458" y="29" width="70" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="533" y="29" width="70" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="533" y="27" width="70" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="533" y="7" width="70" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="611" y="7" width="70" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="611" y="27" width="70" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="611" y="29" width="70" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="687" y="29" width="70" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="687" y="27" width="70" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="687" y="7" width="70" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="765" y="7" width="70" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="765" y="27" width="70" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="765" y="29" width="70" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="840" y="29" width="70" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="840" y="27" width="70" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="840" y="7" width="70" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+		</band>
+	</summary>
+</jasperReport>

@@ -1,0 +1,445 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISIntmSpecialRate">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIISIntmSpecialRate" type="com.geniisys.giis.entity.GIISIntmSpecialRate"/>
+	
+	<resultMap class="GIISIntmSpecialRate" id="giiss082RecListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="intm_no"     		property="intmNo"/>
+		<result column="iss_cd"     		property="issCd"/>
+		<result column="peril_cd"     		property="perilCd"/>
+		<result column="peril_name"     	property="perilName"/>
+		<result column="rate"     			property="rate"/>
+		<result column="line_cd"     		property="lineCd"/>
+		<result column="override_tag"     	property="overrideTag"/>
+		<result column="user_id"     		property="userId"/>
+		<result column="last_update"     	property="lastUpdate"/>
+		<result column="remarks"     		property="remarks"/>
+		<result column="subline_cd"     	property="sublineCd"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="giiss082HistoryResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="eff_date"     		property="effDate"/>
+		<result column="expiry_date"     	property="expiryDate"/>
+		<result column="peril_name"     	property="perilName"/>
+		<result column="old_comm_rate"     	property="oldCommRate"/>
+		<result column="new_comm_rate"     	property="newCommRate"/>
+		<result column="override_tag"     	property="overrideTag"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="intmNoLovMap" extends="BaseEntity.TableGridResultMap">
+		<result column="intm_no"     		property="intmNo"/>
+		<result column="intm_name"     		property="intmName"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="issCdLovMap" extends="BaseEntity.TableGridResultMap">
+		<result column="iss_cd"     		property="issCd"/>
+		<result column="iss_name"     		property="issName"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="lineCdLovMap" extends="BaseEntity.TableGridResultMap">
+		<result column="line_cd"     		property="lineCd"/>
+		<result column="line_name"     		property="lineName"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="sublineCdLovMap" extends="BaseEntity.TableGridResultMap">
+		<result column="subline_cd"     	property="sublineCd"/>
+		<result column="subline_name"     	property="sublineName"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="perilLovMap" extends="BaseEntity.TableGridResultMap">
+		<result column="peril_cd"     		property="perilCd"/>
+		<result column="peril_name"     	property="perilName"/>
+		<result column="peril_type"     	property="perilType"/>
+	</resultMap>
+	
+	<select id="getGIISS082RecList" resultMap="giiss082RecListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss082_pkg.get_intm_rate_list(#intmNo#, #issCd#, #lineCd#, #sublineCd#, #rate#, #overrideTag#))
+						  <isNotNull property="perilName">
+								WHERE UPPER(peril_name) LIKE UPPER(#perilName#)
+		                  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="overrideTag">
+			              		ORDER BY override_tag
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="perilName">
+			              		ORDER BY peril_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="rate">
+			              		ORDER BY rate
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss082_pkg.get_intm_rate_list(#intmNo#, #issCd#, #lineCd#, #sublineCd#, #rate#, #overrideTag#))
+						  <isNotNull property="perilName">
+		                	    WHERE UPPER(peril_name) LIKE UPPER(#perilName#)
+		                  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<select id="getGIISS082History" resultMap="giiss082HistoryResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss082_pkg.get_history_list(#intmNo#, #issCd#, #lineCd#, #sublineCd#,
+		  	      										#effDate#, #expiryDate#, #oldCommRate#, #newCommRate#, #overrideTag#))
+						WHERE 1 = 1
+						  <isNotNull property="perilName">
+		                	    AND UPPER(peril_name) LIKE UPPER(#perilName#)
+		                  </isNotNull>
+		                  <isNotNull property="effDate">
+		                	    AND eff_date = #effDate#
+		                  </isNotNull>
+		                  <isNotNull property="expiryDate">
+		                	    AND expiry_date = #expiryDate#
+		                  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="overrideTag">
+			              		ORDER BY override_tag
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="effDate">
+			              		ORDER BY TO_DATE(eff_date, 'mm-dd-yyyy')
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="expiryDate">
+			              		ORDER BY TO_DATE(expiry_date, 'mm-dd-yyyy')
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="perilName">
+			              		ORDER BY peril_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="oldCommRate">
+			              		ORDER BY old_comm_rate
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="newCommRate">
+			              		ORDER BY new_comm_rate
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss082_pkg.get_history_list(#intmNo#, #issCd#, #lineCd#, #sublineCd#,
+		  	      										#effDate#, #expiryDate#, #oldCommRate#, #newCommRate#, #overrideTag#))
+						WHERE 1 = 1
+						  <isNotNull property="perilName">
+		                	    AND UPPER(peril_name) LIKE UPPER(#perilName#)
+		                  </isNotNull>
+		                  <isNotNull property="effDate">
+		                	    AND eff_date = #effDate#
+		                  </isNotNull>
+		                  <isNotNull property="expiryDate">
+		                	    AND expiry_date = #expiryDate#
+		                  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<select id="getGiiss082IntmNoLOV" resultMap="intmNoLovMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giiss082_pkg.get_intm_lov(#findText#))
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="intmNo">
+								ORDER BY intm_no
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="intmName">
+								ORDER BY intm_name
+							</isEqual>							
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(giiss082_pkg.get_intm_lov(#findText#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiiss082IssCdLOV" resultMap="issCdLovMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giiss082_pkg.get_iss_cd_lov(#lineCd#, #userId#, #findText#))
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="issCd">
+								ORDER BY iss_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="issName">
+								ORDER BY iss_name
+							</isEqual>							
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(giiss082_pkg.get_iss_cd_lov(#lineCd#, #userId#, #findText#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiiss082LineCdLOV" resultMap="lineCdLovMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giiss082_pkg.get_line_cd_lov(#issCd#, #userId#, #findText#))
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="lineCd">
+								ORDER BY line_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="lineName">
+								ORDER BY line_name
+							</isEqual>							
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(giiss082_pkg.get_line_cd_lov(#issCd#, #userId#, #findText#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiiss082SublineCdLOV" resultMap="sublineCdLovMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giiss082_pkg.get_subline_cd_lov(#lineCd#, #findText#))
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="sublineCd">
+								ORDER BY subline_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="sublineName">
+								ORDER BY subline_name
+							</isEqual>							
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(giiss082_pkg.get_subline_cd_lov(#lineCd#, #findText#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiiss082PerilLOV" resultMap="perilLovMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giiss082_pkg.get_peril_lov(#intmNo#, #issCd#, #lineCd#, #sublineCd#, #findText#))
+						  <isNotNull property="notIn">
+					  		WHERE peril_cd NOT IN $notIn$
+					  	  </isNotNull>
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="perilName">
+								ORDER BY peril_name
+							</isEqual>						
+							<isEqual property="sortColumn" compareValue="perilType">
+								ORDER BY peril_type
+							</isEqual>	
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(giiss082_pkg.get_peril_lov(#intmNo#, #issCd#, #lineCd#, #sublineCd#, #findText#))
+						<isNotNull property="notIn">
+					      WHERE peril_cd NOT IN $notIn$
+					  	</isNotNull>
+						   ) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getCopyIntmLOV" resultMap="intmNoLovMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giiss082_pkg.get_copy_intm_lov(#findText#))
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="intmNo">
+								ORDER BY intm_no
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="intmName">
+								ORDER BY intm_name
+							</isEqual>							
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(giiss082_pkg.get_copy_intm_lov(#findText#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getCopyIssCdLOV" resultMap="issCdLovMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giiss082_pkg.get_copy_iss_cd_lov(#intmNo#, #findText#))
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="issCd">
+								ORDER BY iss_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="issName">
+								ORDER BY iss_name
+							</isEqual>							
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(giiss082_pkg.get_copy_iss_cd_lov(#intmNo#, #findText#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getCopyLineCdLOV" resultMap="lineCdLovMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giiss082_pkg.get_copy_line_cd_lov(#intmNo#, #issCd#, #findText#))
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="lineCd">
+								ORDER BY line_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="lineName">
+								ORDER BY line_name
+							</isEqual>							
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(giiss082_pkg.get_copy_line_cd_lov(#intmNo#, #issCd#, #findText#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getCopySublineCdLOV" resultMap="sublineCdLovMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giiss082_pkg.get_copy_subline_cd_lov(#intmNo#, #issCd#, #lineCd#, #findText#))
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="sublineCd">
+								ORDER BY subline_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="sublineName">
+								ORDER BY subline_name
+							</isEqual>							
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(giiss082_pkg.get_copy_subline_cd_lov(#intmNo#, #issCd#, #lineCd#, #findText#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="giiss082populatePerils" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			giiss082_pkg.populate_perils(#intmNo#, #issCd#, #lineCd#, #sublineCd#, #userId#);
+		END;
+	</procedure>
+	
+	<procedure id="copyIntmRate" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			giiss082_pkg.copy_intm_rate_giiss082(#intmNoTo#, #intmNoFrom#, #lineCd#, #issCd#, #sublineCd#, #userId#);
+		END;
+	</procedure>
+	
+	<procedure id="setIntmSpecialRate" parameterClass="GIISIntmSpecialRate">
+	    DECLARE
+	    	v_rec giis_intm_special_rate%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+			v_rec.intm_no := #intmNo#;
+			v_rec.iss_cd := #issCd#;
+			v_rec.peril_cd := #perilCd#;
+			v_rec.rate := #rate#;
+			v_rec.line_cd := #lineCd#;
+			v_rec.override_tag := #overrideTag#;
+			v_rec.user_id := #userId#;
+			v_rec.remarks := #remarks#;
+			v_rec.subline_cd := #sublineCd#;
+			
+ 			giiss082_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<delete id="delIntmSpecialRate" parameterClass="GIISIntmSpecialRate">
+		BEGIN
+ 			giiss082_pkg.del_rec(#intmNo#, #issCd#, #lineCd#, #sublineCd#, #perilCd#);
+ 		END;
+ 	</delete>
+ 	
+ 	<select id="getGIISS082PerilList" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+ 		SELECT giiss082_pkg.get_peril_list(#intmNo#, #issCd#, #lineCd#, #sublineCd#)
+ 		  FROM DUAL
+ 	</select>
+	
+</sqlMap>

@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIRIR001C_PERILS" pageWidth="532" pageHeight="672" columnWidth="532" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="P_FNL_BINDER_ID" class="java.lang.Integer"/>
+	<parameter name="P_LINE_CD" class="java.lang.String"/>
+	<parameter name="P_FRPS_YY" class="java.lang.Integer"/>
+	<parameter name="P_FRPS_SEQ_NO" class="java.lang.Integer"/>
+	<parameter name="P_CURRENCY_RT" class="java.math.BigDecimal"/>
+	<parameter name="P_REVERSE_SW" class="java.lang.String"/>
+	<parameter name="P_REVERSE_DATE" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT *
+  FROM TABLE(GIRIR001C_PKG.get_report_perils(
+		$P{P_FNL_BINDER_ID},
+		$P{P_LINE_CD},
+		$P{P_FRPS_YY},
+		$P{P_FRPS_SEQ_NO},
+		$P{P_CURRENCY_RT},
+		$P{P_REVERSE_SW},
+		TO_DATE($P{P_REVERSE_DATE}) ) )]]>
+	</queryString>
+	<field name="PERIL_TITLE" class="java.lang.String"/>
+	<field name="FNL_BINDER_ID" class="java.lang.Integer"/>
+	<field name="LINE_CD" class="java.lang.String"/>
+	<field name="FRPS_YY" class="java.lang.Integer"/>
+	<field name="FRPS_SEQ_NO" class="java.lang.Integer"/>
+	<field name="GROSS_PREM" class="java.math.BigDecimal"/>
+	<field name="RI_PREM_AMT" class="java.math.BigDecimal"/>
+	<field name="RI_COMM_RT" class="java.math.BigDecimal"/>
+	<field name="RI_COMM_AMT" class="java.math.BigDecimal"/>
+	<field name="LESS_RI_COMM_AMT" class="java.math.BigDecimal"/>
+	<field name="RI_PREM_VAT" class="java.math.BigDecimal"/>
+	<field name="RI_COMM_VAT" class="java.math.BigDecimal"/>
+	<field name="RI_WHOLDING_VAT" class="java.math.BigDecimal"/>
+	<field name="CF_GROSS_PREM" class="java.math.BigDecimal"/>
+	<field name="CF_RI_PREM_AMT" class="java.math.BigDecimal"/>
+	<field name="CF_RI_COMM_AMT" class="java.math.BigDecimal"/>
+	<field name="CF_LCOMM_AMT" class="java.math.BigDecimal"/>
+	<field name="CF_LESS_COMM_VAT" class="java.math.BigDecimal"/>
+	<field name="CF_RI_PREM_VAT" class="java.math.BigDecimal"/>
+	<field name="CF_RI_COMM_VAT" class="java.math.BigDecimal"/>
+	<field name="CF_RI_WHOLDING_VAT" class="java.math.BigDecimal"/>
+	<field name="CF_RI_WHOLDING_VATCOMM" class="java.math.BigDecimal"/>
+	<variable name="V_SUM_GROSS_PREM" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{GROSS_PREM}]]></variableExpression>
+		<initialValueExpression><![CDATA[new BigDecimal('0')]]></initialValueExpression>
+	</variable>
+	<variable name="V_SUM_RI_PREM_AMT" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{RI_PREM_AMT}]]></variableExpression>
+		<initialValueExpression><![CDATA[new BigDecimal('0')]]></initialValueExpression>
+	</variable>
+	<variable name="V_SUM_RI_COMM_AMT" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{RI_COMM_AMT}]]></variableExpression>
+		<initialValueExpression><![CDATA[new BigDecimal('0')]]></initialValueExpression>
+	</variable>
+	<variable name="V_SUM_LCOMM_AMT" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{LESS_RI_COMM_AMT}]]></variableExpression>
+		<initialValueExpression><![CDATA[new BigDecimal('0')]]></initialValueExpression>
+	</variable>
+	<variable name="V_CF_GROSS_PREM" class="java.math.BigDecimal">
+		<variableExpression><![CDATA[($P{P_REVERSE_SW} == "Y" || ($P{P_REVERSE_DATE} != "" && $P{P_REVERSE_DATE} != null)) ?
+$V{V_SUM_GROSS_PREM}.multiply($P{P_CURRENCY_RT}).multiply(new BigDecimal("-1")) :
+$V{V_SUM_GROSS_PREM}.multiply($P{P_CURRENCY_RT})]]></variableExpression>
+		<initialValueExpression><![CDATA[]]></initialValueExpression>
+	</variable>
+	<variable name="V_CF_RI_PREM_AMT" class="java.math.BigDecimal">
+		<variableExpression><![CDATA[($P{P_REVERSE_SW} == "Y" || ($P{P_REVERSE_DATE} != "" && $P{P_REVERSE_DATE} != null)) ?
+$V{V_SUM_RI_PREM_AMT}.multiply($P{P_CURRENCY_RT}).multiply(new BigDecimal("-1")) :
+$V{V_SUM_RI_PREM_AMT}.multiply($P{P_CURRENCY_RT})]]></variableExpression>
+		<initialValueExpression><![CDATA[new BigDecimal('0')]]></initialValueExpression>
+	</variable>
+	<variable name="V_CF_RI_COMM_AMT" class="java.math.BigDecimal">
+		<variableExpression><![CDATA[($P{P_REVERSE_SW} == "Y" || ($P{P_REVERSE_DATE} != "" && $P{P_REVERSE_DATE} != null)) ?
+$V{V_SUM_RI_COMM_AMT}.multiply($P{P_CURRENCY_RT}).multiply(new BigDecimal("-1")) :
+$V{V_SUM_RI_COMM_AMT}.multiply($P{P_CURRENCY_RT})]]></variableExpression>
+		<initialValueExpression><![CDATA[new BigDecimal('0')]]></initialValueExpression>
+	</variable>
+	<variable name="V_CF_LCOMM_AMT" class="java.math.BigDecimal">
+		<variableExpression><![CDATA[($P{P_REVERSE_SW} == "Y" || ($P{P_REVERSE_DATE} != "" && $P{P_REVERSE_DATE} != null)) ?
+$V{V_SUM_LCOMM_AMT}.multiply($P{P_CURRENCY_RT}).multiply(new BigDecimal("-1")) :
+$V{V_SUM_LCOMM_AMT}.multiply($P{P_CURRENCY_RT})]]></variableExpression>
+		<initialValueExpression><![CDATA[new BigDecimal('0')]]></initialValueExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<columnHeader>
+		<band height="26" splitType="Stretch">
+			<line>
+				<reportElement x="1" y="5" width="530" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement x="3" y="9" width="33" height="12"/>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[PERIL]]></text>
+			</staticText>
+			<line>
+				<reportElement x="2" y="23" width="33" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement x="41" y="9" width="100" height="12"/>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[GROSS PREMIUM]]></text>
+			</staticText>
+			<line>
+				<reportElement x="43" y="23" width="97" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement x="146" y="9" width="100" height="12"/>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[PREMIUM CEDED]]></text>
+			</staticText>
+			<line>
+				<reportElement x="148" y="23" width="97" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement x="250" y="9" width="71" height="12"/>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[RI COMM %]]></text>
+			</staticText>
+			<line>
+				<reportElement x="252" y="23" width="69" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement x="326" y="9" width="100" height="12"/>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[LESS: RI COMM AMT.]]></text>
+			</staticText>
+			<line>
+				<reportElement x="328" y="23" width="97" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement x="430" y="9" width="100" height="12"/>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[NET PREMIUM]]></text>
+			</staticText>
+			<line>
+				<reportElement x="432" y="23" width="98" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="14" splitType="Stretch">
+			<textField isBlankWhenNull="true">
+				<reportElement x="3" y="1" width="33" height="12"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{PERIL_TITLE}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="41" y="1" width="100" height="12"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{CF_GROSS_PREM}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="146" y="1" width="100" height="12"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{CF_RI_PREM_AMT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.0000" isBlankWhenNull="true">
+				<reportElement x="250" y="1" width="59" height="12"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{RI_COMM_RT}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="310" y="1" width="11" height="12"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[%]]></text>
+			</staticText>
+			<textField pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="326" y="1" width="100" height="12"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{CF_RI_COMM_AMT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="431" y="1" width="100" height="12"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{CF_LCOMM_AMT}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<summary>
+		<band height="43">
+			<line>
+				<reportElement x="43" y="1" width="97" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="148" y="1" width="97" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="328" y="1" width="97" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="432" y="1" width="98" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<textField pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="431" y="3" width="100" height="12"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_CF_LCOMM_AMT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="326" y="3" width="100" height="12"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_CF_RI_COMM_AMT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="146" y="3" width="100" height="12"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_CF_RI_PREM_AMT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="41" y="3" width="100" height="12"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_CF_GROSS_PREM}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="3" y="15" width="57" height="12"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[VAT]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="3" y="27" width="57" height="12"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[W/holding VAT]]></text>
+			</staticText>
+			<textField pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="146" y="15" width="100" height="12"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{CF_RI_PREM_VAT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="326" y="15" width="100" height="12"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{CF_RI_COMM_VAT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="431" y="15" width="100" height="12"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{CF_LESS_COMM_VAT}.multiply($P{P_CURRENCY_RT})]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="431" y="27" width="100" height="12"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{CF_RI_WHOLDING_VAT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="326" y="27" width="100" height="12"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{CF_RI_WHOLDING_VATCOMM}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

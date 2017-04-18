@@ -1,0 +1,839 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISBlock">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIISBlock" type="com.geniisys.common.entity.GIISBlock"/>
+	<typeAlias alias="GIISRisks" type="com.geniisys.common.entity.GIISRisks"/>
+	
+	<resultMap class="GIISBlock" id="GIISBlockLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="BLOCK_NO"			property="blockNo" />
+		<result column="BLOCK_ID"			property="blockId" />
+		<result column="BLOCK_DESC"			property="blockDesc" />
+		<result column="DISTRICT_NO"	    property="districtNo" />
+		<result column="DISTRICT_DESC"		property="districtDesc" />	
+		<result column="CITY_CD" 			property="cityCd" />
+		<result column="CITY"				property="city" />
+		<result column="EQ_ZONE" 			property="eqZone" />
+		<result column="EQ_DESC" 			property="eqDesc" />
+		<result column="TYPHOON_ZONE" 		property="typhoonZone" />
+		<result column="TYPHOON_ZONE_DESC" 	property="typhoonZoneDesc" />
+		<result column="FLOOD_ZONE"			property="floodZone" />
+		<result column="FLOOD_ZONE_DESC"	property="floodZoneDesc" />
+		<result column="PROVINCE_CD" 		property="provinceCd" />
+		<result column="PROVINCE_DESC" 		property="province" />
+		<result column="REGION_CD"			property="regionCd" />
+	</resultMap>
+	
+  	<resultMap id="districtBlockDtlMap" class="java.util.HashMap">
+  		<result column="city" 			property="cityDesc"/>
+		<result column="city_cd" 		property="cityCd"/>
+		<result column="province_cd" 	property="provinceCd"/>
+		<result column="province" 		property="provinceDesc" />
+		<result column="district_no"	property="districtNo" />
+		<result column="district_desc"  property="districtDesc" />
+		<result column="block_no"	    property="blockNo" />
+		<result column="block_desc"     property="blockDesc" />	
+		<result column="block_id"       property="blockId" />		
+  		<result column="rownum_" 		property="rowNum" />
+		<result column="count_"			property="rowCount"/>
+  	</resultMap>
+  	
+  	<resultMap class="java.util.HashMap" id="giiss007ResultMap" extends="BaseEntity.TableGridResultMap">
+  		<result column="district_no"		property="districtNo" />
+		<result column="block_no"			property="blockNo" />
+		<result column="block_desc"			property="blockDesc" />
+		<result column="retn_lim_amt"		property="retnLimAmt" />
+		<result column="trty_lim_amt"	    property="trtyLimAmt" />
+		<result column="netret_beg_bal"		property="netretBegBal" />	
+		<result column="facul_beg_bal" 		property="faculBegBal" />
+		<result column="trty_beg_bal"		property="trtyBegBal" />
+		<result column="eq_zone" 			property="eqZone" />
+		<result column="eq_zone_desc" 		property="eqZoneDesc" />
+		<result column="flood_zone" 		property="floodZone" />
+		<result column="flood_zone_desc" 	property="floodZoneDesc" />
+		<result column="typhoon_zone" 		property="typhoonZone" />
+		<result column="typhoon_zone_desc" 	property="typhoonZoneDesc" />
+		<result column="sheet_no" 			property="sheetNo" />
+		<result column="district_desc"		property="districtDesc" />
+		<result column="user_id"			property="userId" />
+		<result column="last_update" 		property="lastUpdate" />
+		<result column="remarks"	 		property="remarks" />
+		<result column="block_id"			property="blockId" />
+		<result column="province_cd"		property="provinceCd" />
+		<result column="city"				property="city" />
+		<result column="city_cd"			property="cityCd" />
+		<result column="province"			property="province" />
+		<result column="beg_balance"		property="begBalance" />
+		<result column="active_tag"			property="activeTag" />
+	</resultMap>
+	
+	<resultMap class="GIISRisks" id="giiss007RisksResultMap" extends="BaseEntity.TableGridResultMap">
+  		<result column="risk_cd"			property="riskCd" />
+		<result column="risk_desc"			property="riskDesc" />
+	</resultMap>
+	
+	<select id="getGIISBlockLOV" resultMap="GIISBlockLOVMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giis_block_pkg.get_block_list(#param1#, #param2#, #param3#, #param4#))
+						  <isNull property="sortColumn">
+								ORDER BY block_desc
+						  </isNull>
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="blockDesc">
+								ORDER BY block_desc
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="districtDesc">
+								ORDER BY district_desc
+							</isEqual>
+							<isEqual property="ascDescFlag" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlag" compareValue="DESC">
+								DESC
+							</isEqual>
+						  </isNotNull>
+						  ) a,
+					   (SELECT COUNT(*) count_
+						  FROM TABLE(giis_block_pkg.get_block_list(#param1#, #param2#, #param3#, #param4#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getDistrictDtlLOV" resultMap="districtBlockDtlMap">
+  		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(giis_block_pkg.get_dtls_from_district(#provinceCd#, #cityCd#))
+		          		  <isEqual property="findText" compareValue="null">
+		          		  	WHERE (UPPER(district_no) LIKE UPPER(#searchString#) OR UPPER(district_desc) LIKE UPPER(#searchString#))
+		          		  </isEqual>        
+			              <isNotNull property="findText">
+		                  WHERE (UPPER(district_no) LIKE UPPER(#findText#) OR UPPER(district_desc) LIKE UPPER(#findText#))
+		             	  </isNotNull>
+			          	  <isNotNull property="sortColumn">
+			          	  	  <isEqual property="sortColumn" compareValue="districtNo">
+				              		ORDER BY district_no
+				              </isEqual>
+			                  <isEqual property="sortColumn" compareValue="districtDesc">
+				              		ORDER BY district_desc
+				              </isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giis_block_pkg.get_dtls_from_district(#provinceCd#, #cityCd#))
+		          		  <isEqual property="findText" compareValue="null">
+		          		  	WHERE (UPPER(district_no) LIKE UPPER(#searchString#) OR UPPER(district_desc) LIKE UPPER(#searchString#))
+		          		  </isEqual> 
+			              <isNotNull property="findText">
+		                  WHERE (UPPER(district_no) LIKE UPPER(#findText#) OR UPPER(district_desc) LIKE UPPER(#findText#))
+		             	  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+  	
+  	<select id="getBlockDtlLOV" resultMap="districtBlockDtlMap">
+  		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(giis_block_pkg.get_dtls_from_block(#provinceCd#, #cityCd#, #districtNo#))              
+			          	  <isEqual property="findText" compareValue="null">
+				          	WHERE (UPPER(block_no) LIKE UPPER(#searchString#) OR UPPER(block_desc) LIKE UPPER(#searchString#))			                      		
+			              </isEqual>
+			              <isNotNull property="findText">
+		                  WHERE (UPPER(block_no) LIKE UPPER(#findText#) OR UPPER(block_desc) LIKE UPPER(#findText#))
+		             	  </isNotNull>
+			          	  <isNotNull property="sortColumn">
+			          	  	  <isEqual property="sortColumn" compareValue="blockNo">
+				              		ORDER BY block_no
+				              </isEqual>
+			                  <isEqual property="sortColumn" compareValue="blockDesc">
+				              		ORDER BY block_desc
+				              </isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giis_block_pkg.get_dtls_from_block(#provinceCd#, #cityCd#, #districtNo#))
+		                  <isEqual property="findText" compareValue="null">
+				          	WHERE (UPPER(block_no) LIKE UPPER(#searchString#) OR UPPER(block_desc) LIKE UPPER(#searchString#))			                      		
+			              </isEqual>
+			              <isNotNull property="findText">
+		                  WHERE (UPPER(block_no) LIKE UPPER(#findText#) OR UPPER(block_desc) LIKE UPPER(#findText#))
+		             	  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+  	
+  	<select id="getGIISDistrictBlockLOV" resultMap="GIISBlockLOVMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giis_block_pkg.get_block_list_tg(#regionCd#, #provinceCd#, #cityCd#, #districtNo#, #findText#))
+						  <isNull property="sortColumn">
+								ORDER BY block_desc
+						  </isNull>
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="blockDesc">
+								ORDER BY block_desc
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="districtDesc">
+								ORDER BY district_desc
+							</isEqual>
+							<isEqual property="ascDescFlag" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlag" compareValue="DESC">
+								DESC
+							</isEqual>
+						  </isNotNull>
+						  ) a,
+					   (SELECT COUNT(*) count_
+						  FROM TABLE(giis_block_pkg.get_block_list_tg(#regionCd#, #provinceCd#, #cityCd#, #districtNo#, #findText#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	
+	<resultMap id="gipis155DistrictMap" class="java.util.HashMap">
+		<result column="district_no"	property="districtNo" />
+		<result column="district_desc"  property="districtDesc" />
+  		<result column="rownum_" 		property="rowNum" />
+		<result column="count_"			property="rowCount"/>
+  	</resultMap>
+  	
+  	<select id="getGipis155DistrictLOV" resultMap="gipis155DistrictMap">
+  		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(giis_block_pkg.get_district_listing_gipis155(#provinceCd#, #cityCd#))              
+			          	  <isNotNull property="findText">
+			                  WHERE UPPER(district_no) LIKE UPPER(NVL(#findText#, district_no)) 
+			                     OR UPPER(district_desc) LIKE UPPER(NVL(#findText#, district_desc))
+		             	  </isNotNull>
+		             	  <isNull property="findText">
+		                  	  WHERE UPPER(district_no) LIKE UPPER(NVL(#searchString#, district_no)) 
+			                     OR UPPER(district_desc) LIKE UPPER(NVL(#searchString#, district_desc))
+		             	  </isNull>
+			          	  <isNotNull property="sortColumn">
+			          	  	  <isEqual property="sortColumn" compareValue="blockNo">
+				              		ORDER BY district_no
+				              </isEqual>
+			                  <isEqual property="sortColumn" compareValue="blockDesc">
+				              		ORDER BY district_desc
+				              </isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giis_block_pkg.get_district_listing_gipis155(#provinceCd#, #cityCd#))              
+			          	  <isNotNull property="findText">
+		                  	  WHERE UPPER(district_no) LIKE UPPER(NVL(#findText#, district_no)) 
+			                     OR UPPER(district_desc) LIKE UPPER(NVL(#findText#, district_desc))
+		             	  </isNotNull>
+		             	  <isNull property="findText">
+		                  	  WHERE UPPER(district_no) LIKE UPPER(NVL(#searchString#, district_no)) 
+			                     OR UPPER(district_desc) LIKE UPPER(NVL(#searchString#, district_desc))
+		             	  </isNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+  	
+  	<resultMap id="gipis155BlockMap" class="java.util.HashMap">
+		<result column="block_no"		property="blockNo" />
+		<result column="block_desc"  	property="blockDesc" />
+  		<result column="rownum_" 		property="rowNum" />
+		<result column="count_"			property="rowCount"/>
+  	</resultMap>
+  	
+  	<select id="getGipis155BlockLOV" resultMap="gipis155BlockMap">
+  		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(giis_block_pkg.get_block_listing_gipis155(#provinceCd#, #cityCd#, #districtNo#))              
+			          	  <isNotNull property="findText">
+		                  	WHERE UPPER(block_no) LIKE UPPER(NVL(#findText#, block_no)) 
+		                  	   OR UPPER(block_desc) LIKE UPPER(NVL(#findText#, block_desc))
+		             	  </isNotNull>
+		             	  <isNull property="findText">
+		                  	WHERE UPPER(block_no) LIKE UPPER(NVL(#searchString#, block_no)) 
+		                  	   OR UPPER(block_desc) LIKE UPPER(NVL(#searchString#, block_desc))
+		             	  </isNull>
+			          	  <isNotNull property="sortColumn">
+			          	  	  <isEqual property="sortColumn" compareValue="blockNo">
+				              		ORDER BY block_no
+				              </isEqual>
+			                  <isEqual property="sortColumn" compareValue="blockDesc">
+				              		ORDER BY block_desc
+				              </isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giis_block_pkg.get_block_listing_gipis155(#provinceCd#, #cityCd#, #districtNo#))              
+			          	  <isNotNull property="findText">
+		                  	WHERE UPPER(block_no) LIKE UPPER(NVL(#findText#, block_no)) 
+		                  	   OR UPPER(block_desc) LIKE UPPER(NVL(#findText#, block_desc))
+		             	  </isNotNull>
+		             	  <isNull property="findText">
+		                  	WHERE UPPER(block_no) LIKE UPPER(NVL(#searchString#, block_no)) 
+		                  	   OR UPPER(block_desc) LIKE UPPER(NVL(#searchString#, block_desc))
+		             	  </isNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+  	
+  	<resultMap class="java.util.HashMap" id="GICLS056DistrictResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="district_no" property="districtNo" />
+		<result column="district_desc" property="districtDesc" />
+	</resultMap>
+	
+	<select id="getGicls056DistrictLov" resultMap="GICLS056DistrictResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(gicls056_pkg.get_district_lov(#provinceCd#, #cityCd#))
+		  	      		<isNotEmpty property="findText">
+			  	      		WHERE UPPER(district_no) LIKE UPPER(#findText#)
+			  	      		OR UPPER(district_desc) LIKE UPPER(#findText#)
+			  	      	</isNotEmpty>
+			  	      	<isNotEmpty property="filterText">
+			  	      		WHERE UPPER(district_no) LIKE UPPER(#filterText#)
+			  	      		OR UPPER(district_desc) LIKE UPPER(#filterText#)
+			  	      	</isNotEmpty>
+		                  <isEqual property="sortColumn" compareValue="districtNo">
+			              		ORDER BY district_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="districtDesc">
+			              		ORDER BY district_desc
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(gicls056_pkg.get_district_lov(#provinceCd#, #cityCd#))
+		                  <isNotEmpty property="findText">
+			  	      		WHERE UPPER(district_no) LIKE UPPER(#findText#)
+			  	      		OR UPPER(district_desc) LIKE UPPER(#findText#)
+			  	      	</isNotEmpty>
+			  	      	<isNotEmpty property="filterText">
+			  	      		WHERE UPPER(district_no) LIKE UPPER(#filterText#)
+			  	      		OR UPPER(district_desc) LIKE UPPER(#filterText#)
+			  	      	</isNotEmpty>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="GICLS056BlockResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="block_no" property="blockNo" />
+		<result column="block_desc" property="blockDesc" />
+	</resultMap>
+	
+	<select id="getGicls056BlockLov" resultMap="GICLS056BlockResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(gicls056_pkg.get_block_lov(#provinceCd#, #cityCd#, #districtNo#))
+		                  <isNotEmpty property="findText">
+			  	      		WHERE UPPER(block_no) LIKE UPPER(#findText#)
+			  	      		OR UPPER(block_desc) LIKE UPPER(#findText#)
+			  	      	</isNotEmpty>
+			  	      	<isNotEmpty property="filterText">
+			  	      		WHERE UPPER(block_no) LIKE UPPER(#filterText#)
+			  	      		OR UPPER(block_desc) LIKE UPPER(#filterText#)
+			  	      	</isNotEmpty>
+		                  <isEqual property="sortColumn" compareValue="blockNo">
+			              		ORDER BY block_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="blockDesc">
+			              		ORDER BY block_desc
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(gicls056_pkg.get_block_lov(#provinceCd#, #cityCd#, #districtNo#))
+		                  <isNotEmpty property="findText">
+			  	      		WHERE UPPER(block_no) LIKE UPPER(#findText#)
+			  	      		OR UPPER(block_desc) LIKE UPPER(#findText#)
+			  	      	</isNotEmpty>
+			  	      	<isNotEmpty property="filterText">
+			  	      		WHERE UPPER(block_no) LIKE UPPER(#filterText#)
+			  	      		OR UPPER(block_desc) LIKE UPPER(#filterText#)
+			  	      	</isNotEmpty>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+  	
+  	<select id="getGiiss007Province" resultMap="giiss007ResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss007_pkg.get_province_rec_list)
+			              <isNotNull property="filter">
+							WHERE 1 = 1 
+								<isNotEmpty prepend="AND" property="provinceCd">
+										UPPER(province_cd) LIKE UPPER(#provinceCd#)
+								</isNotEmpty>	 	
+								<isNotEmpty prepend="AND" property="province">
+										UPPER(province) LIKE UPPER(#province#)
+								</isNotEmpty>	 																																													
+						  </isNotNull>	
+			              <isEqual property="sortColumn" compareValue="provinceCd province">
+			              		ORDER BY province_cd
+			              </isEqual>		
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss007_pkg.get_province_rec_list)
+		                   	<isNotNull property="filter">
+								WHERE 1 = 1 
+									<isNotEmpty prepend="AND" property="provinceCd">
+											UPPER(province_cd) LIKE UPPER(#provinceCd#)
+									</isNotEmpty>	 	
+									<isNotEmpty prepend="AND" property="province">
+											UPPER(province) LIKE UPPER(#province#)
+									</isNotEmpty>	 																																													
+						 	 </isNotNull>	
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<select id="getGiiss007City" resultMap="giiss007ResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss007_pkg.get_city_rec_list(#provinceCd#))
+		  	      		  <isNotNull property="filter">
+							WHERE 1 = 1 
+								<isNotEmpty prepend="AND" property="cityCd">
+										UPPER(city_cd) LIKE UPPER(#cityCd#)
+								</isNotEmpty>	 	
+								<isNotEmpty prepend="AND" property="city">
+										UPPER(city) LIKE UPPER(#city#)
+								</isNotEmpty>	 																																													
+						  </isNotNull>	
+			              <isEqual property="sortColumn" compareValue="cityCd city">
+			              		ORDER BY city_cd
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss007_pkg.get_city_rec_list(#provinceCd#))
+			                  <isNotNull property="filter">
+								WHERE 1 = 1 
+									<isNotEmpty prepend="AND" property="cityCd">
+											UPPER(city_cd) LIKE UPPER(#cityCd#)
+									</isNotEmpty>	 	
+									<isNotEmpty prepend="AND" property="city">
+											UPPER(city) LIKE UPPER(#city#)
+									</isNotEmpty>	 																																													
+							  </isNotNull>	
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<select id="getGiiss007District" resultMap="giiss007ResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss007_pkg.get_district_rec_list(#provinceCd#, #cityCd#))
+			              <isNotNull property="filter">
+							WHERE 1 = 1 
+								<isNotEmpty prepend="AND" property="districtNo">
+										UPPER(district_no) LIKE UPPER(#districtNo#)
+								</isNotEmpty>	 	
+								<isNotEmpty prepend="AND" property="districtDesc">
+										UPPER(district_desc) LIKE UPPER(#districtDesc#)
+								</isNotEmpty>	 																																													
+						  </isNotNull>	
+			              <isEqual property="sortColumn" compareValue="districtNo districtDesc">
+			              		ORDER BY district_no
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss007_pkg.get_district_rec_list(#provinceCd#, #cityCd#))
+			                  <isNotNull property="filter">
+								WHERE 1 = 1 
+									<isNotEmpty prepend="AND" property="districtNo">
+											UPPER(district_no) LIKE UPPER(#districtNo#)
+									</isNotEmpty>	 	
+									<isNotEmpty prepend="AND" property="districtDesc">
+											UPPER(district_desc) LIKE UPPER(#districtDesc#)
+									</isNotEmpty>	 																																													
+							  </isNotNull>	
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	
+	<select id="getGiiss007Block" resultMap="giiss007ResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss007_pkg.get_block_rec_list(#provinceCd#, #cityCd#, #districtNo#))
+			              <isNotNull property="filter">
+								WHERE 1 = 1 
+									<isNotEmpty prepend="AND" property="activeTag">
+											UPPER(active_tag) LIKE UPPER(#activeTag#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="blockId">
+											block_id = #blockId#
+									</isNotEmpty>	 	
+									<isNotEmpty prepend="AND" property="blockNo">
+											UPPER(block_no) LIKE UPPER(#blockNo#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="blockDesc">
+											UPPER(block_desc) LIKE UPPER(#blockDesc#)
+									</isNotEmpty>	
+									<isNotEmpty prepend="AND" property="eqZone">
+											UPPER(eq_zone) LIKE UPPER(#eqZone#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="floodZone">
+											UPPER(flood_zone) LIKE UPPER(#floodZone#)
+									</isNotEmpty>	
+									<isNotEmpty prepend="AND" property="typhoonZone">
+											UPPER(typhoon_zone) LIKE UPPER(#typhoonZone#)
+									</isNotEmpty>		 																																													
+						  </isNotNull>	
+						  <isEqual property="sortColumn" compareValue="blockId">
+			              		ORDER BY block_id
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="blockNo">
+			              		ORDER BY block_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="blockDesc">
+			              		ORDER BY block_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="eqZone">
+			              		ORDER BY eq_zone
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="floodZone">
+			              		ORDER BY flood_zone
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="typhoonZone">
+			              		ORDER BY typhoon_zone
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="activeTag">
+			              		ORDER BY active_tag
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss007_pkg.get_block_rec_list(#provinceCd#, #cityCd#, #districtNo#))
+		                   <isNotNull property="filter">
+								WHERE 1 = 1 
+									<isNotEmpty prepend="AND" property="activeTag">
+											UPPER(active_tag) LIKE UPPER(#activeTag#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="blockId">
+											block_id = #blockId#
+									</isNotEmpty>	 	
+									<isNotEmpty prepend="AND" property="blockNo">
+											UPPER(block_no) LIKE UPPER(#blockNo#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="blockDesc">
+											UPPER(block_desc) LIKE UPPER(#blockDesc#)
+									</isNotEmpty>	
+									<isNotEmpty prepend="AND" property="eqZone">
+											UPPER(eq_zone) LIKE UPPER(#eqZone#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="floodZone">
+											UPPER(flood_zone) LIKE UPPER(#floodZone#)
+									</isNotEmpty>	
+									<isNotEmpty prepend="AND" property="typhoonZone">
+											UPPER(typhoon_zone) LIKE UPPER(#typhoonZone#)
+									</isNotEmpty>		 																																													
+						  </isNotNull>	
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<select id="getGiiss007RisksDetails" resultMap="giiss007RisksResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss007_pkg.get_risks_rec_list(#blockId#))
+			              <isNotNull property="filter">
+								WHERE 1 = 1 
+									<isNotEmpty prepend="AND" property="riskCd">
+											UPPER(risk_cd) LIKE UPPER(#riskCd#)
+									</isNotEmpty>	 	
+									<isNotEmpty prepend="AND" property="riskDesc">
+											UPPER(risk_desc) LIKE UPPER(#riskDesc#)
+									</isNotEmpty>											 																																													
+						  </isNotNull>	
+						  <isEqual property="sortColumn" compareValue="riskCd">
+			              		ORDER BY risk_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="riskDesc">
+			              		ORDER BY risk_desc
+			              </isEqual>			             
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss007_pkg.get_risks_rec_list(#blockId#))
+		                    <isNotNull property="filter">
+								WHERE 1 = 1 
+									<isNotEmpty prepend="AND" property="riskCd">
+											UPPER(risk_cd) LIKE UPPER(#riskCd#)
+									</isNotEmpty>	 	
+									<isNotEmpty prepend="AND" property="riskDesc">
+											UPPER(risk_desc) LIKE UPPER(#riskDesc#)
+									</isNotEmpty>											 																																													
+						 	</isNotNull>	
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<select id="getGiiss007AllRisksDetails" resultMap="giiss007RisksResultMap">
+		SELECT '1' rownum_, 
+		       '1' count_,
+		        a.* FROM TABLE(giiss007_pkg.get_risks_rec_list(#blockId#)) a
+	</select>	
+	
+	<procedure id="valDeleteRecRisk" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss007_pkg.val_del_rec_risk(#blockId#, #riskCd#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddRecRisk" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss007_pkg.val_add_rec_risk(#blockId#, #riskCd#, #riskDesc#);
+ 		END;
+ 	</procedure> 	
+ 	
+ 	<procedure id="valAddRecDistrict" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss007_pkg.val_add_rec_district(#provinceCd#, #cityCd#, #districtNo#);
+ 		END;
+ 	</procedure> 	
+ 	
+ 	<delete id="delGiiss007Risk" parameterClass="GIISRisks">
+		BEGIN
+ 			giiss007_pkg.del_rec_risk(#blockId#, #riskCd#);
+ 		END;
+ 	</delete>
+ 	
+ 	<procedure id="setGiiss007Risk" parameterClass="GIISRisks">
+	    DECLARE
+	    	v_rec giis_risks%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.block_id := #blockId#;
+ 			v_rec.risk_cd := #riskCd#;
+ 			v_rec.risk_desc := #riskDesc#;
+ 			v_rec.user_id := #userId#;
+ 			
+ 			giiss007_pkg.set_rec_risk(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddRecBlock" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss007_pkg.val_add_rec_block(#provinceCd#, #cityCd#, #districtNo#, #blockNo#);
+ 		END;
+ 	</procedure> 
+ 	
+ 	<procedure id="valDeleteRecBlock" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss007_pkg.val_del_rec_block(#blockId#);
+ 		END;
+ 	</procedure>
+	
+	<procedure id="setGiiss007Block" parameterClass="GIISBlock">
+	    DECLARE
+	    	v_rec giis_block%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.province_cd := #provinceCd#;
+ 			v_rec.city_cd := #cityCd#;
+ 			v_rec.district_no := #districtNo#;
+ 			v_rec.block_id := #blockId#;
+ 			v_rec.block_no := #blockNo#;
+ 			v_rec.block_desc := #blockDesc#;
+ 			v_rec.retn_lim_amt := #retnLimAmt#;
+ 			v_rec.trty_lim_amt := #trtyLimAmt#;
+ 			v_rec.netret_beg_bal := #netretBegBal#;
+ 			v_rec.facul_beg_bal := #faculBegBal#;
+ 			v_rec.trty_beg_bal := #trtyBegBal#;
+ 			v_rec.eq_zone := #eqZone#;
+ 			v_rec.flood_zone := #floodZone#;
+ 			v_rec.typhoon_zone := #typhoonZone#;
+ 			v_rec.sheet_no := #sheetNo#;
+ 			v_rec.district_desc := #districtDesc#; 			
+ 			v_rec.province := #province#;
+ 			v_rec.city := #city#;
+ 			v_rec.active_tag := #activeTag#;
+ 			v_rec.remarks := #remarks#;
+ 			v_rec.user_id := #userId#;			
+ 			
+ 			giiss007_pkg.set_rec_block(v_rec);
+ 		END;
+ 	</procedure>	
+ 	
+ 	<procedure id="updateGiiss007District" parameterClass="GIISBlock">
+	    DECLARE
+	    	v_rec giis_block%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.province_cd := #provinceCd#;
+ 			v_rec.city_cd := #cityCd#;
+ 			v_rec.district_no := #districtNo#;
+ 			v_rec.district_desc := #districtDesc#;
+ 			v_rec.sheet_no := #sheetNo#;			
+ 			
+ 			giiss007_pkg.update_rec_district(v_rec);
+ 		END;
+ 	</procedure>	
+ 
+	<delete id="delGiiss007Block" parameterClass="java.lang.Integer">
+		BEGIN
+ 			giiss007_pkg.del_rec_block(#blockId#);
+ 		END;
+ 	</delete>
+ 	
+ 	<procedure id="valDeleteRecProvince" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss007_pkg.val_del_rec_province(#provinceCd#);
+ 		END;
+ 	</procedure> 
+ 	
+ 	<delete id="delGiiss007Province" parameterClass="java.lang.String">
+		BEGIN
+ 			giiss007_pkg.del_rec_province(#provinceCd#);
+ 		END;
+ 	</delete>
+ 	
+ 	<procedure id="valDeleteRecCity" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss007_pkg.val_del_rec_city(#provinceCd#,#cityCd#);
+ 		END;
+ 	</procedure> 
+ 	
+ 	<delete id="delGiiss007City" parameterClass="GIISBlock">
+ 		 DECLARE
+	    	v_rec giis_block%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			 			
+ 			v_rec.province_cd := #provinceCd#;
+ 			v_rec.city_cd := #cityCd#;
+
+ 			giiss007_pkg.del_rec_city(v_rec);
+ 		END;
+ 	</delete>
+ 	
+ 	<procedure id="valDeleteRecDistrict" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss007_pkg.val_del_rec_district(#provinceCd#,#cityCd#,#districtNo#);
+ 		END;
+ 	</procedure> 
+ 	
+ 	<delete id="delGiiss007District" parameterClass="GIISBlock">
+ 		 DECLARE
+	    	v_rec giis_block%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			 			
+ 			v_rec.province_cd := #provinceCd#;
+ 			v_rec.city_cd := #cityCd#;
+ 			v_rec.district_no := #districtNo#;
+
+ 			giiss007_pkg.del_rec_district(v_rec);
+ 		END;
+ 	</delete>
+</sqlMap>

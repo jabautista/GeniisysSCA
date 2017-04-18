@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISTariff">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIISTariff" type="com.geniisys.common.entity.GIISTariff"/>
+	
+	<resultMap class="GIISTariff" id="GIISTariffPerilLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="tariffCd"		column="TARF_CD" />
+		<result property="tariffDesc"	column="TARF_DESC" />
+		<result property="tariffRate"	column="TARF_RATE" />
+	</resultMap>
+	
+	<resultMap id="GIISTariffLOVResultMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result property="tariffCd"		column="tarf_cd" />
+		<result property="tarfDesc"		column="tarf_desc" />
+	</resultMap>
+	
+	<resultMap class="GIISTariff" id="GIISS005RecListMap" extends="BaseEntity.TableGridResultMap">
+		<result column="tarf_cd"     			property="tariffCd"/>
+		<result column="tarf_desc"     			property="tariffDesc"/>
+		<result column="tarf_rate"     			property="tariffRate"/>
+		<result column="tarf_remarks"     		property="tariffRemarks"/>
+		<result column="occupancy_cd"    		property="occupancyCd"/>
+		<result column="occupancy_desc"    		property="occupancyDesc"/>
+		<result column="tariff_zone"    		property="tariffZone"/>
+		<result column="tariff_zone_desc"    	property="tariffZoneDesc"/>
+		<result column="remarks"    			property="remarks"/>
+		<result column="user_id"    			property="userId"/>
+		<result column="last_update"    		property="dspLastUpdate"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="occupancyLovMap" extends="BaseEntity.TableGridResultMap">
+		<result column="occupancy_cd"     		property="occupancyCd"/>
+		<result column="occupancy_desc"     	property="occupancyDesc"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="tariffLovMap" extends="BaseEntity.TableGridResultMap">
+		<result column="tariff_zone"     		property="tariffZone"/>
+		<result column="tariff_zone_desc"     	property="tariffZoneDesc"/>
+	</resultMap>
+	
+	<select id="getPerilTariffLOV" parameterClass="java.util.HashMap" resultMap="GIISTariffPerilLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giis_tariff_pkg.get_peril_tariff_list1(#lineCd#, #perilCd#, #findText#))
+						  <isEqual property="sortColumn" compareValue="tariffDesc">
+								ORDER BY tarf_desc
+						  </isEqual>
+						  <isNotNull property="sortColumn">
+								<isEqual property="ascDescFlag" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlag" compareValue="DESC">
+									DESC
+								</isEqual>
+						  </isNotNull>
+					   )a,
+					   (SELECT COUNT(*) count_
+						  FROM TABLE(giis_tariff_pkg.get_peril_tariff_list1(#lineCd#, #perilCd#, #findText#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getTariffCodeLOV" resultMap="GIISTariffPerilLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giis_tariff_pkg.get_tariff_list)
+						  <isNotNull property="findText">
+		                  	WHERE UPPER(tarf_desc) LIKE UPPER(#findText#)
+		                  </isNotNull>
+					   )a,
+					   (SELECT COUNT(*) count_
+						  FROM TABLE(giis_tariff_pkg.get_tariff_list)
+						  <isNotNull property="findText">
+		                  	WHERE UPPER(tarf_desc) LIKE UPPER(#findText#)
+		                  </isNotNull>
+		                  ) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="Gipis155TarfLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="tarfCd"		column="TARF_CD" />
+		<result property="tarfDesc"		column="TARF_DESC" />
+	</resultMap>
+	
+	<select id="getGipis155TarfLOV" resultMap="Gipis155TarfLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT DISTINCT TARF_CD, TARF_DESC
+						  FROM TABLE(giis_tariff_pkg.get_tariff_list)
+						  <isNotNull property="findText">
+		                  	WHERE UPPER(tarf_cd) LIKE UPPER(NVL(#findText#, tarf_cd))
+		                  	   OR UPPER(tarf_desc) LIKE UPPER(NVL(#findText#, tarf_desc))
+		                  </isNotNull>
+						  <isNull property="findText">
+		                  	WHERE UPPER(tarf_cd) LIKE UPPER(NVL(#searchString#, tarf_cd))
+		                  	   OR UPPER(tarf_desc) LIKE UPPER(NVL(#searchString#, tarf_desc))
+		                  </isNull>
+		                  <isNotNull property="sortColumn">
+		                  		<isEqual property="sortColumn" compareValue="tarfCd">
+		                  			ORDER BY tarf_cd
+		                  		</isEqual>
+		                  		<isEqual property="sortColumn" compareValue="tarfDesc">
+		                  			ORDER BY tarf_desc
+		                  		</isEqual>
+								<isEqual property="ascDescFlag" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlag" compareValue="DESC">
+									DESC
+								</isEqual>
+						  </isNotNull>		                  		
+					   ) a,
+					   (SELECT count(DISTINCT TARF_CD) count_
+						  FROM TABLE(giis_tariff_pkg.get_tariff_list)
+						  <isNotNull property="findText">
+		                  	WHERE UPPER(tarf_cd) LIKE UPPER(NVL(#findText#, tarf_cd))
+		                  	   OR UPPER(tarf_desc) LIKE UPPER(NVL(#findText#, tarf_desc))
+		                  </isNotNull>
+						  <isNull property="findText">
+		                  	WHERE UPPER(tarf_cd) LIKE UPPER(NVL(#searchString#, tarf_cd))
+		                  	   OR UPPER(tarf_desc) LIKE UPPER(NVL(#searchString#, tarf_desc))
+		                  </isNull>
+		               ) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiiss054TarfLOV" resultMap="GIISTariffLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIISS054_PKG.get_tarf_lov)		                 
+		                  	<isNull property="findText">
+				             	WHERE UPPER(tarf_cd) LIKE UPPER(#searchString#)
+				                 OR UPPER(tarf_desc) LIKE UPPER(#searchString#)					                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(tarf_cd) LIKE UPPER(#findText#)
+				                 OR UPPER(tarf_desc) LIKE UPPER(#findText#)				  				         		
+			             	</isNotNull>		             
+			              	<isEqual property="sortColumn" compareValue="tariffCd">
+			              		ORDER BY tarf_cd
+			              	</isEqual>	
+			              	<isEqual property="sortColumn" compareValue="tarfDesc">
+			              		ORDER BY tarf_desc
+			              	</isEqual>			              		                      
+			          	  	<isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	</isNotNull>
+		                  ) a, 
+		               (SELECT count (*) count_ 
+		                  FROM TABLE(GIISS054_PKG.get_tarf_lov)		                 
+		                  	<isNull property="findText">
+				             	WHERE UPPER(tarf_cd) LIKE UPPER(#searchString#)
+				                 OR UPPER(tarf_desc) LIKE UPPER(#searchString#)					                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(tarf_cd) LIKE UPPER(#findText#)
+				                 OR UPPER(tarf_desc) LIKE UPPER(#findText#)				  				         		
+			             	</isNotNull>			
+			             	) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGIISS005RecList" resultMap="GIISS005RecListMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss005_pkg.get_rec_list(#tariffCd#, #tariffDesc#, #tariffRate#, #tariffRemarks#))
+		  	     		<isNotNull property="filter">
+  							WHERE 1 = 1
+  							<isNotEmpty prepend="AND" property="occupancyDesc">
+  								(UPPER(occupancy_desc) LIKE UPPER(#occupancyDesc#) OR UPPER(occupancy_cd) LIKE UPPER(#occupancyDesc#)) 
+  							</isNotEmpty>
+  							<isNotEmpty prepend="AND" property="tariffZoneDesc">
+  								(UPPER(tariff_zone_desc) LIKE UPPER(#tariffZoneDesc#) OR UPPER(tariff_zone) LIKE UPPER(#tariffZoneDesc#))
+  							</isNotEmpty>
+  						</isNotNull>
+		                  <isEqual property="sortColumn" compareValue="tariffCd">
+			              		ORDER BY tarf_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="tariffDesc">
+			              		ORDER BY tarf_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="tariffRate">
+			              		ORDER BY tarf_rate
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="tariffRemarks">
+			              		ORDER BY tarf_remarks
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss005_pkg.get_rec_list(#tariffCd#, #tariffDesc#, #tariffRate#, #tariffRemarks#))
+		                <isNotNull property="filter">
+  							WHERE 1 = 1
+  							<isNotEmpty prepend="AND" property="occupancyDesc">
+  								(UPPER(occupancy_desc) LIKE UPPER(#occupancyDesc#) OR UPPER(occupancy_cd) LIKE UPPER(#occupancyDesc#)) 
+  							</isNotEmpty>
+  							<isNotEmpty prepend="AND" property="tariffZoneDesc">
+  								(UPPER(tariff_zone_desc) LIKE UPPER(#tariffZoneDesc#) OR UPPER(tariff_zone) LIKE UPPER(#tariffZoneDesc#))
+  							</isNotEmpty>
+  						</isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<select id="getGIISS005OccupancyLov" resultMap="occupancyLovMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giiss005_pkg.get_occupancy_lov(#findText#))
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="occupancyCd">
+								ORDER BY occupancy_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="occupancyDesc">
+								ORDER BY occupancy_desc
+							</isEqual>							
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(giiss005_pkg.get_occupancy_lov(#findText#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGIISS005TariffLov" resultMap="tariffLovMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giiss005_pkg.get_tariff_lov(#findText#))
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="tariffZone">
+								ORDER BY tariff_zone
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="tariffZoneDesc">
+								ORDER BY tariff_zone_desc
+							</isEqual>							
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(giiss005_pkg.get_tariff_lov(#findText#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="valAddTariff" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss005_pkg.val_add_rec(#tariffCd#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteTariff" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss005_pkg.val_del_rec(#tariffCd#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="setGIISS005Tariff" parameterClass="GIISTariff">
+	    DECLARE
+	    	v_rec giis_tariff%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.tarf_cd := #tariffCd#;
+ 			v_rec.tarf_desc := #tariffDesc#;
+ 			v_rec.tarf_rate := #tariffRate#;
+ 			v_rec.tarf_remarks := #tariffRemarks#;
+ 			v_rec.remarks := #remarks#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.occupancy_cd := #occupancyCd#;
+ 			v_rec.tariff_zone := #tariffZone#;
+ 			
+ 			giiss005_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<delete id="delGIISS005Tariff" parameterClass="java.lang.String">
+		BEGIN
+ 			giiss005_pkg.del_rec(#tariffCd#);
+ 		END;
+ 	</delete>
+	
+</sqlMap>

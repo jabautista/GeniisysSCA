@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISUserIssCd">
+	<typeAlias alias="GIISUserIssCd" type="com.geniisys.common.entity.GIISUserIssCd" />
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<resultMap id="GIISUserIssCdMap" class="GIISUserIssCd">
+		<result column="TRAN_CD"		property="tranCd" />
+		<result column="USERID"			property="userID" />
+		<result column="ISS_CD"			property="issCd" />
+		<result column="ISS_NAME"		property="issName" />
+	</resultMap>
+	
+	<procedure id="checkUserPerIssCdAcctg" resultClass="java.lang.Integer" parameterClass="java.util.HashMap">
+		SELECT GIIS_USER_ISS_CD_PKG.check_user_per_iss_cd_acctg(#lineCd#, #issCd#, #moduleId#) FROM dual
+	</procedure>
+	
+	<select id="checkUserPerIssCdAcctg2" resultClass="java.lang.String" parameterClass="map">
+		SELECT GIIS_USER_ISS_CD_PKG.check_user_per_iss_cd_acctg2(#lineCd#, #issCd#, #moduleId#, #userId#) FROM dual
+	</select>
+	
+	<select id="getGiisUserIssCdList" resultMap="GIISUserIssCdMap">
+		select tran_cd, userid, iss_cd, iss_name
+		  from table(Giis_User_Iss_Cd_Pkg.get_giis_user_iss_cd_grp_list(#userID#))
+      order by iss_name
+	</select>
+	
+	<insert id="setGiisUserIssCd" parameterClass="GIISUserIssCd">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			Giis_User_Iss_Cd_Pkg.set_giis_user_iss_cd(#userID#, #tranCd#, #issCd#, #userId#);
+		END;
+	</insert>
+	
+	<delete id="deleteGiisUserIssCd" parameterClass="java.lang.String">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;		
+			Giis_User_Iss_Cd_Pkg.del_giis_user_iss_cd(#userID#);
+		END;
+	</delete>
+
+	<resultMap id="giisUserIssCdResultMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result column="tran_cd"	property="tranCd" />
+		<result column="iss_cd"		property="issCd" />
+		<result column="iss_name"	property="issName" />
+		<result column="not_in"		property="notIn" />
+	</resultMap>	
+	
+	<select id="getUserIssCd" resultMap="giisUserIssCdResultMap">
+		SELECT *
+		   FROM (SELECT rownum rownum_, 
+		                b.count_, 
+		                a.* 
+		           FROM (SELECT * 
+		                   FROM TABLE (GIISS040_PKG.get_user_iss_cd(#userId#, #tranCd#, #issCd#, #issName#))
+		                  <isEqual property="sortColumn" compareValue="issCd">
+			              		ORDER BY iss_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="issName">
+			              		ORDER BY iss_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               	  (SELECT count(*) count_ 
+		                     FROM TABLE (GIISS040_PKG.get_user_iss_cd(#userId#, #tranCd#, #issCd#, #issName#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>	
+	
+	<select id="getGiiss040IssLOV" resultMap="giisUserIssCdResultMap">
+		SELECT *
+		   FROM (SELECT rownum rownum_, 
+		                b.count_, 
+		                a.* 
+		           FROM (SELECT * 
+		                   FROM TABLE (GIISS040_PKG.get_iss_lov(#findText#))
+		                  <isNotNull property="notIn">
+					  		WHERE iss_cd NOT IN ($notIn$)
+					  	  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="issCd">
+			              		ORDER BY iss_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="issName">
+			              		ORDER BY iss_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               	  (SELECT count(*) count_ 
+		                     FROM TABLE (GIISS040_PKG.get_iss_lov(#findText#))
+		                     <isNotNull property="notIn">
+					  		   WHERE iss_cd NOT IN ($notIn$)
+					  	     </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>	
+		
+	<delete id="delGiiss040UserIss" parameterClass="java.util.HashMap">
+		BEGIN
+ 			giiss040_pkg.del_user_iss(#gutUserId#, #tranCd#, #issCd#);
+ 		END;
+ 	</delete>
+ 		
+	<procedure id="setGiiss040UserIss" parameterClass="GIISUserIssCd">
+		BEGIN
+		    giis_users_pkg.app_user := #appUser#;
+ 			giiss040_pkg.set_user_iss(#gutUserId#, #tranCd#, #issCd#);
+ 		END;
+ 	</procedure>	
+
+	<resultMap id="allUserIssCdResultMap" class="GIISUserIssCd">
+		<result column="iss_cd"		property="issCd" />
+		<result column="iss_name"	property="issName" />
+	</resultMap>	
+
+	<select id="includeAllIssCodes" resultMap="allUserIssCdResultMap">
+		SELECT * FROM TABLE (GIISS040_PKG.include_all_iss_codes)
+	</select>
+</sqlMap>

@@ -1,0 +1,33 @@
+SET SERVEROUTPUT ON
+
+BEGIN
+   EXECUTE IMMEDIATE
+      'ALTER TABLE cpi.GIAC_DEFERRED_RI_PREM_CEDE_DTL ADD comp_sw  VARCHAR2(1)';
+
+   DBMS_OUTPUT.PUT_LINE (
+      'Successfully added comp_sw column to GIAC_DEFERRED_RI_PREM_CEDE_DTL table.');
+EXCEPTION
+   WHEN OTHERS
+   THEN
+      DBMS_OUTPUT.PUT_LINE (SQLERRM || '-' || SQLCODE);
+END;
+/
+BEGIN
+   UPDATE cpi.GIAC_DEFERRED_RI_PREM_CEDE_DTL
+      SET COMP_SW = 'N'
+    WHERE COMP_SW IS NULL;
+
+   COMMIT;
+END;
+/
+BEGIN
+   EXECUTE IMMEDIATE
+      'ALTER TABLE cpi.giac_deferred_ri_prem_cede_dtl MODIFY(comp_sw DEFAULT ''N'')';
+
+   DBMS_OUTPUT.PUT_LINE ('Added default value for comp_sw.');
+EXCEPTION
+   WHEN OTHERS
+   THEN
+      DBMS_OUTPUT.PUT_LINE (SQLERRM || '-' || SQLCODE);
+END;
+/

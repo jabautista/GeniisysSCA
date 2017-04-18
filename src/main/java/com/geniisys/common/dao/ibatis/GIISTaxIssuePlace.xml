@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISTaxIssuePlace">
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+
+	<typeAlias alias="GIISTaxIssuePlace" type="com.geniisys.common.entity.GIISTaxIssuePlace" />
+	
+	<resultMap id="issuePlaceList" class="com.geniisys.common.entity.GIISTaxIssuePlace" extends="BaseEntity.TableGridResultMap">
+		<result column="ISS_CD" 	property="issCd"/>
+		<result column="LINE_CD" 	property="lineCd"/>
+		<result column="TAX_CD" 	property="taxCd"/>
+		<result column="PLACE_CD" 	property="placeCd"/>
+		<result column="TAX_ID" 	property="taxId"/>
+		<result column="RATE" 		property="rate"/>
+		<result column="PLACE" 		property="place"/>
+	</resultMap>
+	
+	<resultMap id="taxIssuePlaceList" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result column="NOT_IN" 	property="notIn"/>
+		<result column="ISS_CD" 	property="issCd"/>
+		<result column="LINE_CD" 	property="lineCd"/>
+		<result column="TAX_CD" 	property="taxCd"/>
+		<result column="PLACE_CD" 	property="placeCd"/>
+		<result column="TAX_ID" 	property="taxId"/>
+		<result column="RATE" 		property="rate"/>
+		<result column="PLACE" 		property="place"/>
+	</resultMap>
+	
+	<select id="getTaxPlaceList" parameterClass="java.util.HashMap" resultMap="taxIssuePlaceList">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(Giiss028_pkg.get_tax_issue_place_list(#issCd#, #lineCd#, #taxCd#, #taxId#))
+		  	      		<isNotNull property="filter">
+							WHERE 1=1
+							<isNotEmpty prepend="AND"  property="place">
+								upper(place) LIKE upper(#place#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="rate">
+								rate = #rate#
+							</isNotEmpty>
+						</isNotNull>
+		                <isEqual property="sortColumn" compareValue="place">
+			            	ORDER BY place
+		              	</isEqual>
+		              	<isEqual property="sortColumn" compareValue="rate">
+			            	ORDER BY rate
+		              	</isEqual>
+		          	  	<isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		             	</isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(Giiss028_pkg.get_tax_issue_place_list(#issCd#, #lineCd#, #taxCd#, #taxId#))
+		                 <isNotNull property="filter">
+							WHERE 1=1
+							<isNotEmpty prepend="AND"  property="place">
+								upper(place) LIKE upper(#place#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="rate">
+								rate = #rate#
+							</isNotEmpty>
+						</isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+ 	<resultMap class="java.util.HashMap" id="GIISS028TaxPlaceLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="placeCd" 		column="place_cd"/>
+		<result property="place" 		column="place"/>
+	</resultMap>
+	
+	<select id="getGiiss028TaxPlaceLOV" resultMap="GIISS028TaxPlaceLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIISS028_PKG.get_place_list(#issCd#, #lineCd#, #taxCd#, #taxId#))	         
+		                  	<isNull property="findText">
+				             	WHERE UPPER(place) LIKE UPPER(#searchString#)				                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(place) LIKE UPPER(#findText#)			  				         		
+			             	</isNotNull>		
+			             	<isNotNull property="notIn">
+								AND place NOT IN ($notIn$)
+							</isNotNull>              
+			              	<isEqual property="sortColumn" compareValue="place">
+			              		ORDER BY place
+			              	</isEqual>	
+			              	<isEqual property="sortColumn" compareValue="placeCd">
+			              		ORDER BY place_cd
+			              	</isEqual>	              		                      
+			          	  	<isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	</isNotNull>
+		                  ) a, 
+		               (SELECT count (*) count_ 
+		                  FROM TABLE(GIISS028_PKG.get_place_list(#issCd#, #lineCd#, #taxCd#, #taxId#))	  	
+		                  	<isNull property="findText">
+				                 WHERE UPPER(place) LIKE UPPER(#searchString#)				                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(place) LIKE UPPER(#findText#)			  				         		
+			             	</isNotNull>	
+			             	<isNotNull property="notIn">
+								AND place NOT IN ($notIn$)
+							</isNotNull>   	
+			             	) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+ 	<procedure id="setTaxPlace" parameterClass="GIISTaxIssuePlace">
+	    DECLARE
+	    	v_rec giis_tax_issue_place%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.iss_cd := #issCd#;
+			v_rec.line_cd := #lineCd#;
+			v_rec.tax_cd := #taxCd#;
+			v_rec.tax_id := #taxId#;
+			v_rec.place_cd := #placeCd#;
+			v_rec.rate := #rate#;
+ 			v_rec.user_id := #userId#;
+ 			
+ 			GIISS028_PKG.set_tax_place_rec(v_rec);
+ 		END;
+ 	</procedure> 
+ 	
+ 	<delete id="delTaxPlace" parameterClass="GIISTaxIssuePlace">
+		BEGIN
+ 			GIISS028_PKG.del_tax_place_rec(#issCd#, #lineCd#, #taxCd#, #taxId#, #placeCd#);
+ 		END;
+ 	</delete> 
+ 	
+ 	<procedure id="valDeleteTaxPlace" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			GIISS028_PKG.val_del_place_rec(#issCd#, #lineCd#, #placeCd#);
+ 		END;
+ 	</procedure>
+</sqlMap>

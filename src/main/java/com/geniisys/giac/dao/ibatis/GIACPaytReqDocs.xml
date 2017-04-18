@@ -1,0 +1,448 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GIACPaytReqDocs">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+
+	<typeAlias alias="GIACPaytReqDocsClass" type="com.geniisys.giac.entity.GIACPaytReqDocs"/>
+
+	<resultMap class="GIACPaytReqDocsClass" id="GIACPaytReqDocsResultMap">
+		<result column="gibr_gfun_fund_cd"  property="gibrGfunFundCd"/>
+		<result column="gibr_branch_cd"     property="gibrBranchCd"/>
+		<result column="document_cd"        property="documentCd"/>
+		<result column="document_name"      property="documentName"/>
+		<result column="line_cd_tag"        property="lineCdTag"/>
+		<result column="yy_tag"             property="yyTag"/>
+		<result column="mm_tag"             property="mmTag"/>
+		<result column="doc_id"             property="docId"/>
+		<result column="remarks"            property="remarks"/>
+		<result column="user_id"            property="userId"/>
+		<result column="last_update"        property="lastUpdate"/>
+		<result column="cpi_rec_no"         property="cpiRecNo"/>
+		<result column="cpi_branch_cd"      property="cpiBranchCd"/>
+	</resultMap>
+
+	<resultMap class="GIACPaytReqDocsClass" id="GIACPaytReqDocsResultMapGrid" extends="GIACPaytReqDocsResultMap">
+		<result column="rownum_" 			property="rowNum" />
+		<result column="count_"				property="rowCount"/>
+	</resultMap>
+	
+	<resultMap class="com.geniisys.giac.entity.GIACPaytReqDocs" id="documentLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="document_cd"		property="documentCd" />
+		<result column="document_name"	property="documentName" />
+	</resultMap>
+
+	<select id="getRgDocumentCdClaimLOV" resultMap="GIACPaytReqDocsResultMapGrid">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giac_payt_req_docs_pkg.get_rg_document_cd_claim(#fundCd#, #branchCd#))
+		                  <isNotNull property="findText">
+				          WHERE (UPPER(document_cd) LIKE UPPER(#findText#) 
+				         	 OR UPPER(document_name) LIKE UPPER(#findText#)
+				         	 )
+				          </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="documentCd">
+			              		ORDER BY document_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="documentName">
+			              		ORDER BY document_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giac_payt_req_docs_pkg.get_rg_document_cd_claim(#fundCd#, #branchCd#))
+		                  <isNotNull property="findText">
+				         WHERE (UPPER(document_cd) LIKE UPPER(#findText#) 
+				         	 OR UPPER(document_name) LIKE UPPER(#findText#)
+				         	 )
+				         </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<select id="getRgDocumentCdNonClaimLOV" resultMap="GIACPaytReqDocsResultMapGrid" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giac_payt_req_docs_pkg.get_rg_document_cd_non_claim(#fundCd#, #branchCd#, #paramName#))
+		                  <isNotNull property="findText">
+				          WHERE (UPPER(document_cd) LIKE UPPER(#findText#) 
+				         	 OR UPPER(document_name) LIKE UPPER(#findText#)
+				         	 )
+				          </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="documentCd">
+			              		ORDER BY document_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="documentName">
+			              		ORDER BY document_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giac_payt_req_docs_pkg.get_rg_document_cd_non_claim(#fundCd#, #branchCd#, #paramName#))
+		                  <isNotNull property="findText">
+				         WHERE (UPPER(document_cd) LIKE UPPER(#findText#) 
+				         	 OR UPPER(document_name) LIKE UPPER(#findText#)
+				         	 )
+				         </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+
+	<select id="getRgDocumentCdOtherLOV" resultMap="GIACPaytReqDocsResultMapGrid">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giac_payt_req_docs_pkg.get_rg_document_cd_other(#fundCd#, #branchCd#))
+		                  <isNotNull property="findText">
+				          WHERE (UPPER(document_cd) LIKE UPPER(#findText#) 
+				         	 OR UPPER(document_name) LIKE UPPER(#findText#)
+				         	 )
+				          </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="documentCd">
+			              		ORDER BY document_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="documentName">
+			              		ORDER BY document_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giac_payt_req_docs_pkg.get_rg_document_cd_other(#fundCd#, #branchCd#))
+		                  <isNotNull property="findText">
+				         WHERE (UPPER(document_cd) LIKE UPPER(#findText#) 
+				         	 OR UPPER(document_name) LIKE UPPER(#findText#)
+				         	 )
+				         </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<select id="getRgDocumentCdAllLOV" resultMap="GIACPaytReqDocsResultMapGrid">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giac_payt_req_docs_pkg.get_rg_document_cd_all)
+		                  <isNotNull property="findText">
+				          WHERE (UPPER(document_cd) LIKE UPPER(#findText#) 
+				         	 OR UPPER(document_name) LIKE UPPER(#findText#)
+				         	 )
+				          </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="documentCd">
+			              		ORDER BY document_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="documentName">
+			              		ORDER BY document_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giac_payt_req_docs_pkg.get_rg_document_cd_all)
+		                  <isNotNull property="findText">
+				         WHERE (UPPER(document_cd) LIKE UPPER(#findText#) 
+				         	 OR UPPER(document_name) LIKE UPPER(#findText#)
+				         	 )
+				         </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<!-- <parameterMap id="paytReqNumSchemeMap" class="java.util.HashMap">
+		<parameter property="fundCd" 		javaType="java.lang.String" 		jdbcType="VARCHAR" 		mode="IN" />
+		<parameter property="branchCd" 		javaType="java.lang.String" 		jdbcType="VARCHAR" 		mode="IN" />
+		<parameter property="documentCd"	javaType="java.lang.String" 		jdbcType="VARCHAR" 		mode="IN" />
+		<parameter property="nbtLineCdTag"	javaType="java.lang.String" 		jdbcType="VARCHAR" 		mode="OUT" />
+		<parameter property="nbtYyTag" 		javaType="java.lang.String" 		jdbcType="VARCHAR" 		mode="OUT" />
+		<parameter property="nbtMmTag" 		javaType="java.lang.String" 		jdbcType="VARCHAR" 		mode="OUT" />
+	</parameterMap>
+	<procedure id="getPaytReqNumberingScheme" parameterMap="paytReqNumSchemeMap">
+		{ CALL GIAC_PAYT_REQ_DOCS_PKG.get_payt_req_numbering_scheme(?, ?, ?, ?, ?, ?) }
+		BEGIN
+			GIAC_PAYT_REQ_DOCS_PKG.get_payt_req_numbering_scheme(?, ?, ?, ?, ?, ?);
+		END;
+	</procedure> -->
+	
+	<select id="getPaytReqNumberingScheme" resultMap="GIACPaytReqDocsResultMap">
+		SELECT *
+		  FROM TABLE(GIAC_PAYT_REQ_DOCS_PKG.get_payt_req_numbering_scheme(#fundCd#, #branchCd#, #documentCd#))
+	</select>
+	 
+	<select id="getGIACS002DocumentLOV" parameterClass="java.util.HashMap" resultMap="GIACPaytReqDocsResultMapGrid">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+		  			   b.count_,
+		  			   a.*
+		  		  FROM (SELECT *
+		  		  		  FROM TABLE(GIAC_PAYT_REQ_DOCS_PKG.get_document_cd_list(#moduleId#, #userId#, #fundCd#, #branchCd#))  <!-- [Kris 05.10.2013: added parameter branchCd for PF SR_13021] -->
+		  		  		  <isNotNull property="findText">
+				          WHERE (UPPER(document_cd) LIKE UPPER(#findText#)  )
+				         	 OR (UPPER(document_name) LIKE UPPER(#findText#) )
+				         	 OR (UPPER(gibr_gfun_fund_cd) LIKE UPPER(#findText#)) 			         	 
+				          </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="documentCd">
+			              		ORDER BY document_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="documentName">
+			              		ORDER BY document_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="gibrGfunFundCd">
+			              		ORDER BY gibr_gfun_fund_cd
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		  		  		  ) a,
+		  		  	   (SELECT count(*) count_
+		  		  	     FROM TABLE(GIAC_PAYT_REQ_DOCS_PKG.get_document_cd_list(#moduleId#, #userId#, #fundCd#, #branchCd#))  <!-- [Kris 05.10.2013: added parameter branchCd for PF SR_13021] -->
+		  		  	     <isNotNull property="findText">
+				          WHERE (UPPER(document_cd) LIKE UPPER(#findText#) )
+				         	 OR (UPPER(document_name) LIKE UPPER(#findText#) )
+				         	 OR (UPPER(gibr_gfun_fund_cd) LIKE UPPER(#findText#) ) 				         	 
+				          </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="documentCd">
+			              		ORDER BY document_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="documentName">
+			              		ORDER BY document_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="gibrGfunFundCd">
+			              		ORDER BY gibr_gfun_fund_cd
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		  		  	     ) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="validateGIACS002DocCd" parameterClass="java.util.HashMap">
+		BEGIN
+			GIAC_PAYT_REQ_DOCS_PKG.validate_document_cd(#fundCd#, #branchCd#, #documentCd#);
+		END;
+	</procedure>
+	
+	<!-- Joms for Document LOV -->
+	<select id="fetchRequestLOV" resultMap="documentLOVMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIAC_PAYT_REQ_DOCS_PKG.FETCH_DOCUMENT_LIST(#branchCd#, #findText#))
+		                  <isEqual property="sortColumn" compareValue="documentCd">
+			              		ORDER BY document_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="documentName">
+			              		ORDER BY document_name
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIAC_PAYT_REQ_DOCS_PKG.FETCH_DOCUMENT_LIST(#branchCd#, #findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGIACS273DocLOV" resultMap="documentLOVMap" parameterClass="map">	<!-- shan 01.13.2014 -->
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIAC_PAYT_REQ_DOCS_PKG.FETCH_DOCUMENT_LIST(#branchCd#, #findText#))
+		                  <isNotNull property="findText">
+					          WHERE (UPPER(document_cd) LIKE UPPER(#findText#)  )
+					         	 OR (UPPER(document_name) LIKE UPPER(#findText#) )			         	 
+				          </isNotNull>
+				          <isNull property="findText">
+					          WHERE (UPPER(document_cd) LIKE UPPER(NVL(#searchString#, document_cd))  )
+					         	 OR (UPPER(document_name) LIKE UPPER(NVL(#searchString#, document_name)) )			         	 
+				          </isNull>
+		                  <isEqual property="sortColumn" compareValue="documentCd">
+			              		ORDER BY document_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="documentName">
+			              		ORDER BY document_name
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIAC_PAYT_REQ_DOCS_PKG.FETCH_DOCUMENT_LIST(#branchCd#, #findText#))
+		                  <isNotNull property="findText">
+					          WHERE (UPPER(document_cd) LIKE UPPER(#findText#)  )
+					         	 OR (UPPER(document_name) LIKE UPPER(#findText#) )			         	 
+				          </isNotNull>
+				          <isNull property="findText">
+					          WHERE (UPPER(document_cd) LIKE UPPER(NVL(#searchString#, document_cd))  )
+					         	 OR (UPPER(document_name) LIKE UPPER(NVL(#searchString#, document_name)) )			         	 
+				          </isNull>
+		                ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="validateDocCd2" resultClass="java.lang.String" parameterClass="java.util.HashMap">
+		SELECT GIAC_PAYT_REQ_DOCS_PKG.validate_document_cd2(#documentCd#, #branchCd#) FROM DUAL
+	</select>
+	
+	<resultMap class="GIACPaytReqDocsClass" id="giacPaytReqDocListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="doc_id"     		property="docId"/>
+		<result column="document_cd" 	property="documentCd"/>
+		<result column="document_name"  	property="documentName"/>
+		<result column="line_cd_tag"  	property="lineCdTag"/>
+		<result column="yy_tag" 		property="yyTag"/>
+		<result column="mm_tag"  		property="mmTag"/>
+		<result column="purchase_tag"  	property="purchaseTag"/>
+		<result column="user_id"     	property="userId"/>
+		<result column="last_update" 	property="lastUpdate"/>
+		<result column="remarks"     	property="remarks"/>
+	</resultMap>
+	
+	<select id="getGiacs306RecList" resultMap="giacPaytReqDocListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giacs306_pkg.get_rec_list(#fundCd#, #branchCd#, #documentCd#, #documentName#, #lineCdTag#, #yyTag#, #mmTag#, #purchaseTag#))
+		                  <isEqual property="sortColumn" compareValue="documentCd">
+			              		ORDER BY document_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="documentName">
+			              		ORDER BY document_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="lineCdTag">
+			              		ORDER BY line_cd_tag
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="yyTag">
+			              		ORDER BY yy_tag
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="mmTag">
+			              		ORDER BY mm_tag
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="purchaseTag">
+			              		ORDER BY purchase_tag
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giacs306_pkg.get_rec_list(#fundCd#, #branchCd#, #documentCd#, #documentName#, #lineCdTag#, #yyTag#, #mmTag#, #purchaseTag#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setPaytReqDoc" parameterClass="GIACPaytReqDocsClass">
+	    DECLARE
+	    	v_rec giac_payt_req_docs%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.doc_id := #docId#;
+ 			v_rec.gibr_gfun_fund_cd := #gibrGfunFundCd#;
+ 			v_rec.gibr_branch_cd := #gibrBranchCd#;
+ 			v_rec.document_cd := #documentCd#;
+ 			v_rec.document_name := #documentName#;
+ 			v_rec.line_cd_tag := #lineCdTag#;
+ 			v_rec.yy_tag := #yyTag#;
+ 			v_rec.mm_tag := #mmTag#;
+ 			v_rec.purchase_tag := #purchaseTag#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			giacs306_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeletePaytReqDoc" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giacs306_pkg.val_del_rec(#fundCd#, #branchCd#, #documentCd#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddPaytReqDoc" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giacs306_pkg.val_add_rec(#fundCd#, #branchCd#, #documentCd#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delPaytReqDoc" parameterClass="GIACPaytReqDocsClass">
+		BEGIN
+ 			giacs306_pkg.del_rec(#gibrGfunFundCd#, #gibrBranchCd#, #documentCd#);
+ 		END;
+ 	</delete>
+ 	
+ 	<select id="printGIACR057CSV" resultClass="java.util.HashMap" parameterClass="map">
+		SELECT *
+		  FROM TABLE(giacr057_pkg.get_giacr057_csv(#P_BRANCH_CD#,
+												   #P_DOCUMENT_CD#,
+												   #P_DOCUMENT_NAME#,
+												   #P_FROM_DATE#,
+												   #P_STATUS#,
+												   #P_TO_DATE#,
+												   #P_USER_ID#))
+	</select>
+</sqlMap>

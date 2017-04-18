@@ -1,0 +1,1752 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIACModuleEntries">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<resultMap class="java.util.HashMap" id="giacs106LineLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="line_cd"			property="lineCd" />
+		<result column="line_name"			property="lineName" />
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="giacs106RiLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="ri_cd"				property="riCd" />
+		<result column="ri_name"			property="riName" />
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="giacs119RiLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="ri_cd"				property="riCd" />
+		<result column="ri_name"			property="riName" />
+		<result column="ri_sname"			property="riSname" />
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="giacs181GetParamsMap" extends="BaseEntity.TableGridResultMap">
+		<result column="from_date"			property="fromDate" />
+		<result column="to_date"			property="toDate" />
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="giacs183GetDateMap">
+		<result column="from_date"			property="fromDate" />
+		<result column="to_date"			property="toDate" />
+		<result column="cut_off_date"		property="cutOffDate" />
+	</resultMap>
+	
+	
+	<parameterMap class="map" id="giacs181ExtractToTableMap">
+		<parameter property="fromDate"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="toDate"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="userId"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="exist"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+	</parameterMap>
+	
+	<parameterMap class="map" id="extractGIACS182">
+		<parameter property="fromDate"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="toDate"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="cutOffDate"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="riCd"			jdbcType="VARCHAR"		javaType="java.lang.String"	    mode="IN" />
+		<parameter property="lineCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="userId"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="exist"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+	</parameterMap>
+	
+	<parameterMap class="map" id="giacs183ExtractToTableMap">
+		<parameter property="fromDate"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="toDate"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="cutOffDate"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="riCd"      	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="lineCd"    	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="exist"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+		<parameter property="fundCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+		<parameter property="branchCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+		<parameter property="tranDate"		jdbcType="DATE"			javaType="java.util.Date" 		mode="OUT" />
+		<parameter property="collnAmt"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+	</parameterMap>
+	
+	<parameterMap class="map" id="giacs183MainLoopMap">
+		<parameter property="fromDate"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="toDate"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="cutOffDate"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="fundCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="branchCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="tranDate"		jdbcType="DATE"			javaType="java.util.Date" 		mode="INOUT" />
+		<parameter property="collnAmt"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="INOUT" />
+	</parameterMap>
+	
+	<resultMap class="java.util.HashMap" id="treatyLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="share_cd"				property="shareCd" />
+		<result column="treaty_name"			property="treatyName" />
+	</resultMap>
+	
+	<select id="getGiacs106LineLOV" resultMap="giacs106LineLOVMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		          FROM (SELECT * 
+		  		   		  FROM TABLE(GIACS106_PKG.get_line_lov(#riCd#))
+						 <isNotNull property="findText">
+							WHERE (UPPER(line_cd) LIKE UPPER(#findText#)
+							OR UPPER(line_name) LIKE UPPER(#findText#))
+						 </isNotNull>
+						 <isNull property="findText">
+							WHERE (UPPER(line_cd) LIKE UPPER(#findText2#)
+							OR UPPER(line_name) LIKE UPPER(#findText2#))
+						 </isNull>
+                         <isEqual property="sortColumn" compareValue="lineCd">
+                                ORDER BY line_cd
+                         </isEqual>
+                          <isEqual property="sortColumn" compareValue="lineName">
+                                ORDER BY line_name
+                         </isEqual>
+		  				 <isNotNull property="sortColumn">
+                                 <isEqual property="ascDescFlg" compareValue="ASC">
+                                     ASC
+                                 </isEqual> 
+                                 <isEqual property="ascDescFlg" compareValue="DESC">
+                                     DESC
+                                 </isEqual>
+                         </isNotNull> 
+		  		   		) a,
+		          	   (SELECT count(*) count_ 
+		  		   		  FROM TABLE(GIACS106_PKG.get_line_lov(#riCd#))
+	  		   		     <isNotNull property="findText">
+							WHERE (UPPER(line_cd) LIKE UPPER(#findText#)
+							OR UPPER(line_name) LIKE UPPER(#findText#))
+						 </isNotNull>
+						 <isNull property="findText">
+							WHERE (UPPER(line_cd) LIKE UPPER(#findText2#)
+							OR UPPER(line_name) LIKE UPPER(#findText2#))
+						 </isNull>
+		  		   		) b
+               )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiacs106RiLOV" resultMap="giacs106RiLOVMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		          FROM (SELECT * 
+		  		   		  FROM TABLE(GIACS106_PKG.get_ri_lov)
+						 <isNotNull property="findText">
+							WHERE (ri_cd LIKE #findText#
+							OR UPPER(ri_name) LIKE UPPER(#findText#))
+						 </isNotNull>
+						 <isNull property="findText">
+							WHERE (ri_cd LIKE #findText2#
+							OR UPPER(ri_name) LIKE UPPER(#findText2#))
+						 </isNull>
+                         <isEqual property="sortColumn" compareValue="riCd">
+                                ORDER BY ri_cd
+                         </isEqual>
+                          <isEqual property="sortColumn" compareValue="riName">
+                                ORDER BY ri_name
+                         </isEqual>
+		  				 <isNotNull property="sortColumn">
+                                 <isEqual property="ascDescFlg" compareValue="ASC">
+                                     ASC
+                                 </isEqual> 
+                                 <isEqual property="ascDescFlg" compareValue="DESC">
+                                     DESC
+                                 </isEqual>
+                         </isNotNull> 
+		  		   		) a,
+		          	   (SELECT count(*) count_ 
+		  		   		  FROM TABLE(GIACS106_PKG.get_ri_lov)
+	  		   		     <isNotNull property="findText">
+							WHERE (ri_cd LIKE #findText#
+							OR UPPER(ri_name) LIKE UPPER(#findText#))
+						 </isNotNull>
+						 <isNull property="findText">
+							WHERE (ri_cd LIKE #findText2#
+							OR UPPER(ri_name) LIKE UPPER(#findText2#))
+						 </isNull>
+		  		   		) b
+               )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiacs105LineLOV" resultMap="giacs106LineLOVMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		          FROM (SELECT * 
+		  		   		  FROM TABLE(GIACS105_PKG.get_line_lov)
+						 <isNotNull property="findText">
+							WHERE (UPPER(line_cd) LIKE UPPER(#findText#)
+							OR UPPER(line_name) LIKE UPPER(#findText#))
+						 </isNotNull>
+						 <isNull property="findText">
+							WHERE (UPPER(line_cd) LIKE UPPER(#findText2#)
+							OR UPPER(line_name) LIKE UPPER(#findText2#))
+						 </isNull>
+                         <isEqual property="sortColumn" compareValue="lineCd">
+                                ORDER BY line_cd
+                         </isEqual>
+                          <isEqual property="sortColumn" compareValue="lineName">
+                                ORDER BY line_name
+                         </isEqual>
+		  				 <isNotNull property="sortColumn">
+                                 <isEqual property="ascDescFlg" compareValue="ASC">
+                                     ASC
+                                 </isEqual> 
+                                 <isEqual property="ascDescFlg" compareValue="DESC">
+                                     DESC
+                                 </isEqual>
+                         </isNotNull> 
+		  		   		) a,
+		          	   (SELECT count(*) count_ 
+		  		   		  FROM TABLE(GIACS105_PKG.get_line_lov)
+	  		   		     <isNotNull property="findText">
+							WHERE (UPPER(line_cd) LIKE UPPER(#findText#)
+							OR UPPER(line_name) LIKE UPPER(#findText#))
+						 </isNotNull>
+						 <isNull property="findText">
+							WHERE (UPPER(line_cd) LIKE UPPER(#findText2#)
+							OR UPPER(line_name) LIKE UPPER(#findText2#))
+						 </isNull>
+		  		   		) b
+               )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiacs105RiLOV" resultMap="giacs106RiLOVMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		          FROM (SELECT * 
+		  		   		  FROM TABLE(GIACS105_PKG.get_ri_lov)
+						 <isNotNull property="findText">
+							WHERE (ri_cd LIKE #findText#
+							OR UPPER(ri_name) LIKE UPPER(#findText#))
+						 </isNotNull>
+						 <isNull property="findText">
+							WHERE (ri_cd LIKE #findText2#
+							OR UPPER(ri_name) LIKE UPPER(#findText2#))
+						 </isNull>
+                         <isEqual property="sortColumn" compareValue="riCd">
+                                ORDER BY ri_cd
+                         </isEqual>
+                          <isEqual property="sortColumn" compareValue="riName">
+                                ORDER BY ri_name
+                         </isEqual>
+		  				 <isNotNull property="sortColumn">
+                                 <isEqual property="ascDescFlg" compareValue="ASC">
+                                     ASC
+                                 </isEqual> 
+                                 <isEqual property="ascDescFlg" compareValue="DESC">
+                                     DESC
+                                 </isEqual>
+                         </isNotNull> 
+		  		   		) a,
+		          	   (SELECT count(*) count_ 
+		  		   		  FROM TABLE(GIACS105_PKG.get_ri_lov)
+	  		   		     <isNotNull property="findText">
+							WHERE (ri_cd LIKE #findText#
+							OR UPPER(ri_name) LIKE UPPER(#findText#))
+						 </isNotNull>
+						 <isNull property="findText">
+							WHERE (ri_cd LIKE #findText2#
+							OR UPPER(ri_name) LIKE UPPER(#findText2#))
+						 </isNull>
+		  		   		) b
+               )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+
+<!--BEGIN Gzelle 06.18.2013 GIACS171-->	
+	<select id="getPremAssumedRiLOV" resultMap="giacs106RiLOVMap">
+	    SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT *
+		                  FROM TABLE(giacs171_pkg.get_ri_lov)
+		                  <isNull property="findText">
+						   	WHERE ri_cd LIKE upper(NVL(#search#, ri_cd))
+						  </isNull>
+			          	  <isNotNull property="findText">
+		                  	WHERE (UPPER(ri_cd) LIKE UPPER(#findText#) 
+		                  	 		OR UPPER(ri_name) LIKE UPPER(#findText#))
+		             	  </isNotNull>
+			          	  <isNotNull property="sortColumn">
+			          	  	  <isEqual property="sortColumn" compareValue="riCd">
+				              		ORDER BY ri_cd
+				              </isEqual>
+			                  <isEqual property="sortColumn" compareValue="riName">
+				              		ORDER BY ri_name
+				              </isEqual>	
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">	
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+							) a,
+							(SELECT count(*) count_
+								 FROM TABLE(giacs171_pkg.get_ri_lov)
+								  <isNull property="findText">
+						   	 		WHERE ri_cd LIKE upper(NVL(#search#, ri_cd))
+						  		 </isNull>
+					          	  <isNotNull property="findText">
+				                  WHERE (UPPER(ri_cd) LIKE UPPER(#findText#) 
+				                  	 		OR UPPER(ri_name) LIKE UPPER(#findText#))
+				             	  </isNotNull>
+			                ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+
+	<select id="getPremAssumedLineLOV" resultMap="giacs106LineLOVMap">
+	    SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT *
+		                  FROM TABLE(giacs171_pkg.get_line_lov)
+		                  <isNull property="findText">
+						   WHERE upper(line_cd) LIKE upper(NVL(#search#, line_cd))
+						  </isNull>
+			          	  <isNotNull property="findText">
+		                   WHERE (UPPER(line_cd) LIKE UPPER(#findText#) 
+		                  	 		OR UPPER(line_name) LIKE UPPER(#findText#))
+		             	  </isNotNull>
+			          	  <isNotNull property="sortColumn">
+			          	  	  <isEqual property="sortColumn" compareValue="lineCd">
+				              		ORDER BY line_cd
+				              </isEqual>
+			                  <isEqual property="sortColumn" compareValue="lineName">
+				              		ORDER BY line_name
+				              </isEqual>	
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">	
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+							) a,
+							(SELECT count(*) count_
+								 FROM TABLE(giacs171_pkg.get_line_lov)
+								 <isNull property="findText">
+								 WHERE upper(line_cd) LIKE upper(NVL(#search#, line_cd))
+								 </isNull>
+					          	  <isNotNull property="findText">
+				                  WHERE (UPPER(line_cd) LIKE UPPER(#findText#) 
+				                  	 		OR UPPER(line_name) LIKE UPPER(#findText#))
+				             	  </isNotNull>
+			                ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+
+	<resultMap class="java.util.HashMap" id="datesResultMap">
+		<result column="from_date"			property="fromDate" />
+		<result column="to_date"			property="toDate" />
+		<result column="ri_cd"				property="riCd" />
+		<result column="ri_name"			property="riName" />
+		<result column="line_cd"			property="lineCd" />
+		<result column="line_name"			property="lineName" />
+	</resultMap>	
+	
+	<select id="getGiacs171Dates" resultMap="datesResultMap">
+	    SELECT * FROM TABLE(giacs171_pkg.get_dates(#userId#))
+	</select>			
+	
+	<parameterMap class="java.util.HashMap" id="extractToTableMap1">
+		<parameter property="appUser"		jdbcType="VARCHAR"	javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="fromDate"		jdbcType="VARCHAR"	javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="toDate"		jdbcType="VARCHAR" 	javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="lineCd"		jdbcType="VARCHAR" 	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="riCd"			jdbcType="INTEGER"	javaType="java.lang.Integer" 	mode="IN"/>
+		<parameter property="appUser"		jdbcType="VARCHAR"	javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="msg"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+	</parameterMap>	
+	
+	<procedure id="extractToTable" parameterMap="extractToTableMap1">
+	  	BEGIN
+  			giis_users_pkg.app_user := ?;
+  			giacs171_pkg.extract_to_table(?,?,?,?,?,?);
+  		END;
+	</procedure>
+<!--END-->
+
+<!--BEGIN Gzelle 07.01.2013 GIACS136-->	
+	<select id="getPremCededTreatyLOV" resultMap="treatyLOVResultMap">
+	    SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT *
+		                  FROM TABLE(giacs136_pkg.get_treaty_lov(#quarter#,#year#,#lineCd#))
+		                  <isNull property="findText">
+						   	 		WHERE share_cd LIKE upper(NVL(#search#, share_cd))
+						   	 			OR UPPER(treaty_name) LIKE UPPER(NVL(#search#, treaty_name))
+						  </isNull>
+			          	  <isNotNull property="findText">
+		                  WHERE (UPPER(share_cd) LIKE UPPER(#findText#) 
+		                  	 		OR UPPER(treaty_name) LIKE UPPER(#findText#))
+		             	  </isNotNull>
+			          	  <isNotNull property="sortColumn">
+			          	  	  <isEqual property="sortColumn" compareValue="shareCd">
+				              		ORDER BY share_cd
+				              </isEqual>
+			                  <isEqual property="sortColumn" compareValue="treatyName">
+				              		ORDER BY treaty_name
+				              </isEqual>	
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">	
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+							) a,
+							(SELECT count(*) count_
+								 FROM TABLE(giacs136_pkg.get_treaty_lov(#quarter#,#year#,#lineCd#))
+								  <isNull property="findText">
+						   	 		WHERE share_cd LIKE upper(NVL(#search#, share_cd))
+						   	 			OR UPPER(treaty_name) LIKE UPPER(NVL(#search#, treaty_name))
+						  		  </isNull>
+					          	  <isNotNull property="findText">
+				                  WHERE (UPPER(share_cd) LIKE UPPER(#findText#) 
+		                  	 				OR UPPER(treaty_name) LIKE UPPER(#findText#))
+				             	  </isNotNull>
+			                ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+
+	<select id="getPremCededLineLOV" resultMap="giacs106LineLOVMap">
+	    SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT *
+		                  FROM TABLE(giacs136_pkg.get_line_lov(#quarter#,#year#))
+		                   <isNull property="findText">
+								 WHERE upper(line_cd) LIKE upper(NVL(#search#, line_cd))
+		                  	 		OR UPPER(line_name) LIKE upper(NVL(#search#, line_name))
+						 </isNull>
+			          	  <isNotNull property="findText">
+		                  WHERE (UPPER(line_cd) LIKE UPPER(#findText#) 
+		                  	 		OR UPPER(line_name) LIKE UPPER(#findText#))
+		             	  </isNotNull>
+			          	  <isNotNull property="sortColumn">
+			          	  	  <isEqual property="sortColumn" compareValue="lineCd">
+				              		ORDER BY line_cd
+				              </isEqual>
+			                  <isEqual property="sortColumn" compareValue="lineName">
+				              		ORDER BY line_name
+				              </isEqual>	
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">	
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+							) a,
+							(SELECT count(*) count_
+								 FROM TABLE(giacs136_pkg.get_line_lov(#quarter#,#year#))
+								 <isNull property="findText">
+								  WHERE upper(line_cd) LIKE upper(NVL(#search#, line_cd))
+		                  	 		OR UPPER(line_name) LIKE upper(NVL(#search#, line_name))
+								 </isNull>
+					          	  <isNotNull property="findText">
+				                  WHERE (UPPER(line_cd) LIKE UPPER(#findText#) 
+				                  	 		OR UPPER(line_name) LIKE UPPER(#findText#))
+				             	  </isNotNull>
+			                ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+
+	<resultMap class="java.util.HashMap" id="paramResultMap">
+		<result column="cession_year"		property="cessionYear" />
+		<result column="cession_mm"			property="cessionMm" />
+		<result column="share_cd"			property="shareCd" />
+		<result column="treaty_name"		property="treatyName" />
+		<result column="line_cd"			property="lineCd" />
+		<result column="line_name"			property="lineName" />
+	</resultMap>	
+	
+	<select id="getGiacs136Params" resultMap="paramResultMap">
+	    SELECT * FROM TABLE(giacs136_pkg.get_prev_params(#userId#))
+	</select>		
+	
+  	<select id="validateIfExisting" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT giacs136_pkg.validate_existing_extract(#quarter#, #year#, #userId#, #lineCd#, #shareCd#) FROM DUAL
+	</select>	
+	
+	 <select id="validateBeforeInsert" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT giacs136_pkg.validate_before_insert(#quarter#, #year#, #userId#) FROM DUAL
+	</select>			
+	
+	<parameterMap class="java.util.HashMap" id="extractToTableMap">
+		<parameter property="appUser"	jdbcType="VARCHAR"	javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="quarter"	jdbcType="VARCHAR"	javaType="java.lang.Integer" 	mode="IN"/>
+		<parameter property="year"		jdbcType="VARCHAR" 	javaType="java.lang.Integer" 	mode="IN"/>
+		<parameter property="userId"	jdbcType="VARCHAR" 	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="lineCd"	jdbcType="VARCHAR" 	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="shareCd"	jdbcType="VARCHAR" 	javaType="java.lang.Integer" 	mode="IN"/>
+		<parameter property="msg"		jdbcType="VARCHAR" 	javaType="java.lang.String"		mode="OUT"/>
+	</parameterMap>	
+	
+	<parameterMap class="java.util.HashMap" id="extractToTableMapDel">
+		<parameter property="appUser"	jdbcType="VARCHAR"	javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="quarter"	jdbcType="NUMBER"	javaType="java.lang.Integer" 	mode="IN"/>
+		<parameter property="year"		jdbcType="NUMBER" 	javaType="java.lang.Integer" 	mode="IN"/>
+		<parameter property="userId"	jdbcType="VARCHAR" 	javaType="java.lang.String"		mode="IN"/>
+	</parameterMap>		
+	
+	<procedure id="deleteExtractedRecords" parameterMap="extractToTableMapDel">
+	  	BEGIN
+  			giis_users_pkg.app_user := ?;
+  			giacs136_pkg.delete_extracted_records(?,?,?);
+  		END;
+	</procedure>
+	
+	<procedure id="extractRecordsToTable" parameterMap="extractToTableMap">
+	  	BEGIN
+  			giis_users_pkg.app_user := ?;
+  			giacs136_pkg.extract_records(?,?,?,?,?,?);
+  		END;
+	</procedure>
+<!--END-->	
+
+	<select id="getGiacs119LineLOV" resultMap="giacs106LineLOVMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		          FROM (SELECT * 
+		  		   		  FROM TABLE(GIACS119_PKG.get_line_lov)
+						 <isNotNull property="findText">
+							WHERE (UPPER(line_cd) LIKE UPPER(#findText#)
+							OR UPPER(line_name) LIKE UPPER(#findText#))
+						 </isNotNull>
+						 <isNull property="findText">
+							WHERE (UPPER(line_cd) LIKE UPPER(#findText2#)
+							OR UPPER(line_name) LIKE UPPER(#findText2#))
+						 </isNull>
+                         <isEqual property="sortColumn" compareValue="lineCd">
+                                ORDER BY line_cd
+                         </isEqual>
+                          <isEqual property="sortColumn" compareValue="lineName">
+                                ORDER BY line_name
+                         </isEqual>
+		  				 <isNotNull property="sortColumn">
+                                 <isEqual property="ascDescFlg" compareValue="ASC">
+                                     ASC
+                                 </isEqual> 
+                                 <isEqual property="ascDescFlg" compareValue="DESC">
+                                     DESC
+                                 </isEqual>
+                         </isNotNull> 
+		  		   		) a,
+		          	   (SELECT count(*) count_ 
+		  		   		  FROM TABLE(GIACS119_PKG.get_line_lov)
+	  		   		     <isNotNull property="findText">
+							WHERE (UPPER(line_cd) LIKE UPPER(#findText#)
+							OR UPPER(line_name) LIKE UPPER(#findText#))
+						 </isNotNull>
+						 <isNull property="findText">
+							WHERE (UPPER(line_cd) LIKE UPPER(#findText2#)
+							OR UPPER(line_name) LIKE UPPER(#findText2#))
+						 </isNull>
+		  		   		) b
+               )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiacs119RiLOV" resultMap="giacs119RiLOVMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		          FROM (SELECT * 
+		  		   		  FROM TABLE(GIACS119_PKG.get_ri_lov)
+						 <isNotNull property="findText">
+							WHERE (ri_cd LIKE #findText#
+							OR UPPER(ri_name) LIKE UPPER(#findText#)
+							OR UPPER(ri_sname) LIKE UPPER(#findText#))
+						 </isNotNull>
+						 <isNull property="findText">
+							WHERE (ri_cd LIKE #findText2#
+							OR UPPER(ri_name) LIKE UPPER(#findText2#)
+							OR UPPER(ri_sname) LIKE UPPER(#findText2#))
+						 </isNull>
+                         <isEqual property="sortColumn" compareValue="riCd">
+                                ORDER BY ri_cd
+                         </isEqual>
+                          <isEqual property="sortColumn" compareValue="riName">
+                                ORDER BY ri_name
+                         </isEqual>
+                         <isEqual property="sortColumn" compareValue="riSname">
+                                ORDER BY ri_sname
+                         </isEqual>
+		  				 <isNotNull property="sortColumn">
+                                 <isEqual property="ascDescFlg" compareValue="ASC">
+                                     ASC
+                                 </isEqual> 
+                                 <isEqual property="ascDescFlg" compareValue="DESC">
+                                     DESC
+                                 </isEqual>
+                         </isNotNull> 
+		  		   		) a,
+		          	   (SELECT count(*) count_ 
+		  		   		  FROM TABLE(GIACS119_PKG.get_ri_lov)
+	  		   		     <isNotNull property="findText">
+							WHERE (ri_cd LIKE #findText#
+							OR UPPER(ri_name) LIKE UPPER(#findText#)
+							OR UPPER(ri_sname) LIKE UPPER(#findText#))
+						 </isNotNull>
+						 <isNull property="findText">
+							WHERE (ri_cd LIKE #findText2#
+							OR UPPER(ri_name) LIKE UPPER(#findText2#)
+							OR UPPER(ri_sname) LIKE UPPER(#findText2#))
+						 </isNull>
+		  		   		) b
+               )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiacs181LineLOV" resultMap="giacs106LineLOVMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		          FROM (SELECT * 
+		  		   		  FROM TABLE(GIACS181_PKG.get_line_lov)
+						 <isNotNull property="findText">
+							WHERE (UPPER(line_cd) LIKE UPPER(#findText#)
+							OR UPPER(line_name) LIKE UPPER(#findText#))
+						 </isNotNull>
+						 <isNull property="findText">
+							WHERE (UPPER(line_cd) LIKE UPPER(#findText2#)
+							OR UPPER(line_name) LIKE UPPER(#findText2#))
+						 </isNull>
+                         <isEqual property="sortColumn" compareValue="lineCd">
+                                ORDER BY line_cd
+                         </isEqual>
+                          <isEqual property="sortColumn" compareValue="lineName">
+                                ORDER BY line_name
+                         </isEqual>
+		  				 <isNotNull property="sortColumn">
+                                 <isEqual property="ascDescFlg" compareValue="ASC">
+                                     ASC
+                                 </isEqual> 
+                                 <isEqual property="ascDescFlg" compareValue="DESC">
+                                     DESC
+                                 </isEqual>
+                         </isNotNull> 
+		  		   		) a,
+		          	   (SELECT count(*) count_ 
+		  		   		  FROM TABLE(GIACS181_PKG.get_line_lov)
+	  		   		     <isNotNull property="findText">
+							WHERE (UPPER(line_cd) LIKE UPPER(#findText#)
+							OR UPPER(line_name) LIKE UPPER(#findText#))
+						 </isNotNull>
+						 <isNull property="findText">
+							WHERE (UPPER(line_cd) LIKE UPPER(#findText2#)
+							OR UPPER(line_name) LIKE UPPER(#findText2#))
+						 </isNull>
+		  		   		) b
+               )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiacs181RiLOV" resultMap="giacs106RiLOVMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		          FROM (SELECT * 
+		  		   		  FROM TABLE(GIACS181_PKG.get_ri_lov)
+						 <isNotNull property="findText">
+							WHERE (ri_cd LIKE #findText#
+							OR UPPER(ri_name) LIKE UPPER(#findText#))
+						 </isNotNull>
+						 <isNull property="findText">
+							WHERE (ri_cd LIKE #findText2#
+							OR UPPER(ri_name) LIKE UPPER(#findText2#))
+						 </isNull>
+                         <isEqual property="sortColumn" compareValue="riCd">
+                                ORDER BY ri_cd
+                         </isEqual>
+                          <isEqual property="sortColumn" compareValue="riName">
+                                ORDER BY ri_name
+                         </isEqual>
+		  				 <isNotNull property="sortColumn">
+                                 <isEqual property="ascDescFlg" compareValue="ASC">
+                                     ASC
+                                 </isEqual> 
+                                 <isEqual property="ascDescFlg" compareValue="DESC">
+                                     DESC
+                                 </isEqual>
+                         </isNotNull> 
+		  		   		) a,
+		          	   (SELECT count(*) count_ 
+		  		   		  FROM TABLE(GIACS181_PKG.get_ri_lov)
+	  		   		     <isNotNull property="findText">
+							WHERE (ri_cd LIKE #findText#
+							OR UPPER(ri_name) LIKE UPPER(#findText#))
+						 </isNotNull>
+						 <isNull property="findText">
+							WHERE (ri_cd LIKE #findText2#
+							OR UPPER(ri_name) LIKE UPPER(#findText2#))
+						 </isNull>
+		  		   		) b
+               )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="giacs181ValidateBeforeExtract" resultClass="String">
+		SELECT GIACS181_PKG.validate_print(#fromDate#,#toDate#) FROM DUAL
+	</select>
+	
+	<select id="giacs182ValidateDateParams" resultClass="String">
+		SELECT GIACS182_PKG.validate_date_params(#fromDate#,#toDate#, #cutOffDate#, #userId#) FROM DUAL
+	</select>
+	
+	<select id="giacs181GetParams" resultMap="giacs181GetParamsMap">
+		SELECT * 
+		  FROM (SELECT a.*, '1' count_, rownum rownum_
+		          FROM (SELECT * 
+		  		   		  FROM TABLE(GIACS181_PKG.get_giac_dueto_ext_params)
+		  		   		) a
+               )
+	</select>
+	
+	<procedure id="giacs181ExtractToTable" parameterMap="giacs181ExtractToTableMap">
+		CALL GIACS181_PKG.extract_to_table(TO_DATE(?,'MM-DD-YYYY'), TO_DATE(?,'MM-DD-YYYY'), ?,?)
+	</procedure>
+	
+	<procedure id="extractGIACS182" parameterMap="extractGIACS182">
+		CALL GIACS182_PKG.extract_giacs182(TO_DATE(?,'MM-DD-YYYY'), TO_DATE(?,'MM-DD-YYYY'), TO_DATE(?,'MM-DD-YYYY'), ?,?,?,?)
+	</procedure>
+	
+	<select id="fetchRILOV" resultMap="giacs106RiLOVMap" parameterClass="java.util.HashMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		          FROM (SELECT * FROM TABLE (GIACS182_PKG.FETCH_RI_LIST)
+		          		<isNotNull property="findText">
+		          			WHERE UPPER(ri_cd) LIKE UPPER(NVL(#findText# || '%', ri_cd))
+		          			   OR UPPER(ri_name) LIKE UPPER(NVL(#findText# || '%', ri_name))
+		          		</isNotNull>
+		          		<isNotNull property="sortColumn">
+		          			<isEqual property="sortColumn" compareValue="riCd">
+		          				ORDER BY ri_cd
+		          			</isEqual>
+		          			<isEqual property="sortColumn" compareValue="riName">
+		          				ORDER BY ri_name
+		          			</isEqual>
+		          			<isEqual property="ascDescFlg" compareValue="ASC">
+		          				ASC
+		          			</isEqual>
+		          			<isEqual property="ascDescFlg" compareValue="DESC">
+		          				DESC
+		          			</isEqual>
+		          		</isNotNull>
+		          		) a,
+		          		(SELECT count(*) count_ FROM TABLE (GIACS182_PKG.FETCH_RI_LIST)
+		          		 <isNotNull property="findText">
+		          			WHERE UPPER(ri_cd) LIKE UPPER(NVL(#findText# || '%', ri_cd))
+		          			   OR UPPER(ri_name) LIKE UPPER(NVL(#findText# || '%', ri_name))
+		          		 </isNotNull>
+		          		) b		  
+		  )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="fetchLineLOV" resultMap="giacs106LineLOVMap" parameterClass="java.util.HashMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		          FROM (SELECT * FROM TABLE (GIACS182_PKG.FETCH_LINE_LIST)
+		          		<isNotNull property="findText">
+		          			WHERE UPPER(line_cd) LIKE UPPER(NVL(#findText# || '%', line_cd))
+		          			   OR UPPER(line_name) LIKE UPPER(NVL(#findText# || '%', line_name))
+		          		</isNotNull>
+		          		<isNotNull property="sortColumn">
+		          			<isEqual property="sortColumn" compareValue="lineCd">
+		          				ORDER BY line_cd
+		          			</isEqual>
+		          			<isEqual property="sortColumn" compareValue="lineName">
+		          				ORDER BY line_name
+		          			</isEqual>
+		          			<isEqual property="ascDescFlg" compareValue="ASC">
+		          				ASC
+		          			</isEqual>
+		          			<isEqual property="ascDescFlg" compareValue="DESC">
+		          				DESC
+		          			</isEqual>
+		          		</isNotNull>
+		          		) a,
+		          		(SELECT count(*) count_ FROM TABLE (GIACS182_PKG.FETCH_LINE_LIST)
+		          		 <isNotNull property="findText">
+		          			WHERE UPPER(line_cd) LIKE UPPER(NVL(#findText# || '%', line_cd))
+		          			   OR UPPER(line_name) LIKE UPPER(NVL(#findText# || '%', line_name))
+		          		 </isNotNull>
+		          		) b		  
+		  )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiacs183LineLOV" resultMap="giacs106LineLOVMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		          FROM (SELECT * 
+		  		   		  FROM TABLE(GIACS183_PKG.get_line_lov)
+						 <isNotNull property="findText">
+							WHERE (UPPER(line_cd) LIKE UPPER(#findText#)
+							OR UPPER(line_name) LIKE UPPER(#findText#))
+						 </isNotNull>
+						 <isNull property="findText">
+							WHERE (UPPER(line_cd) LIKE UPPER(#findText2#)
+							OR UPPER(line_name) LIKE UPPER(#findText2#))
+						 </isNull>
+                         <isEqual property="sortColumn" compareValue="lineCd">
+                                ORDER BY line_cd
+                         </isEqual>
+                          <isEqual property="sortColumn" compareValue="lineName">
+                                ORDER BY line_name
+                         </isEqual>
+		  				 <isNotNull property="sortColumn">
+                                 <isEqual property="ascDescFlg" compareValue="ASC">
+                                     ASC
+                                 </isEqual> 
+                                 <isEqual property="ascDescFlg" compareValue="DESC">
+                                     DESC
+                                 </isEqual>
+                         </isNotNull> 
+		  		   		) a,
+		          	   (SELECT count(*) count_ 
+		  		   		  FROM TABLE(GIACS183_PKG.get_line_lov)
+	  		   		     <isNotNull property="findText">
+							WHERE (UPPER(line_cd) LIKE UPPER(#findText#)
+							OR UPPER(line_name) LIKE UPPER(#findText#))
+						 </isNotNull>
+						 <isNull property="findText">
+							WHERE (UPPER(line_cd) LIKE UPPER(#findText2#)
+							OR UPPER(line_name) LIKE UPPER(#findText2#))
+						 </isNull>
+		  		   		) b
+               )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiacs183RiLOV" resultMap="giacs106RiLOVMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		          FROM (SELECT * 
+		  		   		  FROM TABLE(GIACS183_PKG.get_ri_lov)
+						 <isNotNull property="findText">
+							WHERE (ri_cd LIKE #findText#
+							OR UPPER(ri_name) LIKE UPPER(#findText#))
+						 </isNotNull>
+						 <isNull property="findText">
+							WHERE (ri_cd LIKE #findText2#
+							OR UPPER(ri_name) LIKE UPPER(#findText2#))
+						 </isNull>
+                         <isEqual property="sortColumn" compareValue="riCd">
+                                ORDER BY ri_cd
+                         </isEqual>
+                          <isEqual property="sortColumn" compareValue="riName">
+                                ORDER BY ri_name
+                         </isEqual>
+		  				 <isNotNull property="sortColumn">
+                                 <isEqual property="ascDescFlg" compareValue="ASC">
+                                     ASC
+                                 </isEqual> 
+                                 <isEqual property="ascDescFlg" compareValue="DESC">
+                                     DESC
+                                 </isEqual>
+                         </isNotNull> 
+		  		   		) a,
+		          	   (SELECT count(*) count_ 
+		  		   		  FROM TABLE(GIACS183_PKG.get_ri_lov)
+	  		   		     <isNotNull property="findText">
+							WHERE (ri_cd LIKE #findText#
+							OR UPPER(ri_name) LIKE UPPER(#findText#))
+						 </isNotNull>
+						 <isNull property="findText">
+							WHERE (ri_cd LIKE #findText2#
+							OR UPPER(ri_name) LIKE UPPER(#findText2#))
+						 </isNull>
+		  		   		) b
+               )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="giacs183GetDate" resultMap="giacs183GetDateMap" parameterClass="String">
+		SELECT * FROM TABLE(GIACS183_PKG.get_date(#userId#))
+	</select>
+	
+	<select id="giacs183ValidateBeforeExtract" resultClass="String">
+		SELECT GIACS183_PKG.validate_print(#fromDate#,#toDate#,#cutOffDate#) FROM DUAL
+	</select>
+	
+	<procedure id="giacs183ExtractToTable" parameterMap="giacs183ExtractToTableMap">
+		CALL GIACS183_PKG.extract_to_table(?,?,?,?,?,?,?,?,?,?)
+	</procedure>
+	
+	<procedure id="giacs183MainLoop" parameterMap="giacs183MainLoopMap">
+		CALL GIACS183_PKG.main_loop(?,?,?,?,?,?,?)
+	</procedure>
+
+	<!-- shan 07.03.2013 GIACS296-->
+	<parameterMap class="java.util.HashMap" id="extractGIACS296Map">
+		<parameter property="asOfDate"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="cutOffDate"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="riCd"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="lineCd"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="userId"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>		
+		<parameter property="recCount"		jdbcType="INTEGER"	javaType="java.lang.Integer"		mode="OUT"/>		
+	</parameterMap>
+	
+	<procedure id="extractGIACS296" parameterMap="extractGIACS296Map">
+		CALL GIACS296_PKG.extract_records(TO_DATE(?, 'MM-DD-RRRR'), TO_DATE(?, 'MM-DD-RRRR'), ?, ?, ?, ?)
+	</procedure>
+	
+	<!-- SR-3876, 3879 : shan 08.27.2015 -->
+	<resultMap id="extractDateGIACS296Map" class="java.util.HashMap">
+		<result property="asOfDate"		column="AS_OF_DATE"/>
+		<result property="cutOffDate"	column="CUT_OFF_DATE"/>
+	</resultMap>
+	
+	<select id="getExtractDateGIACS296" resultMap="extractDateGIACS296Map" parameterClass="java.lang.String">
+		SELECT DISTINCT TO_CHAR(as_of_date,'MM-DD-RRRR') as_of_date, TO_CHAR(cut_off_Date,'MM-DD-RRRR') cut_off_Date
+		  FROM giac_outfacul_soa_ext
+		 WHERE user_id = #userId#
+	</select>
+	
+	<select id="getExtractCountGIACS296" resultClass="java.lang.Integer" parameterClass="java.lang.String">
+		SELECT COUNT(*)
+		  FROM giac_outfacul_soa_ext
+		 WHERE user_id = #userId#		  
+	</select>
+	<!-- end SR-3876, 3879 -->
+	
+	<!-- end GIACS296 -->
+	
+	<!-- shan 07.04.2013 GIACS279 -->
+	<parameterMap class="map" id="giacs279InitialValuesMap">
+		<parameter property="userId"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="INOUT"/>
+		<parameter property="extractDate"	jdbcType="DATE"		javaType="java.util.Date"		mode="OUT"/>
+		<parameter property="asOfDate"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="cutOffDate"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="riCd"			jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="OUT"/>
+		<parameter property="lineCd"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="clmPaytTag"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="riName"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="lineName"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="getGIACS279InitialValues" parameterMap="giacs279InitialValuesMap">
+		CALL GIACS279_PKG.get_initial_values(?, ?, ?, ?, ?, ?, ?, ?, ?)
+	</procedure>
+	
+	<parameterMap class="map" id="extractGIACS279Map">
+		<parameter property="asOfDate"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="cutOffDate"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="riCd"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="lineCd"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="payeeType"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="chkClaims"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="chkAging"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="fcParam"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/> <!--benjo 12.04.2015 UCPBGEN-SR-20083-->
+		<parameter property="tpParam"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/> <!--benjo 12.04.2015 UCPBGEN-SR-20083-->
+		<parameter property="userId"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="msg"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="giacs279ExtractTable" parameterMap="extractGIACS279Map">
+		CALL GIACS279_PKG.extract_table(TO_DATE(?, 'MM-DD-RRRR'), TO_DATE(?, 'MM-DD-RRRR'), ?, ?, ?, ?, ?, ?, ?, ?, ?) <!--benjo 12.04.2015 UCPBGEN-SR-20083-->
+	</procedure>
+	
+	<parameterMap class="map" id="checkGiacs279DatesMap">
+		<parameter property="userId"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="btn"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="asOfDate"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="cutOffDate"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="checkGIACS279Dates" parameterMap="checkGiacs279DatesMap">
+		CALL GIACS279_PKG.check_dates(?, ?, ?, ?)
+	</procedure>
+	
+	<!-- end GIACS279 -->
+	
+	<!-- shan GIACS274 -->
+	<parameterMap class="java.util.HashMap" id="giacs274PrevExtResultMap">
+		<parameter property="userId"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="paramLineCd"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="lineName"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="paramIssCd"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="issName"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="fromDate"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="toDate"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="asOfDate"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="dateTag"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+	</parameterMap>
+	
+	<!-- <select id="checkGiacs274PrevExt" resultMap="giacs274PrevExtResultMap" parameterClass="java.lang.String">
+		SELECT param_line_cd, param_iss_cd, from_date, to_date, as_of_date, user_id, date_tag
+          FROM giac_redist_binders_ext
+         WHERE user_id = #userId#
+           AND ROWNUM = 1
+	</select> -->
+	
+	<procedure id="checkGiacs274PrevExt" parameterMap="giacs274PrevExtResultMap">
+		BEGIN
+			GIACS274_PKG.check_prev_ext_params(?, ?, ?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<resultMap class="java.util.HashMap" id="giacs274BranchLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result property="branchCd"		column="BRANCH_CD"/>
+		<result property="branchName"	column="BRANCH_NAME"/>
+	</resultMap>
+	
+	<select id="getGIACS274BranchLOV" resultMap="giacs274BranchLOVMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		  		  FROM (SELECT * FROM TABLE(GIACS274_PKG.get_branch_lov(#searchString#, #userId#))
+		  		  			<isNotNull property="findText">
+								WHERE (UPPER(branch_cd) LIKE UPPER(#findText#)
+								OR UPPER(branch_name) LIKE UPPER(#findText#))
+							 </isNotNull>
+							 <isNotNull property="sortColumn">
+							 	<isEqual property="sortColumn" compareValue="branchCd">
+							 		ORDER BY branch_cd
+							 	</isEqual>
+							 	<isEqual property="sortColumn" compareValue="branchName">
+							 		ORDER BY branch_name
+							 	</isEqual>
+							 	<isEqual property="ascDescFlg" compareValue="ASC">
+							 		ASC
+							 	</isEqual>
+							 	<isEqual property="ascDescFlg" compareValue="DESC">
+							 		DESC
+							 	</isEqual>
+							 </isNotNull>
+		  		  		) a,
+		  		  		(SELECT count(*) count_ FROM TABLE(GIACS274_PKG.get_branch_lov(#searchString#, #userId#))
+		  		  			<isNotNull property="findText">
+								WHERE (UPPER(branch_cd) LIKE UPPER(#findText#)
+								OR UPPER(branch_name) LIKE UPPER(#findText#))
+							 </isNotNull>
+		  		  		)b
+		  )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="validateGIACS274BranchCd" resultClass="String" parameterClass="String">
+		SELECT branch_name
+		  FROM GIAC_BRANCHES
+		 WHERE UPPER(branch_cd) = UPPER(#branchCd#)
+	</select>
+	
+	<parameterMap class="map" id="extractGiacs274Map">
+		<parameter property="lineCd"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="issCd"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="fromDate"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="toDate"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="asOfDate"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="dateParam"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="issueDate"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="effDate"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="userId"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="msg"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="recExtracted"	jdbcType="INTEGER"	javaType="java.lang.Integer"		mode="OUT"/>
+	</parameterMap>	
+	
+	<procedure id="extractGiacs274" parameterMap="extractGiacs274Map">
+		CALL GIACS274_PKG.extract_records(?, ?, TO_DATE(?, 'MM-DD-RRRR'), TO_DATE(?, 'MM-DD-RRRR'), TO_DATE(?, 'MM-DD-RRRR'), ?, ?, ?, ?, ?, ?)
+	</procedure>
+	<!-- end GIACS274 -->
+	
+	<!--Gzelle 07.22.2013-->
+	<resultMap id="getLastExtractMap" class="java.util.HashMap"> 
+		<result column="from_date"			property="fromDate"/>
+		<result column="to_date"			property="toDate"/>
+		<result column="cut_off_date"		property="cutOff"/>		
+	</resultMap>
+	
+	<select id="getLastExtractSOAFaculRi" resultMap="getLastExtractMap">
+		SELECT * FROM TABLE(giacs121_pkg.get_last_extract(#userId#))
+	</select>
+	
+	<select id="getSOAFaculRiLineLOV" resultMap="giacs106LineLOVMap">
+		SELECT *
+  		  FROM (SELECT ROWNUM rownum_, b.count_, a.*
+  		  		  FROM (SELECT * FROM TABLE(giacs121_pkg.get_soa_facul_ri_line(#riCd#, #userId#))
+						<isNull property="findText">
+						 WHERE upper(line_cd) LIKE upper(NVL(#search#, line_cd))
+						 	OR upper(line_name) LIKE upper(NVL(#search#, line_name))
+						</isNull>
+						<isNotNull property="findText">
+						 WHERE upper(line_cd) LIKE upper(#findText#)
+						    OR upper(line_name) LIKE upper(#findText#)
+						</isNotNull>
+	            	<isEqual property="sortColumn" compareValue="lineCd">
+              			ORDER BY line_cd
+	            	</isEqual>
+	            	<isEqual property="sortColumn" compareValue="lineName">
+              			ORDER BY line_name
+	            	</isEqual>
+	            	<isNotNull property="sortColumn">
+              			<isEqual property="ascDescFlg" compareValue="ASC">
+              				ASC
+              			</isEqual>
+              			<isEqual property="ascDescFlg" compareValue="DESC">
+              				DESC
+              			</isEqual>
+              		</isNotNull>) a,
+              (SELECT count(*) count_
+	          	 FROM TABLE(giacs121_pkg.get_soa_facul_ri_line(#riCd#, #userId#))
+				 <isNull property="findText">
+				WHERE upper(line_cd) LIKE upper(NVL(#search#, line_cd))
+	   		 	   OR upper(line_name) LIKE upper(NVL(#search#, line_name))
+				 </isNull>
+				 <isNotNull property="findText">
+				WHERE upper(line_cd) LIKE upper(#findText#)
+				   OR upper(line_name) LIKE upper(#findText#)
+				 </isNotNull>
+				)b) 
+	    	WHERE rownum_ BETWEEN #from# AND #to# 	
+	</select>
+	
+	<select id="getSOAFaculRiLOV" resultMap="giacs106RiLOVMap">
+		SELECT *
+  		  FROM (SELECT ROWNUM rownum_, b.count_, a.*
+  		  		  FROM (SELECT * FROM TABLE(giacs121_pkg.get_soa_facul_ri_lov)
+						<isNull property="findText">
+						 WHERE ri_cd LIKE upper(NVL(#search#, ri_cd))
+						   OR  upper(ri_name) LIKE upper(NVL(#search#, ri_name))
+						</isNull>
+						<isNotNull property="findText">
+						 WHERE ri_cd LIKE upper(#findText#)
+						    OR upper(ri_name) LIKE upper(#findText#)
+						</isNotNull>
+	            	<isEqual property="sortColumn" compareValue="riCd">
+              			ORDER BY ri_cd
+	            	</isEqual>
+	            	<isEqual property="sortColumn" compareValue="riName">
+              			ORDER BY ri_name
+	            	</isEqual>
+	            	<isNotNull property="sortColumn">
+              			<isEqual property="ascDescFlg" compareValue="ASC">
+              				ASC
+              			</isEqual>
+              			<isEqual property="ascDescFlg" compareValue="DESC">
+              				DESC
+              			</isEqual>
+              		</isNotNull>) a,
+              (SELECT count(*) count_
+	          	 FROM TABLE(giacs121_pkg.get_soa_facul_ri_lov)
+				 <isNull property="findText">
+				WHERE ri_cd LIKE upper(NVL(#search#, ri_cd))
+				  OR  upper(ri_name) LIKE upper(NVL(#search#, ri_name))
+				 </isNull>
+				 <isNotNull property="findText">
+				WHERE ri_cd LIKE upper(#findText#)
+				   OR upper(ri_name) LIKE upper(#findText#)
+				 </isNotNull>
+				)b) 
+	    	WHERE rownum_ BETWEEN #from# AND #to# 	
+	</select>	
+
+	<parameterMap class="java.util.HashMap" id="deleteSOAFaculRiMap">
+		<parameter property="appUser"	jdbcType="VARCHAR"	javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="userId"	jdbcType="VARCHAR"	javaType="java.lang.String" 	mode="IN"/>
+	</parameterMap>	
+	
+	<procedure id="deleteSOAFaculRi" parameterMap="deleteSOAFaculRiMap">
+	  	BEGIN
+  			giis_users_pkg.app_user := ?;
+  			giacs121_pkg.delete_soa_facul_ri(?);
+  		END;
+	</procedure>
+
+	<parameterMap class="java.util.HashMap" id="extractSOAFaculRiMap">
+		<parameter property="appUser"	jdbcType="VARCHAR"	javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="dateTag" 	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="currTag"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="fromDate"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="toDate"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="cutOffDate" jdbcType="VARCHAR" javaType="java.lang.String"  	mode="IN"/>
+		<parameter property="lineCd"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="riCd"		jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="IN"/>
+		<parameter property="userId"	jdbcType="VARCHAR"	javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="msg"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+	</parameterMap>	
+		
+	<procedure id="extractSOAFaculRi" parameterMap="extractSOAFaculRiMap">
+	  	BEGIN
+  			giis_users_pkg.app_user := ?;
+  			giacs121_pkg.extract_soa_facul_ri(?,?,?,?,?,?,?,?,?);
+  		END;
+	</procedure>
+		
+	<!--END-->
+	
+	<parameterMap class="java.util.HashMap" id="extractGiacs276ResMap">
+		<parameter property="commParam"		jdbcType="INTEGER"	javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="issParam"		jdbcType="INTEGER"	javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="fromDate"		jdbcType="VARCHAR"	javaType="java.lang.String"	 mode="IN"/>
+		<parameter property="toDate"		jdbcType="VARCHAR"	javaType="java.lang.String"	 mode="IN"/>
+		<parameter property="lineCd"		jdbcType="VARCHAR"	javaType="java.lang.String"	 mode="IN"/>
+		<parameter property="userId"		jdbcType="VARCHAR"	javaType="java.lang.String"	 mode="IN"/>
+		<parameter property="recExtracted"	jdbcType="INTEGER"	javaType="java.lang.Integer" mode="OUT"/>
+	</parameterMap>	
+	
+	<procedure id="extractGiacs276" parameterMap="extractGiacs276ResMap">
+    	BEGIN
+    		GIACS276_PKG.ext_rec_giacs276(?,?,?,?,?,?,?);
+    	END;
+	</procedure>
+	
+
+	<!--start Gzelle 09232015 SR18729--> 
+	<parameterMap class="map" id="giacs276InitialValuesParamMap"> 
+		<parameter property="commParam"		jdbcType="VARCHAR"	javaType="java.lang.String"  mode="INOUT"/>
+		<parameter property="userId"		jdbcType="VARCHAR"	javaType="java.lang.String"	 mode="IN"/> 
+		<parameter property="fromDate"		jdbcType="VARCHAR"	javaType="java.lang.String"	 mode="OUT"/> 
+		<parameter property="toDate"		jdbcType="VARCHAR"	javaType="java.lang.String"	 mode="OUT"/> 
+		<parameter property="lineCd"		jdbcType="VARCHAR"	javaType="java.lang.String"	 mode="OUT"/> 
+		<parameter property="lineName"		jdbcType="VARCHAR"	javaType="java.lang.String"	 mode="OUT"/> 
+	</parameterMap> 
+	 
+	<procedure id="getGiacs276InitialValues" parameterMap="giacs276InitialValuesParamMap"> 
+		CALL GIACS276_PKG.get_initial_values(?, ?, ?, ?, ?, ?) 
+	</procedure> 
+	
+	<parameterMap class="map" id="valExtractPrintParamMap"> 
+		<parameter property="trigger"		jdbcType="VARCHAR"	javaType="java.lang.String"  mode="IN"/> 
+		<parameter property="commParam"		jdbcType="VARCHAR"	javaType="java.lang.String"	 mode="IN"/> 
+		<parameter property="userId"		jdbcType="VARCHAR"	javaType="java.lang.String"	 mode="INOUT"/> 
+		<parameter property="fromDate"		jdbcType="VARCHAR"	javaType="java.lang.String"	 mode="IN"/> 
+		<parameter property="toDate"		jdbcType="VARCHAR"	javaType="java.lang.String"	 mode="IN"/> 
+		<parameter property="lineCd"		jdbcType="VARCHAR"	javaType="java.lang.String"	 mode="IN"/> 
+		<parameter property="valResult"		jdbcType="VARCHAR"	javaType="java.lang.String"	 mode="OUT"/> 
+	</parameterMap> 
+	
+	<procedure id="valExtractPrint" parameterMap="valExtractPrintParamMap"> 
+		CALL GIACS276_PKG.val_extract_print(?, ?, ?, ?, ?, ?, ?) 
+	</procedure> 
+	<!--end Gzelle 09232015 SR18729--> 
+	 
+
+	<!-- For GIACS220 -->
+	<parameterMap id="checkForGiacs220PrevExtractParamMap" class="map">
+		<parameter property="lineCd"		jdbcType="VARCHAR"	javaType="java.lang.String" mode="IN"/>
+		<parameter property="shareCd"		jdbcType="NUMERIC"	javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="treatyYy"		jdbcType="NUMERIC"	javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="year"			jdbcType="NUMERIC"	javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="qtr"			jdbcType="NUMERIC"	javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="month1"		jdbcType="NUMERIC"	javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="month2"		jdbcType="NUMERIC"	javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="month3"		jdbcType="NUMERIC"	javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="userId"		jdbcType="VARCHAR"	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="hasPrevExt"	jdbcType="VARCHAR"	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="recordCount"	jdbcType="NUMERIC"	javaType="java.lang.Integer" mode="OUT"/>
+	</parameterMap>
+	<procedure id="checkForGiacs220PrevExtract" parameterMap="checkForGiacs220PrevExtractParamMap">
+		{ CALL GIACS220_PKG.check_and_extract(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) }
+	</procedure>
+	
+	<parameterMap id="deletePrevExtractParamMap" class="map">
+		<parameter property="lineCd"		jdbcType="VARCHAR"	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="shareCd"		jdbcType="NUMERIC"	javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="treatyYy"		jdbcType="NUMERIC"	javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="year"			jdbcType="NUMERIC"	javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="qtr"			jdbcType="NUMERIC"	javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="userId"		jdbcType="VARCHAR"	javaType="java.lang.String"  mode="IN"/>
+	</parameterMap>
+	<procedure id="deletePrevExtract" parameterMap="deletePrevExtractParamMap">
+		{ CALL GIACS220_PKG.pg_delete_prev_extract(?, ?, ?, ?, ?, ?) }
+	</procedure>
+	
+	<parameterMap class="map" id="pgExtractAllParamMap">
+		<parameter property="lineCd"		jdbcType="VARCHAR"	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="shareCd"		jdbcType="NUMERIC"	javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="treatyYy"		jdbcType="NUMERIC"	javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="year"			jdbcType="NUMERIC"	javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="qtr"			jdbcType="NUMERIC"	javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="month1"		jdbcType="NUMERIC"	javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="month2"		jdbcType="NUMERIC"	javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="month3"		jdbcType="NUMERIC"	javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="recordCount"	jdbcType="NUMERIC"	javaType="java.lang.Integer" mode="OUT"/>
+	</parameterMap>
+	<procedure id="pgExtractAll" parameterMap="pgExtractAllParamMap">
+		{ CALL GIACS220_PKG.pg_extract_all(?, ?, ?, ?, ?, ?, ?, ?, ?) }
+	</procedure>
+	
+	<procedure id="pgCompute" parameterClass="com.geniisys.common.entity.GIISDistShare">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GIACS220_PKG.pg_compute(#lineCd#, #shareCd#, #treatyYy#, #riCd#, #year#, #qtr#, #userId#);
+		END;
+	</procedure>
+	
+	<parameterMap id="pgPostParamMap" class="map">
+		<parameter property="lineCd"		jdbcType="VARCHAR"	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="shareCd"		jdbcType="NUMERIC"	javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="treatyYy"		jdbcType="NUMERIC"	javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="riCd"			jdbcType="NUMERIC"	javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="year"			jdbcType="NUMERIC"	javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="qtr"			jdbcType="NUMERIC"	javaType="java.lang.Integer" mode="IN"/>		
+		<parameter property="exist"			jdbcType="VARCHAR"	javaType="java.lang.String"  mode="OUT"/>
+	</parameterMap>
+	<procedure id="pgPost" parameterMap="pgPostParamMap">
+		{ CALL GIACS220_PKG.pg_post(?, ?, ?, ?, ?, ?, ?) }
+	</procedure>
+	
+	<procedure id="checkBeforeView" parameterMap="pgPostParamMap">
+		{ CALL GIACS220_PKG.check_bef_view(?, ?, ?, ?, ?, ?, ?) }
+	</procedure>
+	
+	<resultMap id="getGiacs220TreatyQtrSummaryResultMap" class="java.util.HashMap" >
+		<result column="RI_CD"					property="riCd" />
+		<result column="RI_NAME"				property="riName" />
+		<result column="LINE_CD"				property="lineCd" />
+		<result column="LINE_NAME"				property="lineName" />		
+		<result column="TRTY_YY"				property="treatyYy" />
+		<result column="SHARE_CD"				property="shareCd" />
+		<result column="TREATY_NAME"			property="treatyName" />		
+		<result column="TRTY_SHR_PCT"			property="trtyShrPct" />
+		<result column="PROC_YEAR"				property="year" />
+		<result column="PROC_QTR"				property="qtr" />		
+		<result column="PREMIUM_CEDED_AMT"		property="premiumCededAmt" />
+		<result column="COMMISSION_AMT"			property="commissionAmt" />
+		<result column="CLM_LOSS_PAID_AMT"		property="clmLossPaidAmt" />
+		<result column="CLM_LOSS_EXPENSE_AMT"	property="clmLossExpenseAmt" />
+		<result column="PREM_RESV_RETND_AMT"	property="premResvRetndAmt" />		
+		<result column="FUNDS_HELD_PCT"			property="fundsHeldPct" />
+		<result column="OUTSTANDING_LOSS_AMT"	property="outstandingLossAmt" />
+		<result column="PREM_RESV_RELSD_AMT"	property="premResvRelsdAmt" />
+		<result column="RELEASED_INT_AMT"		property="releasedIntAmt" />
+		<result column="WHT_TAX_RT"				property="whtTaxRt" />
+		<result column="WHT_TAX_AMT"			property="whtTaxAmt" />		
+		<result column="ENDING_BAL_AMT"			property="endingBalAmt" />
+		<result column="PREV_BALANCE_DUE"		property="prevBalanceDue" />
+		<result column="PREVIOUS_BAL_AMT"		property="previousBalAmt" />
+		<result column="RETAINED_INT_AMT"		property="retainedIntAmt" />
+		<result column="SUMMARY_ID"				property="summaryId" />		
+		<result column="ACCT_TRTY_TYPE"			property="acctTrtyType" />
+		<result column="EXTRACT_DATE"			property="extractDate" />
+		<result column="INT_ON_PREM_PCT"		property="intOnPremPct" />
+		<result column="PREM_TAX_AMT"			property="premTaxAmt" />
+		<result column="FINAL_TAG"				property="finalTag" />
+		<result column="USER_ID"				property="userId" />
+		<result column="LAST_UPDATE_STR"		property="lastUpdateStr" />		
+	</resultMap>
+	<select id="getGiacs220TreatyQtrSummary" resultMap="getGiacs220TreatyQtrSummaryResultMap" parameterClass="map">
+		SELECT *
+		  FROM TABLE(GIAC_TREATY_QTR_SUMMARY_PKG.get_trty_qtr_summary(#lineCd#, #shareCd#, #treatyYy#, #riCd#, #year#, #qtr#))
+	</select>
+	
+	<resultMap id="getGiacs220TreatyCashAcctResultMap" class="java.util.HashMap">
+		<result column="SUMMARY_ID"				property="summaryId" />
+		<result column="PREV_BALANCE"			property="prevBalance" />
+		<result column="PREV_BALANCE_DT"		property="prevBalanceDt" />
+		<result column="BALANCE_AS_ABOVE"		property="balanceAsAbove" />
+		<result column="OUR_REMITTANCE"			property="ourRemittance" />
+		<result column="YOUR_REMITTANCE"		property="yourRemittance" />
+		<result column="CASH_CALL_PAID"			property="cashCallPaid" />
+		<result column="CASH_BAL_IN_FAVOR"		property="cashBalInFavor" />
+		<result column="PREV_RESV_BALANCE"		property="prevResvBalance" />
+		<result column="RESV_BALANCE_AS_OF"		property="resvBalanceAsOf" />
+		<result column="PREV_RESV_BAL_DT"		property="prevResvBalDt" />
+		<result column="RESV_BALANCE"			property="resvBalance" />
+		<result column="RESV_BALANCE_DT"		property="resvBalanceDt" />		
+		<result column="USER_ID"				property="userId" />
+		<result column="LAST_UPDATE"			property="lastUpdate" />
+	</resultMap>
+	<select id="getGiacs220TreatyCashAcct" resultMap="getGiacs220TreatyCashAcctResultMap" parameterClass="java.util.HashMap">
+		SELECT *
+  		  FROM TABLE(giac_treaty_cash_acct_pkg.get_cash_acct_info(#summaryId#, #year#, #qtr#))
+	</select>
+	
+	<resultMap  id="getPerilBreakdownResultMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result column="RI_CD"					property="riCd" />
+		<result column="RI_NAME"				property="riName" />
+		<result column="LINE_CD"				property="lineCd" />
+		<result column="SHARE_CD"				property="shareCd" />
+		<result column="TRTY_YY"				property="treatyYy" />
+		<result column="PROC_YEAR"				property="year" />
+		<result column="PROC_QTR"				property="qtr" />	
+		<result column="PERIL_CD"				property="perilCd" />
+		<result column="PERIL_NAME"				property="perilName" />
+		<result column="PREMIUM_AMT"			property="premiumAmt" />
+		<result column="TOTAL_PREMIUM_AMT"		property="totalPremiumAmt" />	
+		<result column="TRTY_COMM_RT"			property="treatyCommRt" />
+		<result column="COMMISSION_AMT"			property="commissionAmt" />
+		<result column="TOTAL_COMMISSION_AMT"	property="totalCommissionAmt" />
+		<result column="LOSS_PAID_AMT"			property="lossPaidAmt" />
+		<result column="TOTAL_LOSS_PAID_AMT"	property="totalLossPaidAmt" />
+		<result column="TREATY_SEQ_NO"			property="treatySeqNo" />
+		<result column="LOSS_EXP_AMT"			property="lossExpAmt" />
+		<result column="TOTAL_LOSS_EXP_AMT"		property="totalLossExpAmt" />
+	</resultMap>
+	<select id="getPerilBreakdownList" resultMap="getPerilBreakdownResultMap" parameterClass="map">
+		SELECT *
+  		  FROM (SELECT ROWNUM rownum_, b.count_, a.*, c.total_premium_amt
+  		  		  FROM (SELECT * FROM TABLE(GIACS220_PKG.get_peril_breakdown(#lineCd#, #shareCd#, #treatyYy#, #riCd#, #year#, #qtr#))
+						WHERE 1 = 1
+						<isNotNull property="filter">
+						 	<isNotEmpty prepend="AND" property="perilCd">
+						 		peril_cd = #perilCd#
+						 	</isNotEmpty>
+						 	<isNotEmpty prepend="AND" property="perilName">
+						 		UPPER(peril_name) LIKE UPPER(#perilName#)
+						 	</isNotEmpty>
+						 	<isNotEmpty prepend="AND" property="premiumAmt">
+						 		premium_amt = #premiumAmt#
+						 	</isNotEmpty>						 	
+						</isNotNull>
+		            	<isNotNull property="sortColumn">
+			            	<isEqual property="sortColumn" compareValue="perilCd">
+		              			ORDER BY peril_cd
+			            	</isEqual>
+			            	<isEqual property="sortColumn" compareValue="perilName">
+		              			ORDER BY peril_name
+			            	</isEqual>
+			            	<isEqual property="sortColumn" compareValue="premiumAmt">
+		              			ORDER BY premium_amt
+			            	</isEqual>
+	              			<isEqual property="ascDescFlg" compareValue="ASC">
+	              				ASC
+	              			</isEqual>
+	              			<isEqual property="ascDescFlg" compareValue="DESC">
+	              				DESC
+	              			</isEqual>
+	              		</isNotNull>) a,
+		              (SELECT count(*) count_
+			          	 FROM TABLE(GIACS220_PKG.get_peril_breakdown(#lineCd#, #shareCd#, #treatyYy#, #riCd#, #year#, #qtr#))
+						WHERE 1 = 1
+								<isNotNull property="filter">
+								 	<isNotEmpty prepend="AND" property="perilCd">
+								 		peril_cd = #perilCd#
+								 	</isNotEmpty>
+								 	<isNotEmpty prepend="AND" property="perilName">
+								 		UPPER(peril_name) LIKE UPPER(#perilName#)
+								 	</isNotEmpty>
+								 	<isNotEmpty prepend="AND" property="premiumAmt">
+								 		premium_amt = #premiumAmt#
+								 	</isNotEmpty>						 	
+								</isNotNull>
+						)b,
+						(SELECT SUM(premium_amt) total_premium_amt
+						   FROM TABLE(GIACS220_PKG.get_peril_breakdown(#lineCd#, #shareCd#, #treatyYy#, #riCd#, #year#, #qtr#))
+						  WHERE 1 = 1
+						<isNotNull property="filter">
+						 	<isNotEmpty prepend="AND" property="perilCd">
+						 		peril_cd = #perilCd#
+						 	</isNotEmpty>
+						 	<isNotEmpty prepend="AND" property="perilName">
+						 		UPPER(peril_name) LIKE UPPER(#perilName#)
+						 	</isNotEmpty>
+						 	<isNotEmpty prepend="AND" property="premiumAmt">
+						 		premium_amt = #premiumAmt#
+						 	</isNotEmpty>						 	
+						</isNotNull>) c) 
+	    	WHERE rownum_ BETWEEN #from# AND #to# 	
+	</select>
+	
+	<select id="getCommissionBreakdownList" resultMap="getPerilBreakdownResultMap" parameterClass="map">
+		SELECT *
+  		  FROM (SELECT ROWNUM rownum_, b.count_, a.*, c.total_commission_amt
+  		  		  FROM (SELECT * FROM TABLE(GIACS220_PKG.get_commission_breakdown(#lineCd#, #shareCd#, #treatyYy#, #riCd#, #year#, #qtr#))
+						WHERE 1 = 1
+						<isNotNull property="filter">
+						 	<isNotEmpty prepend="AND" property="treatyCommRt">
+						 		trty_comm_rt = #treatyCommRt#
+						 	</isNotEmpty>
+						 	<isNotEmpty prepend="AND" property="commissionAmt">
+						 		commission_amt = #commissionAmt#
+						 	</isNotEmpty>
+						 	<isNotEmpty prepend="AND" property="premiumAmt">
+						 		premium_amt = #premiumAmt#
+						 	</isNotEmpty>						 	
+						</isNotNull>
+		            	<isNotNull property="sortColumn">
+			            	<isEqual property="sortColumn" compareValue="treatyCommRt">
+		              			ORDER BY trty_comm_rt
+			            	</isEqual>
+			            	<isEqual property="sortColumn" compareValue="commissionAmt">
+		              			ORDER BY commission_amt
+			            	</isEqual>
+			            	<isEqual property="sortColumn" compareValue="premiumAmt">
+		              			ORDER BY premium_amt
+			            	</isEqual>
+	              			<isEqual property="ascDescFlg" compareValue="ASC">
+	              				ASC
+	              			</isEqual>
+	              			<isEqual property="ascDescFlg" compareValue="DESC">
+	              				DESC
+	              			</isEqual>
+	              		</isNotNull>) a,
+		              (SELECT count(*) count_
+			          	 FROM TABLE(GIACS220_PKG.get_commission_breakdown(#lineCd#, #shareCd#, #treatyYy#, #riCd#, #year#, #qtr#))
+						WHERE 1 = 1
+						<isNotNull property="filter">
+						 	<isNotEmpty prepend="AND" property="treatyCommRt">
+						 		trty_comm_rt = #treatyCommRt#
+						 	</isNotEmpty>
+						 	<isNotEmpty prepend="AND" property="commissionAmt">
+						 		commission_amt = #commissionAmt#
+						 	</isNotEmpty>
+						 	<isNotEmpty prepend="AND" property="premiumAmt">
+						 		premium_amt = #premiumAmt#
+						 	</isNotEmpty>						 	
+						</isNotNull>
+						)b,
+						(SELECT SUM(commission_amt) total_commission_amt
+						   FROM TABLE(GIACS220_PKG.get_commission_breakdown(#lineCd#, #shareCd#, #treatyYy#, #riCd#, #year#, #qtr#))
+						  WHERE 1 = 1
+						<isNotNull property="filter">
+						 	<isNotEmpty prepend="AND" property="treatyCommRt">
+						 		trty_comm_rt = #treatyCommRt#
+						 	</isNotEmpty>
+						 	<isNotEmpty prepend="AND" property="commissionAmt">
+						 		commission_amt = #commissionAmt#
+						 	</isNotEmpty>
+						 	<isNotEmpty prepend="AND" property="premiumAmt">
+						 		premium_amt = #premiumAmt#
+						 	</isNotEmpty>						 	
+						</isNotNull>) c) 
+	    	WHERE rownum_ BETWEEN #from# AND #to# 	
+	</select>
+	
+	<select id="getClmLossPaidBreakdownList" resultMap="getPerilBreakdownResultMap" parameterClass="map">
+		SELECT *
+  		  FROM (SELECT ROWNUM rownum_, b.count_, a.*, c.total_loss_paid_amt
+  		  		  FROM (SELECT * FROM TABLE(GIACS220_PKG.get_clm_loss_paid_breakdown(#lineCd#, #shareCd#, #treatyYy#, #riCd#, #year#, #qtr#))
+						WHERE 1 = 1
+						<isNotNull property="filter">
+						 	<isNotEmpty prepend="AND" property="perilCd">
+						 		peril_cd = #perilCd#
+						 	</isNotEmpty>
+						 	<isNotEmpty prepend="AND" property="perilName">
+						 		UPPER(peril_name) LIKE UPPER(#perilName#)
+						 	</isNotEmpty>
+						 	<isNotEmpty prepend="AND" property="lossPaidAmt">
+						 		loss_paid_amt = #lossPaidAmt#
+						 	</isNotEmpty>						 	
+						</isNotNull>
+		            	<isNotNull property="sortColumn">
+			            	<isEqual property="sortColumn" compareValue="perilCd">
+		              			ORDER BY peril_cd
+			            	</isEqual>
+			            	<isEqual property="sortColumn" compareValue="perilName">
+		              			ORDER BY peril_name
+			            	</isEqual>
+			            	<isEqual property="sortColumn" compareValue="lossPaidAmt">
+		              			ORDER BY loss_paid_amt
+			            	</isEqual>
+	              			<isEqual property="ascDescFlg" compareValue="ASC">
+	              				ASC
+	              			</isEqual>
+	              			<isEqual property="ascDescFlg" compareValue="DESC">
+	              				DESC
+	              			</isEqual>
+	              		</isNotNull>) a,
+		              (SELECT count(*) count_
+			          	 FROM TABLE(GIACS220_PKG.get_clm_loss_paid_breakdown(#lineCd#, #shareCd#, #treatyYy#, #riCd#, #year#, #qtr#))
+						WHERE 1 = 1
+								<isNotNull property="filter">
+								 	<isNotEmpty prepend="AND" property="perilCd">
+								 		peril_cd = #perilCd#
+								 	</isNotEmpty>
+								 	<isNotEmpty prepend="AND" property="perilName">
+								 		UPPER(peril_name) LIKE UPPER(#perilName#)
+								 	</isNotEmpty>
+								 	<isNotEmpty prepend="AND" property="lossPaidAmt">
+								 		loss_paid_amt = #lossPaidAmt#
+								 	</isNotEmpty>						 	
+								</isNotNull>
+						)b,
+						(SELECT SUM(loss_paid_amt) total_loss_paid_amt
+						   FROM TABLE(GIACS220_PKG.get_clm_loss_paid_breakdown(#lineCd#, #shareCd#, #treatyYy#, #riCd#, #year#, #qtr#))
+						  WHERE 1 = 1
+						<isNotNull property="filter">
+						 	<isNotEmpty prepend="AND" property="perilCd">
+						 		peril_cd = #perilCd#
+						 	</isNotEmpty>
+						 	<isNotEmpty prepend="AND" property="perilName">
+						 		UPPER(peril_name) LIKE UPPER(#perilName#)
+						 	</isNotEmpty>
+						 	<isNotEmpty prepend="AND" property="lossPaidAmt">
+						 		loss_paid_amt = #lossPaidAmt#
+						 	</isNotEmpty>						 	
+						</isNotNull>) c) 
+	    	WHERE rownum_ BETWEEN #from# AND #to# 	
+	</select>
+	
+	<select id="getClmLossExpBreakdownList" resultMap="getPerilBreakdownResultMap" parameterClass="map">
+		SELECT *
+  		  FROM (SELECT ROWNUM rownum_, b.count_, a.*, c.total_loss_exp_amt
+  		  		  FROM (SELECT * FROM TABLE(GIACS220_PKG.get_clm_loss_exp_breakdown(#lineCd#, #shareCd#, #treatyYy#, #riCd#, #year#, #qtr#))
+						WHERE 1 = 1
+						<isNotNull property="filter">
+						 	<isNotEmpty prepend="AND" property="perilCd">
+						 		peril_cd = #perilCd#
+						 	</isNotEmpty>
+						 	<isNotEmpty prepend="AND" property="perilName">
+						 		UPPER(peril_name) LIKE UPPER(#perilName#)
+						 	</isNotEmpty>
+						 	<isNotEmpty prepend="AND" property="lossExpAmt">
+						 		loss_exp_amt = #lossExpAmt#
+						 	</isNotEmpty>						 	
+						</isNotNull>
+		            	<isNotNull property="sortColumn">
+			            	<isEqual property="sortColumn" compareValue="perilCd">
+		              			ORDER BY peril_cd
+			            	</isEqual>
+			            	<isEqual property="sortColumn" compareValue="perilName">
+		              			ORDER BY peril_name
+			            	</isEqual>
+			            	<isEqual property="sortColumn" compareValue="lossExpAmt">
+		              			ORDER BY loss_exp_amt
+			            	</isEqual>
+	              			<isEqual property="ascDescFlg" compareValue="ASC">
+	              				ASC
+	              			</isEqual>
+	              			<isEqual property="ascDescFlg" compareValue="DESC">
+	              				DESC
+	              			</isEqual>
+	              		</isNotNull>) a,
+		              (SELECT count(*) count_
+			          	 FROM TABLE(GIACS220_PKG.get_clm_loss_exp_breakdown(#lineCd#, #shareCd#, #treatyYy#, #riCd#, #year#, #qtr#))
+						WHERE 1 = 1
+								<isNotNull property="filter">
+								 	<isNotEmpty prepend="AND" property="perilCd">
+								 		peril_cd = #perilCd#
+								 	</isNotEmpty>
+								 	<isNotEmpty prepend="AND" property="perilName">
+								 		UPPER(peril_name) LIKE UPPER(#perilName#)
+								 	</isNotEmpty>
+								 	<isNotEmpty prepend="AND" property="lossExpAmt">
+								 		loss_exp_amt = #lossExpAmt#
+								 	</isNotEmpty>						 	
+								</isNotNull>
+						)b,
+						(SELECT SUM(loss_exp_amt) total_loss_exp_amt
+						   FROM TABLE(GIACS220_PKG.get_clm_loss_exp_breakdown(#lineCd#, #shareCd#, #treatyYy#, #riCd#, #year#, #qtr#))
+						  WHERE 1 = 1
+						<isNotNull property="filter">
+						 	<isNotEmpty prepend="AND" property="perilCd">
+						 		peril_cd = #perilCd#
+						 	</isNotEmpty>
+						 	<isNotEmpty prepend="AND" property="perilName">
+						 		UPPER(peril_name) LIKE UPPER(#perilName#)
+						 	</isNotEmpty>
+						 	<isNotEmpty prepend="AND" property="lossExpAmt">
+						 		loss_exp_amt = #lossExpAmt#
+						 	</isNotEmpty>						 	
+						</isNotNull>) c) 
+	    	WHERE rownum_ BETWEEN #from# AND #to# 	
+	</select>
+	
+	<procedure id="saveGiacs220TreatyStatement" parameterClass="map">
+		DECLARE
+			v_treaty	GIAC_TREATY_QTR_SUMMARY%ROWTYPE;
+		BEGIN
+			v_treaty.summary_id 			:= #summaryId#;
+			v_treaty.outstanding_loss_amt 	:= #outstandingLossAmt#;
+			v_treaty.prem_resv_relsd_amt 	:= #premResvRelsdAmt#;
+			v_treaty.released_int_amt 		:= #releasedIntAmt#;
+			v_treaty.wht_tax_amt 			:= #whtTaxAmt#;
+			v_treaty.ending_bal_amt 		:= #endingBalAmt#;
+			
+			GIAC_TREATY_QTR_SUMMARY_PKG.update_treaty_statement(v_treaty);
+		END;
+	</procedure>
+	
+	<procedure id="saveGiacs220TreatyCashAcct" parameterClass="map">
+		DECLARE
+			v_treaty	GIAC_TREATY_CASH_ACCT%ROWTYPE;
+		BEGIN
+			v_treaty.summary_id 			:= #summaryId#;
+			v_treaty.prev_balance 			:= #prevBalance#;
+			v_treaty.prev_balance_dt 		:= TO_DATE(#prevBalanceDt#, 'mm-dd-yyyy');
+			v_treaty.our_remittance 		:= #ourRemittance#;
+			v_treaty.your_remittance 		:= #yourRemittance#;
+			v_treaty.cash_call_paid 		:= #cashCallPaid#;
+			v_treaty.cash_bal_in_favor 		:= #cashBalInFavor#;
+			v_treaty.prev_resv_balance 		:= #prevResvBalance#;
+			v_treaty.prev_resv_bal_dt 		:= TO_DATE(#prevResvBalanceDt#, 'mm-dd-yyyy');
+			v_treaty.resv_balance 			:= #resvBalance#;
+			v_treaty.resv_balance_dt 		:= TO_DATE(#resvBalanceDt#, 'mm-dd-yyyy');
+			
+			GIAC_TREATY_CASH_ACCT_PKG.update_cash_acct_info(v_treaty);
+		END;
+	</procedure>
+	<!-- end: for GIACS220 -->
+	
+	<resultMap class="java.util.HashMap" id="riLovMap" extends="BaseEntity.TableGridResultMap">
+		<result column="ri_cd"		property="riCd" />
+		<result column="ri_name"	property="riName" />
+	</resultMap>
+	
+	<select id="showGiacs182RiLov" resultMap="riLovMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+					   b.count_, 
+					   a.* 
+				  FROM (SELECT * 
+						  FROM TABLE (giacs182_pkg.get_ri_lov(#findText#))
+						  <isEqual property="sortColumn" compareValue="riCd">
+								ORDER BY ri_cd
+						  </isEqual>
+						  <isEqual property="sortColumn" compareValue="riName">
+								ORDER BY ri_name
+						  </isEqual>
+						  <isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+						  </isNotNull>
+						  ) a, 
+					   (SELECT count(*) count_ 
+						  FROM TABLE (giacs182_pkg.get_ri_lov(#findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="lineLovMap" extends="BaseEntity.TableGridResultMap">
+		<result column="line_cd"		property="lineCd" />
+		<result column="line_name"		property="lineName" />
+	</resultMap>
+	
+	<select id="showGiacs182LineLov" resultMap="lineLovMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+					   b.count_, 
+					   a.* 
+				  FROM (SELECT * 
+						  FROM TABLE (giacs182_pkg.get_line_lov(#findText#))
+						  <isEqual property="sortColumn" compareValue="lineCd">
+								ORDER BY line_cd
+						  </isEqual>
+						  <isEqual property="sortColumn" compareValue="lineName">
+								ORDER BY line_name
+						  </isEqual>
+						  <isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+						  </isNotNull>
+						  ) a, 
+					   (SELECT count(*) count_ 
+						  FROM TABLE (giacs182_pkg.get_line_lov(#findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="GIACS182VarMap">
+		<result column="cut_off_date"		property="cutOffDate" />
+		<result column="from_date"			property="fromDate" />
+		<result column="to_date"			property="toDate" />
+	</resultMap>
+	
+	<select id="getGIACS182Variables" resultMap="GIACS182VarMap" parameterClass="java.lang.String">
+		SELECT *
+		  FROM TABLE(GIACS182_PKG.get_giacs182_variables(#userId#))
+	</select>
+	
+</sqlMap>

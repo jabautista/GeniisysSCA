@@ -1,0 +1,426 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISSignatory">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+
+	<typeAlias alias="GIISSignatoryClass" type="com.geniisys.giis.entity.GIISSignatory" />
+	
+	<resultMap class="java.util.HashMap" id="GIISSignatoryMap1" extends="BaseEntity.TableGridResultMap">
+		<result property="reportId"			column="REPORT_ID" />
+		<result property="reportTitle"		column="REPORT_TITLE" />
+		<result property="issCd"			column="ISS_CD" />
+		<result property="issName"			column="ISS_NAME" />
+		<result property="lineCd"			column="LINE_CD" />
+		<result property="lineName"			column="LINE_NAME" />
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="GIISSignatoryMap2" extends="BaseEntity.TableGridResultMap">
+		<result property="reportId"				column="REPORT_ID" />
+		<result property="issCd"				column="ISS_CD" />
+		<result property="lineCd"				column="LINE_CD" />
+		<result property="currentSignatorySw"	column="CURRENT_SIGNATORY_SW" />
+		<result property="signatoryId"			column="SIGNATORY_ID" />
+		<result property="signatory"			column="SIGNATORY" />
+		<result property="fileName"				column="FILE_NAME" />
+		<result property="remarks"				column="REMARKS" />
+		<result property="userId"				column="USER_ID" />
+		<result property="lastUpdate"			column="LAST_UPDATE" />
+		<result property="status"				column="STATUS" />
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="GIISS116ReportLOV" extends="BaseEntity.TableGridResultMap">
+		<result property="reportId"			column="REPORT_ID" />
+		<result property="reportTitle"		column="REPORT_TITLE" />
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="GIISS116IssourceLOV" extends="BaseEntity.TableGridResultMap">
+		<result property="issCd"		column="ISS_CD" />
+		<result property="issName"		column="ISS_NAME" />
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="GIISS116LineLOV" extends="BaseEntity.TableGridResultMap">
+		<result property="lineCd"		column="LINE_CD" />
+		<result property="lineName"		column="LINE_NAME" />
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="GIISS116SignatoryLOV" extends="BaseEntity.TableGridResultMap">
+		<result property="signatoryId"		column="SIGNATORY_ID" />
+		<result property="signatory"		column="SIGNATORY" />
+		<result property="fileName"			column="FILE_NAME" />
+		<result property="status"			column="STATUS" />
+	</resultMap>
+	
+	<parameterMap class="map" id="validateSignatoryReportMap">
+		<parameter property="reportId" 			jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"/>
+		<parameter property="issCd" 			jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"/>
+		<parameter property="lineCd" 			jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"/>
+		<parameter property="result" 			jdbcType="INTEGER" javaType="java.lang.Integer" mode="OUT"/>
+	</parameterMap>
+	 
+	<select id="getReportSignatory" resultMap="GIISSignatoryMap1" parameterClass="java.util.HashMap">		
+	    SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT *
+  						  FROM TABLE (giiss116_pkg.get_report_signatory2(#appUser#)) <!-- changed by robert 01.02.2014 -->
+		                  <isNotNull property="filter">
+										WHERE 1=1
+										<isNotEmpty prepend="AND"  property="reportId">
+											REPORT_ID LIKE upper(#reportId#)
+										</isNotEmpty>
+										<isNotEmpty prepend="AND"  property="reportTitle">
+											REPORT_TITLE LIKE upper(#reportTitle#)
+										</isNotEmpty>
+										<isNotEmpty prepend="AND"  property="issCd">
+											ISS_CD LIKE upper(#issCd#)
+										</isNotEmpty>
+										<isNotEmpty prepend="AND"  property="issName">
+											ISS_NAME LIKE upper(#issName#)
+										</isNotEmpty>
+										<isNotEmpty prepend="AND"  property="lineCd">
+											LINE_CD LIKE UPPER(#lineCd#)
+										</isNotEmpty>
+										<isNotEmpty prepend="AND"  property="lineName">
+											LINE_NAME LIKE upper(#lineName#)
+										</isNotEmpty>
+						 </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="reportId">
+			              		ORDER BY REPORT_ID
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="reportTitle">
+			              		ORDER BY REPORT_TITLE
+			              </isEqual>
+			               <isEqual property="sortColumn" compareValue="issCd">
+			              		ORDER BY ISS_CD
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="issName">
+			              		ORDER BY ISS_NAME
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="lineCd">
+			              		ORDER BY LINE_CD
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="lineName">
+			              		ORDER BY LINE_NAME
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giiss116_pkg.get_report_signatory2(#appUser#))
+		                  <isNotNull property="filter">
+										WHERE 1=1
+										<isNotEmpty prepend="AND"  property="reportId">
+											REPORT_ID LIKE upper(#reportId#)
+										</isNotEmpty>
+										<isNotEmpty prepend="AND"  property="reportTitle">
+											REPORT_TITLE LIKE upper(#reportTitle#)
+										</isNotEmpty>
+										<isNotEmpty prepend="AND"  property="issCd">
+											ISS_CD LIKE upper(#issCd#)
+										</isNotEmpty>
+										<isNotEmpty prepend="AND"  property="issName">
+											ISS_NAME LIKE upper(#issName#)
+										</isNotEmpty>
+										<isNotEmpty prepend="AND"  property="lineCd">
+											LINE_CD LIKE #lineCd#
+										</isNotEmpty>
+										<isNotEmpty prepend="AND"  property="lineName">
+											LINE_NAME LIKE upper(#lineName#)
+										</isNotEmpty>
+						 </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getReportSignatoryDetails" resultMap="GIISSignatoryMap2" parameterClass="java.util.HashMap">
+	SELECT *
+		FROM (SELECT rownum rownum_,
+				 b.count_,
+				 a.*
+			FROM (SELECT *
+					FROM TABLE (giiss116_pkg.get_report_signatory_details(#reportId#, #issCd#,
+																			#lineCd#))
+		                  <isNotNull property="filter">
+										WHERE 1=1
+										<isNotEmpty prepend="AND"  property="signatoryId">
+											SIGNATORY_ID = #signatoryId#
+										</isNotEmpty>
+										<isNotEmpty prepend="AND"  property="signatory">
+											SIGNATORY LIKE upper(#signatory#)
+										</isNotEmpty>
+										<isNotEmpty prepend="AND"  property="remarks">
+											REMARKS LIKE upper(#remarks#)
+										</isNotEmpty>
+										<isNotEmpty prepend="AND"  property="currentSignatorySw">
+											CURRENT_SIGNATORY_SW LIKE upper(#currentSignatorySw#)
+										</isNotEmpty>
+						 </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="currentSignatorySw">
+			              		ORDER BY CURRENT_SIGNATORY_SW
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="signatoryId">
+			              		ORDER BY SIGNATORY_ID
+			              </isEqual>
+			               <isEqual property="sortColumn" compareValue="signatory">
+			              		ORDER BY SIGNATORY
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="remarks">
+			              		ORDER BY REMARKS
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giiss116_pkg.get_report_signatory_details(#reportId#, #issCd#, #lineCd#))
+		                  <isNotNull property="filter">
+										WHERE 1=1
+										<isNotEmpty prepend="AND"  property="signatoryId">
+											SIGNATORY_ID = #signatoryId#
+										</isNotEmpty>
+										<isNotEmpty prepend="AND"  property="signatory">
+											SIGNATORY LIKE upper(#signatory#)
+										</isNotEmpty>
+										<isNotEmpty prepend="AND"  property="remarks">
+											REMARKS LIKE upper(#remarks#)
+										</isNotEmpty>
+										<isNotEmpty prepend="AND"  property="currentSignatorySw">
+											CURRENT_SIGNATORY_SW LIKE upper(#currentSignatorySw#)
+										</isNotEmpty>
+						 </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGIISS116ReportLOV" resultMap="GIISS116ReportLOV" parameterClass="java.util.HashMap">		
+	    SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT *
+  						  FROM TABLE (giiss116_pkg.get_report_listing)
+		                  <isNotNull property="findText">
+										WHERE 1=1
+										<isNotEmpty prepend="AND"  property="findText">
+											(REPORT_ID LIKE upper(#findText#) OR
+											 upper(REPORT_TITLE) LIKE upper(#findText#))
+										</isNotEmpty>
+						 </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="reportId">
+			              		ORDER BY REPORT_ID
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="reportTitle">
+			              		ORDER BY REPORT_TITLE
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giiss116_pkg.get_report_listing)
+		                  <isNotNull property="findText">
+										WHERE 1=1
+										<isNotEmpty prepend="AND"  property="findText">
+											(REPORT_ID LIKE upper(#findText#) OR
+											 REPORT_TITLE LIKE upper(#findText#))
+										</isNotEmpty>
+						 </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGIISS116IssourceLOV" resultMap="GIISS116IssourceLOV" parameterClass="java.util.HashMap">		
+	    SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT *
+  						  FROM TABLE (giiss116_pkg.get_issource_listing(#userId#, #lineCd#))
+		                  <isNotNull property="findText">
+										WHERE 1=1
+										<isNotEmpty prepend="AND"  property="findText">
+											(ISS_CD LIKE upper(#findText#) OR
+											 ISS_NAME LIKE upper(#findText#))
+										</isNotEmpty>
+						 </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="issCd">
+			              		ORDER BY ISS_CD
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="issName">
+			              		ORDER BY ISS_NAME
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giiss116_pkg.get_issource_listing(#userId#, #lineCd#))
+		                  <isNotNull property="findText">
+										WHERE 1=1
+										<isNotEmpty prepend="AND"  property="findText">
+											(ISS_CD LIKE upper(#findText#) OR
+											 ISS_NAME LIKE upper(#findText#))
+										</isNotEmpty>
+						 </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGIISS116LineLOV" resultMap="GIISS116LineLOV" parameterClass="java.util.HashMap">		
+	    SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT *
+  						  FROM TABLE (giiss116_pkg.get_line_listing(#userId#, #issCd#))
+		                  <isNotNull property="findText">
+										WHERE 1=1
+										<isNotEmpty prepend="AND"  property="findText">
+											(LINE_CD LIKE upper(#findText#) OR
+											 LINE_NAME LIKE upper(#findText#))
+										</isNotEmpty>
+						 </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="lineCd">
+			              		ORDER BY LINE_CD
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="lineName">
+			              		ORDER BY LINE_NAME
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giiss116_pkg.get_line_listing(#userId#, #issCd#))
+		                  <isNotNull property="findText">
+										WHERE 1=1
+										<isNotEmpty prepend="AND"  property="findText">
+											(LINE_CD LIKE upper(#findText#) OR
+											 LINE_NAME LIKE upper(#findText#))
+										</isNotEmpty>
+						 </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGIISS116SignatoryLOV" resultMap="GIISS116SignatoryLOV" parameterClass="java.util.HashMap">		
+	    SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT *
+  						  FROM TABLE (giiss116_pkg.get_signatory_listing)
+  						  WHERE 1=1
+		                  <isNotNull property="findText">
+								<isNotEmpty prepend="AND"  property="findText">
+									(SIGNATORY_ID LIKE upper(#findText#) OR
+									 SIGNATORY LIKE upper(#findText#))
+								</isNotEmpty>										
+						 </isNotNull>
+						 <isNotNull property="notIn">
+					  		AND signatory_id NOT IN $notIn$
+					  	 </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="signatoryId">
+			              		ORDER BY SIGNATORY_ID
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="signatory">
+			              		ORDER BY SIGNATORY
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giiss116_pkg.get_signatory_listing)
+		                  WHERE 1=1
+		                  <isNotNull property="findText">
+								<isNotEmpty prepend="AND"  property="findText">
+									(SIGNATORY_ID LIKE upper(#findText#) OR
+									 SIGNATORY LIKE upper(#findText#))
+								</isNotEmpty>
+						 </isNotNull>
+						 <isNotNull property="notIn">
+					  		AND signatory_id NOT IN $notIn$
+					  	 </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="validateSignatoryReport" parameterMap="validateSignatoryReportMap">
+		{CALL giiss116_pkg.val_signatory_report(?, ?, ?, ?)}
+	</procedure>
+	
+	<procedure id="setGIISSignatory" parameterClass="GIISSignatoryClass">
+		DECLARE
+		  v_signatory giiss116_pkg.giis_report_signatory_dtl_type;
+		BEGIN
+		  giis_users_pkg.app_user := #userId#;
+		  	
+		  v_signatory.report_id 			:= #reportId#;
+		  v_signatory.iss_cd 				:= #issCd#;
+		  v_signatory.line_cd 				:= #lineCd#;
+		  v_signatory.current_signatory_sw	:= #currentSignatorySw#;
+		  v_signatory.signatory_id 			:= #signatoryId#;
+		  v_signatory.file_name 			:= #fileName#;
+		  v_signatory.remarks 				:= #remarks#;
+		  
+		  giiss116_pkg.set_giis_signatory(v_signatory);
+		END;
+	</procedure>
+	
+	<procedure id="delGIISSignatory" parameterClass="GIISSignatoryClass">
+		BEGIN
+			giiss116_pkg.delete_giis_signatory(#reportId#, #issCd#, #lineCd#, #signatoryId#);
+		END;
+	</procedure>
+	
+	<procedure id="updateSignatoryFilename" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			giiss116_pkg.set_signatory_file_name(#signatoryId#, #fileName#);
+		END;
+	</procedure>
+	
+	<select id="getGIISS116UsedSignatories" resultClass="java.lang.String">
+		SELECT giiss116_pkg.get_used_signatories (#reportId#, #issCd#, #lineCd#) FROM DUAL
+	</select>
+	
+</sqlMap>

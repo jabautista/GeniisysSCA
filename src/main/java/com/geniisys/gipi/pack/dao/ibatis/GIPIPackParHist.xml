@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIPackParHist">
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<parameterMap class="map" id="insertPackParhistMap">
+		<parameter property="userId" 			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="packParId"			jdbcType="INTEGER" 	javaType="java.lang.Integer" mode="IN"/>
+	</parameterMap>
+	
+	
+	<procedure id="insertPackParHist" parameterClass="java.util.HashMap">
+		BEGIN
+			GIPI_PACK_PARHIST_PKG.set_gipi_pack_parhist(#packParId#, #userId#, #entrySource#, #parStatCd#);
+		END;
+	</procedure>
+	
+	<procedure id="insertPackParhist" parameterMap="insertPackParhistMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			GIPI_PACK_PARHIST_PKG.INSERT_PACK_PARHIST(?);
+		END;	
+	</procedure>
+	
+</sqlMap>

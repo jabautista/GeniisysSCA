@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISGeographyClass">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIISGeographyClass" type="com.geniisys.common.entity.GIISGeographyClass"/>
+	<typeAlias alias="GIISGeogClass" type="com.geniisys.common.entity.GIISGeogClass"/>
+	
+	<resultMap class="GIISGeographyClass" id="GIISGeographyClassLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="geogDesc"		column="GEOG_DESC" />
+		<result property="geogCd"	column="GEOG_CD" />
+		<result property="geogType"	column="TYPE" />
+	</resultMap>
+	
+	<!-- added by Kris 01.16.2013 for GIPIS173 -->
+	<resultMap class="GIISGeographyClass" id="GIISGeographyClassLOV2ResultMap">
+		<result property="geogDesc"			column="GEOG_DESC" />
+		<result property="geogCd"			column="GEOG_CD" />
+		<result property="geogType"			column="TYPE" />
+		<result property="geogClassType"	column="CLASS_TYPE" />
+	</resultMap>
+	<!-- END: added by Kris 01.16.2013 for GIPIS173 -->
+	
+	<resultMap class="java.util.HashMap" id="GIISGeogClassResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="geogCd" 			column="geog_cd"/>
+		<result property="geogDesc" 		column="geog_desc"/>	
+		<result property="classType" 		column="class_type"/>
+		<result property="meanClassType" 	column="mean_class_type"/>
+		<result property="remarks" 			column="remarks"/>
+		<result property="userId" 			column="user_id"/>
+		<result property="lastUpdate" 		column="last_update"/>					
+	</resultMap>
+	
+	<select id="getGeogDescLOV" parameterClass="java.util.HashMap" resultMap="GIISGeographyClassLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giis_geog_class_pkg.get_geog2_list(#quoteId#))
+						  <isNotNull property="findText">
+		                  	WHERE UPPER(GEOG_DESC) LIKE UPPER(#findText#)
+		                  </isNotNull>
+					   )a,
+					   (SELECT COUNT(*) count_
+						  FROM TABLE(giis_geog_class_pkg.get_geog2_list(#quoteId#))
+						  <isNotNull property="findText">
+		                  	WHERE UPPER(GEOG_DESC) LIKE UPPER(#findText#)
+		                  </isNotNull>
+		                  ) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<!-- added by Kris 01.16.2013 for GIPIS173 -->
+	<select id="getGeographyLOV" resultMap="GIISGeographyClassLOV2ResultMap" parameterClass="java.util.HashMap" >
+		SELECT * 
+		  FROM TABLE(Giis_Geog_Class_Pkg.get_all_geog_list)
+		  <isNotNull property="findText">
+		 WHERE UPPER(GEOG_DESC) LIKE '%'||UPPER(#findText#)||'%'
+		 </isNotNull>
+		 <isNotNull property="findText">
+		    OR UPPER(TYPE) LIKE '%'||UPPER(#findText#)||'%'
+		    </isNotNull>
+		 <isEqual property="sortColumn" compareValue="geogDesc">
+		 ORDER BY geog_desc
+		 </isEqual>
+		 <isEqual property="sortColumn" compareValue="geogType">
+		 ORDER BY type
+		 </isEqual>
+		 <isEqual property="ascDescFlg" compareValue="ASC">
+		   ASC
+		 </isEqual>
+		 <isEqual property="ascDescFlg" compareValue="DESC">
+		  DESC
+         </isEqual>
+	</select>
+	
+	<select id="showGeographyClass" resultMap="GIISGeogClassResultMap">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+						 b.count_, 
+						 a.*
+					FROM (SELECT *
+							FROM TABLE (GIISS080_PKG.show_geog_class)		
+							<isNotNull property="filter">
+								WHERE 1 = 1 
+									<isNotEmpty prepend="AND" property="geogCd">
+										UPPER(geog_cd) LIKE UPPER(#geogCd#)
+									</isNotEmpty>
+	 								<isNotEmpty prepend="AND" property="geogDesc">
+										UPPER(geog_desc) LIKE UPPER(#geogDesc#)
+									</isNotEmpty>	
+									<isNotEmpty prepend="AND" property="classType">
+										UPPER(class_type) LIKE UPPER(#classType#)
+									</isNotEmpty>	
+									<isNotEmpty prepend="AND" property="meanClassType">
+										UPPER(mean_class_type) LIKE UPPER(#meanClassType#)
+									</isNotEmpty>	 		 																																														
+							</isNotNull>					
+							<isEqual property="sortColumn" compareValue="geogCd">
+								ORDER BY geog_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="geogDesc">
+								ORDER BY geog_desc
+							</isEqual>		
+							<isEqual property="sortColumn" compareValue="classType">
+								ORDER BY class_type
+							</isEqual>	
+							<isEqual property="sortColumn" compareValue="meanClassType">
+								ORDER BY mean_class_type
+							</isEqual>												
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>
+						) a,
+						(SELECT count(*) count_
+						   FROM TABLE (GIISS080_PKG.show_geog_class)						 		
+							<isNotNull property="filter">
+								WHERE 1 = 1 
+									<isNotEmpty prepend="AND" property="geogCd">
+										UPPER(geog_cd) LIKE UPPER(#geogCd#)
+									</isNotEmpty>
+	 								<isNotEmpty prepend="AND" property="geogDesc">
+										UPPER(geog_desc) LIKE UPPER(#geogDesc#)
+									</isNotEmpty>	
+									<isNotEmpty prepend="AND" property="classType">
+										UPPER(class_type) LIKE UPPER(#classType#)
+									</isNotEmpty>	 					
+									<isNotEmpty prepend="AND" property="meanClassType">
+										UPPER(mean_class_type) LIKE UPPER(#meanClassType#)
+									</isNotEmpty>																																									
+							</isNotNull>								  
+						   ) b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select>	
+	
+	<select id="validateGeogCdInput" resultClass="java.lang.String">
+		SELECT GIISS080_PKG.validate_geog_cd_input(#inputString#)FROM dual							
+	</select>
+	
+	<select id="validateGeogDescInput" resultClass="java.lang.String">
+		SELECT GIISS080_PKG.validate_geog_desc_input(#inputString#)FROM dual							
+	</select>
+	
+	<select id="validateBeforeDelete" resultClass="java.lang.String">
+		SELECT GIISS080_PKG.validate_before_delete(#geogCd#)FROM dual							
+	</select>
+	
+	<insert id="setGeogClass" parameterClass="GIISGeogClass">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;						
+			GIISS080_PKG.set_geog_class(
+				#geogCd#, #geogDesc#,
+				#classType#,#remarks#);
+		END;	
+	</insert>	
+	
+	<delete id="deleteInGeogClass" parameterClass="GIISGeogClass">
+		BEGIN
+			GIISS080_PKG.delete_in_geog_class(#geogCd#);
+		END;
+	</delete>	
+</sqlMap>

@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISPosition">
+
+ 	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+
+	<typeAlias alias="giisPosition" type="com.geniisys.common.entity.GIISPosition"/>
+	
+	<resultMap id="getCapacityLOVMap" class="com.geniisys.common.entity.GIISPosition" extends="BaseEntity.TableGridResultMap">
+		<result column="POSITION_CD" 			property="positionCd" />
+		<result column="POSITION" 					property="position" />
+	</resultMap>
+
+	<select id="getCapacityLOV" resultMap="getCapacityLOVMap">
+		 SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giis_position_pkg.get_capacity_lov)
+		                  <isNotNull property="findText">
+		                  	WHERE UPPER(POSITION) LIKE UPPER(#findText#)
+		                  </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                 FROM TABLE (giis_position_pkg.get_capacity_lov)
+		                  <isNotNull property="findText">
+		                  	WHERE UPPER(POSITION) LIKE UPPER(#findText#)
+		                  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="giisPosition" id="giisPositionResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="position_cd"    property="positionCd"/>
+		<result column="position"  		property="position"/>
+		<result column="user_id"     	property="userId"/>
+		<result column="last_update" 	property="lastUpdate"/>
+		<result column="remarks"     	property="remarks"/>
+	</resultMap>
+	
+	<select id="getGiiss023RecList" resultMap="giisPositionResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss023_pkg.get_rec_list)
+		  	      <isNotNull property="filter">
+		  	      	WHERE 1 = 1 
+		  	      		<isNotEmpty prepend="AND" property="positionCd">
+                        	position_cd = #positionCd#
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="position">
+                            UPPER(position) LIKE UPPER(#position#)
+                        </isNotEmpty>
+		  	      </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="positionCd">
+			              		ORDER BY position_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="position">
+			              		ORDER BY position
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss023_pkg.get_rec_list)
+		                  <isNotNull property="filter">
+				  	      	WHERE 1 = 1 
+				  	      		<isNotEmpty prepend="AND" property="positionCd">
+		                        	position_cd = #positionCd#
+		                        </isNotEmpty>
+		                        <isNotEmpty prepend="AND" property="position">
+		                            UPPER(position) LIKE UPPER(#position#)
+		                        </isNotEmpty>
+				  	      </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<select id="getGiiss023AllRecList" resultMap="giisPositionResultMap">
+		SELECT rownum rownum_, 
+		               '1' count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss023_pkg.get_rec_list)
+		                  ) a	
+	</select>		
+	
+	<procedure id="setPosition" parameterClass="giisPosition">
+	    DECLARE
+	    	v_rec giis_position%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.position_cd := #positionCd#;
+ 			v_rec.position := #position#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			giiss023_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<!-- <procedure id="valDeleteAirType" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss023_pkg.val_del_rec(#recId#);
+ 		END;
+ 	</procedure> -->
+ 	
+ 	<select id="valDeletePosition" resultClass="java.lang.String">
+		SELECT giiss023_pkg.val_del_rec(#positionCd#)FROM dual							
+	</select>
+	
+ 	<parameterMap class="map" id="valAddPositionMap">
+		<parameter property="position"			jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="IN"/>
+		<parameter property="positionCd"		jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="IN"/>
+	</parameterMap>
+ 	
+ 	<procedure id="valAddPosition" parameterMap="valAddPositionMap">
+ 		BEGIN
+ 			giiss023_pkg.val_add_rec(?,?);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delPosition" parameterClass="java.lang.Integer">
+		BEGIN
+ 			giiss023_pkg.del_rec(#positionCd#);
+ 		END;
+ 	</delete>
+</sqlMap>

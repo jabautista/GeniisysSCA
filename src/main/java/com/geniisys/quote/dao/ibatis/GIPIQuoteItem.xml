@@ -1,0 +1,557 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="gipiQuoteItem">
+
+  	<cacheModel id="oneDayClient" type="MEMORY">
+	    <flushInterval hours="24"/>
+	    <property name="reference-type" value="WEAK"/>
+ 	</cacheModel>
+ 	
+ 	<typeAlias alias="GIPIQuoteItemClass" type="com.geniisys.quote.entity.GIPIQuoteItem" />
+ 	
+	<resultMap class="GIPIQuoteItemClass" id="GIPIQuoteItemResultMap">
+		<result column="quote_id" property="quoteId" />
+		<result column="item_no" property="itemNo" />
+		<result column="item_title" property="itemTitle" />
+		<result column="item_desc" property="itemDesc" />
+		<result column="currency_cd" property="currencyCd" />
+		<result column="currency_rate" property="currencyRate" />
+		<result column="pack_line_cd" property="packLineCd" />
+		<result column="pack_subline_cd" property="packSublineCd" />
+		<result column="tsi_amt" property="tsiAmt" />
+		<result column="prem_amt" property="premAmt" />
+		<result column="cpi_rec_no" property="cpiRecNo" />
+		<result column="currency_desc" property="currencyDesc" />
+		<result column="coverage_cd" property="coverageCd" />
+		<result column="mc_motor_no" property="mcMotorNo" />
+		<result column="mc_plate_no" property="mcPlateNo" />
+		<result column="mc_serial_no" property="mcSerialNo" />
+		<result column="date_from" property="dateFrom" />
+		<result column="date_to" property="dateTo" />
+		<result column="ann_prem_amt" property="annPremAmt" />
+		<result column="ann_tsi_amt" property="annTsiAmt" />
+		<result column="changed_tag" property="changedTag" />
+		<result column="comp_sw" property="compSw" />
+		<result column="discount_sw" property="discountSw" />
+		<result column="group_cd" property="groupCd" />
+		<result column="item_desc2" property="itemDesc2" />
+		<result column="item_grp" property="itemGrp" />
+		<result column="other_info" property="otherInfo" />
+		<result column="pack_ben_cd" property="packBenCd" />
+		<result column="prorate_flag" property="prorateFlag" />
+		<result column="rec_flag" property="recFlag" />
+		<result column="region_cd" property="regionCd" />
+		<result column="short_rt_percent" property="shortRtPercent" />
+		<result column="surcharge_sw" property="surchargeSw" />
+		<result column="coverage_desc" property="coverageDesc" />
+		<result column="currency_desc" property="currencyDesc" />
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="GIPIQuoteItemResultMapGrid" extends="GIPIQuoteItemResultMap">
+		<result column="rownum_" 	property="rowNum" />
+		<result column="count_"		property="rowCount"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="GIPIQuoteACItemResultMapGrid" extends="GIPIQuoteItemResultMapGrid">
+		<result column="{quoteId=QUOTE_ID, itemNo=ITEM_NO}" property="gipiQuoteACItem" select="getGIPIQuoteACItemDetails"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="GIPIQuoteAVItemResultMapGrid" extends="GIPIQuoteItemResultMapGrid">
+		<result column="{quoteId=QUOTE_ID, itemNo=ITEM_NO}" property="gipiQuoteAVItem" select="getGIPIQuoteAVItemDetails"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="GIPIQuoteCAItemResultMapGrid" extends="GIPIQuoteItemResultMapGrid">
+		<result column="{quoteId=QUOTE_ID, itemNo=ITEM_NO}" property="gipiQuoteCAItem" select="getGIPIQuoteCAItemDetails"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="GIPIQuoteENItemResultMapGrid" extends="GIPIQuoteItemResultMapGrid">
+		<result column="{quoteId=QUOTE_ID}" property="gipiQuoteENItem" select="getGIPIQuoteENItemDetails"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="GIPIQuoteFIItemResultMapGrid" extends="GIPIQuoteItemResultMapGrid">
+		<result column="{quoteId=QUOTE_ID, itemNo=ITEM_NO}" property="gipiQuoteFIItem" select="getGIPIQuoteFIItemDetails"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="GIPIQuoteMHItemResultMapGrid" extends="GIPIQuoteItemResultMapGrid">
+		<result column="{quoteId=QUOTE_ID, itemNo=ITEM_NO}" property="gipiQuoteMHItem" select="getGIPIQuoteMHItemDetails"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="GIPIQuoteMCItemResultMapGrid" extends="GIPIQuoteItemResultMapGrid">
+		<result column="{quoteId=QUOTE_ID, itemNo=ITEM_NO}" property="gipiQuoteItemMC" select="getGIPIQuoteMCItemDetails"/>
+	</resultMap>
+	
+ 	<resultMap class="java.util.HashMap" id="GIPIQuoteMNItemResultMapGrid" extends="GIPIQuoteItemResultMapGrid">
+		<result column="{quoteId=QUOTE_ID, itemNo=ITEM_NO}" property="gipiQuoteMNItem" select="getGIPIQuoteMNItemDetails"/>
+	</resultMap>
+	
+	<select id="getQuoteItemInfoList" resultMap="GIPIQuoteItemResultMapGrid" parameterClass="java.util.HashMap">		
+	    SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (gipi_quote_item_pkg.get_gipi_quote_item(#quoteId#))
+		               <isNotNull property="filter">
+						 WHERE 1=1
+               				<isNotEmpty prepend="AND"  property="itemNo">
+               					item_no = #itemNo#
+               				</isNotEmpty>
+               				<isNotEmpty prepend="AND"  property="itemTitle">
+               					upper(item_title) = upper(#itemTitle#)
+               				</isNotEmpty>
+                    	</isNotNull>
+		                  <isEqual property="sortColumn" compareValue="itemNo">
+			              		ORDER BY ITEM_NO
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="itemTitle">
+			              		ORDER BY ITEM_TITLE
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="itemDesc itemDesc2">
+			              		ORDER BY item_desc || item_desc2
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (gipi_quote_item_pkg.get_gipi_quote_item(#quoteId#))
+		                  <isNotNull property="filter">
+						 WHERE 1=1
+               				<isNotEmpty prepend="AND"  property="itemNo">
+               					item_no = #itemNo#
+               				</isNotEmpty>
+               				<isNotEmpty prepend="AND"  property="itemTitle">
+               					upper(item_title) = upper(#itemTitle#)
+               				</isNotEmpty>
+                    	</isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getQuoteACItemInfoList" resultMap="GIPIQuoteACItemResultMapGrid" parameterClass="java.util.HashMap">		
+	    SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (gipi_quote_item_pkg.get_gipi_quote_item(#quoteId#))
+		               <isNotNull property="filter">
+						 WHERE 1=1
+               				<isNotEmpty prepend="AND"  property="itemNo">
+               					item_no = #itemNo#
+               				</isNotEmpty>
+               				<isNotEmpty prepend="AND"  property="itemTitle">
+               					upper(item_title) = upper(#itemTitle#)
+               				</isNotEmpty>
+                    	</isNotNull>
+		                  <isEqual property="sortColumn" compareValue="itemNo">
+			              		ORDER BY ITEM_NO
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="itemTitle">
+			              		ORDER BY ITEM_TITLE
+			              </isEqual>
+			               <isEqual property="sortColumn" compareValue="itemDesc itemDesc2">
+			              		ORDER BY item_desc || item_desc2
+			              </isEqual>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (gipi_quote_item_pkg.get_gipi_quote_item(#quoteId#))
+		                  <isNotNull property="filter">
+						 WHERE 1=1
+               				<isNotEmpty prepend="AND"  property="itemNo">
+               					item_no = #itemNo#
+               				</isNotEmpty>
+               				<isNotEmpty prepend="AND"  property="itemTitle">
+               					upper(item_title) = upper(#itemTitle#)
+               				</isNotEmpty>
+                    	</isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+ 	<select id="getQuoteAVItemInfoList" resultMap="GIPIQuoteAVItemResultMapGrid" parameterClass="java.util.HashMap">		
+	    SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (gipi_quote_item_pkg.get_gipi_quote_item(#quoteId#))
+		               <isNotNull property="filter">
+						 WHERE 1=1
+               				<isNotEmpty prepend="AND"  property="itemNo">
+               					item_no = #itemNo#
+               				</isNotEmpty>
+               				<isNotEmpty prepend="AND"  property="itemTitle">
+               					upper(item_title) = upper(#itemTitle#)
+               				</isNotEmpty>
+                    	</isNotNull>
+		                  <isEqual property="sortColumn" compareValue="itemNo">
+			              		ORDER BY ITEM_NO
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="itemTitle">
+			              		ORDER BY ITEM_TITLE
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="itemDesc itemDesc2">
+			              		ORDER BY item_desc || item_desc2
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (gipi_quote_item_pkg.get_gipi_quote_item(#quoteId#))
+		                  <isNotNull property="filter">
+						 WHERE 1=1
+               				<isNotEmpty prepend="AND"  property="itemNo">
+               					item_no = #itemNo#
+               				</isNotEmpty>
+               				<isNotEmpty prepend="AND"  property="itemTitle">
+               					upper(item_title) = upper(#itemTitle#)
+               				</isNotEmpty>
+                    	</isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getQuoteCAItemInfoList" resultMap="GIPIQuoteCAItemResultMapGrid" parameterClass="java.util.HashMap">		
+	    SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (gipi_quote_item_pkg.get_gipi_quote_item(#quoteId#))
+		               <isNotNull property="filter">
+						 WHERE 1=1
+               				<isNotEmpty prepend="AND"  property="itemNo">
+               					item_no = #itemNo#
+               				</isNotEmpty>
+               				<isNotEmpty prepend="AND"  property="itemTitle">
+               					upper(item_title) = upper(#itemTitle#)
+               				</isNotEmpty>
+                    	</isNotNull>
+		                  <isEqual property="sortColumn" compareValue="itemNo">
+			              		ORDER BY ITEM_NO
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="itemTitle">
+			              		ORDER BY ITEM_TITLE
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="itemDesc itemDesc2">
+			              		ORDER BY item_desc || item_desc2
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (gipi_quote_item_pkg.get_gipi_quote_item(#quoteId#))
+		                  <isNotNull property="filter">
+						 WHERE 1=1
+               				<isNotEmpty prepend="AND"  property="itemNo">
+               					item_no = #itemNo#
+               				</isNotEmpty>
+               				<isNotEmpty prepend="AND"  property="itemTitle">
+               					upper(item_title) = upper(#itemTitle#)
+               				</isNotEmpty>
+                    	</isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getQuoteENItemInfoList" resultMap="GIPIQuoteENItemResultMapGrid" parameterClass="java.util.HashMap">		
+	    SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (gipi_quote_item_pkg.get_gipi_quote_item(#quoteId#))
+		               <isNotNull property="filter">
+						 WHERE 1=1
+               				<isNotEmpty prepend="AND"  property="itemNo">
+               					item_no = #itemNo#
+               				</isNotEmpty>
+               				<isNotEmpty prepend="AND"  property="itemTitle">
+               					upper(item_title) = upper(#itemTitle#)
+               				</isNotEmpty>
+                    	</isNotNull>
+		                  <isEqual property="sortColumn" compareValue="itemNo">
+			              		ORDER BY ITEM_NO
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="itemTitle">
+			              		ORDER BY ITEM_TITLE
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="itemDesc itemDesc2">
+			              		ORDER BY item_desc || item_desc2
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (gipi_quote_item_pkg.get_gipi_quote_item(#quoteId#))
+		                  <isNotNull property="filter">
+						 WHERE 1=1
+               				<isNotEmpty prepend="AND"  property="itemNo">
+               					item_no = #itemNo#
+               				</isNotEmpty>
+               				<isNotEmpty prepend="AND"  property="itemTitle">
+               					upper(item_title) = upper(#itemTitle#)
+               				</isNotEmpty>
+                    	</isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getQuoteFIItemInfoList" resultMap="GIPIQuoteFIItemResultMapGrid" parameterClass="java.util.HashMap">		
+	    SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (gipi_quote_item_pkg.get_gipi_quote_item(#quoteId#))
+		               <isNotNull property="filter">
+						 WHERE 1=1
+               				<isNotEmpty prepend="AND"  property="itemNo">
+               					item_no = #itemNo#
+               				</isNotEmpty>
+               				<isNotEmpty prepend="AND"  property="itemTitle">
+               					upper(item_title) = upper(#itemTitle#)
+               				</isNotEmpty>
+                    	</isNotNull>
+		                  <isEqual property="sortColumn" compareValue="itemNo">
+			              		ORDER BY ITEM_NO
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="itemTitle">
+			              		ORDER BY ITEM_TITLE
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="itemDesc itemDesc2">
+			              		ORDER BY item_desc || item_desc2
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (gipi_quote_item_pkg.get_gipi_quote_item(#quoteId#))
+		                  <isNotNull property="filter">
+						 WHERE 1=1
+               				<isNotEmpty prepend="AND"  property="itemNo">
+               					item_no = #itemNo#
+               				</isNotEmpty>
+               				<isNotEmpty prepend="AND"  property="itemTitle">
+               					upper(item_title) = upper(#itemTitle#)
+               				</isNotEmpty>
+                    	</isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getQuoteMHItemInfoList" resultMap="GIPIQuoteMHItemResultMapGrid" parameterClass="java.util.HashMap">		
+	    SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (gipi_quote_item_pkg.get_gipi_quote_item(#quoteId#))
+		               <isNotNull property="filter">
+						 WHERE 1=1
+               				<isNotEmpty prepend="AND"  property="itemNo">
+               					item_no = #itemNo#
+               				</isNotEmpty>
+               				<isNotEmpty prepend="AND"  property="itemTitle">
+               					upper(item_title) = upper(#itemTitle#)
+               				</isNotEmpty>
+                    	</isNotNull>
+		                  <isEqual property="sortColumn" compareValue="itemNo">
+			              		ORDER BY ITEM_NO
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="itemTitle">
+			              		ORDER BY ITEM_TITLE
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="itemDesc itemDesc2">
+			              		ORDER BY item_desc || item_desc2
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (gipi_quote_item_pkg.get_gipi_quote_item(#quoteId#))
+		                  <isNotNull property="filter">
+						 WHERE 1=1
+               				<isNotEmpty prepend="AND"  property="itemNo">
+               					item_no = #itemNo#
+               				</isNotEmpty>
+               				<isNotEmpty prepend="AND"  property="itemTitle">
+               					upper(item_title) = upper(#itemTitle#)
+               				</isNotEmpty>
+                    	</isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getQuoteMCItemInfoList" resultMap="GIPIQuoteMCItemResultMapGrid" parameterClass="java.util.HashMap">		
+	    SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (gipi_quote_item_pkg.get_gipi_quote_item(#quoteId#))
+		               <isNotNull property="filter">
+						 WHERE 1=1
+               				<isNotEmpty prepend="AND"  property="itemNo">
+               					item_no = #itemNo#
+               				</isNotEmpty>
+               				<isNotEmpty prepend="AND"  property="itemTitle">
+               					upper(item_title) = upper(#itemTitle#)
+               				</isNotEmpty>
+                    	</isNotNull>
+		                  <isEqual property="sortColumn" compareValue="itemNo">
+			              		ORDER BY ITEM_NO
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="itemTitle">
+			              		ORDER BY ITEM_TITLE
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="itemDesc itemDesc2">
+			              		ORDER BY item_desc || item_desc2
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (gipi_quote_item_pkg.get_gipi_quote_item(#quoteId#))
+		                  <isNotNull property="filter">
+						 WHERE 1=1
+               				<isNotEmpty prepend="AND"  property="itemNo">
+               					item_no = #itemNo#
+               				</isNotEmpty>
+               				<isNotEmpty prepend="AND"  property="itemTitle">
+               					upper(item_title) = upper(#itemTitle#)
+               				</isNotEmpty>
+                    	</isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getQuoteMNItemInfoList" resultMap="GIPIQuoteMNItemResultMapGrid" parameterClass="java.util.HashMap">		
+	    SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (gipi_quote_item_pkg.get_gipi_quote_item(#quoteId#))
+		               <isNotNull property="filter">
+						 WHERE 1=1
+               				<isNotEmpty prepend="AND"  property="itemNo">
+               					item_no = #itemNo#
+               				</isNotEmpty>
+               				<isNotEmpty prepend="AND"  property="itemTitle">
+               					upper(item_title) = upper(#itemTitle#)
+               				</isNotEmpty>
+                    	</isNotNull>
+		                  <isEqual property="sortColumn" compareValue="itemNo">
+			              		ORDER BY ITEM_NO
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="itemTitle">
+			              		ORDER BY ITEM_TITLE
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="itemDesc itemDesc2">
+			              		ORDER BY item_desc || item_desc2
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (gipi_quote_item_pkg.get_gipi_quote_item(#quoteId#))
+		                  <isNotNull property="filter">
+						 WHERE 1=1
+               				<isNotEmpty prepend="AND"  property="itemNo">
+               					item_no = #itemNo#
+               				</isNotEmpty>
+               				<isNotEmpty prepend="AND"  property="itemTitle">
+               					upper(item_title) = upper(#itemTitle#)
+               				</isNotEmpty>
+                    	</isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="postCommitQuoteItem"	parameterClass="com.geniisys.quote.entity.GIPIQuoteItem">
+  		BEGIN
+  			giis_users_pkg.app_user := #appUser#;
+  			Gipi_Quote_Item_Pkg.post_commit_quote_item(#quoteId#,   #currencyCd#,   #currencyRate#);
+  		END;
+  	</procedure>
+  	
+  	<procedure id="setGiimm002Invoice"	parameterClass="com.geniisys.quote.entity.GIPIQuoteItem">
+  		BEGIN
+  			giis_users_pkg.app_user := #appUser#;
+  			set_giimm002_invoice(#quoteId#,   #itemNo#);
+  		END;
+  	</procedure>
+  	
+  	<procedure id="setGipiQuoteItem3"	parameterClass="com.geniisys.quote.entity.GIPIQuoteItem">
+  		BEGIN
+  			giis_users_pkg.app_user := #appUser#;
+  			Gipi_Quote_Item_Pkg.set_gipi_quote_item3(
+	  		#quoteId#,    #itemNo#,     #premAmt#,   #tsiAmt#,   #itemTitle#,   #itemDesc#,   
+	  		#itemDesc2#,  #currencyCd#,     #currencyRate#,	#coverageCd# ,  #packLineCd#,  
+	  		#packSublineCd#,  #dateFrom#,  #dateTo#);
+  		END;
+  	</procedure>
+  	
+  	<delete id="deleteQuoteItemAddl" parameterClass="java.util.HashMap">
+  		BEGIN
+			Gipi_Quote_Item_Pkg.del_quote_item_addl(#quoteId#, #itemNo#, #currencyCd#);
+		END;
+	</delete>
+	
+	<select id="getMaxQuoteItemNo" parameterClass="java.lang.Integer" resultClass="java.lang.Integer">
+		SELECT NVL(MAX(ITEM_NO),0)
+          FROM GIPI_QUOTE_ITEM
+        WHERE quote_id = #quoteId#
+	</select>
+ 	
+</sqlMap>

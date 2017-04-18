@@ -1,0 +1,16 @@
+DROP TRIGGER CPI.FIRE_OCCUPANCY_TBXIU;
+
+CREATE OR REPLACE TRIGGER CPI.FIRE_OCCUPANCY_TBXIU
+BEFORE INSERT OR UPDATE
+ON CPI.GIIS_FIRE_OCCUPANCY FOR EACH ROW
+DECLARE
+BEGIN
+  DECLARE
+    begin
+      :new.user_id     :=  NVL (giis_users_pkg.app_user, USER);
+      :new.last_update :=  sysdate;
+    end;
+END;
+/
+
+

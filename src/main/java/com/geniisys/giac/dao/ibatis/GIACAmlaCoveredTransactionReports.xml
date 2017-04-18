@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="amlaCoveredTransactionReports">
+
+	<typeAlias alias="GIACAmlaExt" type="com.geniisys.giac.entity.GIACAmlaExt"/>
+
+	<resultMap id="getAmlabranchMap" class="java.util.HashMap">
+		<result column="BRANCH_CD"			property="branchCd"/>
+		<result column="INST_CD"			property="instCd"/>
+		<result column="NEW_DATE"			property="newDate"/>
+	</resultMap>
+	
+	<resultMap id="getAmlaRecordMap" class="java.util.HashMap">
+		<result column="SEQ_NO"				property="seqNo"/>
+		<result column="BRANCH_CD"			property="branchCd"/>
+		<result column="TRAN_DATE"			property="tranDate"/>
+		<result column="TRAN_TYPE"			property="tranType"/>
+		<result column="REF_NO"				property="refNo"/>
+		<result column="CLIENT_TYPE"		property="clientType"/>
+		<result column="LOCAL_AMT"			property="localAmt"/>
+		<result column="FOREIGN_AMT"		property="foreignAmt"/>
+		<result column="CURRENCY_SNAME"		property="currencySname"/>
+		<result column="PAYOR_TYPE"			property="payorType"/>
+		<result column="CORPORATE_NAME"		property="corporateName"/>
+		<result column="LAST_NAME"			property="lastName"/>
+		<result column="FIRST_NAME"			property="firstName"/>
+		<result column="MIDDLE_NAME"		property="middleName"/>
+		<result column="ADDRESS1"			property="address1"/>
+		<result column="ADDRESS2"			property="address2"/>
+		<result column="ADDRESS3"			property="address3"/>
+		<result column="BIRTHDATE"			property="birthDate"/>
+		<result column="POLICY_NO"			property="policyNo"/>		<!--added by Mark C. 07132015 policyNo, expiryDate, effDate-->
+		<result column="EXPIRY_DATE"		property="expiryDate"/>
+		<result column="EFF_DATE"			property="effDate"/>
+		<result column="TSI_AMT"			property="tsiAmt"/> <!-- added by gab 04.08.2016 SR 21922 -->
+		<result column="FC_TSI_AMT"			property="fcTsiAmt"/> <!-- added by gab 04.26.2016 SR 21922 -->
+	</resultMap>
+	
+	<parameterMap id="insertAmlaExtMap" class="java.util.HashMap">
+		<parameter property="fromDate"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="toDate"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<!--<parameter property="tranType"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/> -->  <!-- removed by Mark C. 07142015, only collection transactions -->
+		<parameter property="userId"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="cnt"			jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="OUT"/>
+		<parameter property="totDetailAmt"	jdbcType="INTEGER"	javaType="java.math.BigDecimal"	mode="OUT"/>
+	</parameterMap>	
+	
+	<procedure id="insertAmlaExt" parameterMap="insertAmlaExtMap">
+		BEGIN
+			amla_covered_transaction_pkg.insert_amla_ext(?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<procedure id="deleteAmlaExt"	parameterClass="java.lang.String">
+		BEGIN
+			amla_covered_transaction_pkg.delete_amla_ext(#userId#);
+		END;
+	</procedure>
+	
+	<select id="getAmlabranch" parameterClass="java.lang.String" resultMap="getAmlabranchMap">
+		SELECT DISTINCT branch_cd, giacp.v('AMLA_INSTITUTION_CD') inst_cd, TO_CHAR(SYSDATE, 'yyyyMMdd') new_date
+		   <!-- FROM giac_alma_ext -->
+		   FROM giac_amla_ext <!-- edited by gab 04.07.2016 -->
+		  WHERE user_id = #userId#
+	   ORDER BY branch_cd ASC
+	</select>
+	
+	<select id="getAmlaRecords" parameterClass="java.util.HashMap" resultMap="getAmlaRecordMap">
+		SELECT * FROM TABLE(amla_covered_transaction_pkg.get_amla_details(#userId#, #branchCd#))
+	</select>
+	
+</sqlMap>

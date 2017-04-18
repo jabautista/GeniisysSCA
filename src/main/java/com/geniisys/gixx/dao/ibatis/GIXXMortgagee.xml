@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap>
+	<typeAlias alias="GIXXMortgagee" type="com.geniisys.gixx.entity.GIXXMortgagee" />
+	
+	<resultMap id="getGIXXItemMortgageesMap" class="GIXXMortgagee">
+		<result column="EXTRACT_ID"		property="extractId" />
+		<result column="ITEM_NO"		property="itemNo" />
+		<result column="ISS_CD"			property="issCd" />
+		<result column="MORTG_CD"		property="mortgCd" />
+		<result column="MORTG_NAME"		property="mortgName" />
+		<result column="AMOUNT"			property="amount" />
+		<result column="TOTAL_AMOUNT"	property="totalAmount" />
+		<result column="REMARKS"		property="remarks" />
+		<result column="DELETE_SW"		property="deleteSw" />
+		<result column="POLICY_ID"		property="policyId" />
+		<result column="DSP_ITEM_NO"	property="dspItemNo" />		
+		<result property="rowNum"			column="rownum_"/>
+		<result property="rowCount"			column="count_"/>
+	</resultMap>
+	
+	<select id="getGIXXMortgageeList" resultMap="getGIXXItemMortgageesMap" parameterClass="java.util.HashMap">
+		<!-- SELECT *       
+          FROM (SELECT rownum rownum_ , b.count_, a.*     
+                  FROM (SELECT * FROM TABLE(gixx_mortgagee_pkg.get_mortgagee_list(#extractId#))) a,
+	               	   (SELECT count(*) count_ FROM TABLE(gixx_mortgagee_pkg.get_mortgagee_list(#extractId#))) b)         
+	     WHERE rownum_ BETWEEN NVL(#from#,rownum_) AND NVL(#to#,rownum_) -->
+	     
+	     SELECT *
+            FROM (SELECT rownum rownum_,b.count_,a.*
+                    FROM (SELECT * FROM TABLE(gixx_mortgagee_pkg.get_mortgagee_list(#extractId#))
+	                  	 <isEqual property="sortColumn"	compareValue="itemNo">
+	                    	 	ORDER BY ITEM_NO
+	                    	 </isEqual>
+	                    	 <isEqual property="sortColumn" compareValue="mortgCd">
+	                    	 	ORDER BY MORTG_CD
+	                    	 </isEqual>
+	                    	 <isEqual property="sortColumn" compareValue="mortgName">
+	                    	 	ORDER BY MORTG_NAME
+	                    	 </isEqual>
+	                    	 <isEqual property="sortColumn" compareValue="amount">
+	                    	 	ORDER BY AMOUNT
+	                    	 </isEqual>             	                     	 
+				             <isNotNull property="sortColumn">
+				             	<isEqual property="ascDescFlg" compareValue="ASC">
+				          			ASC
+				          		</isEqual>
+				          		<isEqual property="ascDescFlg" compareValue="DESC">
+				          			DESC
+				          		</isEqual>
+				          	</isNotNull>	
+			          	   ) a,
+                          (SELECT count(*) count_ FROM TABLE(gixx_mortgagee_pkg.get_mortgagee_list(#extractId#))) b)
+ 		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGIXXItemMortgagees" resultMap="getGIXXItemMortgageesMap" parameterClass="java.util.HashMap">
+		SELECT *       
+          FROM (SELECT rownum rownum_ , b.count_, a.*     
+                  FROM (SELECT * FROM TABLE(gixx_mortgagee_pkg.get_item_mortgagee_info(#extractId#, #itemNo#))) a,
+	               	   (SELECT count(*) count_ FROM TABLE(gixx_mortgagee_pkg.get_item_mortgagee_info(#extractId#, #itemNo#))) b)         
+	     WHERE rownum_ BETWEEN NVL(#from#,rownum_) AND NVL(#to#,rownum_)
+	</select>
+</sqlMap>

@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIWPackLineSubline">
+
+	<typeAlias alias="GIPIWPackLineSublineClass" type="com.geniisys.gipi.pack.entity.GIPIWPackLineSubline"/>
+
+	<resultMap class="GIPIWPackLineSublineClass" id="GIPIWPackLineSublineResultMap">
+		<result property="packParId" 	column="PACK_PAR_ID"/>
+		<result property="parId" 		column="PAR_ID"/>
+		<result property="packLineCd" 	column="PACK_LINE_CD"/>
+		<result property="packSublineCd" column="PACK_SUBLINE_CD"/>
+		<result property="lineCd" 		column="LINE_CD"/>
+		<result property="itemTag"		column="ITEM_TAG"/>
+		<result property="remarks" 		column="REMARKS"/>
+		<result property="opFlag" 		column="OP_FLAG"/>
+		<result property="menuLineCd"	column="MENU_LINE_CD"/>
+	</resultMap>
+
+	<parameterMap class="map" id="updateGIPIWPackLineSublineEndtParamMap">
+		<parameter property="parId" 		jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="packLineCd"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN" />
+		<parameter property="packSublineCd"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN" />
+		<parameter property="packPolFlag"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN" />
+	</parameterMap>
+	
+	<resultMap class="com.geniisys.gipi.pack.entity.GIPIWPackLineSubline" id="GIPIWPackLineSublineMap">
+  		<result property="packLineCd" column="pack_line_cd"/>
+  		<result property="packLineName" column="pack_line_name"/>
+  		<result property="packSublineCd" column="pack_subline_cd"/>
+  		<result property="packSublineName" column="pack_subline_name"/>
+  	</resultMap>
+  	
+  	<resultMap class="GIPIWPackLineSublineClass" id="GIPIWPackLineSublineResultMap2">
+		<result property="packParId" 	column="PACK_PAR_ID"/>
+		<result property="parId" 		column="PAR_ID"/>
+		<result property="packLineCd" 	column="PACK_LINE_CD"/>
+		<result property="packLineName" 	column="PACK_LINE_NAME"/>
+		<result property="packSublineCd" column="PACK_SUBLINE_CD"/>
+		<result property="packSublineName" column="PACK_SUBLINE_Name"/>
+		<result property="itemTag"		column="ITEM_TAG"/>
+		<result property="remarks" 		column="REMARKS"/>
+	</resultMap>
+
+	<procedure id="createWPackLineSubline" parameterClass="java.util.HashMap">
+		BEGIN
+			Gipi_Wpack_Line_Subline_Pkg.create_wpack_line_subline(#parId#, #lineCd#);
+		END;
+	</procedure>
+	
+	<procedure id="updateGIPIWPackLineSublineEndt" parameterMap="updateGIPIWPackLineSublineEndtParamMap">
+		{CALL UPD_GIPI_WPACK_LINE_SUBLINE(?, ?, ?, ?)}
+	</procedure>
+
+	<procedure id="populatePackage" parameterClass="java.util.HashMap">
+		BEGIN
+			Gipi_Wpack_Line_Subline_Pkg.POPULATE_PACKAGE(#parId#, #lineCd#);
+		END;
+	</procedure>
+	
+	<procedure id="getGIPIWPackLineSublineListing" resultMap="GIPIWPackLineSublineResultMap">
+		SELECT * FROM TABLE(gipi_wpack_line_subline_pkg.get_gipi_wpack_line_subline3(#packParId#))
+	</procedure>	
+	
+	<!-- create by irwin -->
+	<select id="getGIPIWPackLineSublineList" resultMap="GIPIWPackLineSublineMap" parameterClass="String">
+  		SELECT *
+  			FROM TABLE (gipi_wpack_line_subline_pkg.get_line_subline (#lineCd#))
+  	</select>
+  	
+  	<select id="getGIPIWPackLineSublineList2" resultMap="GIPIWPackLineSublineResultMap2" parameterClass="Integer">
+  		SELECT * from table(gipi_wpack_line_subline_pkg.get_wpack_line_subline_list2(#packParId#))
+  	</select>
+  											 <!-- PPar = PackPar -->
+  	<select id="getGIPIWPackLineSublineListByPParId" resultMap="GIPIWPackLineSublineResultMap2" parameterClass="Integer">
+  		SELECT * from table(gipi_wpack_line_subline_pkg.get_wpack_line_subline_list(#packParId#))
+  	</select>
+	
+	<select id="getGIPIWpackLineSublineDspTag" parameterClass="map" resultClass="String">
+		SELECT gipi_wpack_line_subline_pkg.get_wpack_dsp_tag(#parId#,#packLineCd#,#packSublineCd#, #lineCd#) FROM dual
+	</select>
+	
+	<select id="getParlistParIdNextVal" resultClass="Integer">
+		SELECT  PARLIST_PAR_ID_S.NEXTVAL
+	    	FROM DUAL
+	</select>
+	
+	<select id="getGIPIWPackEndtLineSublineList" resultMap="GIPIWPackLineSublineMap" parameterClass="map">
+  		SELECT *
+  			FROM TABLE (gipi_wpack_line_subline_pkg.get_endt_line_subline (#lineCd#,#sublineCd#,#issCd#,#issueYy#,#polSeqNo#,#renewNo#))
+  	</select>
+	
+	<insert id="setGIPIWPackLineSubline" parameterClass="GIPIWPackLineSublineClass">
+		BEGIN
+			 gipi_wpack_line_subline_pkg.set_gipi_wpack_line_subline (
+			      #parId#,
+			      #packParId#,
+			      #lineCd#,
+			      #packLineCd#,
+			      #packSublineCd#,
+			      #itemTag#,
+			      #remarks#
+			   );
+		END;
+	</insert>
+	
+	<update id="preDelGIPIWPackLineSubline" parameterClass="map">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			UPDATE gipi_parlist
+			   SET par_status = 99
+			 WHERE par_id = #parId#; 
+		
+		END;
+		
+	</update>
+	
+	<delete id="delGIPIWPackLineSubline" parameterClass="GIPIWPackLineSublineClass">
+		BEGIN
+			gipi_wpack_line_subline_pkg.del_gipi_wpack_line_subline (
+			     #parId#,
+			     #lineCd#,
+			     #packLineCd#,
+				 #packSublineCd#
+			   );
+		END;
+	</delete>
+	
+	<procedure id="postInsertGIPIWLineSubline" parameterClass="map">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			gipi_wpack_line_subline_pkg.gipis093_post_insert(
+									#issCd#,
+									#packParId#,
+									#packLineCd#,
+									#parId#);
+		END;
+	</procedure>
+	
+	<procedure id="postInsertGIPIS0094" parameterClass="map">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			gipi_wpack_line_subline_pkg.gipis094_post_insert(#packParId#, #packLineCd#, #packSublineCd#, #parId#,
+															 #lineCd#,	#sublineCd#, #issCd#, #issueYy#, #polSeqNo#, #renewNo#);
+		END;
+	</procedure>
+	
+	<parameterMap class="map" id="checkIfExistGIPIWPackItemPerilMap">
+		<parameter property="parId" 		jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="packLineCd"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN" />
+		<parameter property="packSublineCd"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN" />
+		<parameter property="items"			jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="OUT" />
+		<parameter property="perils"		jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="OUT" />
+	</parameterMap>
+	
+	<procedure id="checkIfExistGIPIWPackItemPeril" parameterMap="checkIfExistGIPIWPackItemPerilMap">
+		{ CALL check_line_subline_item_peril(?, ?, ?, ?, ?) }
+	</procedure>
+	
+	<procedure id="GIPIWPackLineSublineDelPack" parameterClass="map">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			gipis093_del_pack(#parId#, #issCd#);
+		END;			
+	</procedure>
+	
+	<procedure id="GIPIWPackLineSublineKeyDelRec" parameterClass="map">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			gipis093_key_del_rec( #parId#,
+								   #lineCd#,
+								   #issCd#,
+								   #packLineCd#,
+								   #packSublineCd#,
+								   #hasPerils#);
+		END;
+	</procedure>
+	
+	<delete id="delGIPIWPackLineSublineByPackParId" parameterClass="java.lang.Integer">
+		BEGIN
+			gipi_wpack_line_subline_pkg.del_wpack_line_subline_by_id(#packParId#);
+		END;
+	</delete>
+	
+	<procedure id="postInsertPackLineSubline" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			gipi_wpack_line_subline_pkg.post_insert_pack_line_subline(#packParId#);
+		END;
+	</procedure>	
+	
+	<procedure id="giris005AlineSublinePostInsert" parameterClass="map">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			INSERT INTO GIPI_PARLIST(pack_par_id, par_id, line_cd, 
+	                     iss_cd, par_yy, quote_seq_no, 
+	                     par_type, assign_sw, par_status, 
+	                     assd_no, underwriter, remarks)
+	               VALUES(#packParId#, #parId#, #lineCd#, 
+	                      #issCd#, #parYy#, #quoteSeqNo#, 
+	                      #parType#, #assignSw#, #parStatus#, 
+	                      #assdNo#, #underWriter#, #remarks#);
+		END;
+	</procedure>
+	
+	<procedure id="giris005AlineSublinePostInsert2" parameterClass="map">
+		INSERT INTO GIRI_WINPOLBAS(accept_no, par_id, ri_cd, 
+              accept_date, ri_policy_no, ri_endt_no, 
+              ri_binder_no, writer_cd, offer_date, 
+              accept_by, orig_tsi_amt, orig_prem_amt, 
+              remarks, ref_accept_no, pack_par_id, pack_accept_no)
+      VALUES(#acceptNo#, #parId#, #riCd#, 
+              to_date(#acceptDate#, 'MM/DD/YYYY'), #riPolicyNo#, #riEndtNo#, 
+              #riBinderNo#, #writerCd#,to_date(#offerDate#, 'MM/DD/YYYY'), 
+              #acceptBy#, #origTsiAmt#, #origPremAmt#, 
+             #remarks#, #refAcceptNo#, #packParId#, #packAcceptNo#)
+	</procedure>
+	
+	<procedure id="cancellationUpdateAmounts" parameterClass="java.lang.Integer">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			gipi_wpack_line_subline_pkg.cancellation_update_amounts(#packParId#);
+		END;
+	</procedure>
+</sqlMap>

@@ -1,0 +1,355 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIACR186" pageWidth="1440" pageHeight="612" whenNoDataType="NoDataSection" columnWidth="1400" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="39a73d75-bce2-4efc-9ec7-94dc3aacae1b">
+	<property name="ireport.zoom" value="0.5266625086121627"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="P_BANK_CD" class="java.lang.String"/>
+	<parameter name="P_CLEARED" class="java.lang.String"/>
+	<parameter name="P_BANK_ACCT_CD" class="java.lang.String"/>
+	<parameter name="P_NULL" class="java.lang.String"/>
+	<parameter name="P_BRANCH_CD" class="java.lang.String"/>
+	<parameter name="P_FROM_DATE" class="java.lang.String"/>
+	<parameter name="P_TO_DATE" class="java.lang.String"/>
+	<parameter name="P_AS_OF_DATE" class="java.lang.String"/>
+	<parameter name="P_USER_ID" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[select a.*,
+       'From ' || TO_CHAR(TO_DATE($P{P_FROM_DATE}, 'mm-dd-yyyy'), 'fmMonth dd, yyyy') ||
+       ' to ' || TO_CHAR(TO_DATE($P{P_TO_DATE}, 'mm-dd-yyyy'), 'fmMonth dd, yyyy') v_from_to_date,
+       ' As of ' || TO_CHAR(TO_DATE($P{P_AS_OF_DATE}, 'mm-dd-yyyy'), 'fmMonth dd, yyyy') v_as_of_date
+  from table (cpi.GIACR186_PKG.populate_giacr186($P{P_BANK_CD},
+					     $P{P_CLEARED},
+					     $P{P_BANK_ACCT_CD},
+					     $P{P_NULL},
+					     $P{P_BRANCH_CD},
+					     TO_DATE($P{P_FROM_DATE}, 'mm-dd-yyyy'),
+					     TO_DATE($P{P_TO_DATE}, 'mm-dd-yyyy'),
+					     TO_DATE($P{P_AS_OF_DATE}, 'mm-dd-yyyy'),
+					     $P{P_USER_ID}
+		)) a
+ order by branch_name, bank_name, bank_acct_no, check_date, check_no]]>
+	</queryString>
+	<field name="COMPANY_NAME" class="java.lang.String"/>
+	<field name="COMPANY_ADDRESS" class="java.lang.String"/>
+	<field name="DATE_POSTED" class="java.sql.Timestamp"/>
+	<field name="BRANCH_CD" class="java.lang.String"/>
+	<field name="BRANCH_NAME" class="java.lang.String"/>
+	<field name="BANK_NAME" class="java.lang.String"/>
+	<field name="DV_NO" class="java.lang.String"/>
+	<field name="DV_PREFIX" class="java.lang.String"/>
+	<field name="DV_NO2" class="java.lang.String"/>
+	<field name="DV_DATE" class="java.sql.Timestamp"/>
+	<field name="CHECK_DATE" class="java.sql.Timestamp"/>
+	<field name="CHECK_AMOUNT" class="java.math.BigDecimal"/>
+	<field name="CHECK_NO" class="java.lang.String"/>
+	<field name="CHECK_PREFIX" class="java.lang.String"/>
+	<field name="CHECK_NO2" class="java.math.BigDecimal"/>
+	<field name="DATE_RELEASED" class="java.sql.Timestamp"/>
+	<field name="CLEARING_DATE" class="java.sql.Timestamp"/>
+	<field name="BANK_ACCT_NO" class="java.lang.String"/>
+	<field name="PAYEE" class="java.lang.String"/>
+	<field name="CHECK_STATUS" class="java.lang.String"/>
+	<field name="V_FROM_TO_DATE" class="java.lang.String"/>
+	<field name="V_AS_OF_DATE" class="java.lang.String"/>
+	<variable name="V_CNT_RELEASED_CHECKS_ACCOUNT" class="java.math.BigDecimal" resetType="Group" resetGroup="BANK_ACCT_NO" calculation="Count">
+		<variableExpression><![CDATA[$F{CHECK_NO}]]></variableExpression>
+	</variable>
+	<variable name="V_CNT_RELEASED_CHECKS_BANK" class="java.math.BigDecimal" resetType="Group" resetGroup="BANK" calculation="Count">
+		<variableExpression><![CDATA[$F{CHECK_NO}]]></variableExpression>
+	</variable>
+	<variable name="V_CNT_RELEASED_CHECKS_BRANCH" class="java.math.BigDecimal" resetType="Group" resetGroup="BRANCH" calculation="Count">
+		<variableExpression><![CDATA[$F{CHECK_NO}]]></variableExpression>
+	</variable>
+	<variable name="V_SUM_CHECKS_ACCOUNT" class="java.math.BigDecimal" resetType="Group" resetGroup="BANK_ACCT_NO" calculation="Sum">
+		<variableExpression><![CDATA[$F{CHECK_AMOUNT}]]></variableExpression>
+	</variable>
+	<variable name="V_SUM_CHECKS_BANK" class="java.math.BigDecimal" resetType="Group" resetGroup="BANK" calculation="Sum">
+		<variableExpression><![CDATA[$F{CHECK_AMOUNT}]]></variableExpression>
+	</variable>
+	<variable name="V_SUM_CHECKS_BRANCH" class="java.math.BigDecimal" resetType="Group" resetGroup="BRANCH" calculation="Sum">
+		<variableExpression><![CDATA[$F{CHECK_AMOUNT}]]></variableExpression>
+	</variable>
+	<variable name="V_SUM_CHECKS_TOTAL" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CHECK_AMOUNT}]]></variableExpression>
+	</variable>
+	<variable name="V_CNT_RELEASED_CHECKS_REPORT" class="java.math.BigDecimal" calculation="Count">
+		<variableExpression><![CDATA[$F{CHECK_NO}]]></variableExpression>
+	</variable>
+	<group name="BRANCH" isStartNewPage="true">
+		<groupExpression><![CDATA[$F{BRANCH_NAME}]]></groupExpression>
+	</group>
+	<group name="BANK" isStartNewPage="true">
+		<groupExpression><![CDATA[$F{BANK_NAME}]]></groupExpression>
+	</group>
+	<group name="ACCOUNT">
+		<groupExpression><![CDATA[$F{COMPANY_NAME}]]></groupExpression>
+	</group>
+	<group name="BANK_ACCT_NO">
+		<groupExpression><![CDATA[$F{BANK_ACCT_NO}]]></groupExpression>
+	</group>
+	<title>
+		<band height="11">
+			<staticText>
+				<reportElement x="338" y="0" width="412" height="11" isRemoveLineWhenBlank="true" uuid="ddc759fb-cf60-4765-8481-be78bf7d8ffc">
+					<printWhenExpression><![CDATA[$F{BRANCH_NAME} != null]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[Payee Name]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="750" y="0" width="60" height="11" isRemoveLineWhenBlank="true" uuid="e473989c-a049-49f0-b520-98155b1b6bef">
+					<printWhenExpression><![CDATA[$F{BRANCH_NAME} != null]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[Posting Date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1196" y="0" width="60" height="11" isRemoveLineWhenBlank="true" uuid="5dfc84d5-c3a2-402a-9111-f5618c0fd21a">
+					<printWhenExpression><![CDATA[$F{BRANCH_NAME} != null]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[Check Amount]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1256" y="0" width="60" height="11" isRemoveLineWhenBlank="true" uuid="d6a6ff66-082d-4abd-8887-e7118c5123e4">
+					<printWhenExpression><![CDATA[$F{BRANCH_NAME} != null]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[Release Date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1316" y="0" width="60" height="11" isRemoveLineWhenBlank="true" uuid="224db7e0-bd75-4385-92ec-134d39de9b24">
+					<printWhenExpression><![CDATA[$F{BRANCH_NAME} != null]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[Clearing Date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="810" y="0" width="60" height="11" isRemoveLineWhenBlank="true" uuid="32fdcf89-c3b3-4d98-a23d-829c2fa6c08d">
+					<printWhenExpression><![CDATA[$F{BRANCH_NAME} != null]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[DV Date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="978" y="0" width="55" height="11" isRemoveLineWhenBlank="true" uuid="c92b7023-6947-40e1-9cae-87443a87c1bb">
+					<printWhenExpression><![CDATA[$F{BRANCH_NAME} != null]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[Check Date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1141" y="0" width="55" height="11" isRemoveLineWhenBlank="true" uuid="103eb4c7-967e-43f4-ad37-13cac2a981a0">
+					<printWhenExpression><![CDATA[$F{BRANCH_NAME} != null]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[Check Status]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="0" width="44" height="11" isRemoveLineWhenBlank="true" uuid="87f329a8-47b4-45b4-af11-b4e95487faf2">
+					<printWhenExpression><![CDATA[$F{BRANCH_NAME} != null]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[Branch Code]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="44" y="0" width="98" height="11" isRemoveLineWhenBlank="true" uuid="39e2d9cc-2963-473c-9863-520872c3dbbe">
+					<printWhenExpression><![CDATA[$F{BRANCH_NAME} != null]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[Branch Name]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="142" y="0" width="98" height="11" isRemoveLineWhenBlank="true" uuid="ddeec3ca-73f2-4b4a-adb8-7de7766a6147">
+					<printWhenExpression><![CDATA[$F{BRANCH_NAME} != null]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[Bank Name]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="240" y="0" width="98" height="11" isRemoveLineWhenBlank="true" uuid="bbf16f1b-ba4d-4000-b547-890badbb2ca0">
+					<printWhenExpression><![CDATA[$F{BRANCH_NAME} != null]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[Bank Account No.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="870" y="0" width="54" height="11" isRemoveLineWhenBlank="true" uuid="f2d74cef-0285-478c-9342-1e6be67bfd94">
+					<printWhenExpression><![CDATA[$F{BRANCH_NAME} != null]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[DV Prefix]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="924" y="0" width="54" height="11" isRemoveLineWhenBlank="true" uuid="23866e43-e737-44ad-be64-f9ea7e863a44">
+					<printWhenExpression><![CDATA[$F{BRANCH_NAME} != null]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[DV No.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1033" y="0" width="54" height="11" isRemoveLineWhenBlank="true" uuid="d2c3d789-6f09-44ed-9470-02b3d1bf229a">
+					<printWhenExpression><![CDATA[$F{BRANCH_NAME} != null]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[Check Prefix]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1087" y="0" width="54" height="11" isRemoveLineWhenBlank="true" uuid="1a48b774-a082-44a5-ace2-0356689714ab">
+					<printWhenExpression><![CDATA[$F{BRANCH_NAME} != null]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[Check No.]]></text>
+			</staticText>
+		</band>
+	</title>
+	<detail>
+		<band height="11">
+			<printWhenExpression><![CDATA[$F{BRANCH_NAME} != null]]></printWhenExpression>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="338" y="0" width="412" height="11" uuid="7736b8a5-77b2-41ec-9716-8e594ba6ffba"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PAYEE}]]></textFieldExpression>
+			</textField>
+			<textField pattern="MM-dd-yyyy" isBlankWhenNull="true">
+				<reportElement x="810" y="0" width="60" height="11" uuid="2b77070a-7ced-4455-8b95-060935e6ddbb"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DV_DATE}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="MM-dd-yyyy" isBlankWhenNull="true">
+				<reportElement x="750" y="0" width="60" height="11" uuid="9f46e870-8991-42aa-84e2-c638648e93f3"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DATE_POSTED}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement x="1196" y="0" width="60" height="11" uuid="aaee01e8-e1f7-4972-be8e-134cd99e797f"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CHECK_AMOUNT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="MM-dd-yyyy" isBlankWhenNull="true">
+				<reportElement x="1256" y="0" width="60" height="11" uuid="824c1fa1-8f8e-4106-86f5-e8fbbe6fd7ca"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DATE_RELEASED}]]></textFieldExpression>
+			</textField>
+			<textField pattern="MM-dd-yyyy" isBlankWhenNull="true">
+				<reportElement x="1316" y="0" width="60" height="11" uuid="daf07034-dcba-42e0-ae27-0f47c58fc9dc"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CLEARING_DATE}]]></textFieldExpression>
+			</textField>
+			<textField pattern="MM-dd-yyyy" isBlankWhenNull="true">
+				<reportElement x="978" y="0" width="55" height="11" uuid="50b1bf10-08d5-41c7-9ed6-266e8dcffc28"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CHECK_DATE}]]></textFieldExpression>
+			</textField>
+			<textField pattern="MM-dd-yyyy" isBlankWhenNull="true">
+				<reportElement x="1141" y="0" width="55" height="11" uuid="5b40fc98-f33f-41a9-a459-3d2335fdcbdc"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CHECK_STATUS}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="0" y="0" width="44" height="11" uuid="4705107a-664c-4276-9e62-7f8d043fcb52"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{BRANCH_CD}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="44" y="0" width="98" height="11" uuid="a09b1f83-289a-4575-891e-17ddd80bbe0d"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{BRANCH_NAME}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="142" y="0" width="98" height="11" uuid="69ec2079-75c8-4890-b09f-2f2a17ebd272"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{BANK_NAME}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="240" y="0" width="98" height="11" uuid="fe14983a-f7b0-47da-a93d-05160cbb846f"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{BANK_ACCT_NO}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="870" y="0" width="54" height="11" uuid="038746c0-742a-4650-91bf-ef1b1acb51d4"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DV_PREFIX}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="924" y="0" width="54" height="11" uuid="9665dee6-8e21-420c-aa3c-7c6a32758ec1"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DV_NO2}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="1087" y="0" width="54" height="11" uuid="f81abb82-f249-4a82-9eff-d12efd8bc50d"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CHECK_NO2}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="1033" y="0" width="54" height="11" uuid="2f6615f8-2190-4ab8-9df7-761944cd5f21"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CHECK_PREFIX}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISBondClassClause">
+	
+	<typeAlias alias="giisBondClassClause" type="com.geniisys.common.entity.GIISBondClassClause"/>
+  	
+	<resultMap class="giisBondClassClause" id="giisBondClassClauseListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="clause_type"     property="clauseType"/>
+		<result column="clause_desc"  property="clauseDesc"/>
+		<result column="user_id"     property="userId"/>
+		<result column="last_update" property="lastUpdate"/>
+		<result column="remarks"     property="remarks"/>
+	</resultMap>
+	
+	<select id="getGiiss099RecList" resultMap="giisBondClassClauseListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss099_pkg.get_rec_list(#clauseType#, #clauseDesc#))
+		                  <isEqual property="sortColumn" compareValue="clauseType">
+			              		ORDER BY clause_type
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="clauseDesc">
+			              		ORDER BY clause_desc
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss099_pkg.get_rec_list(#clauseType#, #clauseDesc#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setBondClassClause" parameterClass="giisBondClassClause">
+	    DECLARE
+	    	v_rec giis_bond_class_clause%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.clause_type := #clauseType#;
+ 			v_rec.clause_desc := #clauseDesc#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			giiss099_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteBondClassClause" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss099_pkg.val_del_rec(#recId#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddBondClassClause" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss099_pkg.val_add_rec(#recId#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delBondClassClause" parameterClass="java.lang.String">
+		BEGIN
+ 			giiss099_pkg.del_rec(#clauseType#);
+ 		END;
+ 	</delete>
+</sqlMap>

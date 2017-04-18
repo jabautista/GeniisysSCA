@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISTyphoonZone">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIISLineSublineCoveragesClass" type="com.geniisys.common.entity.GIISLineSublineCoverages"/>
+		
+	<resultMap class="java.util.HashMap" id="GIISLineCoveragesResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="lineCd" 				column="line_cd"/>
+		<result property="lineName" 			column="line_name"/>						
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="GIISLineSublineCoveragesResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="lineCd" 				column="line_cd"/>
+		<result property="packLineCd" 			column="pack_line_cd"/>		
+		<result property="packSublineCd" 		column="pack_subline_cd"/>	
+		<result property="requiredFlag" 		column="required_flag"/>	
+		<result property="userId" 				column="user_id"/>	
+		<result property="lastUpdate" 			column="last_update"/>		
+		<result property="remarks" 				column="remarks"/>	
+		<result property="packLineName" 		column="pack_line_name"/>		
+		<result property="packSublineName" 		column="pack_subline_name"/>				
+	</resultMap> 
+	
+	<resultMap class="java.util.HashMap" id="GIISPkgLineCvrgLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="packLineCd" 		column="pack_line_cd"/>
+		<result property="packLineName" 	column="pack_line_name"/>			
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="GIISPkgSublineCvrgLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="packSublineCd" 		column="pack_subline_cd"/>
+		<result property="packSublineName" 	column="pack_subline_name"/>			
+	</resultMap>
+				
+	<select id="showPackageLineCoverage" resultMap="GIISLineCoveragesResultMap">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+						 b.count_, 
+						 a.*
+					FROM (SELECT *
+							FROM TABLE (GIISS096_PKG.show_pkg_line_cvrg(#userId#))		
+							<isNotNull property="filter">
+								WHERE 1 = 1 
+									<isNotEmpty prepend="AND" property="lineCd">
+										UPPER(line_cd) LIKE UPPER(#lineCd#)
+									</isNotEmpty>
+	 								<isNotEmpty prepend="AND" property="lineName">
+										UPPER(line_name) LIKE UPPER(#lineName#)
+									</isNotEmpty>																																								
+							</isNotNull>					
+							<isEqual property="sortColumn" compareValue="lineCd">
+								ORDER BY line_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="lineName">
+								ORDER BY line_name
+							</isEqual>												
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>
+						) a,
+						(SELECT count(*) count_
+						   FROM TABLE (GIISS096_PKG.show_pkg_line_cvrg(#userId#))						 		
+							<isNotNull property="filter">
+								WHERE 1 = 1 
+									<isNotEmpty prepend="AND" property="lineCd">
+										UPPER(line_cd) LIKE UPPER(#lineCd#)
+									</isNotEmpty>
+	 								<isNotEmpty prepend="AND" property="lineName">
+										UPPER(line_name) LIKE UPPER(#lineName#)
+									</isNotEmpty>																																								
+							</isNotNull>								  
+						   ) b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select>	
+	
+	<select id="showPackageLineSublineCoverage" resultMap="GIISLineSublineCoveragesResultMap">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+						 b.count_, 
+						 a.*
+					FROM (SELECT *
+							FROM TABLE (GIISS096_PKG.show_pkg_line_subline_cvrg(#lineCd#,#userId#))		
+							<isNotNull property="filter">
+								WHERE 1 = 1 
+									<isNotEmpty prepend="AND" property="requiredFlag">
+										UPPER(required_flag) LIKE UPPER(#requiredFlag#)
+									</isNotEmpty>
+	 								<isNotEmpty prepend="AND" property="packLineCd">
+										UPPER(pack_line_cd) LIKE UPPER(#packLineCd#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="packLineName">
+										UPPER(pack_line_name) LIKE UPPER(#packLineName#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="packSublineCd">
+										UPPER(pack_subline_cd) LIKE UPPER(#packSublineCd#)
+									</isNotEmpty>	
+									<isNotEmpty prepend="AND" property="packSublineName">
+										UPPER(pack_subline_name) LIKE UPPER(#packSublineName#)
+									</isNotEmpty>																															
+							</isNotNull>					
+							<isEqual property="sortColumn" compareValue="requiredFlag">
+								ORDER BY required_flag
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="packLineCd">
+								ORDER BY pack_line_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="packLineName">
+								ORDER BY pack_line_name
+							</isEqual>	
+							<isEqual property="sortColumn" compareValue="packSublineCd">
+								ORDER BY pack_subline_cd
+							</isEqual>	
+							<isEqual property="sortColumn" compareValue="packSublineName">
+								ORDER BY pack_subline_name
+							</isEqual>													
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>
+						) a,
+						(SELECT count(*) count_
+						   FROM TABLE (GIISS096_PKG.show_pkg_line_subline_cvrg(#lineCd#,#userId#))						 		
+							<isNotNull property="filter">
+								WHERE 1 = 1 
+									<isNotEmpty prepend="AND" property="requiredFlag">
+										UPPER(required_flag) LIKE UPPER(#requiredFlag#)
+									</isNotEmpty>
+	 								<isNotEmpty prepend="AND" property="packLineCd">
+										UPPER(pack_line_cd) LIKE UPPER(#packLineCd#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="packLineName">
+										UPPER(pack_line_name) LIKE UPPER(#packLineName#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="packSublineCd">
+										UPPER(pack_subline_cd) LIKE UPPER(#packSublineCd#)
+									</isNotEmpty>	
+									<isNotEmpty prepend="AND" property="packSublineName">
+										UPPER(pack_subline_name) LIKE UPPER(#packSublineName#)
+									</isNotEmpty>																															
+							</isNotNull>							  
+						   ) b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select>	
+	
+	<select id="getPkgLineCvrgLOV" resultMap="GIISPkgLineCvrgLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIISS096_PKG.get_pkg_line_cvrg_lov(#userId#))		                 
+		                  	<isNull property="findText">
+				                 WHERE UPPER(pack_line_cd) LIKE UPPER(#searchString#)
+				                 OR UPPER(pack_line_name) LIKE UPPER(#searchString#)					                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(pack_line_cd) LIKE UPPER(#findText#)
+				                 OR UPPER(pack_line_name) LIKE UPPER(#findText#)				  				         		
+			             	</isNotNull>		             
+			              	<isEqual property="sortColumn" compareValue="packLineCd">
+			              		ORDER BY pack_line_cd
+			              	</isEqual>	
+			              	<isEqual property="sortColumn" compareValue="packLineName">
+			              		ORDER BY pack_line_name
+			              	</isEqual>			              		                      
+			          	  	<isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	</isNotNull>
+		                  ) a, 
+		               (SELECT count (*) count_ 
+		                  FROM TABLE(GIISS096_PKG.get_pkg_line_cvrg_lov(#userId#))		                 
+		                  	<isNull property="findText">
+				                 WHERE UPPER(pack_line_cd) LIKE UPPER(#searchString#)
+				                 OR UPPER(pack_line_name) LIKE UPPER(#searchString#)					                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(pack_line_cd) LIKE UPPER(#findText#)
+				                 OR UPPER(pack_line_name) LIKE UPPER(#findText#)				  				         		
+			             	</isNotNull>		
+			             	) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>	
+	
+	<select id="getPkgSublineCvrgLOV" resultMap="GIISPkgSublineCvrgLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIISS096_PKG.get_pkg_subline_cvrg_lov(#packLineCd#))		                 
+		                  	<isNull property="findText">
+				                 WHERE UPPER(pack_subline_cd) LIKE UPPER(#searchString#)
+				                 OR UPPER(pack_subline_name) LIKE UPPER(#searchString#)				                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(pack_subline_cd) LIKE UPPER(#findText#)
+				                 OR UPPER(pack_subline_name) LIKE UPPER(#findText#)				  				         		
+			             	</isNotNull>		             
+			              	<isEqual property="sortColumn" compareValue="packSublineCd">
+			              		ORDER BY pack_subline_cd
+			              	</isEqual>	
+			              	<isEqual property="sortColumn" compareValue="packSublineName">
+			              		ORDER BY pack_subline_name
+			              	</isEqual>			              		                      
+			          	  	<isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	</isNotNull>
+		                  ) a, 
+		               (SELECT count (*) count_ 
+		                  FROM TABLE(GIISS096_PKG.get_pkg_subline_cvrg_lov(#packLineCd#))		                 
+		                  	<isNull property="findText">
+				                 WHERE UPPER(pack_subline_cd) LIKE UPPER(#searchString#)
+				                 OR UPPER(pack_subline_name) LIKE UPPER(#searchString#)					                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(pack_subline_cd) LIKE UPPER(#findText#)
+				                 OR UPPER(pack_subline_name) LIKE UPPER(#findText#)				  				         		
+			             	</isNotNull>	
+			             	) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>	
+	
+	<insert id="setPkgLineSublineCvrg" parameterClass="GIISLineSublineCoveragesClass">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;						
+			GIISS096_PKG.set_pkg_line_subline_cvrg(
+				#lineCd#, #packLineCd#,
+				#packSublineCd#,#requiredFlag#,
+				#remarks#);
+		END;	
+	</insert>	
+	
+	<delete id="deleteInPkgLineSublineCvrg" parameterClass="GIISLineSublineCoveragesClass">
+		BEGIN
+			GIISS096_PKG.dlt_in_pkg_line_subline_cvrg(#lineCd#, #packLineCd#,
+				#packSublineCd#);
+		END;
+	</delete>
+	
+	<procedure id="valDeleteRecPkgLineSubline" parameterClass="java.util.HashMap">
+	    BEGIN
+ 			GIISS096_PKG.val_del_rec(#lineCd#,#packLineCd#,#packSublineCd#);
+ 		END;
+ 	</procedure>	
+ 	
+ 	<procedure id="valAddRecPkgLineSubline" parameterClass="java.util.HashMap">
+	    BEGIN
+ 			GIISS096_PKG.val_add_rec(#lineCd#,#packLineCd#,#packSublineCd#);
+ 		END;
+ 	</procedure>
+</sqlMap>

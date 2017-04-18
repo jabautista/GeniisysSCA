@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISCoverage">
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="giisCoverage" type="com.geniisys.common.entity.GIISCoverage"/>
+	
+	<resultMap class="giisCoverage" id="giisCoverageListResultMap" extends="BaseEntity.TableGridResultMap">
+	    <result column="COVERAGE_CD" 			property="coverageCd"/>
+		<result column="COVERAGE_DESC" 			property="coverageDesc"/>
+		<result column="REMARKS" 				property="remarks"/>
+		<result column="CPI_REC_NO" 			property="cpiRecNo"/>
+		<result column="CPI_BRANCH_CD" 			property="cpiBranchCd"/>
+		<result column="LINE_CD" 				property="lineCd"/>
+		<result column="line_name" 				property="lineName"/>
+		<result column="SUBLINE_CD" 			property="sublineCd"/>
+		<result column="subline_name" 			property="sublineName"/>
+		<result column="user_id"     			property="userId"/>
+		<result column="last_update" 			property="lastUpdate"/>
+		<result column="remarks"     			property="remarks"/>
+	</resultMap>
+
+	<resultMap id="giisCoverageResultMap" class="com.geniisys.common.entity.GIISCoverage" extends="BaseEntity.TableGridResultMap">
+		<result column="COVERAGE_CD" 			property="coverageCd"/>
+		<result column="COVERAGE_DESC" 			property="coverageDesc"/>
+		<result column="REMARKS" 				property="remarks"/>
+		<result column="CPI_REC_NO" 			property="cpiRecNo"/>
+		<result column="CPI_BRANCH_CD" 			property="cpiBranchCd"/>
+		<result column="LINE_CD" 				property="lineCd"/>
+		<result column="SUBLINE_CD" 			property="sublineCd"/>
+		<result column="user_id"     			property="userId"/>
+		<result column="last_update" 			property="lastUpdate"/>
+		<result column="remarks"     			property="remarks"/>
+	</resultMap>
+	
+	<resultMap id="giisCoverageLOVMap" class="com.geniisys.common.entity.GIISCoverage" extends="BaseEntity.TableGridResultMap">
+		<result column="COVERAGE_CD" 			property="coverageCd"/>
+		<result column="COVERAGE_DESC" 			property="coverageDesc"/>
+	</resultMap>
+	
+	<select id="getGiisCoverageLOV" resultMap="giisCoverageLOVMap">
+  		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIIS_COVERAGE_PKG.get_coverage2_list())              
+			          	  <isNotNull property="searchString">
+		             	  	<isNotNull property="findText">
+			                  WHERE UPPER(coverage_cd) LIKE UPPER(#findText#)
+		                  	     OR UPPER(coverage_desc) LIKE UPPER(#findText#)
+			             	</isNotNull>
+		                 	<isNull property="findText">
+		                 	  WHERE UPPER(coverage_cd) LIKE UPPER(NVL(#searchString#, coverage_cd))
+		                  	     OR UPPER(coverage_desc) LIKE UPPER(NVL(#searchString#, coverage_desc))
+		                 	</isNull>
+		             	  </isNotNull>
+			          	  <isNotNull property="sortColumn">
+				          	  <isEqual property="sortColumn" compareValue="coverageCd">
+				              		ORDER BY coverage_cd
+				              </isEqual>
+			                  <isEqual property="sortColumn" compareValue="coverageDesc">
+				              		ORDER BY coverage_desc
+				              </isEqual>	
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GIIS_COVERAGE_PKG.get_coverage2_list())
+		                  <isNotNull property="searchString">
+		             	  	<isNotNull property="findText">
+			                  WHERE UPPER(coverage_cd) LIKE UPPER(#findText#)
+		                  	     OR UPPER(coverage_desc) LIKE UPPER(#findText#)
+			             	</isNotNull>
+		                 	<isNull property="findText">
+		                 	  WHERE UPPER(coverage_cd) LIKE UPPER(NVL(#searchString#, coverage_cd))
+		                  	     OR UPPER(coverage_desc) LIKE UPPER(NVL(#searchString#, coverage_desc))
+		                 	</isNull>
+		             	  </isNotNull>
+		             	  <isNull property="searchString">
+		             	  	<isNotNull property="findText">
+			                  WHERE ( UPPER(coverage_cd) LIKE UPPER(#findText#) 
+			                  		  OR UPPER(coverage_desc) LIKE UPPER(#findText#))
+			             	 </isNotNull>
+		             	  </isNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+	
+	<select id="getGiiss113RecList" resultMap="giisCoverageListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss113_pkg.get_rec_list(#coverageCd#, #coverageDesc#, #lineCd#, #sublineCd#))
+		                  <isEqual property="sortColumn" compareValue="coverageCd">
+			              		ORDER BY coverage_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="coverageDesc">
+			              		ORDER BY coverage_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="lineCd">
+			              		ORDER BY line_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="sublineCd">
+			              		ORDER BY subline_cd
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss113_pkg.get_rec_list(#coverageCd#, #coverageDesc#, #lineCd#, #sublineCd#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<select id="getAllCoverageDescList" resultMap="giisCoverageListResultMap">
+	    SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss113_pkg.get_all_coverage_desc)) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss113_pkg.get_all_coverage_desc)) b)
+	</select>
+	
+	<procedure id="valAddCoverage" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss113_pkg.val_add_rec(#coverageDesc#);
+ 		END;
+ 	</procedure> 
+ 	
+	<procedure id="valDelCoverage" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss113_pkg.val_del_rec(#coverageCd#);
+ 		END;
+ 	</procedure>
+ 	
+	<procedure id="setCoverage" parameterClass="giisCoverage">
+	    DECLARE
+	    	v_rec giis_coverage%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.coverage_cd := #coverageCd#;
+ 			v_rec.coverage_desc := #coverageDesc#;
+ 			v_rec.line_cd := #lineCd#;
+ 			v_rec.subline_cd := #sublineCd#;
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			giiss113_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+	<delete id="delCoverage" parameterClass="giisCoverage">
+		BEGIN
+ 			giiss113_pkg.del_rec(#coverageCd#);
+ 		END;
+ 	</delete>
+ 	
+	<resultMap id="getGiiss113LineCdLovMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+	  	<result column="line_cd"			property="lineCd"/>
+	  	<result column="line_name"			property="lineName"/>
+	  	<result column="rownum_" 			property="rowNum" />
+		<result column="count_"				property="rowCount" />
+  	</resultMap>
+ 	
+	<select id="getGiiss113LineCd" resultMap="getGiiss113LineCdLovMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+					   b.count_, 
+					   a.* 
+				  FROM (SELECT * 
+						  FROM TABLE (giiss113_pkg.get_line_lov(#userId#, #findText#))
+						  <isEqual property="sortColumn" compareValue="lineCd">
+								ORDER BY line_cd
+						  </isEqual>
+						  <isEqual property="sortColumn" compareValue="lineName">
+								ORDER BY line_name
+						  </isEqual>
+						  <isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+						  </isNotNull>
+						  ) a, 
+					   (SELECT count(*) count_ 
+						  FROM TABLE (giiss113_pkg.get_line_lov(#userId#, #findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap id="getGiiss113SublineCdLovMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+	  	<result column="subline_cd"				property="sublineCd"/>
+	  	<result column="subline_name"			property="sublineName"/>
+	  	<result column="rownum_" 				property="rowNum" />
+		<result column="count_"					property="rowCount" />
+  	</resultMap>
+  	
+	<select id="getGiiss113SublineCd" resultMap="getGiiss113SublineCdLovMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+					   b.count_, 
+					   a.* 
+				  FROM (SELECT * 
+						  FROM TABLE (giiss113_pkg.get_subline_lov(#userId#, #findText#, #lineCd#))
+						  <isEqual property="sortColumn" compareValue="sublineCd">
+								ORDER BY subline_cd
+						  </isEqual>
+						  <isEqual property="sortColumn" compareValue="sublineName">
+								ORDER BY subline_name
+						  </isEqual>
+						  <isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+						  </isNotNull>
+						  ) a, 
+					   (SELECT count(*) count_ 
+						  FROM TABLE (giiss113_pkg.get_subline_lov(#userId#, #findText#, #lineCd#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+</sqlMap>

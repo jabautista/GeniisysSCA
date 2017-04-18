@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISMotorType">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIISMotorType" type="com.geniisys.common.entity.GIISMotorType"/>
+	
+	<resultMap class="GIISMotorType" id="GIISMotorTypeMap" extends="BaseEntity.TableGridResultMap">
+		<result property="typeCd" column="type_cd"/>
+		<result property="motorTypeDesc" column="motor_type_desc"/>
+		<result property="unladenWt" column="unladen_wt"/>
+		<result property="sublineCd" column="subline_cd"/>
+	</resultMap>
+	
+	<resultMap class="GIISMotorType" id="GIISMotorTypeResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="typeCd" 			column="type_cd"/>
+		<result property="motorTypeDesc" 	column="motor_type_desc"/>	
+		<result property="unladenWt" 		column="unladen_wt"/>	
+		<result property="sublineCd" 		column="subline_cd"/>
+		<result property="motorTypeRate" 	column="motor_type_rate"/>
+		<result property="remarks" 			column="remarks"/>
+		<result property="userId" 			column="user_id"/>
+		<result property="lastUpdate" 		column="last_update"/>
+	</resultMap>
+	
+	<select id="getMotorTypeLOV" resultMap="GIISMotorTypeMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(Giis_Motortype_Pkg.get_motortype_list(#sublineCd#, #findText#))
+						   <isNull property="sortColumn">
+							ORDER BY type_Cd ASC
+						  </isNull>
+						  <isNotNull property="sortColumn">			
+							<isEqual property="sortColumn" compareValue="typeCd">
+								ORDER BY type_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="motorTypeDesc">
+								ORDER BY motor_type_desc
+							</isEqual>							
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(Giis_Motortype_Pkg.get_motortype_list(#sublineCd#, #findText#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getMotorType" resultMap="GIISMotorTypeResultMap">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+						 b.count_, 
+						 a.*
+					FROM (SELECT *
+							FROM TABLE (GIISS055_PKG.get_motor_type(#sublineCd#))		
+							<isNotNull property="filter">
+								WHERE 1 = 1 									
+	 								<isNotEmpty prepend="AND" property="typeCd">
+										type_cd = #typeCd#
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="motorTypeDesc">
+										UPPER(motor_type_desc) LIKE UPPER(#motorTypeDesc#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="unladenWt">
+										UPPER(unladen_wt) LIKE UPPER(#unladenWt#)
+									</isNotEmpty>																																							
+							</isNotNull>					
+							<isEqual property="sortColumn" compareValue="typeCd">
+								ORDER BY type_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="motorTypeDesc">
+								ORDER BY motor_type_desc
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="unladenWt">
+								ORDER BY unladen_wt
+							</isEqual>																				
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>
+						) a,
+						(SELECT count(*) count_
+						   FROM TABLE (GIISS055_PKG.get_motor_type(#sublineCd#))						 		
+							<isNotNull property="filter">
+								WHERE 1 = 1 									
+	 								<isNotEmpty prepend="AND" property="typeCd">
+										type_cd = #typeCd#
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="motorTypeDesc">
+										UPPER(motor_type_desc) LIKE UPPER(#motorTypeDesc#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="unladenWt">
+										UPPER(unladen_wt) LIKE UPPER(#unladenWt#)
+									</isNotEmpty>																																							
+							</isNotNull>								  
+						   ) b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select>	
+	
+	<select id="validateGIISS055MotorType" resultClass="java.lang.String">
+		SELECT GIISS055_PKG.validate_giiss055_motor_type(#typeCd#,#sublineCd#)FROM dual							
+	</select>
+	
+	<select id="chkDeleteGIISS055MotorType" resultClass="java.lang.String">
+		SELECT GIISS055_PKG.chk_delete_giiss055_motor_type(#typeCd#,#sublineCd#)FROM dual							
+	</select>
+	
+	<insert id="setMotorType" parameterClass="GIISMotorType">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;						
+			GIISS055_PKG.set_motor_type(
+				#sublineCd#, #typeCd#,
+				#motorTypeDesc#,#unladenWt#,
+				#remarks#);
+		END;	
+	</insert>	
+	
+	<delete id="deleteInMotorType" parameterClass="GIISMotorType">
+		BEGIN
+			GIISS055_PKG.delete_in_motor_type(#sublineCd#,#typeCd#);
+		END;
+	</delete>
+</sqlMap>

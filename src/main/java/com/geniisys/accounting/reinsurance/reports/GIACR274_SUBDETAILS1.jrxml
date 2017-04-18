@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIACR274_SUBDETAILS" language="groovy" printOrder="Horizontal" pageWidth="280" pageHeight="250" columnWidth="280" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="3.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="S_LEFT" isDefault="true" hAlign="Left" isBlankWhenNull="true" fontName="Arial" fontSize="7">
+		<pen lineWidth="0.75" lineStyle="Dashed"/>
+	</style>
+	<style name="S_TITLE" isDefault="false" hAlign="Center" isBlankWhenNull="true" fontName="Arial" fontSize="7"/>
+	<style name="S_RIGHT" isDefault="false" hAlign="Right" isBlankWhenNull="true" fontName="Arial" fontSize="7"/>
+	<style name="S_NUMBER" isDefault="false" hAlign="Right" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true" fontName="Arial" fontSize="7"/>
+	<parameter name="P_ISS_CD" class="java.lang.String"/>
+	<parameter name="P_LINE_CD" class="java.lang.String"/>
+	<parameter name="P_USER_ID" class="java.lang.String"/>
+	<parameter name="P_DIST_NO" class="java.math.BigDecimal"/>
+	<parameter name="P_POLICY_ID" class="java.math.BigDecimal"/>
+	<queryString>
+		<![CDATA[SELECT * FROM TABLE (giacr274_pkg.populate_giacr274_DETAILS(
+$P{P_ISS_CD},
+$P{P_LINE_CD},
+$P{P_USER_ID},
+$P{P_POLICY_ID},
+$P{P_DIST_NO}
+))]]>
+	</queryString>
+	<field name="DIST_NO" class="java.math.BigDecimal"/>
+	<field name="BINDER_NO" class="java.lang.String"/>
+	<field name="RI_NAME" class="java.lang.String"/>
+	<field name="PREM_AMT" class="java.math.BigDecimal"/>
+	<field name="COMM_AMT" class="java.math.BigDecimal"/>
+	<field name="POLICY_ID" class="java.math.BigDecimal"/>
+	<field name="PAID_AMT" class="java.math.BigDecimal"/>
+	<variable name="V_P_PREM" class="java.math.BigDecimal" resetType="Group" resetGroup="GRP_POL" calculation="Sum">
+		<variableExpression><![CDATA[$F{PREM_AMT}]]></variableExpression>
+	</variable>
+	<variable name="V_P_COMM" class="java.math.BigDecimal" resetType="Group" resetGroup="GRP_POL" calculation="Sum">
+		<variableExpression><![CDATA[$F{COMM_AMT}]]></variableExpression>
+	</variable>
+	<variable name="V_P_PAID" class="java.math.BigDecimal" resetType="Group" resetGroup="GRP_POL" calculation="Sum">
+		<variableExpression><![CDATA[$F{PAID_AMT}]]></variableExpression>
+	</variable>
+	<group name="GRP_POL">
+		<groupExpression><![CDATA[$F{POLICY_ID}]]></groupExpression>
+		<groupFooter>
+			<band height="16">
+				<frame>
+					<reportElement positionType="Float" x="126" y="0" width="154" height="16"/>
+					<textField>
+						<reportElement style="S_NUMBER" x="0" y="5" width="50" height="11"/>
+						<textElement/>
+						<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_P_PREM}]]></textFieldExpression>
+					</textField>
+					<line>
+						<reportElement x="4" y="1" width="48" height="1"/>
+					</line>
+					<line>
+						<reportElement x="56" y="1" width="48" height="1"/>
+					</line>
+					<textField>
+						<reportElement style="S_NUMBER" x="52" y="5" width="50" height="11"/>
+						<textElement/>
+						<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_P_COMM}]]></textFieldExpression>
+					</textField>
+					<line>
+						<reportElement x="106" y="1" width="48" height="1"/>
+					</line>
+					<textField isStretchWithOverflow="true">
+						<reportElement style="S_NUMBER" x="104" y="5" width="50" height="11"/>
+						<textElement/>
+						<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_P_PAID}]]></textFieldExpression>
+					</textField>
+				</frame>
+			</band>
+		</groupFooter>
+	</group>
+	<detail>
+		<band height="11">
+			<textField isStretchWithOverflow="true">
+				<reportElement style="S_NUMBER" positionType="Float" x="230" y="0" width="50" height="11"/>
+				<textElement/>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{PAID_AMT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement style="S_NUMBER" positionType="Float" x="178" y="0" width="50" height="11"/>
+				<textElement/>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{COMM_AMT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement style="S_NUMBER" positionType="Float" x="126" y="0" width="50" height="11"/>
+				<textElement/>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{PREM_AMT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement style="S_LEFT" positionType="Float" x="90" y="0" width="36" height="11"/>
+				<textElement/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{RI_NAME}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement style="S_RIGHT" positionType="Float" isPrintRepeatedValues="false" x="0" y="0" width="38" height="11" isRemoveLineWhenBlank="true"/>
+				<textElement/>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{DIST_NO}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="40" y="0" width="50" height="11"/>
+				<textElement/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{BINDER_NO}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

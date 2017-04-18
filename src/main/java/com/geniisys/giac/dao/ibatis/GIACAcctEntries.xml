@@ -1,0 +1,539 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIACAcctEntries">
+	
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<resultMap id="GIACAcctEntriesResultMap" class="com.geniisys.giac.entity.GIACAcctEntries">
+		<result property="gaccTranId" 			column="gacc_tran_id" />
+		<result property="gaccGfunFundCd" 		column="gacc_gfun_fund_cd" />
+		<result property="gaccGibrBranchCd" 	column="gacc_gibr_branch_cd" />
+		<result property="acctEntryId" 			column="acct_entry_id" />
+		<result property="glAcctId" 			column="gl_acct_id" />
+		<result property="glAcctCategory" 		column="gl_acct_category" />
+		<result property="glControlAcct" 		column="gl_control_acct" />
+		<result property="glSubAcct1" 			column="gl_sub_acct_1" />
+		<result property="glSubAcct2" 			column="gl_sub_acct_2" />
+		<result property="glSubAcct3" 			column="gl_sub_acct_3" />
+		<result property="glSubAcct4" 			column="gl_sub_acct_4" />
+		<result property="glSubAcct5" 			column="gl_sub_acct_5" />
+		<result property="glSubAcct6" 			column="gl_sub_acct_6" />
+		<result property="glSubAcct7" 			column="gl_sub_acct_7" />
+		<result property="slCd" 				column="sl_cd" />
+		<result property="debitAmt" 			column="debit_amt" />
+		<result property="creditAmt" 			column="credit_amt" />
+		<result property="generationType" 		column="generation_type" />
+		<result property="slTypeCd" 			column="sl_type_cd" />
+		<result property="slSourceCd" 			column="sl_source_cd" />
+		<result property="remarks" 				column="remarks" />
+		<result property="cpiRecNo" 			column="cpi_rec_no" />
+		<result property="cpiBranchCd" 			column="cpi_branch_cd" />
+		<result property="sapText" 				column="sap_text" />
+		<result property="glAcctName"			column="gl_acct_name" />
+		<result property="slName"				column="sl_name" />
+		
+	</resultMap>
+	
+	<resultMap id="GIACAcctEntriesResultMap2" class="java.util.HashMap" extends="GIACAcctEntriesResultMap">
+		<result column="rownum_" 		property="rowNum" />
+		<result column="count_"			property="rowCount"/>
+		<result column="acct_code" 		property="acctCode" />
+		<result column="total_debit_amt" 	property="totalDebitAmt" />
+		<result column="total_credit_amt" 	property="totalCreditAmt" />
+		<result column="ledger_cd" 			property="ledgerCd" />		<!-- start - Gzelle 11102015 KB#132 AP/AR ENH -->
+		<result column="subledger_cd" 		property="subLedgerCd" />
+		<result column="transaction_cd" 	property="transactionCd" />
+		<result column="acct_seq_no" 		property="acctSeqNo" />
+		<result column="acct_tran_type" 	property="acctTranType" />	
+		<result column="acct_ref_no"		property="acctRefNo" />
+		<result column="dr_cr_tag" 			property="drCrTag" /> 		<!-- end -  Gzelle 11102015 KB#132 AP/AR ENH -->
+	</resultMap>
+	
+	<parameterMap class="map" id="aegParametersMap">
+		<parameter property="appUser"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="gaccBranchCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="gaccFundCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="gaccTranId"		jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="IN"/>
+		<parameter property="moduleName"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="depFlag"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="b140IssCd"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="b140PremSeqNo"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="message"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="aegParameters2Map">
+		<parameter property="appUser" 	 jdbcType="INTEGER"		javaType="java.lang.Integer" 	mode="IN"/>
+		<parameter property="aegTranId" 	 jdbcType="INTEGER"		javaType="java.lang.Integer" 	mode="IN"/>
+        <parameter property="aegModuleNm"    jdbcType="VARCHAR"		javaType="java.lang.String"     mode="IN"/>
+        <parameter property="aegSlTypeCd1"   jdbcType="VARCHAR"		javaType="java.lang.String"     mode="IN"/>    
+        <parameter property="aegSlTypeCd2"   jdbcType="VARCHAR"		javaType="java.lang.String"     mode="IN"/>
+        <parameter property="genType"        jdbcType="VARCHAR"		javaType="java.lang.String"     mode="IN"/>
+        <parameter property="moduleId"       jdbcType="INTEGER"		javaType="java.math.BigDecimal"    mode="IN"/>
+        <parameter property="gaccBranchCd"   jdbcType="VARCHAR"		javaType="java.lang.String"     mode="IN"/>
+        <parameter property="gaccFundCd"     jdbcType="VARCHAR"		javaType="java.lang.String"     mode="IN"/>
+        <parameter property="userId"         jdbcType="VARCHAR"		javaType="java.lang.String"     mode="IN"/>
+        <parameter property="vMsgAlert"      jdbcType="VARCHAR"		javaType="java.lang.String" 	mode="OUT"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="aegDeleteAcctEntriesYMap">
+		<parameter property="appUser" jdbcType="VARCHAR" javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="gaccTranId" jdbcType="INTEGER" 	javaType="java.lang.Integer" 	mode="IN"/>
+		<parameter property="moduleName" jdbcType="VARCHAR" javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="moduleId" 	 jdbcType="VARCHAR" javaType="java.lang.Integer" 	mode="OUT"/>
+		<parameter property="genType" 	 jdbcType="VARCHAR" javaType="java.lang.String" 	mode="OUT"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="genAcctEntrNMap">
+		<parameter property="appUser" jdbcType="VARCHAR" javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="moduleName" jdbcType="VARCHAR" javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="tranType"   jdbcType="INTEGER" javaType="java.lang.Integer" 	mode="IN"/>
+		<parameter property="issCd" 	 jdbcType="VARCHAR" javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="premSeqNo"  jdbcType="INTEGER" javaType="java.lang.Integer" 	mode="IN"/>
+		<parameter property="branchCd" 	 jdbcType="VARCHAR" javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="fundCd" 	 jdbcType="VARCHAR" javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="gaccTranId" jdbcType="INTEGER" javaType="java.lang.Integer" 	mode="IN"/>
+		<parameter property="itemNo" 	 jdbcType="INTEGER" javaType="java.lang.Integer" 	mode="OUT"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="genAcctEntrYMap">
+		<parameter property="appUser" jdbcType="VARCHAR" javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="gaccTranId" jdbcType="INTEGER" javaType="java.lang.Integer" 	mode="IN"/>
+		<parameter property="moduleName" jdbcType="VARCHAR" javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="itemNo" 	 jdbcType="INTEGER" javaType="java.lang.Integer" 	mode="OUT"/>
+		<parameter property="branchCd" 	 jdbcType="VARCHAR" javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="fundCd" 	 jdbcType="VARCHAR" javaType="java.lang.String" 	mode="IN"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="aegParametersGiacs012Map">
+		<parameter property="appUser"	jdbcType="VARCHAR"	javaType="java.lang.String"  	mode="IN"/>
+		<parameter property="gaccGibrBranchCd"	jdbcType="VARCHAR"	javaType="java.lang.String"  	mode="IN"/>
+		<parameter property="gaccGfunFundCd"	jdbcType="VARCHAR"	javaType="java.lang.String"	 	mode="IN"/>
+		<parameter property="gaccTranId"		jdbcType="INTEGER"	javaType="java.lang.Integer" 	mode="IN"/>
+		<parameter property="collnAmt"			jdbcType="INTEGER"	javaType="java.math.BigDecimal"	mode="IN"/>
+		<parameter property="itemNo"			jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="IN"/>
+		<parameter property="moduleName"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="message"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="aegParametersGIACS001Map">
+		<parameter property="userId"			jdbcType="VARCHAR"	javaType="java.lang.String"  	mode="IN"/>
+		<parameter property="gaccTranId"		jdbcType="INTEGER"	javaType="java.lang.Integer" 	mode="IN"/>
+		<parameter property="branchCd"			jdbcType="VARCHAR"	javaType="java.lang.String"  	mode="IN"/>
+		<parameter property="fundCd"			jdbcType="VARCHAR"	javaType="java.lang.String"	 	mode="IN"/>
+		<parameter property="moduleName"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="slCd"				jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="slTypeCd"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="message"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="aegParametersGIACS019Map">
+		<parameter property="appUser"			jdbcType="VARCHAR"	javaType="java.lang.String"  	mode="IN"/>
+		<parameter property="gaccTranId"		jdbcType="INTEGER"	javaType="java.lang.Integer" 	mode="IN"/>
+		<parameter property="moduleName"		jdbcType="VARCHAR"	javaType="java.lang.String"  	mode="IN"/>
+		<parameter property="branchCd"			jdbcType="VARCHAR"	javaType="java.lang.String"  	mode="IN"/>
+		<parameter property="fundCd"			jdbcType="VARCHAR"	javaType="java.lang.String"	 	mode="IN"/>
+		<parameter property="message"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="INOUT"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="checkManualAcctEntryMap">
+		<parameter property="gaccTranId"		jdbcType="INTEGER"  javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="userId"			jdbcType="VARCHAR" 	javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="transMesg"			jdbcType="VARCHAR" 	javaType="java.lang.String" 	mode="OUT"/>
+		<parameter property="userValid"			jdbcType="VARCHAR" 	javaType="java.lang.String" 	mode="OUT"/>
+		<parameter property="allowManual"		jdbcType="VARCHAR" 	javaType="java.lang.String"		mode="OUT"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="closeDCBGIACS035Map">
+		<parameter property="moduleName"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="tranId"		jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="branchCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="fundCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="itemNo"		jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="pdcExists"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="userId"		jdbcType="VARCHAR"		javaType="java.lang.String" 	mode="IN" />
+		<parameter property="mesg"	        jdbcType="VARCHAR"		javaType="java.lang.String" 	mode="OUT" />
+	</parameterMap>
+	
+	<parameterMap class="map" id="aegParametersGiacs042Map"> <!-- dren 08.03.2015 : SR 0017729 - Adding Acct Entries - Start -->
+		<parameter property="appUser"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="gaccBranchCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="gaccFundCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="gaccTranId"		jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="IN"/>
+		<parameter property="moduleName"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="message"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+	</parameterMap>	
+	
+	<procedure id="aegParametersGiacs042"	parameterMap="aegParametersGiacs042Map">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			GIAC_ACCT_ENTRIES_PKG.AEG_PARAMETERS_GIACS042(?, ?, ?, ?, ?);
+		END;
+	</procedure>	<!-- dren 08.03.2015 : SR 0017729 - Adding Acct Entries - End -->
+
+	<procedure id="aegParameters"	parameterMap="aegParametersMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			GIAC_ACCT_ENTRIES_PKG.aeg_parameters(?, ?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<procedure id="aegParameters2"  parameterMap="aegParameters2Map">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			GIAC_ACCT_ENTRIES_PKG.aeg_parameters2(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<!--Created by Tonio for GIACS007 Sept 22, 2010  -->
+	<procedure id="aegDeleteAcctEntriesY" parameterMap="aegDeleteAcctEntriesYMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			GIAC_ACCT_ENTRIES_PKG.aeg_delete_acct_entries_y(?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<procedure id="genAcctEntrY" parameterMap="genAcctEntrYMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			giac_acct_entries_pkg.gen_acct_entr_y(?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<procedure id="genAcctEntrN" parameterMap="genAcctEntrNMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			giac_acct_entries_pkg.gen_acct_entr_n(?, ?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	<!-- END -->
+	
+	<!-- added by steven 05.17.2013 -->
+	<select id="getGiacAcctEntries2" resultMap="GIACAcctEntriesResultMap" parameterClass="java.util.HashMap">  
+		SELECT * FROM TABLE(GIAC_ACCT_ENTRIES_PKG.get_acct_entries(#gaccTranId#))
+	</select>
+	
+	<!--Created by D.Alcantara for GIACS030 Dec 1, 2010  -->
+	<!--Modified by Christian Santos : For new Table grid : 05.31.2012 -->
+	<select id="getGiacAcctEntries" resultMap="GIACAcctEntriesResultMap2" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		       		   b.count_, 
+		       		   a.*,
+		       		   (SELECT SUM(debit_amt) 
+				          FROM TABLE(GIAC_ACCT_ENTRIES_PKG.get_acct_entries(#gaccTranId#))) total_debit_amt,
+				       (SELECT SUM(credit_amt) 
+				          FROM TABLE(GIAC_ACCT_ENTRIES_PKG.get_acct_entries(#gaccTranId#))) total_credit_amt
+				  FROM (SELECT * 
+				          FROM TABLE(GIAC_ACCT_ENTRIES_PKG.get_acct_entries(#gaccTranId#))
+						<dynamic prepend="WHERE ">
+					  		  	<isNotNull property="glAcctName" prepend="AND">
+					  		  		gl_acct_name LIKE UPPER(#glAcctName#)
+					  		  	</isNotNull>
+					  		  	<isNotNull property="slName" prepend="AND">
+					  		  		sl_name LIKE UPPER(#slName#)
+					  		  	</isNotNull>
+					  		  	<isNotNull property="debitAmt" prepend="AND">
+					  		  		debit_amt LIKE #debitAmt#
+					  		  	</isNotNull>
+					  		  	<isNotNull property="creditAmt" prepend="AND">
+					  		  		credit_amt LIKE #creditAmt#
+					  		  	</isNotNull>
+					  		  	<isNotNull property="acctCode" prepend="AND">
+									acct_code LIKE #acctCode#
+					  		  	</isNotNull>
+					  	</dynamic>
+						<!-- <isEqual property="sortColumn" compareValue="glAcctCategory glControlAcct glSubAcct1 glSubAcct2 glSubAcct3 glSubAcct4 glSubAcct5 glSubAcct6 glSubAcct7">
+			          		ORDER BY gl_acct_category
+			          		 <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_control_acct
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_1
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_2
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_3
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_4
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_5
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_6
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_7
+			          	</isEqual>  -->
+			          	<isEqual property="sortColumn" compareValue="acctCode">
+			          		ORDER BY acct_code
+			          	</isEqual> 	
+			          	<isEqual property="sortColumn" compareValue="glAcctName">
+			          		ORDER BY gl_acct_name
+			          	</isEqual> 			          	
+			          	<isEqual property="sortColumn" compareValue="slName">
+			          		ORDER BY sl_name
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="debitAmt">
+			          		ORDER BY debit_amt
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="creditAmt">
+			          		ORDER BY credit_amt
+			          	</isEqual>
+			          	<isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	</isNotNull>				          
+				          ) a,
+		          (SELECT count(*) count_ 
+		                  FROM TABLE (GIAC_ACCT_ENTRIES_PKG.get_acct_entries(#gaccTranId#))
+		                  ) b)
+		WHERE rownum_ BETWEEN #from# AND #to#
+		          
+	</select>
+	
+	<select id="getNewAcctEntryId" resultClass="java.lang.Integer" parameterClass="java.lang.Integer">
+		<!-- SELECT GIAC_ACCT_ENTRIES_PKG.generate_acct_entry_id(#gaccTranId#) FROM DUAL -->
+		SELECT (NVL(MAX(acct_entry_id), 0) + 1) nextAcct 
+        	FROM giac_acct_entries
+        WHERE gacc_tran_id = #gaccTranId#
+	</select>
+	
+	<procedure id="delAcctEntry" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			GIAC_ACCT_ENTRIES_PKG.delete_acct_entry(#gaccTranId#, #acctEntryId#);
+		END;
+	</procedure>
+	
+	<procedure id="saveAcctEntry" parameterClass="com.geniisys.giac.entity.GIACAcctEntries">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			GIAC_ACCT_ENTRIES_PKG.save_acct_entry(
+				#gaccTranId#, #gaccGfunFundCd#, #gaccGibrBranchCd#, #acctEntryId#, 
+				#glAcctId#, #glAcctCategory#, #glControlAcct#, #glSubAcct1#, 
+				#glSubAcct2#, #glSubAcct3#, #glSubAcct4#, #glSubAcct5#, #glSubAcct6#,
+				#glSubAcct7#, #slCd#, #debitAmt#, #creditAmt#, #generationType#,
+				#slTypeCd#, #slSourceCd#, #remarks#, #sapText#, #userId#, #acctRefNo#, #acctTranType#);	<!--  #acctRefNo#, #acctTranType#- Gzelle 11102015 KB#132 AP/AR ENH -->
+		END;
+	</procedure>
+	
+	<procedure id="updateSeqNoGIACS030" parameterClass="com.geniisys.giac.entity.GIACAcctEntries">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			UPDATE_SEQ_NO(#glAcctId#, #gaccGfunFundCd#, #gaccGibrBranchCd#, #gaccTranId#);
+		END;
+	</procedure>
+	
+	<!-- Nica 12.23.2010 for GIACS012 -->
+	<procedure id="aegParametersGIACS012"	parameterMap="aegParametersGiacs012Map">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			
+			GIAC_ACCT_ENTRIES_PKG.aeg_parameters_giacs012(?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<procedure id="updateSeqNoCMDMGIACS030" parameterClass="com.geniisys.giac.entity.GIACAcctEntries">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			UPDATE_SEQ_NO_CM_DM(#glAcctId#, #gaccGfunFundCd#, #gaccGibrBranchCd#, #gaccTranId#);
+		END;
+	</procedure>
+	<!-- END -->
+	
+	<procedure id="aegParametersGIACS001" parameterMap="aegParametersGIACS001Map" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			GIAC_ACCT_ENTRIES_PKG.aeg_parameters_giacs001(?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<insert id="aegParametersGIACS019" parameterMap="aegParametersGIACS019Map">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			GIAC_ACCT_ENTRIES_PKG.aeg_parameters_giacs019(?, ?, ?, ?, ?);
+		END;
+	</insert>
+	
+	<procedure id="checkManualAcctEntry" parameterMap="checkManualAcctEntryMap">
+		{CALL CHECK_MANUAL_ACCT_ENTRY(?, ?, ?, ?, ?)}
+	</procedure>
+	
+	<procedure id="balanceEntriesGIACS035" parameterMap="closeDCBGIACS035Map">
+		BEGIN
+			GIAC_ACCT_ENTRIES_PKG.aeg_balancing_entries_giacs035(?, ?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<resultMap id="getGIACS086AcctEntriesTableGridMap" class="java.util.HashMap">
+		<result property="glAcctCategory" 	column="GL_ACCT_CATEGORY"/>
+		<result property="glControlAcct" 	column="GL_CONTROL_ACCT"/>
+		<result property="glSubAcct1" 		column="GL_SUB_ACCT_1"/>
+		<result property="glSubAcct2" 		column="GL_SUB_ACCT_2"/>
+		<result property="glSubAcct3" 		column="GL_SUB_ACCT_3"/>
+		<result property="glSubAcct4" 		column="GL_SUB_ACCT_4"/>
+		<result property="glSubAcct5" 		column="GL_SUB_ACCT_5"/>
+		<result property="glSubAcct6" 		column="GL_SUB_ACCT_6"/>
+		<result property="glSubAcct7" 		column="GL_SUB_ACCT_7"/>
+		<result property="slCd" 		 		column="SL_CD"/>
+		<result property="debitAmt" 	 		column="DEBIT_AMT"/>
+		<result property="creditAmt"  		column="CREDIT_AMT"/>
+		<result property="dspGlAcctName" 		column="DSP_GL_ACCT_NAME"/>
+		<result property="dspSlName" 		column="dsp_sl_name"/>
+		<result property="glAcctCd" 			column="DSP_GL_ACCT_CODE"/>
+		<result property="rowNum"				column="ROWNUM_"/>
+		<result property="rowCount"				column="COUNT_"	/>
+	</resultMap>
+	
+	<select id="getGIACS086AcctEntriesTableGrid" resultMap="getGIACS086AcctEntriesTableGridMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*
+		          FROM (SELECT * 
+		                  FROM TABLE (giac_acct_entries_pkg.get_giacs086_acct_entries(#tranId#, #glAcctCategory#, #glControlAcct#, #glSubAcct1#, #glSubAcct2#, #glSubAcct3#, #glSubAcct4#, #glSubAcct15#, #glSubAcct6#, #glSubAcct7#, #slCd#, #debitAmt#, #creditAmt#))
+			            <isEqual property="sortColumn" compareValue="glAcctCd">
+		              		ORDER BY dsp_gl_acct_code
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="slCd">
+		              		ORDER BY sl_cd
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="debitAmt">
+		              		ORDER BY debit_amt
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="creditAmt">
+		              		ORDER BY credit_amt
+			            </isEqual>
+			            <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	</isNotNull>) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giac_acct_entries_pkg.get_giacs086_acct_entries(#tranId#, #glAcctCategory#, #glControlAcct#, #glSubAcct1#, #glSubAcct2#, #glSubAcct3#, #glSubAcct4#, #glSubAcct15#, #glSubAcct6#, #glSubAcct7#, #slCd#, #debitAmt#, #creditAmt#))) b)
+		WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="insUpdAcctEntriesGICLS055" parameterClass="map">
+		BEGIN
+			giac_acct_entries_pkg.Ins_Updt_Acct_Entries_gicls055(#recoveryAcctId#, #acctTranId#, #varFundCd#, #varBranchCd#, #userId#);
+		END;
+	</procedure>
+	
+	<procedure id="gicls032AegInsUpdtGiacAcctEntries">
+		BEGIN
+			gicls032_aeg_ins_giac_acct_ent(#claimId#, #adviceId#, #issCd#, #userId#, #tranId#, #payeeCd#, #payeeClassCd#);
+		END;
+	</procedure>
+	
+	<procedure id="aegParametersGIACS026"	parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			AEG_PARAMETERS_GIACS026(#gaccBranchCd#, #gaccFundCd#, #gaccTranId#, #depFlag#, #b140IssCd#, #b140PremSeqNo#);
+		END;
+	</procedure>
+	
+	<select id="getGIACS016SumAcctEntriesTableGrid" resultMap="getGIACS086AcctEntriesTableGridMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*
+		          FROM (SELECT * 
+		                  FROM TABLE (giac_acct_entries_pkg.get_giacs016_sum_acct_entries(#replenishId#, #glAcctCategory#, #glControlAcct#, #glSubAcct1#, #glSubAcct2#, #glSubAcct3#, #glSubAcct4#, #glSubAcct15#, #glSubAcct6#, #glSubAcct7#, #slCd#, #debitAmt#, #creditAmt#))
+			            <isEqual property="sortColumn" compareValue="glAcctCd">
+		              		ORDER BY dsp_gl_acct_code
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="slCd">
+		              		ORDER BY sl_cd
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="debitAmt">
+		              		ORDER BY debit_amt
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="creditAmt">
+		              		ORDER BY credit_amt
+			            </isEqual>
+			            <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	</isNotNull>) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giac_acct_entries_pkg.get_giacs016_sum_acct_entries(#replenishId#, #glAcctCategory#, #glControlAcct#, #glSubAcct1#, #glSubAcct2#, #glSubAcct3#, #glSubAcct4#, #glSubAcct15#, #glSubAcct6#, #glSubAcct7#, #slCd#, #debitAmt#, #creditAmt#))) b)
+		WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="checkGIACS060GLTrans" resultClass="java.lang.String">
+		SELECT giac_acct_entries_pkg.check_giacs060_gl_trans(#branchCd#, #fundCd#, #category#, #control#,
+			#sub1#, #sub2#, #sub3#, #sub4#, #sub5#, #sub6#, #sub7#, #tranClass#, #slCd#, #slTypeCd#, #tranPost#, #fromDate#, #toDate#)
+		  FROM DUAL
+	</select>
+	
+</sqlMap>

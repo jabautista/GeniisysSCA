@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIWCasualtyPersonnel">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIPIWCasualtyPersonnel" type="com.geniisys.gipi.entity.GIPIWCasualtyPersonnel"/>
+	
+	<resultMap class="GIPIWCasualtyPersonnel" id="GipiWCasualtyPersonnelMap">
+		<result column="par_id" 			property="parId"/>
+		<result column="item_no" 			property="itemNo"/>
+		<result column="personnel_no" 		property="personnelNo"/>
+		<result column="name" 				property="personnelName"/>
+		<result column="include_tag" 		property="includeTag"/>
+		<result column="capacity_cd" 		property="capacityCd"/>
+		<result column="amount_covered" 	property="amountCovered"/>
+		<result column="remarks" 			property="remarks"/>
+		<result column="delete_sw" 			property="deleteSw"/>
+		<result column="capacity_desc" 		property="capacityDesc"/>
+	</resultMap>
+	
+	<resultMap class="GIPIWCasualtyPersonnel" id="CasualtyPersonnelTableGridResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="par_id" 			property="parId"/>
+		<result column="item_no" 			property="itemNo"/>
+		<result column="personnel_no" 		property="personnelNo"/>
+		<result column="name" 				property="personnelName"/>
+		<result column="include_tag" 		property="includeTag"/>
+		<result column="capacity_cd" 		property="capacityCd"/>
+		<result column="amount_covered" 	property="amountCovered"/>
+		<result column="remarks" 			property="remarks"/>
+		<result column="delete_sw" 			property="deleteSw"/>
+		<result column="capacity_desc" 		property="capacityDesc"/>
+	</resultMap>
+	
+	<parameterMap class="map" id="getCasualtyPersonnelDetailsParamMap">
+		<parameter property="parId"			jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="itemNo"		jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="personnelNo"	jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="name"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT" />
+		<parameter property="remarks"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT" />
+		<parameter property="capacityCd"	jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="OUT" />
+		<parameter property="amountCovered"	jdbcType="NUMERIC"	javaType="java.math.BigDecimal"	mode="OUT" />
+	</parameterMap>
+	
+	<procedure id="getGipiWCasualtyPersonnel" resultMap="GipiWCasualtyPersonnelMap">
+		SELECT *
+		  FROM TABLE(GIPI_WCASUALTY_PERSONNEL_PKG.get_gipi_wcasualty_personnels(#parId#))
+	</procedure>
+	
+	<procedure id="getCasualtyPersonnelForPackPolicyItems" resultMap="GipiWCasualtyPersonnelMap">
+		SELECT * FROM TABLE(GIPI_WCASUALTY_PERSONNEL_PKG.get_gipi_wcas_prsnnel_pack_pol(#parId#, #itemNo#))
+	</procedure>
+	
+	<select id="getGIPIWCasualtyPersonnelTableGrid" resultMap="CasualtyPersonnelTableGridResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(gipi_wcasualty_personnel_pkg.get_gipi_wcas_pers_tg(#parId#, #itemNo#, #name#, #capacityDesc#, #remarks#))
+						  <isNull property="sortColumn">
+							ORDER BY personnel_no ASC
+						  </isNull>
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="personnelNo"> <!-- changed by robert 09232013 compareValue="groupedItemNo"> -->
+								ORDER BY personnel_no
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="capacityDesc"> <!-- changed by robert 09232013 compareProperty="capacityDesc"> -->
+								ORDER BY capacity_desc
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="personnelName"> <!-- changed by robert 09232013 compareValue="name"> -->
+								ORDER BY name
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="amountCovered">
+								ORDER BY amount_covered
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="remarks">
+								ORDER BY remarks
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(gipi_wcasualty_personnel_pkg.get_gipi_wcas_pers_tg(#parId#, #itemNo#, #name#, #capacityDesc#, #remarks#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<insert id="setGipiWCasualtyPersonnel" parameterClass="com.geniisys.gipi.entity.GIPIWCasualtyPersonnel">
+		BEGIN
+			GIPI_WCASUALTY_PERSONNEL_PKG.set_gipi_wcasualty_personnels(
+					#parId#,#itemNo#,#personnelNo#,#personnelName#,
+					#includeTag#,#capacityCd#,#amountCovered#,#remarks#);
+		END;
+	</insert>
+	
+	<procedure id="delGIPIWCasualtyPersonnel2" parameterClass="java.util.HashMap">
+		BEGIN
+			GIPI_WCASUALTY_PERSONNEL_PKG.del_gipi_wcasualty_personnel2(#parId#,#itemNo#,#personnelNo#);
+		END;
+	</procedure>
+	
+	<procedure id="getCasualtyPersonnelDetails" parameterMap="getCasualtyPersonnelDetailsParamMap">
+		{CALL GET_CASUALTY_PERSONNEL_DTL(?, ?, ?, ?, ?, ?, ?)}
+	</procedure>
+	
+</sqlMap>	

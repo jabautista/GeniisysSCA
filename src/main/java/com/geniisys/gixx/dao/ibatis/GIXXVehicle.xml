@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap>
+	<typeAlias alias="GIXXVehicle" type="com.geniisys.gixx.entity.GIXXVehicle" />
+	
+	<resultMap id="getGIXXCargoCarrierTGMap" class="GIXXVehicle" extends="BaseEntity.TableGridResultMap">
+		<result column="EXTRACT_ID"			property="extractId" />
+		<result column="ITEM_NO"			property="itemNo" />
+		<result column="VESSEL_CD"			property="vesselCd" />
+		<result column="VESSEL_NAME"			property="vesselName" />
+	</resultMap>
+	
+	<resultMap id="getGIXXVehicleItemInfoMap" class="GIXXVehicle">
+		<result column="EXTRACT_ID"		property="extractId" />
+		<result column="ITEM_NO"		property="itemNo" />
+		<result column="ASSIGNEE"		property="assignee" />
+		<result column="COC_TYPE"		property="cocType" />
+		<result column="COC_SERIAL_NO"		property="cocSerialNo" />
+		<result column="COC_YY"		property="cocYy" />
+		<result column="ACQUIRED_FROM"		property="acquiredFrom" />
+		<result column="TYPE_OF_BODY_CD"		property="typeOfBodyCd" />
+		<result column="PLATE_NO"		property="plateNo" />
+		<result column="MODEL_YEAR"		property="modelYear" />
+		<result column="CAR_COMPANY_CD"		property="carCompanyCd" />
+		<result column="MV_FILE_NO"		property="mvFileNo" />
+		<result column="NO_OF_PASS"		property="noOfPass" />
+		<result column="MAKE"		property="make" />
+		<result column="BASIC_COLOR_CD"		property="basicColorCd" />
+		<result column="COLOR_CD"		property="colorCd" />
+		<result column="COLOR"		property="color" />
+		<result column="BASIC_COLOR"		property="basicColor" />
+		<result column="SERIES_CD"		property="seriesCd" />
+		<result column="MAKE_CD"		property="makeCd" />
+		<result column="TOWING"		property="towing" />
+		<result column="MOT_TYPE"		property="motType" />
+		<result column="UNLADEN_WT"		property="unladenWt" />
+		<result column="SERIAL_NO"		property="serialNo" />
+		<result column="SUBLINE_CD"		property="sublineCd" />
+		<result column="SUBLINE_TYPE_CD"		property="sublineTypeCd" />
+		<result column="REPAIR_LIM"		property="repairLim" />
+		<result column="MOTOR_NO"		property="motorNo" />
+		<result column="ENGINE_SERIES"		property="engineSeries" />
+		<result column="CAR_COMPANY"		property="carCompany" />
+		<result column="TYPE_OF_BODY"		property="typeOfBody" />
+		<result column="MOTOR_TYPE_DESC"		property="motorTypeDesc" />
+		<result column="DEDUCTIBLE"		property="deductible" />
+		<result column="SUBLINE_TYPE_DESC"		property="sublineTypeDesc" />	
+	</resultMap>
+	
+	<select id="getGIXXCargoCarrierTG" resultMap="getGIXXCargoCarrierTGMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, b.count_, a.*
+		  		  FROM (SELECT * FROM TABLE(gixx_cargo_carrier_pkg.get_cargo_carrier_list(#extractId#, #itemNo#))) a,
+		  		  	   (SELECT count(*) count_ FROM TABLE (gixx_cargo_carrier_pkg.get_cargo_carrier_list(#extractId#, #itemNo#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#		
+	</select>
+	
+	<select id="getGIXXVehicleItemInfo" resultMap="getGIXXVehicleItemInfoMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM TABLE(gixx_vehicle_pkg.get_vehicle_info(#extractId#, #itemNo#, #policyId#))
+	</select>
+</sqlMap>

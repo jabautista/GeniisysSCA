@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GICLLossExpenseTax">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GICLLossExpenseTaxClass" type="com.geniisys.gicl.entity.GICLLossExpenseTax"/>
+	
+	<resultMap class="GICLLossExpenseTaxClass" id="GICLLossExpenseTaxResultMap">
+		<result property="claimId"          column="CLAIM_ID" />
+        <result property="clmLossId"        column="CLM_LOSS_ID" />
+        <result property="taxId"            column="TAX_ID" />
+        <result property="taxCd"            column="TAX_CD" />
+        <result property="taxName"          column="TAX_NAME" />
+        <result property="taxType"          column="TAX_TYPE" />
+        <result property="lossExpCd"        column="LOSS_EXP_CD" />
+        <result property="baseAmt"          column="BASE_AMT" />
+        <result property="taxAmt"           column="TAX_AMT" />
+        <result property="taxPct"           column="TAX_PCT" />
+        <result property="userId"           column="USER_ID" />
+        <result property="lastUpdate"       column="LAST_UPDATE" />
+        <result property="advTag"           column="ADV_TAG" />
+        <result property="netTag"           column="NET_TAG" />
+        <result property="cpiRecNo"         column="CPI_REC_NO" />
+        <result property="cpiBranchCd"      column="CPI_BRANCH_CD" />
+        <result property="withTax"          column="W_TAX" />
+        <result property="slTypeCd"         column="SL_TYPE_CD" />
+        <result property="slCd"             column="SL_CD" />
+	</resultMap>
+	
+	<resultMap id="GICLLossExpTaxTableGridMap" class="GICLLossExpenseTaxClass" extends="GICLLossExpenseTaxResultMap">
+  		<result property="rowNum"			column="ROWNUM_"/>
+		<result property="rowCount"			column="COUNT_"/>
+  	</resultMap>
+	
+	<select id="getLossExpenseTax" resultMap="GICLLossExpenseTaxResultMap">
+		SELECT * 
+		  FROM gicl_loss_expense_tax
+		 WHERE claim_id = #claimId#
+		   AND clm_loss_id = #claimLossId#
+		   AND tax_id = #taxId#
+		   AND tax_cd = #taxCd#
+		   AND tax_type = #taxType#	
+	</select>
+	
+	<select id="getLossExpenseTaxes" resultMap="GICLLossExpenseTaxResultMap">
+		SELECT * FROM TABLE(gicl_loss_expense_tax_pkg.get_loss_exp_taxes(#claimId#,#claimLossId#,#taxId#,#taxCd#,#taxType#))
+	</select>
+	
+	<procedure id="deleteLossExpTax" parameterClass="java.util.HashMap">
+		BEGIN
+			GICL_LOSS_EXP_TAX_PKG.delete_loss_exp_tax(#claimId#, #clmLossId#);
+		END;
+	</procedure>
+	
+	<select id="checkExistLossExpTax" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT GICL_LOSS_EXP_TAX_PKG.check_exist_loss_exp_tax_2(#claimId#, #clmLossId#, #lossExpCd#) FROM dual
+	</select>
+	
+	<procedure id="deleteLossExpTax2" parameterClass="java.util.HashMap">
+		BEGIN
+			GICL_LOSS_EXP_TAX_PKG.delete_loss_exp_tax_2(#claimId#, #clmLossId#, #lossExpCd#);
+		END;
+	</procedure>
+	
+	<procedure id="deleteLossExpTax3" parameterClass="java.util.HashMap">
+		BEGIN
+			GICL_LOSS_EXP_TAX_PKG.delete_loss_exp_tax_3(#claimId#, #clmLossId#, #taxId#, #taxCd#, #taxType#);
+		END;
+	</procedure>
+	
+	<procedure id="deleteLossExpTax4" parameterClass="java.util.HashMap">
+		BEGIN
+			GICL_LOSS_EXP_TAX_PKG.delete_loss_exp_tax_4(#claimId#, #clmLossId#, #dedLossExpCd#);
+		END;
+	</procedure>
+	
+	<procedure id="deleteLossExpTax5" parameterClass="java.util.HashMap">
+		BEGIN
+			GICL_LOSS_EXP_TAX_PKG.delete_loss_exp_tax_5(#claimId#, #clmLossId#, #lossExpCd#, #dedLossExpCd#);
+		END;
+	</procedure>
+	
+	<procedure id="setGiclLossExpTax" parameterClass="GICLLossExpenseTaxClass">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GICL_LOSS_EXP_TAX_PKG.set_gicl_loss_exp_tax
+				(#claimId#,    #clmLossId#,   #taxId#,     #taxCd#,     #taxType#, 
+				 #lossExpCd#,  #baseAmt#,     #taxAmt#,    #taxPct#,    #advTag#,
+                 #netTag#,     #withTax#,     #slTypeCd#,  #slCd#,      #userId#);
+		END;
+	</procedure>
+	
+	<procedure id="gicls030KeyCommitC009" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GICL_LOSS_EXP_TAX_PKG.gicls030_c009_key_commit(#claimId#, #clmLossId#, #userId#);
+		END;
+	</procedure>
+	
+	<select id="getGiclLossExpTaxList" resultMap="GICLLossExpTaxTableGridMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GICL_LOSS_EXP_TAX_PKG.get_gicl_loss_exp_tax_list(#claimId#, #clmLossId#, #issCd#))  
+		                <isNotNull property="filter">
+			      			WHERE 1=1
+			      			<isNotEmpty prepend="AND" property="taxType">
+           					  UPPER(tax_type) LIKE UPPER(#taxType#)
+           			        </isNotEmpty>
+           			        <isNotEmpty prepend="AND" property="taxCd">
+           					  tax_cd LIKE #taxCd#
+           			        </isNotEmpty>
+           			        <isNotEmpty prepend="AND" property="taxName">
+           					  UPPER(tax_name) LIKE UPPER(#taxName#)
+           			        </isNotEmpty>
+           			        <isNotEmpty prepend="AND" property="slCd">
+           					  sl_cd LIKE #slCd#
+           			        </isNotEmpty>
+           			        <isNotEmpty prepend="AND" property="lossExpCd">
+           					  UPPER(loss_exp_cd) LIKE UPPER(#lossExpCd#)
+           			        </isNotEmpty>
+           			        <isNotEmpty prepend="AND" property="baseAmt">
+           					  base_amt LIKE #baseAmt#
+           			        </isNotEmpty>
+           			        <isNotEmpty prepend="AND" property="taxPct">
+           					  tax_pct LIKE #taxPct#
+           			        </isNotEmpty>
+           			        <isNotEmpty prepend="AND" property="taxAmt">
+           					  tax_amt LIKE #taxAmt#
+           			        </isNotEmpty>
+		                </isNotNull>
+		                <isEqual property="sortColumn" compareValue="taxType">
+							ORDER BY tax_type
+						</isEqual>
+						<isEqual property="sortColumn" compareValue="taxCd">
+							ORDER BY tax_cd
+						</isEqual>
+						<isEqual property="sortColumn" compareValue="taxName">
+							ORDER BY tax_name
+						</isEqual>
+						<isEqual property="sortColumn" compareValue="slCd">
+							ORDER BY sl_cd
+						</isEqual>
+						<isEqual property="sortColumn" compareValue="lossExpCd">
+							ORDER BY loss_exp_cd
+						</isEqual>
+						<isEqual property="sortColumn" compareValue="baseAmt">
+							ORDER BY base_amt
+						</isEqual>
+						<isEqual property="sortColumn" compareValue="taxPct">
+							ORDER BY tax_pct
+						</isEqual>
+						<isEqual property="sortColumn" compareValue="taxAmt">
+							ORDER BY tax_amt
+						</isEqual>
+						<isNotNull property="sortColumn">
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a, 
+               (SELECT count(*) count_ 
+                  FROM TABLE(GICL_LOSS_EXP_TAX_PKG.get_gicl_loss_exp_tax_list(#claimId#, #clmLossId#, #issCd#))
+                  		<isNotNull property="filter">
+			      			WHERE 1=1
+			      			<isNotEmpty prepend="AND" property="taxType">
+           					  UPPER(tax_type) LIKE UPPER(#taxType#)
+           			        </isNotEmpty>
+           			        <isNotEmpty prepend="AND" property="taxCd">
+           					  tax_cd LIKE #taxCd#
+           			        </isNotEmpty>
+           			        <isNotEmpty prepend="AND" property="taxName">
+           					  UPPER(tax_name) LIKE UPPER(#taxName#)
+           			        </isNotEmpty>
+           			        <isNotEmpty prepend="AND" property="slCd">
+           					  sl_cd LIKE #slCd#
+           			        </isNotEmpty>
+           			        <isNotEmpty prepend="AND" property="lossExpCd">
+           					  UPPER(loss_exp_cd) LIKE UPPER(#lossExpCd#)
+           			        </isNotEmpty>
+           			        <isNotEmpty prepend="AND" property="baseAmt">
+           					  base_amt LIKE #baseAmt#
+           			        </isNotEmpty>
+           			        <isNotEmpty prepend="AND" property="taxPct">
+           					  tax_pct LIKE #taxPct#
+           			        </isNotEmpty>
+           			        <isNotEmpty prepend="AND" property="taxAmt">
+           					  tax_amt LIKE #taxAmt#
+           			        </isNotEmpty>
+		                </isNotNull>) b) 
+	</select>
+	
+	<select id="getLETaxNextTaxId" parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+		SELECT GICL_LOSS_EXP_TAX_PKG.get_next_tax_id(#claimId#, #clmLossId#) FROM dual
+	</select>
+	
+	<select id="checkLossExpTaxType" parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+		SELECT GICL_LOSS_EXP_TAX_PKG.check_loss_exp_tax_type(#claimId#, #clmLossId#) FROM dual
+	</select>
+	
+</sqlMap>

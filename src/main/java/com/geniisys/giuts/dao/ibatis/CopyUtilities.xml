@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="CopyUtilities">
+
+	<parameterMap class="map" id="populateSummaryMap">
+		<parameter property="userId"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="lineCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="sublineCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="issCd"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="issueYy"		jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="polSeqNo"		jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="renewNo"		jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="parIssCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="spldPolSw"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="spldEndtSw"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="cancelSw"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="expiredSw"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="parId"			jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="INOUT" />
+	</parameterMap>
+
+	<procedure id="populateSummaryGIUTS009" parameterMap="populateSummaryMap">
+		BEGIN
+			GIIS_USERS_PKG.app_user := ?;
+			GIUTS009_PKG.populate_summary(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<parameterMap class="map" id="populateOtherInfoGIUTS009Map">
+		<parameter property="userId"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="parId"			jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="lineCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="sublineCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="issCd"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="issueYy"		jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="polSeqNo"		jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="renewNo"		jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="spldPolSw"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="spldEndtSw"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="cancelSw"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="expiredSw"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+	</parameterMap>
+
+	<procedure id="populateOtherInfoGIUTS009" parameterMap="populateOtherInfoGIUTS009Map">
+		BEGIN
+			GIIS_USERS_PKG.app_user := ?;
+			GIUTS009_PKG.copy_par_id := ?;
+			GIUTS009_PKG.populate_other_info(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<procedure id="continueSummary" parameterMap="populateSummaryMap">
+		BEGIN
+			GIIS_USERS_PKG.app_user := ?;
+			GIUTS009_PKG.continue_summary(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<parameterMap class="map" id="updateSummarizedPARMap">
+		<parameter property="userId"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="parId"			jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="parSeqNo"		jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="OUT" />
+		<parameter property="quoteSeqNo"	jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="OUT" />
+	</parameterMap>
+	
+	<procedure id="updateSummarizedPAR" parameterMap="updateSummarizedPARMap">
+		BEGIN
+			GIIS_USERS_PKG.app_user := ?;
+			GIUTS009_PKG.update_summarized_par(?, ?, ?);
+		END;
+	</procedure>
+	
+	<procedure id="checkExistingPolicyGIUTS009" parameterClass="map">
+		BEGIN
+			GIUTS009_PKG.check_if_policy_exists(#lineCd#, #sublineCd#, #issCd#, #issueYy#, #polSeqNo#, #renewNo#);
+		END;
+	</procedure>
+	
+	<procedure id="checkPolicyGIUTS009" parameterClass="map">
+		BEGIN
+			GIUTS009_PKG.check_policy(#lineCd#, #sublineCd#, #issCd#, #issueYy#,
+				#polSeqNo#, #renewNo#, #spldPolSw#, #spldEndtSw#, #cancelSw#, #expiredSw#);
+		END;
+	</procedure>
+	
+	<procedure id="validateLineGIUTS009" parameterClass="map">
+		BEGIN
+			GIUTS009_PKG.validate_line(#lineCd#, #sublineCd#, #issCd#, #issueYy#, #polSeqNo#,
+				#renewNo#, #spldPolSw#, #spldEndtSw#, #cancelSw#, #expiredSw#, #userId#);
+		END;
+	</procedure>
+	
+	<procedure id="validateIssCdGIUTS009" parameterClass="map">
+		BEGIN
+			GIUTS009_PKG.validate_iss_cd(#lineCd#, #sublineCd#, #issCd#, #issueYy#, #polSeqNo#,
+				#renewNo#, #spldPolSw#, #spldEndtSw#, #cancelSw#, #expiredSw#, #userId#);
+		END;
+	</procedure>
+	
+	<procedure id="validateParIssCdGIUTS009" parameterClass="map">
+		BEGIN
+			GIUTS009_PKG.validate_par_iss_cd(#lineCd#, #parIssCd#, #userId#);
+		END;
+	</procedure>
+	
+	<!-- added userId by reymon 05042013 -->
+	<select id="validateLineCdGiuts008a" parameterClass="map" resultClass="java.lang.String">
+		SELECT giuts008a_pkg.validate_line_cd(#lineCd#,#issCd#, #userId#) FROM DUAL
+	</select>
+	
+	<!-- added userId by reymon 05072013 -->
+	<select id="validateIssCdGiuts008a" parameterClass="map" resultClass="java.lang.String">
+		SELECT giuts008a_pkg.validate_iss_cd(#lineCd#,#issCd#, #userId#) FROM DUAL
+	</select>
+	
+	<parameterMap id="copyPackPolicyGiuts008aMap" class="map">
+		<parameter property="lineCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="sublineCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="issCd"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="parIssCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="issueYy"		jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="polSeqNo"		jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="renewNo"		jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="endtIssCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="endtYy"		jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="endtSeqNo"		jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="userId"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="parSeqNo"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+		<parameter property="quoteSeqNo"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+	</parameterMap>
+	
+	<procedure id="copyPackPolicyGiuts008a" parameterMap="copyPackPolicyGiuts008aMap">
+		BEGIN
+			giuts008a_pkg.copy_pack_policy_giuts008a(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	
+</sqlMap>

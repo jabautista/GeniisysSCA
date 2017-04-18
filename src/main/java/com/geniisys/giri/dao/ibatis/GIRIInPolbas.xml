@@ -1,0 +1,756 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIRIWInPolbas">
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference_type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIRIInPolbas" type="com.geniisys.giri.entity.GiriInPolbas"/>
+	
+	<resultMap class="java.util.HashMap" id="giriInpolbasResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="policy_no" 				property="policyNo" />
+		<result column="line_cd"				property="lineCd" />
+		<result column="subline_cd"				property="sublineCd" />
+		<result column="iss_cd"				    property="issCd" />
+		<result column="issue_yy"				property="issueYy" />
+		<result column="pol_seq_no"				property="polSeqNo" />
+		<result column="renew_no"				property="renewNo" />
+		<result column="endt_no" 				property="endtNo" />
+		<result column="assd_no" 				property="assdNo" />
+		<result column="assd_name" 				property="assdName" />
+		<result column="accept_no" 				property="acceptNo" />
+		<result column="policy_id" 				property="policyId" />
+		<result column="ri_policy_no" 			property="riPolicyNo" />
+		<result column="ri_endt_no" 			property="riEndtNo" />
+		<result column="ri_binder_no" 			property="riBinderNo" />
+		<result column="ri_cd" 			        property="riCd" />
+		<result column="writer_cd" 			    property="writerCd" />
+		<result column="accept_date" 			property="acceptDate" />
+		<result column="offer_date" 			property="offerDate" />
+		<result column="accept_by" 			    property="acceptBy" />
+		<result column="orig_tsi_amt" 			property="origTSIAmt" />
+		<result column="orig_prem_amt" 			property="origPremAmt" />
+		<result column="remarks" 				property="remarks" />
+		<result column="ref_accept_no" 			property="refAcceptNo" />
+		<result column="cpi_rec_no" 			property="cpiRecNo" />
+		<result column="cpi_branch_cd" 			property="cpiBranchCd" />
+		<result column="oar_print_date" 		property="oarPrintDate" />
+		<result column="pack_accept_no" 		property="packAcceptNo" />
+		<result column="pack_policy_id" 		property="packPolicyId" />
+		<result column="offered_by" 			property="offeredBy" />
+		<result column="amount_offered" 		property="amountOffered" />
+		<result column="arc_ext_data" 			property="arcExtData" />
+		<result column="ri_sname" 			    property="riSname" />
+		<result column="ri_sname2" 			    property="riSname2" />
+	</resultMap>
+	
+	<select id="showINPolbasLOV" resultMap="giriInpolbasResultMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE (giuts026_pkg.get_giri_inpolbas(#userId#, #lineCd#, #sublineCd#, #issCd#, #issueYy#, #polSeqNo#, #renewNo#))
+		                        <!-- benjo 08.17.2016 SR-21030 -->
+		                        <!-- WHERE check_user_per_line2 (line_cd,
+                                                            iss_cd,
+                                                            'GIUTS026',
+                                                            #userId#
+                                                           ) = 1
+                                  AND check_user_per_iss_cd2 (line_cd,
+                                                              iss_cd,
+                                                              'GIUTS026',
+                                                              #userId#
+                                                             ) = 1 -->
+                                <!-- end SR-21030 -->
+		          		 <isEqual property="sortColumn" compareValue="policyNo">
+		              		ORDER BY policy_no
+			             </isEqual>
+			             <isEqual property="sortColumn" compareValue="endtNo">
+		              		ORDER BY endt_no
+			             </isEqual>
+			             <isEqual property="sortColumn" compareValue="assdName">
+		              		ORDER BY assd_name
+			             </isEqual>
+			             <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	  </isNotNull>
+		           
+		           ) a, 
+		          	   (SELECT count(*) count_  FROM TABLE (giuts026_pkg.get_giri_inpolbas(#userId#, #lineCd#, #sublineCd#, #issCd#, #issueYy#, #polSeqNo#, #renewNo#)) 
+		          	                           <!-- benjo 08.17.2016 SR-21030 -->
+		          	                           <!-- WHERE check_user_per_line2 (line_cd,
+                                                                           iss_cd,
+                                                                           'GIUTS026',
+                                                                           #userId#
+                                                                          ) = 1
+                                                 AND check_user_per_iss_cd2 (line_cd,
+                                                                             iss_cd,
+                                                                             'GIUTS026',
+                                                                             #userId#
+                                                                          ) = 1 -->
+                                               <!-- end SR-21030 -->
+		          	                            ) b)
+		         WHERE  rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<update id="updateAcceptanceInfo">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			giuts026_pkg.update_acceptance_no(#policyId#, #riEndtNo#, #riPolicyNo#, #riBinderNo#, #origTSIAmt#, #origPremAmt#, #remarks#, #userId#);
+		END;
+	</update>
+	
+	<!-- J. Diago for GIRIS013 09.09.2013 -->
+	<resultMap class="java.util.HashMap" id="getInwardRiPaymentStatusMap" extends="BaseEntity.TableGridResultMap">
+	    <result column="policy_id" 				property="policyId" />
+	    <result column="iss_cd" 				property="issCd" />
+	    <result column="prem_seq_no" 			property="premSeqNo" />
+	    <result column="invoice_no" 			property="invoiceNo" />
+	    <result column="currency_desc" 			property="currencyDesc" />
+	    <result column="net_due" 				property="netDue" />
+	    <result column="balance" 				property="balance" />
+	    <result column="collection_amt" 		property="collectionAmt" />			
+	</resultMap>
+	
+	<select id="getInwardRiPaymentStatus" resultMap="getInwardRiPaymentStatusMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giris013_pkg.get_inw_ri_payt_stat(#policyId#))
+		                 WHERE 1 = 1
+		                   AND UPPER(invoice_no) LIKE UPPER(NVL(#invoiceNo# || '%', invoice_no))
+		          		 <isEqual property="sortColumn" compareValue="invoiceNo">
+		              		ORDER BY invoice_no
+			             </isEqual>
+			             <isEqual property="sortColumn" compareValue="currencyDesc">
+		              		ORDER BY currency_desc
+			             </isEqual>
+			             <isEqual property="sortColumn" compareValue="netDue">
+		              		ORDER BY net_due
+			             </isEqual>
+			             <isEqual property="sortColumn" compareValue="collectionAmt">
+		              		ORDER BY collection_amt
+			             </isEqual>
+			             <isEqual property="sortColumn" compareValue="balance">
+		              		ORDER BY balance
+			             </isEqual>
+			             <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	  </isNotNull>
+		           
+		           ) a, 
+		          	   (SELECT count(*) count_  
+		          	      FROM TABLE (giris013_pkg.get_inw_ri_payt_stat(#policyId#))
+		          	     WHERE 1 = 1
+		          	       AND UPPER(invoice_no) LIKE UPPER(NVL(#invoiceNo# || '%', invoice_no))
+		          	     ) b)
+		         WHERE  rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="showGIRIS013PolNoLOVMap" extends="BaseEntity.TableGridResultMap">
+	    <result column="policy_no" 				property="policyNo" />
+	    <result column="line_cd" 				property="lineCd" />
+	    <result column="subline_cd" 			property="sublineCd" />
+	    <result column="iss_cd" 				property="issCd" />
+	    <result column="issue_yy" 				property="issueYy" />
+	    <result column="pol_seq_no" 			property="polSeqNo" />
+	    <result column="renew_no" 				property="renewNo" />
+	    <result column="endt_iss_cd" 			property="endtIssCd" />
+	    <result column="endt_yy" 				property="endtYy" />
+	    <result column="endt_seq_no" 			property="endtSeqNo" />
+	    <result column="ri_policy_no" 			property="riPolicyNo" />
+	    <result column="policy_id" 				property="policyId" />
+	    <result column="ri_endt_no" 			property="riEndtNo" />
+	    <result column="ri_binder_no" 			property="riBinderNo" />
+	    <result column="ri_sname" 				property="riSname" />
+	    <result column="eff_date" 				property="effDate" />
+	    <result column="expiry_date" 			property="expiryDate" />
+	</resultMap>
+	
+	<select id="showGIRIS013PolNoLOV" resultMap="showGIRIS013PolNoLOVMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giris013_pkg.get_polno_lov(#lineCd#))
+		                 WHERE 1 = 1
+		                   AND line_cd = #lineCd#
+		                   AND UPPER(subline_cd) LIKE UPPER(NVL(#sublineCd#, subline_cd))
+		                   AND UPPER(issue_yy) LIKE UPPER(NVL(#issueYy#, issue_yy))
+		                   AND UPPER(pol_seq_no) LIKE UPPER(NVL(#polSeqNo#, pol_seq_no))
+		                   AND UPPER(renew_no) LIKE UPPER(NVL(#renewNo#, renew_no))
+		                   AND TO_DATE(TO_CHAR(eff_date, 'MM-DD-RRRR'), 'MM-DD-RRRR') = NVL(TO_DATE(#effDate#, 'MM-DD-RRRR'), TO_DATE(TO_CHAR(eff_date, 'MM-DD-RRRR'), 'MM-DD-RRRR'))
+		                   AND TO_DATE(TO_CHAR(expiry_date, 'MM-DD-RRRR'), 'MM-DD-RRRR') = NVL(TO_DATE(#expiryDate#, 'MM-DD-RRRR'), TO_DATE(TO_CHAR(expiry_date, 'MM-DD-RRRR'), 'MM-DD-RRRR'))
+		                   AND check_user_per_iss_cd2(line_cd, iss_cd, 'GIRIS013', #userId#) = 1
+		                 <isNotEmpty property="riPolicyNo" prepend="AND">
+			  		  	       UPPER(ri_policy_no) LIKE UPPER(NVL(#riPolicyNo# || '%', ri_policy_no))
+				  		 </isNotEmpty>
+				  		 <isNotEmpty property="riEndtNo" prepend="AND">
+			  		  	       UPPER(ri_endt_no) LIKE UPPER(NVL(#riEndtNo# || '%', ri_endt_no))
+				  		 </isNotEmpty>
+				  		 <isNotEmpty property="riBinderNo" prepend="AND">
+			  		  	       UPPER(ri_binder_no) LIKE UPPER(NVL(#riBinderNo# || '%', ri_binder_no))
+				  		 </isNotEmpty>
+		          		 <isEqual property="sortColumn" compareValue="policyNo">
+		              		ORDER BY policy_no
+			             </isEqual>
+			             <isEqual property="sortColumn" compareValue="riPolicyNo">
+		              		ORDER BY ri_policy_no
+			             </isEqual>
+			             <isEqual property="sortColumn" compareValue="riEndtNo">
+		              		ORDER BY ri_endt_no
+			             </isEqual>
+			             <isEqual property="sortColumn" compareValue="riBinderNo">
+		              		ORDER BY ri_binder_no
+			             </isEqual>
+			             <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	 </isNotNull>
+		           ) a, 
+		          	   (SELECT count(*) count_  
+		          	      FROM TABLE (giris013_pkg.get_polno_lov(#lineCd#))
+		          	     WHERE 1 = 1
+		                   AND line_cd = #lineCd#
+		                   AND UPPER(subline_cd) LIKE UPPER(NVL(#sublineCd#, subline_cd))
+		                   AND UPPER(issue_yy) LIKE UPPER(NVL(#issueYy#, issue_yy))
+		                   AND UPPER(pol_seq_no) LIKE UPPER(NVL(#polSeqNo#, pol_seq_no))
+		                   AND UPPER(renew_no) LIKE UPPER(NVL(#renewNo#, renew_no))
+		                   AND TO_DATE(TO_CHAR(eff_date, 'MM-DD-RRRR'), 'MM-DD-RRRR') = NVL(TO_DATE(#effDate#, 'MM-DD-RRRR'), TO_DATE(TO_CHAR(eff_date, 'MM-DD-RRRR'), 'MM-DD-RRRR'))
+		                   AND TO_DATE(TO_CHAR(expiry_date, 'MM-DD-RRRR'), 'MM-DD-RRRR') = NVL(TO_DATE(#expiryDate#, 'MM-DD-RRRR'), TO_DATE(TO_CHAR(expiry_date, 'MM-DD-RRRR'), 'MM-DD-RRRR'))
+		                   AND check_user_per_iss_cd2(line_cd, iss_cd, 'GIRIS013', #userId#) = 1
+				  		   <isNotEmpty property="riPolicyNo" prepend="AND">
+			  		  	       UPPER(ri_policy_no) LIKE UPPER(NVL(#riPolicyNo# || '%', ri_policy_no))
+				  		   </isNotEmpty>
+				  		   <isNotEmpty property="riEndtNo" prepend="AND">
+			  		  	       UPPER(ri_endt_no) LIKE UPPER(NVL(#riEndtNo# || '%', ri_endt_no))
+				  		   </isNotEmpty>
+				  		   <isNotEmpty property="riBinderNo" prepend="AND">
+			  		  	       UPPER(ri_binder_no) LIKE UPPER(NVL(#riBinderNo# || '%', ri_binder_no))
+				  		   </isNotEmpty>
+		          	     ) b)
+		         WHERE  rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="getInwRiDetailsMap" extends="BaseEntity.TableGridResultMap">
+	    <result column="ref_no" 				property="refNo" />
+		<result column="pay_date" 				property="payDate" />
+		<result column="collection_amt" 		property="collectionAmt" />
+	</resultMap>
+	
+	<select id="getInwRiDetails" resultMap="getInwRiDetailsMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giris013_pkg.get_inw_ri_payt_dtls(#issCd#, #premSeqNo#))
+		          		 <isEqual property="sortColumn" compareValue="refNo">
+		              		ORDER BY ref_no
+			             </isEqual>
+			             <isEqual property="sortColumn" compareValue="payDate">
+		              		ORDER BY pay_date
+			             </isEqual>
+			             <isEqual property="sortColumn" compareValue="collectionAmt">
+		              		ORDER BY collection_amt
+			             </isEqual>
+			             <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	  </isNotNull>
+		           
+		           ) a, 
+		          	   (SELECT count(*) count_  
+		          	      FROM TABLE (giris013_pkg.get_inw_ri_payt_dtls(#issCd#, #premSeqNo#))
+		          	     ) b)
+		         WHERE  rownum_ BETWEEN #from# AND #to#
+	</select>
+	<!-- J. Diago for GIRIS013 09.09.2013 -->
+	
+	<!-- Pol Cruz for GIRIS012 Start -->
+	<resultMap class="java.util.HashMap" id="giris012FRPSLovMap" extends="BaseEntity.TableGridResultMap">
+	    <result column="line_cd" 		property="lineCd" />
+		<result column="frps_yy" 		property="frpsYy" />
+		<result column="frps_seq_no" 	property="frpsSeqNo" />
+		<result column="subline_cd" 	property="sublineCd" />
+		<result column="iss_cd" 		property="issCd" />
+		<result column="issue_yy" 		property="issueYy" />
+		<result column="pol_seq_no" 	property="polSeqNo" />
+		<result column="renew_no" 		property="renewNo" />
+		<result column="assured" 		property="assured" />
+		<result column="eff_date" 		property="effDate" />
+		<result column="expiry_date" 	property="expiryDate" />
+		<result column="endt_iss_cd" 	property="endtIssCd" />
+		<result column="endt_yy" 		property="endtYy" />
+		<result column="endt_seq_no" 	property="endtSeqNo" />
+	</resultMap>
+		
+	<select id="getGIRIS012FRPSLov" resultMap="giris012FRPSLovMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, a.*, ' ' tot_recovery_det_count
+		          FROM (SELECT * FROM TABLE(giris012_pkg.get_frps_lov(#lineCd#, #frpsYy#, #frpsSeqNo#, #effDate#, #expiryDate#,
+				                  									  #sublineCd#, #issCd#, #issueYy#, #polSeqNo#, #renewNo#,
+				                  									  #endtIssCd#, #endtYy#, #endtSeqNo#, #assured#, #userId#))
+			            <isEqual property="sortColumn" compareValue="frpsNo">
+		              		<!-- ORDER BY line_cd || '-' || frps_yy || '-' || frps_seq_no -->
+		              		ORDER BY line_cd, frps_yy, frps_seq_no
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="effDate">
+		              		ORDER BY eff_date
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="expiryDate">
+		              		ORDER BY expiry_date
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="policyNo">
+		              		<!-- ORDER BY line_cd || '-' || subline_cd || '-' || iss_cd || '-' || issue_yy || '-' || pol_seq_no || '-' || renew_no -->
+		              		ORDER BY line_cd, subline_cd, iss_cd, issue_yy, pol_seq_no, renew_no
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="endorsementNo">
+		              		<!-- ORDER BY endt_iss_cd || '-' || endt_yy || '-' || endt_seq_no -->
+		              		ORDER BY endt_iss_cd , endt_yy, endt_seq_no
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="assured">
+		              		ORDER BY assured
+			            </isEqual>
+			            <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	 </isNotNull>) a, 
+		               (SELECT count(*) count_
+		                  FROM TABLE (giris012_pkg.get_frps_lov(#lineCd#, #frpsYy#, #frpsSeqNo#, #effDate#, #expiryDate#,
+		                  										#sublineCd#, #issCd#, #issueYy#, #polSeqNo#, #renewNo#,
+		                  										#endtIssCd#, #endtYy#, #endtSeqNo#, #assured#, #userId#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="giris012MainTGMap" extends="BaseEntity.TableGridResultMap">
+	    <result column="binder_no" 			property="binderNo" />
+		<result column="ri_sname2" 			property="riSname2" />
+		<result column="net_due" 			property="netDue" />
+		<result column="net_due_computed"	property="netDueComputed" />
+		<result column="tot_amt_paid" 		property="totAmtPaid" />
+		<result column="disbursement_amt" 	property="disbursementAmt" />
+		<result column="balance" 			property="balance" />
+		<result column="line_cd" 			property="lineCd" />
+		<result column="frps_yy" 			property="frpsYy" />
+		<result column="frps_seq_no" 		property="frpsSeqNo" />
+		<result column="fnl_binder_id" 		property="fnlBinderId" />
+		<result column="frps_no" 			property="frpsNo" />
+		<result column="ri_sname" 			property="riSname" />
+		<result column="ri_prem_amt" 		property="riPremAmt" />
+		<result column="ri_comm_amt" 		property="riCommAmt" />
+		<result column="prem_tax" 			property="premTax" />
+		<result column="ri_cd" 				property="riCd" />
+	</resultMap>
+	
+	<select id="populateGIRIS012MainTG" resultMap="giris012MainTGMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, a.*, ' ' tot_recovery_det_count
+		          FROM (SELECT * FROM TABLE(giris012_pkg.populate_main_tg(#lineCd#, #frpsYy#, #frpsSeqNo#, #userId#))
+		          		WHERE 1 = 1
+		          		AND UPPER(binder_no) LIKE UPPER(NVL(#binderNo#, binder_no))
+		          		AND UPPER(ri_sname2) LIKE UPPER(NVL(#riSname2#, ri_sname2))
+		          		AND net_due_computed = NVL(#netDueComputed#, net_due_computed)
+		          		AND tot_amt_paid = NVL(#totAmtPaid#, tot_amt_paid)
+		          		AND balance = NVL(#balance#, balance)
+			            <isEqual property="sortColumn" compareValue="binderNo">
+		              		ORDER BY binder_no
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="riSname2">
+		              		ORDER BY ri_sname2
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="netDueComputed">
+		              		ORDER BY net_due_computed
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="totAmtPaid">
+		              		ORDER BY tot_amt_paid
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="balance">
+		              		ORDER BY balance
+			            </isEqual>
+			            <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	 </isNotNull>) a, 
+		               (SELECT count(*) count_
+		                  FROM TABLE (giris012_pkg.populate_main_tg(#lineCd#, #frpsYy#, #frpsSeqNo#, #userId#))
+		                  WHERE 1 = 1
+		          		  AND UPPER(binder_no) LIKE UPPER(NVL(#binderNo#, binder_no))
+			          	  AND UPPER(ri_sname2) LIKE UPPER(NVL(#riSname2#, ri_sname2))
+			          	  AND net_due_computed = NVL(#netDueComputed#, net_due_computed)
+			          	  AND tot_amt_paid = NVL(#totAmtPaid#, tot_amt_paid)
+			          	  AND balance = NVL(#balance#, balance)) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="giris012DetailsMap" extends="BaseEntity.TableGridResultMap">
+	    <result column="gacc_tran_id" 		property="gaccTranId" />
+		<result column="d010_fnl_binder_id"	property="d010FnlBinderId" />
+		<result column="tran_class" 		property="tranClass" />
+		<result column="ref_no"				property="refNo" />
+		<result column="pay_date" 			property="payDate" />
+		<result column="disbursement_amt" 	property="disbursementAmt" />
+	</resultMap>
+	
+	<select id="getGIRIS012Details" resultMap="giris012DetailsMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, a.*, ' ' tot_recovery_det_count
+		          FROM (SELECT * FROM TABLE(giris012_pkg.get_details(#fnlBinderId#))
+			            <isEqual property="sortColumn" compareValue="refNo">
+		              		ORDER BY ref_no
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="disbursementAmt">
+		              		ORDER BY disbursement_amt
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="payDate">
+		              		ORDER BY pay_date
+			            </isEqual>
+			            <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	 </isNotNull>) a, 
+		               (SELECT count(*) count_
+		                  FROM TABLE (giris012_pkg.get_details(#fnlBinderId#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	<!-- Pol Cruz for GIRIS012 End -->
+	
+	<!-- Pol Cruz for GIUTS030 Start -->
+	
+	<resultMap class="java.util.HashMap" id="giuts030BinderListMap" extends="BaseEntity.TableGridResultMap">
+	    <result column="line_cd" property="lineCd" />
+		<result column="binder_yy" property="binderYy" />
+		<result column="binder_seq_no" property="binderSeqNo" />
+		<result column="ri_cd" property="riCd" />
+		<result column="ri_name" property="riName" />
+		<result column="binder_date" property="binderDate" />
+		<result column="reverse_date" property="reverseDate" />
+		<result column="ri_tsi_amt" property="riTsiAmt" />
+		<result column="ri_prem_amt" property="riPremAmt" />
+		<result column="bndr_stat_cd" property="bndrStatCd" />
+		<result column="bndr_stat_desc" property="bndrStatDesc" />
+		<result column="policy_no" property="policyNo" />
+		<result column="assd_no" property="assdNo" />
+		<result column="assd_name" property="assdName" />
+		<result column="fnl_binder_id" property="fnlBinderId" />
+		<result column="frps_no" property="frpsNo" />
+		<result column="ref_binder_no" property="refBinderNo" />
+		<result column="confirm_no" property="confirmNo" />
+		<result column="confirm_date" property="confirmDate" />
+		<result column="release_date" property="releaseDate" />
+		<result column="released_by" property="releasedBy" />
+		<result column="replaced_flag" property="replacedFlag" />
+	</resultMap>
+	
+	<select id="getGIUTS030BinderList" resultMap="giuts030BinderListMap">
+	    <!-- Added by MarkS Optimization SR5801 11.9.2016 -->
+	     SELECT * FROM TABLE 	(giuts030_pkg.get_binder_list(#moduleId#, 
+	     												      #userId#, 
+	     												      #status#,
+														      #sortColumn#,
+														      #ascDescFlg#,
+														      #from#,
+														      #to#,
+														      #lineCd#,
+														      #binderYy#,
+														      #binderSeqNo#,
+														      #riName#,
+														      #binderDate#,
+														      #reverseDate#,
+														      #riTsiAmt#,   
+														      #riPremAmt#,   
+														      #bndrStatDesc#))
+		<!-- SELECT *
+			FROM (SELECT rownum rownum_,
+						 COUNT(1) OVER() count_, 
+						 a.*
+					FROM (SELECT *
+							FROM TABLE (giuts030_pkg.get_binder_list(#moduleId#, #userId#, #status#))
+							<isNotNull property="filter">
+							WHERE 1 = 1 
+ 								<isNotEmpty prepend="AND" property="lineCd">
+									UPPER(line_cd) LIKE UPPER(#lineCd#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="binderYy">
+									binder_yy = #binderYy#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="binderSeqNo">
+									binder_seq_no = #binderSeqNo#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="riName">
+									UPPER(ri_name) LIKE UPPER(#riName#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="binderDate">
+									TRUNC(binder_date) = TO_DATE(#binderDate#, 'mm-dd-yyyy')
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="reverseDate">
+									TRUNC(reverse_date) = TO_DATE(#reverseDate#, 'mm-dd-yyyy')
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="riTsiAmt">
+									ri_tsi_amt = #riTsiAmt#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="riPremAmt">
+									ri_prem_amt = #riPremAmt#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="bndrStatDesc">
+									UPPER(bndr_stat_desc) LIKE UPPER(#bndrStatDesc#)
+								</isNotEmpty>
+							</isNotNull>
+							<isEqual property="sortColumn" compareValue="lineCd binderYy binderSeqNo">
+								ORDER BY line_cd
+								<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>
+								
+								, binder_yy
+								<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>
+								, binder_seq_no
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="riName">
+								ORDER BY ri_name
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="binderDate">
+								ORDER BY binder_date
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="reverseDate">
+								ORDER BY reverse_date
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="riTsiAmt">
+								ORDER BY ri_tsi_amt
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="riPremAmt">
+								ORDER BY ri_prem_amt
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="bndrStatDesc">
+								ORDER BY bndr_stat_desc
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>
+						) a)
+			WHERE rownum_ BETWEEN #from# AND #to# -->
+	</select>	
+		
+	<!-- Pol Cruz for GIUTS030 End -->
+	
+	<resultMap class="java.util.HashMap" id="giris027RiLovResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="ri_cd" 		property="riCd" />
+		<result column="ri_name"	property="riName" />
+	</resultMap>
+	
+	<select id="getGiris027RiLov" resultMap="giris027RiLovResultMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE (giris027_pkg.get_ri_lov)
+		          	 	 <isNotNull property="findText">
+				  			<isNotEmpty property="findText">
+				  				WHERE (TO_CHAR(ri_cd) LIKE #findText# OR
+				  			 	       UPPER(ri_name) LIKE UPPER(#findText#))
+				  		 	</isNotEmpty>
+						 </isNotNull>		
+		          		 <isEqual property="sortColumn" compareValue="riCd">
+		              		ORDER BY ri_cd
+			             </isEqual>
+			             <isEqual property="sortColumn" compareValue="riName">
+		              		ORDER BY ri_name
+			             </isEqual>
+			             <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	  </isNotNull>) a, 
+		          	   (SELECT count(*) count_
+		          	      FROM TABLE (giris027_pkg.get_ri_lov)
+		          	      <isNotNull property="findText">
+				  			<isNotEmpty property="findText">
+				  				WHERE (TO_CHAR(ri_cd) LIKE #findText# OR
+				  			 	       UPPER(ri_name) LIKE UPPER(#findText#))
+				  		 	</isNotEmpty>
+						 </isNotNull>) b)
+		  WHERE  rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="giris027ResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="line_cd" 		property="lineCd" />
+		<result column="iss_cd" 		property="issCd" />
+		<result column="par_yy" 		property="parYy" />
+		<result column="par_seq_no" 	property="parSeqNo" />
+		<result column="quote_seq_no" 	property="quoteSeqNo" />
+		<result column="par_status" 	property="parStatus" />
+		<result column="policy_no" 		property="policyNo" />
+		<result column="accept_date" 	property="acceptDate" />
+		<result column="accept_no" 		property="acceptNo" />
+		<result column="assd_no" 		property="assdNo" />
+		<result column="assd_name" 		property="assdName" />
+		<result column="accept_by" 		property="acceptBy" />
+		<result column="ri_cd" 			property="riCd" />
+		<result column="ref_accept_no" 	property="refAcceptNo" />
+		<result column="writer_cd" 		property="writerCd" />
+		<result column="ri_name" 		property="riName" />
+		<result column="ri_policy_no" 	property="riPolicyNo" />
+		<result column="ri_binder_no" 	property="riBinderNo" />
+		<result column="ri_endt_no" 	property="riEndtNo" />
+		<result column="offer_date" 	property="offerDate" />
+		<result column="offered_by" 	property="offeredBy" />
+		<result column="amount_offered"	property="amountOffered" />
+		<result column="orig_tsi_amt"	property="origTsiAmt" />
+		<result column="orig_prem_amt"	property="origPremAmt" />
+		<result column="remarks" 		property="remarks" />
+	</resultMap>
+	
+	<select id="populateGiris027" resultMap="giris027ResultMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE (giris027_pkg.populate_giris027(#riCd#, #userId#))
+		          	 	 <isNotNull property="filter">
+							WHERE 1 = 1 
+ 								<isNotEmpty prepend="AND" property="lineCd">
+									UPPER(line_cd) LIKE UPPER(#lineCd#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="issCd">
+									UPPER(iss_cd) LIKE UPPER(#issCd#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="parYy">
+									par_yy = #parYy#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="parSeqNo">
+									par_seq_no = #parSeqNo#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="quoteSeqNo">
+									quote_seq_no = #quoteSeqNo#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="assdName">
+									UPPER(assd_name) LIKE UPPER(#assdName#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="acceptNo">
+									accept_no = #acceptNo#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="acceptDate">
+									TRUNC(accept_date) = TRUNC(TO_DATE(#acceptDate#, 'mm-dd-yyyy'))
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="acceptBy">
+									UPPER(accept_by) LIKE UPPER(#acceptBy#)
+								</isNotEmpty>
+						 </isNotNull>
+		          		 <isEqual property="sortColumn" compareValue="lineCd issCd parYy parSeqNo quoteSeqNo">
+		              		ORDER BY line_cd, iss_cd, par_yy, par_seq_no, quote_seq_no
+			             </isEqual>
+			             <isEqual property="sortColumn" compareValue="assdName">
+		              		ORDER BY assd_name
+			             </isEqual>
+			             <isEqual property="sortColumn" compareValue="acceptNo">
+		              		ORDER BY accept_no
+			             </isEqual>
+			             <isEqual property="sortColumn" compareValue="acceptDate">
+		              		ORDER BY accept_date
+			             </isEqual>
+			             <isEqual property="sortColumn" compareValue="acceptBy">
+		              		ORDER BY accept_by
+			             </isEqual>
+			             <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	  </isNotNull>) a, 
+		          	   (SELECT count(*) count_
+		          	      FROM TABLE (giris027_pkg.populate_giris027(#riCd#, #userId#))
+		          	      <isNotNull property="filter">
+							WHERE 1 = 1 
+ 								<isNotEmpty prepend="AND" property="lineCd">
+									UPPER(line_cd) LIKE UPPER(#lineCd#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="issCd">
+									UPPER(iss_cd) LIKE UPPER(#issCd#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="parYy">
+									par_yy = #parYy#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="parSeqNo">
+									par_seq_no = #parSeqNo#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="quoteSeqNo">
+									quote_seq_no = #quoteSeqNo#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="assdName">
+									UPPER(assd_name) LIKE UPPER(#assdName#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="acceptNo">
+									accept_no = #acceptNo#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="acceptDate">
+									TRUNC(accept_date) = TRUNC(TO_DATE(#acceptDate#, 'mm-dd-yyyy'))
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="acceptBy">
+									UPPER(accept_by) LIKE UPPER(#acceptBy#)
+								</isNotEmpty>
+						 </isNotNull>) b)
+		  WHERE  rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+</sqlMap>

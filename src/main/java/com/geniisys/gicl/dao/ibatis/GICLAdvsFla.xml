@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GICLAdvsFla">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GICLAdvsFla" type="com.geniisys.gicl.entity.GICLAdvsFla"/>
+	
+	<resultMap id="FLADtlsMap" class="GICLAdvsFla" extends="BaseEntity.TableGridResultMap">
+		<result column="FLA_ID"				property="flaId"/>
+		<result column="FLA_NO"				property="flaNo"/>
+	  	<result column="PRINT_SW" 			property="printSw"/>
+	  	<result column="LINE_CD"			property="lineCd"/>
+	  	<result column="LA_YY"				property="laYy"/>
+		<result column="FLA_SEQ_NO" 		property="flaSeqNo"/>
+		<result column="PAID_SHR_AMT" 		property="paidShrAmt"/>
+		<result column="NET_SHR_AMT" 		property="netShrAmt"/>
+		<result column="ADV_SHR_AMT" 		property="advShrAmt"/>
+		<result column="RI_CD" 				property="riCd"/>
+		<result column="RI_NAME"			property="riName"/>
+		<result column="DSP_RI_NAME"		property="dspRiName"/>
+		<result column="FLA_TITLE" 			property="flaTitle"/>
+		<result column="FLA_HEADER" 		property="flaHeader"/>
+		<result column="FLA_FOOTER" 		property="flaFooter"/>
+		<result column="ADV_FLA_ID"			property="advFlaId"/>
+		<result column="SHARE_TYPE"			property="shareType"/>
+		<result column="GRP_SEQ_NO"			property="grpSeqNo"/>
+  	</resultMap>
+  	
+  	<parameterMap class="map" id="cancelFlaMap">
+  		<parameter property="userId"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="claimId"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="lineCd"		jdbcType="VARCHAR"	javaType="java.lang.String"   	mode="IN"/>
+		<parameter property="laYy"			jdbcType="VARCHAR"	javaType="java.lang.String"   	mode="IN"/>
+		<parameter property="shareType"		jdbcType="VARCHAR"	javaType="java.lang.String"   	mode="IN"/>
+		<parameter property="advFlaId"		jdbcType="VARCHAR"	javaType="java.lang.String"   	mode="IN"/>
+		<parameter property="message"		jdbcType="VARCHAR"	javaType="java.lang.String"  	mode="OUT"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="updateFlaMap">
+		<parameter property="userId"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="claimId"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="grpSeqNo"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="shareType"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="adviceId"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="flaSeqNo"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="flaTitle"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="flaHeader"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="flaFooter"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="generateFlaMap">
+		<parameter property="userId"		jdbcType="VARCHAR"	javaType="java.lang.String"   	mode="IN"/>
+		<parameter property="claimId"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="adviceId"		jdbcType="NUMBER"	javaType="java.lang.Integer"	mode="IN"/>
+		<parameter property="lineCd"		jdbcType="VARCHAR"	javaType="java.lang.String"   	mode="IN"/>
+		<parameter property="clmYy"			jdbcType="VARCHAR"	javaType="java.lang.String"   	mode="IN"/>
+		<parameter property="vAdvFlaId"		jdbcType="NUMBER"	javaType="java.lang.Integer"   	mode="IN"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="clmFlaGrpMap">
+		<parameter property="userId"		jdbcType="VARCHAR"	javaType="java.lang.String"   	mode="IN"/>
+		<parameter property="claimId"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="lineCd"		jdbcType="VARCHAR"	javaType="java.lang.String"   	mode="IN"/>
+		<parameter property="clmYy"			jdbcType="VARCHAR"	javaType="java.lang.String"   	mode="IN"/>
+		<parameter property="vAdvice"		jdbcType="VARCHAR"	javaType="java.lang.String"   	mode="IN"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="updateFlaPrintSwMap">
+		<parameter property="userId"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="claimId"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="shareType"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="riCd"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="flaSeqNo"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="lineCd"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="laYy"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+	</parameterMap>
+  	
+  	<select id="getFLADtls" resultMap="FLADtlsMap" parameterClass="java.util.HashMap">
+ 		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(GICL_ADVS_FLA_PKG.get_fla_dtls(#claimId#, #grpSeqNo#, #shareType#, #adviceId#))
+		                  <isEqual property="sortColumn" compareValue="flaNo">
+			              		ORDER BY fla_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="dspRiName">
+			              		ORDER BY dsp_ri_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="paidShrAmt">
+			              		ORDER BY paid_shr_amt
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="netShrAmt">
+			              		ORDER BY net_shr_amt
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="advShrAmt">
+			              		ORDER BY adv_shr_amt
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GICL_ADVS_FLA_PKG.get_fla_dtls(#claimId#, #grpSeqNo#, #shareType#, #adviceId#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+  	
+  	<procedure id="generateFla" parameterMap="generateFlaMap">
+  		BEGIN
+  			GIIS_USERS_PKG.app_user := ?;
+  			GICL_ADVS_FLA_PKG.generate_fla(?, ?, ?, ?, ?);
+  		END;
+	</procedure>
+	
+	<select id="getAdvFlaId" resultClass="java.lang.Integer">
+		SELECT GICL_ADVS_FLA_PKG.get_adv_fla_id FROM DUAL
+	</select>
+	
+	<procedure id="clmFlaGrp1" parameterMap="clmFlaGrpMap">
+		BEGIN
+			GIIS_USERS_PKG.app_user := ?;
+			GICL_ADVS_FLA_PKG.clm_fla_grp1(?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<procedure id="clmFlaGrp1A" parameterMap="clmFlaGrpMap">
+		BEGIN
+			GIIS_USERS_PKG.app_user := ?;
+			GICL_ADVS_FLA_PKG.clm_fla_grp1a(?, ?, ?, ?);
+		END;
+	</procedure>
+  	
+  	<procedure id="cancelFla" parameterMap="cancelFlaMap">
+  		BEGIN
+  			GIIS_USERS_PKG.app_user := ?;
+  			GICL_ADVS_FLA_PKG.cancel_fla(?, ?, ?, ?, ?, ?);
+  		END;
+	</procedure>
+	
+	<procedure id="updateFla" parameterMap="updateFlaMap">
+		BEGIN
+			GIIS_USERS_PKG.app_user := ?;
+			GICL_ADVS_FLA_PKG.update_fla(?, ?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<select id="validatePdFla" resultClass="java.lang.String">
+		SELECT GICL_ADVS_FLA_PKG.validate_pd_fla(#userId#, #lineCd#, #laYy#, #flaSeqNo#, #riCd#, #override#) FROM DUAL
+	</select>
+	
+	<procedure id="updateFlaPrintSw" parameterMap="updateFlaPrintSwMap">
+		BEGIN
+			GIIS_USERS_PKG.app_user := ?;
+			GICL_ADVS_FLA_PKG.update_fla_print_sw(?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+  	
+</sqlMap>

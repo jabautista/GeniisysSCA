@@ -1,0 +1,409 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIRIR001_PERIL_SUBREPORT" pageWidth="555" pageHeight="802" columnWidth="555" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" isFloatColumnFooter="true">
+	<property name="ireport.zoom" value="1.6105100000000014"/>
+	<property name="ireport.x" value="30"/>
+	<property name="ireport.y" value="0"/>
+	<style name="FONT_STYLE1" isDefault="true" lineSpacing="Single" fontName="Monospaced" fontSize="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false"/>
+	<style name="FONT_STYLE_2" lineSpacing="Single" fontName="Monospaced" fontSize="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false"/>
+	<parameter name="P_FNL_BINDER_ID" class="java.lang.Integer"/>
+	<parameter name="P_LINE_CD" class="java.lang.String"/>
+	<parameter name="P_FRPS_YY" class="java.lang.Integer"/>
+	<parameter name="P_FRPS_SEQ_NO" class="java.lang.Integer"/>
+	<parameter name="P_SHORT_NAME" class="java.lang.String"/>
+	<parameter name="P_SHOW_VAT" class="java.lang.String"/>
+	<parameter name="P_SHOW_WHOLD_VAT" class="java.lang.String"/>
+	<parameter name="P_SHOW_TAX" class="java.lang.String"/>
+	<parameter name="P_RI_CD" class="java.lang.Integer"/>
+	<parameter name="P_REVERSE_SW" class="java.lang.String"/>
+	<parameter name="P_REVERSE_DATE" class="java.sql.Timestamp"/>
+	<parameter name="P_VAT_TITLE" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT *
+FROM TABLE
+(GIRI_BINDER_REPORTS_PKG.get_giri_binder_report_perils($P{P_FNL_BINDER_ID}, $P{P_LINE_CD}, $P{P_FRPS_YY}, $P{P_FRPS_SEQ_NO}, $P{P_REVERSE_SW},
+						       $P{P_REVERSE_DATE}, $P{P_RI_CD}))]]>
+	</queryString>
+	<field name="GROSS_PREM" class="java.math.BigDecimal"/>
+	<field name="RI_PREM_AMT" class="java.math.BigDecimal"/>
+	<field name="RI_COMM_RT" class="java.math.BigDecimal"/>
+	<field name="RI_COMM_AMT" class="java.math.BigDecimal"/>
+	<field name="LESS_RI_COMM_AMT" class="java.math.BigDecimal"/>
+	<field name="FNL_BINDER_ID" class="java.math.BigDecimal"/>
+	<field name="LINE_CD" class="java.lang.String"/>
+	<field name="FRPS_YY" class="java.math.BigDecimal"/>
+	<field name="FRPS_SEQ_NO" class="java.math.BigDecimal"/>
+	<field name="PERIL_TITLE" class="java.lang.String"/>
+	<field name="RI_PREM_VAT" class="java.math.BigDecimal"/>
+	<field name="RI_COMM_VAT" class="java.math.BigDecimal"/>
+	<field name="PERIL_COMM_VAT" class="java.math.BigDecimal"/>
+	<field name="V_SEQUENCE" class="java.math.BigDecimal"/>
+	<field name="PRT_FLAG" class="java.lang.String"/>
+	<field name="RI_WHOLDING_VAT" class="java.math.BigDecimal"/>
+	<field name="LESS_COMM_VAT" class="java.math.BigDecimal"/>
+	<field name="DISPLAY_PERIL" class="java.lang.String"/>
+	<field name="CNT_DISP_PERIL" class="java.lang.Integer"/>
+	<field name="PERIL_ROWNO" class="java.lang.Integer"/>
+	<variable name="V_SUM_GROSS_PREM" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{GROSS_PREM}]]></variableExpression>
+		<initialValueExpression><![CDATA[new BigDecimal('0')]]></initialValueExpression>
+	</variable>
+	<variable name="V_SUM_RI_PREM_AMT" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{RI_PREM_AMT}]]></variableExpression>
+		<initialValueExpression><![CDATA[new BigDecimal('0')]]></initialValueExpression>
+	</variable>
+	<variable name="V_SUM_RI_COMM_AMT" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{RI_COMM_AMT}]]></variableExpression>
+		<initialValueExpression><![CDATA[new BigDecimal('0')]]></initialValueExpression>
+	</variable>
+	<variable name="V_SUM_LESS_RI_COMM_AMT" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{LESS_RI_COMM_AMT}]]></variableExpression>
+		<initialValueExpression><![CDATA[new BigDecimal('0')]]></initialValueExpression>
+	</variable>
+	<variable name="V_LESS_COM_VAT" class="java.math.BigDecimal">
+		<variableExpression><![CDATA[$F{LESS_COMM_VAT}]]></variableExpression>
+		<initialValueExpression><![CDATA[new BigDecimal('0')]]></initialValueExpression>
+	</variable>
+	<variable name="V_RI_WHOLD_VAT" class="java.math.BigDecimal">
+		<variableExpression><![CDATA[$F{RI_WHOLDING_VAT}]]></variableExpression>
+		<initialValueExpression><![CDATA[new BigDecimal('0')]]></initialValueExpression>
+	</variable>
+	<variable name="V_CNT_DISPLAYED_PERIL" class="java.lang.Integer" resetType="Column" calculation="Sum">
+		<variableExpression><![CDATA[$F{CNT_DISP_PERIL}]]></variableExpression>
+	</variable>
+	<detail>
+		<band height="12" splitType="Stretch">
+			<frame>
+				<reportElement x="0" y="0" width="555" height="12" isRemoveLineWhenBlank="true">
+					<printWhenExpression><![CDATA[$F{DISPLAY_PERIL}.equals( "Y" )]]></printWhenExpression>
+				</reportElement>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00;(   #,##0.00 )" isBlankWhenNull="true">
+					<reportElement x="75" y="0" width="100" height="12" isRemoveLineWhenBlank="true"/>
+					<textElement textAlignment="Right" lineSpacing="Single"/>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{GROSS_PREM}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="###0.0000" isBlankWhenNull="true">
+					<reportElement style="FONT_STYLE1" x="284" y="0" width="40" height="12"/>
+					<textElement textAlignment="Right" lineSpacing="Single"/>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{RI_COMM_RT}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00;(  #,##0.00  )" isBlankWhenNull="true">
+					<reportElement style="FONT_STYLE1" x="360" y="0" width="80" height="12"/>
+					<textElement textAlignment="Right" lineSpacing="Single"/>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{RI_COMM_AMT}.abs()]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement style="FONT_STYLE1" x="45" y="0" width="25" height="12"/>
+					<textElement textAlignment="Right" lineSpacing="Single"/>
+					<textFieldExpression class="java.lang.String"><![CDATA[$P{P_SHORT_NAME}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00;(  #,##0.00  )" isBlankWhenNull="true">
+					<reportElement x="195" y="0" width="80" height="12" isRemoveLineWhenBlank="true"/>
+					<textElement textAlignment="Right" lineSpacing="Single"/>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{RI_PREM_AMT}.abs()]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement style="FONT_STYLE1" x="325" y="0" width="10" height="12" isRemoveLineWhenBlank="true"/>
+					<textElement textAlignment="Left" lineSpacing="Single"/>
+					<text><![CDATA[ %]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement style="FONT_STYLE1" positionType="Float" x="465" y="0" width="5" height="12" isRemoveLineWhenBlank="true">
+						<printWhenExpression><![CDATA[new BigDecimal("0").compareTo($F{LESS_RI_COMM_AMT}) == 1]]></printWhenExpression>
+					</reportElement>
+					<textElement textAlignment="Center" lineSpacing="Single"/>
+					<textFieldExpression class="java.lang.String"><![CDATA["("]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement style="FONT_STYLE1" positionType="Float" x="550" y="0" width="5" height="12" isRemoveLineWhenBlank="true">
+						<printWhenExpression><![CDATA[new BigDecimal("0").compareTo($F{LESS_RI_COMM_AMT}) == 1]]></printWhenExpression>
+					</reportElement>
+					<textElement textAlignment="Center" lineSpacing="Single"/>
+					<textFieldExpression class="java.lang.String"><![CDATA[")"]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement style="FONT_STYLE1" positionType="Float" x="440" y="0" width="5" height="12" isRemoveLineWhenBlank="true">
+						<printWhenExpression><![CDATA[new BigDecimal("0").compareTo($F{RI_COMM_AMT}) == 1]]></printWhenExpression>
+					</reportElement>
+					<textElement textAlignment="Center" lineSpacing="Single"/>
+					<textFieldExpression class="java.lang.String"><![CDATA[")"]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement style="FONT_STYLE1" positionType="Float" x="355" y="0" width="5" height="12" isRemoveLineWhenBlank="true">
+						<printWhenExpression><![CDATA[new BigDecimal("0").compareTo($F{RI_COMM_AMT}) == 1]]></printWhenExpression>
+					</reportElement>
+					<textElement textAlignment="Center" lineSpacing="Single"/>
+					<textFieldExpression class="java.lang.String"><![CDATA["("]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement style="FONT_STYLE1" positionType="Float" x="275" y="0" width="5" height="12" isRemoveLineWhenBlank="true">
+						<printWhenExpression><![CDATA[new BigDecimal("0").compareTo($F{RI_PREM_AMT}) == 1]]></printWhenExpression>
+					</reportElement>
+					<textElement textAlignment="Center" lineSpacing="Single"/>
+					<textFieldExpression class="java.lang.String"><![CDATA[")"]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement style="FONT_STYLE1" positionType="Float" x="190" y="0" width="5" height="12" isRemoveLineWhenBlank="true">
+						<printWhenExpression><![CDATA[new BigDecimal("0").compareTo($F{RI_PREM_AMT}) == 1]]></printWhenExpression>
+					</reportElement>
+					<textElement textAlignment="Center" lineSpacing="Single"/>
+					<textFieldExpression class="java.lang.String"><![CDATA["("]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+					<reportElement style="FONT_STYLE1" x="470" y="0" width="80" height="12"/>
+					<textElement textAlignment="Right" lineSpacing="Single"/>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{LESS_RI_COMM_AMT}.abs()]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement style="FONT_STYLE1" x="0" y="0" width="45" height="12"/>
+					<textElement lineSpacing="Single"/>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{PERIL_TITLE}]]></textFieldExpression>
+				</textField>
+			</frame>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="63">
+			<line>
+				<reportElement x="75" y="13" width="100" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="180" y="13" width="98" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="340" y="13" width="105" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="450" y="13" width="105" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(   #,##0.00 )" isBlankWhenNull="true">
+				<reportElement style="FONT_STYLE1" positionType="Float" x="75" y="18" width="100" height="12" isRemoveLineWhenBlank="true"/>
+				<textElement textAlignment="Right" lineSpacing="Single"/>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_SUM_GROSS_PREM}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="FONT_STYLE1" positionType="Float" x="45" y="18" width="25" height="12"/>
+				<textElement textAlignment="Right" lineSpacing="Single"/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$P{P_SHORT_NAME}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(  #,##0.00  )" isBlankWhenNull="true">
+				<reportElement style="FONT_STYLE1" positionType="Float" x="195" y="18" width="80" height="12" isRemoveLineWhenBlank="true"/>
+				<textElement textAlignment="Right" lineSpacing="Single"/>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_SUM_RI_PREM_AMT}.abs()]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(  #,##0.00  )" isBlankWhenNull="true">
+				<reportElement style="FONT_STYLE1" positionType="Float" x="360" y="18" width="80" height="12" isRemoveLineWhenBlank="true"/>
+				<textElement textAlignment="Right" lineSpacing="Single"/>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_SUM_RI_COMM_AMT}.abs()]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement style="FONT_STYLE1" positionType="Float" x="470" y="18" width="80" height="12" isRemoveLineWhenBlank="true"/>
+				<textElement textAlignment="Right" lineSpacing="Single"/>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_SUM_LESS_RI_COMM_AMT}.abs()]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="FONT_STYLE1" x="0" y="34" width="70" height="12" isRemoveLineWhenBlank="true">
+					<printWhenExpression><![CDATA[$P{P_SHOW_VAT}.equals("N") ? false : true]]></printWhenExpression>
+				</reportElement>
+				<textElement lineSpacing="Single" markup="none"/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$P{P_VAT_TITLE}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(  #,##0.00  )" isBlankWhenNull="true">
+				<reportElement style="FONT_STYLE1" positionType="Float" x="195" y="34" width="80" height="12" isRemoveLineWhenBlank="true">
+					<printWhenExpression><![CDATA[$P{P_SHOW_VAT}.equals("N") ? false : true]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right" lineSpacing="Single"/>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{RI_PREM_VAT}.abs()]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(  #,##0.00  )" isBlankWhenNull="true">
+				<reportElement style="FONT_STYLE1" positionType="Float" x="360" y="34" width="80" height="12" isRemoveLineWhenBlank="true">
+					<printWhenExpression><![CDATA[$P{P_SHOW_VAT}.equals("N") ? false : true]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right" lineSpacing="Single"/>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{RI_COMM_VAT}.abs()]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(  #,##0.00  )" isBlankWhenNull="true">
+				<reportElement style="FONT_STYLE1" positionType="Float" x="470" y="34" width="80" height="12" isRemoveLineWhenBlank="true">
+					<printWhenExpression><![CDATA[$P{P_SHOW_VAT}.equals("N") ? false : true]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right" lineSpacing="Single"/>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{LESS_COMM_VAT}.abs()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="FONT_STYLE1" x="0" y="49" width="70" height="12" isRemoveLineWhenBlank="true">
+					<printWhenExpression><![CDATA[$P{P_SHOW_WHOLD_VAT}.equals("N") ? false : true]]></printWhenExpression>
+				</reportElement>
+				<textElement lineSpacing="Single"/>
+				<text><![CDATA[W/holding VAT]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(  #,##0.00  )" isBlankWhenNull="true">
+				<reportElement style="FONT_STYLE1" positionType="Float" x="195" y="49" width="80" height="12" isRemoveLineWhenBlank="true">
+					<printWhenExpression><![CDATA[$P{P_SHOW_WHOLD_VAT}.equals("N") ? false : true]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right" lineSpacing="Single"/>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{RI_WHOLDING_VAT}.abs()]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(  #,##0.00  )" isBlankWhenNull="true">
+				<reportElement style="FONT_STYLE1" positionType="Float" x="470" y="49" width="80" height="12" isRemoveLineWhenBlank="true">
+					<printWhenExpression><![CDATA[$P{P_SHOW_WHOLD_VAT}.equals("N") ? false : true]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right" lineSpacing="Single"/>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{RI_WHOLDING_VAT}.abs()]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="FONT_STYLE1" positionType="Float" x="550" y="34" width="5" height="12" isRemoveLineWhenBlank="true">
+					<printWhenExpression><![CDATA[($P{P_SHOW_VAT}.equals("N") ? false : true) && (new BigDecimal("0").compareTo($F{LESS_COMM_VAT}) == 1)]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Center" lineSpacing="Single"/>
+				<textFieldExpression class="java.lang.String"><![CDATA[")"]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="FONT_STYLE1" positionType="Float" x="465" y="34" width="5" height="12" isRemoveLineWhenBlank="true">
+					<printWhenExpression><![CDATA[($P{P_SHOW_VAT}.equals("N") ? false : true) && (new BigDecimal("0").compareTo($F{LESS_COMM_VAT}) == 1)]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Center" lineSpacing="Single"/>
+				<textFieldExpression class="java.lang.String"><![CDATA["("]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="FONT_STYLE1" positionType="Float" x="465" y="18" width="5" height="12" isRemoveLineWhenBlank="true">
+					<printWhenExpression><![CDATA[new BigDecimal("0").compareTo($V{V_SUM_LESS_RI_COMM_AMT}) == 1]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Center" lineSpacing="Single"/>
+				<textFieldExpression class="java.lang.String"><![CDATA["("]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="FONT_STYLE1" positionType="Float" x="550" y="18" width="5" height="12" isRemoveLineWhenBlank="true">
+					<printWhenExpression><![CDATA[new BigDecimal("0").compareTo($V{V_SUM_LESS_RI_COMM_AMT}) == 1]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Center" lineSpacing="Single"/>
+				<textFieldExpression class="java.lang.String"><![CDATA[")"]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="FONT_STYLE1" positionType="Float" x="465" y="49" width="5" height="12" isRemoveLineWhenBlank="true">
+					<printWhenExpression><![CDATA[($P{P_SHOW_WHOLD_VAT}.equals("N") ? false : true) && (new BigDecimal("0").compareTo($F{RI_WHOLDING_VAT}) == 1)]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Center" lineSpacing="Single"/>
+				<textFieldExpression class="java.lang.String"><![CDATA["("]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="FONT_STYLE1" positionType="Float" x="550" y="49" width="5" height="12" isRemoveLineWhenBlank="true">
+					<printWhenExpression><![CDATA[($P{P_SHOW_WHOLD_VAT}.equals("N") ? false : true) && (new BigDecimal("0").compareTo($F{RI_WHOLDING_VAT}) == 1)]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Center" lineSpacing="Single"/>
+				<textFieldExpression class="java.lang.String"><![CDATA[")"]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="FONT_STYLE1" positionType="Float" x="440" y="18" width="5" height="12" isRemoveLineWhenBlank="true">
+					<printWhenExpression><![CDATA[new BigDecimal("0").compareTo($V{V_SUM_RI_COMM_AMT}) == 1]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Center" lineSpacing="Single"/>
+				<textFieldExpression class="java.lang.String"><![CDATA[")"]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="FONT_STYLE1" positionType="Float" x="440" y="34" width="5" height="12" isRemoveLineWhenBlank="true">
+					<printWhenExpression><![CDATA[($P{P_SHOW_VAT}.equals("N") ? false : true) && (new BigDecimal("0").compareTo($F{RI_COMM_VAT}) == 1)]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Center" lineSpacing="Single"/>
+				<textFieldExpression class="java.lang.String"><![CDATA[")"]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="FONT_STYLE1" positionType="Float" x="355" y="34" width="5" height="12" isRemoveLineWhenBlank="true">
+					<printWhenExpression><![CDATA[($P{P_SHOW_VAT}.equals("N") ? false : true) && (new BigDecimal("0").compareTo($F{RI_COMM_VAT}) == 1)]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Center" lineSpacing="Single"/>
+				<textFieldExpression class="java.lang.String"><![CDATA["("]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="FONT_STYLE1" positionType="Float" x="355" y="18" width="5" height="12" isRemoveLineWhenBlank="true">
+					<printWhenExpression><![CDATA[new BigDecimal("0").compareTo($V{V_SUM_RI_COMM_AMT}) == 1]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Center" lineSpacing="Single"/>
+				<textFieldExpression class="java.lang.String"><![CDATA["("]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="FONT_STYLE1" positionType="Float" x="275" y="18" width="5" height="12" isRemoveLineWhenBlank="true">
+					<printWhenExpression><![CDATA[new BigDecimal("0").compareTo($V{V_SUM_RI_PREM_AMT}) == 1]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Center" lineSpacing="Single"/>
+				<textFieldExpression class="java.lang.String"><![CDATA[")"]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="FONT_STYLE1" positionType="Float" x="275" y="34" width="5" height="12" isRemoveLineWhenBlank="true">
+					<printWhenExpression><![CDATA[($P{P_SHOW_VAT}.equals("N") ? false : true) && (new BigDecimal("0").compareTo($F{RI_PREM_VAT}) == 1)]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Center" lineSpacing="Single"/>
+				<textFieldExpression class="java.lang.String"><![CDATA[")"]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="FONT_STYLE1" positionType="Float" x="275" y="49" width="5" height="12" isRemoveLineWhenBlank="true">
+					<printWhenExpression><![CDATA[($P{P_SHOW_WHOLD_VAT}.equals("N") ? false : true) && (new BigDecimal("0").compareTo($F{RI_WHOLDING_VAT}) == 1)]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Center" lineSpacing="Single"/>
+				<textFieldExpression class="java.lang.String"><![CDATA[")"]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="FONT_STYLE1" positionType="Float" x="190" y="49" width="5" height="12" isRemoveLineWhenBlank="true">
+					<printWhenExpression><![CDATA[($P{P_SHOW_WHOLD_VAT}.equals("N") ? false : true) && (new BigDecimal("0").compareTo($F{RI_WHOLDING_VAT}) == 1)]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Center" lineSpacing="Single"/>
+				<textFieldExpression class="java.lang.String"><![CDATA["("]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="FONT_STYLE1" positionType="Float" x="190" y="34" width="5" height="12" isRemoveLineWhenBlank="true">
+					<printWhenExpression><![CDATA[($P{P_SHOW_VAT}.equals("N") ? false : true) && (new BigDecimal("0").compareTo($F{RI_PREM_VAT}) == 1)]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Center" lineSpacing="Single"/>
+				<textFieldExpression class="java.lang.String"><![CDATA["("]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="FONT_STYLE1" positionType="Float" x="190" y="18" width="5" height="12" isRemoveLineWhenBlank="true">
+					<printWhenExpression><![CDATA[new BigDecimal("0").compareTo($V{V_SUM_RI_PREM_AMT}) == 1]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Center" lineSpacing="Single"/>
+				<textFieldExpression class="java.lang.String"><![CDATA["("]]></textFieldExpression>
+			</textField>
+			<frame>
+				<reportElement isPrintRepeatedValues="false" x="0" y="0" width="555" height="12" isRemoveLineWhenBlank="true">
+					<printWhenExpression><![CDATA[$V{V_CNT_DISPLAYED_PERIL} == 0 ]]></printWhenExpression>
+				</reportElement>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00;(   #,##0.00 )" isBlankWhenNull="true">
+					<reportElement x="75" y="0" width="100" height="12" isRemoveLineWhenBlank="true"/>
+					<textElement textAlignment="Right" lineSpacing="Single"/>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[0.00]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00;(  #,##0.00  )" isBlankWhenNull="true">
+					<reportElement style="FONT_STYLE1" x="360" y="0" width="80" height="12"/>
+					<textElement textAlignment="Right" lineSpacing="Single"/>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[0.00]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00;(  #,##0.00  )" isBlankWhenNull="true">
+					<reportElement x="195" y="0" width="80" height="12" isRemoveLineWhenBlank="true"/>
+					<textElement textAlignment="Right" lineSpacing="Single"/>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[0.00]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement style="FONT_STYLE1" positionType="Float" x="465" y="0" width="5" height="12" isRemoveLineWhenBlank="true">
+						<printWhenExpression><![CDATA[new BigDecimal("0").compareTo($F{LESS_RI_COMM_AMT}) == 1]]></printWhenExpression>
+					</reportElement>
+					<textElement textAlignment="Center" lineSpacing="Single"/>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+					<reportElement style="FONT_STYLE1" x="470" y="0" width="80" height="12"/>
+					<textElement textAlignment="Right" lineSpacing="Single"/>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[0.00]]></textFieldExpression>
+				</textField>
+			</frame>
+		</band>
+	</columnFooter>
+</jasperReport>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GICLR206E_TOTAL_LOSS" language="groovy" pageWidth="70" pageHeight="752" columnWidth="70" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="2.4157650000000035"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="Crosstab Data Text" isDefault="false" hAlign="Center"/>
+	<parameter name="P_SESSION_ID" class="java.lang.String"/>
+	<parameter name="P_BUSS_SOURCE" class="java.lang.String"/>
+	<parameter name="P_ISS_CD" class="java.lang.String"/>
+	<parameter name="P_LINE_CD" class="java.lang.String"/>
+	<parameter name="P_SUBLINE_CD" class="java.lang.String"/>
+	<parameter name="P_LOSS_YEAR" class="java.math.BigDecimal"/>
+	<queryString>
+		<![CDATA[SELECT NVL(SUM(a.expenses_paid),0) paid_losses
+  FROM GICL_RES_BRDRX_EXTR a
+ WHERE a.session_id = $P{P_SESSION_ID}
+   AND a.buss_source = $P{P_BUSS_SOURCE}
+   AND a.iss_cd = $P{P_ISS_CD}
+   AND a.line_cd = $P{P_LINE_CD}
+   AND a.subline_cd = $P{P_SUBLINE_CD}
+   AND a.loss_year = $P{P_LOSS_YEAR}
+   AND NVL(a.expenses_paid, 0) <> 0]]>
+	</queryString>
+	<field name="PAID_LOSSES" class="java.math.BigDecimal"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="9" splitType="Stretch">
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement mode="Transparent" x="0" y="0" width="70" height="9" isPrintWhenDetailOverflows="true" forecolor="#000000" backcolor="#FFFFFF"/>
+				<textElement textAlignment="Right" verticalAlignment="Top" rotation="None" lineSpacing="Single" markup="none">
+					<font fontName="Arial" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{PAID_LOSSES}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

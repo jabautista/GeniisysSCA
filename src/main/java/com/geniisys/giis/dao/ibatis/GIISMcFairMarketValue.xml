@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISMcFairMarketValue">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<resultMap id="GIISMcFairMarketValueResult" class="com.geniisys.giis.entity.GIISMcFairMarketValue" extends="BaseEntity.TableGridResultMap">
+ 		<!-- <result property="carCompany" 		column="CAR_COMPANY" />
+		<result property="make"				column="MAKE" />
+		<result property="engineSeries"		column="ENGINE_SERIES" /> --> 
+		<result property="carCompanyCd"		column="CAR_COMPANY_CD" />
+		<result property="makeCd"			column="MAKE_CD" />
+		<result property="seriesCd"			column="SERIES_CD" />
+		<result property="modelYear"		column="MODEL_YEAR" />
+		<result property="histNo"			column="HIST_NO" />
+		<result property="effDate"			column="EFF_DATE" />
+		<result property="fmvValue"			column="FMV_VALUE" />
+		<result property="fmvValueMin"   	column="FMV_VALUE_MIN" />
+		<result property="fmvValueMax" 	 	column="FMV_VALUE_MAX" />
+		<result property="maxSequence" 	 	column="MAX_SEQUENCE" />
+		<result property="deleteSw" 	 	column="DELETE_SW" />
+		<result property="userId"			column="USER_ID" />
+		<result property="lastUpdate"   	column="LAST_UPDATE" />
+		<result property="lastEffDate"   	column="LAST_EFF_DATE" />				
+	</resultMap>
+	
+ 	<resultMap id="GIISCarCompanyListing" class="com.geniisys.giis.entity.GIISMcFairMarketValue" extends="BaseEntity.TableGridResultMap">
+  		<result column="CAR_COMPANY"				property="carCompany"			jdbcType="VARCHAR" />
+  		<result column="CAR_COMPANY_CD"				property="carCompanyCd"			jdbcType="VARCHAR" />
+  		<result column="MAKE"						property="make"					jdbcType="VARCHAR" />
+  		<result column="MAKE_CD"					property="makeCd"				jdbcType="VARCHAR" />
+  		<result column="ENGINE_SERIES"				property="engineSeries"			jdbcType="VARCHAR" />     	
+  		<result column="SERIES_CD"					property="seriesCd"				jdbcType="VARCHAR" />   	
+  	</resultMap>
+  
+  	<select id="getGIISS223SourceList" resultMap ="GIISCarCompanyListing">
+  		SELECT *
+		  FROM (SELECT rownum rownum_, b.count_, a.* 
+		          FROM (SELECT car_company, car_company_cd, make, make_cd, engine_series, series_cd
+		          		  FROM TABLE(GIISS223_PKG.get_mc_fmv_source_list(#appUser#))
+		          		  <isNotNull property="filter">
+		          		  	WHERE 1 = 1
+		          		  	  	<isNotEmpty prepend="AND" property="carCompany">
+		          		  			UPPER(car_company) LIKE UPPER(#carCompany#)
+		          		  	  	</isNotEmpty>
+		          		  	  	<isNotEmpty prepend="AND" property="make">
+		          		  			UPPER(make) LIKE UPPER(#make#)
+		          		  	  	</isNotEmpty>
+		          		  	  	<isNotEmpty prepend="AND" property="engineSeries">
+		          		  			UPPER(engine_series) LIKE UPPER(#engineSeries#)
+		          		  	  	</isNotEmpty>		          		  	  	
+		          		  </isNotNull>
+		          		  <isEqual property="sortColumn" compareValue="carCompany">
+			              		ORDER BY car_company
+			              </isEqual>
+		          		  <isEqual property="sortColumn" compareValue="make">
+			              		ORDER BY make
+			              </isEqual>
+		          		  <isEqual property="sortColumn" compareValue="engineSeries">
+			              		ORDER BY engine_series
+			              </isEqual>			              			              
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIISS223_PKG.get_mc_fmv_source_list(#appUser#))
+		                  <isNotNull property="filter">
+		          		  	WHERE 1 = 1		          		  	  	
+		          		  	  	<isNotEmpty prepend="AND" property="carCompany">
+		          		  			UPPER(car_company) LIKE UPPER(#carCompany#)
+		          		  	  	</isNotEmpty>
+		          		  	  	<isNotEmpty prepend="AND" property="make">
+		          		  			UPPER(make) LIKE UPPER(#make#)
+		          		  	  	</isNotEmpty>
+		          		  	  	<isNotEmpty prepend="AND" property="engineSeries">
+		          		  			UPPER(engine_series) LIKE UPPER(#engineSeries#)
+		          		  	  	</isNotEmpty>				          		  	  	
+		          		  </isNotNull>
+		                ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>	  	
+	
+ 	<select id="getGIISS223FmvList" resultMap="GIISMcFairMarketValueResult" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, b.count_, a.*
+				  FROM (SELECT *
+						  FROM TABLE(GIISS223_PKG.get_mc_fmv_list(#carCompanyCd#,#makeCd#,#seriesCd#))
+						  	<isNotNull property="filter">
+						  	  WHERE 1 = 1
+						  		<isNotEmpty prepend="AND" property="carCompanyCd">
+						  			UPPER(CAR_COMPANY_CD) LIKE UPPER(#carCompanyCd#)
+						  		</isNotEmpty>
+						  		<isNotEmpty prepend="AND" property="makeCd">
+						  			UPPER(MAKE_CD) LIKE UPPER(#makeCd#)
+						  		</isNotEmpty>
+						  		<isNotEmpty prepend="AND" property="seriesCd">
+						  			UPPER(SERIES_CD) LIKE UPPER(#seriesCd#)
+						  		</isNotEmpty>
+						  		<isNotEmpty prepend="AND" property="modelYear">
+						  			UPPER(MODEL_YEAR) LIKE UPPER(#modelYear#)
+						  		</isNotEmpty>
+						  		<isNotEmpty prepend="AND" property="histNo">
+						  			UPPER(HIST_NO) LIKE UPPER(#histNo#)
+						  		</isNotEmpty>
+						  		<isNotEmpty prepend="AND" property="effDate">
+						  			UPPER(EFF_DATE) LIKE TO_CHAR(TO_DATE(#effDate#, 'MM-DD-YYYY'),'YYYY-MM-DD')						  			
+						  		</isNotEmpty>
+						  		<isNotEmpty prepend="AND" property="fmvValue">
+						  			UPPER(FMV_VALUE) LIKE UPPER(#fmvValue#)
+						  		</isNotEmpty>
+						  		<isNotEmpty prepend="AND" property="fmvValueMin">
+						  			UPPER(FMV_VALUE_MIN) LIKE UPPER(#fmvValueMin#)
+						  		</isNotEmpty>
+						  		<isNotEmpty prepend="AND" property="fmvValueMax">
+						  			UPPER(FMV_VALUE_MAX) LIKE UPPER(#fmvValueMax#)
+						  		</isNotEmpty>
+						  		<isNotEmpty prepend="AND" property="deleteSw">
+						  			UPPER(DELETE_SW) LIKE UPPER(#deleteSw#)
+						  		</isNotEmpty>	
+						   	</isNotNull>
+						  	<isEqual property="sortColumn" compareValue="carCompanyCd">
+								ORDER BY CAR_COMPANY_CD
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="makeCd">
+								ORDER BY MAKE_CD
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="seriesCd">
+								ORDER BY SERIES_CD
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="modelYear">
+								ORDER BY MODEL_YEAR
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="histNo">
+								ORDER BY HIST_NO
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="effDate">
+								ORDER BY EFF_DATE
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="fmvValue">
+								ORDER BY FMV_VALUE
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="fmvValueMin">
+								ORDER BY FMV_VALUE_MIN
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="fmvValueMax">
+								ORDER BY FMV_VALUE_MAX
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="deleteSw">
+								ORDER BY DELETE_SW
+							</isEqual>							
+						  	<isNotNull property="sortColumn">							
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+						  	</isNotNull>
+						  ) a,
+					   (SELECT COUNT(*) count_
+						  FROM TABLE(GIISS223_PKG.get_mc_fmv_list(#carCompanyCd#,#makeCd#,#seriesCd#))
+					  	<isNotNull property="filter">
+						  	  WHERE 1 = 1
+						  		<isNotEmpty prepend="AND" property="carCompanyCd">
+						  			UPPER(CAR_COMPANY_CD) LIKE UPPER(#carCompanyCd#)
+						  		</isNotEmpty>
+						  		<isNotEmpty prepend="AND" property="makeCd">
+						  			UPPER(MAKE_CD) LIKE UPPER(#makeCd#)
+						  		</isNotEmpty>
+						  		<isNotEmpty prepend="AND" property="seriesCd">
+						  			UPPER(SERIES_CD) LIKE UPPER(#seriesCd#)
+						  		</isNotEmpty>
+						  		<isNotEmpty prepend="AND" property="modelYear">
+						  			UPPER(MODEL_YEAR) LIKE UPPER(#modelYear#)
+						  		</isNotEmpty>
+						  		<isNotEmpty prepend="AND" property="histNo">
+						  			UPPER(HIST_NO) LIKE UPPER(#histNo#)
+						  		</isNotEmpty>
+						  		<isNotEmpty prepend="AND" property="effDate">
+						  			UPPER(EFF_DATE) LIKE TO_CHAR(TO_DATE(#effDate#, 'MM-DD-YYYY'),'YYYY-MM-DD')
+						  		</isNotEmpty>
+						  		<isNotEmpty prepend="AND" property="fmvValue">
+						  			UPPER(FMV_VALUE) LIKE UPPER(#fmvValue#)
+						  		</isNotEmpty>
+						  		<isNotEmpty prepend="AND" property="fmvValueMin">
+						  			UPPER(FMV_VALUE_MIN) LIKE UPPER(#fmvValueMin#)
+						  		</isNotEmpty>
+						  		<isNotEmpty prepend="AND" property="fmvValueMax">
+						  			UPPER(FMV_VALUE_MAX) LIKE UPPER(#fmvValueMax#)
+						  		</isNotEmpty>
+						  		<isNotEmpty prepend="AND" property="deleteSw">
+						  			UPPER(DELETE_SW) LIKE UPPER(#deleteSw#)
+						  		</isNotEmpty>	
+						   	</isNotNull>
+						) b)
+				  WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap id="getGIISS223ModelYearLovMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+	  	<result column="MODEL_YEAR"			property="modelYear"/>
+  	</resultMap>	
+  	
+	<select id="getGIISS223ModelYear" resultMap="getGIISS223ModelYearLovMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+					   b.count_, 
+					   a.* 
+				  FROM (SELECT * 
+						  FROM TABLE (GIISS223_PKG.get_model_year_lov(#findText#))
+						  <isEqual property="sortColumn" compareValue="modelYear">
+								ORDER BY MODEL_YEAR
+						  </isEqual>
+						  <isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+						  </isNotNull>
+						  ) a, 
+					   (SELECT count(*) count_ 
+						  FROM TABLE (GIISS223_PKG.get_model_year_lov(#findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>  	
+  	
+  	<procedure id="setGiisFmv" parameterClass="com.geniisys.giis.entity.GIISMcFairMarketValue">
+		DECLARE
+		  v_fmv GIIS_MC_FMV%ROWTYPE;
+		BEGIN
+		  giis_users_pkg.app_user := #appUser#;
+		  		 
+		  v_fmv.car_company_cd 		:= #carCompanyCd#;
+		  v_fmv.make_cd    			:= #makeCd#;
+		  v_fmv.series_cd   		:= #seriesCd#;
+          v_fmv.model_year  		:= #modelYear#;
+          v_fmv.hist_no  			:= #histNo#;
+          v_fmv.eff_date  			:= TO_DATE(#effDate#,'MM/DD/YYYY');
+          v_fmv.fmv_value  			:= #fmvValue#;
+          v_fmv.fmv_value_min  		:= #fmvValueMin#;
+          v_fmv.fmv_value_max 		:= #fmvValueMax#;
+          v_fmv.delete_sw    		:= #deleteSw#;
+          v_fmv.user_id 			:= #appUser#;
+		  
+		  GIISS223_PKG.set_giis_fmv(v_fmv);
+		END;
+	</procedure>
+
+</sqlMap>

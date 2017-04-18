@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIACR139_GRAND_TOTAL" language="groovy" pageWidth="970" pageHeight="750" columnWidth="970" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="1.5421731577181266"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="Crosstab Data Text" isDefault="false" hAlign="Center"/>
+	<style name="table" isDefault="false">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_TH" isDefault="false" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_CH" isDefault="false" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_TD" isDefault="false" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<parameter name="P_POLICY_ID" class="java.math.BigDecimal"/>
+	<parameter name="P_ZONE_TYPE" class="java.lang.String"/>
+	<parameter name="P_DATE" class="java.lang.String"/>
+	<parameter name="P_AS_OF_SW" class="java.lang.String"/>
+	<parameter name="P_USER_ID" class="java.lang.String"/>
+	<parameter name="P_FROM_DATE" class="java.lang.String"/>
+	<parameter name="P_TO_DATE" class="java.lang.String"/>
+	<parameter name="P_AS_OF" class="java.lang.String"/>
+	<parameter name="P_ZONE_GRP" class="java.lang.String"/>
+	<parameter name="P_RISK_CNT" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT   zone_type,
+         SUM (bldg_total_tsi) bldg_total_tsi,
+         SUM (bldg_total_prem) bldg_total_prem,
+         SUM (cont_total_tsi) cont_total_tsi,
+         SUM (cont_total_prem) cont_total_prem,
+         SUM (loss_total_tsi) loss_total_tsi,
+         SUM (loss_total_prem) loss_total_prem
+    FROM (SELECT b.zone_type,
+                 DECODE (b.fi_item_grp, 'B', total_tsi, 0) bldg_total_tsi,
+                 DECODE (b.fi_item_grp, 'B', total_prem, 0) bldg_total_prem,
+                 DECODE (b.fi_item_grp, 'C', total_tsi, 0) cont_total_tsi,
+                 DECODE (b.fi_item_grp, 'C', total_prem, 0) cont_total_prem,
+                 DECODE (b.fi_item_grp, 'L', total_tsi, 0) loss_total_tsi,
+                 DECODE (b.fi_item_grp, 'L', total_prem, 0) loss_total_prem
+            FROM TABLE
+                    (gipir039a_pkg.get_fire_stat_dtl_crosstab_v2
+                                                                ($P{P_ZONE_TYPE},
+                                                                 $P{P_DATE},
+                                                                 $P{P_AS_OF_SW},
+                                                                 $P{P_USER_ID},
+                                                                 $P{P_FROM_DATE},
+                                                                 $P{P_TO_DATE},
+                                                                 $P{P_AS_OF},
+                                                                 NULL,
+                                                                 NULL,
+                                                                 NULL,
+                                                                 $P{P_RISK_CNT}
+                                                                )
+                    ) b)
+GROUP BY zone_type
+ORDER BY zone_type   ]]>
+	</queryString>
+	<field name="ZONE_TYPE" class="java.math.BigDecimal"/>
+	<field name="BLDG_TOTAL_TSI" class="java.math.BigDecimal"/>
+	<field name="BLDG_TOTAL_PREM" class="java.math.BigDecimal"/>
+	<field name="CONT_TOTAL_TSI" class="java.math.BigDecimal"/>
+	<field name="CONT_TOTAL_PREM" class="java.math.BigDecimal"/>
+	<field name="LOSS_TOTAL_TSI" class="java.math.BigDecimal"/>
+	<field name="LOSS_TOTAL_PREM" class="java.math.BigDecimal"/>
+	<variable name="V_DUMMY" class="java.lang.String"/>
+	<variable name="V_TOTAL_TSI" class="java.math.BigDecimal">
+		<variableExpression><![CDATA[$F{BLDG_TOTAL_TSI}+$F{CONT_TOTAL_TSI}+$F{LOSS_TOTAL_TSI}]]></variableExpression>
+		<initialValueExpression><![CDATA[$F{BLDG_TOTAL_TSI}+$F{CONT_TOTAL_TSI}+$F{LOSS_TOTAL_TSI}]]></initialValueExpression>
+	</variable>
+	<variable name="V_TOTAL_PREM" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BLDG_TOTAL_PREM}+$F{CONT_TOTAL_PREM}+$F{LOSS_TOTAL_PREM}]]></variableExpression>
+		<initialValueExpression><![CDATA[$F{BLDG_TOTAL_PREM}+$F{CONT_TOTAL_PREM}+$F{LOSS_TOTAL_PREM}]]></initialValueExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<summary>
+		<band height="36" splitType="Immediate">
+			<textField pattern="#,##0.00;(-#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="85" y="10" width="85" height="11"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{BLDG_TOTAL_PREM}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(-#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="599" y="10" width="85" height="11"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_TOTAL_TSI}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(-#,##0.00)">
+				<reportElement x="0" y="10" width="85" height="11"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{BLDG_TOTAL_TSI}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(-#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="200" y="10" width="85" height="11"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{CONT_TOTAL_TSI}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(-#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="285" y="10" width="85" height="11"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{CONT_TOTAL_PREM}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(-#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="684" y="10" width="85" height="11"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_TOTAL_PREM}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(-#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="485" y="10" width="85" height="11"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{LOSS_TOTAL_PREM}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(-#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="400" y="10" width="85" height="11"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{LOSS_TOTAL_TSI}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="1" width="170" height="9"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[------------------------------------------------------------------------------------------------------------------]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="200" y="1" width="170" height="9"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[------------------------------------------------------------------------------------------------------------------]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="400" y="1" width="170" height="9"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[------------------------------------------------------------------------------------------------------------------]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="599" y="1" width="170" height="9"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[------------------------------------------------------------------------------------------------------------------]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="21" width="170" height="9"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[======================================================================]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="200" y="21" width="170" height="9"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[======================================================================]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="400" y="21" width="170" height="9"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[======================================================================]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="599" y="21" width="170" height="9"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[======================================================================]]></text>
+			</staticText>
+		</band>
+	</summary>
+</jasperReport>

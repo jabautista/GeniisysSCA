@@ -1,0 +1,420 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="GICLClmResHist">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+
+	<typeAlias alias="GICLClmResHistClass" type="com.geniisys.gicl.entity.GICLClmResHist"/>
+	
+	<resultMap class="GICLClmResHistClass" id="GICLClmResHistResultMap">
+		<result column="claim_id"			property="claimId"/>
+		<result column="clm_res_hist_id"	property="clmResHistId"/>
+		<result column="hist_seq_no"		property="histSeqNo"/>
+		<result column="item_no"			property="itemNo"/>
+		<result column="peril_cd"			property="perilCd"/>
+		<result column="user_id"			property="userId"/>
+		<result column="last_update"		property="lastUpdate"/>
+		<result column="payee_class_cd"		property="payeeClassCd"/>
+		<result column="payee_cd"			property="payeeCd"/>
+		<result column="date_paid"			property="datePaid"/>
+		<result column="loss_reserve"		property="lossReserve"/>
+		<result column="losses_paid"		property="lossesPaid"/>
+		<result column="expense_reserve"	property="expenseReserve"/>
+		<result column="expenses_paid"		property="expensesPaid"/>
+		<result column="dist_sw"			property="distSw"/>
+		<result column="currency_cd"		property="currencyCd"/>
+		<result column="convert_rate"		property="convertRate"/>
+		<result column="cpi_rec_no"			property="cpiRecNo"/>
+		<result column="cpi_branch_cd"		property="cpiBranchCd"/>
+		<result column="prev_loss_res"		property="prevLossRes"/>
+		<result column="prev_loss_paid"		property="prevLossPaid"/>
+		<result column="prev_exp_res"		property="prevExpRes"/>
+		<result column="prev_exp_paid"		property="prevExpPaid"/>
+		<result column="eim_takeup_tag"		property="eimTakeupTag"/>
+		<result column="tran_id"			property="tranId"/>
+		<result column="cancel_tag"			property="cancelTag"/>
+		<result column="remarks"			property="remarks"/>
+		<result column="booking_month"		property="bookingMonth"/>
+		<result column="booking_year"		property="bookingYear"/>
+		<result column="negate_date"		property="negateDate"/>
+		<result column="cancel_date"		property="cancelDate"/>
+		<result column="advice_id"			property="adviceId"/>
+		<result column="distribution_date"	property="distributionDate"/>
+		<result column="clm_loss_id"		property="clmLossId"/>
+		<result column="net_pd_loss"		property="netPdLoss"/>
+		<result column="net_pd_exp"			property="netPdExp"/>
+		<result column="dist_no"			property="distNo"/>
+		<result column="grouped_item_no"	property="groupedItemNo"/>
+		<result column="dist_type"			property="distType"/>
+		<result column="dsp_peril_name"		property="dspPerilName"/>
+	    <result column="dsp_currency_desc"	property="dspCurrencyDesc"/>
+	    <result column="gicl_reserve_rids_exist"	property="giclReserveRidsExist"/>
+	</resultMap>
+	
+	<resultMap class="GICLClmResHistClass" id="GICLClmResHistResultMapGrid" extends="GICLClmResHistResultMap">
+		<result column="rownum_"					property="rowNum"/>
+	    <result column="count_"						property="rowCount"/>
+	</resultMap>
+	
+	<parameterMap id="getLossExpReserveParamMap" class="java.util.HashMap">
+		<parameter property="claimId"		jdbcType="NUMBER"	javaType="java.lang.Integer"	mode="IN"/>
+		<parameter property="itemNo"		jdbcType="NUMBER"	javaType="java.lang.Integer"	mode="IN"/>
+		<parameter property="perilCd"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="lossReserve"	jdbcType="NUMERIC"	javaType="java.math.BigDecimal"	mode="OUT"/>
+		<parameter property="expReserve"	jdbcType="NUMERIC"	javaType="java.math.BigDecimal"	mode="OUT"/>
+	</parameterMap>
+
+	<select id="getGiclClmResHist" resultMap="GICLClmResHistResultMap">
+		SELECT * FROM TABLE(GICL_CLM_RES_HIST_PKG.get_gicl_clm_res_hist(#claimId#, #lineCd#))
+	</select>
+
+	<select id="getGiclClmResHistGrid" resultMap="GICLClmResHistResultMapGrid">
+		SELECT *
+			  FROM (SELECT rownum rownum_, 
+			               b.count_, a.*
+			          FROM (SELECT * 
+			                  FROM TABLE (GICL_CLM_RES_HIST_PKG.get_gicl_clm_res_hist(#claimId#, #lineCd#))
+			                  <isEqual property="sortColumn" compareValue="histSeqNo">
+			                  	ORDER BY hist_seq_no
+			                  </isEqual>
+			                  <isEqual property="sortColumn" compareValue="convertRate">
+			                  	ORDER BY convert_rate
+			                  </isEqual>
+			                  <isEqual property="sortColumn" compareValue="itemNo">
+			              		ORDER BY item_no
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="dspPerilName">
+			              		ORDER BY dsp_peril_name
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="dspCurrencyDesc">
+			              		ORDER BY dsp_currency_desc
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="lossReserve">
+			              		ORDER BY loss_reserve
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="expenseReserve">
+			              		ORDER BY expense_reserve
+				              </isEqual>
+				              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	  </isNotNull>	
+			                  ) a, 
+			               (SELECT count(*) count_
+			                  FROM TABLE (GICL_CLM_RES_HIST_PKG.get_gicl_clm_res_hist(#claimId#, #lineCd#))			                  	
+			                  ) b) 
+			 WHERE rownum_ BETWEEN #from# AND #to#			
+	</select>
+	
+	<procedure id="getLossExpReserve" parameterMap="getLossExpReserveParamMap">
+		BEGIN
+			GICL_CLM_RES_HIST_PKG.get_loss_exp_reserve(?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<select id="getDistByRiskLoc" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT GICL_CLM_RES_HIST_PKG.dist_by_risk_loc(#claimId#, #itemNo#, #perilCd#) exist FROM DUAL
+	</select>
+
+	<resultMap class="GICLClmResHistClass" id="GICLClmResHistResultMap2">
+		<result column="claim_id"					property="claimId"/>
+		<result column="clm_res_hist_id"			property="clmResHistId"/>
+		<result column="hist_seq_no"				property="histSeqNo"/>
+		<result column="currency_cd"				property="currencyCd"/>
+		<result column="convert_rate"				property="convertRate"/>
+		<result column="dist_sw"					property="distSw"/>
+		<result column="item_no"					property="itemNo"/>           
+		<result column="peril_cd"					property="perilCd"/>          
+		<result column="user_id"					property="userId"/>
+		<result column="last_update"				property="lastUpdate"/>
+		<result column="remarks"					property="remarks"/>            
+		<result column="booking_month"				property="bookingMonth"/>      
+		<result column="booking_year"				property="bookingYear"/>
+		<result column="grouped_item_no"			property="groupedItemNo"/>
+		<result column="currency_desc"				property="dspCurrencyDesc"/>
+		<result column="distribution_desc"			property="nbtDistTypeDesc"/>
+	</resultMap>
+	
+	<resultMap class="GICLClmResHistClass" id="GICLClmResHistResultMapGrid2" extends="GICLClmResHistResultMap2">
+		<result column="rownum_" property="rowNum" />
+		<result column="count_" property="rowCount" />
+	</resultMap>
+	
+	<resultMap class="GICLClmResHistClass" id="GICLClmResHistResultMapGrid4" extends="GICLClmResHistResultMap2">
+		<result column="loss_reserve"				property="lossReserve"/>
+		<result column="expense_reserve"			property="expenseReserve"/>
+	</resultMap>
+	
+	<resultMap class="GICLClmResHistClass" id="GICLClmResHistResultMapGrid5" extends="GICLClmResHistResultMapGrid4">  <!-- added by steven 06.03.2013 -->
+		<result column="sdf_last_update"			property="sdfLastUpdate"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="GICLClmResHistTableGridMap4" extends="GICLClmResHistResultMap2">
+		<result column="sdf_last_update"			property="sdfLastUpdate"/>
+		<result column="loss_reserve"				property="lossReserve"/>
+		<result column="expense_reserve"			property="expenseReserve"/>
+		<result column="setup_date"					property="setupDate"/>
+		<result column="setup_by"					property="setupBy"/>
+		<result column="rownum_" 					property="rowNum" />
+		<result column="count_" 					property="rowCount" />
+	</resultMap>
+	
+	<select id="getGiclClmResHistGridByItem" resultMap="GICLClmResHistResultMapGrid2">
+		SELECT *
+			  FROM (SELECT rownum rownum_, 
+			               b.count_, a.*
+			          FROM (SELECT * 
+			                  FROM TABLE (GICL_CLM_RES_HIST_PKG.get_gicl_clm_res_hist2(#claimId#, #itemNo#, #perilCd#))
+			                  <isEqual property="sortColumn" compareValue="itemNo">
+			              		ORDER BY item_no
+				              </isEqual>
+				              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	  </isNotNull>
+			                  ) a, 
+			               (SELECT count(*) count_
+			                  FROM TABLE (GICL_CLM_RES_HIST_PKG.get_gicl_clm_res_hist2(#claimId#, #itemNo#, #perilCd#))          	
+			                ) b
+			 ) WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+
+	<resultMap class="GICLClmResHistClass" id="GICLClmResHistResultMap3">
+		<result property="clmResHistId" column="clm_res_hist_id"/>
+		<result property="groupedItemNo" column="grouped_item_no"/>
+		<result property="histSeqNo" column="hist_seq_no"/>
+		<result property="lossReserve" column="loss_reserve"/>
+		<result property="expenseReserve" column="expense_reserve"/>
+		<result property="claimId" column="claim_id"/>
+		<result property="convertRate" column="convert_rate"/>
+		<result property="bookingYear" column="booking_year"/>
+		<result property="bookingMonth" column="booking_month"/>
+		<result property="distSw" column="dist_sw"/>
+		<result property="remarks" column="remarks"/>
+		<result property="userId" column="user_id"/>
+		<result property="lastUpdate" column="last_update"/>
+	</resultMap>
+	
+	<resultMap class="GICLClmResHistClass" id="GICLClmResHistResultMapGrid3" extends="GICLClmResHistResultMap3">
+		<result column="rownum_" property="rowNum" />
+		<result column="count_" property="rowCount" />
+	</resultMap>
+	
+	<select id="getGiclClmResHistGrid3" resultMap="GICLClmResHistResultMapGrid3">
+		SELECT *
+			  FROM (SELECT rownum rownum_, 
+			               b.count_, a.*
+			          FROM (SELECT * 
+			                  FROM TABLE (GICL_CLM_RES_HIST_PKG.get_gicl_clm_res_hist3(#claimId#, #itemNo#, #perilCd#))
+			                  <isEqual property="sortColumn" compareValue="itemNo">
+			              		ORDER BY item_no
+				              </isEqual>
+				              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	  </isNotNull>
+			                  ) a, 
+			               (SELECT count(*) count_
+			                  FROM TABLE (GICL_CLM_RES_HIST_PKG.get_gicl_clm_res_hist3(#claimId#, #itemNo#, #perilCd#))          	
+			                ) b
+			 ) WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="paymentHistoryMap">
+		<result column="claim_id" 			property="claimId"/>
+        <result column="clm_res_hist_id"	property="clmResHistId"/>
+        <result column="hist_seq_no" 		property="histSeqNo"/>
+        <result column="losses_paid"		property="lossesPaid"/>
+        <result column="expenses_paid"		property="expensesPaid"/>   
+        <result column="convert_rate"		property="convertRate"/>
+        <result column="date_paid"			property="datePaid"/>
+        <result column="cancel_tag"			property="cancelTag"/>
+        <result column="payee_class_cd"		property="payeeClassCd"/>
+        <result column="class_desc"			property="classDesc"/>
+        <result column="payee_cd"			property="payeeCd"/>
+        <result column="payee"				property="payee"/>
+        <result column="remarks"			property="remarks"/>
+        <result column="user_id"			property="userId"/>
+		<result column="last_update"		property="lastUpdate"/>
+        <result column="rownum_"			property="rowNum"/>
+		<result column="count_"				property="rowCount"/>
+	</resultMap>
+	
+	<select id="getPaymentHistoryGrid" resultMap="paymentHistoryMap">
+		SELECT * 
+		  FROM (SELECT rownum rownum_, 
+		        	   b.count_, 
+		               a.*
+		         FROM (SELECT * 
+		                 FROM TABLE (GICL_CLM_RES_HIST_PKG.get_payment_history(#claimId#, #itemNo#, #perilCd#, #groupedItemNo#))
+                         ) a,
+                      (SELECT count(*) count_
+                         FROM TABLE (GICL_CLM_RES_HIST_PKG.get_payment_history(#claimId#, #itemNo#, #perilCd#, #groupedItemNo#))
+                         ) b)
+         WHERE rownum_ BETWEEN #from# AND #to#
+		<isNull property="sortColumn">
+			ORDER BY hist_seq_no ASC
+		</isNull>
+		<isEqual property="sortColumn" compareValue="histSeqNo">
+			ORDER BY hist_seq_no
+		</isEqual>  
+		<isEqual property="sortColumn" compareValue="lossesPaid">
+			ORDER BY losses_paid
+		</isEqual>  
+		<isEqual property="sortColumn" compareValue="expensesPaid">
+			ORDER BY expenses_paid
+		</isEqual>  
+		<isEqual property="sortColumn" compareValue="convertRate">
+			ORDER BY convert_rate
+		</isEqual>  
+		<isEqual property="sortColumn" compareValue="datePaid">
+			ORDER BY date_paid
+		</isEqual>  
+		<isEqual property="sortColumn" compareValue="cancelTag">
+			ORDER BY cancel_tag
+		</isEqual>  
+		<isNotNull property="sortColumn">
+			<isEqual property="ascDescFlg" compareValue="ASC">
+				ASC
+			</isEqual>
+			<isEqual property="ascDescFlg" compareValue="DESC">
+				DESC
+			</isEqual>
+		</isNotNull>
+	</select>
+	
+	<update id="setPaytHistoryRemarks">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			UPDATE gicl_clm_res_hist
+			   SET remarks = #remarks#
+			 WHERE claim_id = #claimId#
+			   AND clm_res_hist_id = #clmResHistId#;
+		END;
+	</update>
+	
+	<select id="checkPaytHistory" resultClass="java.lang.String">
+		SELECT DISTINCT 'Y'
+		  FROM TABLE (GICL_CLM_RES_HIST_PKG.get_payment_history(#claimId#, #itemNo#, #perilCd#, #groupedItemNo#))
+	</select>
+	
+	<select id="getLatestClmResHist" resultMap="GICLClmResHistResultMap2">
+		SELECT * FROM TABLE (GICL_CLM_RES_HIST_PKG.get_last_clm_res_hist(#claimId#, #itemNo#, #perilCd#))
+	</select>
+	
+	<select id="getLatestClmResHist2" resultMap="GICLClmResHistResultMapGrid5">
+		SELECT claim_id,           clm_res_hist_id,                currency_cd,
+			   convert_rate,       dist_sw,                        hist_seq_no,
+			   item_no,            peril_cd,                       user_id,
+			   last_update,        booking_month,                  booking_year,
+			   grouped_item_no,    remarks,	<!--removed ESCAPE_VALUE proc Lara - 11-07-2013 -->					     
+			   tran_id,			   loss_reserve,       			   expense_reserve,
+			   ESCAPE_VALUE(currency_desc) currency_desc,
+			   ESCAPE_VALUE(distribution_desc) distribution_desc,  sdf_last_update 
+		FROM TABLE (GICL_CLM_RES_HIST_PKG.get_last_clm_res_hist2(#claimId#, #itemNo#, #perilCd#))
+	</select>
+	
+	<select id="getGiclClmResHistGrid4" resultMap="GICLClmResHistResultMapGrid4">
+		SELECT *
+			  FROM (SELECT rownum rownum_, 
+			               b.count_, a.*
+			          FROM (SELECT * 
+			                  FROM TABLE (GICL_CLM_RES_HIST_PKG.get_gicl_clm_res_hist4(#claimId#, #itemNo#, #perilCd#))
+			                  ORDER BY NVL(DIST_SW, 'N') DESC, hist_seq_no DESC
+			                  <isEqual property="sortColumn" compareValue="itemNo">
+			              		ORDER BY item_no
+				              </isEqual>
+				              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	  </isNotNull>
+			                  ) a, 
+			               (SELECT count(*) count_
+			                  FROM TABLE (GICL_CLM_RES_HIST_PKG.get_gicl_clm_res_hist4(#claimId#, #itemNo#, #perilCd#))          	
+			                ) b
+			 ) WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getResHistTranIdNull" resultMap="GICLClmResHistTableGridMap4">
+		SELECT *
+			  FROM (SELECT rownum rownum_, 
+			               b.count_, a.*
+			          FROM (SELECT * 
+			                  FROM TABLE (GICL_CLM_RES_HIST_PKG.get_gicl_clm_res_hist4(#claimId#, #itemNo#, #perilCd#))
+			                  WHERE tran_id is null
+			                  <isEqual property="sortColumn" compareValue="histSeqNo">
+			              		ORDER BY hist_seq_no
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="lossReserve">
+			              		ORDER BY loss_reserve
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="expenseReserve">
+			              		ORDER BY expense_reserve
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="convertRate">
+			              		ORDER BY convert_rate
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="bookingMonth bookingYear">
+			              		ORDER BY booking_month || booking_year
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="distSw">
+			              		ORDER BY dist_sw
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="setupDate">
+			              		ORDER BY setup_date
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="setupBy">
+			              		ORDER BY setup_by
+				              </isEqual>
+				              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	  </isNotNull>
+			                  ) a, 
+			               (SELECT count(*) count_
+			                  FROM TABLE (GICL_CLM_RES_HIST_PKG.get_gicl_clm_res_hist4(#claimId#, #itemNo#, #perilCd#))   
+			                  WHERE tran_id is null       	
+			                ) b
+			 ) WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<update id="updateResHistGICLS024">
+		BEGIN
+				giis_users_pkg.app_user := #userId#;
+				clm_update_booking_month(#claimId#, #histSeqNo#, #itemNo#, #perilCd#, #bookingMonth#, #bookingYear#, #remarks#);
+				<!-- Kenneth SR 5163 11.05.2015 moved to new procedure clm_update_booking_month -->
+				<!-- UPDATE gicl_clm_res_hist
+				   SET booking_month = #bookingMonth#,
+				   		   booking_year = #bookingYear#, 
+				           remarks = #remarks#
+				 WHERE claim_id = #claimId#
+				   AND hist_seq_no = #histSeqNo#
+				   AND item_no = #itemNo#
+				   AND peril_cd = #perilCd#; -->
+		END;
+	</update>
+	
+</sqlMap>

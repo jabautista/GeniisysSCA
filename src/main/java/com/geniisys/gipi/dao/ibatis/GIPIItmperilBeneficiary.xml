@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap>
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIPIItmperilBeneficiaryClass" type="com.geniisys.gipi.entity.GIPIItmperilBeneficiary"/>
+	
+	<resultMap class="GIPIItmperilBeneficiaryClass" id="itemperilBeneficiariesMap">
+		<result property="policyId" 		column="policy_id"/>
+		<result property="itemNo" 			column="item_no"/>
+		<result property="groupedItemNo" 	column="grouped_item_no"/>
+		<result property="lineCd" 			column="line_cd"/>
+		<result property="perilCd" 			column="peril_cd"/>
+		<result property="tsiAmt" 			column="tsi_amt"/>
+		<result property="perilName" 		column="peril_name"/>
+		<result property="rowNum"			column="rownum_"/>
+		<result property="rowCount"			column="count_"/>
+	</resultMap>
+	
+	<select id="getItmperilBeneficiaries" resultMap="itemperilBeneficiariesMap" parameterClass="java.util.HashMap">
+		SELECT *       
+                FROM (SELECT rownum rownum_ ,b.count_,a.*     
+                        FROM (SELECT * FROM TABLE(gipi_itmperil_beneficiary_pkg.get_itmperil_beneficiaries(#policyId#,#itemNo#,#groupedItemNo#))) a,
+	               		   (SELECT count(*) count_ FROM TABLE(gipi_itmperil_beneficiary_pkg.get_itmperil_beneficiaries(#policyId#,#itemNo#,#groupedItemNo#))) b)         
+	          WHERE rownum_ BETWEEN NVL(#from#,rownum_) AND NVL(#to#,rownum_)
+	</select>
+</sqlMap>

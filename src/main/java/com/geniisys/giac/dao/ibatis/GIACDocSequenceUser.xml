@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIACDocSequenceUser">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIACDocSequenceUser" type="com.geniisys.giac.entity.GIACDocSequenceUser"/>
+	
+	<resultMap class="GIACDocSequenceUser" id="giacDocSequenceUserListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="DOC_CODE"   	property="docCode"/>
+		<result column="BRANCH_CD" 		property="branchCd"/>
+		<result column="USER_CD" 		property="userCd"/>
+		<result column="USER_NAME" 		property="userName"/>
+		<result column="DOC_PREF" 		property="docPref"/>
+		<result column="OLD_DOC_PREF" 	property="oldDocPref"/>
+		<result column="MIN_SEQ_NO"		property="minSeqNo"/>
+		<result column="OLD_MIN_SEQ_NO"	property="oldMinSeqNo"/>
+		<result column="MAX_SEQ_NO"		property="maxSeqNo"/>
+		<result column="OLD_MAX_SEQ_NO"	property="oldMaxSeqNo"/>
+		<result column="ACTIVE_TAG" 	property="activeTag"/>
+		<result column="OLD_ACTIVE_TAG" 	property="oldActiveTag"/>
+		<result column="USER_ID"     	property="userId"/>
+		<result column="LAST_UPDATE" 	property="lastUpdate"/>
+		<result column="REMARKS"     	property="remarks"/>
+	</resultMap>
+	
+	<select id="getGiacs316RecList" resultMap="giacDocSequenceUserListResultMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giacs316_pkg.get_rec_list(#docCode#, #branchCd#, #userCd#, #userName#, #docPref#, TO_NUMBER(#minSeqNo#), TO_NUMBER(#maxSeqNo#), #activeTag#))
+		  	      		   <isNotNull property="sortColumn">
+				                  <isEqual property="sortColumn" compareValue="docCode">
+					              		ORDER BY doc_code
+					              </isEqual>
+					              <isEqual property="sortColumn" compareValue="branchCd">
+					              		ORDER BY branch_cd
+					              </isEqual>
+					              <isEqual property="sortColumn" compareValue="userCd">
+					              		ORDER BY user_cd
+					              </isEqual>
+					              <isEqual property="sortColumn" compareValue="userName">
+					              		ORDER BY user_name
+					              </isEqual>
+					              <isEqual property="sortColumn" compareValue="docPref">
+					              		ORDER BY doc_pref
+					              </isEqual>			             
+					              <isEqual property="sortColumn" compareValue="minSeqNo">
+					              		ORDER BY min_seq_no
+					              </isEqual>
+					              <isEqual property="sortColumn" compareValue="maxSeqNo">
+					              		ORDER BY max_seq_no
+					              </isEqual>
+					              <isEqual property="sortColumn" compareValue="activeTag">
+					              		ORDER BY active_tag
+					              </isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giacs316_pkg.get_rec_list(#docCode#, #branchCd#, #userCd#, #userName#, #docPref#, TO_NUMBER(#minSeqNo#), TO_NUMBER(#maxSeqNo#), #activeTag#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setDocSequenceUser" parameterClass="GIACDocSequenceUser">
+	    DECLARE
+	    	v_rec giac_doc_sequence_user%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			<!-- v_rec.doc_code 		:= #docCode#;
+ 			v_rec.branch_cd 	:= #branchCd#;
+ 			v_rec.user_cd		:= #userCd#;
+ 			v_rec.doc_pref		:= #docPref#;
+ 			v_rec.min_seq_no	:= #minSeqNo#;
+ 			v_rec.max_seq_no	:= #maxSeqNo#;
+ 			v_rec.active_tag	:= #activeTag#;
+ 			v_rec.user_id 		:= #userId#;
+ 			v_rec.remarks 		:= #remarks#;
+ 			
+ 			giacs316_pkg.set_rec(v_rec);  -->
+ 			
+ 			giacs316_pkg.set_rec(#docCode#, #branchCd#, #userCd#, 
+ 								 #docPref#, #oldDocPref#, 
+ 								 TO_NUMBER(#minSeqNo#), TO_NUMBER(#oldMinSeqNo#), 
+ 								 TO_NUMBER(#maxSeqNo#), TO_NUMBER(#oldMaxSeqNo#), 
+ 								 #activeTag#, #oldActiveTag#, 
+ 								 #remarks#, #userId#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteDocSequenceUser" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giacs316_pkg.val_del_rec(#docCode#, #branchCd#, #userCd#, #docPref#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddDocSequenceUser" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giacs316_pkg.val_add_rec(#docCode#, #branchCd#, #userCd#, #docPref#, TO_NUMBER(#minSeqNo#), TO_NUMBER(#maxSeqNo#));
+ 		END;
+ 	</procedure> 
+ 	
+ 	<procedure id="valMinSeqNo" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giacs316_pkg.validate_min_seq_no(#docCode#, #branchCd#, #docPref#, TO_NUMBER(#minSeqNo#), TO_NUMBER(#maxSeqNo#), TO_NUMBER(#oldMinSeqNo#));
+ 		END;
+ 	</procedure> 
+ 	
+ 	<procedure id="valMaxSeqNo" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giacs316_pkg.validate_max_seq_no(#docCode#, #branchCd#, #docPref#, TO_NUMBER(#minSeqNo#), TO_NUMBER(#maxSeqNo#), TO_NUMBER(#oldMaxSeqNo#));
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valActiveTag" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giacs316_pkg.validate_active_tag(#docCode#, #branchCd#, #userCd#, #docPref#, TO_NUMBER(#minSeqNo#), TO_NUMBER(#maxSeqNo#), #opt#, TO_NUMBER(#oldMinSeqNo#), TO_NUMBER(#oldMaxSeqNo#));
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delDocSequenceUser" parameterClass="GIACDocSequenceUser">
+		DECLARE
+	    	v_rec giac_doc_sequence_user%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.doc_code 		:= #docCode#;
+ 			v_rec.branch_cd 	:= #branchCd#;
+ 			v_rec.user_cd		:= #userCd#;
+ 			v_rec.doc_pref		:= #docPref#;
+ 			v_rec.min_seq_no	:= TO_NUMBER(#minSeqNo#);
+ 			v_rec.max_seq_no	:= TO_NUMBER(#maxSeqNo#);
+ 			v_rec.active_tag	:= #activeTag#;
+ 			v_rec.user_id 		:= #userId#;
+ 			v_rec.remarks 		:= #remarks#;
+ 			
+ 			giacs316_pkg.del_rec(v_rec); 			
+ 		END;
+ 	</delete>
+ 	
+ 	<resultMap class="java.util.HashMap" id="getGiacs316BranchLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="ISS_CD"				property="issCd"/>
+		<result column="ISS_NAME"			property="issName"/>
+		<result column="DOC_TYPE"			property="docType"/>
+		<result column="DOC_TYPE_MEAN"		property="docTypeMean"/>
+	</resultMap>
+	<select id="getGiacs316BranchLOV" resultMap="getGiacs316BranchLOVMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giacs316_pkg.get_giacs316_branch_lov(#docCode#, #moduleId#, #userId#))
+		  	      		  <isNotNull property="findText">
+		  	      		  	WHERE UPPER(iss_cd) LIKE UPPER(#findText#)
+		  	      		  	   OR UPPER(iss_name) LIKE UPPER(#findText#)
+		  	      		  </isNotNull>
+		  	      		  <isNull property="findText">
+		  	      		  	WHERE UPPER(iss_cd) LIKE UPPER(#filterText#)
+		  	      		  	   OR UPPER(iss_name) LIKE UPPER(#filterText#)
+		  	      		  </isNull>
+		                  <isNotNull property="sortColumn">
+			                  	<isEqual property="sortColumn" compareValue="issCd">
+				              		ORDER BY iss_cd
+				              	</isEqual>
+				              	<isEqual property="sortColumn" compareValue="issName">
+				              		ORDER BY iss_name
+				              	</isEqual>			              
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giacs316_pkg.get_giacs316_branch_lov(#docCode#, #moduleId#, #userId#))
+		                  <isNotNull property="findText">
+		  	      		  	WHERE UPPER(iss_cd) LIKE UPPER(#findText#)
+		  	      		  	   OR UPPER(iss_name) LIKE UPPER(#findText#)
+		  	      		  </isNotNull>
+		  	      		  <isNull property="findText">
+		  	      		  	WHERE UPPER(iss_cd) LIKE UPPER(#filterText#)
+		  	      		  	   OR UPPER(iss_name) LIKE UPPER(#filterText#)
+		  	      		  </isNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="getGiacs316UserCdLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="CASHIER_CD"				property="cashierCd"/>
+		<result column="DCB_USER_ID"			property="dcbUserId"/>
+	</resultMap>
+	<select id="getGiacs316UserCdLOV" resultMap="getGiacs316UserCdLOVMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giacs316_pkg.get_giacs316_user_lov(#branchCd#))
+		  	      		  <isNotNull property="findText">
+		  	      		  	WHERE TO_CHAR(cashier_cd) LIKE #findText#
+		  	      		  	   OR UPPER(dcb_user_id) LIKE UPPER(#findText#)
+		  	      		  </isNotNull>
+		  	      		  <isNull property="findText">
+		  	      		  	WHERE TO_CHAR(cashier_cd) LIKE #filterText#
+		  	      		  	   OR UPPER(dcb_user_id) LIKE UPPER(#filterText#)
+		  	      		  </isNull>
+		                  <isNotNull property="sortColumn">
+			                  	<isEqual property="sortColumn" compareValue="cashierCd">
+				              		ORDER BY cashier_cd
+				              	</isEqual>
+				              	<isEqual property="sortColumn" compareValue="dcbUserId">
+				              		ORDER BY dcb_user_id
+				              	</isEqual>			              
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giacs316_pkg.get_giacs316_user_lov(#branchCd#))
+		                  <isNotNull property="findText">
+		  	      		  	WHERE TO_CHAR(cashier_cd) LIKE #findText#
+		  	      		  	   OR UPPER(dcb_user_id) LIKE UPPER(#findText#)
+		  	      		  </isNotNull>
+		  	      		  <isNull property="findText">
+		  	      		  	WHERE TO_CHAR(cashier_cd) LIKE #filterText#
+		  	      		  	   OR UPPER(dcb_user_id) LIKE UPPER(#filterText#)
+		  	      		  </isNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+</sqlMap>

@@ -1,0 +1,501 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIACTranMm">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<resultMap class="com.geniisys.giac.entity.GIACTranMm" id="getClosedTransactionMonthYearMap">
+		<result column="fund_cd" property="fundCd" />
+		<result column="branch_cd" property="branchCd" />
+		<result column="tran_mm" property="tranMm" />	
+		<result column="tran_yr" property="tranYr" />	
+		<result column="closed_tag" property="closedTag" />	
+		<result column="remarks" property="remarks" />
+	</resultMap>
+	
+	<resultMap id="bookingDateLOVMap" class="com.geniisys.giac.entity.GIACTranMm" >
+	  	<result column="booking_mth" 		property="bookingMonth" />
+	  	<result column="booking_year"		property="bookingYear"/>
+		<result property="rowNum"			column="ROWNUM_"/>
+		<result property="rowCount"			column="COUNT_"/>
+  	</resultMap>
+	
+	<select id="getClosedTransactionMonthYear" resultMap="getClosedTransactionMonthYearMap">
+		SELECT * FROM TABLE(giac_tran_mm_pkg.closed_transaction_month_year(#fundCd#, #branchCd#))
+	</select>
+	
+	<select id="getBookingDateLOV" resultMap="bookingDateLOVMap" parameterClass="java.util.HashMap">
+		 SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giac_tran_mm_pkg.get_booking_date_list(#claimId#))
+		                  <isNotNull property="findText">
+		                  	WHERE UPPER(booking_mth) LIKE UPPER(#findText#) 
+							OR  TO_CHAR(booking_year) LIKE  #findText#
+		                  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="bookingMonth">
+			              		ORDER BY booking_mth
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="bookingYear">
+			              		ORDER BY booking_year
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giac_tran_mm_pkg.get_booking_date_list(#claimId#))
+		                  <isNotNull property="findText">
+		                  	WHERE UPPER(booking_mth) LIKE UPPER(#findText#) 
+							OR  TO_CHAR(booking_year) = #findText#
+		                  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="checkBookingDate" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT giac_tran_mm_pkg.check_booking_date(#claimId#, #bookingYear#, #bookingMonth#) FROM DUAL
+	</select>
+	
+	<select id="getGICLS024BookingDateLOV" resultMap="bookingDateLOVMap" parameterClass="java.util.HashMap">
+		 SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giac_tran_mm_pkg.gicls024_get_booking_date_lov(#claimId#))
+		                  <isNotNull property="findText">
+		                  	WHERE UPPER(booking_mth) LIKE UPPER(#findText#) 
+							OR  TO_CHAR(booking_year) LIKE  #findText#
+		                  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="bookingMonth">
+			              		ORDER BY booking_mth
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="bookingYear">
+			              		ORDER BY booking_year
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giac_tran_mm_pkg.gicls024_get_booking_date_lov(#claimId#))
+		                  <isNotNull property="findText">
+		                  	WHERE UPPER(booking_mth) LIKE UPPER(#findText#) 
+							OR  TO_CHAR(booking_year) = #findText#
+		                  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<!-- added by Kris 04.16.2013 for GIACS002 -->
+	<select id="getClosedTag2" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT (GIAC_TRAN_MM_PKG.get_closed_tag(#fundCd#, #branchCd#, #dvDate#)) closed_tag
+  		  FROM dual
+	</select>
+	
+<!-- GIACS038 : shan 12.12.2013 -->
+	<resultMap class="java.util.HashMap" id="giacs038CompanyLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="FUND_CD" 		property="fundCd" />
+		<result column="FUND_DESC" 		property="fundDesc"/>
+	</resultMap>
+	
+	<select id="getGIACS038CompanyLOV" resultMap="giacs038CompanyLOVMap">
+	    SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT DISTINCT fund_cd, fund_desc
+		                  FROM TABLE(giacs038_pkg.get_fund_lov)
+			          	  	  	<isNotNull property="findText">
+									WHERE (UPPER(fund_cd) LIKE UPPER(#findText#) 
+									   OR UPPER(fund_desc) LIKE UPPER(#findText#))
+								</isNotNull>
+								<isNull property="findText">
+									WHERE UPPER(fund_cd) LIKE UPPER(#searchString#)  
+									   OR UPPER(fund_desc) LIKE UPPER(#searchString#)
+								</isNull>
+								<isNotNull property="sortColumn">
+									<isEqual property="sortColumn" compareValue="fundCd">
+										ORDER BY fund_cd
+									</isEqual>
+									<isEqual property="sortColumn" compareValue="fundDesc">
+										ORDER BY fund_desc
+									</isEqual>
+									<isEqual property="ascDescFlg" compareValue="ASC">
+										ASC
+									</isEqual>
+									<isEqual property="ascDescFlg" compareValue="DESC">
+										DESC
+									</isEqual>
+								</isNotNull>
+							) a,
+							(SELECT count(DISTINCT fund_cd) count_
+							FROM TABLE(giacs038_pkg.get_fund_lov)
+			          	  	  	<isNotNull property="findText">
+									WHERE (UPPER(fund_cd) LIKE UPPER(#findText#) 
+									   OR UPPER(fund_desc) LIKE UPPER(#findText#))
+								</isNotNull>
+								<isNull property="findText">
+									WHERE UPPER(fund_cd) LIKE UPPER(#searchString#) 
+									   OR UPPER(fund_desc) LIKE UPPER(#searchString#)
+								</isNull>
+			                ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="giacs038BranchLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="BRANCH_CD" 		property="branchCd" />
+		<result column="BRANCH_NAME" 	property="branchName"/>
+	</resultMap>
+	
+	<select id="getGIACS038BranchLOV" resultMap="giacs038BranchLOVMap">
+	    SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT *
+		                  FROM TABLE(giacs038_pkg.get_branch_lov(#fundCd#, #userId#))
+			          	  	  	<isNotNull property="findText">
+									WHERE (UPPER(branch_cd) LIKE UPPER(#findText#) 
+									   OR UPPER(branch_name) LIKE UPPER(#findText#))
+								</isNotNull>
+								<isNull property="findText">
+									WHERE UPPER(branch_cd) LIKE UPPER(#searchString#) 
+									   OR UPPER(branch_name) LIKE UPPER(#searchString#)
+								</isNull>
+								<isNotNull property="sortColumn">
+									<isEqual property="sortColumn" compareValue="fundCd">
+										ORDER BY fund_cd
+									</isEqual>
+									<isEqual property="sortColumn" compareValue="fundDesc">
+										ORDER BY fund_desc
+									</isEqual>
+									<isEqual property="sortColumn" compareValue="branchCd">
+										ORDER BY branch_cd
+									</isEqual>
+									<isEqual property="sortColumn" compareValue="branchName">
+										ORDER BY branch_name
+									</isEqual>
+									<isEqual property="ascDescFlg" compareValue="ASC">
+										ASC
+									</isEqual>
+									<isEqual property="ascDescFlg" compareValue="DESC">
+										DESC
+									</isEqual>
+								</isNotNull>
+							) a,
+							(SELECT count(*) count_
+							FROM TABLE(giacs038_pkg.get_branch_lov(#fundCd#, #userId#))
+			          	  	  	<isNotNull property="findText">
+									WHERE (UPPER(branch_cd) LIKE UPPER(#findText#) 
+									   OR UPPER(branch_name) LIKE UPPER(#findText#))
+								</isNotNull>
+								<isNull property="findText">
+									WHERE UPPER(branch_cd) LIKE UPPER(#searchString#) 
+									   OR UPPER(branch_name) LIKE UPPER(#searchString#)
+								</isNull>
+			                ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="com.geniisys.giac.entity.GIACTranMm" id="giacs038ResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="FUND_CD" 		property="fundCd" />
+		<result column="BRANCH_CD" 		property="branchCd" />
+		<result column="TRAN_MM" 		property="tranMm" />	
+		<result column="TRAN_YR" 		property="tranYr" />	
+		<result column="DSP_MONTH" 		property="dspMonth"/>
+		<result column="CLOSED_TAG" 	property="closedTag" />	
+		<result column="DSP_CLOSED"		property="dspClosed"/>
+		<result column="CLM_CLOSED_TAG"	property="clmClosedTag"/>
+		<result column="UPDATE_CCT"		property="updateCct"/>
+		<result column="UPDATE_CT"		property="updateCt"/>
+		<result column="CHK_TC" 		property="chkTc"/>
+		<result column="CHK_CCT" 		property="chkCct"/>
+		<result column="REMARKS" 		property="remarks" />
+		<result column="USER_ID" 		property="userId"/>
+		<result column="LAST_UPDATE" 	property="lastUpdate"/>
+	</resultMap>
+	
+	<select id="getGiacs038RecList" resultMap="giacs038ResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giacs038_pkg.get_rec_list(#fundCd#, #branchCd#))
+		  	      		  <isNotNull property="filter">
+		  	      		  	WHERE 1=1
+		  	      		  		<isNotEmpty prepend="AND" property="tranMm">
+		  	      		  			tran_mm = #tranMm#
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="tranYr">
+		  	      		  			tran_yr = #tranYr#
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="dspMonth">
+		  	      		  			UPPER(dsp_month) LIKE UPPER(#dspMonth#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="dspClosed">
+		  	      		  			UPPER(dsp_closed) LIKE UPPER(#dspClosed#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="chkTc">
+		  	      		  			UPPER(chk_tc) LIKE DECODE(UPPER(#chkTc#), 'Y', 'T', 'N')
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="chkCct">
+		  	      		  			UPPER(chk_cct) LIKE UPPER(#chkCct#)
+		  	      		  		</isNotEmpty>
+		  	      		  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="tranYr">
+			              		ORDER BY tran_yr
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="tranMm dspMonth">
+			              		ORDER BY tran_mm
+				              		<isNotNull property="sortColumn">
+					              		<isEqual property="ascDescFlg" compareValue="ASC">
+					              			ASC
+					              		</isEqual>
+					              		<isEqual property="ascDescFlg" compareValue="DESC">
+					              			DESC
+					              		</isEqual>
+					              </isNotNull>
+				              , dsp_month
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="dspClosed">
+			              		ORDER BY dsp_closed
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giacs038_pkg.get_rec_list(#fundCd#, #branchCd#))
+		  	      		  <isNotNull property="filter">
+		  	      		  	WHERE 1=1
+		  	      		  		<isNotEmpty prepend="AND" property="tranMm">
+		  	      		  			tran_mm = #tranMm#
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="tranYr">
+		  	      		  			tran_yr = #tranYr#
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="dspMonth">
+		  	      		  			UPPER(dsp_month) LIKE UPPER(#dspMonth#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="dspClosed">
+		  	      		  			UPPER(dsp_closed) LIKE UPPER(#dspClosed#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="chkTc">
+		  	      		  			UPPER(chk_tc) LIKE DECODE(UPPER(#chkTc#), 'Y', 'T', 'N')
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="chkCct">
+		  	      		  			UPPER(chk_cct) LIKE UPPER(#chkCct#)
+		  	      		  		</isNotEmpty>
+		  	      		  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+		
+	<procedure id="updateTranMm" parameterClass="com.geniisys.giac.entity.GIACTranMm">
+		DECLARE
+	    	v_rec GIAC_TRAN_MM%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.fund_cd 			:= #fundCd#;
+ 			v_rec.branch_cd 		:= #branchCd#;
+ 			v_rec.tran_yr 			:= #tranYr#;
+ 			v_rec.tran_mm 			:= #tranMm#;
+ 			v_rec.closed_tag 		:= #closedTag#;
+ 			v_rec.clm_closed_tag 	:= #clmClosedTag#;
+ 			v_rec.remarks 			:= #remarks#;
+ 			v_rec.user_id			:= #userId#;
+ 			
+ 			giacs038_pkg.update_rec(v_rec, #updateCct#, #updateCt#);
+ 		END;
+	</procedure>
+	
+	<select id="checkFunctionGiacs038" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT GIACS038_PKG.check_function(#userId#, #moduleId#, #functionCode#) FROM DUAL
+	</select>
+	
+	<select id="getNextTranYrGiacs038" parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+		SELECT GIACS038_PKG.get_next_tran_yr(#fundCd#, #branchCd#) FROM DUAL
+	</select>
+	
+	<select id="checkTranYrGiacs038" parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+		SELECT DISTINCT tran_yr
+		  FROM GIAC_TRAN_MM
+		 WHERE fund_cd = #fundCd#
+		   AND branch_cd = #branchCd#
+		   AND tran_yr = #tranYr#
+	</select>
+	
+	<procedure id="generateTranMmGiacs038" parameterClass="java.util.HashMap">
+  		BEGIN
+  			GIIS_USERS_PKG.app_user := #userId#;
+  			
+  			GIACS038_PKG.generate_tran_mm(#fundCd#, #branchCd#, #tranYr#, #userId#);
+  		END;
+  	</procedure>
+  	
+  	<resultMap class="java.util.HashMap" id="giacs038TranMmStatResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="CLOSED_TAG" 	property="closedTag" />	
+		<result column="RV_MEANING"		property="rvMeaning" />
+		<result column="USER_ID" 		property="userId"/>
+		<result column="LAST_UPDATE" 	property="lastUpdate"/>
+	</resultMap>
+	
+	<select id="getGiacs038TranMmStatHist" resultMap="giacs038TranMmStatResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giacs038_pkg.get_tranmm_stat_hist(#fundCd#, #branchCd#, #tranYr#, #tranMm#))
+		  	      		  <isNotNull property="filter">
+		  	      		  	WHERE 1=1
+		  	      		  		<isNotEmpty prepend="AND" property="closedTag">
+		  	      		  			UPPER(closed_tag) LIKE UPPER(#closedTag#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="rvMeaning">
+		  	      		  			UPPER(rv_meaning) LIKE UPPER(#rvMeaning#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="userId">
+		  	      		  			UPPER(user_id) LIKE UPPER(#userId#)
+		  	      		  		</isNotEmpty>
+		  	      		  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="closedTag rvMeaning">
+			              		ORDER BY closed_tag
+				              		<isNotNull property="sortColumn">
+					              		<isEqual property="ascDescFlg" compareValue="ASC">
+					              			ASC
+					              		</isEqual>
+					              		<isEqual property="ascDescFlg" compareValue="DESC">
+					              			DESC
+					              		</isEqual>
+					              </isNotNull>,
+			              		rv_meaning
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="userId">
+			              		ORDER BY user_id
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="lastUpdate">
+			              		ORDER BY last_update
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giacs038_pkg.get_tranmm_stat_hist(#fundCd#, #branchCd#, #tranYr#, #tranMm#))
+		  	      		  <isNotNull property="filter">
+		  	      		  	WHERE 1=1
+		  	      		  		<isNotEmpty prepend="AND" property="closedTag">
+		  	      		  			UPPER(closed_tag) LIKE UPPER(#closedTag#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="rvMeaning">
+		  	      		  			UPPER(rv_meaning) LIKE UPPER(#rvMeaning#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="userId">
+		  	      		  			UPPER(user_id) LIKE UPPER(#userId#)
+		  	      		  		</isNotEmpty>
+		  	      		  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<resultMap class="java.util.HashMap" id="giacs038ClmTranMmStatResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="CLM_CLOSED_TAG" property="clmClosedTag" />	
+		<result column="RV_MEANING"		property="rvMeaning" />
+		<result column="USER_ID" 		property="userId"/>
+		<result column="LAST_UPDATE" 	property="lastUpdate"/>
+	</resultMap>
+	
+	<select id="getGiacs038ClmTranMmStatHist" resultMap="giacs038ClmTranMmStatResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giacs038_pkg.get_clm_tranmm_stat_hist(#fundCd#, #branchCd#, #tranYr#, #tranMm#))
+		  	      		  <isNotNull property="filter">
+		  	      		  	WHERE 1=1
+		  	      		  		<isNotEmpty prepend="AND" property="clmClosedTag">
+		  	      		  			UPPER(clm_closed_tag) LIKE UPPER(#clmClosedTag#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="rvMeaning">
+		  	      		  			UPPER(rv_meaning) LIKE UPPER(#rvMeaning#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="userId">
+		  	      		  			UPPER(user_id) LIKE UPPER(#userId#)
+		  	      		  		</isNotEmpty>
+		  	      		  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="clmClosedTag rvMeaning">
+			              		ORDER BY clm_closed_tag
+				              		<isNotNull property="sortColumn">
+					              		<isEqual property="ascDescFlg" compareValue="ASC">
+					              			ASC
+					              		</isEqual>
+					              		<isEqual property="ascDescFlg" compareValue="DESC">
+					              			DESC
+					              		</isEqual>
+					              </isNotNull>,
+			              		rv_meaning
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="userId">
+			              		ORDER BY user_id
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="lastUpdate">
+			              		ORDER BY last_update
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giacs038_pkg.get_clm_tranmm_stat_hist(#fundCd#, #branchCd#, #tranYr#, #tranMm#))
+		  	      		  <isNotNull property="filter">
+		  	      		  	WHERE 1=1
+		  	      		  		<isNotEmpty prepend="AND" property="clmClosedTag">
+		  	      		  			UPPER(clm_closed_tag) LIKE UPPER(#clmClosedTag#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="rvMeaning">
+		  	      		  			UPPER(rv_meaning) LIKE UPPER(#rvMeaning#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="userId">
+		  	      		  			UPPER(user_id) LIKE UPPER(#userId#)
+		  	      		  		</isNotEmpty>
+		  	      		  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+<!-- end GIACS038  -->
+</sqlMap>	

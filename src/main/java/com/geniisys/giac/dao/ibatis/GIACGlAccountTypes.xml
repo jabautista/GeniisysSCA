@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GIACGlAccountTypes">
+
+	<typeAlias alias="giacGlAccountTypes" type="com.geniisys.giac.entity.GIACGlAccountTypes"/>
+
+	<resultMap class="giacGlAccountTypes" id="giacGlAccountTypesResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="ledgerCd" 	column="ledger_cd"/>
+		<result property="ledgerDesc" 	column="ledger_desc"/>
+		<result property="activeTag" 	column="active_tag"/>
+		<result property="dspActiveTag" column="dsp_active_tag"/>
+		<result property="remarks" 		column="remarks"/>
+		<result property="userId" 		column="user_id"/>
+		<result property="lastUpdate" 	column="last_update"/>
+	</resultMap>
+
+	<select id="getGlAccountTypes" resultMap="giacGlAccountTypesResultMap">
+		SELECT * FROM TABLE(giacs340_pkg.get_gl_acct_type(#ledgerCd#, #ledgerDesc#, #dspActiveTag#, #sortColumn#, #ascDescFlg#, #from#, #to#))
+	</select>
+
+	<procedure id="setGlAcctTypes" parameterClass="map">
+	    DECLARE
+	    	v_rec giac_gl_account_types%ROWTYPE;
+ 		BEGIN		  
+ 			giis_users_pkg.app_user := #userId#;
+ 			   
+ 			v_rec.ledger_cd 	:= #ledgerCd#;
+ 			v_rec.ledger_desc 	:= #ledgerDesc#;
+ 			v_rec.active_tag 	:= #activeTag#;
+ 			v_rec.remarks 		:= #remarks#;
+ 			
+ 			giacs340_pkg.set_gl_acct_type(#origLedgerCd#,#btnVal#,v_rec);
+ 		END;
+ 	</procedure>
+
+ 	<procedure id="valDelGlAcctTypes" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giacs340_pkg.val_del_rec(#ledgerCd#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddGlAcctTypes" parameterClass="map">
+ 		BEGIN
+ 			giacs340_pkg.val_add_rec(#origLedgerCd#,#btnVal#);
+ 		END;
+ 	</procedure> 	
+ 	
+ 	<procedure id="valUpdGlAcctTypes" parameterClass="map">
+ 		BEGIN
+ 			giacs340_pkg.val_upd_rec(#currLedgerCd#);
+ 		END;
+ 	</procedure> 
+
+	<delete id="delGlAcctTypes" parameterClass="java.lang.String">
+		BEGIN
+ 			giacs340_pkg.del_gl_acct_type(#ledgerCd#);
+ 		END;
+ 	</delete>
+
+</sqlMap>

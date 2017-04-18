@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISBancType">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIISBancType" type="com.geniisys.common.entity.GIISBancType"/>
+	<typeAlias alias="GIISBancTypeDtl" type="com.geniisys.common.entity.GIISBancTypeDtl"/>
+	
+	<resultMap class="GIISBancType" id="giiss218RecListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="banc_type_cd"     		property="bancTypeCd"/>
+		<result column="banc_type_desc"     	property="bancTypeDesc"/>
+		<result column="rate"     				property="rate"/>
+		<result column="user_id"     			property="userId"/>
+		<result column="last_update"     		property="lastUpdate"/>
+	</resultMap>
+	
+	<resultMap class="GIISBancTypeDtl" id="bancTypeDtlResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="banc_type_cd"     		property="bancTypeCd"/>
+		<result column="item_no"     			property="itemNo"/>
+		<result column="intm_no"     			property="intmNo"/>
+		<result column="intm_name"     			property="intmName"/>
+		<result column="intm_type"     			property="intmType"/>
+		<result column="intm_type_desc"     	property="intmTypeDesc"/>
+		<result column="share_percentage"     	property="sharePercentage"/>
+		<result column="remarks"     			property="remarks"/>
+		<result column="user_id"     			property="userId"/>
+		<result column="last_update"     		property="lastUpdate"/>
+		<result column="dsp_last_update"     	property="dspLastUpdate"/>
+		<result column="fixed_tag"     			property="fixedTag"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="bancTypeDtlTGMap" extends="bancTypeDtlResultMap">
+		<result column="max_item_no"     		property="maxItemNo"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="intmTypeLovMap" extends="BaseEntity.TableGridResultMap">
+		<result column="intm_type"     		property="intmType"/>
+		<result column="intm_name"     		property="intmName"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="intmLovMap" extends="BaseEntity.TableGridResultMap">
+		<result column="intm_no"     		property="intmNo"/>
+		<result column="intm_name"     		property="intmName"/>
+		<result column="intm_type"     		property="intmType"/>
+		<result column="intm_desc"     		property="intmDesc"/>
+	</resultMap>
+	
+	<select id="getGiiss218RecList" resultMap="giiss218RecListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss218_pkg.get_banc_type_list(#bancTypeCd#, #bancTypeDesc#, #rate#))
+		                  <isEqual property="sortColumn" compareValue="bancTypeCd">
+			              		ORDER BY banc_type_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="bancTypeDesc">
+			              		ORDER BY banc_type_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="rate">
+			              		ORDER BY rate
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss218_pkg.get_banc_type_list(#bancTypeCd#, #bancTypeDesc#, #rate#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<select id="getBancTypeDtls" resultMap="bancTypeDtlTGMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss218_pkg.get_banc_type_details(#bancTypeCd#, #itemNo#, #sharePercentage#))
+		  	      		 WHERE 1 = 1
+		  	      		 <isNotNull property="intmName">
+		  	      		 	AND UPPER(NVL(intm_name, '%')) LIKE UPPER(NVL(#intmName#, NVL(intm_name, '%'))) 
+		  	      		 </isNotNull>
+		  	      		 <isNotNull property="intmTypeDesc">
+		  	      		 	AND UPPER(NVL(intm_type_desc, '%')) LIKE UPPER(NVL(#intmTypeDesc#, NVL(intm_type_desc, '%')))
+		  	      		 </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="itemNo">
+			              		ORDER BY item_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="intmNoAndName">
+			              		ORDER BY intm_no
+			              		<isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual><isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              </isNotNull>, intm_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="intmTypeDesc">
+			              		ORDER BY intm_type_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="sharePercentage">
+			              		ORDER BY share_percentage
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss218_pkg.get_banc_type_details(#bancTypeCd#, #itemNo#, #sharePercentage#))
+		                  WHERE 1 = 1
+		  	      		 <isNotNull property="intmName">
+		  	      		 	AND UPPER(NVL(intm_name, '%')) LIKE UPPER(NVL(#intmName#, NVL(intm_name, '%'))) 
+		  	      		 </isNotNull>
+		  	      		 <isNotNull property="intmTypeDesc">
+		  	      		 	AND UPPER(NVL(intm_type_desc, '%')) LIKE UPPER(NVL(#intmTypeDesc#, NVL(intm_type_desc, '%')))
+		  	      		 </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<select id="getBancTypeDtlTotal" resultClass="java.math.BigDecimal">
+		SELECT SUM(share_percentage)
+		  FROM TABLE(giiss218_pkg.get_banc_type_details(#bancTypeCd#, #itemNo#, #sharePercentage#))
+	</select>
+	
+	<select id="getGiiss218IntmTypeLOV" resultMap="intmTypeLovMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giiss218_pkg.get_intm_type_lov(#findText#))
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="intmType">
+								ORDER BY intm_type
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="intmName">
+								ORDER BY intm_name
+							</isEqual>							
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(giiss218_pkg.get_intm_type_lov(#findText#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiiss218IntmLOV" resultMap="intmLovMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giiss218_pkg.get_intm_lov(#bancTypeCd#, #findText#))
+						  <isNotNull property="notIn">
+					  		WHERE intm_no NOT IN $notIn$
+					  	  </isNotNull>
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="intmNo">
+								ORDER BY intm_no
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="intmName">
+								ORDER BY intm_name
+							</isEqual>							
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(giiss218_pkg.get_intm_lov(#bancTypeCd#, #findText#))
+						  <isNotNull property="notIn">
+					  	  WHERE intm_no NOT IN $notIn$
+					  	  </isNotNull>) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="valAddBancType" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss218_pkg.val_add_rec(#recId#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="setBancType" parameterClass="GIISBancType">
+	    DECLARE
+	    	v_rec giis_banc_type%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.banc_type_cd := #bancTypeCd#;
+ 			v_rec.banc_type_desc := #bancTypeDesc#;
+ 			v_rec.rate := #rate#;
+ 			v_rec.user_id := #userId#;
+ 			
+ 			giiss218_pkg.set_banc_type(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<delete id="delBancType" parameterClass="java.lang.String">
+		BEGIN
+ 			giiss218_pkg.del_banc_type(#bancTypeCd#);
+ 		END;
+ 	</delete>
+ 	
+ 	<procedure id="valAddBancDtl" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss218_pkg.val_add_dtl(#bancTypeCd#, #itemNo#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="setBancTypeDtl" parameterClass="GIISBancTypeDtl">
+	    DECLARE
+	    	v_rec giis_banc_type_dtl%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.banc_type_cd := #bancTypeCd#;
+ 			v_rec.item_no := #itemNo#;
+ 			v_rec.intm_no := #intmNo#;
+ 			v_rec.intm_type := #intmType#;
+ 			v_rec.share_percentage := #sharePercentage#;
+ 			v_rec.remarks := #remarks#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.fixed_tag := #fixedTag#;
+ 			
+ 			giiss218_pkg.set_banc_type_dtl(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<delete id="delBancTypeDtl" parameterClass="java.util.HashMap">
+		BEGIN
+ 			giiss218_pkg.del_banc_type_dtl(#bancTypeCd#, #itemNo#);
+ 		END;
+ 	</delete>
+	
+</sqlMap>

@@ -1,0 +1,916 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="CgRefCode">
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="CgRefCode" type="com.geniisys.common.entity.CGRefCodes"/>
+
+	<resultMap class="CgRefCode" id="CgRefCodeResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="rvLowValue"		column="rv_low_value"/>
+		<result property="rvMeaning" 		column="rv_meaning"/>
+	</resultMap>
+	
+	<parameterMap class="map" id="checkCharRefCodesMap">
+		<parameter property="pValue"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="INOUT" />
+		<parameter property="pMeaning"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="INOUT" />
+		<parameter property="pDomain"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+	</parameterMap>
+	
+	<resultMap class="com.geniisys.common.entity.CGRefCodes" id="GIISRIBaseListMap">
+		<result column="rv_low_value"		property="rvLowValue"		jdbcType="VARCHAR" />
+		<result column="rv_meaning"			property="rvMeaning"		jdbcType="VARCHAR" />
+	</resultMap>
+	
+	<select id="getGIACS072MemoTypeLOV" resultMap="CgRefCodeResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(CG_REF_CODES_PKG.get_cg_ref_codes_list('GIAC_CM_DM.MEMO_TYPE'))
+		         		  <isNull property="findText">
+                             WHERE UPPER(rv_low_value) LIKE UPPER(NVL(#searchString#, rv_low_value))
+                                OR UPPER(rv_meaning) LIKE UPPER(NVL(#searchString#, rv_meaning))
+                          </isNull>
+                          <isNotNull property="findText">
+                             WHERE UPPER(rv_low_value) LIKE UPPER(NVL(#findText#, rv_low_value))
+                                OR UPPER(rv_meaning) LIKE UPPER(NVL(#findText#, rv_meaning))
+                          </isNotNull>
+                          <isNull property="findText">
+                          	<isEmpty property="searchString">
+                          		UNION SELECT NULL, 'ALL MEMO TYPES' FROM DUAL
+                          	</isEmpty>	
+                          </isNull>
+		                  <isEqual property="sortColumn" compareValue="rvLowValue">
+			              		ORDER BY 1
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="rvMeaning">
+			              		ORDER BY 2
+			              </isEqual>			                      
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*)  count_ 
+		                  FROM (SELECT * FROM TABLE (CG_REF_CODES_PKG.get_cg_ref_codes_list('GIAC_CM_DM.MEMO_TYPE'))
+		                         <isNull property="findText">
+                             WHERE UPPER(rv_low_value) LIKE UPPER(NVL(#searchString#, rv_low_value))
+                                OR UPPER(rv_meaning) LIKE UPPER(NVL(#searchString#, rv_meaning))
+                          </isNull>
+                          <isNotNull property="findText">
+                             WHERE UPPER(rv_low_value) LIKE UPPER(NVL(#findText#, rv_low_value))
+                                OR UPPER(rv_meaning) LIKE UPPER(NVL(#findText#, rv_meaning))
+                          </isNotNull>
+                          <isNull property="findText">
+                          	<isEmpty property="searchString">
+                          		UNION SELECT NULL, 'ALL MEMO TYPES' FROM DUAL
+                          	</isEmpty>	
+                          </isNull>
+		                         )) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getCgRefCodeLOV" resultMap="CgRefCodeResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (CG_REF_CODES_PKG.get_cg_ref_codes_list(#domain#))
+		                  WHERE UPPER(rv_low_value) LIKE '%' || UPPER (NVL (#findText#, rv_low_value))|| '%' <!-- added by steven 01.08.2014 -->
+		                  	   OR UPPER(rv_meaning) LIKE '%' || UPPER (NVL (#findText#, rv_meaning))|| '%'
+		                  <isEqual property="sortColumn" compareValue="rvLowValue">
+			              		ORDER BY rv_low_value
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="rvMeaning">
+			              		ORDER BY rv_meaning
+			              </isEqual>			                      
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (CG_REF_CODES_PKG.get_cg_ref_codes_list(#domain#))
+		                   WHERE UPPER(rv_low_value) LIKE '%' || UPPER (NVL (#findText#, rv_low_value))|| '%'
+		                  	   OR UPPER(rv_meaning) LIKE '%' || UPPER (NVL (#findText#, rv_meaning))|| '%'
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>	
+	
+	<select id="getCgRefCodeLOV2" resultMap="CgRefCodeResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (CG_REF_CODES_PKG.get_cg_ref_codes_list(#domain#))
+		                  <isNotNull property="findText">
+		                  	WHERE UPPER(rv_low_value) LIKE UPPER(#findText#)
+		                  	   OR UPPER(rv_meaning) LIKE UPPER(#findText#)
+		                  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="rvLowValue">
+			              		ORDER BY rv_low_value
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="rvMeaning">
+			              		ORDER BY rv_meaning
+			              </isEqual>			                      
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (CG_REF_CODES_PKG.get_cg_ref_codes_list(#domain#))
+		                  <isNotNull property="findText">
+		                  	WHERE UPPER(rv_low_value) LIKE UPPER(#findText#)
+		                  	   OR UPPER(rv_meaning) LIKE UPPER(#findText#)
+		                  </isNotNull>) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getCgRefCodeLOV3" resultMap="CgRefCodeResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (CG_REF_CODES_PKG.get_cg_ref_codes_list3(#domain#))
+		                  <isNotNull property="findText">
+		                  	WHERE UPPER(rv_low_value) LIKE UPPER(#findText#)
+		                  	   OR UPPER(rv_meaning) LIKE UPPER(#findText#)
+		                  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="rvLowValue">
+			              		ORDER BY rv_low_value
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="rvMeaning">
+			              		ORDER BY rv_meaning
+			              </isEqual>			                      
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (CG_REF_CODES_PKG.get_cg_ref_codes_list3(#domain#))
+		                  <isNotNull property="findText">
+		                  	WHERE UPPER(rv_low_value) LIKE UPPER(#findText#)
+		                  	   OR UPPER(rv_meaning) LIKE UPPER(#findText#)
+		                  </isNotNull>) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="checkCharRefCodes"	parameterMap="checkCharRefCodesMap">
+		CALL CG_REF_CODES_PKG.CGDV$$CHK_CHAR_REF_CODES(?, ?, ?)
+	</procedure>
+	
+	<select id="validateMemoType" resultClass="java.lang.String">
+		SELECT cg_ref_codes_pkg.validate_memo_type (#memoType#)
+  		  FROM DUAL
+	</select>
+	
+	<!-- added by kenneth L. for Print Premium Deposit 06.25.2013 -->
+	<select id="getGIACS147DepFlagLov" resultMap="CgRefCodeResultMap">
+		SELECT *
+  		  FROM (SELECT ROWNUM rownum_, 
+	               	   b.count_, 
+	              	   a.* 
+	          	  FROM (SELECT * FROM TABLE(GIACS147_PKG.get_dep_flag_lov)
+					<isNull property="findText">
+						WHERE rv_low_value LIKE upper(NVL(#search#, rv_low_value))
+					</isNull>
+					<isNotNull property="findText">
+					WHERE rv_low_value LIKE upper(#findText#)
+					</isNotNull>
+					
+	            <isEqual property="sortColumn" compareValue="rvLowValue">
+              		ORDER BY rv_low_value
+	            </isEqual>
+	            <isEqual property="sortColumn" compareValue="rvMeaning">
+              		ORDER BY rv_meaning
+	            </isEqual>
+	            <isNotNull property="sortColumn">
+              		<isEqual property="ascDescFlg" compareValue="ASC">
+              			ASC
+              		</isEqual>
+              		<isEqual property="ascDescFlg" compareValue="DESC">
+              			DESC
+              		</isEqual>
+              	</isNotNull>) a,
+              (SELECT count(*) count_
+	          	 FROM TABLE(GIACS147_PKG.get_dep_flag_lov)
+				<isNull property="findText">
+					WHERE rv_low_value LIKE upper(NVL(#search#, rv_low_value))
+					</isNull>
+					<isNotNull property="findText">
+					WHERE rv_low_value LIKE upper(#findText#)
+					</isNotNull>
+				)b) 
+	    	WHERE rownum_ BETWEEN #from# AND #to# 	
+	</select>
+	
+	<select id="fetchStatusLOV" resultMap="CgRefCodeResultMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (CG_REF_CODES_PKG.FETCH_STATUS_LIST(#findText#))
+		                  <isEqual property="sortColumn" compareValue="rvLowValue">
+			              		ORDER BY rv_low_value
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="rvMeaning">
+			              		ORDER BY rv_meaning
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (CG_REF_CODES_PKG.FETCH_STATUS_LIST(#findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGIACS127TranClass" resultMap="CgRefCodeResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(cg_ref_codes_pkg.get_giacs127_tran_class_list)
+		          		 WHERE 1 = 1
+		          	      <isNull property="chkInclude">
+		          	         AND rv_low_value not in ('COL','DV') 
+		          	      </isNull>
+		         		  <isNull property="findText">
+                               AND (UPPER(rv_low_value) LIKE UPPER(NVL(#searchString#, rv_low_value))
+                                OR UPPER(rv_meaning) LIKE UPPER(NVL(#searchString#, rv_meaning)))
+                          </isNull>
+                          <isNotNull property="findText">
+                               AND (UPPER(rv_low_value) LIKE UPPER(NVL(#findText#, rv_low_value))
+                                OR UPPER(rv_meaning) LIKE UPPER(NVL(#findText#, rv_meaning)))
+                          </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="rvLowValue">
+			              		ORDER BY 1
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="rvMeaning">
+			              		ORDER BY 2
+			              </isEqual>			                      
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*)  count_ 
+		                  FROM (SELECT * FROM TABLE (cg_ref_codes_pkg.get_giacs127_tran_class_list)
+		                         WHERE 1 = 1
+		          	      <isNull property="chkInclude">
+		          	         AND rv_low_value not in ('COL','DV') 
+		          	      </isNull>
+		         		 <isNull property="findText">
+                               AND (UPPER(rv_low_value) LIKE UPPER(NVL(#searchString#, rv_low_value))
+                                OR UPPER(rv_meaning) LIKE UPPER(NVL(#searchString#, rv_meaning)))
+                          </isNull>
+                          <isNotNull property="findText">
+                               AND (UPPER(rv_low_value) LIKE UPPER(NVL(#findText#, rv_low_value))
+                                OR UPPER(rv_meaning) LIKE UPPER(NVL(#findText#, rv_meaning)))
+                          </isNotNull>
+		                         )) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="getGIACS127JVTranResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="jvTranCd"		column="jv_tran_cd"/>
+		<result property="jvTranDesc" 		column="jv_tran_desc"/>
+	</resultMap>
+	
+	<select id="getGIACS127JVTran" resultMap="getGIACS127JVTranResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(cg_ref_codes_pkg.get_giacs127_jv_tran)
+		         		  <isNull property="findText">
+                             WHERE UPPER(jv_tran_cd) LIKE UPPER(NVL(#searchString#, jv_tran_cd))
+                                OR UPPER(jv_tran_desc) LIKE UPPER(NVL(#searchString#, jv_tran_desc))
+                          </isNull>
+                          <isNotNull property="findText">
+                             WHERE UPPER(jv_tran_cd) LIKE UPPER(NVL(#findText#, jv_tran_cd))
+                                OR UPPER(jv_tran_desc) LIKE UPPER(NVL(#findText#, jv_tran_desc))
+                          </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="jvTranCd">
+			              		ORDER BY jv_tran_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="jvTranDesc">
+			              		ORDER BY jv_tran_desc
+			              </isEqual>			                      
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*)  count_ 
+		                  FROM (SELECT * FROM TABLE (cg_ref_codes_pkg.get_giacs127_jv_tran)
+		                  <isNull property="findText">
+                             WHERE UPPER(jv_tran_cd) LIKE UPPER(NVL(#searchString#, jv_tran_cd))
+                                OR UPPER(jv_tran_desc) LIKE UPPER(NVL(#searchString#, jv_tran_desc))
+                          </isNull>
+                          <isNotNull property="findText">
+                             WHERE UPPER(jv_tran_cd) LIKE UPPER(NVL(#findText#, jv_tran_cd))
+                                OR UPPER(jv_tran_desc) LIKE UPPER(NVL(#findText#, jv_tran_desc))
+                          </isNotNull>
+		                         )) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="validateGIACS127TranClass" resultClass="java.lang.String">
+		SELECT cg_ref_codes_pkg.validate_giacs127_tran_class (#rvLowValue#, #chkInclude#) FROM DUAL
+	</select>
+	
+	<select id="validateGIACS127JVTran" resultClass="java.lang.String">
+		SELECT cg_ref_codes_pkg.validate_giacs127_jv_tran (#jvTranCd#) FROM DUAL
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="giacs060TranClassLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="tranClass"		column="tran_class"/>
+		<result property="description" 		column="description"/>
+	</resultMap>
+	
+	<select id="getGIACS060TranClassLOV" resultMap="giacs060TranClassLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(cg_ref_codes_pkg.get_giacs060_tran_class)
+		          		 WHERE 1 = 1
+		         		  <isNull property="findText">
+                               AND (UPPER(tran_class) LIKE UPPER(NVL(#searchString#, tran_class))
+                                OR UPPER(description) LIKE UPPER(NVL(#searchString#, description)))
+                          </isNull>
+                          <isNotNull property="findText">
+                               AND (UPPER(tran_class) LIKE UPPER(NVL(#findText#, tran_class))
+                                OR UPPER(description) LIKE UPPER(NVL(#findText#, description)))
+                          </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="tranClass">
+			              		ORDER BY 1
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="description">
+			              		ORDER BY 2
+			              </isEqual>			                      
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*)  count_ 
+		                  FROM (SELECT * FROM TABLE (cg_ref_codes_pkg.get_giacs060_tran_class)
+		                         WHERE 1 = 1
+		         		 <isNull property="findText">
+                               AND (UPPER(tran_class) LIKE UPPER(NVL(#searchString#, tran_class))
+                                OR UPPER(description) LIKE UPPER(NVL(#searchString#, description)))
+                          </isNull>
+                          <isNotNull property="findText">
+                               AND (UPPER(tran_class) LIKE UPPER(NVL(#findText#, tran_class))
+                                OR UPPER(description) LIKE UPPER(NVL(#findText#, description)))
+                          </isNotNull>
+		                         )) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="GIACS601TransactionsResultMap">
+		<result property="tranCd"		column="rv_low_value"/>
+		<result property="tranName" 	column="rv_meaning"/>
+	</resultMap>
+	
+	<select id="getGIACS601Transactions" resultMap="GIACS601TransactionsResultMap">
+		SELECT *
+  			FROM TABLE (cg_ref_codes_pkg.get_giacs601_transactions)
+	</select>
+
+	<resultMap class="java.util.HashMap" id="checkDvPrintLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="rvLowValue" column="rv_low_value"/>
+		<result property="rvMeaning" column="rv_meaning"/>
+	</resultMap>
+	
+	<select id="getCheckDvPrintLOV" resultMap="checkDvPrintLOVResultMap">
+		SELECT *
+  		  FROM (SELECT ROWNUM rownum_, 
+	               	   b.count_, 
+	              	   a.* 
+	          	  FROM (SELECT * FROM TABLE(giacs303_pkg.get_check_dv_print_lov(#findText#))
+         	 		<isNotNull property="sortColumn">
+	          			<isEqual property="sortColumn" compareValue="rvLowValue">
+	          				ORDER BY rv_low_value
+	          			</isEqual>
+	          			<isEqual property="sortColumn" compareValue="rvMeaning">
+	          				ORDER BY rv_meaning
+	          			</isEqual>
+	          			<isEqual property="ascDescFlg" compareValue="ASC">
+	          				ASC
+	          			</isEqual>
+	          			<isEqual property="ascDescFlg" compareValue="DESC">
+	          				DESC
+	          			</isEqual>
+	          		</isNotNull>
+          	   	) a,
+              (SELECT count(*) count_
+	          	 FROM TABLE(giacs303_pkg.get_check_dv_print_lov(#findText#))
+	            )b) 
+	    	WHERE rownum_ BETWEEN #from# AND #to# 
+	</select>
+	
+	<!-- shan 09.04.2013 -->
+	<select id="getGIPIS901ZoneTypeLOV" resultMap="CgRefCodeResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(CG_REF_CODES_PKG.get_cg_ref_cd_ordby_val('GIIS_PERIL.ZONE_TYPE'))
+		         		  <isNull property="findText">
+                             WHERE UPPER(rv_low_value) LIKE UPPER(NVL(#searchString#, rv_low_value))
+                                OR UPPER(rv_meaning) LIKE UPPER(NVL(#searchString#, rv_meaning))
+                          </isNull>
+                          <isNotNull property="findText">
+                             WHERE UPPER(rv_low_value) LIKE UPPER(NVL(#findText#, rv_low_value))
+                                OR UPPER(rv_meaning) LIKE UPPER(NVL(#findText#, rv_meaning))
+                          </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="rvLowValue">
+			              		ORDER BY 1
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="rvMeaning">
+			              		ORDER BY 2
+			              </isEqual>			                      
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*)  count_ 
+		                  FROM (SELECT * FROM TABLE (CG_REF_CODES_PKG.get_cg_ref_cd_ordby_val('GIIS_PERIL.ZONE_TYPE'))
+		                         <isNull property="findText">
+                             WHERE UPPER(rv_low_value) LIKE UPPER(NVL(#searchString#, rv_low_value))
+                                OR UPPER(rv_meaning) LIKE UPPER(NVL(#searchString#, rv_meaning))
+                          </isNull>
+                          <isNotNull property="findText">
+                             WHERE UPPER(rv_low_value) LIKE UPPER(NVL(#findText#, rv_low_value))
+                                OR UPPER(rv_meaning) LIKE UPPER(NVL(#findText#, rv_meaning))
+                          </isNotNull>
+		                         )) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+
+	<select id="getGIPIS901ZoneTypeLOV2" resultMap="CgRefCodeResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(CG_REF_CODES_PKG.get_transaction_type_listing('GIPI_FIRESTAT_EXTRACT.ZONE_TYPE'))
+		         		  <isNull property="findText">
+                             WHERE UPPER(rv_low_value) LIKE UPPER(NVL(#searchString#, rv_low_value))
+                                OR UPPER(rv_meaning) LIKE UPPER(NVL(#searchString#, rv_meaning))
+                          </isNull>
+                          <isNotNull property="findText">
+                             WHERE UPPER(rv_low_value) LIKE UPPER(NVL(#findText#, rv_low_value))
+                                OR UPPER(rv_meaning) LIKE UPPER(NVL(#findText#, rv_meaning))
+                          </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="rvLowValue">
+			              		ORDER BY 1
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="rvMeaning">
+			              		ORDER BY 2
+			              </isEqual>			                      
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*)  count_ 
+		                  FROM (SELECT * FROM TABLE (CG_REF_CODES_PKG.get_transaction_type_listing('GIPI_FIRESTAT_EXTRACT.ZONE_TYPE'))
+		                         <isNull property="findText">
+                             WHERE UPPER(rv_low_value) LIKE UPPER(NVL(#searchString#, rv_low_value))
+                                OR UPPER(rv_meaning) LIKE UPPER(NVL(#searchString#, rv_meaning))
+                          </isNull>
+                          <isNotNull property="findText">
+                             WHERE UPPER(rv_low_value) LIKE UPPER(NVL(#findText#, rv_low_value))
+                                OR UPPER(rv_meaning) LIKE UPPER(NVL(#findText#, rv_meaning))
+                          </isNotNull>
+		                         )) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGIISS080ClassTypeLOV" resultMap="CgRefCodeResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(CG_REF_CODES_PKG.get_giiss080_class_type_lov)		                 
+		                  	<isNull property="findText">
+				                 WHERE UPPER(rv_low_value) LIKE UPPER(#searchString#)
+				                 OR UPPER(rv_meaning) LIKE UPPER(#searchString#)					                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(rv_low_value) LIKE UPPER(#findText#)
+				                 OR UPPER(rv_meaning) LIKE UPPER(#findText#)				  				         		
+			             	</isNotNull>		             
+			              	<isEqual property="sortColumn" compareValue="rvLowValue">
+			              		ORDER BY rv_low_value
+			              	</isEqual>	
+			              	<isEqual property="sortColumn" compareValue="rvMeaning">
+			              		ORDER BY rv_meaning
+			              	</isEqual>			              		                      
+			          	  	<isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	</isNotNull>
+		                  ) a, 
+		               (SELECT count (*) count_ 
+		                  FROM TABLE(CG_REF_CODES_PKG.get_giiss080_class_type_lov)		                 
+		                  		<isNull property="findText">
+				                 WHERE UPPER(rv_low_value) LIKE UPPER(#searchString#)
+				                 OR UPPER(rv_meaning) LIKE UPPER(#searchString#)					                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(rv_low_value) LIKE UPPER(#findText#)
+				                 OR UPPER(rv_meaning) LIKE UPPER(#findText#)				  				         		
+			             	</isNotNull>	
+			             	) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	<select id="getRIBaseList" resultMap ="GIISRIBaseListMap">
+		SELECT rv_meaning, rv_low_value 
+  		FROM cg_ref_codes
+ 		WHERE rv_domain = 'GIIS_REINSURER.LOCAL_FOREIGN_SW'
+  	</select>
+  	
+	<select id="getCgRefCodeLOV4" resultMap="CgRefCodeResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(CG_REF_CODES_PKG.get_cg_ref_cd_ordby_val(#domain#))
+                          <isNotNull property="findText">
+                             WHERE UPPER(rv_low_value) LIKE UPPER(NVL(#findText#, rv_low_value))
+                                OR UPPER(rv_meaning) LIKE UPPER(NVL(#findText#, rv_meaning))
+                          </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="rvLowValue">
+			              		ORDER BY 1
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="rvMeaning">
+			              		ORDER BY 2
+			              </isEqual>			                      
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*)  count_ 
+		                  FROM (SELECT * FROM TABLE (CG_REF_CODES_PKG.get_cg_ref_cd_ordby_val(#domain#))
+                          <isNotNull property="findText">
+                             WHERE UPPER(rv_low_value) LIKE UPPER(NVL(#findText#, rv_low_value))
+                                OR UPPER(rv_meaning) LIKE UPPER(NVL(#findText#, rv_meaning))
+                          </isNotNull>
+		                         )) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGIISS053ZoneGrpLOV" resultMap="CgRefCodeResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (CG_REF_CODES_PKG.get_giiss053_zone_grp_lov)
+		                  <isNotNull property="findText">
+                             WHERE UPPER(rv_low_value) LIKE UPPER(NVL(#findText#, rv_low_value))
+                                OR UPPER(rv_meaning) LIKE UPPER(NVL(#findText#, rv_meaning))
+                          </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="rvLowValue">
+			              		ORDER BY rv_low_value
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="rvMeaning">
+			              		ORDER BY rv_meaning
+			              </isEqual>			                      
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (CG_REF_CODES_PKG.get_giiss053_zone_grp_lov)
+		                  <isNotNull property="findText">
+                             WHERE UPPER(rv_low_value) LIKE UPPER(NVL(#findText#, rv_low_value))
+                                OR UPPER(rv_meaning) LIKE UPPER(NVL(#findText#, rv_meaning))
+                          </isNotNull>) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getCgRefCodeLOV5" resultMap="CgRefCodeResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(CG_REF_CODES_PKG.get_cg_ref_cd_ordby_val(#domain#))
+                          <isNotNull property="findText">
+                             WHERE UPPER(rv_low_value) LIKE UPPER(NVL(#findText#, rv_low_value))
+                                OR UPPER(rv_meaning) LIKE UPPER(NVL(#findText#, rv_meaning))
+                          </isNotNull>
+                          <isNull property="findText">
+                             WHERE UPPER(rv_low_value) LIKE UPPER(NVL(#searchString#, rv_low_value))
+                                OR UPPER(rv_meaning) LIKE UPPER(NVL(#searchString#, rv_meaning))
+                          </isNull>
+		                  <isEqual property="sortColumn" compareValue="rvLowValue">
+			              		ORDER BY 1
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="rvMeaning">
+			              		ORDER BY 2
+			              </isEqual>			                      
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*)  count_ 
+		                  FROM TABLE (CG_REF_CODES_PKG.get_cg_ref_cd_ordby_val(#domain#))
+                          <isNotNull property="findText">
+                             WHERE UPPER(rv_low_value) LIKE UPPER(NVL(#findText#, rv_low_value))
+                                OR UPPER(rv_meaning) LIKE UPPER(NVL(#findText#, rv_meaning))
+                          </isNotNull>
+                          <isNull property="findText">
+                             WHERE UPPER(rv_low_value) LIKE UPPER(NVL(#searchString#, rv_low_value))
+                                OR UPPER(rv_meaning) LIKE UPPER(NVL(#searchString#, rv_meaning))
+                          </isNull>
+		                         ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<!-- Dren Niebres 10.03.2016 SR-4572 : Added LOV for GIACS605 Transaction - Start -->
+ 	<resultMap class="java.util.HashMap" id="giacs605TransactionLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result property="rvLowValue" 		column="rv_low_value" />
+		<result property="rvMeaning" 		column="rv_meaning" />
+	</resultMap>	
+	
+	<select id="getGIACS605TransactionLOV" resultMap="giacs605TransactionLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (CG_REF_CODES_PKG.get_giacs605_transaction_lov(#search#))
+		                 <isNotNull property="findText">
+					         WHERE (UPPER(rv_low_value) LIKE (#findText#))
+				         </isNotNull>          
+			          	  <isNotNull property="sortColumn">
+			                  <isEqual property="sortColumn" compareValue="rvLowValue">
+				              		ORDER BY rv_low_value
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="rvMeaning">
+				              		ORDER BY rv_meaning
+				              </isEqual>
+				          	  <isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              </isNotNull>
+				          </isNotNull>    
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (CG_REF_CODES_PKG.get_giacs605_transaction_lov(#search#))
+			              <isNotNull property="findText">
+					          WHERE (UPPER(rv_low_value) LIKE (#findText#) )
+				          </isNotNull> 
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select> <!-- Dren Niebres 10.03.2016 SR-4572 : Added LOV for GIACS605 Transaction - End -->		
+	
+	<!-- Dren Niebres 10.03.2016 SR-4573 : Added LOV for GIACS606 Transaction - Start -->
+	<resultMap class="java.util.HashMap" id="giacs606TransactionLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result property="rvLowValue" 		column="rv_low_value" />
+		<result property="rvMeaning" 		column="rv_meaning" />
+	</resultMap>	
+	
+	<select id="getGIACS606TransactionLOV" resultMap="giacs606TransactionLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (CG_REF_CODES_PKG.get_giacs606_transaction_lov(#search#))
+		                 <isNotNull property="findText">
+					         WHERE (UPPER(rv_low_value) LIKE (#findText#))
+				         </isNotNull>          
+			          	  <isNotNull property="sortColumn">
+			                  <isEqual property="sortColumn" compareValue="rvLowValue">
+				              		ORDER BY rv_low_value
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="rvMeaning">
+				              		ORDER BY rv_meaning
+				              </isEqual>
+				          	  <isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              </isNotNull>
+				          </isNotNull>    
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (CG_REF_CODES_PKG.get_giacs606_transaction_lov(#search#))
+			              <isNotNull property="findText">
+					          WHERE (UPPER(rv_low_value) LIKE (#findText#) )
+				          </isNotNull> 
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select> <!-- Dren Niebres 10.03.2016 SR-4573 : Added LOV for GIACS606 Transaction - End -->			
+
+	<!-- Dren Niebres 10.03.2016 SR-4573 : Added LOV for GIACS606 Status - Start -->	
+	<resultMap class="java.util.HashMap" id="giacs606StatusLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result property="rvLowValue" 		column="rv_low_value" />
+		<result property="rvMeaning" 		column="rv_meaning" />
+	</resultMap>	
+	
+	<select id="getGIACS606StatusLOV" resultMap="giacs606StatusLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (CG_REF_CODES_PKG.GET_GIACS606_STATUS_LOV(#search#,#transactionType#))
+		                 <isNotNull property="findText">
+					         WHERE (UPPER(rv_low_value) LIKE (#findText#))
+				         </isNotNull>          
+			          	  <isNotNull property="sortColumn">
+			                  <isEqual property="sortColumn" compareValue="rvLowValue">
+				              		ORDER BY rv_low_value
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="rvMeaning">
+				              		ORDER BY rv_meaning
+				              </isEqual>
+				          	  <isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              </isNotNull>
+				          </isNotNull>    
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (CG_REF_CODES_PKG.GET_GIACS606_STATUS_LOV(#search#,#transactionType#))
+			              <isNotNull property="findText">
+					          WHERE (UPPER(rv_low_value) LIKE (#findText#) )
+				          </isNotNull> 
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select> <!-- Dren Niebres 10.03.2016 SR-4573 : Added LOV for GIACS606 Status - End -->		
+	
+	<!-- Dren Niebres 10.03.2016 SR-4573 : Added LOV for GIACS606 Status 2A - Start -->
+	<resultMap class="java.util.HashMap" id="giacs606Status2ALOVMap" extends="BaseEntity.TableGridResultMap">
+		<result property="rvLowValue" 		column="rv_low_value" />
+		<result property="rvMeaning" 		column="rv_meaning" />
+	</resultMap>	
+		
+	<select id="getGIACS606Status2ALOV" resultMap="giacs606Status2ALOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (CG_REF_CODES_PKG.GET_GIACS606_STATUS_LOV(#search#,#transactionType#))
+		                 <isNotNull property="findText">
+					         WHERE (UPPER(rv_low_value) LIKE (#findText#))
+				         </isNotNull>          
+			          	  <isNotNull property="sortColumn">
+			                  <isEqual property="sortColumn" compareValue="rvLowValue">
+				              		ORDER BY rv_low_value
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="rvMeaning">
+				              		ORDER BY rv_meaning
+				              </isEqual>
+				          	  <isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              </isNotNull>
+				          </isNotNull>    
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (CG_REF_CODES_PKG.GET_GIACS606_STATUS_LOV(#search#,#transactionType#))
+			              <isNotNull property="findText">
+					          WHERE (UPPER(rv_low_value) LIKE (#findText#) )
+				          </isNotNull> 
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select> <!-- Dren Niebres 10.03.2016 SR-4573 : Added LOV for GIACS606 Status 2A - End -->	
+	
+	<!-- Dren Niebres 10.03.2016 SR-4573 : Added LOV for GIACS606 Status 2B - Start -->
+	<resultMap class="java.util.HashMap" id="giacs606Status2BLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result property="rvLowValue" 		column="rv_low_value" />
+		<result property="rvMeaning" 		column="rv_meaning" />
+	</resultMap>	
+	
+	<select id="getGIACS606Status2BLOV" resultMap="giacs606Status2BLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (CG_REF_CODES_PKG.GET_GIACS606_STATUS_LOV(#search#,#transactionType#))
+		                 <isNotNull property="findText">
+					         WHERE (UPPER(rv_low_value) LIKE (#findText#))
+				         </isNotNull>          
+			          	  <isNotNull property="sortColumn">
+			                  <isEqual property="sortColumn" compareValue="rvLowValue">
+				              		ORDER BY rv_low_value
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="rvMeaning">
+				              		ORDER BY rv_meaning
+				              </isEqual>
+				          	  <isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              </isNotNull>
+				          </isNotNull>    
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (CG_REF_CODES_PKG.GET_GIACS606_STATUS_LOV(#search#,#transactionType#))
+			              <isNotNull property="findText">
+					          WHERE (UPPER(rv_low_value) LIKE (#findText#) )
+				          </isNotNull> 
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select> <!-- Dren Niebres 10.03.2016 SR-4573 : Added LOV for GIACS606 Status 2B - End -->
+				
+</sqlMap>

@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIPIR909a_CONVERTED_QUOTES_DTL" pageWidth="880" pageHeight="595" orientation="Landscape" columnWidth="880" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="557"/>
+	<property name="ireport.y" value="0"/>
+	<style name="fields" isDefault="true" mode="Transparent" forecolor="#000000" fontName="Arial" fontSize="10" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false"/>
+	<parameter name="P_FROM_DATE" class="java.util.Date"/>
+	<parameter name="P_TO_DATE" class="java.util.Date"/>
+	<parameter name="P_INTM_NO" class="java.lang.String"/>
+	<parameter name="P_LINE" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT LINE_CD, LINE_NAME, QUOTATION, ASSD_NAME, POLICY, INCEPT_DATE, INTERMEDIARY, REMARKS, PREM_AMT, TOTAL_PREM
+FROM TABLE (gipi_quote_pkg.get_converted_quote($P{P_FROM_DATE}, $P{P_TO_DATE}, $P{P_INTM_NO}, $P{P_LINE}))]]>
+	</queryString>
+	<field name="LINE_CD" class="java.lang.String"/>
+	<field name="LINE_NAME" class="java.lang.String"/>
+	<field name="QUOTATION" class="java.lang.String"/>
+	<field name="ASSD_NAME" class="java.lang.String"/>
+	<field name="POLICY" class="java.lang.String"/>
+	<field name="INCEPT_DATE" class="java.sql.Timestamp"/>
+	<field name="INTERMEDIARY" class="java.lang.String"/>
+	<field name="REMARKS" class="java.lang.String"/>
+	<field name="PREM_AMT" class="java.math.BigDecimal"/>
+	<field name="TOTAL_PREM" class="java.math.BigDecimal"/>
+	<variable name="V_LINE_NETPREM" class="java.math.BigDecimal" resetType="Group" resetGroup="GRP_LINECD" calculation="Sum">
+		<variableExpression><![CDATA[$F{PREM_AMT}]]></variableExpression>
+	</variable>
+	<variable name="V_LINE_TOTPREM" class="java.math.BigDecimal" resetType="Group" resetGroup="GRP_LINECD" calculation="Sum">
+		<variableExpression><![CDATA[$F{TOTAL_PREM}]]></variableExpression>
+	</variable>
+	<variable name="V_GRAND_NETPREM" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$V{V_LINE_NETPREM}]]></variableExpression>
+	</variable>
+	<variable name="V_GRAND_TOTPREM" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$V{V_LINE_TOTPREM}]]></variableExpression>
+	</variable>
+	<group name="GRP_LINECD">
+		<groupExpression><![CDATA[$F{LINE_CD}]]></groupExpression>
+		<groupFooter>
+			<band height="28">
+				<textField evaluationTime="Group" evaluationGroup="GRP_LINECD" pattern="#,##0.00;(#,##0.00)">
+					<reportElement style="fields" x="630" y="5" width="100" height="20"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle"/>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_LINE_NETPREM}]]></textFieldExpression>
+				</textField>
+				<textField evaluationTime="Group" evaluationGroup="GRP_LINECD" pattern="#,##0.00;(#,##0.00)">
+					<reportElement style="fields" x="735" y="5" width="100" height="20"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle"/>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_LINE_TOTPREM}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement style="fields" x="525" y="5" width="100" height="20"/>
+					<textElement verticalAlignment="Middle"/>
+					<text><![CDATA[Line Totals:]]></text>
+				</staticText>
+				<line>
+					<reportElement x="630" y="2" width="100" height="1"/>
+					<graphicElement>
+						<pen lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="735" y="2" width="100" height="1"/>
+					<graphicElement>
+						<pen lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="630" y="27" width="100" height="1"/>
+					<graphicElement>
+						<pen lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="735" y="27" width="100" height="1"/>
+					<graphicElement>
+						<pen lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="20" splitType="Stretch">
+			<textField isStretchWithOverflow="true">
+				<reportElement x="0" y="0" width="100" height="20"/>
+				<textElement/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{QUOTATION}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="105" y="0" width="100" height="20"/>
+				<textElement/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{ASSD_NAME}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="210" y="0" width="100" height="20"/>
+				<textElement/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{POLICY}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd-MMM-yyyy">
+				<reportElement x="315" y="0" width="100" height="20"/>
+				<textElement/>
+				<textFieldExpression class="java.sql.Timestamp"><![CDATA[$F{INCEPT_DATE}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="420" y="0" width="100" height="20"/>
+				<textElement/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{INTERMEDIARY}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="525" y="0" width="100" height="20"/>
+				<textElement/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{REMARKS}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(#,##0.00)">
+				<reportElement x="630" y="0" width="100" height="20"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{PREM_AMT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(#,##0.00)">
+				<reportElement x="735" y="0" width="100" height="20"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{TOTAL_PREM}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

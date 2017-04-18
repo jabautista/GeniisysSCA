@@ -1,0 +1,915 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIACBatchDV">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIACBatchDVClass" type="com.geniisys.giac.entity.GIACBatchDV"/>
+	
+	<resultMap class="GIACBatchDVClass" id="GIACBatchDVMap">
+		<result property="batchDvId" column="batch_dv_id"/>
+		<result property="funcCd" column="fund_cd"/>
+		<result property="branchCd" column="branch_cd"/>
+		<result property="batchYear" column="batch_year"/>
+		<result property="batchMM" column="batch_mm"/>
+		<result property="batchSeqNo" column="batch_seq_no"/>
+		<result property="batchDate" column="batch_date"/>
+		<result property="batchFlag" column="batch_flag"/>
+		<result property="payeeClassCd" column="payee_class_cd"/>
+		<result property="payeeCd" column="payee_cd"/>
+		<result property="particulars" column="formatted_particulars"/>
+		<result property="tranId" column="tran_id"/>
+		<result property="paidAmt" column="paid_amt"/>
+		<result property="fcurrAmt" column="fcurr_amt"/>
+		<result property="currencyCd" column="currency_cd"/>
+		<result property="convertRate" column="convert_rate"/>
+		<result property="userId" column="user_id"/>
+		<result property="lastUpdate" column="last_Update"/>
+		<result property="payeeRemarks" column="payee_remarks"/>
+	</resultMap>
+	
+	<resultMap class="GIACBatchDVClass" id="GIACBatchDVMap2" extends="GIACBatchDVMap">
+		<result property="batchNo" column="batch_no"/>
+		<result property="dspPayee" column="dsp_payee"/>
+		<result property="dspCurrency" column="dsp_currency"/>
+		<result property="dspPayeeClass" column="dsp_payee_class"/>
+		<result property="printDetailsSw" column="print_dtl_sw"/>
+	</resultMap>
+	
+	<resultMap class="GIACBatchDVClass" id="getSpecialCSRGridMap" extends="GIACBatchDVMap">
+		<result property="batchNo" column="batch_no"/>
+		<result property="dspPayee" column="dsp_payee"/>
+		<result property="dspCurrency" column="dsp_currency"/>
+		<result property="dspPayeeClass" column="dsp_payee_class"/>
+		<result property="printDetailsSw" column="print_dtl_sw"/>
+		<result column="rownum_" 				property="rowNum" />
+		<result column="count_"					property="rowCount"/>
+	</resultMap>
+	
+	<!-- removed escape_value on particulars reymon 04292013 -->
+	<select id="getSpecialCSRListing" resultMap="getSpecialCSRGridMap" parameterClass="map">
+		SELECT *
+			  FROM (SELECT rownum rownum_, 
+			               b.count_, 
+			               a.* , a.particulars formatted_particulars 
+			          FROM (SELECT * 
+			                  FROM TABLE (giac_batch_dv_pkg.get_special_csr_listing(#fundCd#,#branchCd#,#batchYear#,#batchMM#,#batchSeqNo#,#batchDate#, #userId#,#dspPayeeClass#,#particulars#, #fcurrAmt#,#paidAmt#,#dspCurrency#,#claimId#))
+				              <isEqual property="sortColumn" compareValue="batchNo">
+			              		ORDER BY batch_no
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="batchDate">
+			              		ORDER BY batch_date
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="dspPayeeClass">
+			              		ORDER BY dsp_payee_class
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="dspPayee">
+			              		ORDER BY dsp_payee
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="particulars">
+			              		ORDER BY particulars
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="fcurrAmt">
+			              		ORDER BY fcurr_amt
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="paidAmt">
+			              		ORDER BY paid_amt
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="dspCurrency">
+			              		ORDER BY dsp_Currency
+				              </isEqual>
+				              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	  </isNotNull>) a, 
+			               (SELECT count(*) count_
+			                  FROM TABLE (giac_batch_dv_pkg.get_special_csr_listing(#fundCd#,#branchCd#,#batchYear#,#batchMM#,#batchSeqNo#,#batchDate#, #userId#,#dspPayeeClass#,#particulars#, #fcurrAmt#,#paidAmt#,#dspCurrency#,#claimId#))) b) 
+			 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<parameterMap class="map" id="setGiacBatchDvMap">
+		<parameter property="userId"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="payeeClassCd" 		jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="payeeCd" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="particulars" 		jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="totalPaidAmt" 		jdbcType="NUMERIC"		javaType="java.math.BigDecimal"	mode="IN" />
+		<parameter property="totalFcurrAmt" 	jdbcType="NUMERIC"		javaType="java.math.BigDecimal"	mode="IN" />
+		<parameter property="currencyCd"		jdbcType="INTEGER" 	javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="convertRate"		jdbcType="NUMERIC" 	javaType="java.math.BigDecimal" mode="IN"/>
+		<parameter property="payeeRemarks" 			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="issCd" 		jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="fundCd"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="batchDvId"		jdbcType="INTEGER" 	javaType="java.lang.Integer" mode="OUT"/>
+		<parameter property="msgAlert"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="documentCd"        jdbcType="VARCHAR"  javaType="java.lang.String" mode="OUT" />
+		<parameter property="goucOucId"        jdbcType="INTEGER"  javaType="java.lang.Integer" mode="OUT" />
+		<parameter property="refId"        jdbcType="INTEGER"  javaType="java.lang.Integer" mode="OUT" />
+		<parameter property="docYear"        jdbcType="INTEGER"  javaType="java.lang.Integer" mode="OUT" />
+		<parameter property="docMm"        jdbcType="INTEGER"  javaType="java.lang.Integer" mode="OUT" />
+		<parameter property="docSeqNo"        jdbcType="INTEGER"  javaType="java.lang.Integer" mode="OUT" />
+	</parameterMap>
+	
+	<procedure id="setGiacBatchDv" parameterMap="setGiacBatchDvMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+		 	giac_batch_dv_pkg.set_giac_batch_dv(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?,?,?,?,?,?);
+		END;
+	</procedure>
+	
+	<procedure id="setGiacBatchDvDtl" parameterClass="map">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+		 	giac_batch_dv_dtl_pkg.set_giac_batch_dv_dtl(#batchDvId#, #claimId#, #adviceId#, #issueCode#, 
+		 	#paidAmt#, #clmLossId#);
+		END;
+	</procedure>
+	
+	<insert id="setGiacPaytRequestBatch" parameterClass="map">
+		INSERT INTO giac_payt_requests
+               (gouc_ouc_id, ref_id, fund_cd, request_date,
+                branch_cd, document_cd, doc_year, doc_mm,
+                doc_seq_no, user_id, last_update, with_dv, create_by
+               )
+        VALUES (#goucOucId#, #refId#, #fundCd#, SYSDATE,
+                #issCd#, #documentCd#, #docYear#, #docMm#,
+                #docSeqNo#, #userId#, SYSDATE, 'N', #userId#
+               )
+	</insert>
+	
+	<parameterMap class="java.util.HashMap" id="addPaymentRequestDetailsMap">
+		<parameter property="userId"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="particulars"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="INOUT"/>
+		<parameter property="batchDvId" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="userId2"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="fundCd"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="issCd" 		jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="payee" 		jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="payeeCd" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="payeeClassCd" 		jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="payeeRemarks" 			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="currencyCd"		jdbcType="INTEGER" 	javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="totalPaidAmt" 		jdbcType="NUMERIC"		javaType="java.math.BigDecimal"	mode="IN" />
+		<parameter property="totalFcurrAmt" 	jdbcType="NUMERIC"		javaType="java.math.BigDecimal"	mode="IN" />
+		<parameter property="convertRate"		jdbcType="NUMERIC" 	javaType="java.math.BigDecimal" mode="IN"/>
+		<parameter property="refId" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="dvTranId" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="OUT"/>
+		<parameter property="jvTranId" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="OUT"/>
+		<parameter property="riIssCd" 			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="vCheck" 			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+	</parameterMap>
+      
+	<procedure id="addPaymentRequestDetails" parameterMap="addPaymentRequestDetailsMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+		 	giac_batch_dv_pkg.add_payment_request_details(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);
+		END;
+	</procedure>
+	
+	<parameterMap class="java.util.HashMap" id="addRecsInDirectClaimPaymentsMap">
+		<parameter property="userId"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="payeeCd" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="payeeClassCd" 		jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="claimId" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="adviceId" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="paidAmt" 		jdbcType="NUMERIC"		javaType="java.math.BigDecimal"	mode="IN" />
+		<parameter property="issCd" 		jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="convRt"		jdbcType="NUMERIC" 	javaType="java.math.BigDecimal" mode="IN"/>
+		<parameter property="convertRate"		jdbcType="NUMERIC" 	javaType="java.math.BigDecimal" mode="IN"/>
+		<parameter property="clmLossId" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="netAmt" 		jdbcType="NUMERIC"		javaType="java.math.BigDecimal"	mode="IN" />
+		<parameter property="currencyCd"		jdbcType="INTEGER" 	javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="payeeType" 		jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="riIssCd" 			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="dvTranId" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="jvTranId" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="msgAlert"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="workflowMsgr"		jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="userId2"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+	</parameterMap>
+	
+	<parameterMap class="java.util.HashMap" id="addRecsInDirectClaimPaymentsMap2">
+		<parameter property="userId"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="payeeCd" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="payeeClassCd" 		jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="claimId" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="adviceId" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="paidAmt" 			jdbcType="NUMERIC"	javaType="java.math.BigDecimal"	mode="IN" />
+		<parameter property="issCd" 			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="convRt"			jdbcType="NUMERIC" 	javaType="java.math.BigDecimal" mode="IN"/>
+		<parameter property="convertRate"		jdbcType="NUMERIC" 	javaType="java.math.BigDecimal" mode="IN"/>
+		<parameter property="clmLossId" 		jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="netAmt" 			jdbcType="NUMERIC"	javaType="java.math.BigDecimal"	mode="IN" />
+		<parameter property="currencyCd"		jdbcType="INTEGER" 	javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="payeeType" 		jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="riIssCd" 			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="dvTranId" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="jvTranId" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="itemNo" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="msgAlert"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="workflowMsgr"		jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="userId2"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+	</parameterMap>
+	
+	<parameterMap class="java.util.HashMap" id="addRecsInDirectClaimPaymentsMap3">
+		<parameter property="userId"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="payeeCd" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="payeeClassCd" 		jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="claimId" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="adviceId" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="paidAmt" 			jdbcType="NUMERIC"	javaType="java.math.BigDecimal"	mode="IN" />
+		<parameter property="issCd" 			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="convRt"			jdbcType="NUMERIC" 	javaType="java.math.BigDecimal" mode="IN"/>
+		<parameter property="convertRate"		jdbcType="NUMERIC" 	javaType="java.math.BigDecimal" mode="IN"/>
+		<parameter property="clmLossId" 		jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="netAmt" 			jdbcType="NUMERIC"	javaType="java.math.BigDecimal"	mode="IN" />
+		<parameter property="currencyCd"		jdbcType="INTEGER" 	javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="payeeType" 		jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="riIssCd" 			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="dvTranId" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="jvTranId" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="itemNo" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="batchDvId" 	    jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="msgAlert"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="workflowMsgr"		jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="userId2"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+	</parameterMap>
+	
+	<procedure id="addRecsInDirectClaimPayments" parameterMap="addRecsInDirectClaimPaymentsMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+		 	giac_batch_dv_pkg.add_direct_claim_payments(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);
+		END;
+	</procedure>
+	
+	<procedure id="addRecsInDirectClaimPayments2" parameterMap="addRecsInDirectClaimPaymentsMap2">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+		 	giac_batch_dv_pkg.add_direct_claim_payments_2(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);
+		END;
+	</procedure>
+	
+	<procedure id="addRecsInDirectClaimPayments3" parameterMap="addRecsInDirectClaimPaymentsMap3">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+		 	giac_batch_dv_pkg.add_direct_claim_payments_3(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);
+		END;
+	</procedure>
+     
+     <select id="getGiacBatchDv" resultMap="GIACBatchDVMap2">
+     	SELECT a.*, a.particulars formatted_particulars
+		  FROM (SELECT *
+		          FROM TABLE (giac_batch_dv_pkg.get_giac_batch_dv (#batchDvId#))) a
+     </select>
+     
+     <update id="cancelGIACBatch" parameterClass="map">
+   		BEGIN
+			giis_users_pkg.app_user := #userId#;
+		 	giac_batch_dv_pkg.cancel_giac_batch(#batchDvId#, #tranId#);
+		END;
+     </update>
+     
+     <parameterMap class="map" id="getGIACS086AcctEntPostQueryMap">
+     	<parameter property="tranId"		 jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="branchCd"		 jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="totalDebitAmt"  jdbcType="NUMERIC"	    javaType="java.math.BigDecimal"	mode="OUT" />
+		<parameter property="totalCreditAmt" jdbcType="NUMERIC"	    javaType="java.math.BigDecimal"	mode="OUT" />
+     </parameterMap>
+     
+     <procedure id="getGIACS086AcctEntPostQuery" parameterMap="getGIACS086AcctEntPostQueryMap">
+     	BEGIN
+			giac_batch_dv_pkg.giacs086_acct_ent_post_query(?,?,?,?);
+		END;
+     </procedure>
+     
+     <parameterMap class="map" id="giacs086ValidateAdviceParamMap">
+        <parameter property="adviceId" jdbcType="NUMBER" javaType="java.lang.Integer"/>
+        <parameter property="message" jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT"/> 
+     </parameterMap>
+     
+     <procedure id="giacs086ValidateAdvice" parameterMap="giacs086ValidateAdviceParamMap">
+         BEGIN
+			giac_batch_dv_pkg.validate_advice(?,?);
+		END;
+     </procedure>
+     
+     <!-- shan 07.17.2014 -->
+     <resultMap class="java.util.HashMap" id="GIACBatchDVMap3"  extends="BaseEntity.TableGridResultMap">     	
+		<result property="batchDvId" 	column="batch_dv_id"/>
+		<result property="fundCd" 		column="fund_cd"/>
+		<result property="branchCd" 	column="branch_cd"/>
+		<result property="batchYear" 	column="batch_year"/>
+		<result property="batchMM" 		column="batch_mm"/>
+		<result property="batchSeqNo" 	column="batch_seq_no"/>
+		<result property="batchDate" 	column="batch_date"/>
+		<result property="batchFlag" 	column="batch_flag"/>
+		<result property="payeeClassCd" column="payee_class_cd"/>
+		<result property="payeeCd" 		column="payee_cd"/>
+		<result property="particulars" 	column="particulars"/>
+		<result property="tranId" 		column="tran_id"/>
+		<result property="paidAmt" 		column="paid_amt"/>
+		<result property="fcurrAmt" 	column="fcurr_amt"/>
+		<result property="currencyCd" 	column="currency_cd"/>
+		<result property="convertRate" 	column="convert_rate"/>
+		<result property="userId" 		column="user_id"/>
+		<result property="lastUpdate" 	column="last_Update"/>
+		<result property="payeeRemarks" column="payee_remarks"/>
+		<result property="dspPayee" 	column="dsp_payee"/>
+		<result property="dspRefNo" 	column="dsp_ref_no"/>
+	</resultMap>
+	
+	<select id="getGIACS087Listing" resultMap="GIACBatchDVMap3">
+		<!--Modified by pjsantos 11/8/2016, for optimization GENQA 5817  -->
+		<!-- SELECT *
+			  FROM (SELECT rownum rownum_, 
+			               b.count_, 
+			               a.* 
+			          FROM ( -->SELECT * 
+			                  FROM TABLE (GIACS087_PKG.GET_MAIN_RECORDS(#dspRefNo#,#fundCd#,#branchCd#,#batchYear#,#batchMM#,
+			                                                            #batchSeqNo#,#batchDate#,#payeeCd#,#payeeClassCd#,#dspPayee#,
+			                                                            #batchFlag#,#sortColumn#,#ascDescFlg#,#from#,#to#))
+			             	  <!-- <isNotNull property="filter">
+			  	      		  	WHERE 1=1
+			  	      		  		<isNotEmpty prepend="AND" property="dspRefNo">
+			  	      		  			UPPER(TRIM(dsp_ref_no)) LIKE UPPER(#dspRefNo#)
+			  	      		  		</isNotEmpty>
+			  	      		  		<isNotEmpty prepend="AND" property="fundCd">
+			  	      		  			UPPER(fund_cd) LIKE UPPER(#fundCd#)
+			  	      		  		</isNotEmpty>
+			  	      		  		<isNotEmpty prepend="AND" property="branchCd">
+			  	      		  			UPPER(branch_cd) LIKE UPPER(#branchCd#)
+			  	      		  		</isNotEmpty>
+			  	      		  		<isNotEmpty prepend="AND" property="batchYear">
+			  	      		  			batch_year = #batchYear#
+			  	      		  		</isNotEmpty>
+			  	      		  		<isNotEmpty prepend="AND" property="batchMM">
+			  	      		  			batch_mm = #batchMM#
+			  	      		  		</isNotEmpty>
+			  	      		  		<isNotEmpty prepend="AND" property="batchSeqNo">
+			  	      		  			batch_seq_no = #batchSeqNo#
+			  	      		  		</isNotEmpty>
+			  	      		  		<isNotEmpty prepend="AND" property="batchDate">
+			  	      		  			TRUNC(batch_date) = TO_DATE(#batchDate#, 'MM-DD-RRRR')
+			  	      		  		</isNotEmpty>
+			  	      		  		<isNotEmpty prepend="AND" property="payeeCd">
+			  	      		  			payee_cd = #payeeCd#
+			  	      		  		</isNotEmpty>
+			  	      		  		<isNotEmpty prepend="AND" property="payeeClassCd">
+			  	      		  			UPPER(payee_class_cd) LIKE UPPER(#payeeClassCd#)
+			  	      		  		</isNotEmpty>
+			  	      		  		<isNotEmpty prepend="AND" property="dspPayee">
+			  	      		  			UPPER(dsp_payee) LIKE UPPER(#dspPayee#)
+			  	      		  		</isNotEmpty>
+			  	      		  		<isNotEmpty prepend="AND" property="batchFlag">
+			  	      		  			UPPER(batch_flag) = UPPER(#batchFlag#)
+			  	      		  		</isNotEmpty>
+			  	      		  </isNotNull>
+				              <isNotNull property="sortColumn">
+					              <isEqual property="sortColumn" compareValue="fundCd branchCd batchYear batchMM batchSeqNo">
+				              			ORDER BY fund_cd, branch_cd, batch_year, batch_mm, batch_seq_no
+					              </isEqual>
+					              <isEqual property="sortColumn" compareValue="batchDate">
+				              			ORDER BY batch_date
+					              </isEqual>
+					              <isEqual property="sortColumn" compareValue="payeeCd payeeClassCd dspPayee payeeRemarks">
+				              			ORDER BY payee_cd, payee_class_cd, dsp_payee, payee_remarks
+					              </isEqual>
+					              <isEqual property="sortColumn" compareValue="batchFlag">
+				              			ORDER BY batch_flag
+					              </isEqual>
+					              <isEqual property="sortColumn" compareValue="dspRefNo">
+				              			ORDER BY dsp_ref_no
+					              </isEqual>
+				              	 <isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              	 </isEqual>
+				              	 <isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              	 </isEqual>
+			              	  </isNotNull>) a, 
+			               (SELECT count(*) count_
+			                  FROM TABLE (GIACS087_PKG.GET_MAIN_RECORDS)
+			             	  <isNotNull property="filter">
+			  	      		  	WHERE 1=1
+			  	      		  		<isNotEmpty prepend="AND" property="dspRefNo">
+			  	      		  			UPPER(dsp_ref_no) LIKE UPPER(#dspRefNo#)
+			  	      		  		</isNotEmpty>
+			  	      		  		<isNotEmpty prepend="AND" property="fundCd">
+			  	      		  			UPPER(fund_cd) LIKE UPPER(#fundCd#)
+			  	      		  		</isNotEmpty>
+			  	      		  		<isNotEmpty prepend="AND" property="branchCd">
+			  	      		  			UPPER(branch_cd) LIKE UPPER(#branchCd#)
+			  	      		  		</isNotEmpty>
+			  	      		  		<isNotEmpty prepend="AND" property="batchYear">
+			  	      		  			batch_year = #batchYear#
+			  	      		  		</isNotEmpty>
+			  	      		  		<isNotEmpty prepend="AND" property="batchMM">
+			  	      		  			batch_mm = #batchMM#
+			  	      		  		</isNotEmpty>
+			  	      		  		<isNotEmpty prepend="AND" property="batchSeqNo">
+			  	      		  			batch_seq_no = #batchSeqNo#
+			  	      		  		</isNotEmpty>
+			  	      		  		<isNotEmpty prepend="AND" property="batchDate">
+			  	      		  			TRUNC(batch_date) = TO_DATE(#batchDate#, 'MM-DD-RRRR')
+			  	      		  		</isNotEmpty>
+			  	      		  		<isNotEmpty prepend="AND" property="payeeCd">
+			  	      		  			payee_cd = #payeeCd#
+			  	      		  		</isNotEmpty>
+			  	      		  		<isNotEmpty prepend="AND" property="payeeClassCd">
+			  	      		  			UPPER(payee_class_cd) LIKE UPPER(#payeeClassCd#)
+			  	      		  		</isNotEmpty>
+			  	      		  		<isNotEmpty prepend="AND" property="dspPayee">
+			  	      		  			UPPER(dsp_payee) LIKE UPPER(#dspPayee#)
+			  	      		  		</isNotEmpty>
+			  	      		  		<isNotEmpty prepend="AND" property="batchFlag">
+			  	      		  			UPPER(batch_flag) = UPPER(#batchFlag#)
+			  	      		  		</isNotEmpty>
+			  	      		  </isNotNull>				
+			  	      		  )	  b) 
+			 WHERE rownum_ BETWEEN #from# AND #to# -->
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="GIACS087BatchDetailsMap"  extends="BaseEntity.TableGridResultMap">     	
+		<result property="batchDvId" 	column="batch_dv_id"/>
+		<result property="chkGen" 		column="chk_gen"/>
+		<result property="lineCd" 		column="line_cd"/>
+		<result property="issCd" 		column="iss_cd"/>
+		<result property="adviceId" 		column="advice_id"/>
+		<result property="adviceYear" 		column="advice_year"/>
+		<result property="adviceSeqNo" 		column="advice_seq_no"/>
+		<result property="nbtClmLineCd" 		column="nbt_clm_line_cd"/>
+		<result property="nbtClmSublineCd" 		column="nbt_clm_subline_cd"/>
+		<result property="nbtClmIssCd" 		column="nbt_clm_iss_cd"/>
+		<result property="nbtClmClmYy" 		column="nbt_clm_clm_yy"/>
+		<result property="nbtClmClmSeqNo" 		column="nbt_clm_clm_seq_no"/>
+		<result property="nbtPolLineCd" 		column="nbt_pol_line_cd"/>
+		<result property="nbtPolSublineCd" 		column="nbt_pol_subline_cd"/>
+		<result property="nbtPolPolIssCd" 		column="nbt_pol_pol_iss_cd"/>
+		<result property="nbtPolIssueYy" 		column="nbt_pol_issue_yy"/>
+		<result property="nbtPolPolSeqNo" 		column="nbt_pol_pol_seq_no"/>
+		<result property="nbtPolRenewNo" 		column="nbt_pol_renew_no"/>
+		<result property="nbtAssdNo" 		column="nbt_assd_no"/>
+		<result property="nbtAssdName" 		column="nbt_assd_name"/>
+		<result property="nbtDspLossDate" 		column="nbt_dsp_loss_date"/>
+		<result property="adviceFlag" 		column="advice_flag"/>
+		<result property="paidAmt2" 		column="paid_amt2"/>
+		<result property="nbtPaidAmt" 		column="nbt_paid_amt"/>
+		<result property="paidFcurrAmt" 		column="paid_fcurr_amt"/>
+		<result property="nbtPaidFcurrAmt" 		column="nbt_paid_fcurr_amt"/>
+		<result property="currencyCd" 		column="currency_cd"/>
+		<result property="convertRate" 		column="convert_rate"/>
+		<result property="claimId" 		column="claim_id"/>
+		<result property="apprvdTag" 		column="apprvd_tag"/>
+		<result property="payeeRemarks" 		column="payee_remarks"/>
+		<result property="clmStatCd" 		column="clm_stat_cd"/>
+		<result property="nbtClmStatDesc" 		column="nbt_clm_stat_desc"/>
+		<result property="clmLossId" 		column="clm_loss_id"/>
+		<result property="payeeClassCd" 		column="payee_class_cd"/>
+		<result property="payeeCd" 		column="payee_cd"/>
+		<result property="nbtPayee" 		column="nbt_payee"/>
+		<result property="payeeType" 		column="payee_type"/>
+		<result property="paidAmt" 		column="paid_amt"/>
+		<result property="netAmt" 		column="net_amt"/>
+		<result property="lossCurrCd" 		column="loss_curr_cd"/>
+		<result property="userId" 		column="user_id"/>
+		<result property="lastUpdate" 		column="last_update"/>
+	</resultMap>
+	
+	<select id="getGIACS087BatchDetails" resultMap="GIACS087BatchDetailsMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(GIACS087_PKG.GET_BATCH_DETAILS(#batchDvId#))
+		  	      		  <isNotNull property="filter">
+		  	      		  	WHERE 1=1
+		  	      		  		<isNotEmpty prepend="AND" property="chkGen">
+		  	      		  			UPPER(chk_gen) LIKE UPPER(#chkGen#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="lineCd">
+		  	      		  			UPPER(line_cd) LIKE UPPER(#lineCd#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="issCd">
+		  	      		  			UPPER(iss_cd) LIKE UPPER(#issCd#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="adviceYear">
+		  	      		  			advice_year = #adviceYear#
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="adviceSeqNo">
+		  	      		  			advice_seq_no = #adviceSeqNo#
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="nbtClmLineCd">
+		  	      		  			UPPER(nbt_clm_line_cd) LIKE UPPER(#nbtClmLineCd#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="nbtClmSublineCd">
+		  	      		  			UPPER(nbt_clm_subline_cd) LIKE UPPER(#nbtClmSublineCd#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="nbtClmIssCd">
+		  	      		  			UPPER(nbt_clm_iss_cd) LIKE UPPER(#nbtClmIssCd#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="nbtClmClmYy">
+		  	      		  			nbt_clm_clm_yy = #nbtClmClmYy#
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="nbtClmClmSeqNo">
+		  	      		  			nbt_clm_clm_seq_no = #nbtClmClmSeqNo#
+		  	      		  		</isNotEmpty>		  	      		  		
+		  	      		  		<isNotEmpty prepend="AND" property="nbtPolLineCd">
+		  	      		  			UPPER(nbt_pol_line_cd) LIKE UPPER(#nbtPolLineCd#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="nbtPolSublineCd">
+		  	      		  			UPPER(nbt_pol_subline_cd) LIKE UPPER(#nbtPolSublineCd#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="nbtPolPolIssCd">
+		  	      		  			UPPER(nbt_Pol_pol_iss_cd) LIKE UPPER(#nbtPolPolIssCd#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="nbtPolIssueYy">
+		  	      		  			nbt_pol_issue_yy = #nbtPolIssueYy#
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="nbtPolPolSeqNo">
+		  	      		  			nbt_pol_pol_seq_no = #nbtPolPolSeqNo#
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="nbtPolRenewNo">
+		  	      		  			nbt_pol_renew_no = #nbtPolRenewNo#
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="nbtAssdName">
+		  	      		  			UPPER(nbt_assd_name) LIKE UPPER(#nbtAssdName#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="nbtAssdNo">
+		  	      		  			nbt_Assd_no = #nbtAssdNo#
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="clmStatCd">
+		  	      		  			UPPER(clm_stat_cd) LIKE UPPER(#clmStatCd#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="nbtDspLossDate">
+		  	      		  			TRUNC(nbt_dsp_loss_date) = TO_DATE(#nbtDspLossDate#, 'MM-DD-RRRR')
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="payeeCd">
+		  	      		  			payee_cd = #payeeCd#
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="payeeClassCd">
+		  	      		  			UPPER(payee_class_cd) LIKE UPPER(#payeeClassCd#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="nbtPayee">
+		  	      		  			UPPER(nbt_payee) LIKE UPPER(#nbtPayee#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="currencyCd">
+		  	      		  			currency_cd = #currencyCd#
+		  	      		  		</isNotEmpty>
+		  	      		  </isNotNull>		  	      		  
+			              <isEqual property="sortColumn" compareValue="chkGen">
+			              		ORDER BY chk_gen
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="lineCd issCd adviceYear adviceSeqNo">
+			              		ORDER BY line_cd, iss_cd, advice_year, advice_seq_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="nbtClmLineCd nbtClmSublineCd nbtClmIssCd nbtClmClmYy nbtClmClmSeqNo">
+			              		ORDER BY nbt_clm_line_cd, nbt_clm_subline_cd, nbt_clm_iss_cd, nbt_clm_clm_yy, nbt_clm_clm_seq_no
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="nbtPolLineCd nbtPolSublineCd nbtPolPolIssCd nbtPolIssueYy nbtPolPolSeqNo nbtPolRenewNo">
+			              		ORDER BY nbt_pol_line_cd, nbt_pol_subline_cd, nbt_pol_pol_iss_cd, nbt_pol_issue_yy, nbt_pol_pol_seq_no, nbt_pol_renew_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="nbtAssdNo nbtAssdName">
+			              		ORDER BY nbt_assd_no, nbt_assd_name
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="clmStatCd nbtClmStatDesc">
+			              		ORDER BY clm_stat_cd, nbt_clm_stat_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="nbtDspLossDate">
+			              		ORDER BY nbt_dsp_loss_date
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="payeeClassCd payeeCd nbtPayee payeeRemarks">
+		              			ORDER BY payee_class_cd, payee_cd, nbt_payee, payee_remarks
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="nbtPaidAmt">
+		              			ORDER BY nbt_paid_amt
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="currencyCd">
+		              			ORDER BY currency_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="convertRate">
+		              			ORDER BY convert_rate
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GIACS087_PKG.GET_BATCH_DETAILS(#batchDvId#))
+		  	      		  <isNotNull property="filter">
+		  	      		  	WHERE 1=1
+		  	      		  		<isNotEmpty prepend="AND" property="chkGen">
+		  	      		  			UPPER(chk_gen) LIKE UPPER(#chkGen#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="lineCd">
+		  	      		  			UPPER(line_cd) LIKE UPPER(#lineCd#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="issCd">
+		  	      		  			UPPER(iss_cd) LIKE UPPER(#issCd#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="adviceYear">
+		  	      		  			advice_year = #adviceYear#
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="adviceSeqNo">
+		  	      		  			advice_seq_no = #adviceSeqNo#
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="nbtClmLineCd">
+		  	      		  			UPPER(nbt_clm_line_cd) LIKE UPPER(#nbtClmLineCd#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="nbtClmSublineCd">
+		  	      		  			UPPER(nbt_clm_subline_cd) LIKE UPPER(#nbtClmSublineCd#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="nbtClmIssCd">
+		  	      		  			UPPER(nbt_clm_iss_cd) LIKE UPPER(#nbtClmIssCd#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="nbtClmClmYy">
+		  	      		  			nbt_clm_clm_yy = #nbtClmClmYy#
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="nbtClmClmSeqNo">
+		  	      		  			nbt_clm_clm_seq_no = #nbtClmClmSeqNo#
+		  	      		  		</isNotEmpty>		  	      		  		
+		  	      		  		<isNotEmpty prepend="AND" property="nbtPolLineCd">
+		  	      		  			UPPER(nbt_pol_line_cd) LIKE UPPER(#nbtPolLineCd#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="nbtPolSublineCd">
+		  	      		  			UPPER(nbt_pol_subline_cd) LIKE UPPER(#nbtPolSublineCd#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="nbtPolPolIssCd">
+		  	      		  			UPPER(nbt_Pol_pol_iss_cd) LIKE UPPER(#nbtPolPolIssCd#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="nbtClmClmYy">
+		  	      		  			nbt_clm_clm_yy = #nbtClmClmYy#
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="nbtClmClmSeqNo">
+		  	      		  			nbt_clm_clm_seq_no = #nbtClmClmSeqNo#
+		  	      		  		</isNotEmpty>		  	      		  		
+		  	      		  		<isNotEmpty prepend="AND" property="nbtPolLineCd">
+		  	      		  			UPPER(nbt_pol_line_cd) LIKE UPPER(#nbtPolLineCd#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="nbtPolSublineCd">
+		  	      		  			UPPER(nbt_pol_subline_cd) LIKE UPPER(#nbtPolSublineCd#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="nbtPolIssCd">
+		  	      		  			UPPER(nbt_Pol_iss_cd) LIKE UPPER(#nbtPolIssCd#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="nbtPolIssueYy">
+		  	      		  			nbt_pol_issue_yy = #nbtPolIssueYy#
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="nbtPolPolSeqNo">
+		  	      		  			nbt_pol_pol_seq_no = #nbtPolPolSeqNo#
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="nbtPolRenewNo">
+		  	      		  			nbt_pol_renew_no = #nbtPolRenewNo#
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="nbtAssdName">
+		  	      		  			UPPER(nbt_assd_name) LIKE UPPER(#nbtAssdName#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="nbtAssdNo">
+		  	      		  			nbt_Assd_no = #nbtAssdNo#
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="clmStatCd">
+		  	      		  			UPPER(clm_stat_cd) LIKE UPPER(#clmStatCd#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="nbtDspLossDate">
+		  	      		  			TRUNC(nbt_dsp_loss_date) = TO_DATE(#nbtDspLossDate#, 'MM-DD-RRRR')
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="payeeCd">
+		  	      		  			payee_cd = #payeeCd#
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="payeeClassCd">
+		  	      		  			UPPER(payee_class_cd) LIKE UPPER(#payeeClassCd#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="nbtPayee">
+		  	      		  			UPPER(nbt_payee) LIKE UPPER(#nbtPayee#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="currencyCd">
+		  	      		  			currency_cd = #currencyCd#
+		  	      		  		</isNotEmpty>
+		  	      		  </isNotNull>		
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<resultMap class="java.util.HashMap" id="GIACS087AcctEntriesMap"  extends="BaseEntity.TableGridResultMap">     	
+		<result property="batchDvId" 	column="batch_dv_id"/>
+		<result property="tranId" 		column="tran_id"/>
+		<result property="branchCd" 	column="branch_cd"/>
+		<result property="refNo" 		column="ref_no"/>
+		<result property="particulars" 	column="particulars"/>
+	</resultMap>
+	
+	<select id="getGIACS087AcctEntries" resultMap="GIACS087AcctEntriesMap">
+		SELECT *
+			  FROM (SELECT rownum rownum_, 
+			               b.count_, 
+			               a.* 
+			          FROM (SELECT * 
+			                  FROM TABLE (GIACS087_PKG.GET_ACCT_ENTRIES(#batchDvId#))
+			             	  <isNotNull property="filter">
+			  	      		  	WHERE 1=1
+			  	      		  		<isNotEmpty prepend="AND" property="refNo">
+			  	      		  			UPPER(ref_no) LIKE UPPER(#refNo#)
+			  	      		  		</isNotEmpty>
+			  	      		  		<isNotEmpty prepend="AND" property="branchCd">
+			  	      		  			UPPER(branch_cd) LIKE UPPER(#branchCd#)
+			  	      		  		</isNotEmpty>
+			  	      		  </isNotNull>
+				              <isNotNull property="sortColumn">
+					              <isEqual property="sortColumn" compareValue="branchCd">
+				              			ORDER BY branch_cd
+					              </isEqual>
+					              <isEqual property="sortColumn" compareValue="refNo">
+				              			ORDER BY ref_no
+					              </isEqual>
+					              <isEqual property="sortColumn" compareValue="particulars">
+				              			ORDER BY particulars
+					              </isEqual>
+				              	 <isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              	 </isEqual>
+				              	 <isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              	 </isEqual>
+			              	  </isNotNull>) a, 
+			               (SELECT count(*) count_
+			                  FROM TABLE (GIACS087_PKG.GET_ACCT_ENTRIES(#batchDvId#))
+			             	  <isNotNull property="filter">
+			  	      		  	WHERE 1=1
+			  	      		  		<isNotEmpty prepend="AND" property="refNo">
+			  	      		  			UPPER(ref_no) LIKE UPPER(#refNo#)
+			  	      		  		</isNotEmpty>
+			  	      		  		<isNotEmpty prepend="AND" property="branchCd">
+			  	      		  			UPPER(branch_cd) LIKE UPPER(#branchCd#)
+			  	      		  		</isNotEmpty>
+			  	      		  </isNotNull>			
+			  	      		  )	  b) 
+			 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap id="GIACS087AcctEntriesDtlMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result property="gaccTranId" 			column="gacc_tran_id" />
+		<result property="gaccGfunFundCd" 		column="gacc_gfun_fund_cd" />
+		<result property="gaccGibrBranchCd" 	column="gacc_gibr_branch_cd" />
+		<result property="acctEntryId" 			column="acct_entry_id" />
+		<result property="glAcctId" 			column="gl_acct_id" />
+		<result property="glAcctCategory" 		column="gl_acct_category" />
+		<result property="glControlAcct" 		column="gl_control_acct" />
+		<result property="glSubAcct1" 			column="gl_sub_acct_1" />
+		<result property="glSubAcct2" 			column="gl_sub_acct_2" />
+		<result property="glSubAcct3" 			column="gl_sub_acct_3" />
+		<result property="glSubAcct4" 			column="gl_sub_acct_4" />
+		<result property="glSubAcct5" 			column="gl_sub_acct_5" />
+		<result property="glSubAcct6" 			column="gl_sub_acct_6" />
+		<result property="glSubAcct7" 			column="gl_sub_acct_7" />
+		<result property="slCd" 				column="sl_cd" />
+		<result property="debitAmt" 			column="debit_amt" />
+		<result property="creditAmt" 			column="credit_amt" />
+		<result property="glAcctName"			column="gl_acct_name" />
+		<result property="glAcctNo"				column="gl_acct_no" />		
+	</resultMap>
+	
+	<select id="getGIACS087AcctEntriesDtl" resultMap="GIACS087AcctEntriesDtlMap">
+		SELECT *
+			  FROM (SELECT rownum rownum_, 
+			               b.count_, 
+			               a.* 
+			          FROM (SELECT * 
+			                  FROM TABLE (GIACS087_PKG.GET_ACCT_ENTRIES_DTL(#tranId#))
+			             	  <isNotNull property="filter">
+			  	      		  	WHERE 1=1
+			  	      		  		<isNotEmpty prepend="AND" property="glAcctNo">
+			  	      		  			UPPER(gl_acct_no) LIKE UPPER(#glAcctNo#)
+			  	      		  		</isNotEmpty>
+			  	      		  		<isNotEmpty prepend="AND" property="glAcctName">
+			  	      		  			UPPER(gl_acct_name) LIKE UPPER(#glAcctName#)
+			  	      		  		</isNotEmpty>
+			  	      		  		<isNotEmpty prepend="AND" property="slCd">
+			  	      		  			UPPER(sl_cd) LIKE UPPER(#slCd#)
+			  	      		  		</isNotEmpty>
+			  	      		  		<isNotEmpty prepend="AND" property="debitAmt">
+			  	      		  			debit_amt = #debitAmt#
+			  	      		  		</isNotEmpty>
+			  	      		  		<isNotEmpty prepend="AND" property="creditAmt">
+			  	      		  			credit_amt = #creditAmt#
+			  	      		  		</isNotEmpty>
+			  	      		  </isNotNull>
+				              <isNotNull property="sortColumn">
+					              <isEqual property="sortColumn" compareValue="glAcctNo">
+				              			ORDER BY gl_acct_no
+					              </isEqual>
+					              <isEqual property="sortColumn" compareValue="glAcctName">
+				              			ORDER BY gl_acct_name
+					              </isEqual>
+					              <isEqual property="sortColumn" compareValue="slCd">
+				              			ORDER BY sl_cd
+					              </isEqual>
+					              <isEqual property="sortColumn" compareValue="debitAmt">
+				              			ORDER BY debit_amt
+					              </isEqual>
+					              <isEqual property="sortColumn" compareValue="creditAmt">
+				              			ORDER BY credit_amt
+					              </isEqual>
+				              	 <isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              	 </isEqual>
+				              	 <isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              	 </isEqual>
+			              	  </isNotNull>) a, 
+			               (SELECT count(*) count_
+			                  FROM TABLE (GIACS087_PKG.GET_ACCT_ENTRIES_DTL(#tranId#))
+			             	  <isNotNull property="filter">
+			  	      		  	WHERE 1=1
+			  	      		  		<isNotEmpty prepend="AND" property="glAcctNo">
+			  	      		  			UPPER(gl_acct_no) LIKE UPPER(#glAcctNo#)
+			  	      		  		</isNotEmpty>
+			  	      		  		<isNotEmpty prepend="AND" property="glAcctName">
+			  	      		  			UPPER(gl_acct_name) LIKE UPPER(#glAcctName#)
+			  	      		  		</isNotEmpty>
+			  	      		  		<isNotEmpty prepend="AND" property="slCd">
+			  	      		  			UPPER(sl_cd) LIKE UPPER(#slCd#)
+			  	      		  		</isNotEmpty>
+			  	      		  		<isNotEmpty prepend="AND" property="debitAmt">
+			  	      		  			debit_amt = #debitAmt#
+			  	      		  		</isNotEmpty>
+			  	      		  		<isNotEmpty prepend="AND" property="creditAmt">
+			  	      		  			credit_amt = #creditAmt#
+			  	      		  		</isNotEmpty>
+			  	      		  </isNotNull>		
+			  	      		  )	  b) 
+			 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="giacs087AcctEntTotalsMap">
+		<result property="sumDebitAmt"	column="sum_debit_amt"/>
+		<result property="sumCreditAmt"	column="sum_credit_amt"/>
+	</resultMap>
+	
+	<select id="getGiacs087AcctEntTotals" resultMap="giacs087AcctEntTotalsMap" parameterClass="java.util.HashMap">
+		SELECT SUM(debit_amt) sum_debit_amt, SUM(credit_amt) sum_credit_amt
+	      FROM giac_acct_entries
+	     WHERE gacc_tran_id = #tranId#
+	       AND gacc_gibr_branch_cd = #branchCd#
+	</select>
+     <!-- end 07.17.2014 -->
+     
+    <!-- bonok :: 12.14.2015 :: UCPB SR 21147 -->
+	<parameterMap class="java.util.HashMap" id="addRecsInClaimPaymentsMap">
+		<parameter property="userId"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="payeeCd" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="payeeClassCd" 		jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="claimId" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="adviceId" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="paidAmt" 			jdbcType="NUMERIC"	javaType="java.math.BigDecimal"	mode="IN" />
+		<parameter property="issCd" 			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="convRt"			jdbcType="NUMERIC" 	javaType="java.math.BigDecimal" mode="IN"/>
+		<parameter property="convertRate"		jdbcType="NUMERIC" 	javaType="java.math.BigDecimal" mode="IN"/>
+		<parameter property="clmLossId" 		jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="netAmt" 			jdbcType="NUMERIC"	javaType="java.math.BigDecimal"	mode="IN" />
+		<parameter property="currencyCd"		jdbcType="INTEGER" 	javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="payeeType" 		jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="riIssCd" 			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="dvTranId" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="userId2"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+	</parameterMap>
+	
+	<!-- bonok :: 12.14.2015 :: UCPB SR 21147 -->
+	<procedure id="addRecsInClaimPayments" parameterMap="addRecsInClaimPaymentsMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+		 	giac_batch_dv_pkg.add_claim_payments(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);
+		END;
+	</procedure>
+	
+	<!-- bonok :: 12.14.2015 :: UCPB SR 21147 -->
+	<parameterMap class="java.util.HashMap" id="insertGiacTaxesWheldMap">
+		<parameter property="userId"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="claimId"			jdbcType="INTEGER"  javaType="java.lang.Integer"	mode="IN"/>
+		<parameter property="adviceId"			jdbcType="INTEGER" 	javaType="java.lang.Integer"	mode="IN"/>
+		<parameter property="issCd"				jdbcType="VARCHAR" 	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="riIssCd"			jdbcType="VARCHAR" 	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="batchDvId" 		jdbcType="INTEGER" 	javaType="java.lang.Integer" 	mode="IN"/>
+		<parameter property="msgAlert"			jdbcType="VARCHAR" 	javaType="java.lang.String"  	mode="OUT"/>
+		<parameter property="workflowMsgr"		jdbcType="VARCHAR" 	javaType="java.lang.String"  	mode="OUT"/>
+		<parameter property="userId2"			jdbcType="VARCHAR" 	javaType="java.lang.String"  	mode="IN"/>
+	</parameterMap>
+    
+    <!-- bonok :: 12.14.2015 :: UCPB SR 21147 -->
+	<procedure id="insertGiacTaxesWheld" parameterMap="insertGiacTaxesWheldMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+		 	giac_batch_dv_pkg.insert_giac_taxes_wheld(?,?,?,?,?,?,?,?);
+		END;
+	</procedure>
+</sqlMap>

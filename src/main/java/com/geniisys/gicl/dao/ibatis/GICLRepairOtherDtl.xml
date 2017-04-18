@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GICLRepairOtherDtl">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GICLRepairOtherDtl" type="com.geniisys.gicl.entity.GICLRepairOtherDtl"/>
+	
+	<resultMap class="GICLRepairOtherDtl" id="GICLRepairOtherDtlMap">
+		<result property="evalId" column="eval_id"/>
+		<result property="repairCd" column="repair_Cd"/>
+		<result property="amount" column="amount"/>
+		<result property="updateSw" column="update_Sw"/>
+		<result property="itemNo" column="item_no"/>
+		<result column="rownum_" 	property="rowNum" />
+		<result column="count_"		property="rowCount"/>
+	</resultMap>
+	
+	<resultMap class="GICLRepairOtherDtl" id="GICLRepairOtherDtlGridMap" extends="GICLRepairOtherDtlMap">
+		<result property="repairDesc" column="repair_Desc"/>
+		<result column="rownum_" 	property="rowNum" />
+		<result column="count_"		property="rowCount"/>
+	</resultMap>	
+	
+	<select id="getGiclRepairOtherDtlList" resultMap="GICLRepairOtherDtlGridMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (gicl_repair_other_dtl_pkg.get_gicl_repair_other_dtl(#evalId#))
+		                  <isEqual property="sortColumn" compareValue="itemNo">
+			              		ORDER BY item_no
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="repairDesc">
+			              		ORDER BY repair_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="amount">
+			              		ORDER BY amount
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (gicl_repair_other_dtl_pkg.get_gicl_repair_other_dtl(#evalId#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="repairTypeMap">
+		<result property="repairCd" column="repair_cd"/>
+		<result property="repairDesc" column="repair_desc"/>
+		<result column="rownum_" 	property="rowNum" />
+		<result column="count_"		property="rowCount"/>
+	</resultMap>
+	
+	<select id="getRepairTypeLOV" parameterClass="map" resultMap="repairTypeMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (gicl_repair_type_pkg.get_repair_type_type_list(#evalId#,#findText#))
+		                  <isNotNull property="notIn">
+						  		WHERE repair_cd NOT IN $notIn$
+						  	</isNotNull>
+		                  <isEqual property="sortColumn" compareValue="dspLossDesc">
+			              		ORDER BY dsp_loss_desc
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (gicl_repair_type_pkg.get_repair_type_type_list(#evalId#,#findText#))
+			             		<isNotNull property="notIn">
+							  		WHERE repair_cd NOT IN $notIn$
+							  	</isNotNull>
+		                  ) b) hu
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	<parameterMap class="map" id="validateMap">
+		<parameter property="evalId" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="evalMasterId" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="payeeTypeCd"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="payeeCd" 		jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="vatExist"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="dedExist"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="masterReportType"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="validateBeforeSaveOther" parameterMap="validateMap">
+		BEGIN
+			gicl_repair_other_dtl_pkg.validate_Before_Save_Other(?,?,?,?,?,?,?);
+		END;
+	</procedure>
+	
+	<procedure id="deleteDetailsLabor" parameterClass="map">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			gicl_repair_other_dtl_pkg.delete_details_labor(#evalId#,#payeeTypeCd#,#payeeCd#,#vatExist#,#dedExist#);
+		END;
+	</procedure>
+	
+	<procedure id="saveGiclRepairOtherDtl" parameterClass="map">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			gicl_repair_other_dtl_pkg.save_repair_other_dtl(#evalMasterId#,#evalId#,#repairCd#,#amount#,#itemNo#,#masterReportType#);
+		END;
+	</procedure>
+	
+	<procedure id="updateOtherLaborDetails" parameterClass="map">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			gicl_repair_other_dtl_pkg.update_other_details(#evalId#,#dspTotalLabor#);
+		END;
+	</procedure>
+	
+	<procedure id="deleteOtherRepairDtl" parameterClass="map">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			gicl_repair_other_dtl_pkg.del_repair_other_dtl(#evalId#,#itemNo#,#repairCd#);
+		END;
+	</procedure>
+</sqlMap>	

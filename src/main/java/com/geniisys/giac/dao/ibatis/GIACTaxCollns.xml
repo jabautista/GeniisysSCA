@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GIACTaxCollns">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+    <typeAlias alias="GIACTaxCollns" type="com.geniisys.giac.entity.GIACTaxCollns"/>
+    
+    <resultMap class="GIACTaxCollns" id="GIACTaxCollnsResultMap">
+		<result column="gacc_tran_id" 		property="gaccTranId"/>
+		<result column="transaction_type" 	property="transactionType"/>
+		<result column="b160_iss_cd" 	    property="b160IssCd"/> 
+		<result column="b160_prem_seq_no" 	property="b160PremSeqNo"/>
+		<result column="b160_tax_cd"		property="b160TaxCd"/>
+		<result column="tax_name"			property="taxName"/>
+		<result column="inst_no"			property="instNo"/>
+		<result column="fund_cd"			property="fundCd"/>
+		<result column="tax_amt"			property="taxAmt"/>
+	</resultMap>
+	
+	<resultMap id="getGIACTaxCollnTGResultMap" extends="GIACTaxCollnsResultMap" class="GIACTaxCollns" >
+		<result column="rownum_" property="rowNum" />
+		<result column="count_" property="rowCount" />
+	</resultMap>
+	
+	<select id="getGIACTaxCollnsListing" resultMap="GIACTaxCollnsResultMap">
+		SELECT * FROM TABLE(giac_tax_collns_pkg.get_tax_collns_listing(#gaccTranId#))
+	</select>
+
+	<delete id="deleteGIACTaxCollnsRecs" parameterClass="java.util.HashMap">
+	  BEGIN
+	    giis_users_pkg.app_user := #appUser#;
+	  	giac_tax_collns_pkg.delete_giac_tax_collns_rec(#gaccTranId#, #b160IssCd#, #b160PremSeqNo#, #instNo#);
+	  END;
+	</delete>
+	
+	<select id="getGIACTaxCollnTG" resultMap="getGIACTaxCollnTGResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(giac_tax_collns_pkg.get_tax_collns_listing2(#gaccTranId#, #issCd#, #premSeqNo#, #instNo#))
+			          	<isEqual property="sortColumn" compareValue="b160TaxCd">
+			            	ORDER BY b160_tax_cd
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="taxName">
+			            	ORDER BY tax_name
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="taxAmt">
+			            	ORDER BY tax_amt
+			          	</isEqual>
+			           	<isNotNull property="sortColumn">
+			              	<isEqual property="ascDescFlg" compareValue="ASC">
+			              		ASC
+			              	</isEqual>
+			              	<isEqual property="ascDescFlg" compareValue="DESC">
+			              		DESC
+			              	</isEqual>
+			            </isNotNull>  
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giac_tax_collns_pkg.get_tax_collns_listing2(#gaccTranId#, #issCd#, #premSeqNo#, #instNo#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<delete id="deleteGIACTaxCollns2" parameterClass="java.lang.Integer">
+	  BEGIN
+		   DELETE FROM giac_tax_collns
+		         WHERE gacc_tran_id = #gaccTranId#
+		           AND b160_prem_seq_no NOT IN (SELECT b140_prem_seq_no
+		                                          FROM giac_direct_prem_collns
+		                                         WHERE gacc_tran_id = #gaccTranId#);
+		END; 
+	</delete>
+	
+</sqlMap>

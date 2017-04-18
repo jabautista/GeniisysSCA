@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GIACChkReleaseInfo">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+
+	<typeAlias alias="GIACChkReleaseInfoClass" type="com.geniisys.giac.entity.GIACChkReleaseInfo"/>
+	
+	<resultMap class="GIACChkReleaseInfoClass" id="GIACChkReleaseInfoClass">
+		<result property="gaccTranId" column="gacc_tran_id"/>
+		<result property="itemNo" column="item_no"/>
+		<result property="checkNo" column="check_no"/>
+		<result property="checkReleaseDate" column="check_release_date"/>
+		<result property="checkReleasedBy" column="check_released_by"/>
+		<result property="checkReceivedBy" column="check_received_by"/>
+		<result property="checkPrefSuf" column="check_pref_suf"/>
+		<result property="orNo" column="or_no"/>
+		<result property="orDate" column="or_date"/>
+		<result property="clearingDate" column="clearing_date"/>
+		<result property="lastUpdate" column="last_update" />
+		<result property="userId" column="user_id" />
+		
+		<result property="strCheckReleaseDate" column="str_check_release_date" />
+		<result property="strOrDate" column="str_or_date" />
+		<!-- <result property="strLastUpdate2" column="str_last_update2" />  moved to GIACChkReleaseInfoClass2 Gzelle 11.21.2013-->
+	</resultMap>
+
+<!--Gzelle 11.21.2013 for getgiacs002ChkReleaseInfo  -->
+	<resultMap class="GIACChkReleaseInfoClass" id="GIACChkReleaseInfoClass2">
+		<result property="gaccTranId" column="gacc_tran_id"/>
+		<result property="itemNo" column="item_no"/>
+		<result property="checkNo" column="check_no"/>
+		<result property="checkReleaseDate" column="check_release_date"/>
+		<result property="checkReleasedBy" column="check_released_by"/>
+		<result property="checkReceivedBy" column="check_received_by"/>
+		<result property="checkPrefSuf" column="check_pref_suf"/>
+		<result property="orNo" column="or_no"/>
+		<result property="orDate" column="or_date"/>
+		<result property="clearingDate" column="clearing_date"/>
+		<result property="lastUpdate" column="last_update" />
+		<result property="userId" column="user_id" />
+		
+		<result property="strCheckReleaseDate" column="str_check_release_date" />
+		<result property="strOrDate" column="str_or_date" />
+		<result property="strLastUpdate2" column="str_last_update2" />
+	</resultMap>
+	
+	<select id="getgiacs016ChkReleaseInfo" resultMap="GIACChkReleaseInfoClass" parameterClass="map">
+		SELECT a.*, to_char(a.check_release_date,'mm-dd-yyyy')str_check_release_date, to_char(a.or_date,'mm-dd-yyyy')str_or_date FROM TABLE(giac_chk_release_info_pkg.get_giacs016_chk_release_info(#gaccTranId#, #itemNo#)) a
+	</select>	
+	
+	<!-- Joms Diago -->
+	<procedure id="saveCheckReleaseInfo">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			
+			GIACS046_PKG.set_check_release_info(#gaccTranId#,
+												#itemNo#,
+												#checkNo#,
+												TO_DATE(#checkReleaseDate#,'MM-DD-RRRR'),
+												#releaseBy#,
+												#receiveBy#,
+												#checkPrefSuf#,
+												#orNo#,
+												TO_DATE(#orDate#,'MM-DD-RRRR'),
+												#userId#
+												);
+			COMMIT;
+		END;
+	</procedure>
+	
+<!--Gzelle 11.21.2013 changed resultMap from GIACChkReleaseInfoClass to GIACChkReleaseInfoClass2 to prevent error-->	
+<!--when first resultMap was used by GIACS016  -->
+	<select id="getgiacs002ChkReleaseInfo" resultMap="GIACChkReleaseInfoClass2" parameterClass="map">
+		SELECT a.*, 
+			   TO_CHAR(a.check_release_date,'mm-dd-yyyy')str_check_release_date, 
+			   TO_CHAR(a.or_date,'mm-dd-yyyy')str_or_date,
+			   TO_CHAR(a.last_update, 'MM-DD-RRRR HH:MI:SS AM') str_last_update2
+		  FROM TABLE(giac_chk_release_info_pkg.get_giacs002_chk_release_info(#gaccTranId#, #itemNo#)) a
+	</select>	
+	
+	<procedure id="saveGIACS002ChkReleaseInfo" parameterClass="java.util.HashMap">
+		DECLARE
+			v_check			giac_chk_release_info%ROWTYPE;
+		BEGIN
+			<!-- v_check.gacc_tran_id 		:= #gaccTranId#;
+			v_check.item_no				:= #itemNo#;
+			v_check.check_pref_suf		:= #checkPrefSuf#;
+			v_check.check_no			:= #checkNo#;
+			v_check.check_received_by	:= #checkReceivedBy#;
+			v_check.check_release_date	:= TO_DATE(#checkReleaseDate#, 'mm-dd-yyyy');
+			v_check.or_date 			:= TO_DATE(#orDate#, 'mm-dd-yyyy');
+			v_check.check_released_by	:= #checkReleasedBy";
+			v_check.or_no				:= #orNo#;
+			v_check.user_id				:= #userId#;
+			v_check.last_update			:= TO_DATE(#lastUpdate#, 'MM-DD-RRRR HH:MI:SS AM'); 
+			
+			GIAC_CHK_RELEASE_INFO_PKG.set_chk_release_info(v_check);			-->
+			GIAC_CHK_RELEASE_INFO_PKG.insert_chk_release_info(#gaccTranId#,
+															  #itemNo#,
+															  #checkPrefSuf#,
+															  #checkNo#,
+															  #checkReceivedBy#,
+															  TO_DATE(#checkReleaseDate#, 'mm-dd-yyyy'),
+															  TO_DATE(#orDate#, 'mm-dd-yyyy'),
+															  #checkReleasedBy#,
+															  #orNo#,
+															  #userId#,
+															  TO_DATE(#lastUpdate#, 'MM-DD-RRRR HH:MI:SS AM'));
+		END;
+	</procedure>
+	
+	<resultMap class="java.util.HashMap" id="branchCdLOVMap">
+		<result column="branch_cd"		property="branchCd" />
+		<result column="branch_name"	property="branchName" />
+		<result column="rownum_" 		property="rowNum" />
+		<result column="count_"			property="rowCount"/>
+	</resultMap>
+	
+	<select id="getGiacs046BranchLov" resultMap="branchCdLOVMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+					   b.count_, 
+					   a.* 
+				  FROM (SELECT * 
+						  FROM TABLE (GIACS046_PKG.get_branch_lov(#moduleId#, #userId#, #findText#))
+						  <isEqual property="sortColumn" compareValue="branchCd">
+								ORDER BY branch_cd
+						  </isEqual>
+						  <isEqual property="sortColumn" compareValue="branchName">
+								ORDER BY branch_name
+						  </isEqual>
+						  <isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+						  </isNotNull>
+						  ) a, 
+					   (SELECT count(*) count_ 
+						  FROM TABLE (GIACS046_PKG.get_branch_lov(#moduleId#, #userId#, #findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+</sqlMap>

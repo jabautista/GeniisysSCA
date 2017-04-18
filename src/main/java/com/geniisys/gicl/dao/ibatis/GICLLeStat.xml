@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GICLLeStat">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GICLLeStat" type="com.geniisys.gicl.entity.GICLLeStat"/>
+	
+	<resultMap class="GICLLeStat" 		id="GICLLeStatResultMap">
+		<result property="leStatCd"			column="LE_STAT_CD"/>
+		<result property="leStatDesc"		column="LE_STAT_DESC"/>
+		<result property="remarks"			column="REMARKS"/>
+		<result property="userId"			column="USER_ID"/>
+		<result property="lastUpdate"		column="LAST_UPDATE"/>
+		<result property="rowNum"			column="ROWNUM_"/>
+		<result property="rowCount"			column="COUNT_"/>
+	</resultMap>
+	
+	<select id="getGiclLeStatList" resultMap="GICLLeStatResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GICL_LE_STAT_PKG.get_all_gicl_le_stat(#findText#))
+		          		<isEqual property="sortColumn" compareValue="leStatCd">
+			            	ORDER BY le_stat_cd
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="leStatDesc">
+			            	ORDER BY le_stat_desc
+			          	</isEqual>
+			           	<isNotNull property="sortColumn">
+			              	<isEqual property="ascDescFlg" compareValue="ASC">
+			              		ASC
+			              	</isEqual>
+			              	<isEqual property="ascDescFlg" compareValue="DESC">
+			              		DESC
+			              	</isEqual>
+			            </isNotNull>  
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GICL_LE_STAT_PKG.get_all_gicl_le_stat(#findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap id="giclsLossExpSettlementResultMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result column="le_stat_cd"    	property="leStatCd"/>
+		<result column="le_stat_desc"  	property="leStatDesc"/>
+		<result column="user_id"     	property="userId"/>
+		<result column="last_update" 	property="lastUpdate"/>
+		<result column="remarks"     	property="remarks"/>
+	</resultMap>
+	
+	<select id="getGicls060RecList" resultMap="giclsLossExpSettlementResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(GICLS060_PKG.get_rec_list)
+		  	      <isNotNull property="filter">
+		  	      	WHERE 1 = 1 
+		  	      		<isNotEmpty prepend="AND" property="leStatCd">
+                        	UPPER(le_stat_cd) LIKE UPPER(#leStatCd#)
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="leStatDesc">
+                            UPPER(le_stat_desc) LIKE UPPER(#leStatDesc#)
+                        </isNotEmpty>
+		  	      </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="leStatCd">
+			              		ORDER BY le_stat_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="leStatDesc">
+			              		ORDER BY le_stat_desc
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GICLS060_PKG.get_rec_list)
+		                  <isNotNull property="filter">
+				  	      	WHERE 1 = 1 
+				  	      		<isNotEmpty prepend="AND" property="leStatCd">
+		                        	UPPER(le_stat_cd) LIKE UPPER(#leStatCd#)
+		                        </isNotEmpty>
+		                        <isNotEmpty prepend="AND" property="leStatDesc">
+		                            UPPER(le_stat_desc) LIKE UPPER(#leStatDesc#)
+		                        </isNotEmpty>
+				  	      </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setLossExpSettlement" parameterClass="GICLLeStat">
+	    DECLARE
+	    	v_rec gicl_le_stat%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.le_stat_cd := #leStatCd#;
+ 			v_rec.le_stat_desc := #leStatDesc#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			GICLS060_PKG.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<!-- <procedure id="valDeleteLossExpSettlement" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss048_pkg.val_del_rec(#recId#);
+ 		END;
+ 	</procedure> -->
+ 	
+ 	<select id="valDeleteLossExpSettlement" resultClass="java.lang.String">
+		SELECT GICLS060_PKG.val_del_rec(#leStatCd#)FROM dual							
+	</select>
+ 	
+ 	<procedure id="valAddLossExpSettlement" parameterClass="java.lang.String">
+ 		BEGIN
+ 			GICLS060_PKG.val_add_rec(#recId#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delLossExpSettlement" parameterClass="java.lang.String">
+		BEGIN
+ 			GICLS060_PKG.del_rec(#leStatCd#);
+ 		END;
+ 	</delete>
+</sqlMap>

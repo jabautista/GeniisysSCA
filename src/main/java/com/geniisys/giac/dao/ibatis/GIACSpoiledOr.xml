@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GIACSpoiledOr">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIACSpoiledOrClass" type="com.geniisys.giac.entity.GIACSpoiledOr"/>
+	
+	<resultMap class="GIACSpoiledOrClass" id="GIACSpoiledOrResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="branchCd" 	column="branch_cd"/>
+		<result property="fundCd" 		column="fund_cd"/>
+		<result property="orDate" 		column="or_date"/>
+		<result property="orNo" 		column="or_no"/>
+		<result property="orPref" 		column="or_pref"/>
+		<result property="orPrefNo"		column="or_pref_no"/>
+		<result property="remarks" 		column="remarks"/>
+		<result property="spoilDate" 	column="spoil_date"/>
+		<result property="spoilTag" 	column="spoil_tag"/>
+		<result property="spoilTagDesc" column="spoil_tag_desc"/>
+		<result property="tranId" 		column="tran_id"/>
+	</resultMap>
+	
+	<select id="getGIACSpoiledOrListing" resultMap="GIACSpoiledOrResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIAC_SPOILED_OR_PKG.get_giac_spoiled_or_listing(#fundCd#, #branchCd#, 'GIACS037', #userId#, #filter.orPref#, #filter.orNo#, #filter.orDate#))
+		                  <isEqual property="sortColumn" compareValue="orPrefNo">
+			              		ORDER BY or_pref, or_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="orDate">
+			              		ORDER BY or_date
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="spoilDate">
+			              		ORDER BY spoil_date
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="spoilTagDesc">
+			              		ORDER BY spoil_tag_desc
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIAC_SPOILED_OR_PKG.get_giac_spoiled_or_listing(#fundCd#, #branchCd#, 'GIACS037', #userId#, #filter.orPref#, #filter.orNo#, #filter.orDate#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<procedure id="saveSpoiledOrDtls" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GIAC_SPOILED_OR_PKG.save_spoiled_or_dtls(#orPref#, #orNo#, #origOrPref#, #origOrNo#, #fundCd#, #branchCd#, #spoilDate#, #spoilTag#, #orDate#);
+		END;
+	</procedure>
+	
+	<select id="validateSpoiledOrNo" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT GIAC_SPOILED_OR_PKG.validate_or_no(#orPref#, #orNo#, #fundCd#, #branchCd#) FROM DUAL
+	</select>
+</sqlMap>	

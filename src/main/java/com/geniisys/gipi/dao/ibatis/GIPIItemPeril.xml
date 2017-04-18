@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap>
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIPIItemPeril" type="com.geniisys.gipi.entity.GIPIItemPeril"/>
+	
+	<resultMap class="GIPIItemPeril" id="GIPIItemPerilMap">
+		<result column="POLICY_ID" 		property="policyId"/>
+		<result column="ITEM_NO" 		property="itemNo"/>
+		<result column="LINE_CD" 		property="lineCd"/>
+		<result column="PERIL_CD" 		property="perilCd"/>
+		<result column="PERIL_NAME" 	property="perilName"/>	
+		<result column="PREM_RT" 		property="premiumRate"/>
+		<result column="TSI_AMT" 		property="tsiAmount"/>
+		<result column="PREM_AMT" 		property="premiumAmount"/>
+		<result column="ANN_TSI_AMT" 	property="annTsiAmount"/>
+		<result column="ANN_PREM_AMT" 	property="annPremiumAmount"/>
+		<result column="COMP_REM" 		property="compRem"/>
+		<result column="REC_FLAG" 		property="recFlag"/>
+		<result column="RI_COMM_RATE" 	property="riCommRate"/>
+		<result column="RI_COMM_AMT" 	property="riCommAmount"/>
+		<result column="NO_OF_DAYS" 	property="noOfDays"/>
+		<result column="BASE_AMT" 		property="baseAmount"/>
+		<result column="BASC_PERL_CD" 	property="bascPerlCd"/>
+		<result column="TARF_CD" 		property="tarfCd"/>
+		<result column="PERIL_TYPE" 	property="perilType"/>	
+	</resultMap>
+	
+	<resultMap class="GIPIItemPeril" id="itemPerilMap">
+		<result column="policy_id" 		property="policyId"/>
+		<result column="item_no" 		property="itemNo"/>
+		<result column="peril_cd" 		property="perilCd"/>
+		<result column="prem_rt" 		property="premiumRate"/>
+		<result column="tsi_amt" 		property="tsiAmount"/>
+		<result column="prem_amt" 		property="premiumAmount"/>
+		<result column="surcharge_sw" 	property="surchargeSw"/>
+		<result column="discount_sw" 	property="discountSw"/>
+		<result column="aggregate_sw" 	property="aggregateSw"/>
+		<result column="comp_rem" 		property="compRem"/>
+		<result column="ri_comm_rate" 	property="riCommRate"/>
+		<result column="ri_comm_amt" 	property="riCommAmount"/>
+		<result column="peril_name" 	property="perilName"/>
+		<result property="rowNum" 		column="rownum_"/>
+		<result property="rowCount" 	column="count_"/>
+	</resultMap>
+	
+	<parameterMap class="GIPIItemPeril" id="RiCommRateAmtParamMap">
+		<parameter property="parId" 	jdbcType="NUMBER" javaType="java.lang.Integer" 		mode="IN" />		
+		<parameter property="itemNo" 	jdbcType="NUMBER" javaType="java.lang.Integer" 		mode="IN"/>
+		<parameter property="perilCd" 	jdbcType="NUMBER" javaType="java.lang.Integer" 		mode="IN"/>
+		<parameter property="premAmt" 	jdbcType="NUMBER" javaType="java.math.BigDecimal" 	mode="IN"/>
+		<parameter property="riCommRate" jdbcType="NUMBER" javaType="java.math.BigDecimal"	mode="OUT"/>
+		<parameter property="riCommAmt" jdbcType="NUMBER" javaType="java.math.BigDecimal"	mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="getGIPIItemPeril" resultMap="GIPIItemPerilMap">
+		SELECT * 
+		  FROM TABLE(Gipi_itmperil_Pkg.get_gipi_item_peril(#parId#))
+	</procedure>
+	
+	<select id="checkCompulsoryDeath" resultClass="java.lang.String">
+		SELECT GIPI_ITMPERIL_PKG.check_compulsory_death(#policyId#) FROM DUAL
+	</select>
+	
+	<select id="getItemPerilCount" resultClass="java.lang.Integer">
+		SELECT GIPI_ITMPERIL_PKG.get_item_peril_count(#policyId#) FROM DUAL
+	</select>
+	
+	<!--Modified by Gzelle 06.14.2013 - added sortColumn  -->
+	<select id="getItemPerils" resultMap="itemPerilMap" parameterClass="java.util.HashMap">
+		SELECT *
+            FROM (SELECT rownum rownum_,b.count_,a.*
+                    FROM (SELECT * FROM TABLE(GIPI_ITMPERIL_pkg.get_gipi_itmperil(#policyId#,#itemNo#))
+	                  	 <isEqual property="sortColumn"	compareValue="perilName">
+	                    	 	ORDER BY peril_name
+	                    	 </isEqual>
+	                    	 <isEqual property="sortColumn" compareValue="tsiAmount">
+	                    	 	ORDER BY tsi_amt
+	                    	 </isEqual>
+	                    	 <isEqual property="sortColumn" compareValue="premiumAmount">
+	                    	 	ORDER BY prem_amt
+	                    	 </isEqual>
+	                    	 <isEqual property="sortColumn" compareValue="premiumRate">
+	                    	 	ORDER BY prem_rt
+	                    	 </isEqual>
+	                    	 <isEqual property="sortColumn" compareValue="compRem">
+	                    	 	ORDER BY comp_rem
+	                    	 </isEqual>
+	                    	 <isEqual property="sortColumn" compareValue="surchargeSw">  
+	                    	  	ORDER BY surcharge_sw
+	                    	 </isEqual>
+	                    	 <isEqual property="sortColumn" compareValue="discountSw">  
+	                    	  	ORDER BY discount_sw
+	                    	 </isEqual>	
+	                    	 <isEqual property="sortColumn" compareValue="aggregateSw">  
+	                    	  	ORDER BY aggregate_sw
+	                    	 </isEqual>	   
+	                    	 <isEqual property="sortColumn" compareValue="riCommRate">  <!-- added by robert 10.07.2013 -->
+	                    	  	ORDER BY RI_COMM_RATE
+	                    	 </isEqual>	
+	                    	 <isEqual property="sortColumn" compareValue="riCommAmount">  <!-- added by robert 10.07.2013 -->
+	                    	  	ORDER BY RI_COMM_AMT
+	                    	 </isEqual>	                 	                     	 
+				             <isNotNull property="sortColumn">
+				             	<isEqual property="ascDescFlg" compareValue="ASC">
+				          			ASC
+				          		</isEqual>
+				          		<isEqual property="ascDescFlg" compareValue="DESC">
+				          			DESC
+				          		</isEqual>
+				          	</isNotNull>	
+			          	   ) a,
+                          (SELECT count(*) count_ FROM TABLE(GIPI_ITMPERIL_pkg.get_gipi_itmperil(#policyId#,#itemNo#))) b)
+ 		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="gipis065CheckIfPerilExists" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT GIPIS065_CHECK_PERILS(#parId#, #itemNo#) FROM DUAL
+	</select>
+	
+	<resultMap id="gipis175PerilResultMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result	property="policyId" 		column="policy_id"/>
+		<result	property="lineCd" 			column="line_cd"/>
+		<result	property="perilCd" 			column="peril_cd"/>
+		<result	property="itemNo" 			column="item_no"/>
+		<result	property="dspPerilName" 	column="dsp_peril_name"/>
+		<result	property="recFlag" 			column="rec_flag"/>
+		<result	property="tarfCd" 			column="tarf_cd"/>
+		<result	property="tsiAmt" 			column="tsi_amt"/>
+		<result	property="premRt" 			column="prem_rt"/>
+		<result	property="annTsiAmt" 		column="ann_tsi_amt"/>
+		<result	property="annPremAmt" 		column="ann_prem_amt"/>
+		<result	property="discountSw" 		column="discount_sw"/>
+		<result	property="asChargeSw" 		column="as_charge_sw"/>
+		<result	property="premAmt" 			column="prem_amt"/>
+		<result	property="riCommRate" 		column="ri_comm_rate"/>
+		<result	property="riCommAmt" 		column="ri_comm_amt"/>
+		<result	property="oldRiCommRate"	column="old_ri_comm_rate"/>
+		<result	property="oldRiCommAmt" 	column="old_ri_comm_amt"/>
+		<result	property="summCommAmt"  	column="summ_comm_amt"/>
+		<result	property="riCommVat" 		column="ri_comm_vat"/>
+		<result	property="oldRiCommVat" 	column="old_ri_comm_vat"/>
+		<result	property="rgNum" 			column="rg_num"/>
+	</resultMap>
+	
+	<select id="getGIPIS175Perils" resultMap="gipis175PerilResultMap">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+						 b.count_, 
+						 a.*
+					FROM (SELECT *
+							FROM TABLE (GIPIS175_PKG.get_perils(#policyId#, #itemNo#))
+							<isEqual property="sortColumn" compareValue="dspPerilName">
+								ORDER BY dsp_peril_name
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="premAmt">
+								ORDER BY prem_amt
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="riCommRate">
+								ORDER BY ri_comm_rate
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="riCommAmt">
+								ORDER BY ri_comm_amt
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>
+						) a,
+						(SELECT count(*) count_
+						   FROM TABLE (GIPIS175_PKG.get_perils(#policyId#, #itemNo#))
+						   ) b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<parameterMap class="map" id="gipis175InsertHistParamMap">
+		<parameter property="policyId"		jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+		<parameter property="itemNo"		jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+		<parameter property="perilCd"		jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+		<parameter property="oldRiCommRate"	jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+		<parameter property="oldRiCommAmt"	jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+		<parameter property="riCommRate"	jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+		<parameter property="riCommAmt"		jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+		<parameter property="userId"		jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+		<parameter property="acctEntDate"	jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+	</parameterMap>
+	
+	<procedure id="gipis175InsertHist" parameterMap="gipis175InsertHistParamMap">	
+		CALL GIPIS175_PKG.insert_hist(?, ?, ?, ?, ?, ?, ?, ?, ?)                                
+	</procedure>
+	
+</sqlMap>

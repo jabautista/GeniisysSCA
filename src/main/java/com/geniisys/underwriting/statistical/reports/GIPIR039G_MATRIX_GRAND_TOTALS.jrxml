@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIPIR039G_MATRIX_GRAND_TOTALS" language="groovy" pageWidth="1152" pageHeight="752" columnWidth="1152" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="Crosstab Data Text" isDefault="false" hAlign="Center"/>
+	<parameter name="P_ZONE_TYPE" class="java.lang.String"/>
+	<parameter name="P_AS_OF_SW" class="java.lang.String"/>
+	<parameter name="P_USER_ID" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT '1' DUMMY_CD, ZONE_GRND_TOT_TSI, ZONE_GRND_TOT_PREM
+  FROM TABLE(GIPIR039G_PKG.GET_MATRIX_TOTAL(
+	$P{P_ZONE_TYPE}, $P{P_AS_OF_SW}, $P{P_USER_ID}))
+UNION
+SELECT '2', CF_GRND_BLDG_TSI_AMT, CF_GRND_BLDG_PREM_AMT
+  FROM TABLE(GIPIR039G_PKG.POPULATE_RECAP(
+	$P{P_ZONE_TYPE}, $P{P_AS_OF_SW}, $P{P_USER_ID}))]]>
+	</queryString>
+	<field name="DUMMY_CD" class="java.lang.String"/>
+	<field name="ZONE_GRND_TOT_TSI" class="java.math.BigDecimal"/>
+	<field name="ZONE_GRND_TOT_PREM" class="java.math.BigDecimal"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<summary>
+		<band height="30" splitType="Stretch">
+			<crosstab>
+				<reportElement x="0" y="0" width="1152" height="30"/>
+				<rowGroup name="1" width="0">
+					<bucket>
+						<bucketExpression class="java.lang.String"><![CDATA[1]]></bucketExpression>
+					</bucket>
+					<crosstabRowHeader>
+						<cellContents backcolor="#F0F8FF" mode="Opaque"/>
+					</crosstabRowHeader>
+					<crosstabTotalRowHeader>
+						<cellContents/>
+					</crosstabTotalRowHeader>
+				</rowGroup>
+				<columnGroup name="DUMMY_CD" height="0">
+					<bucket>
+						<bucketExpression class="java.lang.String"><![CDATA[$F{DUMMY_CD}]]></bucketExpression>
+					</bucket>
+					<crosstabColumnHeader>
+						<cellContents backcolor="#F0F8FF" mode="Opaque"/>
+					</crosstabColumnHeader>
+					<crosstabTotalColumnHeader>
+						<cellContents/>
+					</crosstabTotalColumnHeader>
+				</columnGroup>
+				<measure name="ZONE_GRND_TOT_TSIMeasure" class="java.math.BigDecimal">
+					<measureExpression><![CDATA[$F{ZONE_GRND_TOT_TSI}]]></measureExpression>
+				</measure>
+				<measure name="ZONE_GRND_TOT_PREMMeasure" class="java.math.BigDecimal">
+					<measureExpression><![CDATA[$F{ZONE_GRND_TOT_PREM}]]></measureExpression>
+				</measure>
+				<crosstabCell width="177" height="29">
+					<cellContents>
+						<textField pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+							<reportElement style="Crosstab Data Text" x="87" y="9" width="85" height="11"/>
+							<textElement textAlignment="Right">
+								<font fontName="Arial" size="7"/>
+							</textElement>
+							<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{ZONE_GRND_TOT_PREMMeasure}]]></textFieldExpression>
+						</textField>
+						<textField pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+							<reportElement x="0" y="9" width="85" height="11"/>
+							<textElement textAlignment="Right">
+								<font fontName="Arial" size="7"/>
+							</textElement>
+							<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{ZONE_GRND_TOT_TSIMeasure}]]></textFieldExpression>
+						</textField>
+						<staticText>
+							<reportElement style="Crosstab Data Text" x="0" y="0" width="85" height="9"/>
+							<textElement textAlignment="Right">
+								<font fontName="Arial" size="7"/>
+							</textElement>
+							<text><![CDATA[-----------------------------------------]]></text>
+						</staticText>
+						<staticText>
+							<reportElement style="Crosstab Data Text" x="87" y="0" width="85" height="9"/>
+							<textElement textAlignment="Right">
+								<font fontName="Arial" size="7"/>
+							</textElement>
+							<text><![CDATA[-------------------------------------]]></text>
+						</staticText>
+						<staticText>
+							<reportElement style="Crosstab Data Text" x="0" y="20" width="85" height="9"/>
+							<textElement textAlignment="Right">
+								<font fontName="Arial" size="7"/>
+							</textElement>
+							<text><![CDATA[=======================]]></text>
+						</staticText>
+						<staticText>
+							<reportElement style="Crosstab Data Text" x="87" y="20" width="85" height="9"/>
+							<textElement textAlignment="Right">
+								<font fontName="Arial" size="7"/>
+							</textElement>
+							<text><![CDATA[=======================]]></text>
+						</staticText>
+					</cellContents>
+				</crosstabCell>
+			</crosstab>
+		</band>
+	</summary>
+</jasperReport>

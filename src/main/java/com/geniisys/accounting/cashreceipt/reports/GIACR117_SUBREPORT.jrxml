@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIACR117_SUBREPORT" language="groovy" pageWidth="950" pageHeight="612" columnWidth="950" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="1.0245201830476058"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="P_DATE" class="java.util.Date"/>
+	<parameter name="P_DATE2" class="java.util.Date"/>
+	<parameter name="P_POST_TRAN_TOGGLE" class="java.lang.String"/>
+	<parameter name="P_BRANCH" class="java.lang.String"/>
+	<parameter name="P_PER_BRANCH" class="java.lang.String"/>
+	<parameter name="P_USER_ID" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT *
+  FROM TABLE(GIACR117_PKG.get_cr_reg_dets_smmary(
+                                TO_DATE($P{P_DATE}),
+                                TO_DATE($P{P_DATE2}),
+                                $P{P_POST_TRAN_TOGGLE},
+                                $P{P_BRANCH},
+                                $P{P_PER_BRANCH},
+				$P{P_USER_ID} ))]]>
+	</queryString>
+	<field name="SMMARY_GFUN_FUND_CD" class="java.lang.String"/>
+	<field name="SMMARY_BRANCH_CD" class="java.lang.String"/>
+	<field name="SMMARY_BRANCH_NAME" class="java.lang.String"/>
+	<field name="SMMARY_GL_ACCT_NO" class="java.lang.String"/>
+	<field name="SMMARY_GL_ACCT_NAME" class="java.lang.String"/>
+	<field name="SMMARY_DB_AMT" class="java.math.BigDecimal"/>
+	<field name="SMMARY_CD_AMT" class="java.math.BigDecimal"/>
+	<field name="SMMARY_BAL_AMT" class="java.math.BigDecimal"/>
+	<variable name="V_GL_ACCT_COUNT" class="java.lang.Integer" resetType="Group" resetGroup="BRANCH_CD" calculation="Count">
+		<variableExpression><![CDATA[$F{SMMARY_GL_ACCT_NO}]]></variableExpression>
+	</variable>
+	<variable name="V_BRANCH_LABEL" class="java.lang.String"/>
+	<variable name="V_BRANCH_TOTAL_DB" class="java.math.BigDecimal" resetType="Group" resetGroup="BRANCH_CD" calculation="Sum">
+		<variableExpression><![CDATA[$F{SMMARY_DB_AMT}]]></variableExpression>
+	</variable>
+	<variable name="V_BRANCH_TOTAL_CD" class="java.math.BigDecimal" resetType="Group" resetGroup="BRANCH_CD" calculation="Sum">
+		<variableExpression><![CDATA[$F{SMMARY_CD_AMT}]]></variableExpression>
+	</variable>
+	<variable name="V_BRANCH_TOTAL_BAL" class="java.math.BigDecimal" resetType="Group" resetGroup="BRANCH_CD" calculation="Sum">
+		<variableExpression><![CDATA[$F{SMMARY_BAL_AMT}]]></variableExpression>
+	</variable>
+	<variable name="V_GRAND_TOTAL_DB" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{SMMARY_DB_AMT}]]></variableExpression>
+	</variable>
+	<variable name="V_GRAND_TOTAL_CD" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{SMMARY_CD_AMT}]]></variableExpression>
+	</variable>
+	<variable name="V_GRAND_TOTAL_BAL" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{SMMARY_BAL_AMT}]]></variableExpression>
+	</variable>
+	<group name="BRANCH_CD" isReprintHeaderOnEachPage="true">
+		<groupExpression><![CDATA[$F{SMMARY_BRANCH_CD}]]></groupExpression>
+		<groupHeader>
+			<band height="31">
+				<textField isBlankWhenNull="true">
+					<reportElement positionType="Float" x="79" y="1" width="155" height="9">
+						<printWhenExpression><![CDATA[Boolean.valueOf($P{P_PER_BRANCH}.equals('Y'))]]></printWhenExpression>
+					</reportElement>
+					<textElement>
+						<font fontName="SansSerif" size="7"/>
+					</textElement>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{SMMARY_BRANCH_CD} + " - " + $F{SMMARY_BRANCH_NAME}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="3" y="1" width="70" height="9"/>
+					<textElement>
+						<font fontName="SansSerif" size="7"/>
+					</textElement>
+					<textFieldExpression class="java.lang.String"><![CDATA[$P{P_PER_BRANCH}.equals('Y') ?     " Branch: " : "ALL BRANCHES"]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="4" y="17" width="195" height="9"/>
+					<textElement>
+						<font fontName="SansSerif" size="7"/>
+					</textElement>
+					<text><![CDATA[GL Account No.]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="209" y="17" width="393" height="9"/>
+					<textElement>
+						<font fontName="SansSerif" size="7"/>
+					</textElement>
+					<text><![CDATA[Account Name]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="614" y="17" width="105" height="9"/>
+					<textElement textAlignment="Right">
+						<font fontName="SansSerif" size="7"/>
+					</textElement>
+					<text><![CDATA[Debit Amount]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="729" y="17" width="105" height="9"/>
+					<textElement textAlignment="Right">
+						<font fontName="SansSerif" size="7"/>
+					</textElement>
+					<text><![CDATA[Credit Amount]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="844" y="17" width="105" height="9"/>
+					<textElement textAlignment="Right">
+						<font fontName="SansSerif" size="7"/>
+					</textElement>
+					<text><![CDATA[Balance Amount]]></text>
+				</staticText>
+				<line>
+					<reportElement x="4" y="27" width="195" height="1"/>
+					<graphicElement>
+						<pen lineWidth="0.5" lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="209" y="27" width="393" height="1"/>
+					<graphicElement>
+						<pen lineWidth="0.5" lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="614" y="27" width="106" height="1"/>
+					<graphicElement>
+						<pen lineWidth="0.5" lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="729" y="27" width="106" height="1"/>
+					<graphicElement>
+						<pen lineWidth="0.5" lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="844" y="27" width="107" height="1"/>
+					<graphicElement>
+						<pen lineWidth="0.5" lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="14">
+				<printWhenExpression><![CDATA[Boolean.valueOf($P{P_PER_BRANCH}.equals('Y'))]]></printWhenExpression>
+				<line>
+					<reportElement x="614" y="2" width="106" height="1"/>
+					<graphicElement>
+						<pen lineWidth="0.5" lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="729" y="2" width="107" height="1"/>
+					<graphicElement>
+						<pen lineWidth="0.5" lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="844" y="2" width="106" height="1"/>
+					<graphicElement>
+						<pen lineWidth="0.5" lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<staticText>
+					<reportElement x="542" y="4" width="68" height="9"/>
+					<textElement>
+						<font fontName="SansSerif" size="7"/>
+					</textElement>
+					<text><![CDATA[Branch Totals : ]]></text>
+				</staticText>
+				<textField pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+					<reportElement x="614" y="4" width="105" height="9"/>
+					<textElement textAlignment="Right">
+						<font fontName="SansSerif" size="7"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_BRANCH_TOTAL_DB}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+					<reportElement x="729" y="4" width="105" height="9"/>
+					<textElement textAlignment="Right">
+						<font fontName="SansSerif" size="7"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_BRANCH_TOTAL_CD}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+					<reportElement x="844" y="4" width="105" height="9"/>
+					<textElement textAlignment="Right">
+						<font fontName="SansSerif" size="7"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_BRANCH_TOTAL_BAL}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="12">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="4" y="0" width="195" height="9"/>
+				<textElement>
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{SMMARY_GL_ACCT_NO}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="209" y="0" width="393" height="9"/>
+				<textElement>
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{SMMARY_GL_ACCT_NAME}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="614" y="0" width="105" height="9"/>
+				<textElement textAlignment="Right">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{SMMARY_DB_AMT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="729" y="0" width="105" height="9"/>
+				<textElement textAlignment="Right">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{SMMARY_CD_AMT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="844" y="0" width="105" height="9"/>
+				<textElement textAlignment="Right">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{SMMARY_BAL_AMT}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<summary>
+		<band height="19">
+			<staticText>
+				<reportElement x="542" y="4" width="68" height="9"/>
+				<textElement>
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<text><![CDATA[Grand Total : ]]></text>
+			</staticText>
+			<line>
+				<reportElement x="614" y="1" width="106" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="729" y="1" width="106" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="844" y="1" width="106" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="614" y="14" width="107" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="729" y="14" width="106" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="844" y="14" width="106" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="614" y="16" width="106" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="729" y="16" width="107" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="844" y="16" width="106" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<textField pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="614" y="4" width="105" height="9"/>
+				<textElement textAlignment="Right">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_GRAND_TOTAL_DB}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="729" y="4" width="105" height="9"/>
+				<textElement textAlignment="Right">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_GRAND_TOTAL_CD}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="844" y="4" width="105" height="9"/>
+				<textElement textAlignment="Right">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_GRAND_TOTAL_BAL}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

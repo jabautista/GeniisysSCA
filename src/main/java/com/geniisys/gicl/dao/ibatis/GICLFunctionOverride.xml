@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GICLFunctionOverride">
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GICLFunctionOverrideClass" type="com.geniisys.gicl.entity.GICLFunctionOverride"/>
+	
+	<resultMap id="GICLFunctionOverrideResultMap" class="GICLFunctionOverrideClass">
+		<result column="MODULE_ID" 		property="moduleId" 	jdbcType="NUMBER" />
+		<result column="FUNCTION_CODE" 	property="functionCd" 	jdbcType="VARCHAR" />
+		<result column="FUNCTION_NAME" 	property="functionName" jdbcType="VARCHAR" />
+		<result column="MODULE_NAME" 	property="moduleName" 	jdbcType="VARCHAR" />
+		<result column="ROWNUM_"		property="rowNum"/>
+		<result column="COUNT_"			property="rowCount"/>
+	</resultMap>
+	
+	<resultMap id="GICLFunctionOverrideRecordsResultMap" class="java.util.HashMap" >
+		<result column="APPROVE_SW" 	 property="approveSw" 	 jdbcType="VARCHAR" />
+		<result column="OVERRIDE_ID" 	 property="overrideId" 	 jdbcType="NUMBER" />
+		<result column="LINE_CD" 		 property="lineCd" 		 jdbcType="VARCHAR" />
+		<result column="ISS_CD" 		 property="issCd" 		 jdbcType="VARCHAR" />
+		<result column="MODULE_ID" 		 property="moduleId" 	 jdbcType="NUMBER" />
+		<result column="FUNCTION_CD" 	 property="functionCd" 	 jdbcType="VARCHAR" />
+		<result column="DISPLAY" 		 property="display" 	 jdbcType="VARCHAR" />
+		<result column="MODULE_NAME" 	 property="moduleName" 	 jdbcType="VARCHAR" />
+		<result column="REQUEST_DATE" 	 property="requestDate"  jdbcType="DATE" />
+		<result column="REQUEST_BY" 	 property="requestBy" 	 jdbcType="VARCHAR" />
+		<result column="OVERRIDE_USER" 	 property="overrideUser" jdbcType="VARCHAR" />
+		<result column="OVERRIDE_DATE" 	 property="overrideDate" jdbcType="DATE" />
+		<result column="REMARKS" 		 property="remarks" 	 jdbcType="VARCHAR" />
+		<result column="REMARKS" 		 property="origRemarks"	/>
+		<result column="USER_ID" 		 property="userId" 		 jdbcType="VARCHAR" />
+		<result column="LAST_UPDATE" 	 property="lastUpdate" 	 jdbcType="VARCHAR" />
+		<result column="DSP_LAST_UPDATE" property="dspLastUpdate"/>
+		<result column="ROWNUM_"		 property="rowNum"/>
+		<result column="COUNT_"			 property="rowCount"/>
+	</resultMap>
+
+	<select id="getGICLS183FunctionListing" resultMap="GICLFunctionOverrideResultMap" parameterClass="java.util.HashMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_		  			   
+		  		  FROM (SELECT * 
+		  				  FROM TABLE(GICL_FUNCTION_OVERRIDE_PKG.get_functions_list(#appUser#))
+		  				  <isNotNull property="filter">
+		  				  		WHERE 1=1
+		  				  		<isNotEmpty prepend="AND" property="moduleName">
+		  				  			UPPER(module_name) LIKE UPPER(#moduleName#)
+		  				  		</isNotEmpty> 
+		  				  		<isNotEmpty prepend="AND" property="functionName">
+		  				  			UPPER (function_name) LIKE UPPER(#functionName#)
+		  				  		</isNotEmpty> 
+		  				  </isNotNull>
+		  				  <isEqual property="sortColumn" compareValue="moduleName">
+		  				  		ORDER BY module_name
+		  				  </isEqual>
+		  				  <isEqual property="sortColumn" compareValue="functionName">
+		  				  		ORDER BY function_name
+		  				  </isEqual>
+		  				  <isNotNull property="sortColumn">
+			  				  	<isEqual property="ascDescFlg" compareValue="ASC">
+			  				  		ASC
+			  				  	</isEqual>
+			  				  	<isEqual property="ascDescFlg" compareValue="DESC">
+			  				  		DESC
+			  				  	</isEqual>
+		  				  </isNotNull>
+		  				) a,
+		  				(SELECT count(*) count_
+		  				  FROM TABLE(GICL_FUNCTION_OVERRIDE_PKG.get_functions_list(#appUser#))
+		  					<isNotNull property="filter">
+		  				  		WHERE 1=1
+		  				  		<isNotEmpty prepend="AND" property="moduleName">
+		  				  			UPPER(module_name) LIKE UPPER(#moduleName#)
+		  				  		</isNotEmpty> 
+		  				  		<isNotEmpty prepend="AND" property="functionName">
+		  				  			UPPER (function_name) LIKE UPPER(#functionName#)
+		  				  		</isNotEmpty> 
+		  				  </isNotNull>
+		  				) b
+		  		)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGICLS183FunctionOverrideRecordsListing" resultMap="GICLFunctionOverrideRecordsResultMap" parameterClass="java.util.HashMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		  		  FROM (SELECT * 
+		  				  FROM TABLE(GICL_FUNCTION_OVERRIDE_PKG.get_function_records(<!-- #moduleId#, --> #functionCd#, #appUser#))
+		  				  <isNotNull property="filter">
+			  				  	WHERE 1=1
+			  				  	<isNotEmpty prepend="AND" property="display">
+			  				  		UPPER(display) LIKE UPPER(#display#)
+			  				  	</isNotEmpty>
+			  				  	<isNotEmpty prepend="AND" property="requestDate">
+			  				  		TRUNC(request_date) = TO_DATE(#requestDate#, 'MM-DD-RRRR')
+			  				  	</isNotEmpty>
+			  				  	<isNotEmpty prepend="AND" property="requestBy">
+			  				  		UPPER(request_by) LIKE UPPER(#requestBy#)
+			  				  	</isNotEmpty>
+			  				  	<isNotEmpty prepend="AND" property="remarks">
+			  				  		UPPER(remarks) LIKE UPPER(#remarks#)
+			  				  	</isNotEmpty>
+			  				  	<isNotEmpty prepend="AND" property="userId">
+			  				  		 UPPER(user_id) LIKE UPPER(#userId#)
+			  				  	</isNotEmpty>
+			  				  	<isNotEmpty prepend="AND" property="dspLastUpdate">
+			  				  		UPPER(dsp_last_update) LIKE UPPER(#dspLastUpdate#)
+			  				  	</isNotEmpty>	
+		  				  </isNotNull>
+		  				  <isEqual property="sortColumn" compareValue="approveSw">
+		  				  		ORDER BY approve_sw
+		  				  </isEqual>
+		  				  <isEqual property="sortColumn" compareValue="display">
+		  				  		ORDER BY display
+		  				  </isEqual>
+		  				  <isEqual property="sortColumn" compareValue="requestDate">
+		  				  		ORDER BY request_date
+		  				  </isEqual>
+		  				  <isEqual property="sortColumn" compareValue="requestBy">
+		  				  		ORDER BY request_by
+		  				  </isEqual> 
+		  				  <isEqual property="sortColumn" compareValue="remarks">
+		  				  		ORDER BY remarks
+		  				  </isEqual> 
+		  				  <isEqual property="sortColumn" compareValue="userId">
+		  				  		ORDER BY user_id
+		  				  </isEqual>
+		  				  <isEqual property="sortColumn" compareValue="dspLastUpdate">
+		  				  		ORDER BY dsp_last_update
+		  				  </isEqual>
+		  				  <isNotNull property="sortColumn">
+			  				  	<isEqual property="ascDescFlg" compareValue="ASC">
+			  				  		ASC
+			  				  	</isEqual>
+			  				  	<isEqual property="ascDescFlg" compareValue="DESC">
+			  				  		DESC
+			  				  	</isEqual>
+		  				  </isNotNull>
+		  				) a,
+		  				(SELECT count(*) count_ 
+		  				   FROM TABLE(GICL_FUNCTION_OVERRIDE_PKG.get_function_records(<!-- #moduleId#, --> #functionCd#, #appUser#))
+		  				  	<isNotNull property="filter">
+			  				  	WHERE 1=1
+			  				  	<isNotEmpty prepend="AND" property="display">
+			  				  		UPPER(display) LIKE UPPER(#display#)
+			  				  	</isNotEmpty>
+			  				  	<isNotEmpty prepend="AND" property="requestDate">
+			  				  		TRUNC(request_date) = TO_DATE(#requestDate#, 'MM-DD-RRRR')
+			  				  	</isNotEmpty>
+			  				  	<isNotEmpty prepend="AND" property="requestBy">
+			  				  		UPPER(request_by) LIKE UPPER(#requestBy#)
+			  				  	</isNotEmpty>
+			  				  	<isNotEmpty prepend="AND" property="remarks">
+			  				  		UPPER(remarks) LIKE UPPER(#remarks#)
+			  				  	</isNotEmpty> 
+			  				  	<isNotEmpty prepend="AND" property="userId">
+			  				  		 UPPER(user_id) LIKE UPPER(#userId#)
+			  				  	</isNotEmpty>
+			  				  	<isNotEmpty prepend="AND" property="dspLastUpdate">
+			  				  		UPPER(dsp_last_update) LIKE UPPER(#dspLastUpdate#)
+			  				  	</isNotEmpty>	
+		  				  	</isNotNull>
+		  				  ) b		  
+		  		)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	
+	<procedure id="approveGICLS183FunctionOverride" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GICL_FUNCTION_OVERRIDE_PKG.update_function_override(#overrideId#, #userId#, #remarks#);
+		END;
+	</procedure>
+	
+	<procedure id="updateGICLS183FunctionOverrideRemarks" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GICL_FUNCTION_OVERRIDE_PKG.update_record_remarks(#overrideId#, #remarks#, #userId#);
+		END;
+	</procedure>
+</sqlMap>

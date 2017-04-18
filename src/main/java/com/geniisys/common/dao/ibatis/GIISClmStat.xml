@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISClmStat">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIISClmStatClass" type="com.geniisys.common.entity.GIISClmStat"/>
+	
+	<resultMap class="GIISClmStatClass" id="GIISClmStatResultMap">
+	 	<result column="clm_stat_cd" 			property="clmStatCd" />	
+		<result column="clm_stat_desc" 			property="clmStatDesc" />	
+		<result column="clm_stat_type" 			property="clmStatType" />	
+		<result column="remarks" 				property="remarks" />	
+	</resultMap>
+
+	<resultMap class="GIISClmStatClass" id="GIISClmStatResultMapGrid" extends="GIISClmStatResultMap">
+		<result column="rownum_" 				property="rowNum" />
+		<result column="count_"					property="rowCount"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="ClaimStatusResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="clmStatCd" 		column="clm_stat_cd"/>
+		<result property="clmStatDesc" 	column="clm_stat_desc"/>
+		<result property="clmStatType" 	column="clm_stat_type"/>		
+		<result property="remarks" 			column="remarks"/>	
+		<result property="userId" 			column="user_id"/>	
+		<result property="lastUpdate" 		column="last_update"/>		
+	</resultMap>
+
+  	<select id="getClmStatLOV" resultMap="GIISClmStatResultMapGrid">
+  		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(giis_clm_stat_pkg.get_clm_stat_dtl)   
+		          		<isNotNull property="findText">
+		                WHERE (UPPER(clm_stat_cd) LIKE UPPER(#findText#) OR UPPER(clm_stat_desc) LIKE UPPER(#findText#))
+		                </isNotNull>           
+			          	  <isNotNull property="sortColumn">
+			          	      <isEqual property="sortColumn" compareValue="id">
+				              		ORDER BY clm_stat_cd
+				              </isEqual>
+			                  <isEqual property="sortColumn" compareValue="desc">
+				              		ORDER BY clm_stat_desc
+				              </isEqual>	
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giis_clm_stat_pkg.get_clm_stat_dtl)
+		                 <isNotNull property="findText">
+		                 WHERE (UPPER(clm_stat_cd) LIKE UPPER(#findText#) OR UPPER(clm_stat_desc) LIKE UPPER(#findText#))
+		                 </isNotNull> 
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+  	
+  	<select id="getClmStatDesc" resultClass="java.lang.String" parameterClass="java.lang.String">
+  		SELECT giis_clm_stat_pkg.get_clm_desc(#clmStatCd#) FROM DUAL
+  	</select>
+  	
+  	<select id="getClaimStatusMaintenance" resultMap="ClaimStatusResultMap">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+						 b.count_, 
+						 a.*
+					FROM (SELECT *
+							FROM TABLE (GICLS160_PKG.get_claim_status)		
+							<isNotNull property="filter">
+								WHERE 1 = 1 
+	 								<isNotEmpty prepend="AND" property="clmStatCd">
+										UPPER(clm_stat_cd) LIKE UPPER(#clmStatCd#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="clmStatDesc">
+										UPPER(clm_stat_desc) LIKE UPPER(#clmStatDesc#)
+									</isNotEmpty>																
+							</isNotNull>					
+							<isEqual property="sortColumn" compareValue="clmStatCd">
+								ORDER BY clm_stat_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="clmStatDesc">
+								ORDER BY clm_stat_desc
+							</isEqual>						
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>
+						) a,
+						(SELECT count(*) count_
+						   FROM TABLE (GICLS160_PKG.get_claim_status)						 		
+							<isNotNull property="filter">
+								WHERE 1 = 1 
+	 								<isNotEmpty prepend="AND" property="clmStatCd">
+										UPPER(clm_stat_cd) LIKE UPPER(#clmStatCd#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="clmStatDesc">
+										UPPER(clm_stat_desc) LIKE UPPER(#clmStatDesc#)
+									</isNotEmpty>																
+							</isNotNull>							  
+						   ) b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select>	
+	
+	<insert id="setClaimStatus" parameterClass="GIISClmStatClass">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;						
+			GICLS160_PKG.set_claim_status(
+				#clmStatCd#, #clmStatDesc#,
+				#remarks#);
+		END;	
+	</insert>
+	
+	<delete id="deleteInClaimStatus" parameterClass="GIISClmStatClass">
+		BEGIN
+			GICLS160_PKG.delete_in_claim_status(#clmStatCd#);
+		END;
+	</delete>
+	
+	<select id="chkIfValidInput" resultClass="java.lang.String">
+		SELECT GICLS160_PKG.chk_if_valid_input(#txtField#,#searchString#)FROM dual							
+	</select>
+</sqlMap>	

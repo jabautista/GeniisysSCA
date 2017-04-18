@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIInspDataDtl">
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+
+	<typeAlias alias="GIPIInspDataDtl" type="com.geniisys.gipi.entity.GIPIInspDataDtl"/>
+	
+	<resultMap id="GIPIInspDataDtlMap" class="GIPIInspDataDtl">
+		<result column="insp_no"				property="inspNo" />
+		<result column="fi_pro_remarks"			property="fiProRemarks" />
+		<result column="fi_station_remarks" 	property="fiStationRemarks" />
+		<result column="sec_sys_remarks"		property="secSysRemarks" />
+		<result column="gen_surr_remarks"		property="genSurrRemarks" />
+		<result column="maint_dtl_remarks"		property="maintDtlRemarks" />
+		<result column="elec_inst_remarks"		property="elecInstRemarks" />
+		<result column="hk_remarks"				property="hkRemarks" />
+	</resultMap>
+
+	<select id="getInspDataDtl" parameterClass="java.lang.Integer" resultMap="GIPIInspDataDtlMap">
+		SELECT * FROM TABLE(GIPI_INSP_DATA_DTL_PKG.get_insp_data_dtl(#inspNo#))
+	</select>
+	
+	<procedure id="setInspDataDtl" parameterClass="GIPIInspDataDtl">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			GIPI_INSP_DATA_DTL_PKG.set_insp_data_dtl(#inspNo#, #fiProRemarks#, #fiStationRemarks#, #secSysRemarks#,
+													 #genSurrRemarks#, #maintDtlRemarks#, #elecInstRemarks#, #hkRemarks#);
+		END;
+	</procedure>
+	
+	<delete id="delInspDataDtl" parameterClass="java.lang.Integer">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			GIPI_INSP_DATA_DTL_PKG.del_insp_data_dtl(#inspNo#);
+		END;
+	</delete>
+	
+</sqlMap>

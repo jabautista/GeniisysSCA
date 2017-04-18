@@ -1,0 +1,24 @@
+/* Formatted on 12/28/2016 8:24:45 AM (QP5 v5.227.12220.39754) */
+SET SERVEROUTPUT ON
+DECLARE
+V_EXISTS VARCHAR2(1) := 'N';
+BEGIN
+   FOR X
+      IN (SELECT 1
+            FROM COLS
+           WHERE     1 = 1
+                 AND COLUMN_NAME = 'SL_CD'
+                 AND TABLE_NAME = 'GIAC_PRINTED_BIR2307_HIST')
+   LOOP
+      V_EXISTS := 'Y';
+      EXECUTE IMMEDIATE
+         ('ALTER TABLE CPI.GIAC_PRINTED_BIR2307_HIST DROP COLUMN SL_CD');
+   END LOOP;
+   
+   IF V_EXISTS = 'N'
+    THEN
+     DBMS_OUTPUT.PUT_LINE('Table GIAC_PRINTED_BIR2307_HIST is up to date.');
+   ELSE
+         DBMS_OUTPUT.PUT_LINE('Removed column SL_CD from table GIAC_PRINTED_BIR2307_HIST.');
+   END IF;
+END;

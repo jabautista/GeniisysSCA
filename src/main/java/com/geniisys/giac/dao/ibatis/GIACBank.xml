@@ -1,0 +1,382 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIACBank">
+	
+	<typeAlias alias="GIACBankClass" type="com.geniisys.giac.entity.GIACBank"/>
+	
+	<resultMap id="GIACBankLOVResultMap" class="GIACBankClass" extends="BaseEntity.TableGridResultMap">
+		<result column="BANK_NAME"		property="bankName" />
+		<result column="BANK_SNAME"		property="bankSname" />
+		<result column="BANK_CD"		property="bankCd" />
+	</resultMap>
+	
+	<select id="getGIACBankLOV" resultMap="GIACBankLOVResultMap">
+	  	SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+  		 				  FROM TABLE(giac_banks_details_pkg.get_giac_bank_listing(#findText#))
+		                  <isEqual property="sortColumn" compareValue="bankSname">
+			              		ORDER BY bank_sname
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="bankName">
+			              		ORDER BY bank_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="bankCd">
+			              		ORDER BY bank_cd
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_
+  		  					FROM TABLE(giac_banks_details_pkg.get_giac_bank_listing(#findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#  		  
+  	</select>
+  	
+  	<resultMap id="getGIACS002BanksMap" class="com.geniisys.giac.entity.GIACBankAccounts" extends="BaseEntity.TableGridResultMap">
+  		<result column="BANK_ACCT_CD"		property="bankAcctCd" />
+		<result column="BANK_ACCT_NO"		property="bankAcctNo" />
+		<result column="BANK_CD"			property="bankCd" />
+		<result column="BANK_NAME"			property="bankName" />
+		<result column="BANK_ACCT_TYPE"		property="bankAcctType" />
+		<result column="BRANCH_CD"			property="branchCd" />
+		<result column="BRANCH_BANK"		property="branchBank" />
+		<result column="PK_DUMMY"			property="pkDummy" />
+  	</resultMap>
+  	
+  	<select id="getGIACS002BanksLOV" resultMap="getGIACS002BanksMap">
+  		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+  		 				  FROM TABLE(giac_bank_accounts_pkg.get_giacs002_bank_list(#branchCd#, #moduleId#, #userId#, #mirBranchCd#))
+  		 				 <isNotNull property="findText">
+  		 				 WHERE ( UPPER(bank_cd) LIKE UPPER(#findText#)
+  		  				  	 OR   UPPER(bank_acct_cd) LIKE UPPER(#findText#)
+  		  				  	 OR   UPPER(bank_acct_no) LIKE UPPER(#findText#)
+  		  				  	 OR   UPPER(bank_name) LIKE UPPER(#findText#) ) 
+		  		  		 <!-- WHERE 1 = 1
+			  		  		 	<isNotEmpty prepend="AND" property="bankCd">
+			  		         		UPPER(bank_cd) LIKE UPPER(#bankCd#) 
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="bankAcctCd">
+			  		         		UPPER(bank_acct_cd) LIKE UPPER(#bankAcctCd#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="bankAcctNo">
+			  		         		UPPER(bank_acct_no) LIKE UPPER(#bankAcctNo#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="bankName">
+			  		         		UPPER(bank_name) LIKE UPPER(#bankName#) 
+			  		         	</isNotEmpty> -->
+			  		     </isNotNull>
+                  		 <isNotNull property="sortColumn">
+			                  <isEqual property="sortColumn" compareValue="bankCd">
+				              		ORDER BY bank_cd
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="bankAcctCd">
+				              		ORDER BY bank_acct_cd
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="bankAcctNo">
+				              		ORDER BY bank_acct_no
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="bankName">
+				              		ORDER BY bank_name
+				              </isEqual>
+		              		  <isEqual property="ascDescFlg" compareValue="ASC">
+		              			  ASC
+		              		  </isEqual>
+		              		  <isEqual property="ascDescFlg" compareValue="DESC">
+		              			  DESC
+		              		  </isEqual>
+			             </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_
+  		  				  FROM TABLE(giac_bank_accounts_pkg.get_giacs002_bank_list(#branchCd#, #moduleId#, #userId#, #mirBranchCd#))
+  		  				  <isNotNull property="findText">
+  		  				  WHERE ( UPPER(bank_cd) LIKE UPPER(#findText#)
+  		  				  	 OR   UPPER(bank_acct_cd) LIKE UPPER(#findText#)
+  		  				  	 OR   UPPER(bank_acct_no) LIKE UPPER(#findText#)
+  		  				  	 OR   UPPER(bank_name) LIKE UPPER(#findText#) ) 
+		  		  		 <!--WHERE 1 = 1
+			  		  		 	 <isNotEmpty prepend="AND" property="bankCd">
+			  		         		UPPER(bank_cd) LIKE UPPER(#bankCd#) 
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="bankAcctCd">
+			  		         		UPPER(bank_acct_cd) LIKE UPPER(#bankAcctCd#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="bankAcctNo">
+			  		         		UPPER(bank_acct_no) LIKE UPPER(#bankAcctNo#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="bankName">
+			  		         		UPPER(bank_name) LIKE UPPER(#bankName#) 
+			  		         	</isNotEmpty> -->
+			  		     </isNotNull>
+			  		     <isNotNull property="sortColumn">
+	  		  				  <isEqual property="sortColumn" compareValue="bankCd">
+				              		ORDER BY bank_cd
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="bankAcctCd">
+				              		ORDER BY bank_acct_cd
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="bankAcctNo">
+				              		ORDER BY bank_acct_no
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="bankName">
+				              		ORDER BY bank_name
+				              </isEqual>
+			              	  <isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              	  </isEqual>
+			              	  <isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              	  </isEqual>
+			             </isNotNull>) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#  		  
+  	</select>
+  	
+  	<select id="getGIACS135BankAcctNoLOV" resultMap="getGIACS002BanksMap">
+  		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+  		 				  FROM TABLE(giac_bank_accounts_pkg.get_bank_acct_no_list(#branchCd#, #moduleId#, #userId#))
+  		 				 <!-- <isNull property="findText">
+  		 				  WHERE ( UPPER(bank_cd) LIKE UPPER(NVL(#searchString#, bank_cd)) ) 		  		  		
+			  		     </isNull> -->
+			  		     <isNotNull property="findText"> 
+  		 				 	<!-- <isNull property="searchString">
+  		 				 		WHERE ( UPPER(bank_cd) LIKE UPPER(NVL(#findText#, bank_cd)) ) 	
+  		 				 	</isNull> -->
+  		 				 	<!-- <isNotNull property="searchString"> -->
+  		 				 		WHERE ( UPPER(bank_cd) LIKE UPPER(NVL(#findText#, bank_cd))
+	  		  				  	 OR   UPPER(bank_acct_cd) LIKE UPPER(NVL(#findText#, bank_acct_cd))
+	  		  				  	 OR   UPPER(bank_acct_no) LIKE UPPER(NVL(#findText#, bank_acct_no))
+	  		  				  	 OR   UPPER(bank_name) LIKE UPPER(NVL(#findText#, bank_name))
+	  		  				  	 OR   UPPER(branch_bank) LIKE UPPER(NVL(#findText#, branch_bank))
+	  		  				  	 OR   UPPER(branch_cd) LIKE UPPER(NVL(#findText#, branch_cd)) ) 
+  		 				 	<!-- </isNotNull> -->		  		
+					  	 </isNotNull>
+			  		     <isNotNull property="sortColumn">
+			                  <isEqual property="sortColumn" compareValue="bankCd">
+				              		ORDER BY bank_cd
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="bankAcctCd">
+				              		ORDER BY bank_acct_cd
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="bankAcctNo">
+				              		ORDER BY bank_acct_no
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="bankName">
+				              		ORDER BY bank_name
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="branchBank">
+				              		ORDER BY branch_bank
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="branchCd">
+				              		ORDER BY branch_cd
+				              </isEqual>
+		              		  <isEqual property="ascDescFlg" compareValue="ASC">
+		              			  ASC
+		              		  </isEqual>
+		              		  <isEqual property="ascDescFlg" compareValue="DESC">
+		              			  DESC
+		              		  </isEqual>
+			             </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_
+  		  				  FROM (SELECT * FROM TABLE(giac_bank_accounts_pkg.get_bank_acct_no_list(#branchCd#, #moduleId#, #userId#))
+		  		  				<!-- <isNull property="findText">
+		  		 				 WHERE ( UPPER(bank_cd) LIKE UPPER(NVL(#searchString#, bank_cd)) )  		  		  		
+					  		     </isNull> -->
+					  		     <isNotNull property="findText"> 
+		  		 				 	<!-- <isNull property="searchString">
+		  		 				 		WHERE ( UPPER(bank_cd) LIKE UPPER(NVL(#findText#, bank_cd)) )  	
+		  		 				 	</isNull> 
+		  		 				 	<isNotNull property="searchString"> -->
+	  		 				 		WHERE ( UPPER(bank_cd) LIKE UPPER(NVL(#findText#, bank_cd))
+		  		  				  	 OR   UPPER(bank_acct_cd) LIKE UPPER(NVL(#findText#, bank_acct_cd))
+		  		  				  	 OR   UPPER(bank_acct_no) LIKE UPPER(NVL(#findText#, bank_acct_no))
+		  		  				  	 OR   UPPER(bank_name) LIKE UPPER(NVL(#findText#, bank_name))
+		  		  				  	 OR   UPPER(branch_bank) LIKE UPPER(NVL(#findText#, branch_bank))
+		  		  				  	 OR   UPPER(branch_cd) LIKE UPPER(NVL(#findText#, branch_cd)) ) 
+		  		 				 	<!-- </isNotNull> -->		  		
+					  		     </isNotNull>
+					  		     )) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+  	
+	<resultMap class="GIACBankClass" id="GIACBankListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="bank_cd"     property="bankCd"/>
+		<result column="bank_sname"  property="bankSname"/>
+		<result column="bank_name"   property="bankName"/>
+		<result column="user_id"     property="userId"/>
+		<result column="last_update" property="lastUpdate"/>
+		<result column="remarks"     property="remarks"/>
+	</resultMap>
+	
+	<select id="getGiacs307RecList" resultMap="GIACBankListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giacs307_pkg.get_rec_list(#bankCd#, #bankSname#, #bankName#))
+		                  <isEqual property="sortColumn" compareValue="bankCd">
+			              		ORDER BY to_number(bank_cd)
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="bankSname">
+			              		ORDER BY bank_sname
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="bankName">
+			              		ORDER BY bank_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giacs307_pkg.get_rec_list(#bankCd#, #bankSname#, #bankName#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setBank" parameterClass="GIACBankClass">
+	    DECLARE
+	    	v_rec giac_banks%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.bank_cd := #bankCd#;
+ 			v_rec.bank_sname := #bankSname#;
+ 			v_rec.bank_name := #bankName#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			giacs307_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteBank" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giacs307_pkg.val_del_rec(#recId#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddBank" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giacs307_pkg.val_add_rec(#recId#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delBank" parameterClass="java.lang.String">
+		BEGIN
+ 			giacs307_pkg.del_rec(#bankCd#);
+ 		END;
+ 	</delete>
+ 	
+ 	<select id="getGICLS150BankLov" resultMap="GIACBankLOVResultMap"> 	
+ 		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+  		 				  FROM TABLE(giac_banks_details_pkg.get_bank_details)
+  		 				  <isNotNull property="findText">
+						 	  WHERE UPPER(bank_cd) LIKE UPPER(#findText#)
+						 	  OR UPPER(bank_name) LIKE UPPER(#findText#)
+						 	  OR UPPER(bank_sname) LIKE UPPER(#findText#)			                      		
+						  </isNotNull> 
+  		 				  <isNull property="findText">
+						 	  WHERE UPPER(bank_cd) LIKE UPPER(#searchString#)
+						 	  OR UPPER(bank_name) LIKE UPPER(#searchString#)
+						 	  OR UPPER(bank_sname) LIKE UPPER(#searchString#)			                      		
+						  </isNull>   
+		                  <isEqual property="sortColumn" compareValue="bankSname">
+			              		ORDER BY bank_sname
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="bankName">
+			              		ORDER BY bank_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="bankCd">
+			              		ORDER BY bank_cd
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_
+  		  					FROM TABLE(giac_banks_details_pkg.get_bank_details)
+  		  					<isNotNull property="findText">
+						 	  WHERE UPPER(bank_cd) LIKE UPPER(#findText#)
+						 	  OR UPPER(bank_name) LIKE UPPER(#findText#)
+						 	  OR UPPER(bank_sname) LIKE UPPER(#findText#)			                      		
+						  </isNotNull> 
+  		  					<isNull property="findText">
+						 	  WHERE UPPER(bank_cd) LIKE UPPER(#searchString#)
+						 	  OR UPPER(bank_name) LIKE UPPER(#searchString#)
+						   	  OR UPPER(bank_sname) LIKE UPPER(#searchString#)			                      		
+						    </isNull>   
+						  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#  
+	</select>	
+	
+	<resultMap id="GIACS035BankCdLOVMap" class="GIACBankClass" extends="BaseEntity.TableGridResultMap"> <!-- dren 07.16.2015 : SR 0017729 - Added GIACS035BankCdLOV - Start -->
+		<result column="BANK_CD"		property="bankCd" />
+		<result column="BANK_NAME"		property="bankName" />
+	</resultMap>	
+	
+	<select id="getGIACS035BankCdLOV" resultMap="GIACS035BankCdLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giac_banks_details_pkg.GET_GIACS035_BANK_CD_LOV(#search#))
+		                 <isNotNull property="findText">
+					         WHERE (UPPER(bank_name) LIKE (#findText#))
+				         </isNotNull>          
+			          	  <isNotNull property="sortColumn">
+			                  <isEqual property="sortColumn" compareValue="bankCd">
+				              		ORDER BY bank_cd
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="bankName">
+				              		ORDER BY bank_name
+				              </isEqual>
+				          	  <isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              </isNotNull>
+				          </isNotNull>    
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (giac_banks_details_pkg.GET_GIACS035_BANK_CD_LOV(#search#))
+			              <isNotNull property="findText">
+					          WHERE (UPPER(bank_name) LIKE (#findText#))
+				          </isNotNull> 
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>	<!-- dren 07.16.2015 : SR 0017729 - Added GIACS035BankCdLOV - End -->	
+</sqlMap>

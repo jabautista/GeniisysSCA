@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GICLProcessorHist">
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GICLProcessorHistClass" type="com.geniisys.gicl.entity.GICLProcessorHist"/>
+
+	<resultMap class="java.util.HashMap" id="getProcessorHistTableGridListingMap">
+		<result column="claim_id" 	property="claimId" />
+		<result column="user_id"	property="userId" />
+		<result column="last_update" property="lastUpdate" />
+		<result column="in_hou_adj"	property="inHouAdj" />
+		<result column="dsp_last_update"	property="dspLastUpdate" />
+		<result column="rownum_" 	property="rowNum" />
+		<result column="count_"		property="rowCount"/>
+	</resultMap>
+	
+	<select id="getProcessorHistTableGridListing" resultMap="getProcessorHistTableGridListingMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(gicl_processor_hist_pkg.get_processor_hist(#claimId#))           
+			          	  <isEqual property="sortColumn" compareValue="userId">
+			              		ORDER BY user_id
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="dspLastUpdate">
+			              		ORDER BY dsp_last_update
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="inHouAdj">
+			              		ORDER BY in_hou_adj
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(gicl_processor_hist_pkg.get_processor_hist(#claimId#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+</sqlMap>

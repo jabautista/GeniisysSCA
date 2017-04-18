@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIPIR039E_DETAILS_3" language="groovy" columnCount="4" printOrder="Horizontal" pageWidth="990" pageHeight="12" columnWidth="247" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="1.610510000000001"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="Crosstab Data Text" isDefault="false" hAlign="Center"/>
+	<parameter name="P_ZONE_TYPE" class="java.lang.String"/>
+	<parameter name="P_TRTY_TYPE_CD" class="java.lang.String"/>
+	<parameter name="P_AS_OF_SW" class="java.lang.String"/>
+	<parameter name="P_DATE" class="java.lang.String"/>
+	<parameter name="P_AS_OF_DATE" class="java.lang.String"/>
+	<parameter name="P_FROM_DATE" class="java.lang.String"/>
+	<parameter name="P_TO_DATE" class="java.lang.String"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String">
+		<defaultValueExpression><![CDATA["C:\\Users\\johndolon\\Desktop\\GIPIR039E\\"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="P_USER_ID" class="java.lang.String"/>
+	<parameter name="P_ZONE_GRP" class="java.lang.String"/>
+	<parameter name="P_ZONE_NO" class="java.math.BigDecimal"/>
+	<queryString>
+		<![CDATA[SELECT   fi_item_grp, SUM (policy_no) policy_no, SUM (sum_tsi) sum_tsi,
+         SUM (sum_prem_amt) sum_prem_amt, zone_no, zone_type, zone_grp1,
+         trty_type_cd, item_grp_name
+    FROM (SELECT fi_item_grp, policy_no, sum_tsi, sum_prem_amt, zone_no,
+                 zone_type, zone_grp1, trty_type_cd, item_grp_name
+            FROM TABLE (gipir039e_pkg.get_gipir039e_v2 ($P{P_ZONE_TYPE},
+                                                        $P{P_TRTY_TYPE_CD},
+                                                        $P{P_AS_OF_SW},
+                                                        $P{P_USER_ID},
+                                                        $P{P_FROM_DATE},
+                                                        $P{P_TO_DATE},
+                                                        $P{P_AS_OF_DATE}
+                                                       )
+                       )
+           WHERE zone_grp1 = $P{P_ZONE_GRP} AND zone_no = $P{P_ZONE_NO}
+          UNION
+          SELECT DISTINCT fi_item_grp, '0' policy_no, 0 sum_tsi,
+                          0 sum_prem_amt, TO_NUMBER ($P{P_ZONE_NO}) zone_no,
+                          TO_NUMBER ($P{P_ZONE_TYPE}) zone_type,
+                          TO_CHAR($P{P_ZONE_GRP}) zone_grp1, TO_CHAR($P{P_TRTY_TYPE_CD}) trty_type_cd,
+                          item_grp_name
+                     FROM TABLE
+                              (gipir039e_pkg.get_gipir039e_v2
+                                                             ($P{P_ZONE_TYPE},
+                                                              $P{P_TRTY_TYPE_CD},
+                                                              $P{P_AS_OF_SW},
+                                                              $P{P_USER_ID},
+                                                              $P{P_FROM_DATE},
+                                                              $P{P_TO_DATE},
+                                                              $P{P_AS_OF_DATE}
+                                                             )
+                              )
+	UNION
+	SELECT 'T' fi_item_grp, TO_CHAR (SUM (policy_no)) policy_no,
+                   SUM (sum_tsi) sum_tsi, SUM (sum_prem_amt) sum_prem_amt,
+                   TO_NUMBER ($P{P_ZONE_NO}) zone_no, TO_NUMBER ($P{P_ZONE_TYPE}) zone_type,
+                   TO_CHAR ($P{P_ZONE_GRP}) zone_grp1, TO_CHAR ($P{P_TRTY_TYPE_CD})
+                                                                             trty_type_cd,
+                   'Total' item_grp_name
+              FROM TABLE (gipir039e_pkg.get_gipir039e_v2 ($P{P_ZONE_TYPE},
+                                                          $P{P_TRTY_TYPE_CD},
+                                                          $P{P_AS_OF_SW},
+                                                          $P{P_USER_ID},
+                                                          $P{P_FROM_DATE},
+                                                          $P{P_TO_DATE},
+                                                          $P{P_AS_OF_DATE}
+                                                         )
+                         )
+             WHERE zone_grp1 = $P{P_ZONE_GRP} AND zone_no = $P{P_ZONE_NO}
+	 )
+GROUP BY fi_item_grp,
+         zone_no,
+         zone_type,
+         zone_grp1,
+         trty_type_cd,
+         item_grp_name
+ORDER BY zone_grp1, fi_item_grp]]>
+	</queryString>
+	<field name="FI_ITEM_GRP" class="java.lang.String"/>
+	<field name="POLICY_NO" class="java.math.BigDecimal"/>
+	<field name="SUM_TSI" class="java.math.BigDecimal"/>
+	<field name="SUM_PREM_AMT" class="java.math.BigDecimal"/>
+	<field name="ZONE_NO" class="java.math.BigDecimal"/>
+	<field name="ZONE_TYPE" class="java.math.BigDecimal"/>
+	<field name="ZONE_GRP1" class="java.lang.String"/>
+	<field name="TRTY_TYPE_CD" class="java.lang.String"/>
+	<field name="ITEM_GRP_NAME" class="java.lang.String"/>
+	<variable name="V_GTOTAL_TSI" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[]]></variableExpression>
+	</variable>
+	<variable name="V_GTOTAL_PREM" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[]]></variableExpression>
+	</variable>
+	<background>
+		<band/>
+	</background>
+	<detail>
+		<band height="12" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="45" height="11"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{POLICY_NO}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(-#,##0.00)">
+				<reportElement x="45" y="0" width="100" height="11"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{SUM_TSI}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(-#,##0.00)">
+				<reportElement x="145" y="0" width="80" height="11"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{SUM_PREM_AMT}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

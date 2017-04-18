@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISPostingLimit">
+
+  	<cacheModel id="oneDayClient" type="MEMORY">
+    	<flushInterval hours="24"/>
+    	<property name="reference-type" value="WEAK"/>
+  	</cacheModel>
+  	
+  	<typeAlias alias="GIISPostingLimit" type="com.geniisys.giis.entity.GIISPostingLimit"/>
+  	
+  	<resultMap class="GIISPostingLimit" id="GIISPostingLimitMap" extends="BaseEntity.TableGridResultMap">
+  	     <result column="posting_user" 				property="postingUser"   />
+  	     <result column="iss_cd" 					property="issCd" 		 />
+  	     <result column="iss_name" 					property="issName" 		 />
+  	     <result column="line_cd" 					property="lineCd" 		 />
+  	     <result column="line_name" 				property="lineName"		 />  	     
+  	     <result column="all_amt_sw" 				property="allAmtSw" 	 />
+  	     <result column="post_limit" 				property="postLimit" 	 />
+  	     <result column="user_id" 					property="userId" 		 />
+  	     <result column="last_update" 				property="lastUpdate"	 />
+  	     <result column="endt_post_limit" 			property="endtPostLimit" />
+  	     <result column="endt_all_amt_sw" 			property="endtAllAmtSw"  />
+  	</resultMap>
+  	
+  	<select id="getPostingLimits" resultMap="GIISPostingLimitMap">
+  		SELECT *
+  		  FROM (SELECT ROWNUM rownum_, b.count_, a.*
+  		  		  FROM (SELECT * FROM TABLE(GIISS207_PKG.get_posting_limits(#postingUser#, #issCd#, #appUser#))
+						<isNotNull property="filter">
+		                	WHERE 1 = 1		
+		                	<isNotEmpty prepend="AND" property="lineCd">
+								upper(line_cd) LIKE upper(#lineCd#)	
+							</isNotEmpty>					
+							<isNotEmpty prepend="AND" property="lineName">
+								upper(line_name) LIKE upper(#lineName#)	
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="postLimit">
+								post_limit = #postLimit#	
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="allAmtSw">
+								upper(all_amt_sw) LIKE upper(#allAmtSw#)	
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="endtPostLimit">
+								endt_post_limit = #endtPostLimit#	
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="endtAllAmtSw">
+								upper(endt_all_amt_sw) LIKE upper(#endtAllAmtSw#)	
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="userId">
+								upper(user_id) LIKE upper(#userId#)	
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="lastUpdate">
+								last_update = #lastUpdate#
+							</isNotEmpty>
+		                </isNotNull>
+		                 <isEqual property="sortColumn" compareValue="lineCd lineName">
+			              		ORDER BY line_cd 
+			              			<isNotNull property="sortColumn">
+					              		<isEqual property="ascDescFlg" compareValue="ASC">
+					              			ASC
+					              		</isEqual>
+					              		<isEqual property="ascDescFlg" compareValue="DESC">
+					              			DESC
+					              		</isEqual>
+					              </isNotNull>,
+					              line_name
+			             </isEqual>
+	            		<isEqual property="sortColumn" compareValue="postLimit">
+              				ORDER BY post_limit
+	            		</isEqual>
+	            		<isEqual property="sortColumn" compareValue="allAmtSw">
+              				ORDER BY all_amt_sw
+	            		</isEqual>
+	            		<isEqual property="sortColumn" compareValue="endtPostLimit">
+              				ORDER BY endt_post_limit
+	            		</isEqual>
+	            		<isEqual property="sortColumn" compareValue="endtAllAmtSw">
+              				ORDER BY endt_all_amt_sw
+	            		</isEqual>
+	            		<isEqual property="sortColumn" compareValue="userId">
+              				ORDER BY user_id
+	            		</isEqual>
+	            		<isEqual property="sortColumn" compareValue="lastUpdate">
+              				ORDER BY last_update
+	            		</isEqual>
+	            		<isNotNull property="sortColumn">
+              				<isEqual property="ascDescFlg" compareValue="ASC">
+              					ASC
+              				</isEqual>
+              				<isEqual property="ascDescFlg" compareValue="DESC">
+              					DESC
+              				</isEqual>
+              			</isNotNull>) a,
+              (SELECT count(*) count_
+	          	  FROM TABLE(GIISS207_PKG.get_posting_limits(#postingUser#, #issCd#, #appUser#))
+				 		<isNotNull property="filter">
+		                	WHERE 1 = 1		
+		                	<isNotEmpty prepend="AND" property="lineCd">
+								upper(line_cd) LIKE upper(#lineCd#)	
+							</isNotEmpty>							
+							<isNotEmpty prepend="AND" property="lineName">
+								upper(line_name) LIKE upper(#lineName#)	
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="postLimit">
+								post_limit = #postLimit#	
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="allAmtSw">
+								upper(all_amt_sw) LIKE upper(#allAmtSw#)	
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="endtPostLimit">
+								endt_post_limit = #endtPostLimit#	
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="endtAllAmtSw">
+								upper(endt_all_amt_sw) LIKE upper(#endtAllAmtSw#)	
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="userId">
+								upper(user_id) LIKE upper(#userId#)	
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="lastUpdate">
+								last_update = #lastUpdate#
+							</isNotEmpty>							
+		                </isNotNull>)b) 
+	    	WHERE rownum_ BETWEEN #from# AND #to# 
+  	</select>
+  	
+  	<procedure id="savePostingLimits" parameterClass="GIISPostingLimit">
+  		DECLARE
+			v_post_limits GIIS_POSTING_LIMIT%ROWTYPE;
+  		BEGIN
+			giis_users_pkg.app_user       := #appUser#;
+			v_post_limits.posting_user    := #postingUser#;
+			v_post_limits.iss_cd          := #issCd#;
+			v_post_limits.line_cd         := #lineCd#;
+			v_post_limits.all_amt_sw      := #allAmtSw#;
+			v_post_limits.post_limit      := #postLimit#;
+			v_post_limits.endt_post_limit := #endtPostLimit#;
+			v_post_limits.endt_all_amt_sw := #endtAllAmtSw#;
+			v_post_limits.user_id         := #appUser#;
+  		
+			GIISS207_PKG.set_posting_limits(v_post_limits);
+  		END;
+  	</procedure>
+  	
+  	<procedure id="deletePostingLimit" parameterClass="GIISPostingLimit">
+  		DECLARE
+  		  	v_post_limits GIIS_POSTING_LIMIT%ROWTYPE;
+  		BEGIN
+  			giis_users_pkg.app_user 	  := #appUser#;
+  			v_post_limits.posting_user    := #postingUser#;
+			v_post_limits.iss_cd          := #issCd#;
+			v_post_limits.line_cd         := #lineCd#;
+			v_post_limits.all_amt_sw      := #allAmtSw#;
+			v_post_limits.post_limit      := #postLimit#;
+			v_post_limits.endt_post_limit := #endtPostLimit#;
+			v_post_limits.endt_all_amt_sw := #endtAllAmtSw#;
+			
+  		  	GIISS207_PKG.delete_posting_limit(v_post_limits);
+  		END;
+  	</procedure>
+  	
+  	<procedure id="saveCopyToAnotherUser" parameterClass="java.util.HashMap">
+  		BEGIN
+  			giis_users_pkg.app_user := #appUser#;
+  			GIISS207_PKG.set_copy_to_another_user(#copyToUser#,#copyToBranch#,#copyFromUser#,#copyFromBranch#,#populateAllSw#,#appUser#);
+  		END;
+  	</procedure>
+  	
+  	<select id="validateCopyUser" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT GIISS207_PKG.validate_copy_user(#userId#) FROM DUAL
+	</select>
+	
+	<select id="validateCopyBranch" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT GIISS207_PKG.validate_copy_branch(#issCd#) FROM DUAL
+	</select>
+	
+	<select id="validateLineName" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT GIISS207_PKG.validate_line_name(#lineName#, #userId#, #issCd#) FROM DUAL
+	</select>
+
+</sqlMap>

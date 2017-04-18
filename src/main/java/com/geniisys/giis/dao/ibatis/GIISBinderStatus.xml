@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GIISBinderStatus">
+    
+    <typeAlias alias="giisBinderStatus" type="com.geniisys.giis.entity.GIISBinderStatus"/>
+    
+    <resultMap class="java.util.HashMap" id="giisBinderStatusResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="bndrStatCd" 		 column="bndr_stat_cd"/>
+		<result property="bndrStatDesc" 	 column="bndr_stat_desc"/>
+		<result property="bndrTag" 			 column="bndr_tag"/>
+		<result property="dspBndrTagMeaning" column="dsp_bndr_tag_meaning"/>
+		<result property="remarks" 			 column="remarks"/>
+		<result property="userId" 			 column="user_id"/>
+		<result property="lastUpdate" 		 column="last_update"/>
+	</resultMap>
+	
+    <resultMap class="giisBinderStatus" id="giisBinderStatusResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="bndrStatCd" 		 column="bndr_stat_cd"/>
+		<result property="bndrStatDesc" 	 column="bndr_stat_desc"/>
+		<result property="bndrTag" 			 column="bndr_tag"/>
+		<result property="dspBndrTagMeaning" column="dsp_bndr_tag_meaning"/>
+		<result property="remarks" 			 column="remarks"/>
+		<result property="userId" 			 column="user_id"/>
+		<result property="lastUpdate" 		 column="last_update"/>
+	</resultMap>
+	
+    <select id="getGiisBinderStatusList" resultMap="giisBinderStatusResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss209_pkg.get_binder_status_list(#bndrStatCd#, #bndrStatDesc#, #dspBndrTagMeaning#))
+		                  <isEqual property="sortColumn" compareValue="bndrStatCd">
+			              		ORDER BY bndr_stat_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="bndrStatDesc">
+			              		ORDER BY bndr_stat_desc
+			              </isEqual>
+						  <isEqual property="sortColumn" compareValue="dspBndrTagMeaning">
+			              		ORDER BY dsp_bndr_tag_meaning
+			              </isEqual>   
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss209_pkg.get_binder_status_list(#bndrStatCd#, #bndrStatDesc#, #dspBndrTagMeaning#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+    <procedure id="setBinderStat" parameterClass="giisBinderStatus">
+	    DECLARE
+	    	v_rec giis_binder_status%ROWTYPE;
+ 		BEGIN		  
+ 			giis_users_pkg.app_user := #userId#;
+ 			   
+ 			v_rec.bndr_stat_cd := #bndrStatCd#;
+ 			v_rec.bndr_stat_desc := #bndrStatDesc#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.bndr_tag := #bndrTag#;
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			giiss209_pkg.set_binder_status(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+    <delete id="delBinderStat" parameterClass="java.lang.String">
+		BEGIN
+ 			giiss209_pkg.del_binder_status(#bndrStatCd#);
+ 		END;
+ 	</delete>
+ 	
+    <procedure id="valAddBinderStatus" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss209_pkg.val_add_rec(#bndrStatCd#, #bndrStatDesc#);
+ 		END;
+ 	</procedure> 
+ 	
+    <procedure id="valDeleteRec" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss209_pkg.val_del_rec(#bndrStatCd#);
+ 		END;
+ 	</procedure>
+    
+</sqlMap>

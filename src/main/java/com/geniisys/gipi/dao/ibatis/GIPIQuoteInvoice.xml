@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIQuoteInvoice">
+
+  	<cacheModel id="oneDayClient" type="MEMORY">
+    	<flushInterval hours="24"/>
+    	<property name="reference-type" value="WEAK"/>
+  	</cacheModel>
+
+	<resultMap id="GIPIQuoteInvoice" class="com.geniisys.gipi.entity.GIPIQuoteInvoice" >
+		<result column="QUOTE_ID"			property="quoteId"			jdbcType="NUMBER"	/>
+		<result column="ISS_CD"				property="issCd"			jdbcType="VARCHAR2" />
+		<result column="QUOTE_INV_NO"		property="quoteInvNo"		jdbcType="NUMBER" 	/>
+		<result column="CURRENCY_CD"		property="currencyCd"		jdbcType="NUMBER" 	/>
+		<result column="CURRENCY_RT"		property="currencyRt"		jdbcType="NUMBER" 	/>
+		<result column="PREM_AMT"			property="premAmt"			jdbcType="NUMBER" 	/>
+		<result column="INTM_NO"			property="intmNo"			jdbcType="NUMBER" 	/>
+		<result column="TAX_AMT"			property="taxAmt"			jdbcType="NUMBER" 	/>
+<!--	<result column="AMOUNT_DUE" 		property="amountDue"		jdbcType="NUMBER"	/>-->
+	</resultMap>
+	
+<!-- testing lang rencela 05-12-2011	-->
+	<resultMap id="GIPIQuoteInvoice2" class="com.geniisys.gipi.entity.GIPIQuoteInvoice" >
+		<result column="QUOTE_ID"		property="quoteId"			jdbcType="NUMBER"	/>
+		<result column="ISS_CD"			property="issCd"			jdbcType="VARCHAR2" />
+		<result column="QUOTE_INV_NO"	property="quoteInvNo"		jdbcType="NUMBER" 	/>
+		<result column="CURRENCY_CD"	property="currencyCd"		jdbcType="NUMBER" 	/>
+		<result column="CURRENCY_RT"	property="currencyRt"		jdbcType="NUMBER" 	/>
+		<result column="PREM_AMT"		property="premAmt"			jdbcType="NUMBER" 	/>
+		<result column="INTM_NO"		property="intmNo"			jdbcType="NUMBER" 	/>
+		<result column="TAX_AMT"		property="taxAmt"			jdbcType="NUMBER" 	/>
+		<result column="TAX_AMT"		property="taxAmt"			jdbcType="NUMBER" 	/>
+		<result column="{issCd=iss_cd,quoteInvNo=quote_inv_no}"	property="invoiceTaxes"	select="getGIPIQuoteInvTax2"/>
+	</resultMap>	
+	
+	<resultMap id="GIPIQuoteInvSeq" class="com.geniisys.common.entity.GIISQuoteInvSeq" >
+		<result column="ISS_CD"				property="issCd"			jdbcType="VARHCAR2" />
+		<result column="QUOTE_INV_NO"		property="quoteInvNo"		jdbcType="NUMBER"	/>
+		<result column="USER_ID"			property="userId"			jdbcType="VARCHAR2" />
+		<result column="LAST_UPDATE"		property="lastUpdate"		jdbcType="DATE"		/>
+		<result column="REMARKS"			property="remarks"			jdbcType="VARHCAR2" />	
+	</resultMap>
+	
+	<resultMap id="GIPIQuoteInvSummary" class="com.geniisys.gipi.entity.GIPIQuoteInvoiceSummary" >
+		<result column="QUOTE_ID"			property="quoteId"			jdbcType="NUMBER"	/>
+		<result column="QUOTE_INV_NO"		property="quoteInvNo"		jdbcType="NUMBER"	/>
+		<result column="INV_NO"				property="invNo"			jdbcType="NUMBER"	/>	
+		<result column="CURRENCY_CD"		property="currencyCd"		jdbcType="NUMBER"	/>
+		<result column="CURRENCY_DESC"		property="currencyDesc"		jdbcType="VARCHAR2" />
+		<result column="CURRENCY_RT"		property="currencyRt"		jdbcType="NUMBER"	/>
+		<result column="PREM_AMT"			property="premAmt"			jdbcType="NUMBER"	/>
+		<result column="INTM_NO"			property="intmNo"			jdbcType="NUMBER"	/>
+		<result column="INTM_NAME"			property="intmName"			jdbcType="VARCHAR2"	/>
+		<result column="TOT_TAX_AMT"		property="totalTaxAmt"		jdbcType="NUMBER"	/>
+		<result column="TAX_CD"				property="taxCd"			jdbcType="NUMBER"	/>
+		<result column="TAX_DESC"			property="taxDesc"			jdbcType="VARCHAR2" />
+		<result column="TAX_AMT"			property="taxAmt"			jdbcType="NUMBER"	/>
+		<result column="AMOUNT_DUE"			property="amountDue"		jdbcType="NUMBER"	/>
+		<result column="TAX_ID"				property="taxId"			jdbcType="NUMBER"	/>
+		<result column="RATE"				property="rate"				jdbcType="NUMBER"	/>
+		<result column="iss_cd" 			property="issCd" 			jdbcType="VARCHAR2"	/>		
+	</resultMap>
+	
+	<resultMap id="GIPIQuoteInvoiceForPackResultMap" class="com.geniisys.gipi.entity.GIPIQuoteInvoice" >
+		<result column="QUOTE_ID"		property="quoteId"			jdbcType="NUMBER"	/>
+		<result column="ISS_CD"			property="issCd"			jdbcType="VARCHAR2" />
+		<result column="QUOTE_INV_NO"	property="quoteInvNo"		jdbcType="NUMBER" 	/>
+		<result column="CURRENCY_CD"	property="currencyCd"		jdbcType="NUMBER" 	/>
+		<result column="CURRENCY_DESC"	property="currencyDesc"		jdbcType="VARCHAR2" 	/>
+		<result column="CURRENCY_RT"	property="currencyRt"		jdbcType="NUMBER" 	/>
+		<result column="PREM_AMT"		property="premAmt"			jdbcType="NUMBER" 	/>
+		<result column="INTM_NO"		property="intmNo"			jdbcType="NUMBER" 	/>
+		<result column="TAX_AMT"		property="taxAmt"			jdbcType="NUMBER" 	/>
+		<result column="{issCd=iss_cd, quoteInvNo=quote_inv_no}"	property="invoiceTaxes"	select="getGIPIQuoteInvTaxList"/>
+	</resultMap>
+
+	<parameterMap class="map" id="GIPIQuoteInvoiceParamMap">
+		<parameter property="quoteId" 		javaType="java.lang.Integer" 	jdbcType="INTEGER" 	mode="IN"/>
+		<parameter property="quoteInvNo" 	javaType="java.lang.Integer" 	jdbcType="INTEGER" 	mode="INOUT"/>
+		<parameter property="currencyCd" 	javaType="java.lang.Integer" 	jdbcType="INTEGER" 	mode="IN"/>
+		<parameter property="currencyRt" 	javaType="java.math.BigDecimal" jdbcType="DOUBLE" 	mode="IN"/>
+		<parameter property="premAmt" 		javaType="java.math.BigDecimal" jdbcType="DOUBLE" 	mode="IN"/>
+		<parameter property="intmNo" 		javaType="java.lang.Integer" 	jdbcType="INTEGER" 	mode="IN"/>
+		<parameter property="taxAmt" 		javaType="java.math.BigDecimal" jdbcType="DOUBLE" 	mode="IN"/>
+		<parameter property="issCd" 		javaType="java.lang.String"  	jdbcType="VARCHAR" 	mode="IN"/>
+	</parameterMap>
+	
+	<select id="getGIPIQuoteInvSummary" resultMap="GIPIQuoteInvSummary">
+		SELECT * FROM TABLE(gipi_quote_inv_pkg.get_gipi_quote_inv(#value#))
+	</select>
+	
+<!--  Simplified quote invoice retrieval -->
+	<select id="getGIPIQuoteInvoices" resultMap="GIPIQuoteInvoice">
+		SELECT * FROM TABLE(GIPI_QUOTE_INV_PKG.get_gipi_quote_invoice(#quoteId#,#issCd#))
+	</select>
+	
+	<select id="getGIPIQuoteInvoicesWithInvTax" resultMap="GIPIQuoteInvoice2">
+		SELECT * FROM TABLE(GIPI_QUOTE_INV_PKG.get_gipi_quote_invoice(#quoteId#,#issCd#))
+	</select>
+	
+<!--  Mind only the values of the fields of gipi_quote_invoice -->
+	<procedure id="saveGIPIQuoteInvoice" parameterMap="GIPIQuoteInvoiceParamMap">
+		DECLARE
+			inv gipi_quote_inv_pkg.gipi_quote_inv_type;
+		BEGIN
+			inv.quote_id		:= #quoteId#;
+			inv.quote_inv_no	:= #quoteInvNo#;
+			inv.currency_cd 	:= #currencyCd#;
+			inv.currency_rt		:= #currencyRt#;
+			inv.prem_amt 		:= #premAmt#;
+			inv.intm_no			:= #intmNo#;
+			inv.intm_name 		:= #intmName#;
+			inv.tot_tax_amt		:= #totalTaxAmt#;
+			inv.tax_cd 			:= #taxCd#;
+			inv.tax_desc		:= #taxDesc#;
+			inv.tax_amt			:= #taxAmt#;
+			inv.amount_due		:= #amountDue#;
+			inv.tax_id			:= #taxId#;
+			inv.rate			:= #rate#;
+			inv.inv_no 			:= #invNo#;
+			inv.currency_desc	:= #currencyDesc#;
+			GIPI_QUOTE_INV_PKG.Set_Gipi_Quote_Inv(inv,#issCd#);
+		END;
+	</procedure>
+	
+	<procedure id="saveGIPIQuoteInvoice2" parameterMap="GIPIQuoteInvoiceParamMap">
+		CALL GIPI_QUOTE_INV_PKG.Set_Gipi_Quote_Inv2(?, ?, ?, ?, ?, ?, ?, ?)
+	</procedure>
+	
+	<procedure id="deleteGIPIQuoteInvoice" parameterClass="java.util.HashMap">
+		BEGIN
+			GIPI_QUOTE_INV_PKG.Del_Gipi_Quote_Inv(#quoteId#, #quoteInvNo#);
+		END;
+	</procedure>
+	
+	<select id="getInvoiceByQuoteId" resultMap="GIPIQuoteInvoice" parameterClass="java.util.HashMap">
+		SELECT * 
+		  FROM GIPI_QUOTE_INVOICE
+		 WHERE quote_id=#quoteId#
+		   AND iss_cd = #issCd#
+	</select>
+
+	<select id="getInvoiceByQuoteIdAndCurrency" resultMap="GIPIQuoteInvoice" parameterClass="java.util.HashMap">
+		SELECT DISTINCT * 
+		  FROM GIPI_QUOTE_INVOICE
+		 WHERE quote_id=#quoteId#
+		   AND currency_cd = #currencyCd#
+		   AND currency_rt = #currencyRate# 
+		   AND iss_cd = #issCd#
+	</select>
+
+	<select id="getGIPIQuoteInvSeq"	resultMap="GIPIQuoteInvSeq">
+		SELECT *
+		  FROM GIIS_QUOTE_INV_SEQ
+		 WHERE iss_cd = #issCd#
+	</select>
+	
+<!--    BEING EDITED 	-->
+	<select id="getCurrentInvSeq" resultClass="java.lang.Integer">
+		SELECT GIPI_QUOTE_INV_PKG.get_gipi_quote_invseq(#issCd#)
+		  FROM DUAL
+	</select>
+
+<!-- DELETE FROM GIPI_QUOTE_INVTAX WHERE QUOTE_INV_NO = #quoteInvNo# AND ISS_CD = #issCd# -->
+	<delete id="deleteTaxforInvoice" parameterClass="java.util.HashMap">
+	   DELETE FROM GIPI_QUOTE_INVTAX
+	    WHERE quote_inv_no = #quoteInvNo#
+	      AND line_cd = #lineCd#
+	      AND iss_cd = #issCd#
+	</delete>
+	
+	<select id="getGIPIQuoteInvoicesForPackQuotation" resultMap="GIPIQuoteInvoiceForPackResultMap">
+		SELECT * FROM TABLE(GIPI_QUOTE_INV_PKG.get_gipi_quote_inv_for_pack(#packQuoteId#))
+	</select>
+	
+	<procedure id="updateQuoteInvoiceDetails" parameterClass="java.util.HashMap">
+		BEGIN
+			UPDATE_QUOTE_INVOICE_DTLS(#quoteId#, #currencyCd#, #currencyRt#);
+		END;
+	</procedure>
+	
+	<procedure id="updateGIPIQuoteInvoice" parameterClass="java.util.HashMap">
+		BEGIN
+			GIPI_QUOTE_INV_PKG.update_gipi_quote_inv (#quoteId#, #quoteInvNo#, #premAmt#, #intmNo#, #taxAmt#, #issCd#);
+		END;
+	</procedure>
+
+</sqlMap>

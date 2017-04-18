@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIOrigItmPeril">
+	
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference_type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIPIOrigItmPeril" type="com.geniisys.gipi.entity.GIPIOrigItmPeril"/>
+	
+	<resultMap class="GIPIOrigItmPeril" id="gipiOrigItmPerilMap">
+		<result property="parId"				column="PAR_ID"/>
+		<result property="itemNo"				column="ITEM_NO"/>
+		<result property="lineCd"				column="LINE_CD"/>
+		<result property="perilCd"				column="PERIL_CD"/>
+		<result property="recFlag"				column="REC_FLAG"/>
+		<result property="policyId"				column="POLICY_ID"/>
+		<result property="premiumRate"			column="PREM_RT"/>
+		<result property="premiumAmount"		column="PREM_AMT"/>
+		<result property="tsiAmount"			column="TSI_AMT"/>
+		<result property="annPremiumAmount"		column="ANN_PREM_AMT"/>
+		<result property="annTsiAmount"			column="ANN_TSI_AMT"/>
+		<result property="compRem"				column="COMP_REM"/>
+		<result property="discountSw"			column="DISCOUNT_SW"/>
+		<result property="riCommRate"			column="RI_COMM_RATE"/>
+		<result property="riCommAmount"			column="RI_COMM_AMT"/>
+		<result property="surchargeSw"			column="SURCHARGE_SW"/>
+		<result property="perilSname"			column="PERIL_SNAME"/>
+		<result property="perilName"			column="PERIL_NAME"/>
+		<result property="sharePremiumRate"		column="SHARE_PREM_RATE"/>
+		<result property="sharePremiumAmount"	column="SHARE_PREM_AMT"/>
+		<result property="shareTsiAmount"		column="SHARE_TSI_AMT"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="origItmPerilsMap">
+		<result property="policyId"			column="policy_id"/>
+		<result property="itemNo"			column="item_no"/>
+		<result property="perilDesc"		column="peril_desc"/>
+		<result property="compRem"			column="comp_rem"/>
+		<result property="yourPerilCode"	column="your_peril_code"/>
+		<result property="yourPremRt"		column="your_prem_rt"/>
+		<result property="yourPremAmt"		column="your_prem_amt"/>
+		<result property="yourTsiAmt"		column="your_tsi_amt"/>
+		<result property="yourDiscountSw"	column="your_discount_sw"/>
+		<result property="fullPerilCode"	column="full_peril_code"/>
+		<result property="fullPremRt"		column="full_prem_rt"/>
+		<result property="fullPremAmt"		column="full_prem_amt"/>
+		<result property="fullTsiAmt"		column="full_tsi_amt"/>
+		<result property="fullDiscountSw"	column="full_discount_sw"/>
+		<result property="dspFullPremAmt"	column="dsp_full_prem_amt"/>
+		<result property="dspFullTsiAmt"	column="dsp_full_tsi_amt"/>
+		<result property="rowNum" 			column="rownum_"/>			
+		<result property="rowCount"			column="count_"/>
+	</resultMap>
+	
+	<select id="getGipiOrigItmPeril" resultMap="gipiOrigItmPerilMap" parameterClass="java.util.HashMap">
+		SELECT * FROM TABLE(GIPI_ORIG_ITMPERIL_PKG.get_gipi_orig_itmperil(#parId#, #itemNo#))
+	</select>
+	
+	<select id="getOrigItmPerils" resultMap="origItmPerilsMap" parameterClass="java.util.HashMap">
+		SELECT *       
+            FROM (SELECT rownum rownum_ ,b.count_,a.*     
+                    FROM (SELECT * FROM TABLE(gipi_orig_itmperil_pkg.get_orig_itmperil(#policyId#,#itemNo#))
+                    <isEqual property="sortColumn" compareValue="yourPerilCode">
+		            	ORDER BY your_peril_code
+		          	</isEqual>	
+		          	 <isEqual property="sortColumn" compareValue="yourPremRt">
+		            	ORDER BY your_prem_rt
+		          	</isEqual>
+		          	 <isEqual property="sortColumn" compareValue="yourTsiAmt">
+		            	ORDER BY your_tsi_amt
+		          	</isEqual>
+		          	 <isEqual property="sortColumn" compareValue="yourPremAmt">
+		            	ORDER BY your_prem_amt
+		          	</isEqual>
+		          	 <isEqual property="sortColumn" compareValue="yourDiscountSw">
+		            	ORDER BY your_discount_sw
+		          	</isEqual>
+		          	 <isEqual property="sortColumn" compareValue="fullPerilCode">
+		            	ORDER BY full_peril_code
+		          	</isEqual>
+		          	 <isEqual property="sortColumn" compareValue="fullPremRt">
+		            	ORDER BY full_prem_rt
+		          	</isEqual>
+		          	 <isEqual property="sortColumn" compareValue="fullTsiAmt">
+		            	ORDER BY full_tsi_amt
+		          	</isEqual>
+		          	 <isEqual property="sortColumn" compareValue="fullPremAmt">
+		            	ORDER BY full_prem_amt
+		          	</isEqual>
+		          	 <isEqual property="sortColumn" compareValue="fullDiscountSw">
+		            	ORDER BY full_discount_sw
+		          	</isEqual>		          	
+		           	<isNotNull property="sortColumn">
+		              	<isEqual property="ascDescFlg" compareValue="ASC">
+		              		ASC
+		              	</isEqual>
+		              	<isEqual property="ascDescFlg" compareValue="DESC">
+		              		DESC
+		              	</isEqual>
+		            </isNotNull>
+                    ) a,
+                          (SELECT count(*) count_ FROM TABLE(gipi_orig_itmperil_pkg.get_orig_itmperil(#policyId#,#itemNo#))) b)
+        WHERE rownum_ BETWEEN NVL(#from#,rownum_) AND NVL(#to#,rownum_)
+	</select>
+	
+</sqlMap>

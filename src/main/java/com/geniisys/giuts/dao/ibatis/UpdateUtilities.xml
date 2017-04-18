@@ -1,0 +1,1831 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap	namespace="UpdateUtilities">
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+    	<flushInterval hours="24"/>
+    	<property name="reference-type" value="WEAK"/>
+  	</cacheModel>
+  	
+  	<resultMap id="gipis162BookingResultMap" class="java.util.HashMap">
+  		<result property="bookingMth"	  column="BOOKING_MTH"/>
+  		<result property="bookingYear"	  column="BOOKING_YEAR"/>
+  		<result property="bookedTag"	  column="BOOKED_TAG"/>
+  		<result property="remarks"		  column="REMARKS"/>
+  		<result property="lastUpdate"	  column="LAST_UPDATE"/>
+  		<result property="userId"		  column="USER_ID"/>
+  		<result property="origBookingYy"  column="BOOKING_YEAR"/>
+  		<result property="rowNum"		  column="ROWNUM_"/>
+  		<result property="rowCount"		  column="COUNT_"/>
+  	</resultMap> 
+  	
+  	<select id="getGipis162BookingList" resultMap="gipis162BookingResultMap">
+  		SELECT * 
+  		  FROM (SELECT a.*, b.count_, rownum rownum_
+  		     	  FROM (SELECT * 
+  		     	   		  FROM TABLE(GIPIS162_PKG.get_booking_list)   
+  		     	   		  <isNotNull property="filter">
+  		     	   		  		WHERE 1=1
+  		     	   		  		<isNotEmpty prepend="AND" property="bookingMth">
+  		     	   		  			UPPER(booking_mth) LIKE UPPER(#bookingMth#)
+  		     	   		  		</isNotEmpty>
+  		     	   		  		<isNotEmpty prepend="AND" property="bookingYear">
+  		     	   		  			booking_year = #bookingYear#
+  		     	   		  		</isNotEmpty>
+  		     	   		  </isNotNull>
+  		     	   		  <isEqual property="sortColumn" compareValue="bookingMth">
+  		     	   		  		ORDER BY TO_DATE(booking_mth,'MONTH')
+  		     	   		  </isEqual>
+  		     	   		  <isEqual property="sortColumn" compareValue="bookingYear">
+  		     	   		  		ORDER BY booking_year
+  		     	   		  </isEqual>
+  		     	   		  <isEqual property="sortColumn" compareValue="bookedTag">
+  		     	   		  		ORDER BY booked_tag
+  		     	   		  </isEqual>
+  		     	   		  <isNotNull property="sortColumn">
+	  		     	   		  	<isEqual property="ascDescFlg" compareValue="ASC">
+	  		     	   		  		ASC
+	  		     	   		  	</isEqual>
+	  		     	   		  	<isEqual property="ascDescFlg" compareValue="DESC">
+	  		     	   		  		DESC
+	  		     	   		  	</isEqual>
+  		     	   		  </isNotNull>
+  		     	   	    ) a,
+  		     	  	   (SELECT count(*) count_
+  		     	  	      FROM TABLE(GIPIS162_PKG.get_booking_list)
+  		     	   		  <isNotNull property="filter">
+  		     	   		  		WHERE 1=1
+  		     	   		  		<isNotEmpty prepend="AND" property="bookingMth">
+  		     	   		  			UPPER(booking_mth) LIKE UPPER(#bookingMth#)
+  		     	   		  		</isNotEmpty>
+  		     	   		  		<isNotEmpty prepend="AND" property="bookingYear">
+  		     	   		  			booking_year = #bookingYear#
+  		     	   		  		</isNotEmpty>
+  		     	   		  </isNotNull> 
+  		     	   	   ) b
+  		        )
+  		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+  	
+  	<select id="getNextBookingYear" resultClass="java.lang.Integer">
+  		SELECT NVL((MAX(booking_year)+1), to_number(to_char(SYSDATE, 'YYYY'))) 
+	  	  FROM GIIS_BOOKING_MONTH
+  	</select>
+  	
+  	<select id="checkBookingYear" parameterClass="java.lang.Integer" resultClass="java.lang.Integer">
+  		SELECT COUNT(*) cnt
+  		  FROM GIIS_BOOKING_MONTH
+  		 WHERE booking_year = #bookingYear#
+  	</select>
+  	
+  	<parameterMap id="genBookingMonthsMap" class="map">
+  		<parameter property="userId"	  jdbcType="VARCHAR" javaType="java.lang.String"  mode="IN"/>
+  		<parameter property="bookingYear" jdbcType="INTEGER" javaType="java.lang.Integer" mode="IN"/>
+  		<parameter property="userId"	  jdbcType="VARCHAR" javaType="java.lang.String"  mode="IN"/>
+  	</parameterMap>
+  	
+  	<procedure id="generateBookingMonths" parameterMap="genBookingMonthsMap">
+  		BEGIN
+  			GIIS_USERS_PKG.app_user := ?;
+  			GIPIS162_PKG.generate_booking_months(?, ?);
+  		END;
+  	</procedure>
+  	
+  	<update id="updateGiisBookingMonth" parameterClass="java.util.HashMap">
+  		BEGIN
+  			GIIS_USERS_PKG.app_user := #userId#;
+  		
+  			UPDATE GIIS_BOOKING_MONTH
+	  		   SET booking_year = TO_NUMBER(#bookingYear#),
+	  		   	   booked_tag = #bookedTag#,
+	  		   	   remarks = #remarks#,
+	  		   	   last_update = SYSDATE,
+	  		   	   user_id = #userId#
+	  		 WHERE booking_mth = #bookingMth#
+	  		   AND booking_year = TO_NUMBER(#origBookingYy#);
+  		END;
+  	</update>
+  	
+  	<select id="chkBookingMthYear" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+  		SELECT 'Y' exist
+          FROM GIIS_BOOKING_MONTH
+         WHERE booking_mth = #bookingMth#
+           AND booking_year = #bookingYear#
+  	</select>
+  	
+  	<resultMap id="GIUTS029PolicyResultMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+  		<result property="policyId"	  	column="policy_id"/>
+  		<result property="policyNo"	  	column="policy_no"/>
+  		<result property="assdName"	  	column="assd_name"/>
+  		<result property="lineCd"	  	column="line_cd"/>
+  		<result property="sublineCd"  	column="subline_cd"/>
+  		<result property="issCd"  		column="iss_cd"/>
+  		<result property="issueYy"  	column="issue_yy"/>
+  		<result property="polSeqNo" 	column="pol_seq_no"/>
+  		<result property="renewNo"  	column="renew_no"/>
+  		<result property="endtIssCd"	column="endt_iss_cd"/>
+  		<result property="endtYy"  		column="endt_yy"/>
+  		<result property="endtSeqNo"  	column="endt_seq_no"/>
+  	</resultMap>   	
+  	
+  	<select id="showGIUTS029PolicyLOV" resultMap="GIUTS029PolicyResultMap">
+  		SELECT * 
+  		  FROM (SELECT a.*, b.count_, rownum rownum_
+  		     	  FROM (SELECT * 
+  		     	   		  FROM TABLE(GIUTS029_PKG.get_giuts029_pol_lov(#userId#, #lineCd#, #sublineCd#, #issCd#, #issueYy#, #polSeqNo#, #renewNo#, #endtIssCd#, #endtYy#, #endtSeqNo#))
+  		     	   		  <isNotNull property="findText">
+		                		WHERE UPPER(policy_no) LIKE UPPER(#findText#)
+		          				OR UPPER(assd_name) LIKE UPPER(#findText#)
+		                  </isNotNull>
+  		     	   		  <isEqual property="sortColumn" compareValue="policyNo">
+  		     	   		  		ORDER BY policy_no
+  		     	   		  </isEqual>
+  		     	   		  <isEqual property="sortColumn" compareValue="assdName">
+  		     	   		  		ORDER BY assd_name
+  		     	   		  </isEqual>  		     	   		  
+  		     	   		  <isNotNull property="sortColumn">
+	  		     	   		  	<isEqual property="ascDescFlg" compareValue="ASC">
+	  		     	   		  		ASC
+	  		     	   		  	</isEqual>
+	  		     	   		  	<isEqual property="ascDescFlg" compareValue="DESC">
+	  		     	   		  		DESC
+	  		     	   		  	</isEqual>
+  		     	   		  </isNotNull>   		     	   		  
+  		     	   	    ) a,  		     	   	    
+  		     	  	   (SELECT count(*) count_
+  		     	  	      FROM TABLE(GIUTS029_PKG.get_giuts029_pol_lov(#userId#, #lineCd#, #sublineCd#, #issCd#, #issueYy#, #polSeqNo#, #renewNo#, #endtIssCd#, #endtYy#, #endtSeqNo#))
+  		     	   	   		<isNotNull property="findText">
+		                		WHERE UPPER(policy_no) LIKE UPPER(#findText#)
+		          				OR UPPER(assd_name) LIKE UPPER(#findText#)
+		                 	</isNotNull>
+  		     	   	   ) b
+  		        )
+  		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>  
+  	
+  	<resultMap id="GIUTS029ItemsResultMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+  		<result property="itemNo"	  	column="item_no"/>
+  		<result property="itemTitle"	  column="item_title"/>
+  		<result property="itemDesc"	  	column="item_desc"/>
+  		<result property="itemDesc2"  	column="item_desc2"/>
+  	</resultMap>   	
+  	
+  	<select id="getGIUTS029ItemList" resultMap="GIUTS029ItemsResultMap">
+  		SELECT * 
+  		  FROM (SELECT a.*, b.count_, rownum rownum_
+  		     	  FROM (SELECT * 
+  		     	   		  FROM TABLE(GIUTS029_PKG.get_items(#policyId#, #itemNo#, #itemTitle#))
+  		     	   		  <isNotNull property="filter">
+								WHERE 1=1
+								<isNotEmpty prepend="AND"  property="itemDesc">
+									upper(item_desc) LIKE upper(#itemDesc#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="itemDesc2">
+									upper(item_desc2) LIKE upper(#itemDesc2#)
+								</isNotEmpty>
+						  </isNotNull>
+  		     	   		  <isEqual property="sortColumn" compareValue="itemNo">
+  		     	   		  		ORDER BY item_no
+  		     	   		  </isEqual>
+  		     	   		  <isEqual property="sortColumn" compareValue="itemTitle">
+  		     	   		  		ORDER BY item_title
+  		     	   		  </isEqual>
+  		     	   		  <isEqual property="sortColumn" compareValue="itemDesc">
+  		     	   		  		ORDER BY item_desc
+  		     	   		  </isEqual>
+  		     	   		  <isEqual property="sortColumn" compareValue="itemDesc2">
+  		     	   		  		ORDER BY item_desc2
+  		     	   		  </isEqual>
+  		     	   		  <isNotNull property="sortColumn">
+	  		     	   		  	<isEqual property="ascDescFlg" compareValue="ASC">
+	  		     	   		  		ASC
+	  		     	   		  	</isEqual>
+	  		     	   		  	<isEqual property="ascDescFlg" compareValue="DESC">
+	  		     	   		  		DESC
+	  		     	   		  	</isEqual>
+  		     	   		  </isNotNull>   		     	   		  
+  		     	   	    ) a,  		     	   	    
+  		     	  	   (SELECT count(*) count_
+  		     	  	      FROM TABLE(GIUTS029_PKG.get_items(#policyId#, #itemNo#, #itemTitle#))
+  		     	   	   		<isNotNull property="filter">
+								WHERE 1=1
+								<isNotEmpty prepend="AND"  property="itemDesc">
+									upper(item_desc) LIKE upper(#itemDesc#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="itemDesc2">
+									upper(item_desc2) LIKE upper(#itemDesc2#)
+								</isNotEmpty>
+						  	</isNotNull>
+  		     	   	   ) b  		     	   	   
+  		        )
+  		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select> 
+  	
+  	<resultMap class="java.util.HashMap" id="getAttachmentListResultMap">
+  		<result property="policyId"		column="policy_id" />
+  		<result property="itemNo"		column="item_no" />
+  		<result property="fileName"		column="file_name" />
+  	</resultMap>
+  	
+  	<select id="getAttachmentList" resultMap="getAttachmentListResultMap">
+  		SELECT *
+  		  FROM TABLE(GIUTS029_PKG.get_attachment_list(#policyId#, #itemNo#))
+  	</select>
+  	
+  	<resultMap id="GIUTS029AttachmentResultMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+  		<result property="policyId"	  	column="policy_id"/>
+  		<result property="itemNo"	  	column="item_no"/>
+  		<result property="fileName"	 	column="file_name"/>
+  		<result property="fileName2"	column="file_name2"/>
+  		<result property="remarks"	 	column="remarks"/>
+  	</resultMap>    	
+  	
+	<select id="getGIUTS029AttachmentList" resultMap="GIUTS029AttachmentResultMap">
+  		SELECT * 
+  		  FROM (SELECT a.*, b.count_, rownum rownum_
+  		     	  FROM (SELECT * 
+  		     	   		  FROM TABLE(GIUTS029_PKG.get_attachments(#policyId#, #itemNo#))
+  		     	   		  <isEqual property="sortColumn" compareValue="fileName2">
+  		     	   		  		ORDER BY file_name2
+  		     	   		  </isEqual>
+  		     	   		  <isEqual property="sortColumn" compareValue="remarks">
+  		     	   		  		ORDER BY remarks
+  		     	   		  </isEqual>
+  		     	   		  <isNotNull property="sortColumn">
+	  		     	   		  	<isEqual property="ascDescFlg" compareValue="ASC">
+	  		     	   		  		ASC
+	  		     	   		  	</isEqual>
+	  		     	   		  	<isEqual property="ascDescFlg" compareValue="DESC">
+	  		     	   		  		DESC
+	  		     	   		  	</isEqual>
+  		     	   		  </isNotNull>   		     	   		  
+  		     	   	    ) a,  		     	   	    
+  		     	  	   (SELECT count(*) count_
+  		     	  	      FROM TABLE(GIUTS029_PKG.get_attachments(#policyId#, #itemNo#))
+  		     	   	   ) b  		     	   	   
+  		        )
+  		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>  	
+  	
+  	<parameterMap class="java.util.HashMap" id="GIUTS029ParamMap">
+  		<parameter property="allowedMediaTypes" javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT"/>
+  		<parameter property="allowedSizePerFile" javaType="java.lang.Integer" jdbcType="INTEGER" mode="OUT"/>
+  		<parameter property="allowedSizePerItem" javaType="java.lang.Integer" jdbcType="INTEGER" mode="OUT"/>
+  	</parameterMap>
+  	
+  	<procedure id="giuts029NewFormInstance" parameterMap="GIUTS029ParamMap">
+  		BEGIN
+  			GIUTS029_PKG.new_form_instance(?, ?, ?);
+  		END;
+  	</procedure>
+  	
+  	<procedure id="giuts029SetRows">
+  		BEGIN
+  		    GIIS_USERS_PKG.app_user := #appUser#;
+  			GIUTS029_PKG.set_attachments(#policyId#, #itemNo#, #fileName#, #remarks#);
+  		END;
+  	</procedure>
+  	
+  	<procedure id="valAddGiuts029" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			GIUTS029_PKG.val_add_rec(#policyId#, #itemNo#, #fileName#);
+ 		END;
+ 	</procedure>
+  	
+  	<procedure id="giuts029DelRows">
+  		BEGIN
+  			GIUTS029_PKG.del_attachments(#policyId#, #itemNo#, #fileName#);
+  		END;
+  	</procedure>
+  	
+  	<!-- start of GIPIS047 by steven 09.02.2013 -->
+  	<resultMap class="java.util.HashMap" id="gipis047BondLovMap" extends="BaseEntity.TableGridResultMap">
+  		<result column="policy_id" 			property="policyId"/>
+  		<result column="policy_no" 			property="policyNo"/>
+  		<result column="endt_no" 			property="endtNo"/>
+  		<result column="line_cd" 			property="lineCd"/>
+  		<result column="subline_cd" 		property="sublineCd"/>
+  		<result column="iss_cd" 			property="issCd"/>
+  		<result column="issue_yy" 			property="issYy"/>
+  		<result column="pol_seq_no" 		property="polSeqNo"/>
+  		<result column="renew_no" 			property="renewNo"/>
+  		<result column="endt_iss_cd" 		property="endtIssCd"/>
+  		<result column="endt_yy" 			property="endtYy"/>
+  		<result column="endt_seq_no" 		property="endtSeqNo"/>
+  		<result column="assd_no" 			property="assdNo"/>
+  		<result column="eff_date" 			property="effDate"/>
+  		<result column="dsp_eff_date" 		property="dspEffDate"/>
+  		<result column="endt_expiry_date" 	property="endtExpiryDate"/>
+  		<result column="expiry_date" 		property="expiryDate"/>
+  		<result column="incept_date" 		property="inceptDate"/>
+  		<result column="issue_date" 		property="issueDate"/>
+  		<result column="assd_name" 			property="assdName"/>
+  		<result column="updt_eff_dt" 		property="updtEffDt"/>
+  		<result column="dsp_or_no" 			property="dspOrNo"/>
+  		<result column="dsp_amt_paid" 		property="dspAmtPaid"/>
+  		<result column="dsp_obligee_name" 	property="dspObligeeName"/>
+  		<result column="obligee_no" 		property="obligeeNo"/>
+  		<result column="np_name" 			property="npName"/>
+  		<result column="np_no" 				property="npNo"/>
+  		<result column="coll_flag" 			property="collFlag"/>
+  		<result column="waiver_limit" 		property="waiverLimit"/>
+  		<result column="waiver_limit_cond" 	property="waiverLimitCond"/>
+  		<result column="eff_date_cond" 		property="effDateCond"/>
+  	</resultMap>
+  	
+  	<resultMap class="java.util.HashMap" id="gipis047NotaryLovMap" extends="BaseEntity.TableGridResultMap">
+  		<result column="np_name" 			property="npName"/>
+  		<result column="np_no" 				property="npNo"/>
+  	</resultMap>
+  	
+  	<select id="getGipis047BondLov" resultMap="gipis047BondLovMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		          FROM (SELECT *
+  							FROM TABLE (gipis047_pkg.get_bond_lov(#issCd#,#lineCd#,#moduleId#,#userId#))
+  							WHERE 1=1
+								<isNotNull property="filter">
+									<isNotEmpty prepend="AND"  property="policyNo">
+										UPPER(policy_no) LIKE UPPER(#policyNo#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND"  property="endtNo">
+										UPPER(endt_no) LIKE UPPER(#endtNo#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND"  property="assdName">
+										UPPER(assd_name) LIKE UPPER(#assdName#)
+									</isNotEmpty>
+								</isNotNull>
+								<isNotNull property="filterField">
+									<isNotEmpty prepend="AND"  property="sublineCd">
+										UPPER(subline_cd) LIKE UPPER(#sublineCd#) 
+									</isNotEmpty>
+									<isNotEmpty prepend="AND"  property="issueYy">
+										TO_NUMBER(issue_yy) LIKE TO_NUMBER(#issueYy#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND"  property="polSeqNo">
+										TO_NUMBER(pol_seq_no) LIKE TO_NUMBER(#polSeqNo#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND"  property="renewNo">
+										TO_NUMBER(renew_no) LIKE TO_NUMBER(#renewNo#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND"  property="endtIssCd">
+										UPPER(endt_iss_cd) LIKE UPPER(#endtIssCd#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND"  property="endtYy">
+										TO_NUMBER(endt_yy) LIKE TO_NUMBER(#endtYy#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND"  property="endtSeqNo">
+										TO_NUMBER(endt_seq_no) LIKE TO_NUMBER(#endtSeqNo#)
+									</isNotEmpty>
+								</isNotNull>
+								<isEqual property="sortColumn" compareValue="endtNo">
+							 		ORDER BY endt_no
+								</isEqual>
+								<isEqual property="sortColumn" compareValue="policyNo">
+									ORDER BY policy_no
+								</isEqual>	
+								<isEqual property="sortColumn" compareValue="assdName">
+									ORDER BY assd_name
+								</isEqual>	
+								<isNotNull property="sortColumn">
+									<isEqual property="ascDescFlg" compareValue="ASC">
+										ASC
+									</isEqual>
+									<isEqual property="ascDescFlg" compareValue="DESC">
+										DESC
+									</isEqual>
+								</isNotNull>
+		  		   		) a,
+		          	   (SELECT count(*) count_ 
+		  		   		  FROM TABLE (gipis047_pkg.get_bond_lov(#issCd#,#lineCd#,#moduleId#,#userId#))
+		  		   		  WHERE 1=1
+		  		   		    <isNotNull property="filter">
+								<isNotEmpty prepend="AND"  property="policyNo">
+									UPPER(policy_no) LIKE UPPER(#policyNo#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="endtNo">
+									UPPER(endt_no) LIKE UPPER(#endtNo#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="assdName">
+									UPPER(assd_name) LIKE UPPER(#assdName#)
+								</isNotEmpty>                  					
+							</isNotNull>
+							<isNotNull property="filterField">
+								<isNotEmpty prepend="AND"  property="sublineCd">
+									UPPER(subline_cd) LIKE UPPER(#sublineCd#) 
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="issueYy">
+									TO_NUMBER(issue_yy) LIKE TO_NUMBER(#issueYy#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="polSeqNo">
+									TO_NUMBER(pol_seq_no) LIKE TO_NUMBER(#polSeqNo#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="renewNo">
+									TO_NUMBER(renew_no) LIKE TO_NUMBER(#renewNo#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="endtIssCd">
+									UPPER(endt_iss_cd) LIKE UPPER(#endtIssCd#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="endtYy">
+									TO_NUMBER(endt_yy) LIKE TO_NUMBER(#endtYy#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="endtSeqNo">
+									TO_NUMBER(endt_seq_no) LIKE TO_NUMBER(#endtSeqNo#)
+								</isNotEmpty>
+							</isNotNull>
+		  		   		) b
+               )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGipis047NotaryLov" resultMap="gipis047NotaryLovMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		          FROM (SELECT * 
+		  		   		  FROM TABLE (gipis047_pkg.get_notary_lov)
+						 <isNotNull property="findText">
+							WHERE (UPPER(np_name) LIKE UPPER(#findText#) 
+							OR np_no LIKE #findText#)
+						 </isNotNull>
+						 <isNull property="findText">
+							WHERE (UPPER(np_name) LIKE UPPER(#findText2#) 
+							OR np_no LIKE #findText2#)
+						 </isNull>
+                         <isEqual property="sortColumn" compareValue="npName">
+                                ORDER BY np_name
+                         </isEqual>
+                          <isEqual property="sortColumn" compareValue="npNo">
+                                ORDER BY np_no
+                         </isEqual>
+		  				 <isNotNull property="sortColumn">
+                                 <isEqual property="ascDescFlg" compareValue="ASC">
+                                     ASC
+                                 </isEqual> 
+                                 <isEqual property="ascDescFlg" compareValue="DESC">
+                                     DESC
+                                 </isEqual>
+                         </isNotNull> 
+		  		   		) a,
+		          	   (SELECT count(*) count_ 
+		  		   		  FROM TABLE (gipis047_pkg.get_notary_lov)
+	  		   		     <isNotNull property="findText">
+							WHERE (UPPER(np_name) LIKE UPPER(#findText#) 
+							OR np_no LIKE #findText#)
+						 </isNotNull>
+						 <isNull property="findText">
+							WHERE (UPPER(np_name) LIKE UPPER(#findText2#) 
+							OR np_no LIKE #findText2#)
+						 </isNull>
+		  		   		) b
+               )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<insert id="saveGipis047BondUpdate">
+  		DECLARE
+  		  v_bond_basic   gipi_bond_basic%ROWTYPE;
+		BEGIN
+		  v_bond_basic.np_no := #npNo#;
+		  v_bond_basic.waiver_limit := #waiverLimit#;
+		  v_bond_basic.coll_flag := #collFlag#;
+		  v_bond_basic.policy_id := #policyId#;
+		  
+		  gipis047_pkg.set_gipi_bond_basic (v_bond_basic);
+		END;
+  	</insert>
+  	
+  	<resultMap id="gipis156HistoryMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+	    <result property="policyId"     		column="policy_id" />
+	    <result property="takeupSeqNo"			column="takeup_seq_no" />
+	    <result property="issCd"     			column="iss_cd" />
+	    <result property="premSeqNo"    		column="prem_seq_no" />
+	    <result property="oldRegPolSw"  		column="old_reg_pol_sw" />
+	    <result property="newRegPolSw"  		column="new_reg_pol_sw" />
+	    <result property="oldCredBranch"		column="old_cred_branch" />
+	    <result property="newCredBranch"    	column="new_cred_branch" />
+	    <result property="oldBookingMm"     	column="old_booking_mm" />
+	    <result property="newBookingMm"     	column="new_booking_mm" />
+	    <result property="oldBookingMmYy"     	column="old_booking_mm_yy" />
+	    <result property="oldBookingYy"     	column="old_booking_yy" />
+	    <result property="newBookingYy"     	column="new_booking_yy" />
+	    <result property="newBookingMmYy"     	column="new_booking_mm_yy" />
+	    <result property="userId"     			column="user_id" />
+	    <result property="lastUpdate"     		column="last_update" />
+	    <result property="histNo"     			column="hist_no" />
+	    <result property="dspOldBookingMthYy"	column="dsp_old_booking_mth_yy" />
+	    <result property="oldRPolSwitch"     	column="old_r_pol_switch" />
+	    <result property="dspNewBookingMthYy"   column="dsp_new_booking_mth_yy" />
+	    <result property="newRPolSwitch"     	column="new_r_pol_switch" />
+	    <result property="dspUserId"     		column="dsp_user_id" />
+	    <result property="dspLastUpdate"     	column="dsp_last_update" />
+	    <result property="dspOldCredBranch"     column="dsp_old_cred_branch" />
+	    <result property="dspNewCredBranch"     column="dsp_new_cred_branch" />
+	</resultMap>
+	
+	<select id="getGIPIS156History" resultMap="gipis156HistoryMap">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+						 b.count_, 
+						 a.*
+					FROM (SELECT *
+							FROM TABLE (GIPIS156_PKG.get_gipis156_booking_hist(#policyId#, #takeupSeqNo#, #premSeqNo#))
+							<!-- <isEqual property="sortColumn" compareValue="histId">
+								ORDER BY hist_id
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="maxEndtSeqNo">
+								ORDER BY max_endt_seq_no
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="userId">
+								ORDER BY user_id
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="lastUpdate">
+								ORDER BY last_update
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull> -->
+						) a,
+						(SELECT count(*) count_
+						   FROM TABLE (GIPIS156_PKG.get_gipis156_booking_hist(#policyId#, #takeupSeqNo#, #premSeqNo#))
+						   ) b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap id="gipis156BancaHistoryMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+	    <result property="oldArea"     		column="old_area" />
+	    <result property="newArea"			column="new_area" />
+	    <result property="oldBranch"     			column="old_branch" />
+	    <result property="newBranch"    		column="new_branch" />
+	    <result property="oldManager"  		column="old_manager" />
+	    <result property="newManager"  		column="new_manager" />
+	    <result property="histNo"		column="hist_no" />
+	    <result property="dspAreaDescOld"    	column="dsp_area_desc_old" />
+	    <result property="dspAreaDescNew"     	column="dsp_area_desc_new" />
+	    <result property="dspBranchDescOld"     	column="dsp_branch_desc_old" />
+	    <result property="dspBranchDescNew"     	column="dsp_branch_desc_new" />
+	    <result property="dspMgrNameOld"     	column="dsp_mgr_name_old" />
+	    <result property="dspMgrNameNew"     	column="dsp_mgr_name_new" />
+	    <result property="userId"     	column="user_id" />
+	    <result property="lastUpdate"     			column="last_update" />
+	</resultMap>
+	
+	<select id="getGIPIS156BancaHistory" resultMap="gipis156BancaHistoryMap">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+						 b.count_, 
+						 a.*
+					FROM (SELECT *
+							FROM TABLE (GIPIS156_PKG.get_gipis156_banc_hist(#policyId#))
+							<!-- <isEqual property="sortColumn" compareValue="histId">
+								ORDER BY hist_id
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="maxEndtSeqNo">
+								ORDER BY max_endt_seq_no
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="userId">
+								ORDER BY user_id
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="lastUpdate">
+								ORDER BY last_update
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull> -->
+						) a,
+						(SELECT count(*) count_
+						   FROM TABLE (GIPIS156_PKG.get_gipis156_banc_hist(#policyId#))
+						   ) b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap id="gipis156BancAreaLOVMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+	    <result property="areaCd"     		column="area_cd" />
+	    <result property="areaDesc"			column="area_desc" />
+	</resultMap>
+	
+	<select id="getGIPIS156BancAreaLOV" resultMap="gipis156BancAreaLOVMap">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+						 b.count_, 
+						 a.*
+					FROM (SELECT *
+							FROM TABLE (GIPIS156_PKG.get_banc_area_lov)
+							<isNotNull property="findText">
+							   WHERE UPPER(area_cd) LIKE UPPER(#findText#)
+							</isNotNull>
+							<isEqual property="sortColumn" compareValue="areaCd">
+								ORDER BY area_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="areaDesc">
+								ORDER BY area_desc
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>
+						) a,
+						(SELECT count(*) count_
+						   FROM TABLE (GIPIS156_PKG.get_banc_area_lov)
+						   <isNotNull property="findText">
+							   WHERE UPPER(area_cd) LIKE UPPER(#findText#)
+							</isNotNull>
+						   ) b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap id="gipis156BancBranchLOVMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+	    <result property="branchCd"     		column="branch_cd" />
+	    <result property="branchDesc"			column="branch_desc" />
+	    <result property="managerCd"			column="manager_cd" />
+	    <result property="managerName"			column="manager_name" />
+	</resultMap>
+	
+	<select id="getGIPIS156BancBranchLOV" resultMap="gipis156BancBranchLOVMap">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+						 b.count_, 
+						 a.*
+					FROM (SELECT *
+							FROM TABLE (GIPIS156_PKG.get_banc_branch_lov(#areaCd#))
+							<isNotNull property="findText">
+							   WHERE UPPER(branch_cd) LIKE UPPER(#findText#)
+							</isNotNull>
+							<isEqual property="sortColumn" compareValue="branchCd">
+								ORDER BY branch_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="branchDesc">
+								ORDER BY branch_desc
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>
+						) a,
+						(SELECT count(*) count_
+						   FROM TABLE (GIPIS156_PKG.get_banc_branch_lov(#areaCd#))
+						   <isNotNull property="findText">
+							   WHERE UPPER(branch_cd) LIKE UPPER(#findText#)
+							</isNotNull>
+						   ) b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap id="gipis156IssLOVMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+	    <result property="issCd"     		column="iss_cd" />
+	    <result property="issName"			column="iss_name" />
+	</resultMap>
+	
+	<select id="getGIPIS156IssLOV" resultMap="gipis156IssLOVMap">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+						 b.count_, 
+						 a.*
+					FROM (SELECT *
+							FROM TABLE (GIPIS156_PKG.get_iss_lov(#lineCd#, #userId#))
+							<isNotNull property="findText">
+							   WHERE UPPER(iss_cd) LIKE UPPER(#findText#)
+							      OR UPPER(iss_name) LIKE UPPER(#findText#)
+							</isNotNull>
+							<isNull property="findText">
+							   WHERE UPPER(iss_cd) LIKE UPPER(NVL(#searchString#, iss_cd))
+							      OR UPPER(iss_name) LIKE UPPER(NVL(#searchString#, iss_name))
+							</isNull>
+							<isEqual property="sortColumn" compareValue="issCd">
+								ORDER BY iss_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="issName">
+								ORDER BY iss_name
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>
+						) a,
+						(SELECT count(*) count_
+						   FROM TABLE (GIPIS156_PKG.get_iss_lov(#lineCd#, #userId#))
+						   <isNotNull property="findText">
+							   WHERE UPPER(iss_cd) LIKE UPPER(#findText#)
+							      OR UPPER(iss_name) LIKE UPPER(#findText#)
+							</isNotNull>
+							<isNull property="findText">
+							   WHERE UPPER(iss_cd) LIKE UPPER(NVL(#searchString#, iss_cd))
+							      OR UPPER(iss_name) LIKE UPPER(NVL(#searchString#, iss_name))
+							</isNull>
+						   ) b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<!-- apollo 08.06.2015 SR#19928 - added noOfTakeup to determine wether the takeup is single or longterm-->
+	<parameterMap class="map" id="updateGIPIS156ParameterMap">
+		<parameter property="userId"	  jdbcType="VARCHAR" javaType="java.lang.String"  mode="IN"/>
+		<parameter property="policyId"	  jdbcType="VARCHAR" javaType="java.lang.String"  mode="IN"/>		
+		<parameter property="credBranch"	  jdbcType="VARCHAR" javaType="java.lang.String"  mode="IN"/>
+		<parameter property="bookingMth"	  jdbcType="VARCHAR" javaType="java.lang.String"  mode="IN"/>
+		<parameter property="bookingYear"	  jdbcType="VARCHAR" javaType="java.lang.String"  mode="IN"/>
+		<parameter property="regPolicySw"	  jdbcType="VARCHAR" javaType="java.lang.String"  mode="IN"/>
+		<parameter property="takeupSeqNo"	  jdbcType="VARCHAR" javaType="java.lang.String"  mode="IN"/>
+		<parameter property="areaCd"	  jdbcType="VARCHAR" javaType="java.lang.String"  mode="IN"/>
+		<parameter property="branchCd"	  jdbcType="VARCHAR" javaType="java.lang.String"  mode="IN"/>
+		<parameter property="managerCd"	  jdbcType="VARCHAR" javaType="java.lang.String"  mode="IN"/>
+		<parameter property="noOfTakeup"	  jdbcType="VARCHAR" javaType="java.lang.String"  mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="updateGIPIS156" parameterMap="updateGIPIS156ParameterMap">
+		BEGIN
+			GIIS_USERS_PKG.app_user := ?;
+			GIPIS156_PKG.update_gipis156(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<!-- <procedure id="updateGIPIS156" parameterMap="updateGIPIS156ParameterMap">
+		BEGIN
+			GIIS_USERS_PKG.app_user := #userId#;
+			GIPIS156_PKG.update_gipis156(#policyId#, #credBranch#, #bookingMth#, #bookingYear#, #regPolicySw#, #takeupSeqNo#, #areaCd#, #branchCd#, #managerCd#, #noOfTakeup#);
+		END;
+	</procedure> -->
+	
+	<select id="validateGIPIS156AreaCd" resultClass="java.lang.String">
+		SELECT GIPIS156_PKG.val_area_cd(#areaCd#) FROM DUAL
+	</select>
+	
+	<resultMap id="gipis156ValBancBranchCd" class="java.util.HashMap">
+	    <result property="branchCd"     		column="branch_cd" />
+	    <result property="branchDesc"			column="branch_desc" />
+	    <result property="managerCd"			column="manager_cd" />
+	    <result property="managerName"			column="manager_name" />
+	</resultMap>
+	
+	<select id="validateGIPIS156BancBranchCd" resultMap="gipis156ValBancBranchCd">
+		SELECT * FROM TABLE(GIPIS156_PKG.val_banc_branch_cd(#areaCd#, #branchCd#))
+	</select>
+	
+<!--Gzelle 09.16.2013-->
+	<resultMap id="updateInitGenInfoPolListingResultMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+	   <result property="policyId" 		column="policy_id"/>
+	   <result property="polLineCd" 	column="pol_line_cd"/>
+	   <result property="polSublineCd" 	column="pol_subline_cd"/>
+	   <result property="polIssCd" 		column="pol_iss_cd"/>
+	   <result property="polIssueYy" 	column="pol_issue_yy"/>
+	   <result property="polSeqNo" 		column="pol_seq_no"/>
+	   <result property="polRenewNo" 	column="pol_renew_no"/>
+	   <result property="policyNo"		column="policy_no"/>
+	   <result property="parId" 		column="par_id"/>
+	   <result property="parLineCd" 	column="par_line_cd"/>
+	   <result property="parIssCd" 		column="par_iss_cd"/>
+	   <result property="parYy" 		column="par_yy"/>
+	   <result property="parSeqNo" 		column="par_seq_no"/>
+	   <result property="parQuoteSeqNo" column="par_quote_seq_no"/>
+	   <result property="parNo" 		column="par_no"/>
+	   <result property="endtIssCd" 	column="endt_iss_cd"/>
+	   <result property="endtYy" 		column="endt_yy"/>
+	   <result property="endtSeqNo" 	column="endt_seq_no"/>
+	   <result property="endtNo" 		column="endt_no"/>
+	   <result property="assdName" 		column="assd_name"/>
+	   <result property="packPolFlag" 	column="pack_pol_flag"/>
+	   <result property="packPolicyId"  column="pack_policy_id"/>
+	   <result property="packNo"		column="pack_no"/>
+	</resultMap>
+ 	
+ 	<resultMap class="com.geniisys.gipi.entity.GIPIPolgenin" id="GIPIPolgeninResultMap">
+ 		<result property="userId" 			column="user_id"/>
+ 		<result property="lastUpdate" 		column="last_update"/>
+ 		<result property="genInfo01" 		column="gen_info01"/>
+ 		<result property="genInfo02" 		column="gen_info02"/>
+ 		<result property="genInfo03" 		column="gen_info03"/>
+ 		<result property="genInfo04" 		column="gen_info04"/>
+ 		<result property="genInfo05" 		column="gen_info05"/>
+ 		<result property="genInfo06" 		column="gen_info06"/>
+ 		<result property="genInfo07" 		column="gen_info07"/>
+ 		<result property="genInfo08" 		column="gen_info08"/>
+ 		<result property="genInfo09" 		column="gen_info09"/>
+ 		<result property="genInfo10" 		column="gen_info10"/>
+ 		<result property="genInfo11" 		column="gen_info11"/>
+ 		<result property="genInfo12" 		column="gen_info12"/>
+ 		<result property="genInfo13" 		column="gen_info13"/>
+ 		<result property="genInfo14" 		column="gen_info14"/>
+ 		<result property="genInfo15" 		column="gen_info15"/>
+ 		<result property="genInfo16" 		column="gen_info16"/>
+ 		<result property="genInfo17" 		column="gen_info17"/>
+ 		<result property="initialInfo01" 	column="initial_info01"/>
+ 		<result property="initialInfo02" 	column="initial_info02"/>
+ 		<result property="initialInfo03" 	column="initial_info03"/>
+ 		<result property="initialInfo04" 	column="initial_info04"/>
+ 		<result property="initialInfo05" 	column="initial_info05"/>
+ 		<result property="initialInfo06" 	column="initial_info06"/>
+ 		<result property="initialInfo07" 	column="initial_info07"/>
+ 		<result property="initialInfo08" 	column="initial_info08"/>
+ 		<result property="initialInfo09" 	column="initial_info09"/>
+ 		<result property="initialInfo10" 	column="initial_info10"/>
+ 		<result property="initialInfo11" 	column="initial_info11"/>
+ 		<result property="initialInfo12" 	column="initial_info12"/>
+ 		<result property="initialInfo13" 	column="initial_info13"/>
+ 		<result property="initialInfo14" 	column="initial_info14"/>
+ 		<result property="initialInfo15" 	column="initial_info15"/>
+ 		<result property="initialInfo16" 	column="initial_info16"/>
+ 		<result property="initialInfo17" 	column="initial_info17"/>
+ 	</resultMap>
+
+ 	<resultMap class="com.geniisys.gipi.entity.GIPIPackPolgenin" id="GIPIPackPolgeninResultMap">
+ 		<result property="userId" 			column="user_id"/>
+ 		<result property="lastUpdate" 		column="last_update"/>
+ 		<result property="genInfo01" 		column="gen_info01"/>
+ 		<result property="genInfo02" 		column="gen_info02"/>
+ 		<result property="genInfo03" 		column="gen_info03"/>
+ 		<result property="genInfo04" 		column="gen_info04"/>
+ 		<result property="genInfo05" 		column="gen_info05"/>
+ 		<result property="genInfo06" 		column="gen_info06"/>
+ 		<result property="genInfo07" 		column="gen_info07"/>
+ 		<result property="genInfo08" 		column="gen_info08"/>
+ 		<result property="genInfo09" 		column="gen_info09"/>
+ 		<result property="genInfo10" 		column="gen_info10"/>
+ 		<result property="genInfo11" 		column="gen_info11"/>
+ 		<result property="genInfo12" 		column="gen_info12"/>
+ 		<result property="genInfo13" 		column="gen_info13"/>
+ 		<result property="genInfo14" 		column="gen_info14"/>
+ 		<result property="genInfo15" 		column="gen_info15"/>
+ 		<result property="genInfo16" 		column="gen_info16"/>
+ 		<result property="genInfo17" 		column="gen_info17"/>
+ 		<result property="initialInfo01" 	column="initial_info01"/>
+ 		<result property="initialInfo02" 	column="initial_info02"/>
+ 		<result property="initialInfo03" 	column="initial_info03"/>
+ 		<result property="initialInfo04" 	column="initial_info04"/>
+ 		<result property="initialInfo05" 	column="initial_info05"/>
+ 		<result property="initialInfo06" 	column="initial_info06"/>
+ 		<result property="initialInfo07" 	column="initial_info07"/>
+ 		<result property="initialInfo08" 	column="initial_info08"/>
+ 		<result property="initialInfo09" 	column="initial_info09"/>
+ 		<result property="initialInfo10" 	column="initial_info10"/>
+ 		<result property="initialInfo11" 	column="initial_info11"/>
+ 		<result property="initialInfo12" 	column="initial_info12"/>
+ 		<result property="initialInfo13" 	column="initial_info13"/>
+ 		<result property="initialInfo14" 	column="initial_info14"/>
+ 		<result property="initialInfo15" 	column="initial_info15"/>
+ 		<result property="initialInfo16" 	column="initial_info16"/>
+ 		<result property="initialInfo17" 	column="initial_info17"/>
+ 	</resultMap>
+ 	
+ 	<resultMap class="com.geniisys.gipi.entity.GIPIEndtText" id="GIPIEndtTextResultMap">
+ 		<result property="userId" 			column="user_id"/>
+ 		<result property="lastUpdate" 		column="last_update"/>
+ 		<result property="endtText01" 		column="endt_text01"/>
+ 		<result property="endtText02" 		column="endt_text02"/>
+ 		<result property="endtText03" 		column="endt_text03"/>
+ 		<result property="endtText04" 		column="endt_text04"/>
+ 		<result property="endtText05" 		column="endt_text05"/>
+ 		<result property="endtText06" 		column="endt_text06"/>
+ 		<result property="endtText07" 		column="endt_text07"/>
+ 		<result property="endtText08" 		column="endt_text08"/>
+ 		<result property="endtText09" 		column="endt_text09"/>
+ 		<result property="endtText10" 		column="endt_text10"/>
+ 		<result property="endtText11" 		column="endt_text11"/>
+ 		<result property="endtText12" 		column="endt_text12"/>
+ 		<result property="endtText13" 		column="endt_text13"/>
+ 		<result property="endtText14" 		column="endt_text14"/>
+ 		<result property="endtText15" 		column="endt_text15"/>
+ 		<result property="endtText16" 		column="endt_text16"/>
+ 		<result property="endtText17" 		column="endt_text17"/>
+ 	</resultMap> 	
+
+	<select id="getUpdateInitEtcPolicyLOV" resultMap="updateInitGenInfoPolListingResultMap" parameterClass="java.util.HashMap">		 
+		SELECT *
+  		  FROM (SELECT ROWNUM rownum_, b.count_, a.*
+  		  		  FROM (SELECT * FROM TABLE(gipis161_pkg.get_policy_listing2(#userId#,
+  		  		  															#polLineCd#,#polSublineCd#,#polIssCd#,#polIssueYy#,#polSeqNo#,#polRenewNo#,
+  		  		  															#parLineCd#,#parIssCd#,#parYy#,#parSeqNo#,#parQuoteSeqNo#,
+  		  		  															#endtIssCd#,#endtYy#,#endtSeqNo#,#assdName#))
+				    <isNotNull property="filter">
+                     WHERE 1 = 1
+                     	<isNotEmpty prepend="AND" property="policyNo">
+							UPPER(policy_no) LIKE UPPER(#policyNo#)
+						</isNotEmpty>
+						<isNotEmpty prepend="AND" property="endorsementNo">
+							UPPER(endt_no) LIKE UPPER(#endtNo#)
+						</isNotEmpty>
+						<isNotEmpty prepend="AND" property="parNo">
+							UPPER(par_no) LIKE UPPER(#parNo#)
+						</isNotEmpty>
+						<isNotEmpty prepend="AND" property="assdName">
+							UPPER(assd_name) LIKE UPPER(#assdName#)
+						</isNotEmpty>
+                    </isNotNull>
+	            	<isEqual property="sortColumn" compareValue="policyNo">
+              			ORDER BY policy_no
+	            	</isEqual>
+	            	<isEqual property="sortColumn" compareValue="endtNo">
+              			ORDER BY endt_no
+	            	</isEqual>
+	            	<isEqual property="sortColumn" compareValue="parNo">
+              			ORDER BY par_no
+	            	</isEqual>
+	            	<isEqual property="sortColumn" compareValue="assdName">
+              			ORDER BY assd_name
+	            	</isEqual>
+	            	<isNotNull property="sortColumn">
+              			<isEqual property="ascDescFlg" compareValue="ASC">
+              				ASC
+              			</isEqual>
+              			<isEqual property="ascDescFlg" compareValue="DESC">
+              				DESC
+              			</isEqual>
+              		</isNotNull>) a,
+              (SELECT count(*) count_
+	          	 FROM TABLE(gipis161_pkg.get_policy_listing2(#userId#,
+	          	 											#polLineCd#,#polSublineCd#,#polIssCd#,#polIssueYy#,#polSeqNo#,#polRenewNo#,
+  		  		  											#parLineCd#,#parIssCd#,#parYy#,#parSeqNo#,#parQuoteSeqNo#,
+  		  		  											#endtIssCd#,#endtYy#,#endtSeqNo#,#assdName#))
+				 <isNotNull property="filter">
+                     WHERE 1 = 1
+                     	<isNotEmpty prepend="AND" property="policyNo">
+							UPPER(policy_no) LIKE UPPER(#policyNo#)
+						</isNotEmpty>
+						<isNotEmpty prepend="AND" property="endorsementNo">
+							UPPER(endt_no) LIKE UPPER(#endtNo#)
+						</isNotEmpty>
+						<isNotEmpty prepend="AND" property="parNo">
+							UPPER(par_no) LIKE UPPER(#parNo#)
+						</isNotEmpty>
+						<isNotEmpty prepend="AND" property="assdName">
+							UPPER(assd_name) LIKE UPPER(#assdName#)
+						</isNotEmpty>
+                    </isNotNull>
+				)b) 
+	    	WHERE rownum_ BETWEEN #from# AND #to# 	
+ 	</select> 	 		
+
+	<select id="getGeneralInitialInfo" resultMap="GIPIPolgeninResultMap">
+		(SELECT * FROM TABLE(gipis161_pkg.get_gen_init_info(#policyId#)))
+	</select> 	
+	
+	<select id="getGeneralInitialPackInfo" resultMap="GIPIPackPolgeninResultMap">
+		(SELECT * FROM TABLE(gipis161_pkg.get_gen_init_pack_info(#policyId#)))
+	</select>
+	
+	<select id="getEndtInfo" resultMap="GIPIEndtTextResultMap">
+		(SELECT * FROM TABLE(gipis161_pkg.get_endt_info(#policyId#)))
+	</select>	
+	
+	<procedure id="setGenInfo" parameterClass="com.geniisys.gipi.entity.GIPIPolgenin">
+		DECLARE
+			v_gipi	GIPI_POLGENIN%ROWTYPE;
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			v_gipi.policy_id   := #policyId#;
+			v_gipi.gen_info01  := #genInfo01#;
+			v_gipi.gen_info02  := #genInfo02#;
+			v_gipi.gen_info03  := #genInfo03#;
+			v_gipi.gen_info04  := #genInfo04#;
+			v_gipi.gen_info05  := #genInfo05#;
+			v_gipi.gen_info06  := #genInfo06#;
+			v_gipi.gen_info07  := #genInfo07#;
+			v_gipi.gen_info08  := #genInfo08#;
+			v_gipi.gen_info09  := #genInfo09#;
+			v_gipi.gen_info10  := #genInfo10#;
+			v_gipi.gen_info11  := #genInfo11#;
+			v_gipi.gen_info12  := #genInfo12#;
+			v_gipi.gen_info13  := #genInfo13#;
+			v_gipi.gen_info14  := #genInfo14#;
+			v_gipi.gen_info15  := #genInfo15#;
+			v_gipi.gen_info16  := #genInfo16#;
+			v_gipi.gen_info17  := #genInfo17#;
+			v_gipi.user_id     := #userId#;
+			
+			GIPIS161_PKG.set_gen_info_gipi_polgenin(v_gipi);
+		END;
+	</procedure>
+
+	<procedure id="setInitialInfo" parameterClass="com.geniisys.gipi.entity.GIPIPolgenin">
+		DECLARE
+			v_gipi	GIPI_POLGENIN%ROWTYPE;
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			v_gipi.policy_id   := #policyId#;
+			v_gipi.initial_info01  := #initialInfo01#;
+			v_gipi.initial_info02  := #initialInfo02#;
+			v_gipi.initial_info03  := #initialInfo03#;
+			v_gipi.initial_info04  := #initialInfo04#;
+			v_gipi.initial_info05  := #initialInfo05#;
+			v_gipi.initial_info06  := #initialInfo06#;
+			v_gipi.initial_info07  := #initialInfo07#;
+			v_gipi.initial_info08  := #initialInfo08#;
+			v_gipi.initial_info09  := #initialInfo09#;
+			v_gipi.initial_info10  := #initialInfo10#;
+			v_gipi.initial_info11  := #initialInfo11#;
+			v_gipi.initial_info12  := #initialInfo12#;
+			v_gipi.initial_info13  := #initialInfo13#;
+			v_gipi.initial_info14  := #initialInfo14#;
+			v_gipi.initial_info15  := #initialInfo15#;
+			v_gipi.initial_info16  := #initialInfo16#;
+			v_gipi.initial_info17  := #initialInfo17#;
+			v_gipi.user_id     := #userId#;
+			
+			GIPIS161_PKG.set_init_info_gipi_polgenin(v_gipi);
+		END;
+	</procedure>
+		
+	<procedure id="setGenPackInfo" parameterClass="com.geniisys.gipi.entity.GIPIPackPolgenin">
+		DECLARE
+			v_gipi	GIPI_PACK_POLGENIN%ROWTYPE;
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			v_gipi.pack_policy_id   := #packPolicyId#;
+			v_gipi.gen_info01  		:= #genInfo01#;
+			v_gipi.gen_info02  		:= #genInfo02#;
+			v_gipi.gen_info03  		:= #genInfo03#;
+			v_gipi.gen_info04  		:= #genInfo04#;
+			v_gipi.gen_info05  		:= #genInfo05#;
+			v_gipi.gen_info06  		:= #genInfo06#;
+			v_gipi.gen_info07  		:= #genInfo07#;
+			v_gipi.gen_info08  		:= #genInfo08#;
+			v_gipi.gen_info09  		:= #genInfo09#;
+			v_gipi.gen_info10  		:= #genInfo10#;
+			v_gipi.gen_info11  		:= #genInfo11#;
+			v_gipi.gen_info12  		:= #genInfo12#;
+			v_gipi.gen_info13  		:= #genInfo13#;
+			v_gipi.gen_info14  		:= #genInfo14#;
+			v_gipi.gen_info15  		:= #genInfo15#;
+			v_gipi.gen_info16  		:= #genInfo16#;
+			v_gipi.gen_info17  		:= #genInfo17#;
+			v_gipi.user_id     		:= #userId#;
+			
+			GIPIS161_PKG.set_gen_gipi_pack_polgenin(v_gipi);
+		END;
+	</procedure>
+
+	<procedure id="setInitialPackInfo" parameterClass="com.geniisys.gipi.entity.GIPIPackPolgenin">
+		DECLARE
+			v_gipi	GIPI_PACK_POLGENIN%ROWTYPE;
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			v_gipi.pack_policy_id   := #packPolicyId#;
+			v_gipi.initial_info01   := #initialInfo01#;
+			v_gipi.initial_info02   := #initialInfo02#;
+			v_gipi.initial_info03   := #initialInfo03#;
+			v_gipi.initial_info04   := #initialInfo04#;
+			v_gipi.initial_info05   := #initialInfo05#;
+			v_gipi.initial_info06   := #initialInfo06#;
+			v_gipi.initial_info07   := #initialInfo07#;
+			v_gipi.initial_info08   := #initialInfo08#;
+			v_gipi.initial_info09   := #initialInfo09#;
+			v_gipi.initial_info10   := #initialInfo10#;
+			v_gipi.initial_info11   := #initialInfo11#;
+			v_gipi.initial_info12   := #initialInfo12#;
+			v_gipi.initial_info13   := #initialInfo13#;
+			v_gipi.initial_info14   := #initialInfo14#;
+			v_gipi.initial_info15   := #initialInfo15#;
+			v_gipi.initial_info16   := #initialInfo16#;
+			v_gipi.initial_info17   := #initialInfo17#;
+			v_gipi.user_id     		:= #userId#;
+			
+			GIPIS161_PKG.set_init_gipi_pack_polgenin(v_gipi);
+		END;
+	</procedure>	
+
+	<procedure id="setEndtText" parameterClass="com.geniisys.gipi.entity.GIPIEndtText">
+		DECLARE
+			v_gipi	GIPI_ENDTTEXT%ROWTYPE;
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			v_gipi.policy_id   := #policyId#;
+			v_gipi.endt_text01  := #endtText01#;
+			v_gipi.endt_text02  := #endtText02#;
+			v_gipi.endt_text03  := #endtText03#;
+			v_gipi.endt_text04  := #endtText04#;
+			v_gipi.endt_text05  := #endtText05#;
+			v_gipi.endt_text06  := #endtText06#;
+			v_gipi.endt_text07  := #endtText07#;
+			v_gipi.endt_text08  := #endtText08#;
+			v_gipi.endt_text09  := #endtText09#;
+			v_gipi.endt_text10  := #endtText10#;
+			v_gipi.endt_text11  := #endtText11#;
+			v_gipi.endt_text12  := #endtText12#;
+			v_gipi.endt_text13  := #endtText13#;
+			v_gipi.endt_text14  := #endtText14#;
+			v_gipi.endt_text15  := #endtText15#;
+			v_gipi.endt_text16  := #endtText16#;
+			v_gipi.endt_text17  := #endtText17#;
+			v_gipi.user_id     := #userId#;
+			
+			GIPIS161_PKG.set_endt_gipi_endt_text(v_gipi);
+		END;
+	</procedure>
+	
+	<select id="checkPackagePolicy" resultClass="java.lang.String">
+		SELECT gipis161_pkg.check_package(#packPolicyId#) FROM DUAL
+	</select>		
+<!--END-->
+
+	<!-- SR-21812 JET JUN-24-2016 (GIPIS161A) -->
+	<resultMap id="updateInitGenInfoPackPolListingResultMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+	   <result property="packPolicyId" 		column="pack_policy_id"/>
+	   <result property="packPolLineCd" 	column="pack_pol_line_cd"/>
+	   <result property="packPolSublineCd" 	column="pack_pol_subline_cd"/>
+	   <result property="packPolIssCd" 		column="pack_pol_iss_cd"/>
+	   <result property="packPolIssueYy" 	column="pack_pol_issue_yy"/>
+	   <result property="packPolSeqNo" 		column="pack_pol_seq_no"/>
+	   <result property="packPolRenewNo" 	column="pack_pol_renew_no"/>
+	   <result property="packPolicyNo"		column="pack_policy_no"/>
+	   <result property="packParId" 		column="pack_par_id"/>
+	   <result property="packParLineCd" 	column="pack_par_line_cd"/>
+	   <result property="packParIssCd" 		column="pack_par_iss_cd"/>
+	   <result property="packParYy" 		column="pack_par_yy"/>
+	   <result property="packParSeqNo" 		column="pack_par_seq_no"/>
+	   <result property="packParQuoteSeqNo" column="pack_par_quote_seq_no"/>
+	   <result property="packParNo" 		column="pack_par_no"/>
+	   <result property="packEndtIssCd" 	column="pack_endt_iss_cd"/>
+	   <result property="packEndtYy" 		column="pack_endt_yy"/>
+	   <result property="packEndtSeqNo" 	column="pack_endt_seq_no"/>
+	   <result property="packEndtNo" 		column="pack_endt_no"/>
+	   <result property="assdName" 			column="assd_name"/>
+	</resultMap>
+
+	<resultMap class="com.geniisys.gipi.entity.GIPIPackEndtText" id="GIPIPackEndtTextResultMap">
+ 		<result property="userId" 			column="user_id"/>
+ 		<result property="lastUpdate" 		column="last_update"/>
+ 		<result property="endtText01" 		column="endt_text01"/>
+ 		<result property="endtText02" 		column="endt_text02"/>
+ 		<result property="endtText03" 		column="endt_text03"/>
+ 		<result property="endtText04" 		column="endt_text04"/>
+ 		<result property="endtText05" 		column="endt_text05"/>
+ 		<result property="endtText06" 		column="endt_text06"/>
+ 		<result property="endtText07" 		column="endt_text07"/>
+ 		<result property="endtText08" 		column="endt_text08"/>
+ 		<result property="endtText09" 		column="endt_text09"/>
+ 		<result property="endtText10" 		column="endt_text10"/>
+ 		<result property="endtText11" 		column="endt_text11"/>
+ 		<result property="endtText12" 		column="endt_text12"/>
+ 		<result property="endtText13" 		column="endt_text13"/>
+ 		<result property="endtText14" 		column="endt_text14"/>
+ 		<result property="endtText15" 		column="endt_text15"/>
+ 		<result property="endtText16" 		column="endt_text16"/>
+ 		<result property="endtText17" 		column="endt_text17"/>
+ 	</resultMap>
+
+	<select id="getUpdateInitEtcPackPolicyLOV" resultMap="updateInitGenInfoPackPolListingResultMap" parameterClass="java.util.HashMap">
+			SELECT *
+	  		  FROM (SELECT ROWNUM rownum_, b.count_, a.*
+	  		  		  FROM (SELECT * FROM TABLE(gipis161a_pkg.get_pack_policy_listing(#userId#,
+	  		  		  															#packPolLineCd#,#packPolSublineCd#,#packPolIssCd#,#packPolIssueYy#,#packPolSeqNo#,#packPolRenewNo#,
+	  		  		  															#packParLineCd#,#packParIssCd#,#packParYy#,#packParSeqNo#,#packParQuoteSeqNo#,
+	  		  		  															#packEndtIssCd#,#packEndtYy#,#packEndtSeqNo#,#assdName#))
+					    <isNotNull property="filter">
+	                     WHERE 1 = 1
+	                     	<isNotEmpty prepend="AND" property="packPolicyNo">
+								UPPER(pack_policy_no) LIKE UPPER(#packPolicyNo#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="packEndtNo">
+								UPPER(pack_endt_no) LIKE UPPER(#packEndtNo#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="packParNo">
+								UPPER(pack_par_no) LIKE UPPER(#packParNo#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="assdName">
+								UPPER(assd_name) LIKE UPPER(#assdName#)
+							</isNotEmpty>
+	                    </isNotNull>
+		            	<isEqual property="sortColumn" compareValue="packPolicyNo">
+	              			ORDER BY pack_policy_no
+		            	</isEqual>
+		            	<isEqual property="sortColumn" compareValue="packEndtNo">
+	              			ORDER BY pack_endt_no
+		            	</isEqual>
+		            	<isEqual property="sortColumn" compareValue="packParNo">
+	              			ORDER BY pack_par_no
+		            	</isEqual>
+		            	<isEqual property="sortColumn" compareValue="assdName">
+	              			ORDER BY assd_name
+		            	</isEqual>
+		            	<isNotNull property="sortColumn">
+	              			<isEqual property="ascDescFlg" compareValue="ASC">
+	              				ASC
+	              			</isEqual>
+	              			<isEqual property="ascDescFlg" compareValue="DESC">
+	              				DESC
+	              			</isEqual>
+	              		</isNotNull>) a,
+	              (SELECT count(*) count_
+		          	 FROM TABLE(gipis161a_pkg.get_pack_policy_listing(#userId#,
+	  															#packPolLineCd#,#packPolSublineCd#,#packPolIssCd#,#packPolIssueYy#,#packPolSeqNo#,#packPolRenewNo#,
+	  															#packParLineCd#,#packParIssCd#,#packParYy#,#packParSeqNo#,#packParQuoteSeqNo#,
+	  															#packEndtIssCd#,#packEndtYy#,#packEndtSeqNo#,#assdName#))
+					 <isNotNull property="filter">
+	                     WHERE 1 = 1
+	                     	<isNotEmpty prepend="AND" property="packPolicyNo">
+								UPPER(pack_policy_no) LIKE UPPER(#packPolicyNo#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="packEndtNo">
+								UPPER(pack_endt_no) LIKE UPPER(#packEndtNo#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="packParNo">
+								UPPER(pack_par_no) LIKE UPPER(#packParNo#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="assdName">
+								UPPER(assd_name) LIKE UPPER(#assdName#)
+							</isNotEmpty>
+	                    </isNotNull>
+					)b) 
+		    WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+
+	<select id="getPackGeneralInitialInfo" resultMap="GIPIPackPolgeninResultMap">
+		(SELECT * FROM TABLE(gipis161a_pkg.get_pack_gen_init_info(#packPolicyId#)))
+	</select>
+	
+	<select id="getPackEndtInfo" resultMap="GIPIPackEndtTextResultMap">
+		(SELECT * FROM TABLE(gipis161a_pkg.get_pack_endt_info(#packPolicyId#)))
+	</select>
+	
+	<procedure id="setPackGenInfo" parameterClass="com.geniisys.gipi.entity.GIPIPackPolgenin">
+		DECLARE
+			v_gipi	GIPI_PACK_POLGENIN%ROWTYPE;
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			v_gipi.pack_policy_id   := #packPolicyId#;
+			v_gipi.gen_info01  		:= #genInfo01#;
+			v_gipi.gen_info02  		:= #genInfo02#;
+			v_gipi.gen_info03  		:= #genInfo03#;
+			v_gipi.gen_info04  		:= #genInfo04#;
+			v_gipi.gen_info05  		:= #genInfo05#;
+			v_gipi.gen_info06  		:= #genInfo06#;
+			v_gipi.gen_info07  		:= #genInfo07#;
+			v_gipi.gen_info08  		:= #genInfo08#;
+			v_gipi.gen_info09  		:= #genInfo09#;
+			v_gipi.gen_info10  		:= #genInfo10#;
+			v_gipi.gen_info11  		:= #genInfo11#;
+			v_gipi.gen_info12  		:= #genInfo12#;
+			v_gipi.gen_info13  		:= #genInfo13#;
+			v_gipi.gen_info14  		:= #genInfo14#;
+			v_gipi.gen_info15  		:= #genInfo15#;
+			v_gipi.gen_info16  		:= #genInfo16#;
+			v_gipi.gen_info17  		:= #genInfo17#;
+			v_gipi.user_id     		:= #userId#;
+			
+			GIPIS161A_PKG.set_gen_gipi_pack_polgenin(v_gipi);
+		END;
+	</procedure>
+	
+	<procedure id="setPackInitInfo" parameterClass="com.geniisys.gipi.entity.GIPIPackPolgenin">
+		DECLARE
+			v_gipi	GIPI_PACK_POLGENIN%ROWTYPE;
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			v_gipi.pack_policy_id   := #packPolicyId#;
+			v_gipi.initial_info01   := #initialInfo01#;
+			v_gipi.initial_info02   := #initialInfo02#;
+			v_gipi.initial_info03   := #initialInfo03#;
+			v_gipi.initial_info04   := #initialInfo04#;
+			v_gipi.initial_info05   := #initialInfo05#;
+			v_gipi.initial_info06   := #initialInfo06#;
+			v_gipi.initial_info07   := #initialInfo07#;
+			v_gipi.initial_info08   := #initialInfo08#;
+			v_gipi.initial_info09   := #initialInfo09#;
+			v_gipi.initial_info10   := #initialInfo10#;
+			v_gipi.initial_info11   := #initialInfo11#;
+			v_gipi.initial_info12   := #initialInfo12#;
+			v_gipi.initial_info13   := #initialInfo13#;
+			v_gipi.initial_info14   := #initialInfo14#;
+			v_gipi.initial_info15   := #initialInfo15#;
+			v_gipi.initial_info16   := #initialInfo16#;
+			v_gipi.initial_info17   := #initialInfo17#;
+			v_gipi.user_id     		:= #userId#;
+			
+			GIPIS161A_PKG.set_init_gipi_pack_polgenin(v_gipi);
+		END;
+	</procedure>
+	
+	<procedure id="setPackEndtText" parameterClass="com.geniisys.gipi.entity.GIPIPackEndtText">
+		DECLARE
+			v_gipi	GIPI_PACK_ENDTTEXT%ROWTYPE;
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			v_gipi.pack_policy_id   := #packPolicyId#;
+			v_gipi.endt_text01  := #endtText01#;
+			v_gipi.endt_text02  := #endtText02#;
+			v_gipi.endt_text03  := #endtText03#;
+			v_gipi.endt_text04  := #endtText04#;
+			v_gipi.endt_text05  := #endtText05#;
+			v_gipi.endt_text06  := #endtText06#;
+			v_gipi.endt_text07  := #endtText07#;
+			v_gipi.endt_text08  := #endtText08#;
+			v_gipi.endt_text09  := #endtText09#;
+			v_gipi.endt_text10  := #endtText10#;
+			v_gipi.endt_text11  := #endtText11#;
+			v_gipi.endt_text12  := #endtText12#;
+			v_gipi.endt_text13  := #endtText13#;
+			v_gipi.endt_text14  := #endtText14#;
+			v_gipi.endt_text15  := #endtText15#;
+			v_gipi.endt_text16  := #endtText16#;
+			v_gipi.endt_text17  := #endtText17#;
+			v_gipi.user_id		:= #userId#;
+			
+			GIPIS161A_PKG.set_endt_gipi_pack_endttext(v_gipi);
+		END;
+	</procedure>
+	<!-- @# -->
+
+<!-- GIPIS155 Shan 09.26.2013 -->
+	<resultMap class="java.util.HashMap" id="gipis155FireitemResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="policyId"			column="POLICY_ID"/>
+		<result property="itemNo"			column="ITEM_NO"/>
+		<result property="blockId"			column="BLOCK_ID"/>
+		<result property="provinceCd"		column="PROVINCE_CD"/>
+		<result property="provinceDesc"		column="PROVINCE_DESC"/>
+		<result property="cityCd"			column="CITY_CD"/>
+		<result property="city"				column="CITY"/>
+		<result property="districtNo"		column="DISTRICT_NO"/>
+		<result property="nbDistrictNo"		column="NB_DISTRICT_NO"/>
+		<result property="districtDesc"		column="DISTRICT_DESC"/>
+		<result property="blockNo"			column="BLOCK_NO"/>
+		<result property="nbBlockNo"		column="NB_BLOCK_NO"/>
+		<result property="blockDesc"		column="BLOCK_DESC"/>
+		<result property="riskCd"			column="RISK_CD"/>
+		<result property="riskDesc"			column="RISK_DESC"/>
+		<result property="eqZone"			column="EQ_ZONE"/>
+		<result property="eqZoneDesc"		column="EQ_ZONE_DESC"/>
+		<result property="floodZone"		column="FLOOD_ZONE"/>
+		<result property="floodZoneDesc"	column="FLOOD_ZONE_DESC"/>
+		<result property="typhoonZone"		column="TYPHOON_ZONE"/>
+		<result property="typhoonZoneDesc"	column="TYPHOON_ZONE_DESC"/>
+		<result property="origTarfCd"		column="TARF_CD"/>
+		<result property="tarfCd"			column="TARF_CD"/>
+		<result property="tarfDesc"			column="TARF_DESC"/>
+		<result property="tariffZone"		column="TARIFF_ZONE"/>
+		<result property="tariffZoneDesc"	column="TARIFF_ZONE_DESC"/>
+		<result property="userId"			column="USER_ID"/>
+		<result property="lastUpdate"		column="LAST_UPDATE"/>
+	</resultMap>
+	
+	<select id="getGipis155FireItemListing" resultMap="gipis155FireitemResultMap" parameterClass="java.util.HashMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		      	  FROM (SELECT * 
+  						  FROM TABLE(GIPIS155_PKG.GET_FIREITEM_LISTING(#policyId#))
+  						 <isNotNull property="filter">
+  		     	   		  		WHERE 1=1
+  		     	   		  		<isNotEmpty prepend="AND" property="itemNo">
+  		     	   		  			item_no = #itemNo#
+  		     	   		  		</isNotEmpty>
+  		     	   		  		<isNotEmpty prepend="AND" property="provinceCd">
+  		     	   		  			UPPER(province_cd) LIKE UPPER(#provinceCd#)
+  		     	   		  		</isNotEmpty>
+  		     	   		  		<isNotEmpty prepend="AND" property="cityCd">
+  		     	   		  			UPPER(city_cd) LIKE UPPER(#cityCd#)
+  		     	   		  		</isNotEmpty>
+  		     	   		  		<isNotEmpty prepend="AND" property="nbDistrictNo">
+  		     	   		  			UPPER(nb_district_no) LIKE UPPER(#nbDistrictNo#)
+  		     	   		  		</isNotEmpty>
+  		     	   		  		<isNotEmpty prepend="AND" property="nbBlockNo">
+  		     	   		  			UPPER(nb_block_no) LIKE UPPER(#nbBlockNo#)
+  		     	   		  		</isNotEmpty>
+  		     	   		  		<isNotEmpty prepend="AND" property="riskCd">
+  		     	   		  			UPPER(risk_cd) LIKE UPPER(#riskCd#)
+  		     	   		  		</isNotEmpty>
+  		     	   		  		<isNotEmpty prepend="AND" property="eqZone">
+  		     	   		  			UPPER(eq_zone) LIKE UPPER(#eqZone#)
+  		     	   		  		</isNotEmpty>
+  		     	   		  		<isNotEmpty prepend="AND" property="floodZone">
+  		     	   		  			UPPER(flood_zone) LIKE UPPER(#floodZone#)
+  		     	   		  		</isNotEmpty>
+  		     	   		  		<isNotEmpty prepend="AND" property="typhoonZone">
+  		     	   		  			UPPER(typhoon_zone) LIKE UPPER(#typhoonZone#)
+  		     	   		  		</isNotEmpty>
+  		     	   		  		<isNotEmpty prepend="AND" property="tarfCd">
+  		     	   		  			UPPER(tarf_cd) LIKE UPPER(#tarfCd#)
+  		     	   		  		</isNotEmpty>
+  		     	   		  		<isNotEmpty prepend="AND" property="tariffZone">
+  		     	   		  			UPPER(tariff_zone) LIKE UPPER(#tariffZone#)
+  		     	   		  		</isNotEmpty>
+  		     	   		  </isNotNull>
+  		     	   		  <isNotNull property="sortColumn">
+  		     	   		  		<isEqual property="sortColumn" compareValue="itemNo">
+  		     	   		  			ORDER BY item_no
+  		     	   		  		</isEqual>
+  		     	   		  		<isEqual property="sortColumn" compareValue="provinceCd">
+  		     	   		  			ORDER BY province_cd
+  		     	   		  		</isEqual>
+  		     	   		  		<isEqual property="sortColumn" compareValue="cityCd">
+  		     	   		  			ORDER BY city_cd
+  		     	   		  		</isEqual>
+  		     	   		  		<isEqual property="sortColumn" compareValue="nbDistrictNo">
+  		     	   		  			ORDER BY nb_district_no
+  		     	   		  		</isEqual>
+  		     	   		  		<isEqual property="sortColumn" compareValue="nbBlockNo">
+  		     	   		  			ORDER BY nb_block_no
+  		     	   		  		</isEqual>
+  		     	   		  		<isEqual property="sortColumn" compareValue="riskCd">
+  		     	   		  			ORDER BY risk_cd
+  		     	   		  		</isEqual>
+  		     	   		  		<isEqual property="sortColumn" compareValue="eqZone">
+  		     	   		  			ORDER BY eq_zone
+  		     	   		  		</isEqual>
+  		     	   		  		<isEqual property="sortColumn" compareValue="floodZone">
+  		     	   		  			ORDER BY flood_zone
+  		     	   		  		</isEqual>
+  		     	   		  		<isEqual property="sortColumn" compareValue="typhoonZone">
+  		     	   		  			ORDER BY typhoon_zone
+  		     	   		  		</isEqual>
+  		     	   		  		<isEqual property="sortColumn" compareValue="tarfCd">
+  		     	   		  			ORDER BY tarf_cd
+  		     	   		  		</isEqual>
+  		     	   		  		<isEqual property="sortColumn" compareValue="tariffZone">
+  		     	   		  			ORDER BY tariff_zone
+  		     	   		  		</isEqual>  		     	   		  		
+	  		     	   		  	<isEqual property="ascDescFlg" compareValue="ASC">
+	  		     	   		  		ASC
+	  		     	   		  	</isEqual>
+	  		     	   		  	<isEqual property="ascDescFlg" compareValue="DESC">
+	  		     	   		  		DESC
+	  		     	   		  	</isEqual>
+  		     	   		  </isNotNull>
+		      	  		) a,
+		      	  		(SELECT count(*) count_ 
+  						  FROM TABLE(GIPIS155_PKG.GET_FIREITEM_LISTING(#policyId#))
+  						 <isNotNull property="filter">
+  		     	   		  		WHERE 1=1
+  		     	   		  		<isNotEmpty prepend="AND" property="itemNo">
+  		     	   		  			item_no = #itemNo#
+  		     	   		  		</isNotEmpty>
+  		     	   		  		<isNotEmpty prepend="AND" property="provinceCd">
+  		     	   		  			UPPER(province_cd) LIKE UPPER(#provinceCd#)
+  		     	   		  		</isNotEmpty>
+  		     	   		  		<isNotEmpty prepend="AND" property="cityCd">
+  		     	   		  			UPPER(city_cd) LIKE UPPER(#cityCd#)
+  		     	   		  		</isNotEmpty>
+  		     	   		  		<isNotEmpty prepend="AND" property="nbtDistrictNo">
+  		     	   		  			UPPER(nbt_district_no) LIKE UPPER(#nbtDistrictNo#)
+  		     	   		  		</isNotEmpty>
+  		     	   		  		<isNotEmpty prepend="AND" property="nbtBlockNo">
+  		     	   		  			UPPER(nbt_block_no) LIKE UPPER(#nbtBlockNo#)
+  		     	   		  		</isNotEmpty>
+  		     	   		  		<isNotEmpty prepend="AND" property="riskCd">
+  		     	   		  			UPPER(risk_cd) LIKE UPPER(#riskCd#)
+  		     	   		  		</isNotEmpty>
+  		     	   		  		<isNotEmpty prepend="AND" property="eqZone">
+  		     	   		  			UPPER(eq_zone) LIKE UPPER(#eqZone#)
+  		     	   		  		</isNotEmpty>
+  		     	   		  		<isNotEmpty prepend="AND" property="floodZone">
+  		     	   		  			UPPER(flood_zone) LIKE UPPER(#floodZone#)
+  		     	   		  		</isNotEmpty>
+  		     	   		  		<isNotEmpty prepend="AND" property="typhoonZone">
+  		     	   		  			UPPER(typhoon_zone) LIKE UPPER(#typhoonZone#)
+  		     	   		  		</isNotEmpty>
+  		     	   		  		<isNotEmpty prepend="AND" property="tarfCd">
+  		     	   		  			UPPER(tarf_cd) LIKE UPPER(#tarfCd#)
+  		     	   		  		</isNotEmpty>
+  		     	   		  		<isNotEmpty prepend="AND" property="tariffZone">
+  		     	   		  			UPPER(tariff_zone) LIKE UPPER(#tariffZone#)
+  		     	   		  		</isNotEmpty>
+  		     	   		  </isNotNull>
+		      	  		) b 
+		  )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>		
+	
+  	<select id="getBlockIdGipis155" resultClass="java.lang.String"	parameterClass="java.util.HashMap">
+  		SELECT block_id
+  		  FROM giis_block
+  		 WHERE UPPER(province_cd) = UPPER(#provinceCd#)
+  		   AND UPPER(city_cd) = UPPER(#cityCd#)
+  		   AND UPPER(district_no) = UPPER(#districtNo#)
+  		   AND UPPER(block_no) = UPPER(NVL(#blockNo#, block_no))
+  	</select>
+  	
+  	<resultMap class="java.util.HashMap" id="gipis155TarfHistMap" extends="BaseEntity.TableGridResultMap">
+  		<result property="policyId"			column="POLICY_ID"/>
+  		<result property="blockId"			column="BLOCK_ID"/>
+  		<result property="itemNo"			column="ITEM_NO"/>
+  		<result property="oldTarfCd"		column="OLD_TARF_CD"/>
+  		<result property="newTarfCd"		column="NEW_TARF_CD"/>
+  		<result property="userId"			column="USER_ID"/>
+  		<result property="lastUpdate"		column="LAST_UPDATE"/>
+  		<result property="arcExtData"		column="ARC_EXT_DATA"/>
+  		<result property="origOldTarfCd"	column="OLD_TARF_CD"/>
+  		<result property="origNewTarfCd"	column="NEW_TARF_CD"/>
+  		<result property="origUserId"		column="USER_ID"/>
+  		<result property="origLastUpdate"	column="LAST_UPDATE"/>
+  	</resultMap>
+  	
+  	<select id="getGipis155TarfHistListing" resultMap="gipis155TarfHistMap" parameterClass="java.util.HashMap">
+  		SELECT *
+  		  FROM (SELECT a.*, b.count_, rownum rownum_
+  		  		  FROM  (SELECT * FROM TABLE(GIPIS155_PKG.get_tarf_hist_listing(#policyId#, #itemNo#, #blockId#))
+  		  		  		  <isNotNull property="filter">
+  		  		  		  	WHERE 1=1
+  		  		  		  	<isNotEmpty prepend="AND" property="oldTarfCd">
+  		  		  		  		UPPER(old_tarf_cd) = UPPER(NVL(#oldTarfCd#, old_tarf_cd))
+  		  		  		  	</isNotEmpty>
+  		  		  		  	<isNotEmpty prepend="AND" property="newTarfCd">
+  		  		  		  		UPPER(new_tarf_cd) = UPPER(NVL(#newTarfCd#, new_tarf_cd))
+  		  		  		  	</isNotEmpty>
+  		  		  		  	<isNotEmpty prepend="AND" property="userId">
+  		  		  		  		UPPER(user_id) = UPPER(NVL(#userId#, user_id))
+  		  		  		  	</isNotEmpty>
+  		  		  		  </isNotNull>
+  		  		  		  <isNotNull property="sortColumn">
+  		     	   		  		<isEqual property="sortColumn" compareValue="oldTarfCd">
+  		     	   		  			ORDER BY old_tarf_cd
+  		     	   		  		</isEqual>
+  		     	   		  		<isEqual property="sortColumn" compareValue="newTarfCd">
+  		     	   		  			ORDER BY new_tarf_cd
+  		     	   		  		</isEqual>
+  		     	   		  		<isEqual property="sortColumn" compareValue="userId">
+  		     	   		  			ORDER BY user_id
+  		     	   		  		</isEqual>
+  		     	   		  		<isEqual property="sortColumn" compareValue="lastUpdate">
+  		     	   		  			ORDER BY last_update
+  		     	   		  		</isEqual>  		     	   		  			     	   		  		
+	  		     	   		  	<isEqual property="ascDescFlg" compareValue="ASC">
+	  		     	   		  		ASC
+	  		     	   		  	</isEqual>
+	  		     	   		  	<isEqual property="ascDescFlg" compareValue="DESC">
+	  		     	   		  		DESC
+	  		     	   		  	</isEqual>
+  		     	   		  </isNotNull>
+  		  		  		) a,
+  		  		  		(SELECT count(*) count_ FROM TABLE(GIPIS155_PKG.get_tarf_hist_listing(#policyId#, #itemNo#, #blockId#))
+  		  		  		  <isNotNull property="filter">
+  		  		  		  	WHERE 1=1
+  		  		  		  	<isNotEmpty prepend="AND" property="oldTarfCd">
+  		  		  		  		UPPER(old_tarf_cd) = UPPER(NVL(#oldTarfCd#, old_tarf_cd))
+  		  		  		  	</isNotEmpty>
+  		  		  		  	<isNotEmpty prepend="AND" property="newTarfCd">
+  		  		  		  		UPPER(new_tarf_cd) = UPPER(NVL(#newTarfCd#, new_tarf_cd))
+  		  		  		  	</isNotEmpty>
+  		  		  		  	<isNotEmpty prepend="AND" property="userId">
+  		  		  		  		UPPER(user_id) = UPPER(NVL(#userId#, user_id))
+  		  		  		  	</isNotEmpty>
+  		  		  		  </isNotNull>
+  		  		  		) b
+  		  )
+  		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+  	  	
+  	<update id="updateGIPIS155FireItem" parameterClass="java.util.HashMap">
+  		UPDATE GIPI_FIREITEM
+  		   SET block_id		 = #blockId#,
+  		       block_no      = #blockNo#,
+  		   	   district_no	 = #districtNo#,
+  		       tarf_cd		 = #tarfCd#,
+  		       risk_cd		 = #riskCd#,
+  		       eq_zone		 = #eqZone#,
+  		       flood_zone	 = #floodZone#,
+  		       typhoon_zone	 = #typhoonZone#,
+  		       tariff_zone 	 = #tariffZone#,
+  		       user_id		 = #userId#,
+  		       last_update	 = SYSDATE
+  		 WHERE policy_id 	 = #policyId#
+  		   AND item_no		 = #itemNo#
+  	</update>
+  	
+  	<insert id="insertGIPIS155TarfHist" parameterClass="map">
+  		INSERT INTO 
+  		  GIPI_TARF_HIST (policy_id, item_no, block_id, old_tarf_cd, new_tarf_cd, user_id, last_update)
+  		          VALUES (#policyId#, #itemNo#, #blockId#, #oldTarfCd#, #newTarfCd#, #userId#, SYSDATE)
+    </insert>
+
+<!-- GIPIS155 end -->
+
+<!--added by john dolon 9.27.2013 GIUTS032 - update MV File Number  -->
+	<resultMap id="getGiuts032PolLOVMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+	    <result property="policyId"     	column="policy_id" />
+	    <result property="lineCd"			column="line_cd" />
+	    <result property="sublineCd"     	column="subline_cd" />
+	    <result property="issCd"			column="iss_cd" />
+	    <result property="issueYy"     		column="issue_yy" />
+	    <result property="polSeqNo"			column="pol_seq_no" />
+	    <result property="renewNo"     		column="renew_no" />
+	    <result property="endtIssCd"		column="endt_iss_cd" />
+	    <result property="endtYy"     		column="endt_yy" />
+	    <result property="endtSeqNo"		column="endt_seq_no" />
+	    <result property="assdNo"     		column="assd_no" />
+	    <result property="assdName"			column="assd_name" />
+	    <result property="incDate"     		column="incept_date" />
+	    <result property="expDate"			column="expiry_date" />
+	    <result property="effDate"     		column="eff_date" />
+	    <result property="endtExpDate"		column="endt_expiry_date" />
+	</resultMap>
+	
+	<select id="getGiuts032PolLOV" resultMap="getGiuts032PolLOVMap">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+						 b.count_, 
+						 a.*
+					FROM (SELECT *
+							FROM TABLE (GIUTS032_PKG.get_giuts032_pol_lov(#lineCd#,#sublineCd#,#issCd#,#issueYy#,#polSeqNo#,#renewNo#, #userId#))
+							<isNotNull property="findText">
+							   WHERE UPPER(line_cd) LIKE UPPER(#findText#)
+							      OR UPPER(subline_cd) LIKE UPPER(#findText#)
+							       OR UPPER(iss_cd) LIKE UPPER(#findText#)
+							        OR UPPER(issue_yy) LIKE UPPER(#findText#)
+							         OR UPPER(pol_seq_no) LIKE UPPER(#findText#)
+							          OR UPPER(renew_no) LIKE UPPER(#findText#)
+							           OR UPPER(endt_iss_cd) LIKE UPPER(#findText#)
+							            OR UPPER(endt_yy) LIKE UPPER(#findText#)
+							             OR UPPER(endt_seq_no) LIKE UPPER(#findText#)
+							</isNotNull>
+							<isEqual property="sortColumn" compareValue="policyNumber">
+								ORDER BY line_cd, subline_cd, iss_cd, issue_yy, pol_seq_no, renew_no
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="endtNo">
+								ORDER BY endt_iss_cd, endt_yy, endt_seq_no
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>
+						) a,
+						(SELECT count(*) count_
+						   FROM TABLE (GIUTS032_PKG.get_giuts032_pol_lov(#lineCd#,#sublineCd#,#issCd#,#issueYy#,#polSeqNo#,#renewNo#, #userId#))
+						   <isNotNull property="findText">
+							   WHERE UPPER(line_cd) LIKE UPPER(#findText#)
+							      OR UPPER(subline_cd) LIKE UPPER(#findText#)
+							       OR UPPER(iss_cd) LIKE UPPER(#findText#)
+							        OR UPPER(issue_yy) LIKE UPPER(#findText#)
+							         OR UPPER(pol_seq_no) LIKE UPPER(#findText#)
+							          OR UPPER(renew_no) LIKE UPPER(#findText#)
+							           OR UPPER(endt_iss_cd) LIKE UPPER(#findText#)
+							            OR UPPER(endt_yy) LIKE UPPER(#findText#)
+							             OR UPPER(endt_seq_no) LIKE UPPER(#findText#)
+							</isNotNull>
+						   ) b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap id="showUpdateMVFileNoMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+	    <result property="policyId"     	column="policy_id" />
+	    <result property="itemNo"			column="item_no" />
+	    <result property="itemTitle"     	column="item_title" />
+	    <result property="mvFileNo"			column="mv_file_no" />
+	</resultMap>
+	
+	<select id="showUpdateMVFileNo" resultMap="showUpdateMVFileNoMap">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+						 b.count_, 
+						 a.*
+					FROM (SELECT *
+							FROM TABLE (GIUTS032_PKG.get_giuts032_table(#policyId#))
+							<isNotNull property="filter">
+							WHERE 1 = 1 
+ 								<isNotEmpty prepend="AND" property="itemNo">
+									item_no = #itemNo#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="itemTitle">
+									UPPER(item_title) LIKE UPPER(#itemTitle#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="mvFileNo">
+									UPPER(mv_file_no) LIKE UPPER(#mvFileNo#)
+								</isNotEmpty>
+							</isNotNull>
+							<isEqual property="sortColumn" compareValue="itemNo">
+								ORDER BY item_no
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="itemTitle">
+								ORDER BY item_title
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="mvFileNo">
+								ORDER BY mv_file_no
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>
+						) a,
+						(SELECT count(*) count_
+						   FROM TABLE (GIUTS032_PKG.get_giuts032_table(#policyId#))
+						   <isNotNull property="filter">
+							WHERE 1 = 1 
+ 								<isNotEmpty prepend="AND" property="itemNo">
+									item_no = #itemNo#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="itemTitle">
+									UPPER(item_title) LIKE UPPER(#itemTitle#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="mvFileNo">
+									UPPER(mv_file_no) LIKE UPPER(#mvFileNo#)
+								</isNotEmpty>
+							</isNotNull>
+						   ) b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<insert id="saveGipis032MVFileNoUpdate">
+		DECLARE
+  		  v_mv_file_no   VARCHAR2(15);
+  		  v_policy_id	 VARCHAR2(12);
+  		  v_item_no		 VARCHAR2(10);
+		BEGIN
+          v_mv_file_no  := #mvFileNo#;
+          v_policy_id   := #policyId#;
+          v_item_no	    := #itemNo#;
+          GIUTS032_PKG.save_update_mv_file_number(v_mv_file_no, v_policy_id, v_item_no);
+        END;
+  	</insert>
+  	
+<!-- GIUTS025 : shan 10.08.2013 -->
+
+	<resultMap class="java.util.HashMap" id="invoiceGiust025Map" extends="BaseEntity.TableGridResultMap">
+		<result property="policyId"			column="POLICY_ID"/>
+		<result property="issCd"			column="ISS_CD"/>
+		<result property="refInvNo"			column="REF_INV_NO"/>
+		<result property="premSeqNo"		column="PREM_SEQ_NO"/>
+		<result property="invoiceNo"		column="INVOICE_NO"/>
+	</resultMap>
+	
+	<select id="getInvoiceListGiuts025" resultMap="invoiceGiust025Map" parameterClass="java.util.HashMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		  		  FROM (SELECT * FROM TABLE(GIUTS025_PKG.GET_INVOICE_LISTING(#policyId#, #issCd#))
+		  		  		<isNotNull property="filter">
+		  		  			WHERE 1=1
+		  		  			<isNotEmpty prepend="AND" property="invoiceNo">
+		  		  				UPPER(invoice_no) LIKE UPPER(#invoiceNo#)
+		  		  			</isNotEmpty>
+		  		  			<isNotEmpty prepend="AND" property="refInvNo">
+		  		  				UPPER(ref_inv_no) LIKE UPPER(#refInvNo#)
+		  		  			</isNotEmpty>
+		  		  		</isNotNull>
+		  		  		<isNotNull property="sortColumn">
+		  		  			<isEqual property="sortColumn" compareValue="invoiceNo">
+		  		  				ORDER BY invoice_no
+		  		  			</isEqual>
+		  		  			<isEqual property="sortColumn" compareValue="refInvNo">
+		  		  				ORDER BY ref_inv_no
+		  		  			</isEqual>
+		  		  			<isEqual property="ascDescFlg" compareValue="ASC">
+		  		  				ASC
+		  		  			</isEqual>
+		  		  			<isEqual property="ascDescFlg" compareValue="DESC">
+		  		  				DESC
+		  		  			</isEqual>
+		  		  		</isNotNull>
+		  		  		) a,
+		  		  		(SELECT count(*) count_ FROM TABLE(GIUTS025_PKG.GET_INVOICE_LISTING(#policyId#, #issCd#))
+		  		  		<isNotNull property="filter">
+		  		  			WHERE 1=1
+		  		  			<isNotEmpty prepend="AND" property="invoiceNo">
+		  		  				UPPER(invoice_no) LIKE UPPER(#invoiceNo#)
+		  		  			</isNotEmpty>
+		  		  			<isNotEmpty prepend="AND" property="refInvNo">
+		  		  				UPPER(ref_inv_no) LIKE UPPER(#refInvNo#)
+		  		  			</isNotEmpty>
+		  		  		</isNotNull>
+		  		  		) b
+		  )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+
+	<procedure id="updateGipiPolbasicGiuts025" parameterClass="java.util.HashMap">
+		BEGIN
+		    GIIS_USERS_PKG.app_user := #userId#; <!-- added by robert SR 5165 11.05.15 -->
+			GIUTS025_PKG.update_gipi_polbasic(#policyId#, #newRefPolNo#, #newManualRenewNo#, #newRefAcceptNo#); <!-- added newRefAcceptNo by robert SR 5165 11.05.15 -->
+		END;
+	</procedure>	
+	
+	<procedure id="updateGipiInvoiceGiuts025" parameterClass="java.util.HashMap">
+		BEGIN
+		    GIIS_USERS_PKG.app_user := #userId#; <!-- added by robert SR 5165 11.05.15 -->
+			GIUTS025_PKG.update_gipi_invoice(#issCd#, #premSeqNo#, #refInvNo#);
+		END;
+	</procedure>
+<!-- end GIUTS025 -->
+
+	<!-- apollo 08.06.2015 -->
+	<procedure id="updatePolbasicBookingDate" parameterClass="java.lang.String">
+	   BEGIN
+	      GIPIS156_PKG.update_polbasic_booking_date(#policyId#);
+	   END;
+	</procedure>
+
+</sqlMap>

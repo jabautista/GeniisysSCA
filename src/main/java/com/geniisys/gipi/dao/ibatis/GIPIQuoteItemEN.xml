@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap>
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIPIQuoteItemEN" type="com.geniisys.gipi.entity.GIPIQuoteItemEN" />
+	
+	<resultMap id="GIPIQuoteItemENMap" class="GIPIQuoteItemEN">
+		<result column="QUOTE_ID" 					property="quoteId" />
+		<result column="ENGG_BASIC_INFONUM" 		property="enggBasicInfoNum" />
+		<result column="CONTRACT_PROJ_BUSS_TITLE"	property="contractProjBussTitle" />
+		<result column="SITE_LOCATION" 				property="siteLocation" />
+		<result column="CONSTRUCT_START_DATE" 		property="constructStartDate" />
+		<result column="CONSTRUCT_END_DATE" 		property="constructEndDate" />
+		<result column="MAINTAIN_START_DATE" 		property="maintainStartDate" />
+		<result column="MAINTAIN_END_DATE" 			property="maintainEndDate" />
+		<result column="TESTING_START_DATE" 		property="testingStartDate" />
+		<result column="TESTING_END_DATE" 			property="testingEndDate" />
+		<result column="WEEKS_TEST" 				property="weeksTest" />
+		<result column="TIME_EXCESS" 				property="timeExcess" />
+		<result column="MBI_POLICY_NO" 				property="mbiPolicyNo" />
+		<result column="USER_ID" 					property="userId" />
+		<result column="LAST_UPDATE" 				property="lastUpdate" />
+	</resultMap>
+	
+	<select id="getGIPIQuoteItemENDetails" resultMap="GIPIQuoteItemENMap" parameterClass="java.util.HashMap">
+		SELECT * FROM TABLE(Gipi_Quote_Item_Dtls.Get_Gipi_Quote_EN(#quoteId#, #itemNo#))
+	</select>
+	
+	<select id="getGIPIQuoteItemEN" resultMap="GIPIQuoteItemENMap" parameterClass="java.util.HashMap">
+		SELECT * FROM TABLE(Gipi_Quote_Item_Dtls.Get_Gipi_Quote_EN2(#quoteId#))
+	</select>
+	
+	<procedure id="saveGIPIQuoteItemEN" parameterClass="GIPIQuoteItemEN">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			Gipi_Quote_Item_Dtls.Set_Gipi_Quote_EN(
+				#quoteId#,
+	 			#enggBasicInfoNum#,
+				#contractProjBussTitle#,
+	 			#siteLocation#,
+	 			#constructStartDate#,
+	 			#constructEndDate#,
+				#maintainStartDate#,
+	 			#maintainEndDate#,
+				#testingStartDate#,
+				#testingEndDate#,
+	 			#weeksTest#,
+	 			#timeExcess#,
+	 			#mbiPolicyNo#);
+		END;
+	</procedure>
+	
+	<procedure id="deleteGIPIQuoteItemEN">
+		BEGIN
+			GIPI_QUOTE_ITEM_DTLS.Del_gipi_quote_en(#quoteId#, #itemNo#);
+		END;
+	</procedure>
+	
+	<procedure id="delGIPIQuoteItemEN">
+		BEGIN
+			GIPI_QUOTE_ITEM_DTLS.del_gipi_quote_en2(#quoteId#);
+		END;
+	</procedure>
+	
+</sqlMap>

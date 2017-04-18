@@ -1,0 +1,419 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISFunds">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+
+	<resultMap class="java.util.HashMap" id="fundCdLOVMap">
+		<result column="fund_cd" property="fundCd" />
+		<result column="fund_desc" property="fundDesc" />
+	</resultMap>
+
+	<resultMap class="java.util.HashMap" id="fundCdLOVMapTG" extends="BaseEntity.TableGridResultMap">
+		<result column="fund_cd" property="fundCd" />
+		<result column="fund_desc" property="fundDesc" />
+		<result column="rownum_" property="rowNum" />
+		<result column="count_" property="rowCount" />
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="fundCd2LOVMap" extends="BaseEntity.TableGridResultMap">
+		<!-- Created by: Lara Beltran
+		Date: Feb 1, 2013 -->		
+		<result column="fund_cd" property="fundCd" />
+		<result column="fund_desc" property="fundDesc" />
+	</resultMap>
+
+	<select id="getFundCdLOV" resultMap="fundCdLOVMap"
+		parameterClass="java.lang.String">
+		SELECT *
+		FROM TABLE(giis_funds_pkg.get_fund_cd_lov(#keyword#))
+	</select>
+
+	<select id="getCompanyLOV" resultMap="fundCdLOVMapTG">
+		SELECT *
+		FROM (SELECT rownum rownum_,
+		COUNT(1) OVER() count_, <!-- added by MarkS 12.12.2016 SR5862 optimization -->
+		a.*
+		FROM (SELECT *
+		FROM TABLE(giis_funds_pkg.get_fund_cd_lov2)
+		<isNotNull property="findText">
+			WHERE (UPPER(fund_cd) LIKE UPPER(#findText#) OR UPPER(fund_desc) LIKE
+			UPPER(#findText#))
+		</isNotNull>
+		<isNull property="findText">
+			WHERE (UPPER(fund_cd) LIKE UPPER(NVL(#searchString#, fund_cd))
+			  OR UPPER(fund_desc) LIKE UPPER(NVL(#searchString#, fund_desc)))
+		</isNull><!-- added by pol 7.18.2013  -->
+		<isNotNull property="sortColumn">
+			<isEqual property="sortColumn" compareValue="fundCd">
+				ORDER BY fund_cd
+			</isEqual>
+			<isEqual property="sortColumn" compareValue="fundDesc">
+				ORDER BY fund_desc
+			</isEqual>
+			<isEqual property="ascDescFlg" compareValue="ASC">
+				ASC
+			</isEqual>
+			<isEqual property="ascDescFlg" compareValue="DESC">
+				DESC
+			</isEqual>
+		</isNotNull>
+		) a)
+		WHERE rownum_ BETWEEN #from# AND #to#
+		<!-- commented by MarkS 12.12.2016 SR5862 optimization -->
+		<!-- SELECT *
+		FROM (SELECT rownum rownum_,
+		b.count_,
+		a.*
+		FROM (SELECT *
+		FROM TABLE(giis_funds_pkg.get_fund_cd_lov2)
+		<isNotNull property="findText">
+			WHERE (UPPER(fund_cd) LIKE UPPER(#findText#) OR UPPER(fund_desc) LIKE
+			UPPER(#findText#))
+		</isNotNull>
+		<isNull property="findText">
+			WHERE (UPPER(fund_cd) LIKE UPPER(NVL(#searchString#, fund_cd))
+			  OR UPPER(fund_desc) LIKE UPPER(NVL(#searchString#, fund_desc)))
+		</isNull>added by pol 7.18.2013 
+		<isNotNull property="sortColumn">
+			<isEqual property="sortColumn" compareValue="fundCd">
+				ORDER BY fund_cd
+			</isEqual>
+			<isEqual property="sortColumn" compareValue="fundDesc">
+				ORDER BY fund_desc
+			</isEqual>
+			<isEqual property="ascDescFlg" compareValue="ASC">
+				ASC
+			</isEqual>
+			<isEqual property="ascDescFlg" compareValue="DESC">
+				DESC
+			</isEqual>
+		</isNotNull>
+		) a,
+		(SELECT count(*) count_
+		FROM TABLE(giis_funds_pkg.get_fund_cd_lov2)
+		<isNotNull property="findText">
+			WHERE (UPPER(fund_cd) LIKE UPPER(#findText#) OR UPPER(fund_desc) LIKE
+			UPPER(#findText#))
+		</isNotNull>
+		<isNull property="findText">
+			WHERE (UPPER(fund_cd) LIKE UPPER(NVL(#searchString#, fund_cd))
+			  OR UPPER(fund_desc) LIKE UPPER(NVL(#searchString#, fund_desc)))
+		</isNull>added by pol 7.18.2013 
+		) b)
+		WHERE rownum_ BETWEEN #from# AND #to# -->
+		
+	</select>
+	
+	<select id="getCompany2LOV" resultMap="fundCd2LOVMap">
+		<!-- Created by: Lara Beltran
+		Date: Feb 1, 2013 -->	
+		SELECT *
+		FROM (SELECT rownum rownum_,
+		b.count_,
+		a.*
+		FROM (SELECT *
+		FROM TABLE(giis_funds_pkg.get_fund_cd_lov2)
+		<isNotNull property="findText">
+			WHERE (UPPER(fund_cd) LIKE UPPER(#findText#) OR UPPER(fund_desc) LIKE
+			UPPER(#findText#))
+		</isNotNull>
+		<isNotNull property="sortColumn">
+			<isEqual property="sortColumn" compareValue="fundCd">
+				ORDER BY fund_cd
+			</isEqual>
+			<isEqual property="sortColumn" compareValue="fundDesc">
+				ORDER BY fund_desc
+			</isEqual>
+			<isEqual property="ascDescFlg" compareValue="ASC">
+				ASC
+			</isEqual>
+			<isEqual property="ascDescFlg" compareValue="DESC">
+				DESC
+			</isEqual>
+		</isNotNull>
+		) a,
+		(SELECT count(*) count_
+		FROM TABLE(giis_funds_pkg.get_fund_cd_lov2)
+		<isNotNull property="findText">
+			WHERE (UPPER(fund_cd) LIKE UPPER(#findText#) OR UPPER(fund_desc) LIKE
+			UPPER(#findText#))
+		</isNotNull>
+		) b)
+		WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+
+	<resultMap class="java.util.HashMap" id="GIACSInquiryFundLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="fund_cd"				property="fundCd" />
+		<result column="fund_desc"				property="fundDesc" />
+	</resultMap>
+	
+	<select id="getGIACSInquiryFundLOV" resultMap="GIACSInquiryFundLOVResultMap">
+	    SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT *
+		                  FROM TABLE(giis_funds_pkg.get_company_lov_list(#company#))
+			          	  	  <isNotNull property="findText">
+									WHERE (UPPER(fund_cd) LIKE UPPER(#findText#) 
+										OR UPPER(fund_desc) LIKE UPPER(#findText#))
+								</isNotNull>
+								<isNotNull property="sortColumn">
+									<isEqual property="sortColumn" compareValue="fundCd">
+										ORDER BY fund_cd
+									</isEqual>
+									<isEqual property="sortColumn" compareValue="fundDesc">
+										ORDER BY fund_desc
+									</isEqual>
+									<isEqual property="ascDescFlg" compareValue="ASC">
+										ASC
+									</isEqual>
+									<isEqual property="ascDescFlg" compareValue="DESC">
+										DESC
+									</isEqual>
+								</isNotNull>
+							) a,
+							(SELECT count(*) count_
+							FROM TABLE(giis_funds_pkg.get_company_lov_list(#company#))
+							<isNotNull property="findText">
+								WHERE (UPPER(fund_cd) LIKE UPPER(#findText#)
+									OR UPPER(fund_desc) LIKE UPPER(#findText#))
+							</isNotNull>
+			                ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<!-- lara  -->
+	<resultMap class="java.util.HashMap" id="GIACS237FundLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="fund_cd"	property="fundCd" />
+		<result column="fund_desc"		property="fundDesc" />
+	</resultMap>
+	
+	<select id="getGIACS237FundLOV" resultMap="GIACS237FundLOVResultMap">
+	    SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT *
+		                  FROM TABLE(GIACS237_PKG.get_fund_cd_lov)
+			          	  	    <isNull property="findText">
+				                	WHERE UPPER(fund_desc) LIKE UPPER(#searchString#)
+				          			OR UPPER(fund_cd) LIKE UPPER(#searchString#)
+				                </isNull>
+				                <isNotNull property="findText">
+				                	WHERE UPPER(fund_desc) LIKE UPPER(#findText#)
+				          			OR UPPER(fund_cd) LIKE UPPER(#findText#)
+				                </isNotNull>
+								<isNotNull property="sortColumn">
+									<isEqual property="sortColumn" compareValue="fundCd">
+										ORDER BY fund_cd
+									</isEqual>
+									<isEqual property="sortColumn" compareValue="fundDesc">
+										ORDER BY fund_desc
+									</isEqual>
+									<isEqual property="ascDescFlg" compareValue="ASC">
+										ASC
+									</isEqual>
+									<isEqual property="ascDescFlg" compareValue="DESC">
+										DESC
+									</isEqual>
+								</isNotNull>
+							) a,
+							(SELECT count(*) count_
+							FROM TABLE(GIACS237_PKG.get_fund_cd_lov)
+							    <isNull property="findText">
+				                	WHERE UPPER(fund_desc) LIKE UPPER(#searchString#)
+				          			OR UPPER(fund_cd) LIKE UPPER(#searchString#)
+				                </isNull>
+				                <isNotNull property="findText">
+				                	WHERE UPPER(fund_desc) LIKE UPPER(#findText#)
+				          			OR UPPER(fund_cd) LIKE UPPER(#findText#)
+				                </isNotNull>
+			                ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<!-- added filter from textbox before lov shows -->
+	<!-- pol cruz 04.19.2013  -->
+	<select id="getGIACSFundLOV2" resultMap="GIACSInquiryFundLOVResultMap">
+	    SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT *
+		                  FROM TABLE(GIIS_FUNDS_PKG.get_fund_cd_lov2)
+			          	  	    <isNull property="findText">
+				                	WHERE UPPER(fund_desc) LIKE UPPER(NVL(#searchString#, fund_desc))
+				          			OR UPPER(fund_cd) LIKE UPPER(NVL(#searchString#, fund_cd))
+				                </isNull>
+				                <isNotNull property="findText">
+				                	WHERE UPPER(fund_desc) LIKE UPPER(#findText#)
+				          			OR UPPER(fund_cd) LIKE UPPER(#findText#)
+				                </isNotNull>
+								<isNotNull property="sortColumn">
+									<isEqual property="sortColumn" compareValue="fundCd">
+										ORDER BY fund_cd
+									</isEqual>
+									<isEqual property="sortColumn" compareValue="fundDesc">
+										ORDER BY fund_desc
+									</isEqual>
+									<isEqual property="ascDescFlg" compareValue="ASC">
+										ASC
+									</isEqual>
+									<isEqual property="ascDescFlg" compareValue="DESC">
+										DESC
+									</isEqual>
+								</isNotNull>
+							) a,
+							(SELECT count(*) count_
+							FROM TABLE(GIIS_FUNDS_PKG.get_fund_cd_lov2)
+							    <isNull property="findText">
+				                	WHERE UPPER(fund_desc) LIKE UPPER(NVL(#searchString#, fund_desc))
+				          			OR UPPER(fund_cd) LIKE UPPER(NVL(#searchString#, fund_cd))
+				                </isNull>
+				                <isNotNull property="findText">
+				                	WHERE UPPER(fund_desc) LIKE UPPER(#findText#)
+				          			OR UPPER(fund_cd) LIKE UPPER(#findText#)
+				                </isNotNull>
+			                ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+
+	<select id="getFundLOV" resultMap="fundCdLOVMapTG">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+			b.count_,
+			a.*
+			FROM (SELECT *
+			FROM TABLE(giis_funds_pkg.get_fund_cd_lov(#findText#))
+			<isNotNull property="sortColumn">
+				<isEqual property="sortColumn" compareValue="fundCd">
+					ORDER BY fund_cd
+				</isEqual>
+				<isEqual property="sortColumn" compareValue="fundDesc">
+					ORDER BY fund_desc
+				</isEqual>
+				<isEqual property="ascDescFlg" compareValue="ASC">
+					ASC
+				</isEqual>
+				<isEqual property="ascDescFlg" compareValue="DESC">
+					DESC
+				</isEqual>
+			</isNotNull>
+			) a,
+			(SELECT count(*) count_
+			FROM TABLE(giis_funds_pkg.get_fund_cd_lov(#findText#))
+			) b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getFundLOV3" resultMap="fundCdLOVMapTG">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+			b.count_,
+			a.*
+			FROM (SELECT *
+			FROM TABLE(giis_funds_pkg.get_fund_cd_lov3(#moduleId#, #userId#, #findText#))
+			<isNotNull property="sortColumn">
+				<isEqual property="sortColumn" compareValue="fundCd">
+					ORDER BY fund_cd
+				</isEqual>
+				<isEqual property="sortColumn" compareValue="fundDesc">
+					ORDER BY fund_desc
+				</isEqual>
+				<isEqual property="ascDescFlg" compareValue="ASC">
+					ASC
+				</isEqual>
+				<isEqual property="ascDescFlg" compareValue="DESC">
+					DESC
+				</isEqual>
+			</isNotNull>
+			) a,
+			(SELECT count(*) count_
+			FROM TABLE(giis_funds_pkg.get_fund_cd_lov3(#moduleId#, #userId#, #findText#))
+			) b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+
+	<select id="validateFundCd" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT giacs240_pkg.validate_fund_cd(#fundCd#,#moduleId#,#userId#) FROM DUAL
+	</select>
+	
+	<!-- start of GIACS302; steve 11.07.2013-->
+	<typeAlias alias="GIISFunds" type="com.geniisys.common.entity.GIISFunds"/>
+
+	<resultMap class="GIISFunds" id="giacs302RecListMap" extends="BaseEntity.TableGridResultMap">
+		<result column="fund_cd" 			property="fundCd" />
+		<result column="fund_desc" 			property="fundDesc" />
+		<result column="remarks" 			property="remarks" />
+		<result column="user_id" 			property="userId" />
+		<result column="last_update" 		property="lastUpdate" />
+	</resultMap>
+	
+	<select id="getGiacs302RecList" resultMap="giacs302RecListMap">
+		SELECT * 
+			FROM (SELECT rownum rownum_,
+						 b.count_,
+						 a.*
+					FROM (SELECT * 
+							FROM TABLE (giacs302_pkg.get_rec_list (#fundCd#,#fundDesc#))
+							<isEqual property="sortColumn" compareValue="fundCd">
+								ORDER BY fund_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="fundDesc">
+								ORDER BY fund_desc
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>) a, 
+							(SELECT count(*) count_
+							   FROM TABLE (giacs302_pkg.get_rec_list (#fundCd#,#fundDesc#))
+							 ) b)
+		WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="setGIISFund" parameterClass="GIISFunds">
+	    DECLARE
+	    	v_rec giis_funds%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+
+ 			v_rec.fund_cd := #fundCd#;
+ 			v_rec.fund_desc := #fundDesc#;
+ 			v_rec.remarks := #remarks#;
+ 			v_rec.user_id := #userId#;
+ 			
+ 			giacs302_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteGIISFund" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giacs302_pkg.val_del_rec(#recId#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddGIISFund" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giacs302_pkg.val_add_rec(#recId#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delGIISFund" parameterClass="java.lang.String">
+		BEGIN
+ 			giacs302_pkg.del_rec(#recId#);
+ 		END;
+ 	</delete>
+</sqlMap>
+

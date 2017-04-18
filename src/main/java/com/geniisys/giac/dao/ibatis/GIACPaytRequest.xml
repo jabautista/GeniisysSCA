@@ -1,0 +1,811 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIAPaytRequest">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIACPaytRequestClass" type="com.geniisys.giac.entity.GIACPaytRequests"/>
+	
+	<resultMap class="GIACPaytRequestClass" id="GIACPaytRequestResultMap">
+		<result column="gouc_ouc_id" 			property="goucOucId" />    
+		<result column="ref_id" 				property="refId" />         
+		<result column="fund_cd" 				property="fundCd" />         
+		<result column="branch_cd" 				property="branchCd" />       
+		<result column="document_cd" 			property="documentCd" />     
+		<result column="doc_seq_no" 			property="docSeqNo" />     
+		<result column="request_date" 			property="requestDate" />      
+		<result column="line_cd" 				property="lineCd" />         
+		<result column="doc_year" 				property="docYear" />       
+		<result column="doc_mm" 				property="docMm" />       
+		<result column="user_id" 				property="userId" />            
+		<result column="last_update" 			property="lastUpdate" />    	
+		<result column="cpi_rec_no" 			property="cpiRecNo" />     
+		<result column="cpi_branch_cd" 			property="cpiBranchCd" />   
+		<result column="with_dv" 				property="withDv" />         
+		<result column="create_by" 				property="createBy" />       
+		<result column="upload_tag" 			property="uploadTag" />      
+		<result column="rf_replenish_tag" 		property="rfReplenishTag" />
+		<result column="dsp_dept_cd" 			property="dspDeptCd" />
+		<result column="dsp_fund_desc" 			property="dspFundDesc" />
+		<result column="dsp_branch_name" 		property="dspBranchName" />
+		<result column="dsp_ouc_name" 			property="dspOucName" />
+	</resultMap>
+	
+	<parameterMap class="java.util.HashMap" id="GICLS032InsertIntoGiacPaytRequestsParamMap">
+		<parameter property="lineCd" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="issCd" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="userId" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="refId" javaType="java.lang.Integer" jdbcType="NUMERIC" mode="OUT"/>
+	</parameterMap>
+	
+	<resultMap id="clmPaytReqListingMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result column="REF_ID"				property="refId"/>
+		<result column="REQUEST_NO"			property="requestNo"/>
+		<result column="OUC_NAME"			property="oucName"/>
+		<result column="REQUEST_DATE"		property="requestDate"/>
+		<result column="PAYEE"				property="payee"/>
+		<result column="PARTICULARS"		property="particulars"/>
+		<result column="CREATE_BY"			property="createBy"/>
+		<result column="STATUS"				property="status"/>
+  	</resultMap>
+  	
+  	<resultMap id="commFundListingResultMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result column="COMM_SLIP_PREF"		property="commSlipPref"/>
+		<result column="COMM_SLIP_NO"		property="commSlipNo"/>
+		<result column="COMM_SLIP_DATE"		property="commSlipDate"/>
+		<result column="INTM_NO"			property="intmNo"/>
+		<result column="COMM_AMT"			property="commAmt"/>
+		<result column="WTAX_AMT"			property="wtaxAmt"/>
+		<result column="INPUT_VAT_AMT"		property="inputVatAmt"/>
+		<result column="SPOILED_TAG"		property="spoiledTag"/>
+		<result column="BILL_NO"			property="billNo"/>
+		<result column="NET_AMT"			property="netAmt"/>
+		<result column="COMM_SLIP_FLAG"		property="commSlipFlag"/>
+		<result column="COMM_SLIP_TAG"		property="commSlipTag"/>
+		<result column="DSP_COMM_SLIP_DATE"	property="dspCommSlipDate"/>
+		<result column="ISS_CD"				property="issCd"/>
+		<result column="PREM_SEQ_NO"		property="premSeqNo"/>
+		<result column="REC_ID"				property="recId"/>
+		<result column="GACC_TRAN_ID"		property="gaccTranId"/>
+  	</resultMap>
+  	
+  	<parameterMap class="map" id="checkCommFundSlipMap">
+		<parameter property="userId"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="gaccTranId"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="inRecId"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="commSlipPref"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="commSlipNo"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="commSlipDate"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="gicls032InsertIntoGiacPaytRequests" parameterMap="GICLS032InsertIntoGiacPaytRequestsParamMap">
+		BEGIN
+			gicls032_ins_giac_payt_req(?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<select id="getClmPaytReqListing" resultMap="clmPaytReqListingMap" parameterClass="java.util.HashMap">
+ 		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(GIAC_PAYT_REQUESTS_PKG.get_clm_payt_req_listing(#userId#, #paytReqFlag#, #status#, #payee#, #requestNo#, #requestDate#, #particulars#, #createBy#, #branchCd#))
+		                  <isEqual property="sortColumn" compareValue="requestNo">
+			              		ORDER BY request_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="oucName">
+			              		ORDER BY ouc_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="requestDate">
+			              		ORDER BY request_date
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="payee">
+			              		ORDER BY payee
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="particulars">
+			              		ORDER BY particulars
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="createBy">
+			              		ORDER BY create_by
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="status">
+			              		ORDER BY status
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GIAC_PAYT_REQUESTS_PKG.get_clm_payt_req_listing(#userId#, #paytReqFlag#, #status#, #payee#, #requestNo#, #requestDate#, #particulars#, #createBy#, #branchCd#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+  	
+  	<select id="getFaculPremPaytListing" resultMap="clmPaytReqListingMap" parameterClass="java.util.HashMap">
+ 		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(GIAC_PAYT_REQUESTS_PKG.get_facul_prem_payt_listing(#userId#, #paytReqFlag#, #status#, #payee#, #requestNo#, #requestDate#, #particulars#, #createBy#, #branchCd#))
+		                  <isEqual property="sortColumn" compareValue="requestNo">
+			              		ORDER BY request_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="oucName">
+			              		ORDER BY ouc_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="requestDate">
+			              		ORDER BY request_date
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="payee">
+			              		ORDER BY payee
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="particulars">
+			              		ORDER BY particulars
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="createBy">
+			              		ORDER BY create_by
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="status">
+			              		ORDER BY status
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GIAC_PAYT_REQUESTS_PKG.get_facul_prem_payt_listing(#userId#, #paytReqFlag#, #status#, #payee#, #requestNo#, #requestDate#, #particulars#, #createBy#, #branchCd#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+  	
+  	<select id="getCommPaytListing" resultMap="clmPaytReqListingMap" parameterClass="java.util.HashMap">
+ 		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(GIAC_PAYT_REQUESTS_PKG.get_comm_payt_listing(#userId#, #paytReqFlag#, #status#, #payee#, #requestNo#, #requestDate#, #particulars#, #createBy#, #branchCd#))
+		                  <isEqual property="sortColumn" compareValue="requestNo">
+			              		ORDER BY request_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="oucName">
+			              		ORDER BY ouc_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="requestDate">
+			              		ORDER BY request_date
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="payee">
+			              		ORDER BY payee
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="particulars">
+			              		ORDER BY particulars
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="createBy">
+			              		ORDER BY create_by
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="status">
+			              		ORDER BY status
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GIAC_PAYT_REQUESTS_PKG.get_comm_payt_listing(#userId#, #paytReqFlag#, #status#, #payee#, #requestNo#, #requestDate#, #particulars#, #createBy#, #branchCd#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+  	
+  	<select id="getOtherPaytListing" resultMap="clmPaytReqListingMap" parameterClass="java.util.HashMap">
+ 		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(GIAC_PAYT_REQUESTS_PKG.get_other_payt_listing(#userId#, #paytReqFlag#, #status#, #payee#, #requestNo#, #requestDate#, #particulars#, #createBy#, #branchCd#))
+		                  <isEqual property="sortColumn" compareValue="requestNo">
+			              		ORDER BY request_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="oucName">
+			              		ORDER BY ouc_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="requestDate">
+			              		ORDER BY request_date
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="payee">
+			              		ORDER BY payee
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="particulars">
+			              		ORDER BY particulars
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="createBy">
+			              		ORDER BY create_by
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="status">
+			              		ORDER BY status
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GIAC_PAYT_REQUESTS_PKG.get_other_payt_listing(#userId#, #paytReqFlag#, #status#, #payee#, #requestNo#, #requestDate#, #particulars#, #createBy#, #branchCd#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+	
+	<select id="getCancelReqListing" resultMap="clmPaytReqListingMap" parameterClass="java.util.HashMap">
+ 		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(GIAC_PAYT_REQUESTS_PKG.get_cancel_req_listing(#userId#, #paytReqFlag#, #status#, #payee#, #requestNo#, #requestDate#, #particulars#, #createBy#, #branchCd#))
+		                  <isEqual property="sortColumn" compareValue="requestNo">
+			              		ORDER BY request_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="oucName">
+			              		ORDER BY ouc_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="requestDate">
+			              		ORDER BY request_date
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="payee">
+			              		ORDER BY payee
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="particulars">
+			              		ORDER BY particulars
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="createBy">
+			              		ORDER BY create_by
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="status">
+			              		ORDER BY status
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GIAC_PAYT_REQUESTS_PKG.get_cancel_req_listing(#userId#, #paytReqFlag#, #status#, #payee#, #requestNo#, #requestDate#, #particulars#, #createBy#, #branchCd#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+	
+	<select id="getGiacPaytRequests" resultMap="GIACPaytRequestResultMap">
+		SELECT * FROM TABLE(GIAC_PAYT_REQUESTS_PKG.get_giac_payt_requests(#refId#))
+	</select>
+	
+	<select id="getNewRefId" resultClass="Integer">
+		 SELECT gprq_ref_id_s.NEXTVAL FROM dual
+	</select>	
+	
+	<procedure id="setGiacPaytRequests" parameterClass="GIACPaytRequestClass">
+		DECLARE
+			payt_request giac_payt_requests%ROWTYPE;
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			payt_request.ref_id := #refId#;
+			payt_request.gouc_ouc_id := #goucOucId#;
+			payt_request.fund_cd := #fundCd#;
+			payt_request.branch_cd := #branchCd#;
+			payt_request.document_cd := #documentCd#;
+			payt_request.line_cd := #lineCd#;
+			payt_request.doc_year := #docYear#;
+			payt_request.doc_mm := #docMm#;
+			payt_request.user_id := #userId#;
+			payt_request.with_dv := #withDv#;
+			payt_request.create_by := #createBy#;
+			payt_request.upload_tag := #uploadTag#;
+			payt_request.rf_replenish_tag := #rfReplenishTag#;
+			payt_request.request_date := #requestDate#; <!-- RSIC SR-11259, copied from SR-16985 : shan 08.28.2015 -->
+			
+			GIAC_PAYT_REQUESTS_PKG.set_giac_payt_requests(payt_request);
+		END;	
+	</procedure>
+
+	<select id="getClosedTagGIACS016" parameterClass="map" resultClass="String">
+		SELECT GIAC_PAYT_REQUESTS_PKG.get_closed_tag(#fundCd#, to_date(#requestDate#,'MM-DD-YYYY'), #branchCd#) from dual
+	</select>
+	
+	<parameterMap class="java.util.HashMap" id="getFundBranchDescMap">
+		<parameter property="fundCd" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="branchCd" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="fundDesc" javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT"/>
+		<parameter property="branchName" javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="getFundBranchDesc" parameterMap="getFundBranchDescMap">
+		BEGIN
+			GIAC_PAYT_REQUESTS_PKG.get_fund_branch_desc(?,?,?,?);
+		END;	
+	</procedure>
+	
+	<procedure id="valAmtBeforeClosing" parameterClass="map" >
+		BEGIN
+			val_amt_before_closing(#tranId#, #paytAmt#);
+		END;	
+	</procedure>
+	
+	<resultMap class="java.util.HashMap" id="populateChkTagsMap">
+		<result property="varDocumentName" column="var_document_name"/>
+		<result property="varLineCdTag" column="var_line_Cd_tag"/>
+		<result property="varYyTag" column="var_yy_tag"/>
+		<result property="varMmTag" column="var_mm_tag"/>
+	</resultMap>
+	
+	<select id="populateChkTags" resultMap="populateChkTagsMap" parameterClass="map">
+		SELECT * FROM TABLE(GIAC_PAYT_REQUESTS_PKG.POPULATE_CHK_TAGS(#fundCd#, #branchCd#,#documentCd# ))
+	</select>
+	
+	<parameterMap class="java.util.HashMap" id="closeDisbursementMap">
+		<parameter property="refId" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="reqDtlNo" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="tranId" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="userId"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="documentCd"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="branchCd"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="lineCd"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="docYear" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="docMm" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="docSeqNo" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="workflowMsgr"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="pMessageAlert"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>		
+	</parameterMap>
+	
+	<procedure id="closeDisbursementRequest" parameterMap="closeDisbursementMap">
+		Begin
+			GIAC_PAYT_REQUESTS_PKG.close_disbursement_request(?,?,?,?,?,?,?,?,?,?,?,?);
+		end;
+	</procedure>
+	
+	<procedure id="cancelPaymentRequest" parameterClass="map" >
+		Begin
+			giis_users_PKG.app_user := #userId#;
+			GIAC_PAYT_REQUESTS_PKG.cancel_payment_request(#refId#,#tranId#,#userId#);
+		end;
+	</procedure>
+	
+	<resultMap id="getPaymentLinesMap" class="com.geniisys.common.entity.GIISLine">
+		<result property="lineCd"	column="LINE_CD" />
+		<result property="lineName"	column="LINE_NAME" />
+	</resultMap>
+	<select id="getPaymentLinesList" resultMap="getPaymentLinesMap" parameterClass="java.util.HashMap">
+		SELECT *
+  		  FROM TABLE(GIAC_PAYT_REQUESTS_PKG.get_payt_line_cd_list(#fundCd#, #branchCd#, #documentCd#, #moduleId#, #userId#))
+	</select>
+	
+	<resultMap id="getDocMonthYearMap" class="GIACPaytRequestClass">
+		<result property="docYear" 		column="DOC_YEAR" />
+		<result property="docMm"		column="DOC_MM" />
+	</resultMap>
+	
+	<select id="getDocYearList" parameterClass="java.util.HashMap" resultMap="getDocMonthYearMap">
+		SELECT *
+  		  FROM TABLE(GIAC_PAYT_REQUESTS_PKG.get_doc_yy_list(#fundCd#, #branchCd#, #documentCd#, #moduleId#, #userId#, #lineCd#))
+	</select>
+	
+	<select id="getDocMmList" parameterClass="java.util.HashMap" resultMap="getDocMonthYearMap">
+		SELECT *
+  		  FROM TABLE(GIAC_PAYT_REQUESTS_PKG.get_doc_mm_list(#fundCd#, #branchCd#, #documentCd#, #moduleId#, #userId#, #lineCd#, #docYear#))
+	</select>
+	
+	<resultMap id="getDocSeqNoInfoMap" class="GIACPaytRequestClass" >
+		<result property="fundCd"			column="FUND_CD" />
+		<result property="docSeqNo"			column="DOC_SEQ_NO" />
+		<result property="paytReqNo"		column="PAYT_REQ_NO" />
+		<result property="documentName"		column="DOCUMENT_NAME" />
+		<result property="tranId"			column="TRAN_ID" />
+		<result property="refId"			column="REF_ID" />
+		<result property="reqDtlNo"			column="REQ_DTL_NO" />
+		<result property="requestDate"		column="REQUEST_DATE" />
+		<result property="goucOucId"		column="GOUC_OUC_ID" />
+		<result property="dspDeptCd"		column="OUC_CD" />
+		<result property="dspOucName"		column="OUC_NAME" />
+		<result property="payeeClassCd"		column="PAYEE_CLASS_CD" />
+		<result property="classDesc"		column="CLASS_DESC" />
+		<result property="payeeCd"			column="PAYEE_CD" />
+		<result property="payee"			column="PAYEE" />
+		<result property="paytAmt"			column="PAYT_AMT" />
+		<result property="particulars"		column="PARTICULARS" />
+		<result property="currencyCd"		column="CURRENCY_CD" />
+		<result property="currencyDesc"		column="CURRENCY_DESC" />
+		<result property="dvFcurrencyAmt"	column="DV_FCURRENCY_AMT" />
+		<result property="currencyRt"		column="CURRENCY_RT" />
+	</resultMap>
+	<resultMap id="getDocSeqNoTGMap" class="GIACPaytRequestClass" extends="getDocSeqNoInfoMap">
+		<result property="rowNum" 	column="rownum_" />
+		<result property="rowCount" column="count_" />
+	</resultMap>
+	<select id="getDocSeqNoLOV" resultMap="getDocSeqNoTGMap" parameterClass="java.util.HashMap">
+		SELECT *
+  		  FROM (SELECT rownum rownum_,
+  		  			   b.count_,
+  		  			   a.*
+  		  		  FROM (SELECT *
+  		  		  		  FROM TABLE(GIAC_PAYT_REQUESTS_PKG.get_doc_seq_no_list(#fundCd#, #branchCd#, #documentCd#, #moduleId#, #userId#, #lineCd#, #docYear#, #docMm#))
+	  		  		  <isNotNull property="findText">
+  		  		  		  WHERE LTRIM(LPAD(doc_seq_no, 6, 0)) LIKE LTRIM(LPAD(DECODE(#findText#, '%', doc_seq_no, #findText#), 6, 0))	<!-- added DECODE : shan 08.01.2014 -->
+	  		  		  </isNotNull>
+  		  		  		  <isNotNull property="sortColumn">
+	  		  		  		  <isEqual property="sortColumn" compareValue="docSeqNo">
+				              		ORDER BY doc_seq_no
+				              </isEqual>	
+				              <isEqual property="sortColumn" compareValue="fundCd">
+				              		ORDER BY fund_cd
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="paytReqNo">
+				              		ORDER BY PAYT_REQ_NO
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="documentName">
+				              		ORDER BY DOCUMENT_NAME
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="requestDate">
+				              		ORDER BY REQUEST_DATE
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="dspDeptCd">
+				              		ORDER BY OUC_CD
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="dspOucName">
+				              		ORDER BY OUC_NAME
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="payeeClassCd">
+				              		ORDER BY PAYEE_CLASS_CD
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="classDesc">
+				              		ORDER BY CLASS_DESC
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="payeeCd">
+				              		ORDER BY PAYEE_CD
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="payee">
+				              		ORDER BY PAYEE
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="paytAmt">
+				              		ORDER BY PAYT_AMT
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="particulars">
+				              		ORDER BY PARTICULARS
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="currencyCd">
+				              		ORDER BY CURRENCY_CD
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="dvFcurrencyAmt">
+				              		ORDER BY DV_FCURRENCY_AMT
+				              </isEqual>		          	  
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+  		  		  		  ) a,
+  		  		  	   (SELECT count(*) count_
+  		  		  	      FROM TABLE(GIAC_PAYT_REQUESTS_PKG.get_doc_seq_no_list(#fundCd#, #branchCd#, #documentCd#, #moduleId#, #userId#, #lineCd#, #docYear#, #docMm#))
+  		  		  	  <isNotNull property="findText">
+  		  		  		  WHERE LTRIM(LPAD(doc_seq_no, 6, 0)) LIKE LTRIM(LPAD(DECODE(#findText#, '%', doc_seq_no, #findText#), 6, 0))	<!-- added DECODE : shan 08.01.2014 -->
+	  		  		  </isNotNull>
+			              ) b)
+  		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getDocSeqNoList" resultMap="getDocSeqNoInfoMap" parameterClass="java.util.HashMap">
+		SELECT *
+  		  FROM TABLE(GIAC_PAYT_REQUESTS_PKG.get_doc_seq_no_list(#fundCd#, #branchCd#, #documentCd#, #moduleId#, #userId#, #lineCd#, #docYear#, #docMm#))
+	</select>
+	
+	<select id="validateDocSeqNo" resultMap="getDocSeqNoInfoMap" parameterClass="java.util.HashMap">
+		SELECT *
+  		  FROM TABLE(GIAC_PAYT_REQUESTS_PKG.validate_doc_seq_no(#fundCd#, #branchCd#, #documentCd#, #lineCd#, #docYear#, #docMm#, #docSeqNo#))
+	</select>
+	
+	<procedure id="validatePaytDocYy" parameterClass="java.util.HashMap">
+		BEGIN
+			GIAC_PAYT_REQUESTS_PKG.validate_doc_yy(#fundCd#, #branchCd#, #documentCd#, #lineCd#, #docYear#, #nbtYyTag#);
+		END;
+	</procedure>
+	
+	<procedure id="validatePaytDocMm" parameterClass="java.util.HashMap">
+		BEGIN
+			GIAC_PAYT_REQUESTS_PKG.validate_doc_mm(#fundCd#, #branchCd#, #documentCd#, #lineCd#, #docYear#, #docMm#, #nbtMmTag#);
+		END;
+	</procedure>
+	
+	<procedure id="validatePaytLineCd" parameterClass="java.util.HashMap">
+		BEGIN
+			GIAC_PAYT_REQUESTS_PKG.validate_payt_line_cd(#fundCd#, #branchCd#, #documentCd#, #lineCd#, #lineCdTag#);
+		END;
+	</procedure>
+	
+	<resultMap id="giacs045DocumentCdResultMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result column="document_cd" property="documentCd"/>
+  	</resultMap>
+	
+	<select id="getGIACS045DocumentCdLov" resultMap="giacs045DocumentCdResultMap">
+		SELECT *
+            FROM (SELECT ROWNUM rownum_, b.count_, a.*
+                  FROM (SELECT *
+                          FROM TABLE(GIACS045_PKG.get_document_cd_lov)
+                            <isNull property="findText">
+			                	WHERE UPPER(document_cd) LIKE UPPER(NVL(#searchString#, document_cd))
+			                </isNull>
+			                <isNotNull property="findText">
+			                	WHERE UPPER(document_cd) LIKE UPPER(#findText#)
+			                </isNotNull>
+                            <isEqual property="sortColumn" compareValue="documentCd">
+                                     ORDER BY document_cd
+                            </isEqual>
+                            <isNotNull property="sortColumn">
+                                 <isEqual property="ascDescFlg" compareValue="ASC">
+                                     ASC
+                                 </isEqual>
+                                 <isEqual property="ascDescFlg" compareValue="DESC">
+                                     DESC
+                                 </isEqual>
+                            </isNotNull>) a,
+               (SELECT COUNT (*) count_
+                  FROM TABLE
+                          (GIACS045_PKG.get_document_cd_lov)
+                            <isNull property="findText">
+			                	WHERE UPPER(document_cd) LIKE UPPER(NVL(#searchString#, document_cd))
+			                </isNull>
+			                <isNotNull property="findText">
+			                	WHERE UPPER(document_cd) LIKE UPPER(#findText#)
+			                </isNotNull>
+                          ) b)
+          WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap id="giacs045DocYearResultMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result column="doc_year" property="docYear"/>
+		<result column="doc_mm" property="docMm"/>
+  	</resultMap>
+  	
+  	<select id="getGIACS045DocYearLov" resultMap="giacs045DocYearResultMap">
+		SELECT *
+            FROM (SELECT ROWNUM rownum_, b.count_, a.*
+                  FROM (SELECT *
+                          FROM TABLE(GIACS045_PKG.get_doc_year_lov(#documentCd#, #branchCd#, #lineCd#))
+                           <isNull property="findText">
+			                	WHERE doc_year LIKE NVL(#searchString#, doc_year)
+			                </isNull>
+			                <isNotNull property="findText">
+			            	    WHERE doc_year LIKE NVL(#findText#, doc_year)
+			            	      OR doc_mm LIKE NVL(#findText#, doc_mm)
+			                </isNotNull>
+                            <isEqual property="sortColumn" compareValue="docYear">
+                                     ORDER BY doc_year
+                            </isEqual>
+                            <isEqual property="sortColumn" compareValue="docMm">
+                                     ORDER BY doc_mm
+                            </isEqual>
+                            <isNotNull property="sortColumn">
+                                 <isEqual property="ascDescFlg" compareValue="ASC">
+                                     ASC
+                                 </isEqual>
+                                 <isEqual property="ascDescFlg" compareValue="DESC">
+                                     DESC
+                                 </isEqual>
+                            </isNotNull>) a,
+               (SELECT COUNT (*) count_
+                  FROM TABLE
+                          (GIACS045_PKG.get_doc_year_lov(#documentCd#, #branchCd#, #lineCd#))
+                            <isNull property="findText">
+			                	WHERE doc_year LIKE NVL(#searchString#, doc_year)
+			                </isNull>
+			                <isNotNull property="findText">
+			                	WHERE doc_year LIKE NVL(#findText#, doc_year)
+			                	OR doc_mm LIKE NVL(#findText#, doc_mm)
+			                </isNotNull>
+                          ) b)
+          WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap id="giacs045DocSeqNoResultMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result column="doc_seq_no" property="docSeqNo"/>
+		<result column="particulars" property="particulars"/>
+  	</resultMap>
+  	
+  	<select id="getGIACS045DocSeqNoLov" resultMap="giacs045DocSeqNoResultMap">
+		SELECT *
+            FROM (SELECT ROWNUM rownum_, b.count_, a.*
+                  FROM (SELECT *
+                          FROM TABLE(GIACS045_PKG.get_doc_seq_no_lov(#documentCd#, #branchCd#, #lineCd#, #docYear#, #docMm#, #docSeqNo#))
+                            <isNull property="findText">
+			                	WHERE doc_seq_no LIKE NVL(#searchString#, doc_seq_no)
+			                </isNull>
+			                <isNotNull property="findText">
+			            	    WHERE doc_seq_no LIKE NVL(#findText#, doc_seq_no)
+			            	      OR  UPPER(particulars) LIKE UPPER(NVL(#findText#, particulars))
+			                </isNotNull>
+                            <isEqual property="sortColumn" compareValue="docSeqNo">
+                                     ORDER BY doc_seq_no
+                            </isEqual>
+                            <isEqual property="sortColumn" compareValue="particulars">
+                                     ORDER BY particulars
+                            </isEqual>
+                            <isNotNull property="sortColumn">
+                                 <isEqual property="ascDescFlg" compareValue="ASC">
+                                     ASC
+                                 </isEqual>
+                                 <isEqual property="ascDescFlg" compareValue="DESC">
+                                     DESC
+                                 </isEqual>
+                            </isNotNull>) a,
+               (SELECT COUNT (*) count_
+                  FROM TABLE
+                          (GIACS045_PKG.get_doc_seq_no_lov(#documentCd#, #branchCd#, #lineCd#, #docYear#, #docMm#, #docSeqNo#))
+                            <isNull property="findText">
+			                	WHERE doc_seq_no LIKE NVL(#searchString#, doc_seq_no)
+			                </isNull>
+			                <isNotNull property="findText">
+			            	    WHERE doc_seq_no LIKE NVL(#findText#, doc_seq_no)
+			            	      OR  UPPER(particulars) LIKE UPPER(NVL(#findText#, particulars))
+			                </isNotNull>
+                          ) b)
+          WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+
+	<parameterMap class="java.util.HashMap" id="GIACPaytReqOtherDetailsParamMap">
+		<parameter property="tranId" 		javaType="java.lang.Integer" jdbcType="NUMERIC" mode="IN"/>
+		<parameter property="documentCd" 	javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="branchCd" 		javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="lineCd" 		javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="docYear" 		javaType="java.lang.Integer" jdbcType="NUMERIC" mode="IN"/>
+		<parameter property="docMm" 		javaType="java.lang.Integer" jdbcType="NUMERIC" mode="IN"/>
+		<parameter property="docSeqNo" 		javaType="java.lang.Integer" jdbcType="NUMERIC" mode="IN"/>
+		<parameter property="paytReqFlag" 	javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="dspTranNo" 	javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT"/>
+		<parameter property="dspReqNo" 		javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT"/>
+		<parameter property="dspPaytReqMean" javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT"/>
+	</parameterMap>
+
+	<procedure id="giacs016DrDetailsPostQuery" parameterMap="GIACPaytReqOtherDetailsParamMap">
+		BEGIN
+			GIACS016_DR_DETAILS_POST_QUERY(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<procedure id="extractCommFund" parameterClass="java.util.HashMap">
+		BEGIN
+			GIIS_USERS_PKG.app_user := #userId#;
+			GIACS157_pkg.extract_comm_slip(#gaccTranId#, #userId#);
+		END;
+	</procedure>
+	
+	<select id="getCommFundListing" resultMap="commFundListingResultMap">
+		SELECT *
+          FROM (SELECT ROWNUM rownum_,
+            		   b.count_,
+            		   a.*
+                  FROM (SELECT *
+                          FROM TABLE(GIACS157_PKG.get_giac_comm_fund_listing(#gaccTranId#))
+	                        <isNull property="findText">
+			                	WHERE UPPER(NVL(bill_no, '*')) LIKE UPPER(NVL(#billNo#, NVL(bill_no, '*')))
+			                	  AND NVL(comm_amt, 0) = NVL(#commAmt#, NVL(comm_amt, 0))
+			                	  AND NVL(input_vat_amt, 0) = NVL(#inputVatAmt#, NVL(input_vat_amt, 0))
+			                	  AND NVL(intm_no, 0) = NVL(#intmNo#, NVL(intm_no, 0))
+			                	  AND NVL(net_amt, 0) = NVL(#netAmt#, NVL(net_amt, 0))
+			                	  AND NVL(wtax_amt, 0) = NVL(#wtaxAmt#, NVL(wtax_amt, 0))
+			                	  AND UPPER(NVL(comm_slip_pref, '*')) LIKE UPPER(NVL(#commSlipPref#, NVL(comm_slip_pref, '*')))
+			                	  AND NVL(comm_slip_no, 0) = NVL(#commSlipNo#, NVL(comm_slip_no, 0))
+			                	  AND NVL(dsp_comm_slip_date, '*')  = NVL(#dspCommSlipDate#, NVL(dsp_comm_slip_date, '*'))
+			                </isNull>
+                            <isEqual property="sortColumn" compareValue="intmNo">
+                                     ORDER BY intm_no
+                            </isEqual>
+                            <isEqual property="sortColumn" compareValue="billNo">
+                                     ORDER BY bill_no
+                            </isEqual>
+                            <isEqual property="sortColumn" compareValue="commAmt">
+                                     ORDER BY comm_amt
+                            </isEqual>
+                            <isEqual property="sortColumn" compareValue="wtaxAmt">
+                                     ORDER BY wtax_amt
+                            </isEqual>
+                            <isEqual property="sortColumn" compareValue="inputVatAmt">
+                                     ORDER BY input_vat_amt
+                            </isEqual>
+                            <isEqual property="sortColumn" compareValue="netAmt">
+                                     ORDER BY net_amt
+                            </isEqual>
+                            <isEqual property="sortColumn" compareValue="spoiledTag">
+                                     ORDER BY spoiled_tag
+                            </isEqual>
+                            <isEqual property="sortColumn" compareValue="commSlipPref commSlipNo dspCommSlipDate">
+                                     ORDER BY comm_slip_pref, comm_slip_no
+                            </isEqual>
+                            <isNotNull property="sortColumn">
+                                 <isEqual property="ascDescFlg" compareValue="ASC">
+                                     ASC
+                                 </isEqual>
+                                 <isEqual property="ascDescFlg" compareValue="DESC">
+                                     DESC
+                                 </isEqual>
+                            </isNotNull>) a,
+               (SELECT COUNT(*) count_
+                  FROM TABLE(GIACS157_PKG.get_giac_comm_fund_listing(#gaccTranId#))
+                  			<isNull property="findText">
+			                	WHERE UPPER(NVL(bill_no, '*')) LIKE UPPER(NVL(#billNo#, NVL(bill_no, '*')))
+			                	  AND NVL(comm_amt, 0) = NVL(#commAmt#, NVL(comm_amt, 0))
+			                	  AND NVL(input_vat_amt, 0) = NVL(#inputVatAmt#, NVL(input_vat_amt, 0))
+			                	  AND NVL(intm_no, 0) = NVL(#intmNo#, NVL(intm_no, 0))
+			                	  AND NVL(net_amt, 0) = NVL(#netAmt#, NVL(net_amt, 0))
+			                	  AND NVL(wtax_amt, 0) = NVL(#wtaxAmt#, NVL(wtax_amt, 0))
+			                	  AND UPPER(NVL(comm_slip_pref, '*')) LIKE UPPER(NVL(#commSlipPref#, NVL(comm_slip_pref, '*')))
+			                	  AND NVL(comm_slip_no, 0) = NVL(#commSlipNo#, NVL(comm_slip_no, 0))
+			                	  AND NVL(dsp_comm_slip_date, '*')  = NVL(#dspCommSlipDate#, NVL(dsp_comm_slip_date, '*'))
+			                </isNull>
+                          ) b)
+          <!-- WHERE rownum_ BETWEEN #from# AND #to# -->
+          <!-- bonok :: 7.14.2015 - remove pager. temp solution for issue in tagging records in different pages -->
+	</select>
+	
+	<resultMap id="commFundListingResultMap2" class="java.util.HashMap" extends="commFundListingResultMap"> <!-- added by steven 07.31.2014 -->
+		<result column="include"		property="include"/>
+  	</resultMap>
+	
+	<select id="getAllCommFundListing" resultMap="commFundListingResultMap2"> <!-- added by steven 07.31.2014 -->
+		SELECT '1' rownum_, '1' count_, 'N' include, a.* FROM TABLE(GIACS157_PKG.get_giac_comm_fund_listing(#gaccTranId#)) a
+	</select>
+	
+	<procedure id="updateGiacCommFund" parameterClass="java.util.HashMap">
+		BEGIN
+			GIIS_USERS_PKG.app_user := #userId#;
+			GIACS157_PKG.update_giac_comm_fund_ext(#gaccTranId#, #intmNo#, #issCd#, #premSeqNo#, #recId#);
+		END;
+	</procedure>
+	
+	<procedure id="checkCommFundSlip" parameterMap="checkCommFundSlipMap">
+		BEGIN
+			GIIS_USERS_PKG.app_user := ?;
+			GIACS157_PKG.check_comm_fund_slip(?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<!-- Added by reymon 06182013
+		 process after printing comm fund slip -->
+	<procedure id="processAfterPrinting" parameterClass="java.util.HashMap">
+		BEGIN
+			GIIS_USERS_PKG.app_user := #userId#;
+			GIACS157_PKG.proccess_after_printing(#gaccTranId#, #sw#);
+		END;
+	</procedure>
+	
+	<update id="spoilCFS" parameterClass="com.geniisys.giac.entity.GIACCommPayts">	<!-- to spoil CFS records, called when deleting a bill in GIACS020 -->
+		UPDATE GIAC_COMM_FUND_EXT								<!-- shan 10.31.2014 -->
+	       SET spoiled_tag = 'Y',
+	           last_update = SYSDATE
+	     WHERE gacc_tran_id = #gaccTranId#
+	       AND iss_cd = #issCd#
+	       AND prem_seq_no = #premSeqNo#
+	       AND intm_no = #intmNo#
+	       AND comm_tag = #commTag#  <!-- added by robert SR 19752 08.12.15 -->
+	       AND record_no = #recordNo#  <!-- added by robert SR 19752 08.12.15 -->
+	       AND record_seq_no = #recordSeqNo#  <!-- added by robert SR 19752 08.12.15 -->
+	       AND NVL(spoiled_tag, 'N') != 'Y'
+	</update>
+</sqlMap>
+

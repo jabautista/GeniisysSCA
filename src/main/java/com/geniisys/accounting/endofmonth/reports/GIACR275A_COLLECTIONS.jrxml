@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIACR275A_COLLECTIONS" language="groovy" pageWidth="277" pageHeight="11" columnWidth="277" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="2.1435888100000016"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="P_CUT_OFF_DATE" class="java.lang.String"/>
+	<parameter name="P_CUT_OFF_PARAM" class="java.lang.String"/>
+	<parameter name="P_SHARE_PERCENTAGE" class="java.math.BigDecimal"/>
+	<parameter name="P_ISS_CD" class="java.lang.String"/>
+	<parameter name="P_PREM_SEQ_NO" class="java.lang.Integer"/>
+	<parameter name="P_AMOUNT_DUE" class="java.math.BigDecimal"/>
+	<queryString>
+		<![CDATA[select * from table (giacr275a_pkg.get_colls($P{P_CUT_OFF_DATE}, $P{P_CUT_OFF_PARAM}, $P{P_SHARE_PERCENTAGE}, $P{P_ISS_CD}, $P{P_PREM_SEQ_NO}, $P{P_AMOUNT_DUE}))]]>
+	</queryString>
+	<field name="TRAN_ID" class="java.math.BigDecimal"/>
+	<field name="TRAN_CLASS" class="java.lang.String"/>
+	<field name="REF_DATE" class="java.sql.Timestamp"/>
+	<field name="REF_NO" class="java.lang.String"/>
+	<field name="COLLECTION_AMT" class="java.math.BigDecimal"/>
+	<field name="BALANCE_DUE" class="java.math.BigDecimal"/>
+	<variable name="V_TOT_COLL_AMT" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{COLLECTION_AMT}]]></variableExpression>
+	</variable>
+	<variable name="V_TOT_BAL" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BALANCE_DUE}]]></variableExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="11" splitType="Stretch">
+			<textField isStretchWithOverflow="true" pattern="MM-dd-yyyy" isBlankWhenNull="true">
+				<reportElement x="0" y="0" width="46" height="11" isPrintWhenDetailOverflows="true"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.sql.Timestamp"><![CDATA[$F{REF_DATE}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="52" y="0" width="71" height="11" isPrintWhenDetailOverflows="true"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{REF_NO}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="131" y="0" width="70" height="11" isPrintWhenDetailOverflows="true"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{COLLECTION_AMT} == null ? 0 : $F{COLLECTION_AMT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement isPrintRepeatedValues="false" x="207" y="0" width="70" height="11" isPrintWhenDetailOverflows="true"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{BALANCE_DUE}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

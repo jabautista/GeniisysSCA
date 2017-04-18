@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIWDeductible">
+	
+	<typeAlias alias="WDeductible" type="com.geniisys.gipi.entity.GIPIWDeductible" />
+	
+	<resultMap class="WDeductible" id="wdeductibleResultMap">
+		<result property="parId" 			column="PAR_ID" />
+		<result property="itemNo" 			column="ITEM_NO" />
+		<result property="perilCd" 			column="PERIL_CD" />
+		<result property="perilName" 		column="PERIL_NAME" />
+		<result property="dedLineCd" 		column="DED_LINE_CD" />
+		<result property="dedSublineCd" 	column="DED_SUBLINE_CD" />
+		<result property="aggregateSw" 		column="AGGREGATE_SW" />
+		<result property="ceilingSw" 		column="CEILING_SW" />
+		<result property="dedDeductibleCd" 	column="DED_DEDUCTIBLE_CD" />
+		<result property="deductibleTitle" 	column="DEDUCTIBLE_TITLE" />
+		<result property="deductibleRate" 	column="DEDUCTIBLE_RT" />
+		<result property="deductibleAmount" column="DEDUCTIBLE_AMT" />
+		<result property="deductibleText" 	column="DEDUCTIBLE_TEXT" />
+		<result property="minimumAmount" 	column="MIN_AMT" />
+		<result property="maximumAmount" 	column="MAX_AMT" />
+		<result property="rangeSw" 			column="RANGE_SW" />
+		<result property="deductibleType"	column="DED_TYPE" />
+	</resultMap>
+	
+	<resultMap class="WDeductible" id="wdeductiblePackResultMap">
+		<result property="parId" 			column="PAR_ID" />
+		<result property="itemNo" 			column="ITEM_NO" />
+	</resultMap>
+	
+	<resultMap class="WDeductible" id="wPerilDeductibleResultMap">
+		<result property="parId" 			column="PAR_ID" />
+		<result property="itemNo" 			column="ITEM_NO" />
+		<result property="perilCd" 			column="PERIL_CD" />
+	</resultMap>
+	
+	<resultMap class="WDeductible" id="ItemDeductibleTableGridResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="parId" 			column="PAR_ID" />
+		<result property="itemNo" 			column="ITEM_NO" />
+		<result property="perilCd" 			column="PERIL_CD" />
+		<result property="perilName" 		column="PERIL_NAME" />
+		<result property="dedLineCd" 		column="DED_LINE_CD" />
+		<result property="dedSublineCd" 	column="DED_SUBLINE_CD" />
+		<result property="aggregateSw" 		column="AGGREGATE_SW" />
+		<result property="ceilingSw" 		column="CEILING_SW" />
+		<result property="dedDeductibleCd" 	column="DED_DEDUCTIBLE_CD" />
+		<result property="deductibleTitle" 	column="DEDUCTIBLE_TITLE" />
+		<result property="deductibleRate" 	column="DEDUCTIBLE_RT" />
+		<result property="deductibleAmount" column="DEDUCTIBLE_AMT" />
+		<result property="deductibleText" 	column="DEDUCTIBLE_TEXT" />
+		<result property="minimumAmount" 	column="MIN_AMT" />
+		<result property="maximumAmount" 	column="MAX_AMT" />
+		<result property="rangeSw" 			column="RANGE_SW" />
+		<result property="deductibleType"	column="DED_TYPE" />
+		<result property="deductibleType"	column="DED_TYPE" />
+		<result property="totalDeductible"	column="TOTAL_DEDUCTIBLE" />
+	</resultMap>
+	
+	<parameterMap class="map" id="getPerilDedParamMap">
+		<parameter property="parId" 			jdbcType="INT" 		javaType="java.lang.Integer" 	mode="IN" />
+		<parameter property="itemNo" 			jdbcType="INT" 		javaType="java.lang.Integer" 	mode="IN" />
+		<parameter property="deductibleType" 	jdbcType="VARCHAR" 	javaType="java.lang.String" 	mode="IN" />
+		<parameter property="deductibleLevel" 	jdbcType="INT" 		javaType="java.lang.Integer" 	mode="IN" />
+		<parameter property="message" 			jdbcType="VARCHAR" 	javaType="java.lang.String" 	mode="OUT" />
+	</parameterMap>
+	
+	<parameterMap class="map" id="checkWDeductibleParamMap">
+		<parameter property="parId" 			jdbcType="INT" 		javaType="java.lang.Integer" 	mode="IN"/>
+		<parameter property="itemNo"			jdbcType="INT"		javaType="java.lang.Integer"	mode="IN"/>
+		<parameter property="deductibleType"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="deductibleLevel"	jdbcType="INT"		javaType="java.lang.Integer"	mode="IN"/>
+		<parameter property="message"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="INOUT"/>
+	</parameterMap>
+	
+	<select id="getWPolicyDeductible" resultMap="wdeductibleResultMap">
+		SELECT * FROM TABLE(Gipi_Wdeductibles_Pkg.get_gipi_wdeductibles_policy(#parId#))
+	</select>
+	
+	<select id="getWItemDeductible" resultMap="wdeductibleResultMap">
+		SELECT * FROM TABLE(Gipi_Wdeductibles_Pkg.get_gipi_wdeductibles_item(#parId#))
+	</select>
+	
+	<select id="getWPerilDeductible" resultMap="wdeductibleResultMap">
+		SELECT * FROM TABLE(Gipi_Wdeductibles_Pkg.get_gipi_wdeductibles_peril(#parId#))
+	</select>
+	
+	<procedure id="saveWDeductible" parameterClass="com.geniisys.gipi.entity.GIPIWDeductible">
+		DECLARE
+			deduct GIPI_WDEDUCTIBLES%ROWTYPE;
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			
+		 	deduct.PAR_ID 				:= #parId#;
+		 	deduct.ITEM_NO 				:= #itemNo#;
+		 	deduct.PERIL_CD 			:= #perilCd#;
+		 	deduct.DED_LINE_CD 			:= #dedLineCd#;
+		 	deduct.DED_SUBLINE_CD 		:= #dedSublineCd#;
+			deduct.DED_DEDUCTIBLE_CD 	:= #dedDeductibleCd#;		 	
+			deduct.DEDUCTIBLE_TEXT 		:= #deductibleText#;			
+			deduct.DEDUCTIBLE_AMT 		:= #deductibleAmount#;
+			deduct.DEDUCTIBLE_RT 		:= #deductibleRate#;
+			deduct.AGGREGATE_SW 		:= #aggregateSw#;			
+			deduct.CEILING_SW 			:= #ceilingSw#;
+			deduct.USER_ID				:= #userId#;
+			deduct.MIN_AMT				:= #minimumAmount#;
+			deduct.MAX_AMT				:= #maximumAmount#;
+			deduct.RANGE_SW				:= #rangeSw#;
+			
+			Gipi_WDeductibles_Pkg.set_gipi_wdeductibles(deduct);
+		END;	
+	</procedure>
+	
+	<procedure id="deleteWPolicyDeductibles">
+		BEGIN
+			Gipi_WDeductibles_Pkg.del_gipi_wdeductibles_policy(#parId#);
+		END;
+	</procedure>
+	
+	<procedure id="deleteWItemDeductibles">
+		BEGIN
+			Gipi_WDeductibles_Pkg.del_gipi_wdeductibles_item(#parId#);
+		END;
+	</procedure>
+
+	<procedure id="deleteWPerilDeductibles">
+		BEGIN
+			Gipi_WDeductibles_Pkg.del_gipi_wdeductibles_peril(#parId#);
+		END;
+	</procedure>
+	
+	<procedure id="checkWDeductibles" parameterMap="checkWDeductibleParamMap">
+		{ CALL check_wdeductible(?, ?, ?, ?, ?) }
+	</procedure>
+
+	<procedure id="deleteWPerilDeductiblesBeforeCopyPeril" parameterClass="java.util.HashMap">
+	    BEGIN
+	      Gipi_WDeductibles_Pkg.del_gipi_wdeductibles_peril(#parId#, #lineCd#, #nbtSublineCd#);
+	    END;
+	</procedure>
+	
+	<procedure id="deleteWPolicyDeductibles2" parameterClass="java.util.HashMap">
+	    BEGIN
+	      Gipi_WDeductibles_Pkg.del_gipi_wdeductibles_policy_2(#parId#, #lineCd#, #sublineCd#);
+	    END;
+	</procedure>
+	
+	<select id="isExistGipiWdeductible" resultClass="java.lang.String" parameterClass="java.util.HashMap">
+		SELECT NVL(Gipi_Wdeductibles_Pkg.CHECK_GIPI_WDEDUCTIBLES_ITEMS(#parId#, #lineCd#, #sublineCd#), 'N') FROM dual
+	</select>
+	
+	<select id="getDeductibleItemAndPeril" resultMap="wPerilDeductibleResultMap" parameterClass="java.util.HashMap">
+		SELECT * FROM TABLE(Gipi_Wdeductibles_Pkg.GET_GIPI_WDEDUCTIBLES_ITEMS2(#parId#, #lineCd#, #sublineCd#))
+	</select>
+	
+	<procedure id="deleteWDeductibles2">
+		BEGIN
+			Gipi_WDeductibles_Pkg.del_gipi_wdeductibles_2(#parId#, #lineCd#, #sublineCd#);
+			COMMIT;
+		END;
+	</procedure>
+	
+	<procedure id="deleteWDeductiblesPeril" parameterClass="java.util.HashMap">
+		BEGIN
+			GIPI_WDEDUCTIBLES_PKG.del_gipi_wdeductibles_peril(#parId#, #itemNo#, #perilCd#);
+		END;
+	</procedure>
+	
+	<delete id="delGipiWDeductibles" parameterClass="java.util.HashMap">
+		BEGIN
+			GIPI_WDEDUCTIBLES_PKG.del_gipi_wdeductible(#parId#, #itemNo#, #dedDeductibleCd#);
+		END;
+	</delete>
+	
+	<delete id="delGipiWDeductible2" parameterClass="WDeductible">
+		BEGIN
+			GIPI_WDEDUCTIBLES_PKG.del_gipi_wdeductible2(#parId#, #itemNo#, #perilCd#, #dedDeductibleCd#, #dedLineCd#, #dedSublineCd#);
+		END;
+	</delete>	
+	
+	<select id="gipiWLocPerItem" resultMap="wPerilDeductibleResultMap">
+		SELECT * FROM TABLE(GIPI_WLOCATION_PKG.get_item_wlocations(#parId#))
+	</select>
+	
+	<select id="getDeductiblesForPackPolicyItems" resultMap="wdeductiblePackResultMap">
+		SELECT * FROM TABLE(gipi_wdeductibles_pkg.get_gipi_wdeductibles_pack_pol(#parId#, #itemNo#))
+	</select>
+	
+	<select id="getPolicyDeductibleTableGrid" parameterClass="java.util.HashMap" resultMap="ItemDeductibleTableGridResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*,
+					   (SELECT SUM(deductible_amt) FROM TABLE(gipi_wdeductibles_pkg.get_gipi_wdeductibles_policy1(#parId#, null, null))) total_deductible <!-- added by steven 8.17.2012 -->
+				  FROM (SELECT par_id,				item_no,           				item_title,			peril_cd,              
+							   ded_line_cd,       	ded_subline_cd,    				aggregate_sw,   	ceiling_sw,       
+							   deductible_title,  	deductible_rt,     				deductible_amt, 	ded_deductible_cd,
+							   deductible_text,   	min_amt,           				max_amt,        	range_sw,
+							   peril_name,			ded_type
+						  FROM TABLE(gipi_wdeductibles_pkg.get_gipi_wdeductibles_policy1(#parId#, #deductibleTitle#, #deductibleText#))
+						  <isNull property="sortColumn">
+								ORDER BY ded_deductible_cd ASC
+						  </isNull>
+						  <isEqual property="sortColumn" compareValue="deductibleTitle">
+					  			ORDER BY deductible_title
+					  	  </isEqual>
+					  	  <isEqual property="sortColumn" compareValue="deductibleText">
+					  			ORDER BY deductible_text
+					  	  </isEqual>
+					  	  <isEqual property="sortColumn" compareValue="deductibleAmount">
+					  	  		ORDER BY deductible_amt
+					  	  </isEqual>
+					  	  <isEqual property="sortColumn" compareValue="deductibleRate">
+					  	  		ORDER BY deductible_rt
+					  	  </isEqual>
+						  <isNotNull property="ascDescFlg">
+						  	<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC									
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						  </isNotNull>) a,
+					   (SELECT COUNT(*) count_
+						  FROM TABLE(gipi_wdeductibles_pkg.get_gipi_wdeductibles_policy1(#parId#, #deductibleTitle#, #deductibleText#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getItemDeductibleTableGrid" parameterClass="java.util.HashMap" resultMap="ItemDeductibleTableGridResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*,
+					   (SELECT SUM(deductible_amt) FROM TABLE(gipi_wdeductibles_pkg.get_gipi_wdeductibles_item1(#parId#, #itemNo#, null, null))) total_deductible <!-- added by steven 8.17.2012 -->
+				  FROM (SELECT par_id,				item_no,           				item_title,			peril_cd,              
+							   ded_line_cd,       	ded_subline_cd,    				aggregate_sw,   	ceiling_sw,       
+							   deductible_title,  	deductible_rt,     				deductible_amt, 	ded_deductible_cd,
+							   deductible_text,   	min_amt,           				max_amt,        	range_sw,
+							   peril_name,			ded_type
+						  FROM TABLE(gipi_wdeductibles_pkg.get_gipi_wdeductibles_item1(#parId#, #itemNo#, #deductibleTitle#, #deductibleText#))						  
+					  	  <isNull property="sortColumn">
+								ORDER BY ded_deductible_cd ASC
+						  </isNull>
+						  <isEqual property="sortColumn" compareValue="deductibleTitle">
+					  			ORDER BY deductible_title
+					  	  </isEqual>
+					  	  <isEqual property="sortColumn" compareValue="deductibleText">
+					  			ORDER BY deductible_text
+					  	  </isEqual>
+					  	  <isEqual property="sortColumn" compareValue="deductibleAmount">
+					  	  		ORDER BY deductible_amt
+					  	  </isEqual>
+					  	  <isEqual property="sortColumn" compareValue="deductibleRate">
+					  	  		ORDER BY deductible_rt
+					  	  </isEqual>
+						  <isNotNull property="ascDescFlg">
+						  	<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC									
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						  </isNotNull>) a,
+					   (SELECT COUNT(*) count_
+						  FROM TABLE(gipi_wdeductibles_pkg.get_gipi_wdeductibles_item1(#parId#, #itemNo#, #deductibleTitle#, #deductibleText#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getPerilDeductibleTableGrid" parameterClass="java.util.HashMap" resultMap="ItemDeductibleTableGridResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*,
+ 					    (SELECT SUM(deductible_amt) FROM TABLE(gipi_wdeductibles_pkg.get_gipi_wdeductibles_peril(#parId#, #itemNo#, #perilCd#, null, null))) total_deductible  <!-- added by steven 8.17.2012 -->
+				  FROM (SELECT par_id,				item_no,           				item_title,			peril_cd,              
+							   ded_line_cd,       	ded_subline_cd,    				aggregate_sw,   	ceiling_sw,       
+							   deductible_title,  	deductible_rt,     				deductible_amt, 	ded_deductible_cd,
+							   deductible_text,   	min_amt,           				max_amt,        	range_sw,
+							   peril_name,			ded_type
+						  FROM TABLE(gipi_wdeductibles_pkg.get_gipi_wdeductibles_peril(#parId#, #itemNo#, #perilCd#, #deductibleTitle#, #deductibleText#))						  
+					  	  <isNull property="sortColumn">
+								ORDER BY ded_deductible_cd ASC
+						  </isNull>
+						  <isEqual property="sortColumn" compareValue="deductibleTitle">
+					  			ORDER BY deductible_title
+					  	  </isEqual>
+					  	  <isEqual property="sortColumn" compareValue="deductibleText">
+					  			ORDER BY deductible_text
+					  	  </isEqual>
+					  	  <isEqual property="sortColumn" compareValue="deductibleAmount">
+					  	  		ORDER BY deductible_amt
+					  	  </isEqual>
+					  	  <isEqual property="sortColumn" compareValue="deductibleRate">
+					  	  		ORDER BY deductible_rt
+					  	  </isEqual>
+						  <isNotNull property="ascDescFlg">
+						  	<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC									
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						  </isNotNull>) a,
+					   (SELECT COUNT(*) count_
+						  FROM TABLE(gipi_wdeductibles_pkg.get_gipi_wdeductibles_peril(#parId#, #itemNo#, #perilCd#, #deductibleTitle#, #deductibleText#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getAllGIPIWDeductibles" resultMap="wdeductibleResultMap">
+		SELECT par_id,				item_no,           				item_title,			peril_cd,              
+			   ded_line_cd,       	ded_subline_cd,    				aggregate_sw,   	ceiling_sw,       
+			   deductible_title,  	deductible_rt,     				deductible_amt, 	ded_deductible_cd,
+			   deductible_text,   	min_amt,           				max_amt,        	range_sw,
+			   peril_name,			ded_type			
+		  FROM TABLE(gipi_wdeductibles_pkg.get_all_gipi_wdeductibles(#parId#))
+	</select>
+</sqlMap>

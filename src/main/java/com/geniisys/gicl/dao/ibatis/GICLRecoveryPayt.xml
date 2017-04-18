@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GICLRecoveryPayt">
+
+	<typeAlias alias="GICLRecoveryPaytClass" type="com.geniisys.gicl.entity.GICLRecoveryPayt"/>
+	
+	<resultMap class="GICLRecoveryPaytClass" id="GICLRecPaytResultMap">
+		<result	column="recovery_id"		property="recoveryId" />
+		<result	column="recovery_payt_id"	property="recoveryPaytId" />
+		<result	column="claim_id"			property="claimId" />
+		<result	column="payor_class_cd"		property="payorClassCd" />
+		<result	column="payor_cd"			property="payorCd" />
+		<result	column="recovered_amt"		property="recoveredAmt" />
+		<result	column="acct_tran_id"		property="acctTranId" />
+		<result	column="tran_date"			property="tranDate" />
+		<result	column="cancel_tag"			property="cancelTag" />
+		<result	column="cancel_date"		property="cancelDate" />
+		<result	column="entry_tag"			property="entryTag" />
+		<result	column="dist_sw"			property="distSw" />
+		<result	column="acct_tran_id2"		property="acctTranId2" />
+		<result	column="tran_date2"			property="tranDate2" />
+		<result	column="recovery_acct_id"	property="recoveryAcctId" />
+		<result	column="stat_sw"			property="statSw" />
+	</resultMap>
+	
+	<resultMap class="GICLRecoveryPaytClass" id="GICLRecPaytResultMapGrid" extends="GICLRecPaytResultMap">
+		<result	column="user_id"			property="userId" />
+        <result	column="last_update"		property="lastUpdate" />
+        <result	column="cpi_rec_no"			property="cpiRecNo" />
+        <result	column="cpi_branch_cd"		property="cpiBranchCd" />
+        <result column="dsp_payor_name" 	property="dspPayorName"/>
+        <result	column="dsp_ref_cd"			property="dspRefCd" />
+        <result	column="dsp_check_cancel"	property="dspCheckCancel" />
+        <result	column="dsp_check_dist"		property="dspCheckDist" />
+		<result property="rowNum" 			column="rownum_" />
+		<result property="rowCount" 		column="count_" />
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="GICLRecPaytResultMapGrid2" extends="GICLRecPaytResultMapGrid">
+		<result	column="sdf_tran_date"			property="sdfTranDate" />
+	</resultMap>
+
+	<resultMap class="GICLRecoveryPaytClass" id="GICLRecoveryPaytGrid" extends="GICLRecPaytResultMap">
+		<result property="dspRecoveryNo"	column="dsp_recovery_no" />
+		<result property="dspPayorName"		column="dsp_payor_name" />
+		<result property="dspAssdName"		column="dsp_assured_name" />
+		<result property="dspRefNo"			column="dsp_ref_no" />
+		<result property="dspClaimNo"		column="dsp_claim_no" />
+		<result property="dspPolicyNo"		column="dsp_policy_no" />
+		<result property="dspLossDate"		column="dsp_loss_date" />
+		<result property="dspLossCtgry"		column="dsp_loss_ctgry" />
+		<result property="dspClmStatCd"		column="dsp_clm_stat_cd" />
+		<result property="dspInHouAdj"		column="dsp_in_hou_adj" />
+		<result property="acctExists"		column="acct_exists" />
+		<result property="tranFlag"			column="tran_flag" />
+		<result property="rowNum" 			column="rownum_" />
+		<result property="rowCount" 		column="count_" />
+	</resultMap>
+	
+	<parameterMap class="java.util.HashMap" id="cancelRecoveryPaytParamMap">
+		<parameter property="recoveryAcctId"	jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="acctTranId"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN" />
+		<parameter property="userId"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN" />
+		<parameter property="message"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT" />
+	</parameterMap>
+	
+	<select id="getRecoveryPaytTG" resultMap="GICLRecoveryPaytGrid" parameterClass="map">
+		 SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE (GICL_RECOVERY_PAYT_PKG.get_gicl_recovery_payt_list(#claimId#, #recoveryAcctId#, #moduleId#, #userId#))      
+		          		<isNotNull property="filter"> <!-- added by steven 12/7/2012 -->
+							 WHERE 1=1
+	               				<isNotEmpty prepend="AND"  property="dspRecoveryNo">
+	               					dsp_recovery_no LIKE #dspRecoveryNo#
+	               				</isNotEmpty>
+	               				<isNotEmpty prepend="AND"  property="dspRefNo">
+	               					dsp_ref_no LIKE #dspRefNo#
+	               				</isNotEmpty>
+	               				<isNotEmpty prepend="AND"  property="dspPayorName">
+	               					dsp_payor_name LIKE #dspPayorName#
+	               				</isNotEmpty>
+	               				<isNotEmpty prepend="AND"  property="distSw">
+	               					dist_sw LIKE #distSw#
+	               				</isNotEmpty>
+          				</isNotNull>  
+			          	<isEqual property="sortColumn" compareValue="dspRecoveryNo">
+			          		ORDER BY dsp_recovery_no
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="dspRefNo">
+			          		ORDER BY dsp_ref_no
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="dspPayorName">
+			          		ORDER BY dsp_payor_name
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="recoveredAmt">
+			          		ORDER BY recovered_amt
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="distSw">
+			          		ORDER BY dist_sw
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="dspClaimNo">
+			          		ORDER BY dsp_claim_no
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="dspPolicyNo">
+			          		ORDER BY dsp_policy_no
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="dspAssdName">
+			          		ORDER BY dsp_assured_name
+			          	</isEqual>
+			          	<isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	</isNotNull>) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GICL_RECOVERY_PAYT_PKG.get_gicl_recovery_payt_list(#claimId#, #recoveryAcctId#, #moduleId#, #userId#))
+		                  <isNotNull property="filter">
+							 WHERE 1=1
+	               				<isNotEmpty prepend="AND"  property="dspRecoveryNo">
+	               					dsp_recovery_no LIKE #dspRecoveryNo#
+	               				</isNotEmpty>
+	               				<isNotEmpty prepend="AND"  property="dspRefNo">
+	               					dsp_ref_no LIKE #dspRefNo#
+	               				</isNotEmpty>
+	               				<isNotEmpty prepend="AND"  property="dspPayorName">
+	               					dsp_payor_name LIKE #dspPayorName#
+	               				</isNotEmpty>
+	               				<isNotEmpty prepend="AND"  property="distSw">
+	               					dist_sw LIKE #distSw#
+	               				</isNotEmpty>
+          				</isNotNull> 
+          				) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getRecoveryPaytWithAcctTG" resultMap="GICLRecoveryPaytGrid" parameterClass="map">
+		 SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE (GICL_RECOVERY_PAYT_PKG.get_gicl_recovery_payt_list1(#claimId#, #recoveryAcctId#, #moduleId#, #userId#)) 
+			          	<isNotNull property="filter"> <!-- added by steven 12/7/2012 -->
+							 WHERE 1=1
+	               				<isNotEmpty prepend="AND"  property="dspRecoveryNo">
+	               					dsp_recovery_no LIKE #dspRecoveryNo#
+	               				</isNotEmpty>
+	               				<isNotEmpty prepend="AND"  property="dspRefNo">
+	               					dsp_ref_no LIKE #dspRefNo#
+	               				</isNotEmpty>
+	               				<isNotEmpty prepend="AND"  property="dspPayorName">
+	               					dsp_payor_name LIKE #dspPayorName#
+	               				</isNotEmpty>
+	               				<isNotEmpty prepend="AND"  property="distSw">
+	               					dist_sw LIKE #distSw#
+	               				</isNotEmpty>
+          				</isNotNull>  
+			          	<isEqual property="sortColumn" compareValue="dspRecoveryNo">
+			          		ORDER BY dsp_recovery_no
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="dspRefNo">
+			          		ORDER BY dsp_ref_no
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="dspPayorName">
+			          		ORDER BY dsp_payor_name
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="recoveredAmt">
+			          		ORDER BY recovered_amt
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="distSw">
+			          		ORDER BY dist_sw
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="dspClaimNo">
+			          		ORDER BY dsp_claim_no
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="dspPolicyNo">
+			          		ORDER BY dsp_policy_no
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="dspAssdName">
+			          		ORDER BY dsp_assured_name
+			          	</isEqual>
+			          	<isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	</isNotNull>) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GICL_RECOVERY_PAYT_PKG.get_gicl_recovery_payt_list1(#claimId#, #recoveryAcctId#, #moduleId#, #userId#))
+		                  <isNotNull property="filter">
+							 WHERE 1=1
+	               				<isNotEmpty prepend="AND"  property="dspRecoveryNo">
+	               					dsp_recovery_no LIKE #dspRecoveryNo#
+	               				</isNotEmpty>
+	               				<isNotEmpty prepend="AND"  property="dspRefNo">
+	               					dsp_ref_no LIKE #dspRefNo#
+	               				</isNotEmpty>
+	               				<isNotEmpty prepend="AND"  property="dspPayorName">
+	               					dsp_payor_name LIKE #dspPayorName#
+	               				</isNotEmpty>
+	               				<isNotEmpty prepend="AND"  property="distSw">
+	               					dist_sw LIKE #distSw#
+	               				</isNotEmpty>
+          				</isNotNull> 
+          				) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="cancelRecoveryPayt" parameterMap="cancelRecoveryPaytParamMap">
+		BEGIN
+			GICL_RECOVERY_PAYT_PKG.cancel_recovery_payt(?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<procedure id="updateRecoveryForPost" parameterClass="map">
+		BEGIN
+			<!-- GICL_RECOVERY_PAYT_PKG.update_recovery_for_post(#recAcctId#, #acctTranId#); --> <!-- benjo 08.27.2015 comment out -->
+			GICL_RECOVERY_PAYT_PKG.update_recovery_for_post(#recoveryAcctId#, #acctTranId#); <!-- benjo 08.27.2015 UCPBGEN-SR-19654 -->
+		END;
+	</procedure>
+	
+	<procedure id="generateRecovery" parameterClass="map">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			GICL_RECOVERY_PAYT_PKG.update_generated_rec_payt(#recoveryId#, #recoveryPaytId#, #recoveryAcctId#);
+		END;
+	</procedure>
+	
+	<procedure id="updateGeneratedRecovery" parameterClass="GICLRecoveryPaytClass">
+		BEGIN
+			GICL_RECOVERY_PAYT_PKG.update_generated_rec_payt(#recoveryId#, #recoveryPaytId#, #recoveryAcctId#);
+		END;
+	</procedure>
+	
+	<parameterMap class="map" id="checkRecoveryValidPaytMap">
+		<parameter property="claimId" 		javaType="java.lang.String"  jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="recoveryId" 	javaType="java.lang.String"  jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="checkValid" 	javaType="java.lang.Integer" jdbcType="INTEGER" mode="OUT"/>
+		<parameter property="checkAll" 		javaType="java.lang.Integer" jdbcType="INTEGER" mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="checkRecoveryValidPayt" parameterMap="checkRecoveryValidPaytMap">
+		BEGIN
+ 			GICL_RECOVERY_PAYT_PKG.check_recover_valid_payt(?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<select id="getGiclRecoveryPaytGrid" resultMap="GICLRecPaytResultMapGrid">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE (GICL_RECOVERY_PAYT_PKG.get_gicl_recovery_payt(#claimId#, #recoveryId#))        
+			          	<isEqual property="sortColumn" compareValue="dspRefCd">
+			          		ORDER BY dsp_ref_cd
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="payorCd dspPayorName">
+		            		ORDER BY payor_cd
+		            		<isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>, dsp_payor_name
+		          		</isEqual>
+		          		<isEqual property="sortColumn" compareValue="recoveredAmt">
+			          		ORDER BY recovered_amt
+			          	</isEqual>
+			          	<isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	</isNotNull>) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GICL_RECOVERY_PAYT_PKG.get_gicl_recovery_payt(#claimId#, #recoveryId#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiclRecoveryPaytGrid2" resultMap="GICLRecPaytResultMapGrid2">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE (GICL_RECOVERY_PAYT_PKG.get_gicl_recovery_payt2(#claimId#, #recoveryId#))        
+			          	<isEqual property="sortColumn" compareValue="dspRefCd">
+			          		ORDER BY dsp_ref_cd
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="payorClassCd payorCd dspPayorName">
+		            		ORDER BY payor_class_cd
+		            		<isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>, payor_cd
+		            		<isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>, dsp_payor_name
+		          		</isEqual>
+		          		<isEqual property="sortColumn" compareValue="recoveredAmt">
+			          		ORDER BY recovered_amt
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="tranDate">
+			          		ORDER BY tran_date
+			          	</isEqual>
+			          	<isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	</isNotNull>) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GICL_RECOVERY_PAYT_PKG.get_gicl_recovery_payt2(#claimId#, #recoveryId#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<parameterMap class="java.util.HashMap" id="getRecAEAmountSumMap">
+		<parameter property="recoveryAcctId" 	javaType="java.lang.String"  	jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="debitSum" 			javaType="java.math.BigDecimal" jdbcType="NUMERIC" mode="OUT"/>
+		<parameter property="creditSum" 		javaType="java.math.BigDecimal" jdbcType="NUMERIC" mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="getRecAEAmountSum" parameterMap="getRecAEAmountSumMap">
+		{CALL GICL_REC_ACCT_ENTRIES_PKG.get_ae_amounts_sum(?,?,?)}
+	</procedure>
+</sqlMap>

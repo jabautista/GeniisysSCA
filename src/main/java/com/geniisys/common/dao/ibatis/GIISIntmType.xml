@@ -1,0 +1,367 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISIntmType">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIISIntmTypeClass" type="com.geniisys.common.entity.GIISIntmType"/>
+	
+	<resultMap id="getIntmTypeLOVMap" class="com.geniisys.common.entity.GIISIntermediary">
+		<result column="INTM_TYPE"			property="intmType"/>
+		<result column="INTM_DESC"			property="intmDesc"/>
+		<result column="ROWNUM_" 			property="rowNum"/>
+		<result column="COUNT_" 			property="rowCount"/>
+	</resultMap>
+	
+	<parameterMap class="map" id="validateIntmTypeMap">
+		<parameter property="intmType"		jdbcType="VARCHAR"	javaType="java.lang.String"   mode="IN"/>
+		<parameter property="intmDesc"		jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="OUT"/>
+	</parameterMap>
+	
+	<resultMap class="java.util.HashMap" id="GIISIntmTypeResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="intmType" 		column="intm_type"/>
+		<result property="intmDesc" 		column="intm_desc"/>
+		<result property="acctIntmCd" 		column="acct_intm_cd"/>	
+		<result property="remarks" 			column="remarks"/>			
+		<result property="userId" 			column="user_id"/>	
+		<result property="lastUpdate" 		column="last_update"/>			
+	</resultMap> 
+	
+	<select id="getIntmTypeLOV" resultMap="getIntmTypeLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(GIIS_INTM_TYPE_PKG.get_intm_type_listing)
+		                  <isEqual property="sortColumn" compareValue="intmType">
+			              		ORDER BY intm_type
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="intmDesc">
+			              		ORDER BY intm_desc
+			              </isEqual> 
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GIIS_INTM_TYPE_PKG.get_intm_type_listing)) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="validateIntmType" parameterMap="validateIntmTypeMap">
+		CALL GIIS_INTM_TYPE_PKG.validate_intm_type(?, ?)
+	</procedure>
+	
+	<select id="getIntmType2LOV" resultMap="getIntmTypeLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(GIIS_INTM_TYPE_PKG.get_intm_type_listing)
+		   			<isNotNull property="filter">
+		                 WHERE 1 = 1
+		              		<isNotEmpty prepend="AND" property="intmType">
+				        		UPPER(intm_type) LIKE UPPER(#intmType#)
+				        	</isNotEmpty>
+				        	<isNotEmpty prepend="AND" property="intmDesc">
+				        		UPPER(intm_desc) LIKE UPPER(#intmDesc#)
+				        	</isNotEmpty>
+		             </isNotNull>
+		             <isNotNull property="findText">
+		                  WHERE ( UPPER(intm_type) LIKE UPPER(#findText#) 
+		                  			OR UPPER(intm_desc) LIKE UPPER(#findText#) )
+		             </isNotNull>
+		             <isNull property="findText">
+		                  WHERE ( UPPER(intm_type) LIKE UPPER(#filterText#) 
+		                  			OR UPPER(intm_desc) LIKE UPPER(#filterText#) )
+		             </isNull>
+	                 <isNotNull property="sortColumn">
+	                 		 <isEqual property="sortColumn" compareValue="intmType">
+			              		ORDER BY intm_type
+			              	</isEqual>
+			              	<isEqual property="sortColumn" compareValue="intmDesc">
+			              		ORDER BY intm_desc
+			              	</isEqual> 
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GIIS_INTM_TYPE_PKG.get_intm_type_listing)
+		            <isNotNull property="filter">
+		                 WHERE 1 = 1
+		              		<isNotEmpty prepend="AND" property="intmType">
+				        		UPPER(intm_type) LIKE UPPER(#intmType#)
+				        	</isNotEmpty>
+				        	<isNotEmpty prepend="AND" property="intmDesc">
+				        		UPPER(intm_desc) LIKE UPPER(#intmDesc#)
+				        	</isNotEmpty>
+		           </isNotNull>
+		           <isNotNull property="findText">
+	                    WHERE ( UPPER(intm_type) LIKE UPPER(#findText#) 
+	                  			OR UPPER(intm_desc) LIKE UPPER(#findText#) )
+		           </isNotNull>
+		           <isNull property="findText">
+		                  WHERE ( UPPER(intm_type) LIKE UPPER(#filterText#) 
+		                  			OR UPPER(intm_desc) LIKE UPPER(#filterText#) )
+		             </isNull>) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getIntmType3LOV" resultMap="getIntmTypeLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(GIIS_INTM_TYPE_PKG.get_intm_type_listing)
+		   			  <isNull property="findText">
+					     WHERE UPPER(intm_type) LIKE UPPER(NVL(#searchString#, intm_type))
+					        OR UPPER(intm_desc) LIKE UPPER(NVL(#searchString#, intm_desc))
+					  </isNull>
+					  <isNotNull property="findText">
+					     WHERE UPPER(intm_type) LIKE UPPER(NVL(#findText#, intm_type))
+					       OR UPPER(intm_desc) LIKE UPPER(NVL(#findText#, intm_desc))
+					  </isNotNull>
+					  <isEqual property="sortColumn" compareValue="intmType">
+					     ORDER BY 1
+					  </isEqual>
+					  <isEqual property="sortColumn" compareValue="intmDesc">
+					 	 ORDER BY 2
+					  </isEqual>			                      
+					  <isNotNull property="sortColumn">
+					     <isEqual property="ascDescFlg" compareValue="ASC">
+					 	    ASC
+					     </isEqual>
+					 	 <isEqual property="ascDescFlg" compareValue="DESC">
+					 		DESC
+					 	 </isEqual>
+					  </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GIIS_INTM_TYPE_PKG.get_intm_type_listing)
+		            <isNull property="findText">
+					     WHERE UPPER(intm_type) LIKE UPPER(NVL(#searchString#, intm_type))
+					        OR UPPER(intm_desc) LIKE UPPER(NVL(#searchString#, intm_desc))
+					  </isNull>
+					  <isNotNull property="findText">
+					     WHERE UPPER(intm_type) LIKE UPPER(NVL(#findText#, intm_type))
+					       OR UPPER(intm_desc) LIKE UPPER(NVL(#findText#, intm_desc))
+					  </isNotNull>) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<!-- Added by Kris 07.10.2013 for GIACS413 -->
+	<select id="getGIACS413IntmTypeLOV" resultMap="getIntmTypeLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(GIIS_INTM_TYPE_PKG.get_intm_type_lov)
+		  	      		  <isNull property="findText">
+                             WHERE UPPER(intm_type) LIKE UPPER(NVL(#searchString#, intm_type))
+                                OR UPPER(intm_desc) LIKE UPPER(NVL(#searchString#, intm_desc))
+                          </isNull>
+                          <isNotNull property="findText">
+                             WHERE ( UPPER(intm_type) LIKE UPPER(#findText#) 
+		                  			OR UPPER(intm_desc) LIKE UPPER(#findText#) )
+                          </isNotNull>
+		   			<!-- <isNotNull property="filter">
+		                 WHERE 1 = 1
+		              		<isNotEmpty prepend="AND" property="intmType">
+				        		UPPER(intm_type) LIKE UPPER(#intmType#)
+				        	</isNotEmpty>
+				        	<isNotEmpty prepend="AND" property="intmDesc">
+				        		UPPER(intm_desc) LIKE UPPER(#intmDesc#)
+				        	</isNotEmpty>
+		             </isNotNull>
+		             <isNotNull property="findText">
+		                  WHERE ( UPPER(intm_type) LIKE UPPER(#findText#) 
+		                  			OR UPPER(intm_desc) LIKE UPPER(#findText#) )
+		             </isNotNull>
+		             <isNull property="findText">
+                          WHERE UPPER(intm_type) LIKE UPPER(NVL(#searchString#, intm_type))
+                             OR UPPER(intm_desc) LIKE UPPER(NVL(#searchString#, intm_desc))
+                     </isNull> -->
+	                 <isNotNull property="sortColumn">
+	                 		 <isEqual property="sortColumn" compareValue="intmType">
+			              		ORDER BY intm_type
+			              	</isEqual>
+			              	<isEqual property="sortColumn" compareValue="intmDesc">
+			              		ORDER BY intm_desc
+			              	</isEqual> 
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GIIS_INTM_TYPE_PKG.get_intm_type_lov)
+		                  <isNull property="findText">
+                             WHERE UPPER(intm_type) LIKE UPPER(NVL(#searchString#, intm_type))
+                                OR UPPER(intm_desc) LIKE UPPER(NVL(#searchString#, intm_desc))
+                          </isNull>
+                          <isNotNull property="findText">
+                             WHERE ( UPPER(intm_type) LIKE UPPER(#findText#) 
+		                  			OR UPPER(intm_desc) LIKE UPPER(#findText#) )
+                          </isNotNull>
+		            <!-- <isNotNull property="filter">
+		                 WHERE 1 = 1
+		              		<isNotEmpty prepend="AND" property="intmType">
+				        		UPPER(intm_type) LIKE UPPER(#intmType#)
+				        	</isNotEmpty>
+				        	<isNotEmpty prepend="AND" property="intmDesc">
+				        		UPPER(intm_desc) LIKE UPPER(#intmDesc#)
+				        	</isNotEmpty>
+		           </isNotNull>
+		           <isNotNull property="findText">
+	                    WHERE ( UPPER(intm_type) LIKE UPPER(#findText#) 
+	                  			OR UPPER(intm_desc) LIKE UPPER(#findText#) )
+		           </isNotNull>
+		           <isNull property="findText">
+                        WHERE UPPER(intm_type) LIKE UPPER(NVL(#searchString#, intm_type))
+                           OR UPPER(intm_desc) LIKE UPPER(NVL(#searchString#, intm_desc))
+                   </isNull> -->) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="showIntmType" resultMap="GIISIntmTypeResultMap">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+						 b.count_, 
+						 a.*
+					FROM (SELECT *
+							FROM TABLE (GIISS083_PKG.show_intm_type)		
+							<isNotNull property="filter">
+								WHERE 1 = 1 
+	 								<isNotEmpty prepend="AND" property="intmType">
+										UPPER(intm_type) LIKE UPPER(#intmType#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="acctIntmCd">
+										UPPER(acct_intm_cd) LIKE UPPER(#acctIntmCd#)
+									</isNotEmpty>	
+									<isNotEmpty prepend="AND" property="intmDesc">
+										UPPER(intm_desc) LIKE UPPER(#intmDesc#)
+									</isNotEmpty>																								
+							</isNotNull>					
+							<isEqual property="sortColumn" compareValue="intmType">
+								ORDER BY intm_type
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="acctIntmCd">
+								ORDER BY acct_intm_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="intmDesc">
+								ORDER BY intm_desc
+							</isEqual>							
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>
+						) a,
+						(SELECT count(*) count_
+						   FROM TABLE (GIISS083_PKG.show_intm_type)						 		
+							<isNotNull property="filter">
+								WHERE 1 = 1 
+	 								<isNotEmpty prepend="AND" property="intmType">
+										UPPER(intm_type) LIKE UPPER(#intmType#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="acctIntmCd">
+										UPPER(acct_intm_cd) LIKE UPPER(#acctIntmCd#)
+									</isNotEmpty>	
+									<isNotEmpty prepend="AND" property="intmDesc">
+										UPPER(intm_desc) LIKE UPPER(#intmDesc#)
+									</isNotEmpty>																								
+							</isNotNull>						  
+						   ) b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select>	
+
+	<insert id="setIntmType" parameterClass="GIISIntmTypeClass">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;						
+			GIISS083_PKG.set_intm_type(
+				#intmType#, #acctIntmCd#,
+				#intmDesc#,#remarks#);
+		END;	
+	</insert>	
+	
+	<delete id="deleteInIntmType" parameterClass="GIISIntmTypeClass">
+		BEGIN
+			GIISS083_PKG.delete_in_intm_type(#intmType#);
+		END;
+	</delete>	
+	
+	<!-- GIISS203 : shan 11.08.2013 -->
+	<resultMap id="getIntmTypeGiiss203Map" class="java.util.HashMap">
+		<result column="INTM_TYPE"			property="intmType"/>
+		<result column="INTM_DESC"			property="intmDesc"/>
+	</resultMap>
+	
+	<select id="getIntmTypeGiiss203" resultMap="getIntmTypeGiiss203Map">
+		SELECT intm_type, intm_desc FROM GIIS_INTM_TYPE
+	</select>
+	<!-- end GIISS203 -->
+	
+	<select id="getGIACS288IntmTypeLOV" resultMap="getIntmTypeLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(GIIS_INTM_TYPE_PKG.get_giacs288_intm_type_lov(#findText#))
+					  <isEqual property="sortColumn" compareValue="intmType">
+					     ORDER BY 1
+					  </isEqual>
+					  <isEqual property="sortColumn" compareValue="intmDesc">
+					 	 ORDER BY 2
+					  </isEqual>			                      
+					  <isNotNull property="sortColumn">
+					     <isEqual property="ascDescFlg" compareValue="ASC">
+					 	    ASC
+					     </isEqual>
+					 	 <isEqual property="ascDescFlg" compareValue="DESC">
+					 		DESC
+					 	 </isEqual>
+					  </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GIIS_INTM_TYPE_PKG.get_giacs288_intm_type_lov(#findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="valAddIntmType" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss083_pkg.val_add_rec(#intmType#);
+ 		END;
+ 	</procedure> 
+ 	
+ 	 <procedure id="valDeleteIntmType" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss083_pkg.val_del_rec(#intmType#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<select id="valUpdateIntmType" parameterClass="java.util.HashMap" resultClass="java.lang.String"> <!-- Added by Jerome 08.11.2016 SR 5583 -->
+		SELECT giiss083_pkg.chk_giis_intm_type(#intmType#) FROM DUAL
+	</select>
+	
+</sqlMap>

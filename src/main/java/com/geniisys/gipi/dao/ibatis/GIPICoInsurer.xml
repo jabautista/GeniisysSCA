@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPICoInsurer">
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference_type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIPICoInsurer" type="com.geniisys.gipi.entity.GIPICoInsurer" />
+	
+	<resultMap class="GIPICoInsurer" id="gipiCoInsurerMap">
+		<result column="par_id"					property="parId" />
+		<result column="co_ri_cd"				property="coRiCd" />
+		<result column="co_ri_shr_pct"			property="coRiShrPct" />
+		<result column="co_ri_prem_amt"			property="coRiPremAmt" />
+		<result column="co_ri_tsi_amt"			property="coRiTsiAmt" />
+		<result column="policy_id"				property="policyId" />
+		<result column="ri_name" 				property="riName"/>
+		<result column="ri_sname" 				property="riSname"/>
+		<result column="is_default" 			property="isDefault"/>
+	</resultMap>
+	
+	<resultMap class="GIPICoInsurer" id="coInsurersMap">
+		<result property="policyId" 		column="policy_id"/>
+		<result property="parId" 			column="par_id"/>
+		<result property="coRiCd" 			column="co_ri_cd"/>
+		<result property="coRiShrPct" 		column="co_ri_shr_pct"/>
+		<result property="coRiPremAmt" 		column="co_ri_prem_amt"/>
+		<result property="coRiTsiAmt" 		column="co_ri_tsi_amt"/>
+		<result property="riSname" 			column="ri_sname"/>
+		
+		<result property="rowNum" 			column="rownum_"/>
+		<result property="rowCount" 		column="count_"/>
+	</resultMap>
+	
+	<parameterMap class="map" id="coInsSharePctParamMap">
+		<parameter property="parId"  	jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="saveRate"	jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="OUT"/>
+		<parameter property="dspRate"	jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="OUT"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="premTsiSumParameterMap">
+		<parameter property="parId"			jdbcType="INT"			javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="premSum"		jdbcType="NUMERIC"		javaType="java.math.BigDecimal"	mode="OUT" />
+		<parameter property="tsiSum"		jdbcType="NUMERIC"		javaType="java.math.BigDecimal"	mode="OUT" />
+		<parameter property="sharePct"		jdbcType="NUMERIC"		javaType="java.math.BigDecimal"	mode="OUT" />
+		<parameter property="policyId"		jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="OUT" />
+		<parameter property="coPremAmt"		jdbcType="NUMERIC"		javaType="java.math.BigDecimal"	mode="OUT" />
+		<parameter property="coTsiAmt"		jdbcType="NUMERIC"		javaType="java.math.BigDecimal"	mode="OUT" />
+	</parameterMap>
+	
+	<parameterMap class="map" id="postFormGIPIS153Map">
+		<parameter property="userId"		jdbcType="VARCHAR"		javaType="java.lang.String"	  	mode="IN"/>
+		<parameter property="parId"			jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="tsiAmt"		jdbcType="NUMERIC"		javaType="java.math.BigDecimal"	mode="IN" />
+		<parameter property="premAmt"		jdbcType="NUMERIC"		javaType="java.math.BigDecimal"	mode="IN" />
+		<parameter property="coInsSw"		jdbcType="VARCHAR"		javaType="java.lang.String"	  	mode="OUT"/>
+	</parameterMap>
+	
+	<select id="getCoInsurers" resultMap="gipiCoInsurerMap">
+		SELECT par_id, co_ri_cd, co_ri_shr_pct, co_ri_prem_amt, co_ri_tsi_amt, 
+		       policy_id, ri_name, ri_sname, is_default
+			FROM TABLE(GIPI_CO_INSURER_PKG.get_gipi_co_insurer(#parId#))
+	</select>
+	
+	<procedure id="getCoInsSharePct" parameterMap="coInsSharePctParamMap">
+		BEGIN
+			GIPI_CO_INSURER_PKG.get_co_ins_shr_pct(?, ?, ?);
+		END;
+	</procedure>
+	
+	<procedure id="getCoInsurerDefaults" parameterMap="premTsiSumParameterMap">
+		{CALL DEFAULT_PARAMS_GIPIS153(?, ?, ?, ?, ?, ?, ?)}
+	</procedure>
+	
+	<select id="getDefaultCoInsurers" resultMap="gipiCoInsurerMap">
+		SELECT * 
+			FROM TABLE(GIPI_CO_INSURER_PKG.get_default_co_insurers(#policyId#))
+	</select>
+	
+	<procedure id="delGIPICoInsurers" parameterClass="map">
+		BEGIN
+			GIPI_CO_INSURER_PKG.del_gipi_co_insurer1(#parId#, #coRiCd#);
+		END;
+	</procedure>
+	
+	<procedure id="saveGIPICoInsurers" parameterClass="GIPICoInsurer">
+		BEGIN
+			GIIS_USERS_PKG.app_user := #userId#;
+			GIPI_CO_INSURER_PKG.set_gipi_co_insurer(#parId#, #coRiCd#, #coRiPremAmt#, 
+					#coRiTsiAmt#, #coRiShrPct#, #userId#);
+		END;
+	</procedure>
+	
+	<select id="getPolicyCoInsurers" resultMap="coInsurersMap" parameterClass="java.util.HashMap">
+		SELECT *
+          FROM (SELECT rownum rownum_,b.count_,a.*
+                 FROM (SELECT * FROM TABLE(GIPI_CO_INSURER_PKG.get_co_insurers(#policyId#))) a,
+                      (SELECT count(*) count_ FROM TABLE(GIPI_CO_INSURER_PKG.get_co_insurers(#policyId#))) b)              
+		WHERE rownum_ BETWEEN NVL(#from#,rownum_) AND NVL(#to#,rownum_)
+	</select>
+	
+	<select id="checkCoInsurerAccess" resultClass="string">
+		SELECT Gipi_Co_Insurer_Pkg.limit_entry(#parId#) FROM dual
+	</select>
+	
+	<procedure id="postFormCommitGIPIS153" parameterMap="postFormGIPIS153Map">
+		BEGIN
+			GIIS_USERS_PKG.app_user := ?;
+			GIPI_CO_INSURER_PKG.post_forms_commit_gipis153(?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<procedure id="populateInsurerOrigTab" parameterClass="map">
+		BEGIN
+			GIIS_USERS_PKG.app_user := #userId#;
+			GIPI_CO_INSURER_PKG.populate_orig_tab(#parId#);
+		END;
+	</procedure>
+	
+	<procedure id="processDefaultInsurer" parameterClass="map">
+		BEGIN
+			GIIS_USERS_PKG.app_user := #userId#;
+			GIPI_CO_INSURER_PKG.process_default_insurer(#parId#);
+		END;
+	</procedure>
+	
+	<procedure id="processDefaultLead" parameterClass="map">
+		BEGIN
+			GIIS_USERS_PKG.app_user := #userId#;
+			GIPI_CO_INSURER_PKG.process_default_lead(#parId#);
+		END;
+	</procedure>
+	
+	<!-- Apollo Cruz 09.30.2014 -->
+	<procedure id="delAllRelatedCoInsRecs" parameterClass="java.lang.Integer">
+		CALL gipi_co_insurer_pkg.del_all_related_co_ins_recs(#parId#)
+	</procedure>
+</sqlMap>

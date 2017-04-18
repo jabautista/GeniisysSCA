@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIVesAir">
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIPIVesAirClass" type="com.geniisys.gipi.entity.GIPIVesAir"/>
+	<resultMap class="GIPIVesAirClass" id="cargoInformationsMap">
+	
+		<result property="policyId"		column="policy_id"/>
+		<result property="vesselCd"		column="vessel_cd"/>
+		<result property="recFlag"		column="rec_flag"/>
+		<result property="vescon"		column="vescon"/>
+		<result property="voyLimit"		column="voy_limit"/>
+		<result property="vesselName"	column="vessel_name"/>
+		<result property="vesselFlag"	column="vessel_flag"/>
+		<result property="rowNum"		column="rownum_"/>
+		<result property="rowCount"		column="count_"/>
+	</resultMap>
+	
+	<select id="getCargoInformations" resultMap="cargoInformationsMap" parameterClass="java.util.HashMap">
+		SELECT *       
+                FROM (SELECT rownum rownum_ ,b.count_,a.*     
+                        FROM (SELECT * FROM TABLE(GIPI_VES_AIR_PKG.get_cargoinformations(#policyId#))) a,
+	               		   (SELECT count(*) count_ FROM TABLE(GIPI_VES_AIR_PKG.get_cargoinformations(#policyId#))) b)
+	          WHERE rownum_ BETWEEN NVL(#from#,rownum_) AND NVL(#to#,rownum_)
+	</select>
+</sqlMap>

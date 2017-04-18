@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GIACDataChecking">
+
+	<resultMap class="java.util.HashMap" id="EOMCheckingScriptsResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="eomScriptNo" 			column="eom_script_no" />
+		<result property="eomScriptTitle" 		column="eom_script_title" />
+		<result property="eomScriptText1" 		column="eom_script_text_1" />
+		<result property="eomScriptText2" 		column="eom_script_text_2" />
+		<result property="eomScriptSoln" 		column="eom_script_soln" />
+		<result property="remarks" 				column="remarks"/>
+		<result property="userId" 				column="user_id"/>
+		<result property="lastUpdate" 			column="last_update"/>
+		<result property="checkBookDate" 		column="check_book_date"/> <!-- mikel 06.20.2016; GENQA 5544 -->
+	</resultMap>
+	
+	<select id="GIACS353GetCheckingScripts" resultMap="EOMCheckingScriptsResultMap">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+						 b.count_, 
+						 a.*
+					FROM (SELECT *
+							FROM TABLE (GIACS353_PKG.get_checking_scripts)
+							<isNotNull property="filter">
+							WHERE 1 = 1 
+ 								<isNotEmpty prepend="AND" property="eomScriptNo">
+									eom_script_no LIKE #eomScriptNo#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="eomScriptTitle">
+									UPPER(eom_script_title) LIKE UPPER(#eomScriptTitle#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="eomScriptSoln">
+									UPPER(eom_script_soln) LIKE UPPER(#eomScriptSoln#)
+								</isNotEmpty>
+							</isNotNull>
+							<isEqual property="sortColumn" compareValue="eomScriptNo">
+								ORDER BY eom_script_no
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="eomScriptTitle">
+								ORDER BY eom_script_title
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="eomScriptSoln">
+								ORDER BY eom_script_soln
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>
+						) a,
+						(SELECT count(*) count_
+						   FROM TABLE (GIACS353_PKG.get_checking_scripts)
+						   <isNotNull property="filter">
+							WHERE 1 = 1 
+ 								<isNotEmpty prepend="AND" property="eomScriptNo">
+									eom_script_no LIKE #eomScriptNo#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="eomScriptTitle">
+									UPPER(eom_script_title) LIKE UPPER(#eomScriptTitle#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="eomScriptSoln">
+									UPPER(eom_script_soln) LIKE UPPER(#eomScriptSoln#)
+								</isNotEmpty>
+							</isNotNull>
+						   ) b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap id="giacs353CheckQueryResultMap" class="java.util.HashMap">
+		<result property="script" column="script" />
+		<result property="stat" column="stat" />
+	</resultMap>
+	
+	<select id="giacs353CheckQuery" resultMap="giacs353CheckQueryResultMap">
+		SELECT * FROM TABLE (GIACS353_PKG.check_query(#month#, #year#, #query#))
+	</select>
+	
+	<!-- mikel 06.20.2016; GENQA 5544 -->
+	<procedure id="patchRecords" parameterClass="java.util.HashMap">
+		BEGIN
+			GIACS353_PKG.patch_records (#month#, #year#, #scriptType#, #moduleId#);
+		END;
+	</procedure>
+
+</sqlMap>

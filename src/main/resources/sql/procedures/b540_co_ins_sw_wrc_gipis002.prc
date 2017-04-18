@@ -1,0 +1,18 @@
+DROP PROCEDURE CPI.B540_CO_INS_SW_WRC_GIPIS002;
+
+CREATE OR REPLACE PROCEDURE CPI.B540_Co_Ins_Sw_Wrc_Gipis002
+  (b240_par_id IN NUMBER,
+   v_count OUT NUMBER) IS
+BEGIN
+  SELECT COUNT(*)
+        INTO V_COUNT
+        FROM GIPI_WITEM
+       WHERE PAR_ID = B240_PAR_ID
+         AND NOT EXISTS (SELECT ITEM_NO
+                         FROM GIPI_WITMPERL
+                        WHERE PAR_ID = B240_PAR_ID
+                          AND ITEM_NO = GIPI_WITEM.ITEM_NO);
+END;
+/
+
+

@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIACR190B_GPOLICYNO" language="groovy" pageWidth="555" pageHeight="802" columnWidth="555" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="2.5937424601000023"/>
+	<property name="ireport.x" value="543"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String">
+		<defaultValueExpression><![CDATA["C:\\Documents and Settings\\cpi\\Desktop\\GIACR190b\\"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="P_INTM_NO" class="java.lang.Integer"/>
+	<parameter name="P_AGING_ID" class="java.lang.Integer"/>
+	<parameter name="P_USER_ID" class="java.lang.String"/>
+	<parameter name="P_AGING_LIST" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT a.*, b.total_bal_per_policy
+  FROM (select *
+	  FROM table(giacr190b_pkg.populate_giacr190b1($P{P_INTM_NO}, $P{P_AGING_ID}, $P{P_USER_ID}, $P{P_AGING_LIST})))a,
+       (select sum(v_balance_amt_due) total_bal_per_policy
+	  FROM table(giacr190b_pkg.populate_giacr190b1($P{P_INTM_NO}, $P{P_AGING_ID}, $P{P_USER_ID}, $P{P_AGING_LIST}))) b
+ ORDER BY policy_no]]>
+	</queryString>
+	<field name="INCEPT_DATE" class="java.lang.String"/>
+	<field name="EXPIRY_DATE" class="java.lang.String"/>
+	<field name="POLICY_NO" class="java.lang.String"/>
+	<field name="V_DATE" class="java.sql.Timestamp"/>
+	<field name="V_INVOICE" class="java.lang.String"/>
+	<field name="V_PROPERTY1" class="java.lang.String"/>
+	<field name="V_SIGNATORY1" class="java.lang.String"/>
+	<field name="V_DESIGNATION1" class="java.lang.String"/>
+	<field name="V_INTM_NO1" class="java.math.BigDecimal"/>
+	<field name="V_USER1" class="java.lang.String"/>
+	<field name="V_INTM_NAME1" class="java.lang.String"/>
+	<field name="V_INTM_ADDRESS1" class="java.lang.String"/>
+	<field name="V_INTM_ADDRESS2" class="java.lang.String"/>
+	<field name="V_INTM_ADDRESS3" class="java.lang.String"/>
+	<field name="V_INTERMEDIARY_NAME" class="java.lang.String"/>
+	<field name="V_INTERMEDIARY_NO" class="java.math.BigDecimal"/>
+	<field name="V_POLICY" class="java.lang.String"/>
+	<field name="V_POLICY_NO" class="java.lang.String"/>
+	<field name="V_ENDT_NO" class="java.lang.String"/>
+	<field name="V_ISS_CD" class="java.lang.String"/>
+	<field name="V_PREM_SEQ_NO" class="java.math.BigDecimal"/>
+	<field name="V_PREM_BAL_DUE" class="java.math.BigDecimal"/>
+	<field name="V_TAX_BAL_DUE" class="java.math.BigDecimal"/>
+	<field name="V_BALANCE_AMT_DUE" class="java.math.BigDecimal"/>
+	<field name="V_INST_NO" class="java.math.BigDecimal"/>
+	<field name="TOTAL_BAL_PER_POLICY" class="java.math.BigDecimal"/>
+	<variable name="SUMBALANCE_AMT_DUEPERPOLICY" class="java.math.BigDecimal" resetType="None" calculation="System">
+		<variableExpression><![CDATA[]]></variableExpression>
+		<initialValueExpression><![CDATA[]]></initialValueExpression>
+	</variable>
+	<variable name="V_SUM_BALANCE_ALL" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{V_BALANCE_AMT_DUE}]]></variableExpression>
+	</variable>
+	<group name="G_POLICY_NO">
+		<groupExpression><![CDATA[$F{POLICY_NO}]]></groupExpression>
+		<groupHeader>
+			<band height="24">
+				<staticText>
+					<reportElement x="52" y="0" width="5" height="11"/>
+					<textElement>
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[-]]></text>
+				</staticText>
+				<subreport>
+					<reportElement x="295" y="0" width="260" height="11"/>
+					<subreportParameter name="P_INCEPT_DATE">
+						<subreportParameterExpression><![CDATA[$F{INCEPT_DATE}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="P_POLICY_NO">
+						<subreportParameterExpression><![CDATA[$F{POLICY_NO}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="P_INTM_NO">
+						<subreportParameterExpression><![CDATA[$P{P_INTM_NO}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="P_AGING_LIST">
+						<subreportParameterExpression><![CDATA[$P{P_AGING_LIST}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="P_AGING_ID">
+						<subreportParameterExpression><![CDATA[$P{P_AGING_ID}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="P_USER_ID">
+						<subreportParameterExpression><![CDATA[$P{P_USER_ID}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="P_EXPIRY_DATE">
+						<subreportParameterExpression><![CDATA[$F{EXPIRY_DATE}]]></subreportParameterExpression>
+					</subreportParameter>
+					<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					<returnValue subreportVariable="VAR_BAL_AMT_DUE" toVariable="SUMBALANCE_AMT_DUEPERPOLICY"/>
+					<subreportExpression class="java.lang.String"><![CDATA[$P{SUBREPORT_DIR} + "GIACR190B_GPOLICYNO_GPREMSEQNO.jasper"]]></subreportExpression>
+				</subreport>
+				<textField>
+					<reportElement x="0" y="0" width="50" height="11"/>
+					<textElement markup="none">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{INCEPT_DATE}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="70" y="0" width="60" height="11"/>
+					<textElement>
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{EXPIRY_DATE}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="195" y="0" width="100" height="11"/>
+					<textElement>
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{POLICY_NO}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement x="0" y="12" width="130" height="11" forecolor="#FFFFFF"/>
+					<textElement>
+						<font size="7"/>
+					</textElement>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{V_PROPERTY1}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+	</group>
+</jasperReport>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="GICLTakeUpHist">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GICLTakeUpHistClass" type="com.geniisys.gicl.entity.GICLTakeUpHist"/>
+	
+	<parameterMap class="map" id="validateTranDateMap">
+		<parameter property="tranDate" 		 jdbcType="DATE"  		   javaType="java.util.Date"  	  mode="IN"/>
+		<parameter property="msg"   			 jdbcType="VARCHAR"  javaType="java.lang.String"  mode="OUT"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="bookOsGICLB001Map">
+		<parameter property="moduleName"   		jdbcType="VARCHAR"  	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="dspDate" 		 			jdbcType="DATE"  		  	javaType="java.util.Date"  	    mode="IN"/>
+		<parameter property="userId"   						jdbcType="VARCHAR"  	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="message"   			 		jdbcType="VARCHAR"  	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="messageType"   		jdbcType="VARCHAR"  	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="ctr"   							jdbcType="VARCHAR"  	javaType="java.lang.String"  mode="OUT"/>
+	</parameterMap>
+	
+	<select id="getMaxAcctDate" resultClass="java.util.Date">
+		SELECT MAX(acct_date) 
+          FROM gicl_take_up_hist
+	</select>
+	
+	<procedure id="validateTranDate"  parameterMap="validateTranDateMap">
+		CALL gicl_take_up_hist_pkg.validate_tran_date(?, ?)
+	</procedure>
+	
+	<procedure id="bookOsGICLB001"  parameterMap="bookOsGICLB001Map">
+		CALL gicl_take_up_hist_pkg.book_os_giclb001(?, ?, ?, ?, ?, ?)
+	</procedure>	
+
+	<procedure id="gicls032ReverseTakeupHist">
+		BEGIN
+			gicls032_reverse_takeup_hist(#claimId#, #adviceId#, #userId#);
+		END;
+	</procedure>
+
+</sqlMap>

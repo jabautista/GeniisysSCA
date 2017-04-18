@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIWOpenCargo">
+	
+	<typeAlias alias="WOpenCargo" type="com.geniisys.gipi.entity.GIPIWOpenCargo" />
+	
+	<resultMap class="WOpenCargo" id="wopenCargoResultMap">
+		<result property="parId"			column="PAR_ID"/>
+		<result property="geogCd"			column="GEOG_CD"/>
+		<result property="cargoClassCd"		column="CARGO_CLASS_CD"/>
+		<result property="cargoClassDesc"	column="CARGO_CLASS_DESC"/>
+		<result property="recFlag"			column="REC_FLAG"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="wopenCargoResultTGMap" extends="wopenCargoResultMap">
+		<result column="rownum_" 	property="rowNum" />
+		<result column="count_"		property="rowCount"/>
+	</resultMap>
+		
+	<select id="getGIPIWOpenCargo" resultMap="wopenCargoResultMap" >
+		SELECT * FROM TABLE(GIPI_WOPEN_CARGO_PKG.get_gipi_wopen_cargo(#parId#, #geogCd#))
+	</select>
+	
+	<procedure id="saveGIPIWOpenCargo" parameterClass="WOpenCargo">
+		DECLARE
+			v_wopen_cargo GIPI_WOPEN_CARGO%ROWTYPE;
+		BEGIN
+			v_wopen_cargo.PAR_ID 			:= #parId#;
+			v_wopen_cargo.GEOG_CD 			:= #geogCd#;
+			v_wopen_cargo.CARGO_CLASS_CD 	:= #cargoClassCd#;
+		
+			GIPI_WOPEN_CARGO_PKG.set_gipi_wopen_cargo(v_wopen_cargo);
+		END;
+	</procedure>
+	
+	<procedure id="setGIPIWOpenCargo" parameterClass="WOpenCargo">
+		BEGIN
+			GIIS_USERS_PKG.app_user := #userId#;
+			GIPI_WOPEN_CARGO_PKG.set_gipi_wopen_cargo_endt(#parId#, #geogCd#, #cargoClassCd#, #recFlag#);
+		END;
+	</procedure>
+	
+	<procedure id="deleteGIPIWOpenCargo" parameterClass="java.util.HashMap">
+		BEGIN
+			GIPI_WOPEN_CARGO_PKG.del_gipi_wopen_cargo(#parId#, #geogCd#, #cargoClassCd#);
+		END;
+	</procedure>
+	
+	<select id="getGIPIWOpenCargoTG" resultMap="wopenCargoResultTGMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+		               b.count_,
+		               a.*
+		          FROM (SELECT * FROM TABLE(GIPI_WOPEN_CARGO_PKG.get_gipi_wopen_cargo(#parId#, #geogCd#))
+		        <isNotNull property="filter">
+					WHERE 1 = 1
+					<isNotEmpty prepend="AND"  property="cargoClassCd">
+						cargo_class_cd = #cargoClassCd#
+					</isNotEmpty>
+					<isNotEmpty prepend="AND"  property="cargoClassDesc">
+						UPPER(cargo_class_desc) LIKE upper(#cargoClassDesc#)
+					</isNotEmpty>
+				</isNotNull>
+				 <isNull property="sortColumn">
+					ORDER BY cargo_class_cd ASC
+				 </isNull>
+		         <isNotNull property="sortColumn">
+		         <isEqual property="sortColumn" compareValue="cargoClassCd">
+		         		ORDER BY cargo_class_cd
+		         </isEqual>
+		         <isEqual property="sortColumn" compareValue="cargoClassDesc">
+		         		ORDER BY cargo_class_desc
+		         </isEqual>
+		         <isEqual property="ascDescFlg" compareValue="ASC">
+		         		ASC
+		         </isEqual>
+		         <isEqual property="ascDescFlg" compareValue="DESC">
+		         		DESC
+		         </isEqual>
+		         </isNotNull>) a,
+		    (SELECT count(*) count_
+		       FROM TABLE(GIPI_WOPEN_CARGO_PKG.get_gipi_wopen_cargo(#parId#, #geogCd#))
+		       <isNotNull property="filter">
+					WHERE 1 = 1
+					<isNotEmpty prepend="AND"  property="cargoClassCd">
+						cargo_class_cd = #cargoClassCd#
+					</isNotEmpty>
+					<isNotEmpty prepend="AND"  property="cargoClassDesc">
+						UPPER(cargo_class_desc) LIKE upper(#cargoClassDesc#)
+					</isNotEmpty>
+				</isNotNull>
+				<isNull property="sortColumn">
+					ORDER BY cargo_class_cd ASC
+				</isNull>
+		       ) b)
+		WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+</sqlMap>
+	
+	

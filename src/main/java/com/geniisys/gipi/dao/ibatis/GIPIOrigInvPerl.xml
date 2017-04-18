@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIOrigInvPerl">
+	<typeAlias alias="gipiOrigInvPerl" type="com.geniisys.gipi.entity.GIPIOrigInvPerl"/>
+	
+	<resultMap class="gipiOrigInvPerl" id="getGipiOrigInvPerlMap">
+		<result property="parId"		column="PAR_ID"/>
+		<result property="itemGrp"		column="ITEM_GRP"/>
+		<result property="perilCd"		column="PERIL_CD"/>
+		<result property="perilName"	column="PERIL_NAME"/>
+		<result property="tsiAmt"		column="TSI_AMT"/>
+		<result property="premAmt"		column="PREM_AMT"/>
+		<result property="shareTsiAmt"	column="SHARE_TSI_AMT"/>
+		<result property="sharePremAmt"	column="SHARE_PREM_AMT"/>
+		<result property="policyId"		column="POLICY_ID"/>	
+		<result property="riCommAmt"	column="RI_COMM_AMT"/>
+		<result property="riCommRt"		column="RI_comm_RT"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="invPerilsMap">
+		<result	property="policyId"			column="policy_id"/>
+		<result	property="itemGrp"			column="item_grp"/>
+		<result	property="parId"			column="par_id"/>
+		<result	property="perilCd"			column="peril_cd"/>
+		
+		<result	property="yourPerilCode"	column="your_peril_code"/>
+		<result	property="yourPremAmt"		column="your_prem_amt"/>
+		<result	property="yourTsiAmt"		column="your_tsi_amt"/>
+		
+		<result	property="fullPerilCode"	column="full_peril_code"/>
+		<result	property="fullPremAmt"		column="full_prem_amt"/>
+		<result	property="fullTsiAmt"		column="full_tsi_amt"/>
+	</resultMap>
+	
+	<select id="getGipiOrigInvPerl" resultMap="getGipiOrigInvPerlMap">
+		SELECT * FROM TABLE(GIPI_ORIG_INVPERL_PKG.get_gipi_orig_invperl(#parId#, #lineCd#))
+	</select>
+	
+	<select id="getInvPerils" resultMap="invPerilsMap" parameterClass="java.util.HashMap">
+		SELECT *
+          FROM (SELECT rownum rownum_,b.count_,a.*
+                 FROM (SELECT * FROM TABLE(GIPI_ORIG_INVPERL_PKG.get_inv_perils(#policyId#,#itemGrp#))) a,
+                      (SELECT count(*) count_ FROM TABLE(GIPI_ORIG_INVPERL_PKG.get_inv_perils(#policyId#,#itemGrp#))) b)
+		WHERE rownum_ BETWEEN NVL(#from#,rownum_) AND NVL(#to#,rownum_)
+	</select>
+</sqlMap>

@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISSectionOrHazard">
+
+ 	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="giisSectionOrHazard" type="com.geniisys.common.entity.GIISSectionOrHazard"/>
+
+	<resultMap id="getSectionOrHazardLOVMap" class="com.geniisys.common.entity.GIISSectionOrHazard" extends="BaseEntity.TableGridResultMap">
+		<result column="SECTION_OR_HAZARD_CD" 			property="sectionOrHazardCd" />
+		<result column="SECTION_OR_HAZARD_TITLE" 					property="sectionOrHazardTitle" />
+	</resultMap>
+
+	<select id="getSectionOrHazardLOV" resultMap="getSectionOrHazardLOVMap">
+		 SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giis_section_or_hazard_pkg.get_section_or_hazard_lov(#lineCd#,#sublineCd#))
+		                  <isNotNull property="findText">
+		                  	WHERE UPPER(section_or_hazard_title) LIKE UPPER(#findText#)
+		                  </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                 FROM TABLE (giis_section_or_hazard_pkg.get_section_or_hazard_lov(#lineCd#,#sublineCd#))
+		                  <isNotNull property="findText">
+		                  	WHERE UPPER(section_or_hazard_title) LIKE UPPER(#findText#)
+		                  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap id="getGiiss020RecListMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result column="SECTION_LINE_CD" 			property="sectionLineCd" />
+		<result column="SECTION_SUBLINE_CD" 		property="sectionSublineCd" />
+		<result column="SECTION_OR_HAZARD_CD" 		property="sectionOrHazardCd" />
+		<result column="SECTION_OR_HAZARD_TITLE" 	property="sectionOrHazardTitle" />
+		<result column="REMARKS" 					property="remarks" />
+		<result column="LAST_UPDATE" 				property="lastUpdate" />
+		<result column="USER_ID" 					property="userId" />
+		<result column="LINE_NAME" 					property="lineName" />
+		<result column="SUBLINE_NAME"				property="sublineName" />
+	</resultMap>
+
+	<select id="getGiiss020RecList" resultMap="getGiiss020RecListMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss020_pkg.get_rec_list(#moduleId#,#userId#,#fromMenu#))
+		  	      		  <isNotNull property="filter">
+							WHERE 1 = 1 
+							<isNotEmpty prepend="AND" property="sectionLineCd">
+								UPPER(SECTION_LINE_CD) LIKE UPPER(#sectionLineCd#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="sectionSublineCd">
+								UPPER(SECTION_SUBLINE_CD) LIKE UPPER(#sectionSublineCd#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="sectionOrHazardCd">
+								UPPER(SECTION_OR_HAZARD_CD) LIKE UPPER(#sectionOrHazardCd#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="sectionOrHazardTitle">
+								UPPER(SECTION_OR_HAZARD_TITLE) LIKE UPPER(#sectionOrHazardTitle#)
+							</isNotEmpty>
+						  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="sectionLineCd">
+			              		ORDER BY SECTION_LINE_CD
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="sectionSublineCd">
+			              		ORDER BY SECTION_SUBLINE_CD
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="sectionOrHazardCd">
+			              		ORDER BY SECTION_OR_HAZARD_CD
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="sectionOrHazardTitle">
+			              		ORDER BY SECTION_OR_HAZARD_TITLE
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss020_pkg.get_rec_list(#moduleId#,#userId#,#fromMenu#))
+		                  <isNotNull property="filter">
+							WHERE 1 = 1 
+							<isNotEmpty prepend="AND" property="sectionLineCd">
+								UPPER(SECTION_LINE_CD) LIKE UPPER(#sectionLineCd#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="sectionSublineCd">
+								UPPER(SECTION_SUBLINE_CD) LIKE UPPER(#sectionSublineCd#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="sectionOrHazardCd">
+								UPPER(SECTION_OR_HAZARD_CD) LIKE UPPER(#sectionOrHazardCd#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="sectionOrHazardTitle">
+								UPPER(SECTION_OR_HAZARD_TITLE) LIKE UPPER(#sectionOrHazardTitle#)
+							</isNotEmpty>
+						  </isNotNull>) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="getGiiss020LineLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="LINE_CD" 		property="lineCd"/>
+		<result column="LINE_NAME" 		property="lineName"/>
+	</resultMap>
+		
+	<select id="getGiiss020LineLOV" resultMap="getGiiss020LineLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss020_pkg.get_line_lov(#moduleId#, #userId#, #findText#))
+		                  <isEqual property="sortColumn" compareValue="lineCd">
+			              		ORDER BY line_cd
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="lineName">
+			              		ORDER BY line_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss020_pkg.get_line_lov(#moduleId#, #userId#, #findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="getGiiss020SublineLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="LINE_CD" 		property="lineCd"/>
+		<result column="LINE_NAME" 		property="lineName"/>
+		<result column="SUBLINE_CD" 	property="sublineCd"/>
+		<result column="SUBLINE_NAME" 	property="sublineName"/>
+	</resultMap>
+	
+	<select id="getGiiss020SublineLOV" resultMap="getGiiss020SublineLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss020_pkg.get_subline_lov(#lineCd#, #moduleId#, #userId#, #findText#))
+		                  <isEqual property="sortColumn" compareValue="sublineCd">
+			              		ORDER BY subline_cd
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="sublineName">
+			              		ORDER BY subline_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss020_pkg.get_subline_lov(#lineCd#, #moduleId#, #userId#, #findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<select id="getGiiss020LineSublineLOV" resultMap="getGiiss020SublineLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss020_pkg.get_line_subline_lov(#moduleId#, #userId#, #findText#))
+		                  <isEqual property="sortColumn" compareValue="lineCd">
+			              		ORDER BY line_cd
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="sublineCd">
+			              		ORDER BY subline_cd
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="sublineName">
+			              		ORDER BY subline_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss020_pkg.get_line_subline_lov(#moduleId#, #userId#, #findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<procedure id="valAddSectionOrHazard" parameterClass="java.util.HashMap">
+		BEGIN
+ 			giiss020_pkg.val_add_rec(#lineCd#, #sublineCd#, #sectionOrHazardCd#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteSectionOrHazard" parameterClass="java.util.HashMap">
+		BEGIN
+ 			giiss020_pkg.val_del_rec(#lineCd#, #sublineCd#, #sectionOrHazardCd#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="setSectionOrHazardGiiss020" parameterClass="giisSectionOrHazard">
+	    DECLARE
+	    	v_rec giis_section_or_hazard%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.section_line_cd := #sectionLineCd#;
+ 			v_rec.section_subline_cd := #sectionSublineCd#;
+ 			v_rec.section_or_hazard_cd := #sectionOrHazardCd#;
+ 			v_rec.section_or_hazard_title := #sectionOrHazardTitle#;
+ 			v_rec.remarks := #remarks#;
+ 			v_rec.user_id := #userId#;
+ 			
+ 			giiss020_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="delSectionOrHazardGiiss020" parameterClass="giisSectionOrHazard">
+	    DECLARE
+	    	v_rec giis_section_or_hazard%ROWTYPE;
+ 		BEGIN		     
+ 			v_rec.section_line_cd := #sectionLineCd#;
+ 			v_rec.section_subline_cd := #sectionSublineCd#;
+ 			v_rec.section_or_hazard_cd := #sectionOrHazardCd#;
+ 			
+ 			giiss020_pkg.del_rec(v_rec);
+ 		END;
+ 	</procedure>
+</sqlMap>

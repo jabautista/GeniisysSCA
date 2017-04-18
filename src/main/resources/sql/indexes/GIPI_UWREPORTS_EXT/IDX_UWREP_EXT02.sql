@@ -1,0 +1,21 @@
+SET SERVEROUTPUT ON
+
+DECLARE
+   v_exist   NUMBER := 0;
+BEGIN
+   SELECT 1
+     INTO v_exist
+     FROM all_indexes
+    WHERE owner = 'CPI' AND index_name = 'IDX_UWREP_EXT02';
+
+   IF v_exist = 1
+   THEN
+      DBMS_OUTPUT.put_line ('IDX_UWREP_EXT02 already exists.');
+   END IF;
+EXCEPTION
+   WHEN NO_DATA_FOUND
+   THEN
+      EXECUTE IMMEDIATE ('CREATE INDEX CPI.IDX_UWREP_EXT02 ON CPI.GIPI_UWREPORTS_EXT (LINE_CD) TABLESPACE INDEXES COMPUTE STATISTICS');
+
+      DBMS_OUTPUT.put_line ('IDX_UWREP_EXT02 created.');
+END;

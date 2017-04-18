@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GICLLossExpRids">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GICLLossExpRids" type="com.geniisys.gicl.entity.GICLLossExpRids"/>
+	
+	<resultMap class="GICLLossExpRids" id="GICLLossExpRidsResultMap">
+		<result property="claimId"				column="CLAIM_ID"/>
+		<result property="clmLossId"			column="CLM_LOSS_ID"/>
+		<result property="clmDistNo"			column="CLM_DIST_NO"/>
+		<result property="distYear"				column="DIST_YEAR"/>
+		<result property="itemNo"				column="ITEM_NO"/>
+		<result property="perilCd"				column="PERIL_CD"/>
+		<result property="payeeCd"				column="PAYEE_CD"/>
+		<result property="grpSeqNo"				column="GRP_SEQ_NO"/>
+		<result property="riCd"					column="RI_CD"/>
+		<result property="dspRiName"			column="DSP_RI_NAME"/>
+		<result property="userId"				column="USER_ID"/>
+		<result property="lastUpdate"			column="LAST_UPDATE"/>
+		<result property="acctTrtyType"			column="ACCT_TRTY_TYPE"/>
+		<result property="shrLossExpRiPct"		column="SHR_LOSS_EXP_RI_PCT"/>
+		<result property="shrLeRiPdAmt"			column="SHR_LE_RI_PD_AMT"/>
+		<result property="shrLeRiAdvAmt"		column="SHR_LE_RI_ADV_AMT"/>
+		<result property="shrLeRiNetAmt"		column="SHR_LE_RI_NET_AMT"/>
+		<result property="shareType"			column="SHARE_TYPE"/>
+		<result property="rowNum"				column="ROWNUM_"/>
+		<result property="rowCount"				column="COUNT_"/>
+	</resultMap>
+	
+	<select id="getGiclLossExpRidsList" resultMap="GICLLossExpRidsResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GICL_LOSS_EXP_RIDS_PKG.get_gicl_loss_exp_rids(#claimId#, #clmLossId#, #clmDistNo#, #grpSeqNo#))
+		          		 <isNotNull property="filter">
+			      			WHERE 1=1
+			      			<isNotEmpty prepend="AND" property="riCd">
+           					  ri_cd LIKE #riCd#
+           			        </isNotEmpty>
+           			        <isNotEmpty prepend="AND" property="shrLossExpRiPct">
+           					  shr_loss_exp_ri_pct LIKE #shrLossExpRiPct#
+           			        </isNotEmpty>
+           			        <isNotEmpty prepend="AND" property="shrLeRiPdAmt">
+           					  shr_le_ri_pd_amt LIKE #shrLeRiPdAmt#
+           			        </isNotEmpty>
+           			        <isNotEmpty prepend="AND" property="shrLeRiAdvAmt">
+           					  shr_le_ri_adv_amt LIKE #shrLeRiAdvAmt#
+           			        </isNotEmpty>
+           			        <isNotEmpty prepend="AND" property="shrLeRiNetAmt">
+           					  shr_le_ri_net_amt LIKE #shrLeRiNetAmt#
+           			        </isNotEmpty>
+		          		 </isNotNull>
+		                 <isEqual property="sortColumn" compareValue="riCd">
+							ORDER BY ri_cd
+				         </isEqual>
+				         <isEqual property="sortColumn" compareValue="riCd dspRiName">
+							ORDER BY ri_cd
+				         </isEqual>
+				           <isEqual property="sortColumn" compareValue="dspRiName">
+							ORDER BY dsp_ri_name
+				         </isEqual>
+				         <isEqual property="sortColumn" compareValue="shrLossExpRiPct">
+							ORDER BY shr_loss_exp_ri_pct
+				         </isEqual>
+		                 <isEqual property="sortColumn" compareValue="shrLeRiPdAmt">
+							ORDER BY shr_le_ri_pd_amt
+				         </isEqual>
+				         <isEqual property="sortColumn" compareValue="shrLeRiAdvAmt">
+							ORDER BY shr_le_ri_adv_amt
+				         </isEqual>
+		                 <isEqual property="sortColumn" compareValue="shrLeRiNetAmt">
+							ORDER BY shr_le_ri_net_amt
+				         </isEqual>
+				         <isNotNull property="sortColumn">
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>
+		                ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GICL_LOSS_EXP_RIDS_PKG.get_gicl_loss_exp_rids(#claimId#, #clmLossId#, #clmDistNo#, #grpSeqNo#))
+		                 <isNotNull property="filter">
+			      			WHERE 1=1
+			      			<isNotEmpty prepend="AND" property="riCd">
+           					  ri_cd LIKE #riCd#
+           			        </isNotEmpty>
+           			        <isNotEmpty prepend="AND" property="shrLossExpRiPct">
+           					  shr_loss_exp_ri_pct LIKE #shrLossExpRiPct#
+           			        </isNotEmpty>
+           			        <isNotEmpty prepend="AND" property="shrLeRiPdAmt">
+           					  shr_le_ri_pd_amt LIKE #shrLeRiPdAmt#
+           			        </isNotEmpty>
+           			        <isNotEmpty prepend="AND" property="shrLeRiAdvAmt">
+           					  shr_le_ri_adv_amt LIKE #shrLeRiAdvAmt#
+           			        </isNotEmpty>
+           			        <isNotEmpty prepend="AND" property="shrLeRiNetAmt">
+           					  shr_le_ri_net_amt LIKE #shrLeRiNetAmt#
+           			        </isNotEmpty>
+		          		 </isNotNull>) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+</sqlMap>

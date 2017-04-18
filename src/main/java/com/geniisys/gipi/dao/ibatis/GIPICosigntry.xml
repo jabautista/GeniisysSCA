@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GIPICosigntry">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+
+	<typeAlias alias="GIPICosigntryClass" type="com.geniisys.gipi.entity.GIPICosigntry"/>
+
+	<resultMap class="GIPICosigntryClass" id="GIPICosigntryResultMap">
+		<result property="policyId" 			column="policy_id"/>
+        <result property="cosignId" 			column="cosign_id"/>
+        <result property="assdNo" 				column="assd_no"/>
+        <result property="indemFlag" 			column="indem_flag"/>
+        <result property="bondsFlag" 			column="bonds_flag"/>
+        <result property="bondsRiFlag" 			column="bonds_ri_flag"/>
+        <result property="cpiRecNo" 			column="cpi_rec_no"/>
+        <result property="cpiBranchCd" 			column="cpi_branch_cd"/>
+        <result property="arcExtData" 			column="arc_ext_data"/>
+        <result property="dspCosignName" 		column="dsp_cosign_name"/>
+	</resultMap>
+	
+	<resultMap class="GIPICosigntryClass" id="GIPICosigntryResultMapGrid" extends="GIPICosigntryResultMap">
+		<result column="rownum_" 		property="rowNum" />
+		<result column="count_"			property="rowCount"/>
+	</resultMap>
+
+	<select id="getGipiCosigntryGrid" resultMap="GIPICosigntryResultMapGrid">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (gipi_cosigntry_pkg.get_gipi_cosigntry(#policyId#))
+		                  <isEqual property="sortColumn" compareValue="dspCosignName">
+			              		ORDER BY dsp_cosign_name
+			              </isEqual> 
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (gipi_cosigntry_pkg.get_gipi_cosigntry(#policyId#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+
+</sqlMap>

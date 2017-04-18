@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISSpoilageReason">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+
+	<typeAlias alias="GIISSpoilageReason" type="com.geniisys.common.entity.GIISSpoilageReason"/>
+
+	<resultMap class="GIISSpoilageReason" id="giiss212RecListMap" extends="BaseEntity.TableGridResultMap">
+		<result column="spoil_cd" 			property="spoilCd" />
+		<result column="spoil_desc" 		property="spoilDesc" />
+		<result column="remarks" 			property="remarks" />
+		<result column="user_id" 			property="userId" />
+		<result column="last_update" 		property="lastUpdate" />
+		<result column="active_tag" 		property="activeTag" />
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="giiss212RecListMap2" extends="giiss212RecListMap">
+		<result column="exist" 			property="exist" />
+	</resultMap>
+	
+	<select id="getGiiss212RecList" resultMap="giiss212RecListMap2">
+		SELECT * 
+			FROM (SELECT rownum rownum_,
+						 b.count_,
+						 a.*
+					FROM (SELECT * 
+							FROM TABLE (giiss212_pkg.get_rec_list (#spoilCd#,#spoilDesc#))
+							<isEqual property="sortColumn" compareValue="spoilCd">
+								ORDER BY spoil_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="spoilDesc">
+								ORDER BY spoil_desc
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>) a, 
+							(SELECT count(*) count_
+							   FROM TABLE (giiss212_pkg.get_rec_list (#spoilCd#,#spoilDesc#))
+							 ) b)
+		WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="setGIISSpoilageReason" parameterClass="GIISSpoilageReason">
+	    DECLARE
+	    	v_rec giis_spoilage_reason%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+
+ 			v_rec.spoil_cd := #spoilCd#;
+ 			v_rec.spoil_desc := #spoilDesc#;
+ 			v_rec.remarks := #remarks#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.active_tag := #activeTag#;
+ 			
+ 			giiss212_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteGIISSpoilageReason" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss212_pkg.val_del_rec(#recId#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddGIISSpoilageReason" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss212_pkg.val_add_rec(#recId#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delGIISSpoilageReason" parameterClass="java.lang.String">
+		BEGIN
+ 			giiss212_pkg.del_rec(#recId#);
+ 		END;
+ 	</delete>
+</sqlMap>
+

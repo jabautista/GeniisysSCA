@@ -1,0 +1,384 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GIACCreditAndCollectionUtilities">
+
+	<resultMap class="java.util.HashMap" id="giacs412RecordMap" extends="BaseEntity.TableGridResultMap">
+		<result column="tag"				property="tag" />
+		<result column="policy_id"			property="policyId" />
+		<result column="policy_number"		property="policyNo" />
+		<result column="tsi_amt"			property="tsiAmt" />
+		<result column="prem_amt"			property="premAmt" />
+		<result column="line_cd"			property="lineCd" />
+		<result column="subline_cd"			property="sublineCd" />
+		<result column="iss_cd"				property="issCd" />
+		<result column="issue_yy"			property="issueYy" />
+		<result column="pol_seq_no"			property="polSeqNo" />
+		<result column="renew_no"			property="renewNo" />
+		<result column="assd_name"			property="assdName" />
+		<result column="incept_date"		property="inceptDate" />
+		<result column="expiry_date"		property="expiryDate" />
+		<result column="cancellation_tag"	property="cancellationTag" />
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="giacs412EndorsementRecordMap" extends="BaseEntity.TableGridResultMap">
+		<result column="endt_number"	    property="endtNo" />
+		<result column="line_cd"			property="lineCd" />
+		<result column="subline_cd"			property="sublineCd" />
+		<result column="iss_cd"				property="issCd" />
+		<result column="issue_yy"			property="issueYy" />
+		<result column="pol_seq_no"			property="polSeqNo" />
+		<result column="renew_no"			property="renewNo" />
+		<result column="endt_iss_cd"		property="endtIssCd" />
+		<result column="endt_yy"			property="endtYy" />
+		<result column="endt_seq_no"		property="endtSeqNo" />
+		<result column="eff_date"			property="effDate" />
+		<result column="issue_date"			property="issueDate" />
+		<result column="endt_expiry_date"	property="endtExpiryDate" />
+		<result column="tsi_amt"			property="tsiAmt" />
+		<result column="prem_amt"			property="premAmt" />
+	</resultMap>
+	
+	<parameterMap class="java.util.HashMap" id="processCancelledPolMap">
+		<parameter property="cancellationTag"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="lineCd"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="sublineCd"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="issCd"				jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="issueYy"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="polSeqNo"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="renewNo"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="userId"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="tranId"		    jdbcType="VARCHAR"		javaType="java.lang.String"		mode="INOUT" />
+	</parameterMap>	
+	
+	<!-- 
+	<select id="getGIACS412Record" resultMap="giacs412RecordMap">
+		SELECT * 
+		  FROM (SELECT '' tag, 
+		  				a.*, 
+		  				b.count_, 
+		  				rownum rownum_
+		          FROM (SELECT * 
+		  		   		  FROM TABLE(GIACS412_pkg.get_cancelled_policies_records(#userId#))
+						  WHERE 1=1
+						<isNotEmpty prepend="AND"  property="policyNo">
+							UPPER(policy_number) LIKE UPPER(#policyNo#)
+						</isNotEmpty>
+						<isNotEmpty prepend="AND"  property="assdName">
+							UPPER(assd_name) LIKE UPPER(#assdName#)
+						</isNotEmpty>
+						<isNotEmpty prepend="AND"  property="inceptDate">
+							TRUNC(incept_date) = TRUNC(TO_DATE(#inceptDate#,'MM-DD-YYYY'))
+						</isNotEmpty>
+						<isNotEmpty prepend="AND"  property="expiryDate">
+							TRUNC(expiry_date) = TRUNC(TO_DATE(#expiryDate#,'MM-DD-YYYY'))
+						</isNotEmpty>
+						<isNotEmpty prepend="AND"  property="tsiAmt">
+							tsi_amt = #tsiAmt#
+						</isNotEmpty>
+						<isNotEmpty prepend="AND"  property="premAmt">
+							prem_amt = #premAmt#
+						</isNotEmpty>
+						<isEqual property="sortColumn" compareValue="policyNo">
+		              		ORDER BY policy_number
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="assdName">
+		              		ORDER BY assd_name
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="inceptDate">
+		              		ORDER BY incept_date
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="expiryDate">
+		              		ORDER BY expiry_date
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="tsiAmt">
+		              		ORDER BY tsi_amt
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="premAmt">
+		              		ORDER BY prem_amt
+			            </isEqual>
+			            <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	</isNotNull>
+		  		   		) a,
+		          	   (SELECT count(*) count_ 
+		  		   		  FROM TABLE(GIACS412_pkg.get_cancelled_policies_records(#userId#))
+	  		   		     WHERE 1=1
+                    	<isNotEmpty prepend="AND"  property="policyNo">
+							UPPER(policy_number) LIKE UPPER(#policyNo#)
+						</isNotEmpty>
+						<isNotEmpty prepend="AND"  property="assdName">
+							UPPER(assd_name) LIKE UPPER(#assdName#)
+						</isNotEmpty>
+						<isNotEmpty prepend="AND"  property="inceptDate">
+							TRUNC(incept_date) = TRUNC(TO_DATE(#inceptDate#,'MM-DD-YYYY'))
+						</isNotEmpty>
+						<isNotEmpty prepend="AND"  property="expiryDate">
+							TRUNC(expiry_date) = TRUNC(TO_DATE(#expiryDate#,'MM-DD-YYYY'))
+						</isNotEmpty>
+						<isNotEmpty prepend="AND"  property="tsiAmt">
+							tsi_amt = #tsiAmt#
+						</isNotEmpty>
+						<isNotEmpty prepend="AND"  property="premAmt">
+							prem_amt = #premAmt#
+						</isNotEmpty>
+		  		   		) b
+               )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select> --> <!-- optimized by shan 04.17.2015 -->
+	
+	 <select id="getGIACS412Record" resultMap="giacs412RecordMap">
+	 	SELECT '' tag, a.* 
+		  FROM TABLE(GIACS412_pkg.get_cancelled_policies_records(#userId#, #policyNo#, #assdName#, #inceptDate#, #expiryDate#, 
+		  														 #tsiAmt#, #premAmt#, #sortColumn#, #ascDescFlg#, #from#, #to#)) a
+	 </select>
+	 
+	<select id="getGIACS412EndorsementRecord" resultMap="giacs412EndorsementRecordMap">
+		SELECT * 
+		  FROM (SELECT a.*, 
+		  			   b.count_, 
+		  			   rownum rownum_
+		          FROM (SELECT * 
+		  		   		  FROM TABLE(GIACS412_pkg.get_endorsement_records(#userId#,#lineCd#,#sublineCd#,#issCd#,#issueYy#,#polSeqNo#,#renewNo#))
+						  WHERE 1=1
+						<isNotEmpty prepend="AND"  property="endtNo">
+							UPPER(endt_number) LIKE UPPER(#endtNo#)
+						</isNotEmpty>
+						<isNotEmpty prepend="AND"  property="effDate">
+							TRUNC(eff_date) = TRUNC(TO_DATE(#effDate#,'MM-DD-YYYY'))
+						</isNotEmpty>
+						<isNotEmpty prepend="AND"  property="endtExpiryDate">
+							TRUNC(endt_expiry_date) = TRUNC(TO_DATE(#endtExpiryDate#,'MM-DD-YYYY'))
+						</isNotEmpty>
+						<isNotEmpty prepend="AND"  property="issueDate">
+							TRUNC(issue_date) = TRUNC(TO_DATE(#issueDate#,'MM-DD-YYYY'))
+						</isNotEmpty>
+						<isNotEmpty prepend="AND"  property="tsiAmt">
+							tsi_amt = #tsiAmt#
+						</isNotEmpty>
+						<isNotEmpty prepend="AND"  property="premAmt">
+							prem_amt = #premAmt#
+						</isNotEmpty>
+						<isEqual property="sortColumn" compareValue="endtNo">
+		              		ORDER BY endt_number
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="effDate">
+		              		ORDER BY eff_date
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="endtExpiryDate">
+		              		ORDER BY endt_expiry_date
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="issueDate">
+		              		ORDER BY issue_date
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="tsiAmt">
+		              		ORDER BY tsi_amt
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="premAmt">
+		              		ORDER BY prem_amt
+			            </isEqual>
+			            <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	</isNotNull>
+		  		   		) a,
+		          	   (SELECT count(*) count_ 
+		  		   		  FROM TABLE(GIACS412_pkg.get_endorsement_records(#userId#,#lineCd#,#sublineCd#,#issCd#,#issueYy#,#polSeqNo#,#renewNo#))
+	  		   		     WHERE 1=1
+                    	<isNotEmpty prepend="AND"  property="endtNo">
+							UPPER(endt_number) LIKE UPPER(#endtNo#)
+						</isNotEmpty>
+						<isNotEmpty prepend="AND"  property="effDate">
+							TRUNC(eff_date) = TRUNC(TO_DATE(#effDate#,'MM-DD-YYYY'))
+						</isNotEmpty>
+						<isNotEmpty prepend="AND"  property="endtExpiryDate">
+							TRUNC(endt_expiry_date) = TRUNC(TO_DATE(#endtExpiryDate#,'MM-DD-YYYY'))
+						</isNotEmpty>
+						<isNotEmpty prepend="AND"  property="issueDate">
+							TRUNC(issue_date) = TRUNC(TO_DATE(#issueDate#,'MM-DD-YYYY'))
+						</isNotEmpty>
+						<isNotEmpty prepend="AND"  property="tsiAmt">
+							tsi_amt = #tsiAmt#
+						</isNotEmpty>
+						<isNotEmpty prepend="AND"  property="premAmt">
+							prem_amt = #premAmt#
+						</isNotEmpty>
+		  		   		) b
+               )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGIACS412AllRecord" resultMap="giacs412RecordMap">
+		<!-- optimized by shan 04.17.2015
+			SELECT '' tag, a.*, '' count_, '' rownum_
+  			FROM TABLE (giacs412_pkg.get_cancelled_policies_records (#userId#)) a
+  			-->
+  		SELECT '' tag, a.* 
+		  FROM TABLE(GIACS412_pkg.get_cancelled_policies_records(#userId#, null, null, null, null, null, null, null, null, 1, null)) a
+	</select>
+	
+	<procedure id="processCancelledPol" parameterMap="processCancelledPolMap">
+		{CALL giacs412_pkg.process_payments(?,?,?,?,?,?,?,?,?)}
+	</procedure>
+
+	<parameterMap class="java.util.HashMap" id="ageBillsMap">
+		<parameter property="cutOffDate"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="direct"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="reinsurance"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="userId"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+	</parameterMap>	
+	
+	<procedure id="ageBills" parameterMap="ageBillsMap">
+		BEGIN
+			giacs150_pkg.age_bills(?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<!-- GIACS412 enhancement : shan 04.16.2015 -->	
+	<resultMap class="java.util.HashMap" id="giacs412ReverseRecordMap" extends="BaseEntity.TableGridResultMap">
+		<result column="tag"				property="tag" />
+		<result column="policy_id"			property="policyId" />
+		<result column="policy_number"		property="policyNo" />
+		<result column="tsi_amt"			property="tsiAmt" />
+		<result column="prem_amt"			property="premAmt" />
+		<result column="line_cd"			property="lineCd" />
+		<result column="subline_cd"			property="sublineCd" />
+		<result column="iss_cd"				property="issCd" />
+		<result column="issue_yy"			property="issueYy" />
+		<result column="pol_seq_no"			property="polSeqNo" />
+		<result column="renew_no"			property="renewNo" />
+		<result column="assd_name"			property="assdName" />
+		<result column="incept_date"		property="inceptDate" />
+		<result column="expiry_date"		property="expiryDate" />
+	</resultMap>
+		
+	<!-- 
+	<select id="getGIACS412PoliciesForReverse" resultMap="giacs412ReverseRecordMap">
+		SELECT * 
+		  FROM (SELECT '' tag, 
+		  				a.*, 
+		  				b.count_, 
+		  				rownum rownum_
+		          FROM (SELECT * 
+		  		   		  FROM TABLE(GIACS412_pkg.get_policies_for_reverse(#userId#))
+						  WHERE 1=1
+						<isNotEmpty prepend="AND"  property="policyNo">
+							UPPER(policy_number) LIKE UPPER(#policyNo#)
+						</isNotEmpty>
+						<isNotEmpty prepend="AND"  property="assdName">
+							UPPER(assd_name) LIKE UPPER(#assdName#)
+						</isNotEmpty>
+						<isNotEmpty prepend="AND"  property="inceptDate">
+							TRUNC(incept_date) = TRUNC(TO_DATE(#inceptDate#,'MM-DD-YYYY'))
+						</isNotEmpty>
+						<isNotEmpty prepend="AND"  property="expiryDate">
+							TRUNC(expiry_date) = TRUNC(TO_DATE(#expiryDate#,'MM-DD-YYYY'))
+						</isNotEmpty>
+						<isNotEmpty prepend="AND"  property="tsiAmt">
+							tsi_amt = #tsiAmt#
+						</isNotEmpty>
+						<isNotEmpty prepend="AND"  property="premAmt">
+							prem_amt = #premAmt#
+						</isNotEmpty>
+						<isEqual property="sortColumn" compareValue="policyNo">
+		              		ORDER BY policy_number
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="assdName">
+		              		ORDER BY assd_name
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="inceptDate">
+		              		ORDER BY incept_date
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="expiryDate">
+		              		ORDER BY expiry_date
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="tsiAmt">
+		              		ORDER BY tsi_amt
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="premAmt">
+		              		ORDER BY prem_amt
+			            </isEqual>
+			            <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	</isNotNull>
+		  		   		) a,
+		          	   (SELECT count(*) count_ 
+		  		   		  FROM TABLE(GIACS412_pkg.get_policies_for_reverse(#userId#))
+	  		   		     WHERE 1=1
+                    	<isNotEmpty prepend="AND"  property="policyNo">
+							UPPER(policy_number) LIKE UPPER(#policyNo#)
+						</isNotEmpty>
+						<isNotEmpty prepend="AND"  property="assdName">
+							UPPER(assd_name) LIKE UPPER(#assdName#)
+						</isNotEmpty>
+						<isNotEmpty prepend="AND"  property="inceptDate">
+							TRUNC(incept_date) = TRUNC(TO_DATE(#inceptDate#,'MM-DD-YYYY'))
+						</isNotEmpty>
+						<isNotEmpty prepend="AND"  property="expiryDate">
+							TRUNC(expiry_date) = TRUNC(TO_DATE(#expiryDate#,'MM-DD-YYYY'))
+						</isNotEmpty>
+						<isNotEmpty prepend="AND"  property="tsiAmt">
+							tsi_amt = #tsiAmt#
+						</isNotEmpty>
+						<isNotEmpty prepend="AND"  property="premAmt">
+							prem_amt = #premAmt#
+						</isNotEmpty>
+		  		   		) b
+               )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	 -->
+	 
+	 <select id="getGIACS412PoliciesForReverse" resultMap="giacs412ReverseRecordMap">
+		SELECT '' tag, a.*
+		  FROM TABLE(GIACS412_pkg.get_policies_for_reverse(#userId#, #policyNo#, #assdName#, #inceptDate#, #expiryDate#, 
+		  												   #tsiAmt#, #premAmt#, #sortColumn#, #ascDescFlg#, #from#, #to#)) a
+          <isEqual property="sortColumn" compareValue="assdName">
+           		ORDER BY assd_name
+          	<isNotNull property="sortColumn">
+           		<isEqual property="ascDescFlg" compareValue="ASC">
+           			ASC
+           		</isEqual>
+           		<isEqual property="ascDescFlg" compareValue="DESC">
+           			DESC
+           		</isEqual>
+           	</isNotNull>
+          </isEqual>
+	</select>
+		
+	<resultMap class="java.util.HashMap" id="giacs412ReverseByParamMap">
+		<result column="line_cd"			property="lineCd" />
+		<result column="subline_cd"			property="sublineCd" />
+		<result column="iss_cd"				property="issCd" />
+		<result column="issue_yy"			property="issueYy" />
+		<result column="pol_seq_no"			property="polSeqNo" />
+		<result column="renew_no"			property="renewNo" />
+	</resultMap>
+	
+	<select id="getPoliciesForReverseByParam" resultMap="giacs412ReverseByParamMap">
+		SELECT line_cd, subline_cd, iss_cd, issue_yy, pol_seq_no, renew_no
+		  FROM TABLE(GIACS412_pkg.get_policies_for_reverse(#userId#, #policyNo#, #assdName#, #inceptDate#, #expiryDate#, 
+		  												   #tsiAmt#, #premAmt#, #sortColumn#, #ascDescFlg#, 1, #to#))
+	</select>
+	
+	<procedure id="reverseProcessedPolicies" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GIACS412_PKG.REVERSE_PROCESSED_POL(#lineCd#, #sublineCd#, #issCd#, #issueYy#, #polSeqNo#, #renewNo#, #userId#);
+		END;
+	</procedure>
+	<!-- end enhancement : 04.16.2015 -->
+</sqlMap>

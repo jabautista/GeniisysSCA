@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GICLR207L_SUMMARY" language="groovy" pageWidth="296" pageHeight="752" columnWidth="296" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="3.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="P_SUBLINE_CD" class="java.lang.String"/>
+	<parameter name="P_LINE_CD" class="java.lang.String"/>
+	<parameter name="P_TRAN_ID" class="java.lang.Integer"/>
+	<queryString>
+		<![CDATA[SELECT *
+  FROM TABLE (giclr207l_pkg.get_giclr207l_summary ($P{P_TRAN_ID},
+                                                   $P{P_LINE_CD},
+                                                   $P{P_SUBLINE_CD}
+                                                  )
+              )
+ORDER BY grp_seq_no,share_ri]]>
+	</queryString>
+	<field name="SHARE_RI" class="java.math.BigDecimal"/>
+	<field name="GRP_SEQ_NO" class="java.math.BigDecimal"/>
+	<field name="RIDS_LOSS_AMT" class="java.math.BigDecimal"/>
+	<field name="TRTY_NAME" class="java.lang.String"/>
+	<field name="RI_SNAME" class="java.lang.String"/>
+	<variable name="V_SUM_SHARE" class="java.math.BigDecimal" resetType="Group" resetGroup="TRTY_NAME" calculation="Sum">
+		<variableExpression><![CDATA[$F{SHARE_RI}]]></variableExpression>
+	</variable>
+	<variable name="V_SUM_RIDS" class="java.math.BigDecimal" resetType="Group" resetGroup="TRTY_NAME" calculation="Sum">
+		<variableExpression><![CDATA[$F{RIDS_LOSS_AMT}]]></variableExpression>
+	</variable>
+	<variable name="V_SUM_RIDS_RI_CD" class="java.math.BigDecimal" resetType="Group" resetGroup="RI_CD">
+		<variableExpression><![CDATA[$F{RIDS_LOSS_AMT}]]></variableExpression>
+	</variable>
+	<group name="TRTY_NAME">
+		<groupExpression><![CDATA[$F{TRTY_NAME}]]></groupExpression>
+		<groupHeader>
+			<band height="11">
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement positionType="Float" x="0" y="0" width="150" height="11"/>
+					<textElement>
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{TRTY_NAME}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="33">
+				<staticText>
+					<reportElement positionType="Float" x="153" y="22" width="50" height="11"/>
+					<textElement textAlignment="Right">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[==============]]></text>
+				</staticText>
+				<staticText>
+					<reportElement positionType="Float" x="206" y="0" width="90" height="11"/>
+					<textElement textAlignment="Right">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[---------------------------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement positionType="Float" x="153" y="0" width="50" height="11"/>
+					<textElement textAlignment="Right">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement positionType="Float" x="206" y="22" width="90" height="11"/>
+					<textElement textAlignment="Right">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[==================================]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+					<reportElement positionType="Float" x="153" y="11" width="50" height="11"/>
+					<textElement textAlignment="Right">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_SUM_SHARE}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+					<reportElement positionType="Float" x="206" y="11" width="90" height="11"/>
+					<textElement textAlignment="Right">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_SUM_RIDS}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<group name="RI_CD">
+		<groupExpression><![CDATA[$F{RI_SNAME}]]></groupExpression>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<columnHeader>
+		<band height="22" splitType="Stretch">
+			<staticText>
+				<reportElement positionType="Float" x="153" y="0" width="50" height="11"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[PCT Share]]></text>
+			</staticText>
+			<staticText>
+				<reportElement positionType="Float" x="206" y="11" width="90" height="11"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[---------------------------------------------------]]></text>
+			</staticText>
+			<staticText>
+				<reportElement positionType="Float" x="206" y="0" width="90" height="11"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[Share Amount]]></text>
+			</staticText>
+			<staticText>
+				<reportElement positionType="Float" x="153" y="11" width="50" height="11"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[------------------------]]></text>
+			</staticText>
+			<staticText>
+				<reportElement positionType="Float" x="0" y="11" width="150" height="11"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[------------------------]]></text>
+			</staticText>
+			<staticText>
+				<reportElement positionType="Float" x="0" y="0" width="150" height="11"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[Treaty RI Name]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="11" splitType="Stretch">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="15" y="0" width="135" height="11"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{RI_SNAME}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="153" y="0" width="50" height="11"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{SHARE_RI}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="206" y="0" width="90" height="11"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{RIDS_LOSS_AMT}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

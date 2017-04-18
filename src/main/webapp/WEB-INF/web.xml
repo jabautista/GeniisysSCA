@@ -1,0 +1,2304 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	id="WebApp_ID" version="2.5"> -->
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+	id="WebApp_ID" version="3.0">	
+	<session-config>
+		<session-timeout>0</session-timeout>
+	</session-config>
+		
+	<display-name>GENIISYS</display-name>
+	
+	<!-- context parameters  -->
+	<context-param>
+		<param-name>log4jConfigLocation</param-name>
+		<param-value>/WEB-INF/log4j.properties</param-value>
+	</context-param>
+	
+	<context-param>
+		<param-name>webAppRootKey</param-name>
+		<param-value>webapp.root.geniisys</param-value>
+	</context-param>
+	
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>
+			/WEB-INF/applicationContext.xml
+		</param-value>
+	</context-param>
+	
+	<context-param>
+		<param-name>SUBREPORT_DIR</param-name>
+		<param-value>C:/GENIISYS_WEB/REPORTS/</param-value>	
+	</context-param>
+	
+	<context-param>
+		<param-name>GENERATED_REPORTS_DIR</param-name>
+		<param-value>C:/GENIISYS_WEB/GENERATED_REPORTS/</param-value>	
+	</context-param>
+	
+	<context-param>
+		<param-name>UPLOADS_DIR</param-name>
+		<param-value>C:/GENIISYS_WEB/uploads/marketing/quotation/attached_media</param-value>	
+	</context-param>
+	
+	<context-param>
+		<param-name>UPLOADS_PATH</param-name>
+		<param-value>C:/GENIISYS_WEB/uploads/</param-value>	
+	</context-param>
+	
+	<context-param>
+		<param-name>geniisysDescription</param-name>
+		<param-value>GENIISYS (General Insurance Information System) is the leading integrated software solution in the general insurance industry having been successfully implemented in a total of 21 insurance companies in the Philippines since 1991. It is a powerful tool that can greatly improve workflow efficiency by integrating the different functions of a general insurance company.</param-value>
+	</context-param>
+	
+	<!-- Listeners -->
+	<listener>
+      	<listener-class>org.springframework.web.util.Log4jConfigListener</listener-class>
+    </listener>
+
+  	<listener>
+      	<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+		
+	<listener>
+		<listener-class>com.geniisys.framework.util.UserSessionAttributeListener</listener-class>
+	</listener>		
+	
+	<listener>
+		<listener-class>com.geniisys.framework.util.UserSessionBindingListener</listener-class>
+	</listener>		
+	
+	<listener>
+		<listener-class>com.geniisys.framework.util.UserSessionListener</listener-class>
+	</listener>	
+	
+	<listener>
+		<listener-class>com.geniisys.event.listeners.ContextListener</listener-class>
+	</listener>
+
+	<listener>
+		<listener-class>com.geniisys.event.listeners.GeniisysSessionListener</listener-class>
+	</listener>
+	<!-- Realms -->
+	
+	<!-- Define a Security Constraint on this Application -->
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>The content you are trying to access is protected.</web-resource-name>
+			<url-pattern>/WEB-INF/*</url-pattern>
+		</web-resource-collection>
+		<auth-constraint>
+			<role-name>admin</role-name>
+		</auth-constraint>
+	</security-constraint>
+	
+	<!-- added by andrew robes
+	     To redirect http to https. Set transport-guarantee to CONFIDENTIAL -->
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>SSL</web-resource-name>
+			<url-pattern>/*</url-pattern>
+		</web-resource-collection>
+		<user-data-constraint>
+			  <transport-guarantee>NONE</transport-guarantee> 
+           <!--<transport-guarantee>CONFIDENTIAL</transport-guarantee>   -->  		
+   		</user-data-constraint>
+	</security-constraint>
+	
+	<!-- Define the Login Configuration for this Application -->
+	<login-config>
+		<auth-method>BASIC</auth-method>
+		<realm-name>The content you are trying to access is protected.</realm-name>
+	</login-config>
+	
+	<!-- End of Realms -->
+	
+	<!-- error pages -->
+	<error-page>
+		<error-code>404</error-code>
+		<location>/pages/errorPages/pageNotFound.jsp</location>
+	</error-page>
+	
+	<error-page>
+		<error-code>401</error-code>
+		<location>/pages/errorPages/restrictedURLAccess.jsp</location>
+	</error-page>
+	
+	<error-page>
+		<error-code>500</error-code>
+		<location>/pages/errorPages/severeError.jsp</location>
+	</error-page>
+
+	<error-page>
+		<error-code>503</error-code>
+		<location>/pages/errorPages/unavailable.jsp</location>
+	</error-page>	
+	
+	<error-page>
+		<exception-type>NullPointerException</exception-type>
+		<location>/pages/errorPages/nullPointerException.jsp</location>
+	</error-page>
+	
+	<error-page>
+		<exception-type>SQLException</exception-type>
+		<location>/pages/errorPages/sqlException.jsp</location>
+	</error-page>
+	
+	<error-page>
+		<exception-type>Exception</exception-type>
+		<location>/pages/errorPages/exception.jsp</location>
+	</error-page>
+	
+	<!-- ajax tags servlets and controllers -->
+	<servlet>
+		<servlet-name>AjaxAutoCompleteController</servlet-name>
+		<servlet-class>
+			com.geniisys.framework.util.AjaxAutoCompleteController
+		</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>AjaxAutoCompleteController</servlet-name>
+		<url-pattern>/AjaxAutoCompleteController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>AjaxUpdateFieldController</servlet-name>
+		<servlet-class>
+			com.geniisys.framework.util.AjaxUpdateFieldController
+		</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>AjaxUpdateFieldController</servlet-name>
+		<url-pattern>/AjaxUpdateFieldController</url-pattern>
+	</servlet-mapping>
+	
+	<!-- end of ajax tags servlets and controllers -->
+	
+	<!-- servlets -->
+	
+	<!-- added by Tonio 06/17/2010 -->
+	<servlet>
+		<servlet-name>GIACOrderOfPaymentController</servlet-name>
+		<servlet-class>
+			com.geniisys.giac.controllers.GIACOrderOfPaymentController
+		</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIACOrderOfPaymentController</servlet-name>
+		<url-pattern>/GIACOrderOfPaymentController</url-pattern>
+	</servlet-mapping>
+	<!--  						  -->
+	
+	<!-- added by Tonio 08/4/2010 -->
+	<servlet>
+		<servlet-name>GIACDirectPremCollnsController</servlet-name>
+		<servlet-class>
+			com.geniisys.giac.controllers.GIACDirectPremCollnsController
+		</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIACDirectPremCollnsController</servlet-name>
+		<url-pattern>/GIACDirectPremCollnsController</url-pattern>
+	</servlet-mapping>
+	<!--  						  -->
+	
+	<!-- added by Tonio 02/14/2011 -->
+	<servlet>
+		<servlet-name>GIACOutFaculPremPaytsController</servlet-name>
+		<servlet-class>
+			com.geniisys.giac.controllers.GIACOutFaculPremPaytsController
+		</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIACOutFaculPremPaytsController</servlet-name>
+		<url-pattern>/GIACOutFaculPremPaytsController</url-pattern>
+	</servlet-mapping>
+	
+	<!--  						  -->
+	
+	<!-- added by Emman 07/30/2010 -->
+	<!-- GIACPremDepositController -->
+	<servlet>
+		<servlet-name>GIACPremDepositController</servlet-name>
+		<servlet-class>
+			com.geniisys.giac.controllers.GIACPremDepositController
+		</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIACPremDepositController</servlet-name>
+		<url-pattern>/GIACPremDepositController</url-pattern>
+	</servlet-mapping>
+	<!-- End of GIACPremDepositController -->
+	
+	<!-- GIACCommPaytsController -->
+	<servlet>
+		<servlet-name>GIACCommPaytsController</servlet-name>
+		<servlet-class>
+			com.geniisys.giac.controllers.GIACCommPaytsController
+		</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIACCommPaytsController</servlet-name>
+		<url-pattern>/GIACCommPaytsController</url-pattern>
+	</servlet-mapping>
+	
+	<!-- GIACOvrideCommPaytsController -->
+	<servlet>
+		<servlet-name>GIACOvrideCommPaytsController</servlet-name>
+		<servlet-class>
+			com.geniisys.giac.controllers.GIACOvrideCommPaytsController
+		</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIACOvrideCommPaytsController</servlet-name>
+		<url-pattern>/GIACOvrideCommPaytsController</url-pattern>
+	</servlet-mapping>
+	
+	<!-- GIACInwClaimPaytsController -->
+	<servlet>
+		<servlet-name>GIACInwClaimPaytsController</servlet-name>
+		<servlet-class>
+			com.geniisys.giac.controllers.GIACInwClaimPaytsController
+		</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIACInwClaimPaytsController</servlet-name>
+		<url-pattern>/GIACInwClaimPaytsController</url-pattern>
+	</servlet-mapping>
+	
+	<!-- GIACAcctEntriesController -->
+	<servlet>
+		<servlet-name>GIACAcctEntriesController</servlet-name>
+		<servlet-class>com.geniisys.giac.controllers.GIACAcctEntriesController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIACAcctEntriesController</servlet-name>
+		<url-pattern>/GIACAcctEntriesController</url-pattern>
+	</servlet-mapping>
+	
+	<!-- GIACCollnsForOtherOfficeController -->
+	<!-- added by: nica 12.13.2010 -->
+	<servlet>
+		<servlet-name>GIACCollnsForOtherOfficeController</servlet-name>
+		<servlet-class>com.geniisys.giac.controllers.GIACCollnsForOtherOfficeController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIACCollnsForOtherOfficeController</servlet-name>
+		<url-pattern>/GIACCollnsForOtherOfficeController</url-pattern>
+	</servlet-mapping>
+		
+	<!-- GIACCommSlipController -->
+	<servlet>
+		<servlet-name>GIACCommSlipController</servlet-name>
+		<servlet-class>com.geniisys.giac.controllers.GIACCommSlipController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIACCommSlipController</servlet-name>
+		<url-pattern>/GIACCommSlipController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIISController</servlet-name>
+		<servlet-class>
+			com.geniisys.common.controllers.GIISController
+		</servlet-class>
+		<init-param>
+			<param-name>version</param-name>
+			<param-value></param-value>
+		</init-param>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIISController</servlet-name>
+		<url-pattern>/GIISController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIISUserController</servlet-name>
+		<servlet-class>
+			com.geniisys.common.controllers.GIISUserController
+		</servlet-class>
+		<init-param>
+			<param-name>initParam</param-name>
+			<param-value>initValue</param-value>
+		</init-param>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIISUserController</servlet-name>
+		<url-pattern>/GIISUserController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIISAssuredController</servlet-name>
+		<servlet-class>com.geniisys.common.controllers.GIISAssuredController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIISAssuredController</servlet-name>
+		<url-pattern>/GIISAssuredController</url-pattern>
+	</servlet-mapping>	
+	
+	<servlet>
+		<servlet-name>GIISIntermediaryController</servlet-name>
+		<servlet-class>com.geniisys.common.controllers.GIISIntermediaryController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIISIntermediaryController</servlet-name>
+		<url-pattern>/GIISIntermediaryController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIQuotationController</servlet-name>
+		<servlet-class>
+			com.geniisys.gipi.controllers.GIPIQuotationController
+		</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIQuotationController</servlet-name>
+		<url-pattern>/GIPIQuotationController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIQuoteVesAirController</servlet-name>
+		<servlet-class>
+			com.geniisys.gipi.controllers.GIPIQuoteVesAirController
+		</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIQuoteVesAirController</servlet-name>
+		<url-pattern>/GIPIQuoteVesAirController</url-pattern>
+	</servlet-mapping>
+	
+	<!-- added by Cris 05/21/2010 -->
+	<servlet>
+		<servlet-name>GIPIPackQuoteController</servlet-name>
+		<servlet-class>
+			com.geniisys.gipi.pack.controllers.GIPIPackQuoteController
+		</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIPackQuoteController</servlet-name>
+		<url-pattern>/GIPIPackQuoteController</url-pattern>
+	</servlet-mapping>
+	<!-- end Cris 05/21/2010 -->
+	
+	<servlet>
+		<servlet-name>GIPIQuotationInformationController</servlet-name>
+		<servlet-class>
+			com.geniisys.gipi.controllers.GIPIQuotationInformationController
+		</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIQuotationInformationController</servlet-name>
+		<url-pattern>/GIPIQuotationInformationController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIQuotationWarrantyAndClauseController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIQuotationWarrantyAndClauseController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIQuotationWarrantyAndClauseController</servlet-name>
+		<url-pattern>/GIPIQuotationWarrantyAndClauseController</url-pattern>
+	</servlet-mapping>
+	
+	<!-- added by Nica 05/18/2011 -->
+	<servlet>
+		<servlet-name>GIPIPackQuotationInformationController</servlet-name>
+		<servlet-class>
+			com.geniisys.gipi.pack.controllers.GIPIPackQuotationInformationController
+		</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIPackQuotationInformationController</servlet-name>
+		<url-pattern>/GIPIPackQuotationInformationController</url-pattern>
+	</servlet-mapping>
+	<!-- end GIPIPackQuotationInformationController-->
+	
+	<!-- added by Steven 06.14.2012 -->
+	<servlet>
+		<servlet-name>GIPIReassignParPolicyController</servlet-name>
+		<servlet-class>
+			com.geniisys.gipi.controllers.GIPIReassignParPolicyController
+		</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIReassignParPolicyController</servlet-name>
+		<url-pattern>/GIPIReassignParPolicyController</url-pattern>
+	</servlet-mapping>
+	<!-- end GIPIReassignParPolicyController-->
+	
+	<!-- added by Steven 03.13.2013 -->
+	<servlet>
+		<servlet-name>GIPIReassignParEndtController</servlet-name>
+		<servlet-class>
+			com.geniisys.gipi.controllers.GIPIReassignParEndtController
+		</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIReassignParEndtController</servlet-name>
+		<url-pattern>/GIPIReassignParEndtController</url-pattern>
+	</servlet-mapping>
+	<!-- end GIPIReassignParEndtController-->
+	
+	<!-- added by Steven 07.16.2012 -->
+	<servlet>
+		<servlet-name>GIPIInspectionReportAttachedMediaController</servlet-name>
+		<servlet-class>
+			com.geniisys.gipi.controllers.GIPIInspectionReportAttachedMediaController
+		</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIInspectionReportAttachedMediaController</servlet-name>
+		<url-pattern>/GIPIInspectionReportAttachedMediaController</url-pattern>
+	</servlet-mapping>
+	<!-- end GIPIInspectionReportAttachedMediaController-->
+	<servlet>
+		<servlet-name>PrintController</servlet-name>
+		<servlet-class>com.geniisys.common.controllers.PrintController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>PrintController</servlet-name>
+		<url-pattern>/PrintController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>MarketingPrintController</servlet-name>
+		<servlet-class>com.geniisys.marketing.controllers.MarketingPrintController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>MarketingPrintController</servlet-name>
+		<url-pattern>/MarketingPrintController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>PrintORController</servlet-name>
+		<servlet-class>com.geniisys.accounting.reports.controllers.PrintORController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>PrintORController</servlet-name>
+		<url-pattern>/PrintORController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>PrintAcknowledgmentReceiptController</servlet-name>
+		<servlet-class>com.geniisys.accounting.reports.controllers.PrintAcknowledgmentReceiptController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>PrintAcknowledgmentReceiptController</servlet-name>
+		<url-pattern>/PrintAcknowledgmentReceiptController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>PrintPolicyController</servlet-name>
+		<servlet-class>com.geniisys.policydocs.reports.controller.PrintPolicyController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>PrintPolicyController</servlet-name>
+		<url-pattern>/PrintPolicyController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>FileController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.FileController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>FileController</servlet-name>
+		<url-pattern>/FileController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIQuotationDiscountController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIQuotationDiscountController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIQuotationDiscountController</servlet-name>
+		<url-pattern>/GIPIQuotationDiscountController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIQuotationMotorCarController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIQuotationMotorCarController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIQuotationMotorCarController</servlet-name>
+		<url-pattern>/GIPIQuotationMotorCarController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIQuotationFireController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIQuotationFireController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIQuotationFireController</servlet-name>
+		<url-pattern>/GIPIQuotationFireController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIQuotationAccidentController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIQuotationAccidentController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIQuotationAccidentController</servlet-name>
+		<url-pattern>/GIPIQuotationAccidentController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIQuotationMortgageeController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIQuotationMortgageeController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIQuotationMortgageeController</servlet-name>
+		<url-pattern>/GIPIQuotationMortgageeController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIQuotationInvoiceController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIQuotationInvoiceController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIQuotationInvoiceController</servlet-name>
+		<url-pattern>/GIPIQuotationInvoiceController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIQuotationDeductiblesController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIQuotationDeductiblesController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIQuotationDeductiblesController</servlet-name>
+		<url-pattern>/GIPIQuotationDeductiblesController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIQuotationAviationController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIQuotationAviationController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIQuotationAviationController</servlet-name>
+		<url-pattern>/GIPIQuotationAviationController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIQuotationCasualtyController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIQuotationCasualtyController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIQuotationCasualtyController</servlet-name>
+		<url-pattern>/GIPIQuotationCasualtyController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIQuotationEngineeringController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIQuotationEngineeringController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIQuotationEngineeringController</servlet-name>
+		<url-pattern>/GIPIQuotationEngineeringController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIQuotationMarineCargoController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIQuotationMarineCargoController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIQuotationMarineCargoController</servlet-name>
+		<url-pattern>/GIPIQuotationMarineCargoController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIQuotationMarineHullController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIQuotationMarineHullController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIQuotationMarineHullController</servlet-name>
+		<url-pattern>/GIPIQuotationMarineHullController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIWPolicyWarrantyAndClauseController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIWPolicyWarrantyAndClauseController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIWPolicyWarrantyAndClauseController</servlet-name>
+		<url-pattern>/GIPIWPolicyWarrantyAndClauseController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIWDeductibleController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIWDeductibleController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIWDeductibleController</servlet-name>
+		<url-pattern>/GIPIWDeductibleController</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>GIPIWVesAirController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIWVesAirController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIWVesAirController</servlet-name>
+		<url-pattern>/GIPIWVesAirController</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>GIPIWOpenLiabController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIWOpenLiabController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIWOpenLiabController</servlet-name>
+		<url-pattern>/GIPIWOpenLiabController</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>GIPIWOpenCargoController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIWOpenCargoController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIWOpenCargoController</servlet-name>
+		<url-pattern>/GIPIWOpenCargoController</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>GIPIWOpenPerilController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIWOpenPerilController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIWOpenPerilController</servlet-name>
+		<url-pattern>/GIPIWOpenPerilController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIWCommInvoiceController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIWCommInvoiceController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIWCommInvoiceController</servlet-name>
+		<url-pattern>/GIPIWCommInvoiceController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIWPolnrepController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIWPolnrepController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIWPolnrepController</servlet-name>
+		<url-pattern>/GIPIWPolnrepController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIWinvoiceController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIWinvoiceController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIWinvoiceController</servlet-name>
+		<url-pattern>/GIPIWinvoiceController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIWinvTaxController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIWinvTaxController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIWinvTaxController</servlet-name>
+		<url-pattern>/GIPIWinvTaxController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIWinvperlController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIWinvperlController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIWinvperlController</servlet-name>
+		<url-pattern>/GIPIWinvperlController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIWInstallmentController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIWInstallmentController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIWInstallmentController</servlet-name>
+		<url-pattern>/GIPIWInstallmentController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIPARListController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIPARListController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIPARListController</servlet-name>
+		<url-pattern>/GIPIPARListController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIWItemPerilController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIWItemPerilController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIWItemPerilController</servlet-name>
+		<url-pattern>/GIPIWItemPerilController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIParInformationController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIParInformationController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIParInformationController</servlet-name>
+		<url-pattern>/GIPIParInformationController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIParBondInformationController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIParBondInformationController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIParBondInformationController</servlet-name>
+		<url-pattern>/GIPIParBondInformationController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIParMCItemInformationController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIParMCItemInformationController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIParMCItemInformationController</servlet-name>
+		<url-pattern>/GIPIParMCItemInformationController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIWVehicleController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIWVehicleController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIWVehicleController</servlet-name>
+		<url-pattern>/GIPIWVehicleController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIEndtParMCItemInfoController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIEndtParMCItemInfoController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIEndtParMCItemInfoController</servlet-name>
+		<url-pattern>/GIPIEndtParMCItemInfoController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIItemMethodController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIItemMethodController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIItemMethodController</servlet-name>
+		<url-pattern>/GIPIItemMethodController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<description>Used to handle file uploads</description>
+		<servlet-name>FileUploadController</servlet-name>
+		<servlet-class>com.geniisys.common.controllers.FileUploadController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>FileUploadController</servlet-name>
+		<url-pattern>/FileUploadController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<description>Used to handle fleet file uploads</description>
+		<servlet-name>FleetUploadController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.FleetUploadController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>FleetUploadController</servlet-name>
+		<url-pattern>/FleetUploadController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIISUserMaintenanceController</servlet-name>
+		<servlet-class>com.geniisys.common.controllers.GIISUserMaintenanceController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIISUserMaintenanceController</servlet-name>
+		<url-pattern>/GIISUserMaintenanceController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIISUserGroupMaintenanceController</servlet-name>
+		<servlet-class>com.geniisys.common.controllers.GIISUserGroupMaintenanceController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIISUserGroupMaintenanceController</servlet-name>
+		<url-pattern>/GIISUserGroupMaintenanceController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIISModuleController</servlet-name>
+		<servlet-class>com.geniisys.common.controllers.GIISModuleController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIISModuleController</servlet-name>
+		<url-pattern>/GIISModuleController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIWItemController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIWItemController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIWItemController</servlet-name>
+		<url-pattern>/GIPIWItemController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIWMcAccController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIWMcAccController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIWMcAccController</servlet-name>
+		<url-pattern>/GIPIWMcAccController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIWOpenPolicyController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIWOpenPolicyController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIWOpenPolicyController</servlet-name>
+		<url-pattern>/GIPIWOpenPolicyController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIParMortgageeController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIParMortgageeController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIParMortgageeController</servlet-name>
+		<url-pattern>/GIPIParMortgageeController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIISPerilController</servlet-name>
+		<servlet-class>com.geniisys.common.controllers.GIISPerilController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIISPerilController</servlet-name>
+		<url-pattern>/GIISPerilController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIPolbasicController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIPolbasicController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIPolbasicController</servlet-name>
+		<url-pattern>/GIPIPolbasicController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIParDiscountController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIParDiscountController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIParDiscountController</servlet-name>
+		<url-pattern>/GIPIParDiscountController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIParBillGroupingController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIParBillGroupingController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIParBillGroupingController</servlet-name>
+		<url-pattern>/GIPIParBillGroupingController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIWFireItmController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIWFireItmController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIWFireItmController</servlet-name>
+		<url-pattern>/GIPIWFireItmController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIWRequiredDocumentsController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIWRequiredDocumentsController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIWRequiredDocumentsController</servlet-name>
+		<url-pattern>/GIPIWRequiredDocumentsController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIWBankScheduleController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIWBankScheduleController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIWBankScheduleController</servlet-name>
+		<url-pattern>/GIPIWBankScheduleController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIWBondBasicController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIWBondBasicController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIWBondBasicController</servlet-name>
+		<url-pattern>/GIPIWBondBasicController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIWCosignatoryController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIWCosignatoryController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIWCosignatoryController</servlet-name>
+		<url-pattern>/GIPIWCosignatoryController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>PostParController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.PostParController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>PostParController</servlet-name>
+		<url-pattern>/PostParController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIWCargoController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIWCargoController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIWCargoController</servlet-name>
+		<url-pattern>/GIPIWCargoController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIWAviationItemController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIWAviationItemController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIWAviationItemController</servlet-name>
+		<url-pattern>/GIPIWAviationItemController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIWCasualtyItemController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIWCasualtyItemController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIWCasualtyItemController</servlet-name>
+		<url-pattern>/GIPIWCasualtyItemController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIWCasualtyPersonnelController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIWCasualtyPersonnelController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIWCasualtyPersonnelController</servlet-name>
+		<url-pattern>/GIPIWCasualtyPersonnelController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIWItemVesController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIWItemVesController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIWItemVesController</servlet-name>
+		<url-pattern>/GIPIWItemVesController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIWAccidentItemController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIWAccidentItemController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIWAccidentItemController</servlet-name>
+		<url-pattern>/GIPIWAccidentItemController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIWEngineeringItemController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIWEngineeringItemController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIWEngineeringItemController</servlet-name>
+		<url-pattern>/GIPIWEngineeringItemController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIWENAdditionalInfoController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIWENAdditionalInfoController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIWENAdditionalInfoController</servlet-name>
+		<url-pattern>/GIPIWENAdditionalInfoController</url-pattern>
+	</servlet-mapping>
+	
+	
+	<servlet>
+		<servlet-name>GIPIPackPARListController</servlet-name>
+		<servlet-class>
+			com.geniisys.gipi.pack.controllers.GIPIPackPARListController
+		</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIPackPARListController</servlet-name>
+		<url-pattern>/GIPIPackPARListController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIPackParInformationController</servlet-name>
+		<servlet-class>
+			com.geniisys.gipi.pack.controllers.GIPIPackParInformationController
+		</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIPackParInformationController</servlet-name>
+		<url-pattern>/GIPIPackParInformationController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIPackPolbasicController</servlet-name>
+		<servlet-class>com.geniisys.gipi.pack.controllers.GIPIPackPolbasicController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIPackPolbasicController</servlet-name>
+		<url-pattern>/GIPIPackPolbasicController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIPackWarrantyAndClausesController</servlet-name>
+		<servlet-class>com.geniisys.gipi.pack.controllers.GIPIPackWarrantyAndClausesController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIPackWarrantyAndClausesController</servlet-name>
+		<url-pattern>/GIPIPackWarrantyAndClausesController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIWPackLineSublineController</servlet-name>
+		<servlet-class>com.geniisys.gipi.pack.controllers.GIPIWPackLineSublineController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIWPackLineSublineController</servlet-name>
+		<url-pattern>/GIPIWPackLineSublineController</url-pattern>
+	</servlet-mapping>
+	
+	<!-- END OF PACK! -->
+	<servlet>
+		<servlet-name>GIPIPackWPolnrepController</servlet-name>
+		<servlet-class>com.geniisys.gipi.pack.controllers.GIPIPackWPolnrepController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIPackWPolnrepController</servlet-name>
+		<url-pattern>/GIPIPackWPolnrepController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>OverlayController</servlet-name>
+		<servlet-class>
+			com.geniisys.gipi.controllers.OverlayController
+		</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>OverlayController</servlet-name>
+		<url-pattern>/OverlayController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPILoadHistController</servlet-name>
+		<servlet-class>
+			com.geniisys.gipi.controllers.GIPILoadHistController
+		</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPILoadHistController</servlet-name>
+		<url-pattern>/GIPILoadHistController</url-pattern>
+	</servlet-mapping>
+		
+	<servlet>
+		<servlet-name>UploadEnrolleesController</servlet-name>
+		<servlet-class>
+			com.geniisys.gipi.controllers.UploadEnrolleesController
+		</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>UploadEnrolleesController</servlet-name>
+		<url-pattern>/UploadEnrolleesController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIISTariffRatesHdrController</servlet-name>
+		<servlet-class>
+			com.geniisys.common.controllers.GIISTariffRatesHdrController
+		</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIISTariffRatesHdrController</servlet-name>
+		<url-pattern>/GIISTariffRatesHdrController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIACInwFaculPremCollnsController</servlet-name>
+		<servlet-class>
+			com.geniisys.giac.controllers.GIACInwFaculPremCollnsController
+		</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIACInwFaculPremCollnsController</servlet-name>
+		<url-pattern>/GIACInwFaculPremCollnsController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIACDirectClaimPaymentController</servlet-name>
+		<servlet-class>
+			com.geniisys.giac.controllers.GIACDirectClaimPaymentController
+		</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIACDirectClaimPaymentController</servlet-name>
+		<url-pattern>/GIACDirectClaimPaymentController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIACInputVatController</servlet-name>
+		<servlet-class>com.geniisys.giac.controllers.GIACInputVatController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIACInputVatController</servlet-name>
+		<url-pattern>/GIACInputVatController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIISLostBidController</servlet-name>
+		<servlet-class>com.geniisys.common.controllers.GIISLostBidController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIISLostBidController</servlet-name>
+		<url-pattern>/GIISLostBidController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIACLossRecoveriesController</servlet-name>
+		<servlet-class>com.geniisys.giac.controllers.GIACLossRecoveriesController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIACLossRecoveriesController</servlet-name>
+		<url-pattern>/GIACLossRecoveriesController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIACLossRiCollnsController</servlet-name>
+		<servlet-class>com.geniisys.giac.controllers.GIACLossRiCollnsController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIACLossRiCollnsController</servlet-name>
+		<url-pattern>/GIACLossRiCollnsController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIISReinsurerController</servlet-name>
+		<servlet-class>com.geniisys.common.controllers.GIISReinsurerController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIISReinsurerController</servlet-name>
+		<url-pattern>/GIISReinsurerController</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>GIPIUserEventController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIUserEventController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIUserEventController</servlet-name>
+		<url-pattern>/GIPIUserEventController</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>GIPIReminderController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIReminderController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIReminderController</servlet-name>
+		<url-pattern>/GIPIReminderController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIACOpTextController</servlet-name>
+		<servlet-class>com.geniisys.giac.controllers.GIACOpTextController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIACOpTextController</servlet-name>
+		<url-pattern>/GIACOpTextController</url-pattern>
+	</servlet-mapping>
+	
+	<!-- GIACTaxesWheldController -->
+	<servlet>
+		<servlet-name>GIACTaxesWheldController</servlet-name>
+		<servlet-class>
+			com.geniisys.giac.controllers.GIACTaxesWheldController
+		</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIACTaxesWheldController</servlet-name>
+		<url-pattern>/GIACTaxesWheldController</url-pattern>
+	</servlet-mapping>
+	
+	<!-- GIACSlListsController -->
+	<servlet>
+		<servlet-name>GIACSlListsController</servlet-name>
+		<servlet-class>
+			com.geniisys.giac.controllers.GIACSlListsController
+		</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIACSlListsController</servlet-name>
+		<url-pattern>/GIACSlListsController</url-pattern>
+	</servlet-mapping>
+	
+	<!-- GIACSUnidentifiedCollection Controller created by TONIO 12/14/2010-->
+	<servlet>
+		<servlet-name>GIACUnidentifiedCollnsController</servlet-name>
+		<servlet-class>
+			com.geniisys.giac.controllers.GIACUnidentifiedCollnsController
+		</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIACUnidentifiedCollnsController</servlet-name>
+		<url-pattern>/GIACUnidentifiedCollnsController</url-pattern>
+	</servlet-mapping>
+	<!-- END GIACSUnidentifiedCollection Controller  -->
+	
+	<!-- GIACOtherBranchORController, created by D.Alcantara 1/24/2011 -->
+	<servlet>
+		<servlet-name>GIACOtherBranchORController</servlet-name>
+		<servlet-class>
+			com.geniisys.giac.controllers.GIACOtherBranchORController
+		</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIACOtherBranchORController</servlet-name>
+		<url-pattern>/GIACOtherBranchORController</url-pattern>
+	</servlet-mapping>
+	<!-- END GIACOtherBranchORController -->
+		
+	<servlet>
+		<servlet-name>GIISGeninInfoController</servlet-name>
+		<servlet-class>com.geniisys.common.controllers.GIISGeninInfoController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIISGeninInfoController</servlet-name>
+		<url-pattern>/GIISGeninInfoController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIISEndtTextController</servlet-name>
+		<servlet-class>com.geniisys.common.controllers.GIISEndtTextController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIISEndtTextController</servlet-name>
+		<url-pattern>/GIISEndtTextController</url-pattern>
+	</servlet-mapping>
+	
+	<!--  GIACAcknowledgementReceiptController, created by angelo 01.27.2011 -->
+	<servlet>
+		<servlet-name>GIACAcknowledgmentReceiptsController</servlet-name>
+		<servlet-class>com.geniisys.giac.controllers.GIACAcknowledgmentReceiptsController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIACAcknowledgmentReceiptsController</servlet-name>
+		<url-pattern>/GIACAcknowledgmentReceiptsController</url-pattern>
+	</servlet-mapping>
+	
+	<!-- GIISCurrencyController (emman 02.09.2011) -->
+	<servlet>
+		<servlet-name>GIISCurrencyController</servlet-name>
+		<servlet-class>com.geniisys.common.controllers.GIISCurrencyController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIISCurrencyController</servlet-name>
+		<url-pattern>/GIISCurrencyController</url-pattern>
+	</servlet-mapping>
+	
+	<!-- added by Emman 03/16/2011 -->
+	<servlet>
+		<servlet-name>GIACAccTransController</servlet-name>
+		<servlet-class>
+			com.geniisys.giac.controllers.GIACAccTransController
+		</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIACAccTransController</servlet-name>
+		<url-pattern>/GIACAccTransController</url-pattern>
+	</servlet-mapping>
+	
+	<!-- added by Emman 03/30/2011 -->
+	<servlet>
+		<servlet-name>GIISFundsController</servlet-name>
+		<servlet-class>
+			com.geniisys.common.controllers.GIISFundsController
+		</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIISFundsController</servlet-name>
+		<url-pattern>/GIISFundsController</url-pattern>
+	</servlet-mapping>
+	
+	<!-- added by Emman 03/30/2011 -->
+	<servlet>
+		<servlet-name>GIACBranchController</servlet-name>
+		<servlet-class>
+			com.geniisys.giac.controllers.GIACBranchController
+		</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIACBranchController</servlet-name>
+		<url-pattern>/GIACBranchController</url-pattern>
+	</servlet-mapping>
+	
+	<!-- added by Emman 03/30/2011 -->
+	<servlet>
+		<servlet-name>GIACCollnBatchController</servlet-name>
+		<servlet-class>
+			com.geniisys.giac.controllers.GIACCollnBatchController
+		</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIACCollnBatchController</servlet-name>
+		<url-pattern>/GIACCollnBatchController</url-pattern>
+	</servlet-mapping>
+	
+	<!-- added by Emman 04/05/2011 -->
+	<servlet>
+		<servlet-name>GIACBankAccountsController</servlet-name>
+		<servlet-class>
+			com.geniisys.giac.controllers.GIACBankAccountsController
+		</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIACBankAccountsController</servlet-name>
+		<url-pattern>/GIACBankAccountsController</url-pattern>
+	</servlet-mapping>
+	
+	<!-- added by Andrew 04/06/2011 -->
+	<servlet>
+		<servlet-name>GIACSpoiledOrController</servlet-name>
+		<servlet-class>com.geniisys.giac.controllers.GIACSpoiledOrController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIACSpoiledOrController</servlet-name>
+		<url-pattern>/GIACSpoiledOrController</url-pattern>
+	</servlet-mapping>	
+	
+	<!-- added by d.alcantara 04/07/2011 -->
+	<servlet>
+		<servlet-name>GIACDCBNoMaintController</servlet-name>
+		<servlet-class>com.geniisys.giac.controllers.GIACDCBNoMaintController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIACDCBNoMaintController</servlet-name>
+		<url-pattern>/GIACDCBNoMaintController</url-pattern>
+	</servlet-mapping>
+	
+	<!-- added by Emman 04/15/2011 -->
+	<servlet>
+		<servlet-name>GIACBankDepSlipsController</servlet-name>
+		<servlet-class>
+			com.geniisys.giac.controllers.GIACBankDepSlipsController
+		</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIACBankDepSlipsController</servlet-name>
+		<url-pattern>/GIACBankDepSlipsController</url-pattern>
+	</servlet-mapping>
+	
+	<!-- added by Steven 3.18.2013 -->
+	<servlet>
+		<servlet-name>GIACJournalEntryController</servlet-name>
+		<servlet-class>
+			com.geniisys.giac.controllers.GIACJournalEntryController
+		</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIACJournalEntryController</servlet-name>
+		<url-pattern>/GIACJournalEntryController</url-pattern>
+	</servlet-mapping>
+	<!-- end GIACJournalEntryController-->
+	
+	<!-- added by Steven 4.11.2013 -->
+	<servlet>
+		<servlet-name>GIACBatchAcctEntryController</servlet-name>
+		<servlet-class>
+			com.geniisys.giac.controllers.GIACBatchAcctEntryController
+		</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIACBatchAcctEntryController</servlet-name>
+		<url-pattern>/GIACBatchAcctEntryController</url-pattern>
+	</servlet-mapping>
+	<!-- end GIACBatchAcctEntryController-->
+	
+	<servlet>
+		<servlet-name>GIACUpdateCheckStatusController</servlet-name>
+		<servlet-class>
+			com.geniisys.giac.controllers.GIACUpdateCheckStatusController
+		</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIACUpdateCheckStatusController</servlet-name>
+		<url-pattern>/GIACUpdateCheckStatusController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>JavascriptErrorLogger</servlet-name>
+		<servlet-class>com.geniisys.framework.util.JavascriptErrorLogger</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>JavascriptErrorLogger</servlet-name>
+		<url-pattern>/JavascriptErrorLogger</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIQuotationBondBasicController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIQuotationBondBasicController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIQuotationBondBasicController</servlet-name>
+		<url-pattern>/GIPIQuotationBondBasicController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIQuoteCosignController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIQuoteCosignController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIQuoteCosignController</servlet-name>
+		<url-pattern>/GIPIQuoteCosignController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIUWPolDistController</servlet-name>
+		<servlet-class>com.geniisys.giuw.controllers.GIUWPolDistController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIUWPolDistController</servlet-name>
+		<url-pattern>/GIUWPolDistController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIUWPolDistFinalController</servlet-name>
+		<servlet-class>com.geniisys.giuw.controllers.GIUWPolDistFinalController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIUWPolDistFinalController</servlet-name>
+		<url-pattern>/GIUWPolDistFinalController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>PostDistributionController</servlet-name>
+		<servlet-class>com.geniisys.giuw.controllers.PostDistributionController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>PostDistributionController</servlet-name>
+		<url-pattern>/PostDistributionController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIUWWitemdsController</servlet-name>
+		<servlet-class>com.geniisys.giuw.controllers.GIUWWitemdsController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIUWWitemdsController</servlet-name>
+		<url-pattern>/GIUWWitemdsController</url-pattern>
+	</servlet-mapping>
+	
+	<!-- GIUWWPerildsController belle 07.12.2011-->
+	<servlet>
+		<servlet-name>GIUWWPerildsController</servlet-name>
+		<servlet-class>com.geniisys.giuw.controllers.GIUWWPerildsController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIUWWPerildsController</servlet-name>
+		<url-pattern>/GIUWWPerildsController</url-pattern>
+	</servlet-mapping>
+	<!-- end  GIUWWPerildsController-->
+	
+	<servlet>
+		<servlet-name>GIUWPolDistPolbasicVController</servlet-name>
+		<servlet-class>com.geniisys.giuw.controllers.GIUWPolDistPolbasicVController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIUWPolDistPolbasicVController</servlet-name>
+		<url-pattern>/GIUWPolDistPolbasicVController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIUWDistBatchController</servlet-name>
+		<servlet-class>com.geniisys.giuw.controllers.GIUWDistBatchController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIUWDistBatchController</servlet-name>
+		<url-pattern>/GIUWDistBatchController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIPolwcController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIPolwcController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIPolwcController</servlet-name>
+		<url-pattern>/GIPIPolwcController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIInvoiceController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIInvoiceController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIInvoiceController</servlet-name>
+		<url-pattern>/GIPIInvoiceController</url-pattern>
+	</servlet-mapping>
+	<!--  -->
+	<servlet>
+		<servlet-name>GIPIItemPerilController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIItemPerilController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIItemPerilController</servlet-name>
+		<url-pattern>/GIPIItemPerilController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIPIVehicleController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIVehicleController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIVehicleController</servlet-name>
+		<url-pattern>/GIPIVehicleController</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>GIPIItemVesController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIItemVesController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIItemVesController</servlet-name>
+		<url-pattern>/GIPIItemVesController</url-pattern>
+	</servlet-mapping>
+	
+	<!-- CLAIMS SECTION - Irwin Tabisora, Aug.5.11-->
+	<servlet>
+		<servlet-name>GICLClaimsController</servlet-name>
+		<servlet-class>com.geniisys.gicl.controllers.GICLClaimsController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GICLClaimsController</servlet-name>
+		<url-pattern>/GICLClaimsController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GICLReqdDocsController</servlet-name>
+		<servlet-class>com.geniisys.gicl.controllers.GICLReqdDocsController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GICLReqdDocsController</servlet-name>
+		<url-pattern>/GICLReqdDocsController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GICLBatchCsrController</servlet-name>
+		<servlet-class>com.geniisys.gicl.controllers.GICLBatchCsrController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GICLBatchCsrController</servlet-name>
+		<url-pattern>/GICLBatchCsrController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GICLEngineeringDtlController</servlet-name>
+		<servlet-class>com.geniisys.gicl.controllers.GICLEngineeringDtlController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GICLEngineeringDtlController</servlet-name>
+		<url-pattern>/GICLEngineeringDtlController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GICLRecoveryPaytController</servlet-name>
+		<servlet-class>com.geniisys.gicl.controllers.GICLRecoveryPaytController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GICLRecoveryPaytController</servlet-name>
+		<url-pattern>/GICLRecoveryPaytController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GICLClaimReserveController</servlet-name>
+		<servlet-class>com.geniisys.gicl.controllers.GICLClaimReserveController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GICLClaimReserveController</servlet-name>
+		<url-pattern>/GICLClaimReserveController</url-pattern>
+	</servlet-mapping>
+	
+	<!--  rmanalad 4.13.2011 -->
+	<servlet>
+		<servlet-name>GIPIWCollateralTransactionController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIWCollateralTransactionController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIWCollateralTransactionController</servlet-name>
+		<url-pattern>/GIPIWCollateralTransactionController</url-pattern>
+	</servlet-mapping>
+	
+	<!-- gipi inspection controller - angelo 04.05.2011 -->
+	<servlet>
+		<servlet-name>GIPIInspectionReportController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIInspectionReportController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIInspectionReportController</servlet-name>
+		<url-pattern>/GIPIInspectionReportController</url-pattern>
+	</servlet-mapping>
+	<!-- END OF GIPIINSPECTIONREPORTCONTROLLER -->
+	
+	<!-- GIPICoInsurerController - d.alcantara 04-20-2011 -->
+	<servlet>
+		<servlet-name>GIPICoInsurerController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPICoInsurerController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPICoInsurerController</servlet-name>
+		<url-pattern>/GIPICoInsurerController</url-pattern>
+	</servlet-mapping>
+	<!-- / GIPICoInsurerController -->
+	<!--start GIISObligeeController moses 04-28-2011  -->
+	<servlet>
+		<servlet-name>GIISObligeeController</servlet-name>
+		<servlet-class>com.geniisys.common.controllers.GIISObligeeController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIISObligeeController</servlet-name>
+		<url-pattern>/GIISObligeeController</url-pattern>
+	</servlet-mapping>
+	<!--end GIISObligeeController -->
+	<!-- start GIPIMortgageeController moses 04-28-2011 -->
+	<servlet>
+		<servlet-name>GIPIMortgageeController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIMortgageeController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIMortgageeController</servlet-name>
+		<url-pattern>/GIPIMortgageeController</url-pattern>
+	</servlet-mapping>
+	<!-- end GIPIMortgageeController moses 04-28-2011 -->
+	
+	<!-- GIPILeadPolicyController - nica 05.03.2011 -->
+	<servlet>
+		<servlet-name>GIPILeadPolicyController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPILeadPolicyController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPILeadPolicyController</servlet-name>
+		<url-pattern>/GIPILeadPolicyController</url-pattern>
+	</servlet-mapping>
+	<!-- / GIPILeadPolicyController -->	
+	
+	<!-- start GIPIOrigInvTaxController moses 05.25.2011-->
+	<servlet>
+		<servlet-name>GIPIOrigInvTaxController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIOrigInvTaxController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIOrigInvTaxController</servlet-name>
+		<url-pattern>/GIPIOrigInvTaxController</url-pattern>
+	</servlet-mapping>
+	<!-- end GIPIOrigInvTaxController-->
+	
+	<!-- start GIPIOrigInvPerlController moses 05.27.2011-->
+	<servlet>
+		<servlet-name>GIPIOrigInvPerlController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIOrigInvPerlController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIOrigInvPerlController</servlet-name>
+		<url-pattern>/GIPIOrigInvPerlController</url-pattern>
+	</servlet-mapping>
+	<!-- end -->
+	
+	<!-- start GIPIGroupedItemsController 05.06.2011 -->
+	<servlet>
+		<servlet-name>GIPIGroupedItemsController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIGroupedItemsController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIGroupedItemsController</servlet-name>
+		<url-pattern>/GIPIGroupedItemsController</url-pattern>
+	</servlet-mapping>
+	<!-- endt GIPIGroupedItemsController -->
+	
+	<!-- PrintPolicyCertificatesController nica 05.16.2011 -->
+	<servlet>
+		<servlet-name>PrintPolicyCertificatesController</servlet-name>
+		<servlet-class>com.geniisys.underwriting.certificates.reports.controller.PrintPolicyCertificatesController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>PrintPolicyCertificatesController</servlet-name>
+		<url-pattern>/PrintPolicyCertificatesController</url-pattern>
+	</servlet-mapping>
+	<!-- end PrintPolicyCertificatesController-->	
+	
+	<!-- ReverseBinderController robert 08.24.2011 -->
+	<servlet>
+		<servlet-name>ReverseBinderController</servlet-name>
+		<servlet-class>com.geniisys.underwriting.reinsurance.reports.controller.ReverseBinderController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ReverseBinderController</servlet-name>
+		<url-pattern>/ReverseBinderController</url-pattern>
+	</servlet-mapping>
+	<!-- end ReverseBinderController-->	
+	
+	<!-- GIEXExpiryController robert 08.25.2011 -->
+	<servlet>
+		<servlet-name>GIEXExpiryController</servlet-name>
+		<servlet-class>com.geniisys.giex.controllers.GIEXExpiryController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIEXExpiryController</servlet-name>
+		<url-pattern>/GIEXExpiryController</url-pattern>
+	</servlet-mapping>
+	<!-- end GIEXExpiryController-->	
+	
+	<!-- GIEXExpiriesVController robert 09.19.2011 -->
+	<servlet>
+		<servlet-name>GIEXExpiriesVController</servlet-name>
+		<servlet-class>com.geniisys.giex.controllers.GIEXExpiriesVController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIEXExpiriesVController</servlet-name>
+		<url-pattern>/GIEXExpiriesVController</url-pattern>
+	</servlet-mapping>
+	<!-- end GIEXExpiriesVController-->
+	
+	<servlet>
+		<servlet-name>GIEXBusinessConservationController</servlet-name>
+		<servlet-class>com.geniisys.giex.controllers.GIEXBusinessConservationController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIEXBusinessConservationController</servlet-name>
+		<url-pattern>/GIEXBusinessConservationController</url-pattern>
+	</servlet-mapping>
+	
+	<!-- GIISPrincipalSignatoryController irwin 05.23.11 -->
+	<servlet>
+		<servlet-name>GIISPrincipalSignatoryController</servlet-name>
+		<servlet-class>com.geniisys.common.controllers.GIISPrincipalSignatoryController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIISPrincipalSignatoryController</servlet-name>
+		<url-pattern>/GIISPrincipalSignatoryController</url-pattern>
+	</servlet-mapping>
+	<!-- end  GIISPrincipalSignatoryController-->
+	
+	<!-- GIISDistributionShareController Halley 10.15.2012 -->
+	<servlet>
+		<servlet-name>GIISDistributionShareController</servlet-name>
+		<servlet-class>com.geniisys.common.controllers.GIISDistributionShareController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIISDistributionShareController</servlet-name>
+		<url-pattern>/GIISDistributionShareController</url-pattern>
+	</servlet-mapping>
+	<!-- end  GIISDistributionShareController-->
+	
+	<!-- GIISXolController Halley 11.19.2012 -->
+	<servlet>
+		<servlet-name>GIISXolController</servlet-name>
+		<servlet-class>com.geniisys.common.controllers.GIISXolController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIISXolController</servlet-name>
+		<url-pattern>/GIISXolController</url-pattern>
+	</servlet-mapping>
+	<!-- end  GIISXolController-->
+	
+	<!-- GIISWarrantyAndClause gzelle -->	
+	<servlet>
+		<servlet-name>GIISWarrClaController</servlet-name>
+		<servlet-class>com.geniisys.giis.controllers.GIISWarrClaController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIISWarrClaController</servlet-name>
+		<url-pattern>/GIISWarrClaController</url-pattern>
+	</servlet-mapping>
+	<!-- end  GIISWarrantyAndClause -->	
+
+	<servlet>
+		<servlet-name>AccountingLOVController</servlet-name>
+		<servlet-class>com.geniisys.lov.util.AccountingLOVController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>AccountingLOVController</servlet-name>
+		<url-pattern>/AccountingLOVController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>UnderwritingLOVController</servlet-name>
+		<servlet-class>com.geniisys.lov.util.UnderwritingLOVController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>UnderwritingLOVController</servlet-name>
+		<url-pattern>/UnderwritingLOVController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>MarketingLOVController</servlet-name>
+		<servlet-class>com.geniisys.lov.util.MarketingLOVController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>MarketingLOVController</servlet-name>
+		<url-pattern>/MarketingLOVController</url-pattern>
+	</servlet-mapping>
+	
+	<!-- start GIPIBankScheduleController 05.11.2011 moses -->
+	<servlet>
+		<servlet-name>GIPIBankScheduleController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIBankScheduleController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIBankScheduleController</servlet-name>
+		<url-pattern>/GIPIBankScheduleController</url-pattern>
+	</servlet-mapping>
+	<!-- end  GIPIBankScheduleController 05.11.2011 moses -->
+	
+	<!-- start GIPIVesAirController moses 05.12.2011 -->
+	<servlet>
+		<servlet-name>GIPIVesAirController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIVesAirController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIVesAirController</servlet-name>
+		<url-pattern>/GIPIVesAirController</url-pattern>
+	</servlet-mapping>
+	<!-- end GIPIVesAirController moses 05.12.2011 -->
+	
+	<!-- start GIPIDeductiblesController moses 05.12.2011-->
+	<servlet>
+		<servlet-name>GIPIDeductiblesController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIDeductiblesController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIDeductiblesController</servlet-name>
+		<url-pattern>/GIPIDeductiblesController</url-pattern>
+	</servlet-mapping>
+	<!-- end GIPIDeductiblesController-->
+	
+	<!-- start GIPIDeductiblesController bonok 05.18.2012
+		 for new marketing -->
+	<servlet>
+		<servlet-name>GIPIQuoteDeductiblesController</servlet-name>
+		<servlet-class>com.geniisys.quote.controllers.GIPIQuoteDeductiblesController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIQuoteDeductiblesController</servlet-name>
+		<url-pattern>/GIPIQuoteDeductiblesController</url-pattern>
+	</servlet-mapping>
+	<!-- end GIPIDeductiblesController-->
+	
+	<!-- start GIPIOrigItmPerilController moses 05.18.2011 -->
+	<servlet>
+		<servlet-name>GIPIOrigItmPerilController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIOrigItmPerilController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIOrigItmPerilController</servlet-name>
+		<url-pattern>/GIPIOrigItmPerilController</url-pattern>
+	</servlet-mapping>
+	<!-- end GIPIOrigItmPerilController -->
+	
+	<!-- GIRIDistFrpsController belle 06.22.2011-->
+	<servlet>
+		<servlet-name>GIRIDistFrpsController</servlet-name>
+		<servlet-class>com.geniisys.giri.controllers.GIRIDistFrpsController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIRIDistFrpsController</servlet-name>
+		<url-pattern>/GIRIDistFrpsController</url-pattern>
+	</servlet-mapping>
+	<!-- end  GIRIDistFrpsController-->
+	
+	<!-- start GIPIOrigCommInvoiceController moses 05.30.2011-->
+	<servlet>
+		<servlet-name>GIPIOrigCommInvoiceController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIOrigCommInvoiceController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIOrigCommInvoiceController</servlet-name>
+		<url-pattern>/GIPIOrigCommInvoiceController</url-pattern>
+	</servlet-mapping>
+	<!-- end GIPIOrigCommInvoiceController-->
+	
+	<!-- start GIPIMainCoInsController moses 05.31.2011-->
+	<servlet>
+		<servlet-name>GIPIMainCoInsController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIMainCoInsController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIMainCoInsController</servlet-name>
+		<url-pattern>/GIPIMainCoInsController</url-pattern>
+	</servlet-mapping>
+	<!-- end -->
+	
+	<!-- start GIPIMcaccController moses 06.03.2011-->
+	<servlet>
+		<servlet-name>GIPIMcaccController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIMcaccController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIMcaccController</servlet-name>
+		<url-pattern>/GIPIMcaccController</url-pattern>
+	</servlet-mapping>
+	<!-- end -->
+	
+	<!-- start GIPIFireItemController moses 06.07.2011-->
+	<servlet>
+		<servlet-name>GIPIFireItemController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIFireItemController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIFireItemController</servlet-name>
+		<url-pattern>/GIPIFireItemController</url-pattern>
+	</servlet-mapping>
+	<!-- end -->
+	
+	<!-- start GIPICargoController moses 06.09.2011 -->
+	<servlet>
+		<servlet-name>GIPICargoController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPICargoController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPICargoController</servlet-name>
+		<url-pattern>/GIPICargoController</url-pattern>
+	</servlet-mapping>
+	<!-- end -->
+	
+	<!-- start GIPICasualtyItemController moses 06.14.2011-->
+	<servlet>
+		<servlet-name>GIPICasualtyItemController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPICasualtyItemController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPICasualtyItemController</servlet-name>
+		<url-pattern>/GIPICasualtyItemController</url-pattern>
+	</servlet-mapping>
+	<!-- end -->
+	
+	<!-- start GIPICasualtyPersonnelController moses 06.17.2011-->
+	<servlet>
+		<servlet-name>GIPICasualtyPersonnelController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPICasualtyPersonnelController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPICasualtyPersonnelController</servlet-name>
+		<url-pattern>/GIPICasualtyPersonnelController</url-pattern>
+	</servlet-mapping>
+	<!-- end -->
+	<!-- start GIPIAviationItemController moses 06.21.2011-->
+	<servlet>
+		<servlet-name>GIPIAviationItemController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIAviationItemController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIAviationItemController</servlet-name>
+		<url-pattern>/GIPIAviationItemController</url-pattern>
+	</servlet-mapping>
+	<!-- end -->
+
+	<servlet>
+		<servlet-name>GIRIWFrpsRiController</servlet-name>
+		<servlet-class>com.geniisys.giri.controllers.GIRIWFrpsRiController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIRIWFrpsRiController</servlet-name>
+		<url-pattern>/GIRIWFrpsRiController</url-pattern>
+	</servlet-mapping>
+	
+	<!-- start GIPIAccidentItemController moses 06.22.2011-->
+	<servlet>
+		<servlet-name>GIPIAccidentItemController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIAccidentItemController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIAccidentItemController</servlet-name>
+		<url-pattern>/GIPIAccidentItemController</url-pattern>
+	</servlet-mapping>
+	<!-- end -->
+	<!-- GIPIGrpItemsBeneficiaryController moses 06.28.2011-->
+	<servlet>
+		<servlet-name>GIPIGrpItemsBeneficiaryController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIGrpItemsBeneficiaryController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIGrpItemsBeneficiaryController</servlet-name>
+		<url-pattern>/GIPIGrpItemsBeneficiaryController</url-pattern>
+	</servlet-mapping>
+	<!-- end -->
+	
+	<!-- GIPIItmperilBeneficiaryController moses 06.29.2011 -->
+	<servlet>
+		<servlet-name>GIPIItmperilBeneficiaryController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIItmperilBeneficiaryController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIItmperilBeneficiaryController</servlet-name>
+		<url-pattern>/GIPIItmperilBeneficiaryController</url-pattern>
+	</servlet-mapping>
+	<!-- end -->
+	
+	<!-- GIPIItmPerilGroupedController moses 06.30.2011 -->
+	<servlet>
+		<servlet-name>GIPIItmPerilGroupedController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIItmPerilGroupedController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIItmPerilGroupedController</servlet-name>
+		<url-pattern>/GIPIItmPerilGroupedController</url-pattern>
+	</servlet-mapping>
+	<!-- end -->
+	<!-- GIPIBeneficiaryController moses 07.4.2011 -->
+	<servlet>
+		<servlet-name>GIPIBeneficiaryController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIBeneficiaryController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIBeneficiaryController</servlet-name>
+		<url-pattern>/GIPIBeneficiaryController</url-pattern>
+	</servlet-mapping>
+	<!-- end -->
+	<!-- GIPIOpenPolicyController moses 07.8.2011-->
+	<servlet>
+		<servlet-name>GIPIOpenPolicyController</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIOpenPolicyController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIOpenPolicyController</servlet-name>
+		<url-pattern>/GIPIOpenPolicyController</url-pattern>
+	</servlet-mapping>
+	<!-- end -->
+	
+	<!-- GIRIFrpsRiController tonio 07.5.2011 -->
+	<servlet>
+		<servlet-name>GIRIFrpsRiController</servlet-name>
+		<servlet-class>com.geniisys.giri.controllers.GIRIFrpsRiController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIRIFrpsRiController</servlet-name>
+		<url-pattern>/GIRIFrpsRiController</url-pattern>
+	</servlet-mapping>
+	<!-- GIRIBinderController tonio 07.5.2011 -->
+	<!-- GIPIPolbasicPolDistV1Controller nica 07.06.2011 -->
+	<servlet>
+		<servlet-name>GIPIPolbasicPolDistV1Controller</servlet-name>
+		<servlet-class>com.geniisys.gipi.controllers.GIPIPolbasicPolDistV1Controller</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIPIPolbasicPolDistV1Controller</servlet-name>
+		<url-pattern>/GIPIPolbasicPolDistV1Controller</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>GIRIBinderController</servlet-name>
+		<servlet-class>com.geniisys.giri.controllers.GIRIBinderController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIRIBinderController</servlet-name>
+		<url-pattern>/GIRIBinderController</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>GIISEventController</servlet-name>
+		<servlet-class>com.geniisys.common.controllers.GIISEventController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIISEventController</servlet-name>
+		<url-pattern>/GIISEventController</url-pattern>
+	</servlet-mapping>
+	
+	<!-- CGRefCodesController (emman 08.10.2011) -->
+	<servlet>
+		<servlet-name>CGRefCodesController</servlet-name>
+		<servlet-class>com.geniisys.common.controllers.CGRefCodesController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>CGRefCodesController</servlet-name>
+		<url-pattern>/CGRefCodesController</url-pattern>
+	</servlet-mapping>
+	
+	<!-- GIACParametersController (emman 08.10.2011) -->
+	<servlet>
+		<servlet-name>GIACParametersController</servlet-name>
+		<servlet-class>com.geniisys.giac.controllers.GIACParametersController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIACParametersController</servlet-name>
+		<url-pattern>/GIACParametersController</url-pattern>
+	</servlet-mapping>
+	
+	<!-- ReinsuranceAcceptanceController (bonok 01.12.12) -->
+	<servlet>
+		<servlet-name>ReinsuranceAcceptanceController</servlet-name>
+		<servlet-class>com.geniisys.underwriting.reinsurance.reports.controller.ReinsuranceAcceptanceController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ReinsuranceAcceptanceController</servlet-name>
+		<url-pattern>/ReinsuranceAcceptanceController</url-pattern>
+	</servlet-mapping>
+	
+	<!-- GIEXBusinessConservationPrintController (bonok 03.05.12) -->
+	<servlet>
+		<servlet-name>GIEXBusinessConservationPrintController</servlet-name>
+		<servlet-class>com.geniisys.giex.controllers.GIEXBusinessConservationPrintController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIEXBusinessConservationPrintController</servlet-name>
+		<url-pattern>/GIEXBusinessConservationPrintController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>CopyUtilitiesController</servlet-name>
+		<servlet-class>com.geniisys.giuts.controllers.CopyUtilitiesController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>CopyUtilitiesController</servlet-name>
+		<url-pattern>/CopyUtilitiesController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>UpdateUtilitiesController</servlet-name>
+		<servlet-class>com.geniisys.giuts.controllers.UpdateUtilitiesController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>UpdateUtilitiesController</servlet-name>
+		<url-pattern>/UpdateUtilitiesController</url-pattern>
+	</servlet-mapping>
+
+	<!-- For Payment Term Maintenance (Kenneth L. 10.19.2012)-->
+	<servlet>
+		<servlet-name>GIISPayTermController</servlet-name>
+		<servlet-class>com.geniisys.giis.controllers.GIISPayTermController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIISPayTermController</servlet-name>
+		<url-pattern>/GIISPayTermController</url-pattern>
+	</servlet-mapping>
+	<!-- end -->
+	
+	<!-- GIISPostingLimitController (Mae 10.16.2012)-->
+	<servlet>
+		<servlet-name>GIISPostingLimitController</servlet-name>
+		<servlet-class>com.geniisys.giis.controllers.GIISPostingLimitController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIISPostingLimitController</servlet-name>
+		<url-pattern>/GIISPostingLimitController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>SpoilageReinstatementController</servlet-name>
+		<servlet-class>com.geniisys.giuts.controllers.SpoilageReinstatementController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>SpoilageReinstatementController</servlet-name>
+		<url-pattern>/SpoilageReinstatementController</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>SmsLOVController</servlet-name>
+		<servlet-class>com.geniisys.lov.util.SmsLOVController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>SmsLOVController</servlet-name>
+		<url-pattern>/SmsLOVController</url-pattern>
+	</servlet-mapping>
+	
+	<!-- benjo 08.03.2016 SR-5512 -->
+	<servlet>
+		<servlet-name>GIRIIntreatyController</servlet-name>
+		<servlet-class>com.geniisys.giri.controllers.GIRIIntreatyController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GIRIIntreatyController</servlet-name>
+		<url-pattern>/GIRIIntreatyController</url-pattern>
+	</servlet-mapping>
+	<!-- end -->
+	
+	<!-- <servlet>
+		<description>Mailing Controller</description>
+		<servlet-name>MailController</servlet-name>
+		<servlet-class>com.geniisys.common.controllers.MailController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>MailController</servlet-name>
+		<url-pattern>/MailController</url-pattern>
+	</servlet-mapping> -->
+	
+	<!-- Filter -->
+	<!-- <filter>
+        <filter-name>filterChainProxy</filter-name>
+        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+    </filter>
+    
+    <filter-mapping>
+      <filter-name>filterChainProxy</filter-name>
+      <url-pattern>/*</url-pattern>
+    </filter-mapping> -->
+            
+	<welcome-file-list>
+		<welcome-file>pages/index.jsp</welcome-file>
+	</welcome-file-list>
+	
+	<!-- Spring Security -->
+	<filter>
+	  <filter-name>springSecurityFilterChain</filter-name>
+	  <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+	</filter>	  
+	<filter-mapping>
+	  <filter-name>springSecurityFilterChain</filter-name>
+	  <url-pattern>/*</url-pattern>
+	</filter-mapping>
+	
+	<!-- Filters the browser -->
+	<!-- Added by andrew robes - 02.08.2011
+	 	 Set browserValidation parameter to true to enable user browser filtering.
+		 If enabled, this web application will only be accessible through Prism -->
+	<filter>
+	  <filter-name>ServletFilter</filter-name>
+	  <filter-class>com.geniisys.framework.util.ServletFilter</filter-class>
+	  <init-param>
+	  	<param-name>browserValidation</param-name>
+	  	<param-value>false</param-value>
+	  </init-param>
+	</filter>	  
+	<filter-mapping>
+	  <filter-name>ServletFilter</filter-name>
+	  <url-pattern>/*</url-pattern>
+	</filter-mapping>
+	
+	
+	<!-- This is used for concurrent session control -->
+	<listener>
+	  <listener-class>org.springframework.security.web.session.HttpSessionEventPublisher</listener-class>
+	</listener>
+</web-app>

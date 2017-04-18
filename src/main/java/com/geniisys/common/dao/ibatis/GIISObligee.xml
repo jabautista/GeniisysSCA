@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISObligee">
+	
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIISObligee" type="com.geniisys.common.entity.GIISObligee"/>
+	
+	<resultMap id="GIISObligeeMap" class="GIISObligee">
+		<result column="OBLIGEE_NAME"	property="obligeeName"			jdbcType="VARCHAR" />
+		<result column="OBLIGEE_NO"		property="obligeeNo"			jdbcType="NUMBER" />
+		<result column="CONTACT_PERSON"	property="contactPerson"		jdbcType="VARCHAR" />
+		<result column="ADDRESS"		property="address"				jdbcType="VARCHAR" />
+		<result column="ADDRESS1"		property="address1"				jdbcType="VARCHAR" />
+		<result column="ADDRESS2"		property="address2"				jdbcType="VARCHAR" />
+		<result column="ADDRESS3"		property="address3"				jdbcType="VARCHAR" />
+		<result column="DESIGNATION"	property="designation"			jdbcType="VARCHAR" />
+		<result column="PHONE_NO"		property="phoneNo"				jdbcType="VARCHAR" />
+		<result column="REMARKS"		property="remarks"				jdbcType="VARCHAR" />
+		<result column="USER_ID"		property="userId"				jdbcType="VARCHAR" />
+		<result column="LAST_UPDATE_STR"	property="lastUpdateStr"			jdbcType="VARCHAR" />
+		<result column="CPI_REC_NO"		property="cpiRecNo" 			jdbcType="NUMBER" />
+		<result column="CPI_BRANCH_CD"	property="cpiBranchCd"			jdbcType="VARCHAR" />
+		<result column="ROWNUM_"		property="rowNum"/>
+		<result column="COUNT_"			property="rowCount"/>
+	</resultMap>
+	
+	<resultMap id="GIISObligeeMap2" class="GIISObligee">
+		<result column="OBLIGEE_NAME"	property="obligeeName"			jdbcType="VARCHAR" />
+		<result column="OBLIGEE_NO"		property="obligeeNo"			jdbcType="NUMBER" />
+		<result column="CONTACT_PERSON"	property="contactPerson"		jdbcType="VARCHAR" />
+		<result column="ADDRESS"		property="address"				jdbcType="VARCHAR" />
+		<result column="DESIGNATION"	property="designation"			jdbcType="VARCHAR" />
+		<result column="PHONE_NO"		property="phoneNo"				jdbcType="VARCHAR" />
+		<result column="REMARKS"		property="remarks"				jdbcType="VARCHAR" />
+		<result column="CPI_REC_NO"		property="cpiRecNo" 			jdbcType="NUMBER" />
+		<result column="CPI_BRANCH_CD"	property="cpiBranchCd"			jdbcType="VARCHAR" />
+		<result column="ROWNUM_"		property="rowNum"/>
+		<result column="COUNT_"			property="rowCount"/>
+	</resultMap>
+	
+	<!-- <parameterMap class="map" id="GIISObligeeParameterMap">
+	
+	</parameterMap> -->
+	
+	<select id="getObligeeList2" resultMap="GIISObligeeMap2" parameterClass="java.util.HashMap">
+		SELECT *
+  		  FROM (SELECT rownum rownum_, 
+  		  			   b.count_, 
+  		  			   a.*
+          		  FROM (SELECT * 
+          		  		  FROM TABLE(GIIS_OBLIGEE_PKG.get_obligee_list2(#keyword#))
+          		  		<isNotNull property="sortColumn">
+          		  		 	<isEqual property="sortColumn" compareValue="obligeeName">
+	          		  		 	ORDER BY obligee_name
+	          		  		 </isEqual>
+          		  		 	<isEqual property="ascDescFlg" compareValue="ASC">
+          		  		 		ASC
+          		  		 	</isEqual>
+          		  		 	<isEqual property="ascDescFlg" compareValue="DESC">
+          		  		 		DESC
+          		  		 	</isEqual>
+          		  		 </isNotNull>  
+          		        ) a,
+               		   (SELECT count(*) count_ 
+               		   	  FROM TABLE(GIIS_OBLIGEE_PKG.get_obligee_list2(#keyword#))) b
+                )
+ 		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+	
+	<!-- For retrieving Obligee list used for obligee maintenance -->
+	<select id="getObligeeListMaintenance"  resultMap="GIISObligeeMap" parameterClass="java.util.HashMap">
+		SELECT *
+  		  FROM (SELECT rownum rownum_, 
+  		  			   b.count_, 
+  		  			   a.*
+          		  FROM (SELECT * 
+          		  		  FROM TABLE(GIIS_OBLIGEE_PKG.get_obligee_list3(#obligeeNo#, #obligeeName#, #address#, #contactPerson#, #designation#, #phoneNo#, #remarks#, #appUser#))
+          		  		 <isEqual property="sortColumn" compareValue="obligeeNo">
+          		  		 	ORDER BY obligee_no
+          		  		 </isEqual>
+          		  		 <isEqual property="sortColumn" compareValue="obligeeName">
+          		  		 	ORDER BY obligee_name
+          		  		 </isEqual>
+          		  		 <isEqual property="sortColumn" compareValue="address">
+          		  		 	ORDER BY address
+          		  		 </isEqual>
+          		  		 <isEqual property="sortColumn" compareValue="contactPerson">
+          		  		 	ORDER BY contact_person
+          		  		 </isEqual>
+          		  		 <isEqual property="sortColumn" compareValue="designation">
+          		  		 	ORDER BY designation
+          		  		 </isEqual>
+          		  		 <isEqual property="sortColumn" compareValue="phoneNo">
+          		  		 	ORDER BY phone_no
+          		  		 </isEqual>
+          		  		 <isEqual property="sortColumn" compareValue="remarks">
+          		  		 	ORDER BY remarks
+          		  		 </isEqual>
+          		  		 <isNotNull property="sortColumn">
+          		  		 	<isEqual property="ascDescFlg" compareValue="ASC">
+          		  		 		ASC
+          		  		 	</isEqual>
+          		  		 	<isEqual property="ascDescFlg" compareValue="DESC">
+          		  		 		DESC
+          		  		 	</isEqual>
+          		  		 </isNotNull>
+          		  		 
+          		  		) a,
+               		   (SELECT count(*) count_ 
+               		   	  FROM TABLE(GIIS_OBLIGEE_PKG.get_obligee_list3(#obligeeNo#, #obligeeName#, #address#, #contactPerson#, #designation#, #phoneNo#, #remarks#, #appUser#))) b
+                )
+ 		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<!-- For inserting/updating obligee details into the database table -->
+	<procedure id="setObligee" parameterClass="GIISObligee">
+		BEGIN
+			<!-- marco - 05.02.2013 - added parameters-->
+			GIIS_USERS_PKG.app_user := #userId#;
+			GIIS_OBLIGEE_PKG.set_giis_obligee(#obligeeNo#, #obligeeName#, #address#, #contactPerson#, #designation#, #phoneNo#, #remarks#, #address1#, #address2#, #address3#);
+		END;
+	</procedure>
+	
+	<!-- For deleting obligee details from the database table -->
+	<procedure id="deleteObligee" parameterClass="java.lang.Integer">
+		BEGIN
+			GIIS_OBLIGEE_PKG.del_obligee(#obligeeNo#);
+		END;
+	</procedure>
+	
+	<!-- To check if obligeeNo can be deleted or not -->
+	<select id="validateObligeeNoOnDelete" parameterClass="java.lang.Integer" resultClass="java.lang.String">
+		SELECT GIIS_OBLIGEE_PKG.val_obligee_no_on_delete(#obligeeNo#)
+		  FROM dual
+	</select>
+	
+	<!-- Added by shan 03252014 for obligee lov -->
+	<resultMap id="GIISObligeeMap" class="GIISObligee">
+		<result column="obligee_name"	property="obligeeName"/>
+		<result column="obligee_no"		property="obligeeNo"/>
+		<result property="rowNum" 		column="rownum_"/>
+		<result property="rowCount" 	column="count_"/>
+	</resultMap>
+	
+  	<select id="getGIISObligeeLOV" resultMap="GIISObligeeMap" parameterClass="java.util.HashMap">
+		SELECT *
+  		  FROM (SELECT rownum rownum_,b.count_,a.*
+          		  FROM (SELECT * FROM TABLE(GIIS_OBLIGEE_PKG.get_obligee_list2(#findText#))
+          		  	 <isEqual property="sortColumn" compareValue="obligeeName">
+			            ORDER BY obligee_name
+			         </isEqual>
+		             <isNotNull property="sortColumn">
+	              		 <isEqual property="ascDescFlg" compareValue="ASC">
+	              			ASC
+	              		 </isEqual>
+	              		 <isEqual property="ascDescFlg" compareValue="DESC">
+	              			DESC
+	              		 </isEqual>
+              		 </isNotNull>) a,
+               		   (SELECT count(*) count_ FROM TABLE(GIIS_OBLIGEE_PKG.get_obligee_list2(#findText#))) b)
+ 		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+</sqlMap>

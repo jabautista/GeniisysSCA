@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIACPostEntriesToGL">
+	
+	<select id="getGIACS410GLNo" resultClass="java.lang.Integer">
+		SELECT GIACS410_PKG.get_gl_no FROM DUAL
+	</select>
+	
+	<select id="getGIACS410FinanceEnd" resultClass="java.lang.Integer">
+		SELECT GIACS410_PKG.get_finance_end FROM DUAL
+	</select>
+	
+	<select id="getGIACS410FiscalEnd" resultClass="java.lang.Integer">
+		SELECT GIACS410_PKG.get_fiscal_end FROM DUAL
+	</select>
+		
+	<resultMap class="java.util.HashMap" id="GIACS410TranYearLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="tranYear" column="TRAN_YEAR"/>
+	</resultMap>
+	
+	<select id="getGIACS410TranYearLOV" resultMap="GIACS410TranYearLOVResultMap" parameterClass="map">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		     	  FROM (SELECT DISTINCT tran_year 
+		     	  		  FROM giac_monthly_totals 
+		     	  		 WHERE close_tag is null 
+		     	  		   AND tran_year = NVL(TO_NUMBER(#tranYear#), tran_year)
+		     	  		   AND check_user_per_iss_cd_acctg2(null, branch_cd, 'GIACS410', #userId#) = 1
+		     	  		 <isNotNull property="findText">
+		     	  		 	AND TO_CHAR(tran_year) = #findText#
+		     	  		 </isNotNull>	
+		     	  		 <isNull property="findText">
+		     	  		 	AND TO_CHAR(tran_year) LIKE NVL(#searchString#, '%')
+		     	  		 </isNull>			     	  		 
+		     	  		 ORDER BY tran_year 
+		     	  		 <isNotNull property="sortColumn">
+		     	  		 	<isEqual property="ascDescFlg" compareValue="ASC">
+		     	  		 		ASC
+		     	  		 	</isEqual>
+		     	  		 	<isEqual property="ascDescFlg" compareValue="DESC">
+		     	  		 		DESC
+		     	  		 	</isEqual>
+		     	  		 </isNotNull>
+		     	  	   )a,
+		     	  	   (SELECT COUNT(DISTINCT tran_year) count_ 
+		     	  		  FROM giac_monthly_totals 
+		     	  		 WHERE close_tag is null 
+		     	  		   AND tran_year = NVL(TO_NUMBER(#tranYear#), tran_year)
+		     	  		   AND check_user_per_iss_cd_acctg2(null, branch_cd, 'GIACS410', #userId#) = 1
+		     	  		 <isNotNull property="findText">
+		     	  		 	AND TO_CHAR(tran_year) = #findText#
+		     	  		 </isNotNull>	
+		     	  		 <isNull property="findText">
+		     	  		 	AND TO_CHAR(tran_year) LIKE NVL(#searchString#, '%')
+		     	  		 </isNull>				     	  		 
+		     	  		 ORDER BY tran_year
+		     	  	   ) b
+		     	)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="validateGIACS410TranYear" parameterClass="java.lang.String" resultClass="java.lang.Integer">
+		SELECT DISTINCT tran_year 
+		  FROM giac_monthly_totals 
+		 WHERE close_tag is null 
+		   AND tran_year = TO_NUMBER(#tranYear#)
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="GIACS410TranMonthLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="tranMonth"	column="TRAN_MM"/>
+		<result property="tranYear"		column="TRAN_YEAR"/>
+		<result property="postTag"		column="POST_TAG"/>
+		<result property="desc"			column="DESCRIPTION"/>
+	</resultMap>
+	
+	<select id="getGIACS410TranMonthLOV" resultMap="GIACS410TranMonthLOVResultMap" parameterClass="map">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		  		  FROM (SELECT * 
+		  		    	  FROM TABLE(GIACS410_PKG.get_tran_month_lov(#tranYear#, #userId#))
+		  			      <isNotNull property="findText">
+		  			      		WHERE TO_CHAR(tran_mm) = #findText#
+		  			      </isNotNull>
+		  			      <isNull property="findText">
+		  			      		WHERE TO_CHAR(tran_mm) LIKE NVL(#searchString#, '%')
+		  			      </isNull>
+		  			      <isEqual property="sortColumn" compareValue="tranMonth">
+		  			         	ORDER BY tran_mm
+		  			      </isEqual>
+		  			      <isEqual property="sortColumn" compareValue="tranYear">
+		  			       	   	ORDER BY tran_year
+		  			      </isEqual>
+		  			      <isEqual property="sortColumn" compareValue="postTag">
+		  			       	   	ORDER BY post_tag
+		  			      </isEqual>
+		  			      <isEqual property="sortColumn" compareValue="desc">
+		  			       	   	ORDER BY description
+		  			      </isEqual>
+		  			      <isNotNull property="sortColumn">
+		  			      		<isEqual property="ascDescFlg" compareValue="ASC">
+		  			       	   		ASC
+		  			       	   	</isEqual>
+		  			       	   	<isEqual property="ascDescFlg" compareValue="DESC">
+		  			       	   		DESC
+		  			       	   	</isEqual>
+		  			      </isNotNull>
+		  			   )a,
+		  			   (SELECT count(*) count_ 
+		  			      FROM TABLE(GIACS410_PKG.get_tran_month_lov(#tranYear#, #userId#))
+		  			      <isNotNull property="findText">
+		  			      		WHERE TO_CHAR(tran_mm) = #findText#
+		  			      </isNotNull>
+		  			      <isNull property="findText">
+		  			      		WHERE TO_CHAR(tran_mm) LIKE NVL(#searchString#, '%')
+		  			      </isNull>
+		  			    )b
+		       )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="validateGIACS410TranMonth" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT 'Y'
+		  FROM TABLE(GIACS410_pkg.GET_TRAN_MONTH_LOV(#tranYear#))
+		 WHERE tran_mm = #tranMonth#
+	</select>
+	
+	<parameterMap class="java.util.HashMap" id="checkIsPrevMonthClosedMap">
+		<parameter property="tranYear"		javaType="java.lang.String" 	jdbcType="INTEGER"	mode="IN"/>
+		<parameter property="tranMonth"		javaType="java.lang.String" 	jdbcType="INTEGER"	mode="IN"/>
+		<parameter property="postTag"		javaType="java.lang.String"	 	jdbcType="VARCHAR"	mode="IN"/>
+	</parameterMap>
+	
+	<procedure id="checkIsPrevMonthClosed" parameterMap="checkIsPrevMonthClosedMap">
+		CALL GIACS410_PKG.is_prev_month_closed(TO_NUMBER(?), TO_NUMBER(?), ?)
+	</procedure>
+	
+	<parameterMap class="java.util.HashMap" id="postToGLMap">
+		<parameter property="tranYear"		javaType="java.lang.String" 	jdbcType="INTEGER"	mode="IN"/>
+		<parameter property="tranMonth"		javaType="java.lang.String" 	jdbcType="INTEGER"	mode="IN"/>
+		<parameter property="postTag"		javaType="java.lang.String"	 	jdbcType="VARCHAR"	mode="IN"/>		
+		<parameter property="glNo"			javaType="java.lang.String"		jdbcType="INTEGER"	mode="IN"/>
+		<parameter property="fiscalEnd"		javaType="java.lang.String"		jdbcType="INTEGER"	mode="IN"/>
+		<parameter property="financeEnd"	javaType="java.lang.String"		jdbcType="INTEGER"	mode="IN"/>
+		<parameter property="msg"			javaType="java.lang.String"		jdbcType="VARCHAR"	mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="postToGL" parameterMap="postToGLMap">
+		CALL GIACS410_PKG.post_to_gl(TO_NUMBER(?), TO_NUMBER(?), ?, TO_NUMBER(?), TO_NUMBER(?), TO_NUMBER(?), ?)
+	</procedure>
+</sqlMap>

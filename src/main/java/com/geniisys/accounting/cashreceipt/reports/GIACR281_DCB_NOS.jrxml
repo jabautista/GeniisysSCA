@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIACR281_DCB_NOS" language="groovy" pageWidth="195" pageHeight="36" columnWidth="195" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="2.1435888100000016"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="P_BRANCH_CD" class="java.lang.String"/>
+	<parameter name="P_BANK_ACCT_CD" class="java.lang.String"/>
+	<parameter name="P_BANK_ACCT_NO" class="java.lang.String"/>
+	<parameter name="P_TRAN_DATE" class="java.util.Date"/>
+	<parameter name="P_POSTING_DATE" class="java.util.Date"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT * FROM TABLE(GIACR281_PKG.get_giacr281_dcb_nos($P{P_BRANCH_CD}, $P{P_BANK_ACCT_CD}, $P{P_BANK_ACCT_NO}, $P{P_TRAN_DATE}, $P{P_POSTING_DATE}))]]>
+	</queryString>
+	<field name="DCB_NO" class="java.lang.String"/>
+	<variable name="V_D_AMOUNT" class="java.math.BigDecimal" calculation="Sum"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="17" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="5" width="50" height="12"/>
+				<textElement>
+					<font fontName="Arial" size="8"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{DCB_NO}]]></textFieldExpression>
+			</textField>
+			<subreport>
+				<reportElement x="50" y="5" width="145" height="12"/>
+				<subreportParameter name="SUBREPORT_DIR">
+					<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_BANK_ACCT_NO">
+					<subreportParameterExpression><![CDATA[$P{P_BANK_ACCT_NO}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_BRANCH_CD">
+					<subreportParameterExpression><![CDATA[$P{P_BRANCH_CD}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_BANK_ACCT_CD">
+					<subreportParameterExpression><![CDATA[$P{P_BANK_ACCT_CD}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_DCB_NO">
+					<subreportParameterExpression><![CDATA[$F{DCB_NO}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_POSTING_DATE">
+					<subreportParameterExpression><![CDATA[$P{P_POSTING_DATE}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_TRAN_DATE">
+					<subreportParameterExpression><![CDATA[$P{P_TRAN_DATE}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<returnValue subreportVariable="V_AMOUNT" toVariable="V_D_AMOUNT" calculation="Sum"/>
+				<subreportExpression class="java.lang.String"><![CDATA[$P{SUBREPORT_DIR} + "GIACR281_AMOUNTS.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</detail>
+	<summary>
+		<band height="19">
+			<textField pattern="#,##0.00;(#,##0.00)">
+				<reportElement x="110" y="7" width="85" height="12"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="8"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_D_AMOUNT}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="40" y="7" width="70" height="12"/>
+				<textElement>
+					<font fontName="Arial" size="8"/>
+				</textElement>
+				<text><![CDATA[Total Deposits :]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="110" y="0" width="85" height="7"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="5"/>
+				</textElement>
+				<text><![CDATA[--------------------------------------------]]></text>
+			</staticText>
+		</band>
+	</summary>
+</jasperReport>

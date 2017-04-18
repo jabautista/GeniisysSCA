@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISCollateral">
+	<typeAlias alias="GIISCollateralClass" type="com.geniisys.common.entity.GIISCollateral"/>
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<resultMap id="GIISCollateralMap" class="GIISCollateralClass">
+
+		<result column="COLL_TYPE" 			property="collType"/>
+		<result column="COLL_VALUE" 		property="collVal"/>
+		<result column="COLL_DESC" 			property="collDesc"/>
+		<result column="REV_DATE"			property="revDate"/>
+		<result column="COLL_ID"			property="collId"/>
+		<result property="rowNum" 		column="rownum_"/>			
+		<result property="rowCount"		column="count_"/>
+
+	</resultMap>
+	
+	<resultMap id="collateralType" class="com.geniisys.common.entity.GIISCollateralType">
+		<result column="COLL_TYPE"			property="collType"/>
+		<result column="COLL_NAME"			property="collName"/>
+	</resultMap>
+	
+	<select id="getGiisCollateralMap" resultMap="GIISCollateralMap" parameterClass="java.util.HashMap">
+		select * 
+			from (select rownum rownum_ , b.count_, a.*
+				from(SELECT * FROM TABLE(giis_collateral_pkg.get_collateral_dtl(#parId#))
+							  <isEqual property="sortColumn" compareValue="collDesc">
+				              	   ORDER BY  COLL_DESC
+				              </isEqual>
+							  <isEqual property="sortColumn" compareValue="collType">
+				              	   ORDER BY  COLL_TYPE
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="collVal">
+				              	   ORDER BY  COLL_VALUE
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="revDate">
+				              	   ORDER BY  REV_DATE
+				              </isEqual>
+				              <isNotNull property="sortColumn">
+			              	  <isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              	  </isEqual>
+			              	  <isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              	  </isEqual>
+			              	  </isNotNull>) a,
+				(select count(*) count_ FROM TABLE(giis_collateral_pkg.get_collateral_dtl(#parId#))
+				)b)
+		where rownum_ BETWEEN #from# AND #to#
+
+	</select>
+	
+	<select id="getCollType" 	resultMap="collateralType">
+		SELECT * FROM TABLE(giis_collateral_pkg.get_lov_coll_type)
+	</select>
+	
+	<insert id="addCollateralPar" parameterClass="java.util.HashMap">
+		BEGIN
+			GIPI_COLLATERAL_PAR_PKG.add_coll_par(#parId#,#collId#,#collVal#,TO_DATE(#recDate#, 'MM-DD-RRRR'));
+		END;
+	</insert>
+	
+	<procedure id="deleteCollateralpar" parameterClass="java.util.HashMap">
+		BEGIN
+			GIPI_COLLATERAL_PAR_PKG.delete_coll_par(#parId#, #collId#,#collVal#,TO_DATE(#recDate#, 'MM-DD-RRRR'));
+		END;
+	</procedure>
+	
+	<procedure id="updateCollateralPar" parameterClass="java.util.HashMap">
+		BEGIN
+			GIPI_COLLATERAL_PAR_PKG.update_coll_par
+			(#parId#, #collId#,#collVal#,TO_DATE(#recDate#, 'MM-DD-RRRR'),
+			#parId2#, #collId2#,#collVal2#,TO_DATE(#recDate2#, 'MM-DD-RRRR'));
+		END;
+	</procedure>
+	
+</sqlMap>

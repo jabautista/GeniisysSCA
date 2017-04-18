@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GIISXolMaint">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+
+	<typeAlias alias="GIISXolMaintClass" type="com.geniisys.common.entity.GIISXol" />
+	
+	<resultMap class="GIISXolMaintClass" id="GIISXolResultMap">
+		<result column="xol_id"			property="xolId"/>
+		<result column="line_cd"		property="lineCd"/>
+		<result column="xol_yy"			property="xolYy"/>
+		<result column="xol_seq_no"		property="xolSeqNo"/>
+		<result column="xol_trty_name"	property="xolTrtyName"/>
+		<result column="user_id"		property="userId"/>
+		<result column="last_update"	property="lastUpdate"/>
+		<result column="remarks"	    property="remarks"/>
+	</resultMap>
+	
+	<resultMap class="GIISXolMaintClass" id="GIISXolMaintResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="xol_id"			property="xolId"/>
+		<result column="line_cd"		property="lineCd"/>
+		<result column="xol_yy"			property="xolYy"/>
+		<result column="xol_seq_no"		property="xolSeqNo"/>
+		<result column="xol_trty_name"	property="xolTrtyName"/>
+		<result column="user_id"		property="userId"/>
+		<result column="last_update"	property="lastUpdate"/>
+		<result column="remarks"	    property="remarks"/>
+	</resultMap>
+	
+	<select id="getXolList" resultMap="GIISXolMaintResultMap"  parameterClass="java.util.HashMap">
+	    SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIIS060_PKG.get_xol_list(#lineCd#))  
+		          		  <isNotNull property="filter">
+				         	WHERE (xol_seq_no LIKE (#xolSeqNo#) 
+				         	   OR UPPER(xol_trty_name) LIKE UPPER(#xolTrtyName#))
+				          </isNotNull>         
+		          		  <isEqual property="sortColumn" compareValue="xolSeqNo">
+			              		ORDER BY xol_seq_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="xolTrtyName">
+			              		ORDER BY xol_trty_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>)a,(SELECT count(*) count_ 
+		                  FROM TABLE(GIIS060_PKG.get_xol_list(#lineCd#))
+		                  <isNotNull property="filter">
+				         	WHERE (xol_seq_no LIKE (#xolSeqNo#) 
+				         	   OR UPPER(xol_trty_name) LIKE UPPER(#xolTrtyName#))
+				          </isNotNull>  
+		                  ) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<insert id="setXolMaintRow" parameterClass="GIISXolMaintClass"> 
+		BEGIN
+			GIIS060_PKG.set_giis060_xol(#lineCd#,#xolId#,#xolSeqNo#,#xolTrtyName#,#xolYy#,#userId#,#remarks#);
+		END;
+	</insert>
+	
+	<delete id="deleteXolMaintRow" parameterClass="GIISXolMaintClass">
+  		BEGIN
+  			GIIS060_PKG.delete_xol(#xolId#);
+  		END;
+  	</delete>
+  	
+	<select id="validateAddXol" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT GIIS060_PKG.validate_add_xol(#lineCd#,#xolSeqNo#,#xolTrtyName#) FROM DUAL
+	</select>
+	
+	<select id="validateUpdateXol" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT GIIS060_PKG.validate_update_xol(#lineCd#,#xolSeqNo#,#xolTrtyName#) FROM DUAL
+	</select>
+	
+	<select id="validateDeleteXol" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT GIIS060_PKG.validate_delete_xol(#xolId#) FROM DUAL
+	</select>
+	
+	<resultMap id="getGiris007XolRecListRM" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+	    <result column="xol_id" 			property="xolId"/>
+  		<result column="line_cd" 			property="lineCd"/>
+  		<result column="xol_yy" 			property="xolYy"/>
+  		<result column="xol_seq_no" 		property="xolSeqNo"/>
+  		<result column="xol_trty_name" 		property="xolTrtyName"/>
+  		<result column="share_cd" 			property="shareCd"/>
+  		<result column="layer_no" 			property="layerNo"/>
+  		<result column="trty_name" 			property="trtyName"/>
+  		<result column="eff_date" 			property="effDate"/>
+  		<result column="expiry_date" 		property="expiryDate"/>
+  		<result column="xol_treaty" 		property="xolTreaty"/>
+  	</resultMap>
+  	
+	<select id="getGiris007XolRecList" resultMap="getGiris007XolRecListRM">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giris007_pkg.get_xol_list(#lineCd#, #xolYy#, #xolSeqNo#, #layerNo#, #xolTrtyName#, #trtyName#, #userId#, #effDate#, #expiryDate#))
+		                  <isEqual property="sortColumn" compareValue="lineCd xolYy xolSeqNo">
+			              		ORDER BY xol_treaty
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="xolTrtyName">
+			              		ORDER BY xol_trty_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="layerNo trtyName">
+			              		ORDER BY layer_no, trty_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="effDate">
+			              		ORDER BY TO_DATE(eff_date, 'mm-dd-yyyy')
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="expiryDate">
+			              		ORDER BY TO_DATE(expiry_date, 'mm-dd-yyyy')
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giris007_pkg.get_xol_list(#lineCd#, #xolYy#, #xolSeqNo#, #layerNo#, #xolTrtyName#, #trtyName#, #userId#, #effDate#, #expiryDate#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+</sqlMap>

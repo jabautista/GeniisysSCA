@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIACR136A_RECAP" language="groovy" pageWidth="990" pageHeight="792" columnWidth="990" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="e1b3e3ac-e13d-4fac-964c-9fbd756876dd">
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="P_CESSION_YEAR" class="java.lang.Integer"/>
+	<parameter name="P_LINE_CD" class="java.lang.String"/>
+	<parameter name="P_QUARTER" class="java.lang.Integer"/>
+	<parameter name="P_SHARE_CD" class="java.lang.Integer"/>
+	<parameter name="P_USER_ID" class="java.lang.String"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="P_TREATY_YY" class="java.lang.Integer"/>
+	<parameter name="P_BRANCH_CD" class="java.lang.String"/>
+	<parameter name="P_GRP_RIS" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT CF_MONTH,sum(premium_shr1) premium_shr1,
+DECODE(SUM(premium_shr2),NULL,(SUM(premium_shr1)),SUM(premium_shr2)) premium_shr2,
+DECODE(SUM(premium_shr3),NULL,(SUM(premium_shr1)+SUM(premium_shr2)),SUM(premium_shr3)) premium_shr3,
+DECODE(SUM(premium_shr4),NULL,(SUM(premium_shr1)+SUM(premium_shr2)+SUM(premium_shr3)),SUM(premium_shr4)) premium_shr4,
+DECODE(SUM(premium_shr5),NULL,(SUM(premium_shr1)+SUM(premium_shr2)+SUM(premium_shr3)+SUM(premium_shr4)),SUM(premium_shr5)) premium_shr5,
+DECODE(SUM(premium_shr6),NULL,(SUM(premium_shr1)+SUM(premium_shr2)+SUM(premium_shr3)+SUM(premium_shr4)+SUM(premium_shr5)),SUM(premium_shr6)) premium_shr6,
+DECODE(SUM(premium_shr7),NULL,(SUM(premium_shr1)+SUM(premium_shr2)+SUM(premium_shr3)+SUM(premium_shr4)+SUM(premium_shr5)+SUM(premium_shr6)),SUM(premium_shr7)) premium_shr7,
+(SUM(premium_shr1)+NVL(SUM(premium_shr2),0)+NVL(SUM(premium_shr3),0)+NVL(SUM(premium_shr4),0)+NVL(SUM(premium_shr5),0)+NVL(SUM(premium_shr6),0)+NVL(SUM(premium_shr7),0)) prem_totals,
+grp_ris
+ FROM TABLE(GIACR136A_PKG.get_giacr136A_total($P{P_LINE_CD}, $P{P_TREATY_YY}, $P{P_SHARE_CD}, $P{P_CESSION_YEAR}, $P{P_QUARTER}, $P{P_USER_ID}))
+WHERE GRP_RIS=$P{P_GRP_RIS}
+GROUP BY cf_month,cession_mm,grp_ris]]>
+	</queryString>
+	<field name="CF_MONTH" class="java.lang.String"/>
+	<field name="PREMIUM_SHR1" class="java.math.BigDecimal"/>
+	<field name="PREMIUM_SHR2" class="java.math.BigDecimal"/>
+	<field name="PREMIUM_SHR3" class="java.math.BigDecimal"/>
+	<field name="PREMIUM_SHR4" class="java.math.BigDecimal"/>
+	<field name="PREMIUM_SHR5" class="java.math.BigDecimal"/>
+	<field name="PREMIUM_SHR6" class="java.math.BigDecimal"/>
+	<field name="PREMIUM_SHR7" class="java.math.BigDecimal"/>
+	<field name="PREM_TOTALS" class="java.math.BigDecimal"/>
+	<field name="GRP_RIS" class="java.lang.String"/>
+	<detail>
+		<band height="11">
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="557" y="0" width="73" height="11" isPrintWhenDetailOverflows="true" uuid="4f8a5c01-31c2-4b64-9516-d7535e294382"/>
+				<textElement textAlignment="Right">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PREMIUM_SHR5}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="715" y="0" width="73" height="11" isPrintWhenDetailOverflows="true" uuid="f23be546-3bc5-4bb5-9a83-fab84bc4ce1c"/>
+				<textElement textAlignment="Right">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PREMIUM_SHR7}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="478" y="0" width="73" height="11" isPrintWhenDetailOverflows="true" uuid="f56bd241-4873-4bf7-9fc1-f4ed0798d789"/>
+				<textElement textAlignment="Right">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PREMIUM_SHR4}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="636" y="0" width="73" height="11" isPrintWhenDetailOverflows="true" uuid="66280902-1fe2-4517-8b61-9c41e99c8a2c"/>
+				<textElement textAlignment="Right">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PREMIUM_SHR6}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="320" y="0" width="73" height="11" isPrintWhenDetailOverflows="true" uuid="bee5f187-7556-4ff2-b1db-87990da0ebf5"/>
+				<textElement textAlignment="Right">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PREMIUM_SHR2}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="399" y="0" width="73" height="11" isPrintWhenDetailOverflows="true" uuid="46a5121d-26be-4ee2-bfa6-838a3346db41"/>
+				<textElement textAlignment="Right">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PREMIUM_SHR3}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="794" y="0" width="73" height="11" isPrintWhenDetailOverflows="true" uuid="581ffb04-ca71-4cd3-bc57-b9e44ccc93af">
+					<printWhenExpression><![CDATA[( $F{PREMIUM_SHR7}==null ? false : true )]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PREM_TOTALS}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="241" y="0" width="73" height="11" isPrintWhenDetailOverflows="true" uuid="1fccad3d-0f22-49c4-a6ee-b581c4f571c3"/>
+				<textElement textAlignment="Right">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PREMIUM_SHR1}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="0" y="0" width="241" height="11" uuid="4f7c094a-616b-41f3-aa73-7a7ce94e48c1"/>
+				<textElement textAlignment="Left">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CF_MONTH}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

@@ -1,0 +1,509 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIACFunction">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="giacFunction" type="com.geniisys.giac.entity.GIACFunction"/>
+	<typeAlias alias="giacFunctionColumns" type="com.geniisys.giac.entity.GIACFunctionColumns"/>
+	<typeAlias alias="giacFunctionDisplay" type="com.geniisys.giac.entity.GIACFunctionDisplay"/>
+	
+	<select id="getFunctionName" resultClass="java.lang.String">
+		SELECT giac_functions_pkg.get_function_name(#moduleId#, #functionCode#)
+	 	  FROM dual
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="giacs314ResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="module_id"    		property="moduleId"/>
+		<result column="module_name" 		property="moduleName"/>
+		<result column="scrn_rep_name" 		property="scrnRepName"/>
+		<result column="function_code" 		property="functionCode"/>
+		<result column="function_name" 		property="functionName"/>
+		<result column="function_desc"    	property="functionDesc"/>
+		<result column="override_sw"		property="overrideSw"/>
+		<result column="user_id"     		property="userId"/>
+		<result column="last_update" 		property="lastUpdate"/>
+		<result column="remarks"     		property="remarks"/>
+	</resultMap>
+	
+	<select id="getGiacs314RecList" resultMap="giacs314ResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giacs314_pkg.get_rec_list)
+		  	      <isNotNull property="filter">
+		  	      	WHERE 1 = 1 
+		  	      		<isNotEmpty prepend="AND" property="moduleId">
+		  	      			UPPER(module_id) LIKE UPPER(#moduleId#)
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="moduleName">
+		  	      			UPPER(module_name) LIKE UPPER(#moduleName#)
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="functionCode">
+                            UPPER(function_code) LIKE UPPER(#functionCode#)
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="functionName">
+                            UPPER(function_name) LIKE UPPER(#functionName#)
+                        </isNotEmpty>
+		  	      </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="moduleId">
+			              		ORDER BY module_id
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="moduleName">
+			              		ORDER BY module_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="functionCode">
+			              		ORDER BY function_code
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="functionName">
+			              		ORDER BY function_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giacs314_pkg.get_rec_list)
+		                  <isNotNull property="filter">
+				  	      	WHERE 1 = 1 
+				  	      		<isNotEmpty prepend="AND" property="moduleId">
+				  	      			UPPER(module_id) LIKE UPPER(#moduleId#)
+		                        </isNotEmpty>
+		                        <isNotEmpty prepend="AND" property="functionCode">
+		                            UPPER(function_code) LIKE UPPER(#functionCode#)
+		                        </isNotEmpty>
+		                        <isNotEmpty prepend="AND" property="functionName">
+		                            UPPER(function_name) LIKE UPPER(#functionName#)
+		                        </isNotEmpty>
+				  	      </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setAccountingFunction" parameterClass="giacFunction">
+	    DECLARE
+	    	v_rec giac_functions%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.module_id := #moduleId#;
+ 			v_rec.function_code := #functionCode#;
+ 			v_rec.function_name := #functionName#;
+ 			v_rec.function_desc := #functionDesc#;
+ 			v_rec.override_sw := #overrideSw#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			giacs314_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<select id="valDeleteAccountingFunction" resultClass="java.lang.String">
+		SELECT giacs314_pkg.val_del_rec(#moduleId#, #functionCode#)FROM dual							
+	</select>
+ 	
+ 	<procedure id="valAddAccountingFunction" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giacs314_pkg.val_add_rec(#moduleId#, #functionCode#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delAccountingFunction" parameterClass="giacFunction">
+		BEGIN
+ 			giacs314_pkg.del_rec(#moduleId#, #functionCode#);
+ 		END;
+ 	</delete>
+ 	
+ 	<resultMap class="java.util.HashMap" id="giacs314LOVMap" extends="BaseEntity.TableGridResultMap">
+		<result property="moduleId" 		column="module_id" />
+		<result property="moduleName" 		column="module_name" />
+		<result property="scrnRepName" 		column="scrn_rep_name" />
+		<result property="rowNum" 			column="rownum_"/>
+		<result property="rowCount" 		column="count_"/>
+	</resultMap>
+	
+	<select id="getGiacs314ModuleLOV" resultMap="giacs314LOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giacs314_pkg.get_giacs314_module_lov(#search#))
+		                 <isNotNull property="findText">
+					         WHERE (UPPER(module_name) LIKE UPPER(#findText#) 
+					         	 OR UPPER(scrn_rep_name) LIKE UPPER(#findText#)
+					         	 )
+				         </isNotNull>          
+			          	  <isNotNull property="sortColumn">
+			                  <isEqual property="sortColumn" compareValue="moduleName">
+				              		ORDER BY module_name
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="scrnRepName">
+				              		ORDER BY scrn_rep_name
+				              </isEqual>
+				          	  <isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              </isNotNull>
+				          </isNotNull>    
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (giacs314_pkg.get_giacs314_module_lov(#search#))
+			              <isNotNull property="findText">
+					          WHERE (UPPER(module_name) LIKE UPPER(#findText#) 
+					         	 OR UPPER(scrn_rep_name) LIKE UPPER(#findText#)
+					         	 )
+				          </isNotNull> 
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<parameterMap class="map" id="validateGiacs314ModuleMap">
+		<parameter property="moduleName" 	jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="INOUT"/>
+		<parameter property="moduleId"   	jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="validateGiacs314Module" parameterMap="validateGiacs314ModuleMap">
+		BEGIN
+ 			giacs314_pkg.validate_module(?,?);
+ 		END;
+	</procedure>
+	
+	<resultMap class="giacFunctionColumns" id="giacs314FunctionColumnMap" extends="BaseEntity.TableGridResultMap">
+		<result column="function_col_cd"	property="functionColCd"/>
+		<result column="table_name" 		property="tableName"/>
+		<result column="column_name"    	property="columnName"/>
+		<result column="user_id"     		property="userId"/>
+		<result column="last_update" 		property="lastUpdate"/>
+		<result column="remarks"     		property="remarks"/>
+	</resultMap>
+	
+	<select id="showGiacs314FunctionColumn" resultMap="giacs314FunctionColumnMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giacs314_pkg.get_function_column(#moduleId#, #functionCode#))
+		  	      <isNotNull property="filter">
+		  	      	WHERE 1 = 1 
+		  	      		<isNotEmpty prepend="AND" property="tableName">
+		  	      			UPPER(table_name) LIKE UPPER(#tableName#)
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="columnName">
+		  	      			UPPER(column_name) LIKE UPPER(#columnName#)
+                        </isNotEmpty>
+		  	      </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="tableName">
+			              		ORDER BY table_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="columnName">
+			              		ORDER BY column_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giacs314_pkg.get_function_column(#moduleId#, #functionCode#))
+		                  <isNotNull property="filter">
+				  	      	WHERE 1 = 1 
+				  	      		<isNotEmpty prepend="AND" property="tableName">
+		  	      			UPPER(table_name) LIKE UPPER(#tableName#)
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="columnName">
+		  	      			UPPER(column_name) LIKE UPPER(#columnName#)
+                        </isNotEmpty>
+				  	      </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<resultMap class="java.util.HashMap" id="giacs314TableLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result property="tableName" 		column="table_name" />
+		<result property="rowNum" 			column="rownum_"/>
+		<result property="rowCount" 		column="count_"/>
+	</resultMap>
+	
+	<select id="getGiacs314TableLOV" resultMap="giacs314TableLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giacs314_pkg.get_giacs314_table_lov(#search#))
+		                 <isNotNull property="findText">
+					         WHERE UPPER(table_name) LIKE UPPER(#findText#) 
+				         </isNotNull>          
+			          	  <isNotNull property="sortColumn">
+			                  <isEqual property="sortColumn" compareValue="tableName">
+				              		ORDER BY table_name
+				              </isEqual>
+				          	  <isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              </isNotNull>
+				          </isNotNull>    
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (giacs314_pkg.get_giacs314_table_lov(#search#))
+			              <isNotNull property="findText">
+					          WHERE UPPER(table_name) LIKE UPPER(#findText#) 
+				          </isNotNull> 
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="giacs314ColumnLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result property="columnName" 		column="column_name" />
+		<result property="rowNum" 			column="rownum_"/>
+		<result property="rowCount" 		column="count_"/>
+	</resultMap>
+	
+	<select id="getGiacs314ColumnLOV" resultMap="giacs314ColumnLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giacs314_pkg.get_giacs314_column_lov(#tableName#, #search#))
+		                 <isNotNull property="findText">
+					         WHERE UPPER(column_name) LIKE UPPER(#findText#) 
+				         </isNotNull>          
+			          	  <isNotNull property="sortColumn">
+			                  <isEqual property="sortColumn" compareValue="columnName">
+				              		ORDER BY column_name
+				              </isEqual>
+				          	  <isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              </isNotNull>
+				          </isNotNull>    
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (giacs314_pkg.get_giacs314_column_lov(#tableName#, #search#))
+			              <isNotNull property="findText">
+					          WHERE UPPER(column_name) LIKE UPPER(#findText#) 
+				          </isNotNull> 
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<parameterMap class="map" id="validateGiacs314TableMap">
+		<parameter property="tableName" 	jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="INOUT"/>
+	</parameterMap>
+	
+	<procedure id="validateGiacs314Table" parameterMap="validateGiacs314TableMap">
+		BEGIN
+ 			giacs314_pkg.validate_table_name(?);
+ 		END;
+	</procedure>
+	
+	<parameterMap class="map" id="validateGiacs314ColumnMap">
+		<parameter property="tableName" 	jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="IN"/>
+		<parameter property="columnName"   	jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="INOUT"/>
+	</parameterMap>
+	
+	<procedure id="validateGiacs314Column" parameterMap="validateGiacs314ColumnMap">
+		BEGIN
+ 			giacs314_pkg.validate_column_name(?,?);
+ 		END;
+	</procedure>
+	
+	<procedure id="valAddFunctionColumn" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giacs314_pkg.val_add_function_column(#moduleId#, #functionCd#, #tableName#, #columnName#);
+ 		END;
+ 	</procedure> 	
+ 	
+ 	<select id = "checkAccountingFunction" resultClass="java.lang.String"> <!-- Added by Jerome Bautista 05.28.2015 SR 4225 -->
+ 		SELECT check_if_function_exists (#moduleId#, #functionCode#) FROM dual
+ 	</select>
+ 	
+	<delete id="delFunctionColumn" parameterClass="giacFunctionColumns">
+		BEGIN
+ 			giacs314_pkg.del_function_column(#functionColCd#,#moduleId#, #functionCd#, #tableName#, #columnName#);
+ 		END;
+ 	</delete>
+ 	
+ 	<procedure id="setFunctionColumn" parameterClass="giacFunctionColumns">
+	    DECLARE
+	    	v_rec giac_function_columns%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			v_rec.function_col_cd := #functionColCd#;
+ 			v_rec.module_id := #moduleId#;
+ 			v_rec.function_cd := #functionCd#;
+ 			v_rec.table_name := #tableName#;
+ 			v_rec.column_name := #columnName#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			giacs314_pkg.set_function_column(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<resultMap class="java.util.HashMap" id="giacs314FunctionDisplayMap" extends="BaseEntity.TableGridResultMap">
+		<result column="module_id"			property="moduleId"/>
+		<result column="function_cd" 		property="functionCd"/>
+		<result column="display_col_id"    	property="displayColId"/>
+		<result column="display_col_name"   property="displayColName"/>
+		<result column="user_id"     		property="userId"/>
+		<result column="last_update" 		property="lastUpdate"/>
+	</resultMap>
+	
+	<select id="showGiacs314FunctionDisplay" resultMap="giacs314FunctionDisplayMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giacs314_pkg.get_function_display(#moduleId#, #functionCode#))
+		  	      <isNotNull property="filter">
+		  	      	WHERE 1 = 1 
+		  	      		<isNotEmpty prepend="AND" property="displayColName">
+		  	      			UPPER(display_col_name) LIKE UPPER(#displayColName#)
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="displayColId">
+		  	      			UPPER(display_col_id) = UPPER(#displayColId#)
+                        </isNotEmpty>
+		  	      </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="displayColName">
+			              		ORDER BY display_col_name
+			              </isEqual>
+			               <isEqual property="sortColumn" compareValue="displayColId">
+			              		ORDER BY display_col_id
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giacs314_pkg.get_function_display(#moduleId#, #functionCode#))
+		                  <isNotNull property="filter">
+				  	      	WHERE 1 = 1 
+				  	      		<isNotEmpty prepend="AND" property="displayColName">
+				  	      			UPPER(display_col_name) LIKE UPPER(#displayColName#)
+		                        </isNotEmpty>
+		                        <isNotEmpty prepend="AND" property="displayColId">
+				  	      			UPPER(display_col_id) = UPPER(#displayColId#)
+		                        </isNotEmpty>
+				  	      </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="giacs314DisplayLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result property="displayColId" 	column="display_col_id" />
+		<result property="displayColName"	column="display_col_name" />
+		<result property="rowNum" 			column="rownum_"/>
+		<result property="rowCount" 		column="count_"/>
+	</resultMap>
+	
+	<select id="getGiacs314DisplayLOV" resultMap="giacs314DisplayLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giacs314_pkg.get_giacs314_display_lov(#search#))
+		                 <isNotNull property="findText">
+					         WHERE (UPPER(display_col_name) LIKE UPPER(#findText#)
+					         	OR	display_col_id LIKE #findText#) 
+				         </isNotNull>          
+			          	  <isNotNull property="sortColumn">
+			                  <isEqual property="sortColumn" compareValue="displayColId">
+				              		ORDER BY display_col_id
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="displayColName">
+				              		ORDER BY display_col_name
+				              </isEqual>
+				          	  <isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              </isNotNull>
+				          </isNotNull>    
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (giacs314_pkg.get_giacs314_display_lov(#search#))
+			              <isNotNull property="findText">
+					          WHERE (UPPER(display_col_name) LIKE UPPER(#findText#)
+					         	OR	display_col_id LIKE #findText#) 
+				          </isNotNull> 
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<parameterMap class="map" id="validateGiacs314DisplayMap">
+		<parameter property="displayColName" 	jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="INOUT"/>
+		<parameter property="displayColId" 	jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="validateGiacs314Display" parameterMap="validateGiacs314DisplayMap">
+		BEGIN
+ 			giacs314_pkg.validate_display_column(?,?);
+ 		END;
+	</procedure>	
+	
+	<procedure id="valAddColumnDisplay" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giacs314_pkg.val_add_display_column(#moduleId#, #functionCd#, #displayColId#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delColumnDisplay" parameterClass="giacFunctionDisplay">
+		BEGIN
+ 			giacs314_pkg.del_display_column(#moduleId#, #functionCd#, #displayColId#);
+ 		END;
+ 	</delete>
+ 	
+ 	<procedure id="setColumnDisplay" parameterClass="giacFunctionDisplay">
+	    DECLARE
+	    	v_rec giac_function_display%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+
+ 			v_rec.module_id := #moduleId#;
+ 			v_rec.function_cd := #functionCd#;
+ 			v_rec.display_col_id := #displayColId#;
+ 			v_rec.user_id := #userId#;
+ 			
+ 			giacs314_pkg.set_display_column(v_rec);
+ 		END;
+ 	</procedure>
+</sqlMap>

@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GIISReportParameter">
+	
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+
+	<typeAlias alias="giisReportParameter" type="com.geniisys.common.entity.GIISReportParameter"/>
+	
+	<resultMap id="GIISReportParameterResultMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result column="title"			property="title"	 	/>
+		<result column="text"			property="text"			/>
+		<result column="line_cd"		property="lineCd"		/>
+		<result column="remarks"		property="remarks"		/>
+		<result column="user_id"		property="userId"		/>
+		<result column="last_update"	property="lastUpdate"	/>
+		<result column="report_id"		property="reportId"		/>
+		<result column="cpi_branch_cd"	property="cpiBranchCd"	/>
+		<result column="cpi_rec_no"		property="cpiRecNo"		/>
+	</resultMap>
+	
+	<resultMap id="GIISS119ReportResultMap" class="java.util.HashMap"  extends="BaseEntity.TableGridResultMap">
+	  	<result column="report_id" 		property="reportId" 	/>
+  	</resultMap>
+	
+	<!-- For retrieving Report Parameter List used for Report Parameter Maintenance -->
+	<select id="getReportParameterList"  resultMap="GIISReportParameterResultMap">
+		SELECT *
+  		  FROM (SELECT rownum rownum_, 
+  		  			   b.count_, 
+  		  			   a.*
+          		  FROM (SELECT * 
+          		  		  FROM TABLE(GIISS119_PKG.get_report_parameter_list)
+          		  		 <isNotNull property="filter">
+							WHERE 1 = 1 
+	 							<isNotEmpty prepend="AND" property="title">
+									UPPER(title) LIKE UPPER(#title#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="text">
+									UPPER(text) LIKE UPPER(#text#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="lineCd">
+									UPPER(line_cd) LIKE UPPER(#lineCd#)
+								</isNotEmpty> 
+								<isNotEmpty prepend="AND" property="reportId">
+									UPPER(report_id) LIKE UPPER(#reportId#)
+								</isNotEmpty> 								
+						 </isNotNull>	
+          		  		 <isEqual property="sortColumn" compareValue="title">
+          		  		 	ORDER BY title
+          		  		 </isEqual>
+          		  		 <isEqual property="sortColumn" compareValue="text">
+          		  		 	ORDER BY text
+          		  		 </isEqual>
+          		  		 <isEqual property="sortColumn" compareValue="lineCd">
+          		  		 	ORDER BY line_cd
+          		  		 </isEqual>  
+          		  		 <isEqual property="sortColumn" compareValue="reportId">
+          		  		 	ORDER BY report_id
+          		  		 </isEqual>
+          		  		 <isNotNull property="sortColumn">
+          		  		 	<isEqual property="ascDescFlg" compareValue="ASC">
+          		  		 		ASC
+          		  		 	</isEqual>
+          		  		 	<isEqual property="ascDescFlg" compareValue="DESC">
+          		  		 		DESC
+          		  		 	</isEqual>
+          		  		 </isNotNull>
+          		  		 
+          		  		) a,
+               		   (SELECT count(*) count_
+						   FROM TABLE (GIISS119_PKG.get_report_parameter_list)	
+						    <isNotNull property="filter">
+								WHERE 1 = 1 
+		 							<isNotEmpty prepend="AND" property="title">
+										UPPER(title) LIKE UPPER(#title#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="text">
+										UPPER(text) LIKE UPPER(#text#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="lineCd">
+										UPPER(line_cd) LIKE UPPER(#lineCd#)
+									</isNotEmpty> 
+									<isNotEmpty prepend="AND" property="reportId">
+										UPPER(report_id) LIKE UPPER(#reportId#)
+									</isNotEmpty> 								
+							 </isNotNull>						   					   						  
+						   ) b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGIISSReportIdLOV" resultMap="GIISS119ReportResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT DISTINCT report_id
+		                  FROM giis_reports   
+		                  	<isNull property="findText">
+				                 WHERE UPPER(report_id) LIKE UPPER(#searchString#)				         		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+				                 WHERE UPPER(report_id) LIKE UPPER(#findText#)				         		
+			             	</isNotNull>		             
+			              	<isEqual property="sortColumn" compareValue="reportId">
+			              		ORDER BY report_id
+			              	</isEqual>			                      
+			          	  	<isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	</isNotNull>
+		                  ) a, 
+		               (SELECT count(DISTINCT report_id) count_ 
+		                  FROM giis_reports
+		                  	<isNull property="findText">
+				                 WHERE UPPER(report_id) LIKE UPPER(#searchString#)				         		
+			             	</isNull>  
+		                  	<isNotNull property="findText">
+				                 WHERE UPPER(report_id) LIKE UPPER(#findText#)
+			             	</isNotNull>
+			             	) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<insert id="setReportParameter" parameterClass="giisReportParameter">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;						
+			GIISS119_PKG.set_report_parameter(
+				#title#, #text#, 
+				#lineCd#, #remarks#,
+                #reportId#,#cpiBranchCd#,
+                #cpiRecNo#);
+		END;	
+	</insert>
+	
+	<delete id="deleteInReportParameter" parameterClass="giisReportParameter">
+		BEGIN
+			GIISS119_PKG.delete_report_parameter(#title#, #reportId#);
+		END;
+	</delete>
+</sqlMap>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPISReqDocs">
+
+ 	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+
+	<resultMap id="GIPISReqDocsMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result column="DOC_CD" 		property="docCd"/>
+		<result column="DOC_NAME" 		property="docName"/>
+		<result column="rownum_" 		property="rowNum" />
+		<result column="count_"			property="rowCount"/>
+	</resultMap>
+
+	<select id="getReqDocsListingLOV" resultMap="GIPISReqDocsMap">
+		SELECT *
+  			FROM (SELECT rownum rownum_, b.count_, a.*
+          	FROM (SELECT *
+                  FROM TABLE
+                          (giis_required_docs_pkg.get_required_docs_list(#lineCd#,#sublineCd#))
+                          
+                  		  <isNotNull property="notIn">
+		                  		WHERE DOC_CD NOT IN $notIn$
+		                  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="docName">
+			              		ORDER BY DOC_NAME
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>   ) a,
+               (SELECT COUNT (*) count_
+                  FROM TABLE
+                          (giis_required_docs_pkg.get_required_docs_list(#lineCd#,#sublineCd#))) b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select> 
+</sqlMap>

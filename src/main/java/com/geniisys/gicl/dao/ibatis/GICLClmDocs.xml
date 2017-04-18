@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GICLClmDocs">
+	<typeAlias alias="GICLClmDocsClass" type="com.geniisys.gicl.entity.GICLClmDocs"/>
+	
+	<resultMap class="GICLClmDocsClass" id="GICLClmDocsListMap">
+		<result property="clmDocCd" column="clm_doc_cd"/>
+		<result property="clmDocDesc" column="clm_doc_desc"/>
+	</resultMap>
+	
+	<select id="getClmDocsList" resultMap="GICLClmDocsListMap">
+		SELECT *
+		  FROM TABLE (gicl_clm_docs_pkg.get_gicl_clm_docs (#lineCd#, #sublineCd#,#claimId#,#findText#))
+		  <isEqual property="sortColumn" compareValue="clmDocCd">
+          		ORDER BY to_number(clm_doc_cd)
+          </isEqual>
+          <isEqual property="sortColumn" compareValue="clmDocDesc">
+          		ORDER BY clm_doc_desc
+          </isEqual>
+		  <isNotNull property="sortColumn">
+           		<isEqual property="ascDescFlg" compareValue="ASC">
+           			ASC
+           		</isEqual>
+           		<isEqual property="ascDescFlg" compareValue="DESC">
+           			DESC
+           		</isEqual>
+           </isNotNull>
+		 <!--  <isNotNull property="notIn">
+			  WHERE clm_doc_cd NOT IN $notIn$	
+		  </isNotNull>  -->
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="getGicls110LineLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result property="lineCd" 		column="line_cd"/>
+		<result property="lineName" 	column="line_name"/>
+	</resultMap>
+	
+	<select id="getGicls110LineLOV" resultMap="getGicls110LineLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(gicls110_pkg.get_line_lov(#moduleId#, #userId#, #findText#))
+		                  <isEqual property="sortColumn" compareValue="lineCd">
+			              		ORDER BY line_cd
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="lineName">
+			              		ORDER BY line_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(gicls110_pkg.get_line_lov(#moduleId#, #userId#, #findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="getGicls110SublineLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result property="sublineCd" 	column="subline_cd"/>
+		<result property="sublineName" 	column="subline_name"/>
+	</resultMap>
+	
+	<select id="getGicls110SublineLOV" resultMap="getGicls110SublineLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(gicls110_pkg.get_subline_lov(#lineCd#, #moduleId#, #userId#, #findText#))
+		                  <isEqual property="sortColumn" compareValue="sublineCd">
+			              		ORDER BY subline_cd
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="sublineName">
+			              		ORDER BY subline_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(gicls110_pkg.get_subline_lov(#lineCd#, #moduleId#, #userId#, #findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="getClmDocsGicls110ListMap" extends="BaseEntity.TableGridResultMap">
+		<result property="lineCd" 			column="line_cd"/>
+		<result property="sublineCd" 		column="subline_cd"/>
+		<result property="clmDocCd" 		column="dsp_clm_doc_cd"/>
+		<result property="clmDocDesc" 		column="clm_doc_desc"/>
+		<result property="priorityCd" 		column="priority_cd"/>
+		<result property="clmDocRemark" 	column="clm_doc_remark"/>
+		<result property="userId" 			column="user_id"/>
+		<result property="lastUpdate"		column="last_update"/>
+	</resultMap>
+	
+	<select id="getClmDocsGicls110List" resultMap="getClmDocsGicls110ListMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(gicls110_pkg.get_clm_docs_list(#lineCd#, #sublineCd#))
+		  	      		  <isNotNull property="filter">
+							WHERE 1 = 1 
+							<isNotEmpty prepend="AND" property="clmDocCd">
+								UPPER(dsp_clm_doc_cd) LIKE UPPER(#clmDocCd#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="clmDocDesc">
+								UPPER(clm_doc_desc) LIKE UPPER(#clmDocDesc#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="priorityCd">
+								priority_cd LIKE TRIM(LEADING '0' FROM #priorityCd#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="clmDocRemark">
+								UPPER(clm_doc_remark) LIKE UPPER(#clmDocRemark#)
+							</isNotEmpty>
+						  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="clmDocCd">
+			              		ORDER BY dsp_clm_doc_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="clmDocDesc">
+			              		ORDER BY clm_doc_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="priorityCd">
+			              		ORDER BY priority_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="clmDocRemark">
+			              		ORDER BY clm_doc_remark
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(gicls110_pkg.get_clm_docs_list(#lineCd#, #sublineCd#))
+		                  <isNotNull property="filter">
+							WHERE 1 = 1 
+							<isNotEmpty prepend="AND" property="clmDocCd">
+								UPPER(dsp_clm_doc_cd) LIKE UPPER(#dspClmDocCd#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="clmDocDesc">
+								UPPER(clm_doc_desc) LIKE UPPER(#clmDocDesc#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="priorityCd">
+								UPPER(priority_cd) LIKE UPPER(#priorityCd#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="clmDocRemark">
+								UPPER(clm_doc_remark) LIKE UPPER(#clmDocRemark#)
+							</isNotEmpty>
+						  </isNotNull>) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<procedure id="setClmDocsGicls110" parameterClass="GICLClmDocsClass">
+	    DECLARE
+	    	v_rec gicl_clm_docs%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.line_cd := #lineCd#;
+ 			v_rec.subline_cd := #sublineCd#;
+ 			v_rec.clm_doc_cd := #clmDocCd#;
+ 			v_rec.clm_doc_desc := #clmDocDesc#;
+ 			v_rec.clm_doc_remark := #clmDocRemark#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.priority_cd := #priorityCd#;
+ 			
+ 			gicls110_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteRecGicls110" parameterClass="java.util.HashMap">
+ 		BEGIN		     
+ 			gicls110_pkg.val_delete_rec(#lineCd#,#sublineCd#,#clmDocCd#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="delClmDocsGicls110" parameterClass="GICLClmDocsClass">
+	    DECLARE
+	    	v_rec gicl_clm_docs%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.line_cd := #lineCd#;
+ 			v_rec.subline_cd := #sublineCd#;
+ 			v_rec.clm_doc_cd := #clmDocCd#;
+ 			
+ 			gicls110_pkg.del_rec(v_rec);
+ 		END;
+ 	</procedure>
+</sqlMap>

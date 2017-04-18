@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIQuoteCosign">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+
+	<typeAlias alias="GIPIQuoteCosignClass" type="com.geniisys.gipi.entity.GIPIQuoteCosign"/>
+
+	<resultMap class="GIPIQuoteCosignClass" id="GIPIQuoteCosignResultMap">
+		<result column="quote_id" 			property="quoteId"/>
+		<result column="cosign_id" 			property="cosignId"/>
+		<result column="cosign_name" 		property="cosignName"/>
+		<result column="assd_no" 			property="assdNo"/>
+		<result column="indem_flag" 		property="indemFlag"/>
+		<result column="bonds_flag" 		property="bondsFlag"/>
+		<result column="bonds_ri_flag" 		property="bondsRiFlag"/>
+	</resultMap>
+	
+	<select id="getGIPIQuoteCosigns" resultMap="GIPIQuoteCosignResultMap" parameterClass="java.lang.Integer">
+		SELECT * FROM TABLE(Gipi_Quote_Cosign_Pkg.get_gipi_quote_cosign(#quoteId#))
+	</select>
+	
+	<delete id="delGIPIQuoteCosign" parameterClass="GIPIQuoteCosignClass">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			Gipi_Quote_Cosign_Pkg.del_gipi_quote_cosign(#quoteId#, #cosignId#);
+		END;
+	</delete>
+	
+	<insert id="setGIPIQuoteCosign" parameterClass="GIPIQuoteCosignClass">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			Gipi_Quote_Cosign_Pkg.set_gipi_quote_cosign(
+				#quoteId#, #cosignId#,
+				#assdNo#, #indemFlag#,
+				#bondsFlag#, #bondsRiFlag#
+			);
+		END;
+	</insert>
+</sqlMap>

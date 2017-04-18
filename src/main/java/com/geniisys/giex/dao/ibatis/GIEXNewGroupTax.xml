@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIEXNewGroupTax">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+
+	<typeAlias alias="GIEXNewGroupTaxClass" type="com.geniisys.giex.entity.GIEXNewGroupTax" />
+	
+	<resultMap class="GIEXNewGroupTaxClass" id="getGIEXS007B880InfoMap" extends="BaseEntity.TableGridResultMap">
+		<result property="taxCd"							column="TAX_CD" />
+		<result property="lineCd"							column="LINE_CD" />
+		<result property="issCd"							column="ISS_CD" />
+		<result property="taxDesc"						column="TAX_DESC" />
+		<result property="rate"							column="RATE" />
+		<result property="perilSw"						column="PERIL_SW" />
+		<result property="taxId"							column="TAX_ID" />
+		<result property="taxAmt"						column="TAX_AMT" />
+		<result property="currencyTaxAmt"		column="CURRENCY_TAX_AMT" /> <!-- added by joanne 06022014 -->
+		<result property="allocationTag"			column="ALLOCATION_TAG" />
+		<result property="policyId"						column="POLICY_ID" />
+		<result property="nbtPrimarySw"			column="NBT_PRIMARY_SW" />
+		<result property="noRateTag"			column="NO_RATE_TAG" />
+	</resultMap>
+	
+	<select id="getGIEXS007B880Info" resultMap="getGIEXS007B880InfoMap" parameterClass="java.util.HashMap">		
+	    SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIEX_NEW_GROUP_TAX_PKG.GET_GIEXS007_B880_INFO(#policyId#))
+		                   <!--WHERE TAX_CD = NVL(#taxCd#, TAX_CD)
+		                         AND UPPER(TAX_DESC) LIKE UPPER(NVL(#taxDesc#, TAX_DESC))
+		                         AND NVL(TAX_AMT,0) = NVL(#taxAmt#, NVL(TAX_AMT,0))	  -->
+		                  <isEqual property="sortColumn" compareValue="taxCd">
+			              		ORDER BY TAX_CD
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="taxDesc">
+			              		ORDER BY TAX_DESC
+			              </isEqual>
+			              <!--  <isEqual property="sortColumn" compareValue="taxAmt">
+			              		ORDER BY TAX_AMT
+			              </isEqual>-->
+			              <!-- added by joanne 07.01.2014 -->
+			              <isEqual property="sortColumn" compareValue="currencyTaxAmt">
+			              		ORDER BY CURRENCY_TAX_AMT
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIEX_NEW_GROUP_TAX_PKG.GET_GIEXS007_B880_INFO(#policyId#))
+		                   <!-- WHERE TAX_CD = NVL(#taxCd#, TAX_CD)
+		                         AND UPPER(TAX_DESC) LIKE UPPER(NVL(#taxDesc#, TAX_DESC))
+		                        AND NVL(TAX_AMT,0) = NVL(#taxAmt#, NVL(TAX_AMT,0)) -->
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="setB880Dtls" parameterClass="GIEXNewGroupTaxClass">
+		BEGIN
+			giex_new_group_tax_pkg.set_b880_dtls(
+				#policyId#,
+				#lineCd#,
+				#issCd#,
+				#taxCd#,
+				#taxId#,
+				#taxDesc#,
+				#taxAmt#,
+				#rate#,
+				#currencyTaxAmt# <!-- added by joanne 06.02.14 -->
+			);
+		END;
+	</procedure>
+	
+	<delete id="deleteNewGroupTax" parameterClass="java.util.HashMap">
+			DELETE GIEX_NEW_GROUP_TAX
+            WHERE  policy_id 						= #policyId#
+                   AND   tax_cd 						= #taxCd#
+	</delete>
+	
+		<!-- added by joanne 03.27.14 -->
+	<select id="computeNewTaxAmt" resultClass="java.lang.String">
+  		SELECT compute_uw_LOV_expirytax.compute_tax (#policyId#,#issCd#,#lineCd#, #taxCd#, #taxId#, #itemNo#) from dual
+  	</select>
+</sqlMap>

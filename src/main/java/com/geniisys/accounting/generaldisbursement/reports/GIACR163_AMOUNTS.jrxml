@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIACR163_AMOUNTS" language="groovy" pageWidth="327" pageHeight="752" columnWidth="327" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="P_INTM_NO" class="java.lang.String"/>
+	<parameter name="P_ISS_CD" class="java.lang.String"/>
+	<parameter name="P_PREM_SEQ_NO" class="java.lang.Integer"/>
+	<parameter name="P_CF_POLICY_ID" class="java.lang.Integer"/>
+	<parameter name="P_CF_LINE_CD" class="java.lang.String"/>
+	<parameter name="P_CF_POLICY_CTR" class="java.lang.Integer"/>
+	<parameter name="P_PRINT_DETAILS" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT *
+  FROM TABLE(GIACR163_PKG.GET_POLICY_AMOUNTS(
+	$P{P_INTM_NO}, $P{P_ISS_CD}, $P{P_PREM_SEQ_NO},
+	$P{P_CF_POLICY_ID}, $P{P_CF_LINE_CD} ) )]]>
+	</queryString>
+	<field name="PERIL_SNAME" class="java.lang.String"/>
+	<field name="COMM_RT" class="java.math.BigDecimal"/>
+	<field name="PARTIAL_COMM" class="java.math.BigDecimal"/>
+	<field name="PARTIAL_PREM" class="java.math.BigDecimal"/>
+	<variable name="V_TOTAL_PARTIAL_COMM" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{PARTIAL_COMM}]]></variableExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="12" splitType="Stretch">
+			<printWhenExpression><![CDATA[$P{P_PRINT_DETAILS}.equals("Y") ]]></printWhenExpression>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="0" y="0" width="42" height="11"/>
+				<textElement>
+					<font fontName="Arial" size="9"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{PERIL_SNAME}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement mode="Transparent" x="47" y="0" width="95" height="11" backcolor="#CCFFCC"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="9"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{PARTIAL_PREM}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="147" y="0" width="39" height="11"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="9"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{COMM_RT}.setScale(2)]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement mode="Transparent" x="191" y="0" width="95" height="11" backcolor="#FFCCCC"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="9"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{PARTIAL_COMM}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIQuoteItemMC">
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<resultMap id="gipiQuoteItemMCMap" class="com.geniisys.gipi.entity.GIPIQuoteItemMC">
+		<result column="quote_id" 				property="quoteId" />
+	 	<result column="item_no" 				property="itemNo" />
+	 	<result column="plate_no" 				property="plateNo" />
+		<result column="motor_no" 				property="motorNo" />
+		<result column="serial_no" 				property="serialNo" />
+		<result column="subline_type_cd" 		property="sublineTypeCd" />
+	 	<result column="mot_type" 				property="motType"		/>
+	 	<result column="car_company_cd" 		property="carCompanyCd" />
+		<result column="coc_yy" 				property="cocYy"		/>
+	  	<result column="coc_seq_no" 			property="cocSeqNo"		/>          
+	 	<result column="coc_serial_no" 			property="cocSerialNo"	/>
+	 	<result column="coc_type" 				property="cocType"		/>
+	 	<result column="repair_lim" 			property="repairLim"	/>
+	 	<result column="color" 					property="color"		/>
+	 	<result column="model_year" 			property="modelYear" 	/>            
+	 	<result column="make" 					property="make"			/>
+	 	<result column="est_value" 				property="estValue"		/>
+	 	<result column="towing" 				property="towing"		/>
+	 	<result column="assignee" 				property="assignee"		/>
+	 	<result column="no_of_pass" 			property="noOfPass"		/>      
+		<result column="tariff_zone" 			property="tariffZone"	/>
+	 	<result column="coc_issue_date" 		property="cocIssueDate" />
+	 	<result column="mv_file_no" 			property="mvFileNo"		/>
+	 	<result column="acquired_from" 			property="acquiredFrom" />
+	 	<result column="ctv_tag" 				property="ctvTag"		/>
+	 	<result column="type_of_body_cd" 		property="typeOfBodyCd" />
+	 	<result column="unladen_wt" 			property="unladenWt"	/>
+	 	<result column="make_cd" 				property="makeCd"			/>
+	 	<result column="series_cd" 				property="seriesCd"			/>
+	 	<result column="basic_color_cd" 		property="basicColorCd"		/>
+	 	<result column="basic_color" 			property="basicColor"		/>      
+	 	<result column="color_cd" 				property="colorCd"			/>
+	 	<result column="color" 					property="color"			/>
+	 	<result column="origin" 				property="origin"			/>
+	 	<result column="destination" 			property="destination"		/>
+	 	<result column="coc_atcn" 				property="cocAtcn"			/>
+	 	<result column="user_id" 				property="userId"			/>
+	 	<result column="last_update" 			property="lastUpdate"		/>
+	 	<result column="subline_cd" 			property="sublineCd"		/>
+	 	<result column="subline_type_desc" 		property="subTypeDesc"		/>
+	 	<result column="car_company" 			property="carCompany"		/>
+	 	<result column="basic_color" 			property="basicColor"		/>
+	 	<result column="type_of_body" 			property="typeOfBody"		/>
+	 	<result column="engine_series" 			property="engineSeries"		/>
+	 	<result column="deductible_amt" 		property="deductibleAmt"	/>
+	</resultMap>
+	
+	<procedure id="getGIPIQuoteItemMC"  parameterClass="java.util.HashMap" resultMap="gipiQuoteItemMCMap">
+		SELECT DISTINCT * FROM TABLE(Gipi_Quote_Item_Dtls.Get_Gipi_Quote_MC(#quoteId#, #itemNo#))
+	</procedure>
+	
+	<resultMap id="serialMCMap" class="com.geniisys.gipi.entity.GIPIQuoteItemMC">
+		<result column="serial_no" 				property="serialNo" />
+	</resultMap>
+	
+	<procedure id="getAllSerialMc" resultMap="serialMCMap">
+		SELECT * FROM TABLE(GIPI_QUOTE_ITEM_DTLS.GET_ALL_SERIAL_NO_MC)
+	</procedure>
+	
+	<resultMap class="com.geniisys.gipi.entity.GIPIQuoteItemMC" id="motorMCMap">
+		<result column="motor_no" property="motorNo"/>
+	</resultMap>
+	
+	<procedure id="getAllMotorMc" resultMap="motorMCMap">
+		SELECT * FROM TABLE(GIPI_QUOTE_ITEM_DTLS.GET_ALL_MOTOR_NO_MC)
+	</procedure>
+	
+	<resultMap id="plateMCMap" class="com.geniisys.gipi.entity.GIPIQuoteItemMC" >
+		<result property="plateNo" column="plate_no"/>
+	</resultMap>
+	
+	<procedure id="getAllPlateMc" resultMap="plateMCMap">
+		SELECT * FROM TABLE(GIPI_QUOTE_ITEM_DTLS.GET_ALL_PLATE_NO_MC)
+	</procedure>
+	
+	<resultMap class="com.geniisys.gipi.entity.GIPIQuoteItemMC" id="cocMCMap">
+		<result property="cocSerialNo" column="coc_serial_no"/>
+		<result property="serialNo" column="quote_no"/> <!-- used serial no as property for quotation no because they are the same property(STRING) -->
+		
+	</resultMap>
+	
+	<procedure id="getAllCocMc" resultMap="cocMCMap">
+		SELECT * FROM TABLE(GIPI_QUOTE_ITEM_DTLS.GET_ALL_COC_NO_MC)
+	</procedure>
+	<procedure id="getGIPIQuoteItemMCs" resultMap="gipiQuoteItemMCMap">
+		SELECT * FROM TABLE(Gipi_Quote_Item_Dtls.Get_All_Gipi_Quote_Mc(#quoteId#))
+	</procedure>
+	
+	<select id="getDefaultTow" resultClass="java.lang.Integer" parameterClass="java.util.HashMap">
+		SELECT PARAM_VALUE_N
+		  FROM GIIS_PARAMETERS 
+          where PARAM_NAME like #towing# AND PARAM_NAME like #subline#
+	</select>
+	
+	<insert id="saveGIPIQuoteItemMC" parameterClass="com.geniisys.gipi.entity.GIPIQuoteItemMC">
+		DECLARE
+			quoteItemMC GIPI_QUOTE_ITEM_MC%ROWTYPE;
+		BEGIN
+			quoteItemMC.quote_id			:= #quoteId#;
+		 	quoteItemMC.item_no           	:= #itemNo#;
+		 	quoteItemMC.plate_no            := #plateNo#;
+		 	quoteItemMC.motor_no			:= #motorNo#;
+			quoteItemMC.serial_no			:= #serialNo#;             
+		 	quoteItemMC.subline_type_cd	  	:= #sublineTypeCd#;
+		 	quoteItemMC.mot_type			:= #motType#;
+			quoteItemMC.car_company_cd		:= #carCompanyCd#;
+		 	quoteItemMC.coc_yy				:= #cocYy#;
+		 	quoteItemMC.coc_seq_no			:= #cocSeqNo#;         
+		 	quoteItemMC.coc_serial_no		:= #cocSerialNo#;
+		 	quoteItemMC.coc_type			:= #cocType#;
+		 	quoteItemMC.repair_lim			:= #repairLim#;
+		 	quoteItemMC.color				:= #color#;
+		 	quoteItemMC.model_year			:= #modelYear#;        
+		 	quoteItemMC.make				:= #make#;
+		 	quoteItemMC.est_value			:= #estValue#;
+		 	quoteItemMC.towing				:= #towing#;
+		 	quoteItemMC.assignee			:= #assignee#;
+		 	quoteItemMC.no_of_pass			:= #noOfPass#;           
+		 	quoteItemMC.tariff_zone		  	:= #tariffZone#;
+		 	quoteItemMC.coc_issue_date		:= #cocIssueDate#;
+		 	quoteItemMC.mv_file_no			:= #mvFileNo#;
+		 	quoteItemMC.acquired_from		:= #acquiredFrom#;
+		 	quoteItemMC.ctv_tag			  	:= #ctvTag#;                
+		 	quoteItemMC.type_of_body_cd	  	:= #typeOfBodyCd#;
+		 	quoteItemMC.unladen_wt			:= #unladenWt#;
+		 	quoteItemMC.make_cd			 	:= #makeCd#;
+		 	quoteItemMC.series_cd			:= #seriesCd#;
+		 	quoteItemMC.basic_color_cd		:= #basicColorCd#;         
+		 	quoteItemMC.color_cd			:= #colorCd#;
+		 	quoteItemMC.origin				:= #origin#;
+		 	quoteItemMC.destination		  	:= #destination#;
+		 	quoteItemMC.coc_atcn			:= #cocAtcn#;
+		 	quoteItemMC.user_id			 	:= #userId#;           
+		 	quoteItemMC.last_update		  	:= #lastUpdate#;
+		 	quoteItemMC.subline_cd			:= #sublineCd#;
+		 	
+		 	giis_users_pkg.app_user := #appUser#;
+		 	Gipi_Quote_Item_Dtls.Set_Gipi_Quote_MC(quoteItemMC);
+		END;
+	</insert>
+	
+	<procedure id="deleteGIPIQuoteItemMC" parameterClass="java.util.HashMap">
+		BEGIN
+			Gipi_Quote_Item_Dtls.Del_Gipi_Quote_MC(#quoteId#, #itemNo#);
+		END;
+	</procedure>
+	
+	<procedure id="deleteAllItemAddInfoMC" parameterClass="java.util.HashMap">
+		BEGIN
+			Gipi_Quote_Item_Dtls.Del_all_addinfo_MC(#quoteId#);
+		END;
+	</procedure>
+	
+</sqlMap>

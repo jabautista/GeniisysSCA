@@ -1,0 +1,412 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIACAgingSoaDetail">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIACAgingSoaDetailClass" type="com.geniisys.giac.entity.GIACAgingSoaDetail"/>
+	
+	<resultMap class="GIACAgingSoaDetailClass" id="giacAgingSoaDetail">
+		<result column="iss_cd" property="issCd"></result>
+		<result column="prem_seq_no" property="premSeqNo"></result>
+		<result column="inst_no" property="instNo"></result>
+		<result column="balance_amt_due" property="balAmtDue"></result>
+		<result column="prem_balance_due" property="premBalDue"></result>
+		<result column="tax_balance_due" property="taxBalDue"></result>
+	</resultMap>
+
+	<resultMap class="GIACAgingSoaDetailClass" id="InstNoLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="iss_cd" property="issCd"></result>
+		<result column="prem_seq_no" property="premSeqNo"></result>
+		<result column="inst_no" property="instNo"></result>
+		<result column="balance_amt_due" property="balAmtDue"></result>
+		<result column="prem_balance_due" property="premBalDue"></result>
+		<result column="tax_balance_due" property="taxBalDue"></result>
+		<result column="currency_cd" property="currencyCd"></result>
+		<result column="currency_rt" property="currencyRt"></result>
+	</resultMap>	
+	
+	<resultMap class="GIACAgingSoaDetailClass" id="InstInfoResultMap">
+		<result column="iss_cd" property="issCd"></result>
+		<result column="prem_seq_no" property="premSeqNo"></result>
+		<result column="inst_no" property="instNo"></result>
+		<result column="balance_amt_due" property="balAmtDue"></result>
+		<result column="prem_balance_due" property="premBalDue"></result>
+		<result column="tax_balance_due" property="taxBalDue"></result>		
+		<result column="currency_cd" property="currencyCd"></result>
+		<result column="currency_rt" property="currencyRt"></result>
+	</resultMap>
+	
+	<resultMap class="GIACAgingSoaDetailClass" id="giacAgingSoaDetail2">
+		<result column="iss_cd" 			property="issCd"></result>
+		<result column="prem_seq_no" 		property="premSeqNo"></result>
+		<result column="inst_no" 			property="instNo"></result>
+		<result column="a150_line_cd" 		property="a150LineCd"></result>
+		<result column="total_amount_due" 	property="totAmtDue"></result>
+		<result column="total_payments" 	property="totPaymts"></result>
+		<result column="temp_payments" 		property="tempPaymts"></result>
+		<result column="balance_amt_due" 	property="balAmtDue"></result>
+		<result column="a020_assd_no" 		property="a020AssdNo"></result>
+	</resultMap>
+		
+	<resultMap class="java.util.HashMap" id="getPolicyDetails">
+		<result column="iss_cd" 			property="issCd"></result>
+		<result column="prem_seq_no" 		property="premSeqNo"></result>
+		<result column="inst_no" 			property="instNo"></result>
+		<result column="balance_amt_due" 	property="balAmtDue"></result>
+		<result column="prem_balance_due" 	property="premBalDue"></result>
+		<result column="tax_balance_due" 	property="taxBalDue"></result>
+		<result column="chk_tag" 			property="chkTag"></result>
+		<result column="msg_alert" 			property="msgAlert"></result>
+		<result column="tran_type" 			property="tranType"></result>
+		<result column="line_cd" 			property="lineCd"></result>
+		<result column="subline_cd" 		property="sublineCd"></result>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="BillLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="iss_cd" 			property="issCd"></result>
+		<result column="prem_seq_no" 		property="premSeqNo"></result>
+		<result column="property" 			property="property"></result>
+		<result column="ref_inv_no" 		property="refInvNo"></result>
+		<result column="policy_id" 			property="policyId"></result>
+		<result column="policy_no" 			property="policyNo"></result>		
+		<result column="ref_pol_no" 		property="refPolNo"></result>
+		<result column="assd_no" 			property="assdNo"></result>
+		<result column="assd_name" 			property="assdName"></result>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="BillInfoResultMap">
+		<result column="iss_cd" 			property="issCd"></result>
+		<result column="prem_seq_no" 		property="premSeqNo"></result>
+		<result column="property" 			property="property"></result>
+		<result column="ref_inv_no" 		property="refInvNo"></result>
+		<result column="policy_id" 			property="policyId"></result>
+		<result column="policy_no" 			property="policyNo"></result>		
+		<result column="ref_pol_no" 		property="refPolNo"></result>
+		<result column="assd_no" 			property="assdNo"></result>
+		<result column="assd_name" 			property="assdName"></result>
+		<result column="inst_count" 		property="instCount"></result>
+		<result column="dflt_inst_no" 		property="dfltInstNo"></result>
+		<result column="total_bal_amt_due"	property="totalBalAmtDue"></result>	
+	</resultMap>
+	
+	<select id="getInstnoDetails" parameterClass="java.util.HashMap" resultMap="giacAgingSoaDetail">
+		select * from table(giac_aging_soa_details_pkg.get_instno_details(#issCd#,#premSeqNo#))
+	</select>
+	
+	<procedure id="subtRiSoaDetails" parameterClass="com.geniisys.giac.entity.GIACInwFaculPremCollns">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			giac_aging_soa_details_pkg.subt_ri_soa_details( #a180RiCd#, 
+				#b140PremSeqNo#, #instNo#, #collectionAmt#, #premiumAmt#, 
+				#commAmt#, #wholdingTax#, #taxAmount#, #commVat#);
+		END;
+	</procedure>
+	
+	<procedure id="addRiSoaDetails" parameterClass="com.geniisys.giac.entity.GIACInwFaculPremCollns">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			giac_aging_soa_details_pkg.add_ri_soa_details( #a180RiCd#, 
+				#b140PremSeqNo#, #instNo#, #collectionAmt#, #premiumAmt#, 
+				#commAmt#, #wholdingTax#, #taxAmount#, #commVat#);
+		END;
+	</procedure>
+	
+	<select id="getPolDetails" parameterClass="java.util.HashMap" resultMap="getPolicyDetails">
+		select * from table(giac_aging_soa_details_pkg.get_policy_details(#lineCd#, #sublineCd#, #issCd#, #issYear#, #polSeqNo#, #renewNo#, #refPolNo#, #dueTag#))
+	</select>
+	
+	<select id="getGiacAgingSOADetails" parameterClass="java.util.HashMap" resultMap="giacAgingSoaDetail2">
+		SELECT * FROM TABLE(GIAC_AGING_SOA_DETAILS_PKG.get_aging_soa_details(#keyword#, #issCd#))
+	</select>
+	
+	<procedure id="getBillNoLOV" resultMap="BillLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+  		 				  FROM TABLE(giac_aging_soa_details_pkg.get_bill_no_lov(#issCd#,#tranType#,#findText#))<!-- Kenneth 12.02.2015 sr#20856 -->
+		                  <isEqual property="sortColumn" compareValue="premSeqNo">
+			              		ORDER BY prem_seq_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="assdName">
+			              		ORDER BY assd_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="policyId">
+			              		ORDER BY policy_id
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="policyNo">
+			              		ORDER BY policy_no
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_
+  		  					FROM TABLE(giac_aging_soa_details_pkg.get_bill_no_lov(#issCd#,#tranType#,#findText#))) b) <!-- Kenneth 12.02.2015 sr#20856 -->
+		 WHERE rownum_ BETWEEN #from# AND #to#  
+	</procedure>
+	
+	<procedure id="getInstNoLOV" resultMap="InstNoLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+  		 				  <!-- FROM TABLE(giac_aging_soa_details_pkg.get_instno_details2(#issCd#,#premSeqNo#, #findText#)) --> <!-- bonok :: 3.15.2016 :: UCPB SR 21681 -->
+  		 				  FROM TABLE(giac_aging_soa_details_pkg.get_instno_details3(#issCd#,#premSeqNo#, #findText#))
+  		 				  <isNotNull property="notIn">
+  		 				  		WHERE inst_no NOT IN $notIn$
+  		 				  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="instNo">
+			              		ORDER BY inst_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="issCd">
+			              		ORDER BY iss_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="premSeqNo">
+			              		ORDER BY prem_seq_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="balAmtDue">
+			              		ORDER BY balance_amt_due
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="premBalDue">
+			              		ORDER BY prem_balance_due
+			              </isEqual>
+						  <isEqual property="sortColumn" compareValue="taxBalDue">
+			              		ORDER BY tax_balance_due
+			              </isEqual>			              
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_
+  		  					<!-- FROM TABLE(giac_aging_soa_details_pkg.get_instno_details2(#issCd#,#premSeqNo#, #findText#)) --> <!-- bonok :: 3.15.2016 :: UCPB SR 21681 -->
+  		  					FROM TABLE(giac_aging_soa_details_pkg.get_instno_details3(#issCd#,#premSeqNo#, #findText#))
+  		  				  <isNotNull property="notIn">
+								WHERE inst_no NOT IN $notIn$
+  		 				  </isNotNull>
+						) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#  
+	</procedure>
+	
+	<select id="getBillInfo" parameterClass="java.util.HashMap" resultMap="BillInfoResultMap">
+		SELECT * FROM TABLE(giac_aging_soa_details_pkg.get_bill_info(#issCd#, #premSeqNo#, #tranType#))
+	</select>
+	
+	<select id="getInstInfo" parameterClass="java.util.HashMap" resultMap="InstInfoResultMap">
+		<!-- SELECT * FROM TABLE(giac_aging_soa_details_pkg.get_inst_info(#issCd#, #premSeqNo#, #instNo#)) --> <!-- bonok :: 4.8.2016 :: UCPB SR 21681 -->
+		SELECT * FROM TABLE(giac_aging_soa_details_pkg.get_inst_info2(#issCd#, #premSeqNo#, #instNo#))
+	</select>	
+	
+	<parameterMap class="map" id="getPolicyDtlsGIACS007Map">
+		<parameter property="lineCd" 					jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"/>
+		<parameter property="sublineCd" 				jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"/>
+		<parameter property="issCd" 						jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"/>
+		<parameter property="issueYy" 					jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"/>
+		<parameter property="polSeqNo" 				jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"/>
+		<parameter property="renewNo" 				jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"/>
+		<parameter property="refPolNo" 				jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"/>
+		<parameter property="nbtDue" 					jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"/>
+		<parameter property="newIssCd" 				jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT"/>
+		<parameter property="premSeqNo" 			jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT"/>
+		<parameter property="instNo" 					jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT"/>
+		<parameter property="balAmtDue" 				jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT"/>
+		<parameter property="premBalDue" 			jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT"/>
+		<parameter property="taxBalDue" 				jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT"/>
+		<parameter property="currencyCd" 			jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT"/>
+		<parameter property="convertRate" 			jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT"/>
+		<parameter property="currencyDesc" 			jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT"/>
+		<parameter property="tranType" 				jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT"/>
+		<parameter property="msgAlert" 				jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="getPolicyDtlsGIACS007"  parameterMap="getPolicyDtlsGIACS007Map">
+		CALL giac_aging_soa_details_pkg.get_policy_details(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	</procedure>
+	
+	<resultMap class="java.util.HashMap" id="getPackInvoicesMap">
+		<result column="line_cd" 			property="lineCd" />
+		<result column="subline_cd" 		property="sublineCd" />
+		<result column="iss_cd" 			property="issCd" />
+		<result column="prem_seq_no" 		property="premSeqNo" />
+		<result column="inst_no" 			property="instNo" />
+		<result column="balance_amt_due" 	property="balAmtDue" />
+		<result column="tran_type" 			property="tranType" />	<!-- SR-20000 : shan 08.11.2015 -->
+		<result column="rownum_" 			property="rowNum" />
+		<result column="count_"				property="rowCount"/>
+	</resultMap>
+	
+	<!-- <select id="getPackInvoices" parameterClass="java.util.HashMap" resultMap="getPackInvoicesMap">
+		select * from table(giac_aging_soa_details_pkg.get_pack_invoices(#dueTag#, #lineCd#, #sublineCd#, #issCd#, #issYear#, #polSeqNo#, #renewNo#))
+	</select> -->
+	
+	<select id="getPackInvoices" resultMap="getPackInvoicesMap" parameterClass="java.util.HashMap">		
+	    SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT x.*, DECODE(SIGN(balance_amt_due), 1, 1, 3) tran_type 	<!-- SR-20000 : shan 08.11.2015 -->
+		                  FROM TABLE (giac_aging_soa_details_pkg.get_pack_invoices(#dueTag#, #packLineCd#, #packSublineCd#, #packIssCd#, #issYear#, #polSeqNo#, #renewNo#, #userId#)) x
+		                  <isNotNull property="filter">
+			  		  		WHERE 1=1	
+				  		  	<isNotEmpty property="lineCd" prepend="AND">
+			  		  			UPPER(line_cd) LIKE UPPER(#lineCd#)
+				  		  	</isNotEmpty>
+				  		  	<isNotEmpty property="sublineCd" prepend="AND">
+			  		  			UPPER(subline_cd) LIKE UPPER(#sublineCd#)
+				  		  	</isNotEmpty>
+				  		  	<isNotEmpty property="issCd" prepend="AND">
+			  		  			UPPER(iss_cd) LIKE UPPER(#issCd#)
+				  		  	</isNotEmpty>
+				  		  	<isNotEmpty property="premSeqNo" prepend="AND">
+				  		  		prem_seq_no = #premSeqNo#
+				  		  	</isNotEmpty>	
+				  		  	<isNotEmpty property="instNo" prepend="AND">
+				  		  		inst_no = #instNo#
+				  		  	</isNotEmpty>	
+				  		  	<isNotEmpty property="balAmtDue" prepend="AND">
+				  		  		balance_amt_due = #balAmtDue#
+				  		  	</isNotEmpty>				  		  	
+			  		 	</isNotNull>
+			  		 	<isEqual property="sortColumn" compareValue="premSeqNo">
+			              		ORDER BY prem_seq_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="lineCd">
+			              		ORDER BY line_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="sublineCd">
+			              		ORDER BY subline_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="issCd">
+			              		ORDER BY iss_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="instNo">
+			              		ORDER BY inst_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="balAmtDue">
+			              		ORDER BY balance_amt_due
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giac_aging_soa_details_pkg.get_pack_invoices(#dueTag#, #packLineCd#, #packSublineCd#, #packIssCd#, #issYear#, #polSeqNo#, #renewNo#, #userId#))
+		                  <isNotNull property="filter">
+			  		  		WHERE 1=1	
+				  		  	<isNotEmpty property="lineCd" prepend="AND">
+			  		  			UPPER(line_cd) LIKE UPPER(#lineCd#)
+				  		  	</isNotEmpty>
+				  		  	<isNotEmpty property="sublineCd" prepend="AND">
+			  		  			UPPER(subline_cd) LIKE UPPER(#sublineCd#)
+				  		  	</isNotEmpty>
+				  		  	<isNotEmpty property="issCd" prepend="AND">
+			  		  			UPPER(iss_cd) LIKE UPPER(#issCd#)
+				  		  	</isNotEmpty>
+				  		  	<isNotEmpty property="premSeqNo" prepend="AND">
+				  		  		prem_seq_no = #premSeqNo#
+				  		  	</isNotEmpty>	
+				  		  	<isNotEmpty property="instNo" prepend="AND">
+				  		  		inst_no = #instNo#
+				  		  	</isNotEmpty>	
+				  		  	<isNotEmpty property="balAmtDue" prepend="AND">
+				  		  		balance_amt_due = #balAmtDue#
+				  		  	</isNotEmpty>				  		  	
+			  		 	</isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="GIACAgingSoaDetailClass" id="getInvoiceSoaDetailsMap">
+		<result column="ISS_CD" 			property="issCd" />
+		<result column="PREM_SEQ_NO" 		property="premSeqNo" />
+		<result column="INST_NO" 			property="instNo" />
+		<result column="BALANCE_AMT_DUE" 	property="balAmtDue" />
+		<result column="PREM_BALANCE_DUE" 	property="premBalDue" />
+		<result column="TAX_BALANCE_DUE" 	property="taxBalDue" />
+		<result column="TOTAL_AMT_DUE" 		property="totAmtDue" />
+		<result column="TOTAL_PAYMENTS" 	property="totPaymts" />
+		<result column="TEMP_PAYMENTS" 		property="tempPaymts" />
+		<result column="NEXT_AGE_LEVEL_DT" 	property="nextAgeLevelDtStr" />
+	</resultMap>
+	
+	<select id="getInvoiceSoaDetails" parameterClass="map" resultMap="getInvoiceSoaDetailsMap">
+		SELECT *
+		  FROM TABLE (GIAC_AGING_SOA_DETAILS_PKG.get_soa_details(#issCd#, #premSeqNo#))
+	</select>
+	
+ 	<!-- SR-20000 : shan 08.24.2015 -->
+ 	<resultMap id="giac007BranchCdLOVMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result column="ISS_CD" 			property="issCd" 		jdbcType="VARCHAR" />
+		<result column="ISS_NAME" 			property="issName" 		jdbcType="VARCHAR" />
+	</resultMap>
+	
+ 	<select id="getGIACS007BranchCdLOV" resultMap="giac007BranchCdLOVMap">
+ 		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+	                      FROM TABLE(GIIS_ISSOURCE_PKG.get_iss_code_per_acctg_module(#moduleId#, #userId#))
+	                      <isNotNull property="findText">
+	                             WHERE UPPER(iss_cd) LIKE UPPER(NVL(#findText#, iss_cd))
+	                                OR UPPER(iss_name) LIKE UPPER(NVL(#findText#, iss_name))
+                          </isNotNull>    
+                          <isNull property="findText">
+							   WHERE UPPER(iss_cd) LIKE UPPER(NVL(#searchString#, iss_cd))
+							      OR UPPER(iss_name) LIKE UPPER(NVL(#searchString#, iss_name))
+						  </isNull>        
+		                  <isEqual property="sortColumn" compareValue="issCd">
+			              		ORDER BY iss_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="issName">
+			              		ORDER BY iss_name
+			              </isEqual>			                      
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*)  count_ 
+		                  FROM (SELECT * 
+		                          FROM TABLE(GIIS_ISSOURCE_PKG.get_iss_code_per_acctg_module(#moduleId#, #userId#))
+	                          <isNotNull property="findText">
+	                             WHERE UPPER(iss_cd) LIKE UPPER(NVL(#findText#, iss_cd))
+	                                OR UPPER(iss_name) LIKE UPPER(NVL(#findText#, iss_name))
+	                          </isNotNull>  
+                          	  <isNull property="findText">
+								   WHERE UPPER(iss_cd) LIKE UPPER(NVL(#searchString#, iss_cd))
+								      OR UPPER(iss_name) LIKE UPPER(NVL(#searchString#, iss_name))
+						  	  </isNull>       
+						)) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+		
+	</select>
+ 	<!-- end SR-20000 -->
+</sqlMap>

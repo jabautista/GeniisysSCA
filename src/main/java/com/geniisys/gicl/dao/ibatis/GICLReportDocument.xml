@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GICLReportDocument">
+	
+	<typeAlias alias="giclReportDocument" type="com.geniisys.gicl.entity.GICLReportDocument"/>
+  	
+	<resultMap class="java.util.HashMap" id="giclReportDocumentListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="REPORT_ID" 		property="reportId"/>
+		<result column="REPORT_NAME" 	property="reportName"/>
+		<result column="REMARKS"	 	property="remarks"/>
+		<result column="USER_ID"     	property="userId"/>
+		<result column="LAST_UPDATE" 	property="lastUpdate"/>
+		<result column="REPORT_NO"     	property="reportNo"/>
+		<result column="LINE_CD"	 	property="lineCd"/>
+		<result column="LINE_NAME"	 	property="lineName"/>
+		<result column="DOCUMENT_TAG"   property="documentTag"/>
+		<result column="BRANCH_CD" 		property="branchCd"/>
+		<result column="BRANCH_NAME"	property="branchName"/>
+		<result column="DOCUMENT_CD"    property="documentCd"/>
+		<result column="DOCUMENT_NAME"  property="documentName"/>
+		<result column="GICLS181_ISS"  property="gicls181Iss"/>
+	</resultMap>
+	
+	<select id="getGICLS180RecList" resultMap="giclReportDocumentListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(gicls180_pkg.get_rec_list(#moduleId#, #userId#))
+		  	      		  <isNotNull property="filter">
+							WHERE 1 = 1 
+							<isNotEmpty prepend="AND" property="reportNo">
+								report_no LIKE #reportNo#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="reportId">
+								UPPER(report_id) LIKE UPPER(#reportId#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="reportName">
+								UPPER(report_name) LIKE UPPER(#reportName#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="lineCd">
+								UPPER(line_cd) LIKE UPPER(#lineCd#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="documentCd">
+								UPPER(document_cd) LIKE UPPER(#documentCd#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="branchCd">
+								UPPER(branch_cd) LIKE UPPER(#branchCd#)
+							</isNotEmpty>
+						  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="reportNo">
+			              		ORDER BY report_no
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="reportId">
+			              		ORDER BY report_id
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="reportName">
+			              		ORDER BY report_name
+			              </isEqual>
+			               <isEqual property="sortColumn" compareValue="lineCd">
+			              		ORDER BY line_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="documentCd">
+			              		ORDER BY document_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="branchCd">
+			              		ORDER BY branch_cd
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(gicls180_pkg.get_rec_list(#moduleId#, #userId#))
+		                  <isNotNull property="filter">
+							WHERE 1 = 1 
+							<isNotEmpty prepend="AND" property="reportNo">
+								report_no LIKE #reportNo#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="reportId">
+								UPPER(report_id) LIKE UPPER(#reportId#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="reportName">
+								UPPER(report_name) LIKE UPPER(#reportName#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="lineCd">
+								UPPER(line_cd) LIKE UPPER(#lineCd#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="documentCd">
+								UPPER(document_cd) LIKE UPPER(#documentCd#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="branchCd">
+								UPPER(branch_cd) LIKE UPPER(#branchCd#)
+							</isNotEmpty>
+						  </isNotNull>) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<delete id="valDeleteReportDocument" parameterClass="java.lang.String">
+		BEGIN
+ 			gicls180_pkg.val_del_rec(#reportId#);
+ 		END;
+ 	</delete>
+	
+	<procedure id="setReportDocument" parameterClass="giclReportDocument">
+	    DECLARE
+	    	v_rec giac_documents%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.report_id := #reportId#;
+ 			v_rec.report_name := #reportName#;
+ 			v_rec.remarks := #remarks#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.report_no := #reportNo#;
+ 			v_rec.line_cd := #lineCd#;
+ 			v_rec.document_tag := #documentTag#;
+ 			v_rec.branch_cd := #branchCd#;
+ 			v_rec.document_cd := #documentCd#;
+ 			
+ 			gicls180_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="delReportDocument" parameterClass="giclReportDocument">
+	    DECLARE
+	    	v_rec giac_documents%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.report_id := #reportId#;
+ 			v_rec.report_no := #reportNo#;
+ 			
+ 			gicls180_pkg.del_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<resultMap id="gicls180ReportLOVMap" class="java.util.HashMap" >
+	  	<result column="REPORT_ID" 			property="reportId" 		jdbcType="VARCHAR" />
+	  	<result column="REPORT_TITLE"		property="reportTitle"		jdbcType="VARCHAR" />
+	  	<result column="ROWNUM_"			property="rowNum" />
+	  	<result column="COUNT_"				property="rowCount" />
+  	</resultMap>
+  	
+  	<select id="getGICLS180ReportLOV"	resultMap="gicls180ReportLOVMap" parameterClass="java.util.HashMap">
+		 SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT report_id, report_title FROM TABLE(gicls180_pkg.get_report_lov(#findText#))
+		          		  <isNull property="findText">
+		          		  		WHERE (UPPER(report_id) LIKE #filterText#
+		          		  			   OR UPPER(report_title) LIKE #filterText#)
+		          		  </isNull>
+		          		  <isEqual property="sortColumn" compareValue="reportId">
+			              		ORDER BY report_id
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="reportTitle">
+			              		ORDER BY report_title
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (gicls180_pkg.get_report_lov(#findText#))
+				          <isNull property="findText">
+		          		  		WHERE (UPPER(report_id) LIKE #filterText#
+		          		  			   OR UPPER(report_title) LIKE #filterText#)
+		          		  </isNull>) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+  	
+  	<resultMap id="gicls180LineLOVMap" class="java.util.HashMap" >
+	  	<result column="LINE_CD" 			property="lineCd" 		jdbcType="VARCHAR" />
+	  	<result column="LINE_NAME"			property="lineName"		jdbcType="VARCHAR" />
+	  	<result column="ROWNUM_"			property="rowNum" />
+	  	<result column="COUNT_"				property="rowCount" />
+  	</resultMap>
+  	
+  	<select id="getGICLS180LineLOV"	resultMap="gicls180LineLOVMap" parameterClass="java.util.HashMap">
+		 SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT line_cd, line_name FROM TABLE(gicls180_pkg.get_line_lov(#moduleId#,#userId#,#findText#))
+		          		  <isNull property="findText">
+		          		  		WHERE (UPPER(line_cd) LIKE #filterText#
+		          		  			   OR UPPER(line_name) LIKE #filterText#)
+		          		  </isNull>
+		          		  <isEqual property="sortColumn" compareValue="lineCd">
+			              		ORDER BY line_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="lineName">
+			              		ORDER BY line_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (gicls180_pkg.get_line_lov(#moduleId#,#userId#,#findText#))
+				          <isNull property="findText">
+		          		  		WHERE (UPPER(line_cd) LIKE #filterText#
+		          		  			   OR UPPER(line_name) LIKE #filterText#)
+		          		  </isNull>) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+  	
+  	<resultMap id="gicls180DocumentLOVMap" class="java.util.HashMap" >
+	  	<result column="DOCUMENT_CD"		property="documentCd" 		jdbcType="VARCHAR" />
+	  	<result column="DOCUMENT_NAME"		property="documentName"		jdbcType="VARCHAR" />
+	  	<result column="ROWNUM_"			property="rowNum" />
+	  	<result column="COUNT_"				property="rowCount" />
+  	</resultMap>
+  	
+  	<select id="getGICLS180DocumentLOV"	resultMap="gicls180DocumentLOVMap" parameterClass="java.util.HashMap">
+		 SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT document_cd, document_name FROM TABLE(gicls180_pkg.get_document_lov(#findText#))
+		          		  <isNull property="findText">
+		          		  		WHERE (UPPER(document_cd) LIKE #filterText#
+		          		  			   OR UPPER(document_name) LIKE #filterText#)
+		          		  </isNull>
+		          		  <isEqual property="sortColumn" compareValue="documentCd">
+			              		ORDER BY document_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="documentName">
+			              		ORDER BY document_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (gicls180_pkg.get_document_lov(#findText#))
+				          <isNull property="findText">
+		          		  		WHERE (UPPER(document_cd) LIKE #filterText#
+		          		  			   OR UPPER(document_name) LIKE #filterText#)
+		          		  </isNull>) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+  	
+  	<resultMap id="gicls180BranchLOVMap" class="java.util.HashMap" >
+	  	<result column="BRANCH_CD" 			property="branchCd" 		jdbcType="VARCHAR" />
+	  	<result column="BRANCH_NAME"		property="branchName"		jdbcType="VARCHAR" />
+	  	<result column="ROWNUM_"			property="rowNum" />
+	  	<result column="COUNT_"				property="rowCount" />
+  	</resultMap>
+  	
+  	<select id="getGICLS180BranchLOV"	resultMap="gicls180BranchLOVMap" parameterClass="java.util.HashMap">
+		 SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT branch_cd, branch_name FROM TABLE(gicls180_pkg.get_branch_lov(#moduleId#,#userId#,#findText#))
+		          		  <isNull property="findText">
+		          		  		WHERE (UPPER(branch_cd) LIKE #filterText#
+		          		  			   OR UPPER(branch_name) LIKE #filterText#)
+		          		  </isNull>
+		          		  <isEqual property="sortColumn" compareValue="branchCd">
+			              		ORDER BY branch_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="branchName">
+			              		ORDER BY branch_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (gicls180_pkg.get_branch_lov(#moduleId#,#userId#,#findText#))
+				          <isNull property="findText">
+		          		  		WHERE (UPPER(branch_cd) LIKE #filterText#
+		          		  			   OR UPPER(branch_name) LIKE #filterText#)
+		          		  </isNull>) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+</sqlMap>

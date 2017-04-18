@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIACR226" language="groovy" pageWidth="990" pageHeight="842" columnWidth="950" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="ireport.zoom" value="1.6528925619834827"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="S_FONT" isDefault="false" fontName="Arial" fontSize="7"/>
+	<parameter name="P_DATE" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="P_V_ISS_CD" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="P_USER_ID" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT * FROM TABLE (giacr226_pkg.get_giacr226_record ($P{P_V_ISS_CD}, $P{P_DATE}, $P{P_USER_ID}))
+ ORDER BY GL_ACCT, SL_CD, DEBIT_AMT]]>
+	</queryString>
+	<field name="GL_ACCT" class="java.lang.String"/>
+	<field name="GL_ACCT_NAME" class="java.lang.String"/>
+	<field name="DEBIT_AMT" class="java.math.BigDecimal"/>
+	<field name="CREDIT_AMT" class="java.math.BigDecimal"/>
+	<field name="SL_CD" class="java.math.BigDecimal"/>
+	<field name="GSLT_SL_TYPE_CD" class="java.lang.String"/>
+	<field name="GACC_TRAN_ID" class="java.math.BigDecimal"/>
+	<field name="CF_COMPANY_NAME" class="java.lang.String"/>
+	<field name="CF_COMPANY_ADD" class="java.lang.String"/>
+	<field name="CF_COMPANY_MONTH_YEAR" class="java.lang.String"/>
+	<field name="P_DATE" class="java.lang.String"/>
+	<field name="P_USER_ID" class="java.lang.String"/>
+	<field name="V_ISS_CD" class="java.lang.String"/>
+	<field name="V_FLAG" class="java.lang.String"/>
+	<variable name="V_SUM_TOTAL_DEBIT" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{DEBIT_AMT}]]></variableExpression>
+	</variable>
+	<variable name="V_SUM_TOTAL_CREDIT" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CREDIT_AMT}]]></variableExpression>
+	</variable>
+	<variable name="V_TOTAL_DEBIT" class="java.math.BigDecimal" resetType="Group" resetGroup="GL_ACCT_NAME GROUP" calculation="Sum">
+		<variableExpression><![CDATA[$F{DEBIT_AMT}]]></variableExpression>
+	</variable>
+	<variable name="V_TOTAL_CREDIT" class="java.math.BigDecimal" resetType="Group" resetGroup="GL_ACCT_NAME GROUP" calculation="Sum">
+		<variableExpression><![CDATA[$F{CREDIT_AMT}]]></variableExpression>
+	</variable>
+	<group name="GL_ACCT_GROUP">
+		<groupExpression><![CDATA[$F{GL_ACCT}]]></groupExpression>
+	</group>
+	<group name="GL_ACCT_NAME GROUP">
+		<groupExpression><![CDATA[$F{GL_ACCT_NAME}]]></groupExpression>
+		<groupFooter>
+			<band height="33">
+				<printWhenExpression><![CDATA[$F{V_FLAG} == "Y"]]></printWhenExpression>
+				<staticText>
+					<reportElement x="800" y="0" width="150" height="11"/>
+					<textElement textAlignment="Right">
+						<font fontName="Arial" size="8"/>
+					</textElement>
+					<text><![CDATA[-----------------------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="800" y="22" width="149" height="11"/>
+					<textElement textAlignment="Right">
+						<font fontName="Arial" size="8"/>
+					</textElement>
+					<text><![CDATA[==========================]]></text>
+				</staticText>
+				<textField pattern="#,##0.00;(#,##0.00)">
+					<reportElement style="S_FONT" x="650" y="11" width="150" height="11"/>
+					<textElement textAlignment="Right"/>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_TOTAL_DEBIT}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;(#,##0.00)">
+					<reportElement style="S_FONT" x="800" y="11" width="150" height="11"/>
+					<textElement textAlignment="Right"/>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_TOTAL_CREDIT}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="650" y="0" width="150" height="11"/>
+					<textElement textAlignment="Right">
+						<font fontName="Arial" size="8"/>
+					</textElement>
+					<text><![CDATA[---------------------------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="650" y="22" width="150" height="11"/>
+					<textElement textAlignment="Right">
+						<font fontName="Arial" size="8"/>
+					</textElement>
+					<text><![CDATA[=============================]]></text>
+				</staticText>
+			</band>
+		</groupFooter>
+	</group>
+	<pageHeader>
+		<band height="68" splitType="Stretch">
+			<textField>
+				<reportElement style="S_FONT" x="833" y="11" width="96" height="11"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression class="java.lang.String"><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="S_FONT" x="215" y="11" width="618" height="11" isPrintWhenDetailOverflows="true"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{CF_COMPANY_ADD}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="S_FONT" x="215" y="0" width="618" height="11"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{CF_COMPANY_NAME}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="S_FONT" x="-1" y="11" width="39" height="11"/>
+				<textElement/>
+				<text><![CDATA[RUNTIME:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" pattern="hh:mm:ss a" isBlankWhenNull="true">
+				<reportElement style="S_FONT" x="38" y="11" width="177" height="11"/>
+				<textElement/>
+				<textFieldExpression class="java.util.Date"><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="S_FONT" x="-1" y="0" width="39" height="11"/>
+				<textElement/>
+				<text><![CDATA[RUNDATE:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" pattern="MM-dd-yyyy" isBlankWhenNull="true">
+				<reportElement style="S_FONT" x="38" y="0" width="177" height="11"/>
+				<textElement/>
+				<textFieldExpression class="java.util.Date"><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="S_FONT" x="833" y="0" width="116" height="11"/>
+				<textElement textAlignment="Right"/>
+				<text><![CDATA[GIACR226]]></text>
+			</staticText>
+			<textField evaluationTime="Report">
+				<reportElement style="S_FONT" x="929" y="11" width="21" height="11"/>
+				<textElement/>
+				<textFieldExpression class="java.lang.String"><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="S_FONT" x="96" y="22" width="853" height="11"/>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Treaty Distribution (Summary)]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="S_FONT" x="96" y="33" width="854" height="11"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{CF_COMPANY_MONTH_YEAR}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="S_FONT" x="0" y="55" width="951" height="11">
+					<printWhenExpression><![CDATA[(new Boolean(($V{PAGE_NUMBER}).intValue() == 1) & $F{V_FLAG} == 'Y') ? true : false]]></printWhenExpression>
+				</reportElement>
+				<textElement/>
+				<text><![CDATA[GENERATED ACCOUNTING ENTRIES FOR TREATY DISTRIBUTION]]></text>
+			</staticText>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="29" splitType="Stretch">
+			<printWhenExpression><![CDATA[$F{V_FLAG} == 'Y' ? true : false]]></printWhenExpression>
+			<staticText>
+				<reportElement style="S_FONT" x="0" y="0" width="96" height="11"/>
+				<textElement/>
+				<text><![CDATA[GL Acct]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="S_FONT" x="96" y="0" width="437" height="11"/>
+				<textElement/>
+				<text><![CDATA[GL Acct Name]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="S_FONT" x="533" y="0" width="117" height="11"/>
+				<textElement textAlignment="Right"/>
+				<text><![CDATA[SL Code]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="S_FONT" x="650" y="0" width="150" height="11"/>
+				<textElement textAlignment="Right"/>
+				<text><![CDATA[Debit Amount]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="S_FONT" x="800" y="0" width="150" height="11"/>
+				<textElement textAlignment="Right"/>
+				<text><![CDATA[Credit Amount]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="800" y="11" width="150" height="18"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="8"/>
+				</textElement>
+				<text><![CDATA[-----------------------------------------------]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="650" y="11" width="150" height="18"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="8"/>
+				</textElement>
+				<text><![CDATA[---------------------------------------------------]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="533" y="11" width="117" height="18"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="8"/>
+				</textElement>
+				<text><![CDATA[----------------------------------------]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="96" y="11" width="437" height="18"/>
+				<textElement>
+					<font fontName="Arial" size="8"/>
+				</textElement>
+				<text><![CDATA[-----------------------------------------------------------------------------------------------------------------------------------------------------------]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="11" width="96" height="18"/>
+				<textElement>
+					<font fontName="Arial" size="8"/>
+				</textElement>
+				<text><![CDATA[--------------------------------]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="11" splitType="Stretch">
+			<printWhenExpression><![CDATA[$F{V_FLAG} == "Y"]]></printWhenExpression>
+			<textField>
+				<reportElement style="S_FONT" isPrintRepeatedValues="false" x="96" y="0" width="437" height="11"/>
+				<textElement/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{GL_ACCT_NAME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="S_FONT" isPrintRepeatedValues="false" x="0" y="0" width="96" height="11"/>
+				<textElement/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{GL_ACCT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="S_FONT" x="533" y="0" width="117" height="11"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{SL_CD}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement style="S_FONT" x="650" y="0" width="150" height="11"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{DEBIT_AMT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement style="S_FONT" x="800" y="0" width="150" height="11" isPrintWhenDetailOverflows="true"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{CREDIT_AMT}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<summary>
+		<band height="34">
+			<printWhenExpression><![CDATA[$F{V_FLAG} == 'Y' ? true : false]]></printWhenExpression>
+			<textField pattern="#,##0.00;(#,##0.00)">
+				<reportElement style="S_FONT" x="650" y="12" width="150" height="11">
+					<printWhenExpression><![CDATA[$F{V_FLAG} == "Y"]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_SUM_TOTAL_DEBIT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(#,##0.00)">
+				<reportElement style="S_FONT" x="800" y="12" width="150" height="11">
+					<printWhenExpression><![CDATA[$F{V_FLAG} == "Y"]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_SUM_TOTAL_CREDIT}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="800" y="23" width="149" height="11"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="8"/>
+				</textElement>
+				<text><![CDATA[==========================]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="650" y="23" width="150" height="11"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="8"/>
+				</textElement>
+				<text><![CDATA[=============================]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="800" y="1" width="150" height="11"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="8"/>
+				</textElement>
+				<text><![CDATA[-----------------------------------------------]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="650" y="1" width="150" height="11"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="8"/>
+				</textElement>
+				<text><![CDATA[---------------------------------------------------]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="S_FONT" x="-1" y="12" width="651" height="11"/>
+				<textElement textAlignment="Right">
+					<font isItalic="false"/>
+				</textElement>
+				<text><![CDATA[Grand Total: ]]></text>
+			</staticText>
+		</band>
+	</summary>
+</jasperReport>

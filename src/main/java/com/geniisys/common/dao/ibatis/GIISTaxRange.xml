@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISTaxRange">
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIISTaxRange" type="com.geniisys.common.entity.GIISTaxRange"/>
+	
+	<resultMap id="taxRangeList" 	class="com.geniisys.common.entity.GIISTaxRange" extends="BaseEntity.TableGridResultMap">
+	  	<result column="TAX_CD"				property="taxCd"/>
+	  	<result column="LINE_CD"			property="lineCd"/>
+	  	<result column="ISS_CD"				property="issCd"/>
+	  	<result column="TAX_ID"				property="taxId"/>
+	  	<result column="MIN_VALUE"			property="minValue"/>
+	  	<result column="MAX_VALUE"			property="maxValue"/>
+	  	<result column="TAX_AMOUNT"  		property="taxAmount"/>
+	  	<result column="MIN_MIN_VALUE"			property="minMinValue"/>
+	  	<result column="MAX_MAX_VALUE"			property="maxMaxValue"/>
+	  	<result column="REC_COUNT"  		property="recCount"/>
+	</resultMap>
+	
+		<select id="getTaxRangeList" parameterClass="java.util.HashMap" resultMap="taxRangeList">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(Giiss028_pkg.get_tax_range_list(#issCd#, #lineCd#, #taxCd#, #taxId#))
+		  	      		<isNotNull property="filter">
+							WHERE 1=1
+							<isNotEmpty prepend="AND"  property="minValue">
+								min_value = #minValue#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="maxValue">
+								max_value = #maxValue#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="taxAmount">
+								tax_amount = #taxAmount#
+							</isNotEmpty>
+						</isNotNull>
+		                <isEqual property="sortColumn" compareValue="minValue">
+			            	ORDER BY max_value
+		              	</isEqual>
+		              	<isEqual property="sortColumn" compareValue="maxValue">
+			            	ORDER BY min_value
+		              	</isEqual>
+		              	<isEqual property="sortColumn" compareValue="taxAmount">
+			            	ORDER BY tax_amount
+		              	</isEqual>
+		          	  	<isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		             	</isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(Giiss028_pkg.get_tax_range_list(#issCd#, #lineCd#, #taxCd#, #taxId#))
+		                <isNotNull property="filter">
+							WHERE 1=1
+							<isNotEmpty prepend="AND"  property="minValue">
+								min_value = #minValue#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="maxValue">
+								max_value = #maxValue#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="taxAmount">
+								tax_amount = #taxAmount#
+							</isNotEmpty>
+						</isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+ 
+	
+ 	<procedure id="setTaxRange" parameterClass="GIISTaxRange">
+	    DECLARE
+	    	v_rec giis_tax_range%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.iss_cd := #issCd#;
+			v_rec.line_cd := #lineCd#;
+			v_rec.tax_cd := #taxCd#;
+			v_rec.tax_id := #taxId#;
+			v_rec.min_value := #minValue#;
+			v_rec.max_value := #maxValue#;
+			v_rec.tax_amount := #taxAmount#;
+ 			v_rec.user_id := #userId#;
+ 			
+ 			GIISS028_PKG.set_tax_range_rec(v_rec);
+ 		END;
+ 	</procedure> 
+ 	
+ 	<delete id="delTaxRange" parameterClass="GIISTaxRange">
+		BEGIN
+ 			GIISS028_PKG.del_tax_range_rec(#issCd#, #lineCd#, #taxCd#, #taxId#, #minValue#);
+ 		END;
+ 	</delete> 
+ 	
+</sqlMap>

@@ -1,0 +1,936 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:security="http://www.springframework.org/schema/security"
+	xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
+http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
+http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.0.xsd"
+	default-init-method="init">
+
+	<!--
+		========================= RESOURCE DEFINITIONS
+		========================= Configurer that replaces ${...} placeholders
+		with values from a properties file (in this case, JDBC-related
+		settings for the dataSource definition below)
+	-->
+
+	<bean
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"
+		id="propertyConfigurer">
+		<property name="locations">
+			<list>
+				<value>file:C:/GENIISYS_WEB/config/jdbc.properties</value>
+				<value>file:C:/GENIISYS_WEB/config/cocaf.properties</value>				
+				<value>file:C:/GENIISYS_WEB/config/context.properties</value>
+				<value>file:C:/GENIISYS_WEB/config/mail.properties</value>
+			</list>
+		</property>
+	</bean>
+	
+	<bean id="cocafAddress" class="java.lang.String">
+		<constructor-arg>
+			<value>${cocafAddress}</value>
+		</constructor-arg>
+	</bean>
+	
+	<bean id="uploadPath" class="java.lang.String">
+		<constructor-arg>
+			<value>${app.UPLOAD_PATH}</value>
+		</constructor-arg>
+	</bean>
+	
+	<!-- Password Encoder -->
+	<bean class="com.geniisys.framework.util.PasswordEncoder" id="encoder">
+		<property name="algorithm">
+			<value>${security.ALGORITHM}</value>
+		</property>
+		<property name="fileName">
+			<value>${security.KEY_NAME}</value>
+		</property>
+		<property name="fileDir">
+			<value>${security.KEY_DIRECTORY}</value>
+		</property>
+		<property name="keySize">
+			<value>${security.KEY_SIZE}</value>
+		</property>
+	</bean>
+
+	<bean id="dataSource"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName">
+			<value>${jdbc.prod.driverClassName}</value>
+		</property>
+		<property name="url">
+			<value>${jdbc.prod.url}${jdbc.prod.db}</value>
+		</property>
+		<property name="username">
+			<value>${jdbc.prod.username}</value>
+		</property>
+		<property name="password">
+			<value>${jdbc.prod.password}</value>
+		</property>
+		<property name="connectionProperties">
+			<value>SetBigStringTryClob=true</value>
+<!-- 			<props>
+				<prop key="defaultAutoCommit">false</prop>
+			</props> -->
+			<!--<map> <entry key="defaultAutoCommit"> <value>false</value> </entry> 
+				</map> -->
+		</property>
+	</bean>
+
+	<bean id="pool" class="org.apache.commons.pool.impl.GenericObjectPool">
+		<property name="minEvictableIdleTimeMillis">
+			<value>300000</value>
+		</property>
+		<property name="timeBetweenEvictionRunsMillis">
+			<value>60000</value>
+		</property>
+		<property name="lifo">
+			<value>true</value>
+		</property>
+		<property name="maxActive">
+			<value>400</value>
+		</property>
+		<property name="maxIdle">
+			<value>50</value>
+		</property>
+		<property name="maxWait">
+			<value>10000</value>
+		</property>
+		<property name="minIdle">
+			<value>0</value>
+		</property>
+	</bean>
+
+	<bean id="dsConnectionFactory" class="org.apache.commons.dbcp.DataSourceConnectionFactory"
+		depends-on="dataSource" >
+		<constructor-arg>
+			<ref bean="dataSource" />
+		</constructor-arg>
+	</bean>
+
+	<bean id="poolableConnectionFactory" class="org.apache.commons.dbcp.PoolableConnectionFactory"
+		depends-on="dsConnectionFactory" >
+		<constructor-arg index="0">
+			<ref bean="dsConnectionFactory" />
+		</constructor-arg>
+		<constructor-arg index="1">
+			<ref bean="pool" />
+		</constructor-arg>
+		<constructor-arg index="2">
+			<null />
+		</constructor-arg>
+		<constructor-arg index="3">
+			<null />
+		</constructor-arg>
+		<constructor-arg index="4">
+			<value>false</value>
+		</constructor-arg>
+		<constructor-arg index="5">
+			<value>true</value>
+		</constructor-arg>
+	</bean>
+
+	<bean id="pooledDS" class="org.apache.commons.dbcp.PoolingDataSource"
+		depends-on="poolableConnectionFactory" lazy-init="true">
+		<constructor-arg>
+			<ref bean="pool" />
+		</constructor-arg>
+	</bean>
+
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager"
+		depends-on="dataSource" >
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<tx:method name="ajaxSave" propagation="REQUIRED"
+				rollback-for="Exception" />
+			<tx:method name="ajaxUpdate" propagation="REQUIRED"
+				rollback-for="Exception" />
+			<tx:method name="*" />
+		</tx:attributes>
+	</tx:advice>
+
+	<!-- ApplicationWideParameters Instantiation - Whofeih -->
+	<bean class="com.geniisys.framework.util.ApplicationWideParameters"
+		id="appWideParams">
+		<!-- added by nica 12.02.2010 for jasperReport -->
+		<property name="defaultReportFont">
+			<value>${DefaultReportFont}</value>
+		</property>	
+		<property name="autoBugReport">
+			<value>${AutoBugReport}</value>
+		</property>	
+	</bean>
+
+	<!-- Mailer Instantiation - Whofeih -->
+
+	<bean class="com.geniisys.framework.util.Mailer" id="mailer">
+		<property name="hostName">
+			<value>${host}</value>
+		</property>
+		<property name="authUser">
+			<value>${email}</value>
+		</property>
+		<property name="authPassword">
+			<value>${password}</value>
+		</property>
+		<property name="emailFromAddress">
+			<value>${email}</value>
+		</property>
+		<property name="auth">
+			<value>${authorization}</value>
+		</property>
+		<property name="port">
+			<value>${port}</value>
+		</property>
+		<property name="timeout">
+			<value>${timeout}</value>
+		</property>
+	</bean>
+
+	<!-- SqlMap setup for iBATIS Database Layer -->
+	<bean class="org.springframework.orm.ibatis.SqlMapClientFactoryBean"
+		id="sqlMapClient" depends-on="pooledDS" >
+		<property name="configLocation">
+			<value>${config.DIR}/sqlmapconfig.xml</value>
+		</property>
+		<property name="dataSource">
+			<ref local="pooledDS" />
+		</property>
+		<property name="sqlMapClientProperties">
+			<props>
+				<prop key="JDBC.DefaultAutoCommit">false</prop>			
+			</props>
+		</property>
+	</bean>
+
+	<!--  -->
+	<bean class="com.geniisys.framework.util.ExceptionHandler" id="exceptionHandler">
+		<property name="mailer" ref="mailer"></property>
+		<property name="detailedExceptionMessage">
+			<value>${DetailedExceptionMessage}</value>
+		</property>
+		<property name="autoBugReport">
+			<value>${AutoBugReport}</value>
+		</property>				
+	</bean>
+
+	<!-- Util Definition: IBATIS implementation -->
+	<bean class="com.seer.framework.db.DBSequenceUtil" id="dbSequenceUtil"
+		 depends-on="sqlMapClient">
+		<property name="sqlMapClient">
+			<ref local="sqlMapClient" />
+		</property>
+		<property name="dbType">
+			<value>ORACLE</value>
+		</property>
+	</bean>
+
+	<import resource="applicationContextMK.xml"/>
+	<import resource="applicationContextUW.xml"/>
+	<import resource="applicationContextAC.xml"/>
+	<import resource="applicationContextCL.xml"/>
+
+	<!-- SqlMap setup for DAO Objects -->
+	<bean class="com.geniisys.common.dao.impl.GIISLineDAOImpl" id="giisLineDAO"
+		depends-on="sqlMapClient" >
+		<property name="sqlMapClient">
+			<ref local="sqlMapClient" />
+		</property>
+	</bean>
+	<bean class="com.geniisys.common.service.impl.GIISLineFacadeServiceImpl"
+		id="giisLineFacadeService" depends-on="giisLineDAO" >
+		<property name="giisLineDAO" ref="giisLineDAO" />
+	</bean>
+
+	<bean class="com.geniisys.common.dao.impl.GIISSublineDAOImpl" id="giisSublineDAO"
+		depends-on="sqlMapClient" >
+		<property name="sqlMapClient">
+			<ref local="sqlMapClient" />
+		</property>
+	</bean>
+	<bean class="com.geniisys.common.service.impl.GIISSublineFacadeServiceImpl"
+		id="giisSublineFacadeService" depends-on="giisSublineDAO" >
+		<property name="giisSublineDAO" ref="giisSublineDAO" />
+	</bean>
+
+	<!-- GIISIntermediary - emman 3/2/2010 -->
+	<bean class="com.geniisys.common.dao.impl.GIISIntermediaryDAOImpl"
+		id="giisIntermediaryDAO" depends-on="sqlMapClient" >
+		<property name="sqlMapClient">
+			<ref local="sqlMapClient" />
+		</property>
+	</bean>
+	<bean class="com.geniisys.common.service.impl.GIISIntermediaryServiceImpl"
+		id="giisIntermediaryService" depends-on="giisIntermediaryDAO" >
+		<property name="giisIntermediaryDAO" ref="giisIntermediaryDAO" />
+	</bean>
+	<!-- end of GIISIntermediary -->
+	
+	<!-- GIISReports - whofeih 06/11/2010 -->
+	<bean class="com.geniisys.common.dao.impl.GIISReportsDAOImpl"
+		id="giisReportsDAO" depends-on="sqlMapClient" >
+		<property name="sqlMapClient">
+			<ref local="sqlMapClient" />
+		</property>
+	</bean>
+	<bean class="com.geniisys.common.service.impl.GIISReportsServiceImpl"
+		id="giisReportsService" depends-on="giisReportsDAO" >
+		<property name="giisReportsDAO" ref="giisReportsDAO" />
+	</bean>
+	<!-- end of GIISIntermediary -->
+	
+	<!-- GIISReportsAging -->
+	<bean class="com.geniisys.common.dao.impl.GIISReportsAgingDAOImpl"
+		id="giisReportsAgingDAO" depends-on="sqlMapClient" >
+		<property name="sqlMapClient">
+			<ref local="sqlMapClient" />
+		</property>
+	</bean>
+	<bean class="com.geniisys.common.service.impl.GIISReportsAgingServiceImpl"
+		id="giisReportsAgingService" depends-on="giisReportsAgingDAO" >
+		<property name="giisReportsAgingDAO" ref="giisReportsAgingDAO" />
+	</bean>
+	<!-- end: GIISReportsAging -->
+
+	<bean class="com.geniisys.common.dao.impl.GIISISSourceDAOImpl" id="giisIssourceDAO"
+		depends-on="sqlMapClient" >
+		<property name="sqlMapClient">
+			<ref local="sqlMapClient" />
+		</property>
+	</bean>
+	<bean class="com.geniisys.common.service.impl.GIISISSourceFacadeServiceImpl"
+		id="giisIssourceFacadeService" depends-on="giisIssourceDAO" >
+		<property name="giisIssourceDAO" ref="giisIssourceDAO" />
+	</bean>
+
+	<!-- lostBidReason, dalcantara 9.24.2010 -->
+	<bean class="com.geniisys.common.dao.impl.GIISLostBidDAOImpl" id="giisLostBidDAO"
+		depends-on="sqlMapClient">
+		<property name="sqlMapClient">
+			<ref local="sqlMapClient" />
+		</property>
+	</bean>
+	<bean class="com.geniisys.common.service.impl.GIISLostBidFacadeServiceImpl"
+		id="giisLostBidFacadeService" depends-on="giisLostBidDAO" >
+		<property name="giisLostBidDAO" ref="giisLostBidDAO" />
+	</bean>
+	<bean class="com.geniisys.common.service.impl.GIISLostBidServiceImpl" id="giisLostBidService"
+		depends-on="giisLostBidDAO">
+		<property name="giisLostBidDAO" ref="giisLostBidDAO"></property>
+	</bean>
+	<!-- end of lostBidReason -->
+
+	<bean class="com.geniisys.common.dao.impl.GIISAssuredDAOImpl" id="giisAssuredDao"
+		depends-on="sqlMapClient" >
+		<property name="sqlMapClient">
+			<ref local="sqlMapClient" />
+		</property>
+	</bean>
+	<bean class="com.geniisys.common.service.impl.GIISAssuredFacadeServiceImpl"
+		id="giisAssuredFacadeService" depends-on="giisAssuredDao" >
+		<property name="giisAssuredDao" ref="giisAssuredDao" />
+	</bean>
+	
+	<!-- giisparameters -->
+	<bean class="com.geniisys.common.dao.impl.GIISParameterDAOImpl"
+		id="giisParameterDAO" depends-on="sqlMapClient" >
+		<property name="sqlMapClient">
+			<ref local="sqlMapClient" />
+		</property>
+	</bean>
+	<bean class="com.geniisys.common.service.impl.GIISParameterFacadeServiceImpl"
+		id="giisParameterFacadeService" depends-on="giisParameterDAO" >
+		<property name="giisParameterDAO" ref="giisParameterDAO" />
+	</bean>
+	<!-- END OF giisparameters-->
+
+	<!-- User Modules - whofeih -->
+	<bean class="com.geniisys.common.dao.impl.GIISModuleDAOImpl" id="giisModuleDao"
+		depends-on="sqlMapClient" >
+		<property name="sqlMapClient" ref="sqlMapClient"></property>
+	</bean>
+	<bean class="com.geniisys.common.service.impl.GIISModuleServiceImpl"
+		id="giisModuleService" depends-on="giisModuleDao" >
+		<property name="giisModuleDAO" ref="giisModuleDao"></property>
+	</bean>
+	<!-- end of User Module -->
+
+	<!-- User Grp Modules - whofeih -->
+	<bean class="com.geniisys.common.dao.impl.GIISUserGrpModuleDAOImpl"
+		id="giisUserGrpModuleDAO" depends-on="sqlMapClient" >
+		<property name="sqlMapClient" ref="sqlMapClient"></property>
+	</bean>
+	<bean class="com.geniisys.common.service.impl.GIISUserGrpModuleServiceImpl"
+		id="giisUserGrpModuleService" depends-on="giisUserGrpModuleDAO" >
+		<property name="giisUserGrpModuleDAO" ref="giisUserGrpModuleDAO"></property>
+	</bean>
+	<!-- end of User Grp Modulse -->
+
+	<!-- User Tran - whofeih -->
+	<bean class="com.geniisys.common.dao.impl.GIISUserTranDAOImpl" id="giisUserTranDAO"
+		depends-on="sqlMapClient" >
+		<property name="sqlMapClient" ref="sqlMapClient"></property>
+	</bean>
+	<bean class="com.geniisys.common.service.impl.GIISUserTranServiceImpl"
+		id="giisUserTranService" depends-on="giisUserTranDAO" >
+		<property name="giisUserTranDAO" ref="giisUserTranDAO"></property>
+	</bean>
+	<!-- end of User Tran -->
+
+	<!-- User Modules - whofeih -->
+	<bean class="com.geniisys.common.dao.impl.GIISUserModulesDAOImpl"
+		id="giisUserModulesDAO" depends-on="sqlMapClient" >
+		<property name="sqlMapClient" ref="sqlMapClient"></property>
+	</bean>
+	<bean class="com.geniisys.common.service.impl.GIISUserModulesServiceImpl"
+		id="giisUserModulesService" depends-on="giisUserModulesDAO" >
+		<property name="giisUserModulesDAO" ref="giisUserModulesDAO"></property>
+	</bean>
+	<!-- end of User Module -->
+
+	<!-- User Iss Cd - whofeih -->
+	<bean class="com.geniisys.common.dao.impl.GIISUserIssCdDAOImpl"
+		id="giisUserIssCdDAO" depends-on="sqlMapClient" >
+		<property name="sqlMapClient" ref="sqlMapClient"></property>
+	</bean>
+	<bean class="com.geniisys.common.service.impl.GIISUserIssCdServiceImpl"
+		id="giisUserIssCdService" depends-on="giisUserIssCdDAO" >
+		<property name="giisUserIssCdDAO" ref="giisUserIssCdDAO"></property>
+	</bean>
+	<!-- end of User Iss Cd -->
+
+	<!-- User Line - whofeih -->
+	<bean class="com.geniisys.common.dao.impl.GIISUserLineDAOImpl" id="giisUserLineDAO"
+		depends-on="sqlMapClient" >
+		<property name="sqlMapClient" ref="sqlMapClient"></property>
+	</bean>
+	<bean class="com.geniisys.common.service.impl.GIISUserLineServiceImpl"
+		id="giisUserLineService" depends-on="giisUserLineDAO" >
+		<property name="giisUserLineDAO" ref="giisUserLineDAO"></property>
+	</bean>
+	<!-- end of User Line-->
+
+	<!-- LOV HELPER -->
+	<bean class="com.geniisys.common.dao.impl.LOVDAOImpl" id="lovDAO"
+		depends-on="sqlMapClient" >
+		<property name="sqlMapClient">
+			<ref local="sqlMapClient" />
+		</property>
+	</bean>
+	<bean class="com.geniisys.framework.util.LOVHelper" id="lovHelper"
+		depends-on="lovDAO" >
+		<property name="lovDAO">
+			<ref local="lovDAO" />
+		</property>
+	</bean>
+
+	<bean class="com.geniisys.lov.util.LOVUtil" id="lovUtil"
+		depends-on="sqlMapClient" >
+		<property name="sqlMapClient">
+			<ref local="sqlMapClient" />
+		</property>
+	</bean>
+	
+	<bean class="com.geniisys.framework.util.TableGridUtil" id="TableGridUtil"
+		depends-on="sqlMapClient" >
+		<property name="sqlMapClient">
+			<ref local="sqlMapClient" />
+		</property>
+	</bean>
+	
+	<!-- fileEntity - mrobes 02.05.10 -->
+	<bean class="com.geniisys.gipi.dao.impl.FileEntityDAOImpl" id="fileEntityDao"
+		depends-on="sqlMapClient" >
+		<property name="sqlMapClient" ref="sqlMapClient"></property>
+	</bean>
+	<bean class="com.geniisys.gipi.service.impl.FileEntityServiceImpl"
+		id="fileEntityService" depends-on="fileEntityDao" >
+		<property name="fileEntityDAO" ref="fileEntityDao"></property>
+	</bean>
+	<!-- end fileEntity -->
+
+	<!-- giis_grp_issource - Whofeih 01.18.10 -->
+	<bean class="com.geniisys.common.dao.impl.GIISGrpIsSourceDAOImpl"
+		id="giisGrpIsSourceDAO" depends-on="sqlMapClient" >
+		<property name="sqlMapClient" ref="sqlMapClient"></property>
+	</bean>
+	<bean class="com.geniisys.common.service.impl.GIISGrpIsSourceServiceImpl"
+		id="giisGrpIsSourceService" depends-on="giisGrpIsSourceDAO" >
+		<property name="giisGrpIsSourceDAO" ref="giisGrpIsSourceDAO"></property>
+	</bean>
+	<!-- end giis_grp_issource -->
+
+	<!-- giis_user_group_hdr - Whofeih 01.18.10 -->
+	<bean class="com.geniisys.common.dao.impl.GIISUserGrpHdrDAOImpl"
+		id="giisUserGrpHdrDAO" depends-on="sqlMapClient" >
+		<property name="sqlMapClient" ref="sqlMapClient"></property>
+	</bean>
+	<bean class="com.geniisys.common.service.impl.GIISUserGrpHdrServiceImpl"
+		id="giisUserGrpHdrService" depends-on="giisUserGrpHdrDAO" >
+		<property name="giisUserGrpHdrDAO" ref="giisUserGrpHdrDAO"></property>
+	</bean>
+	<!-- end giis_user_group_hdr -->
+
+	<!-- giis_user_group_tran - Whofeih 02.09.10 -->
+	<bean class="com.geniisys.common.dao.impl.GIISUserGrpTranDAOImpl"
+		id="giisUserGrpTranDAO" depends-on="sqlMapClient" >
+		<property name="sqlMapClient" ref="sqlMapClient"></property>
+	</bean>
+	<bean class="com.geniisys.common.service.impl.GIISUserGrpTranServiceImpl"
+		id="giisUserGrpTranService" depends-on="giisUserGrpTranDAO" >
+		<property name="giisUserGrpTranDAO" ref="giisUserGrpTranDAO"></property>
+	</bean>
+	<!-- end giis_user_group_tran -->
+
+	<!-- giis valid ip - whofeih 01/22/2010 -->
+	<bean class="com.geniisys.common.dao.impl.GIISValidIPDAOImpl" id="giisValidIpDAO"
+		depends-on="sqlMapClient" >
+		<property name="sqlMapClient" ref="sqlMapClient"></property>
+	</bean>
+	<bean class="com.geniisys.common.service.impl.GIISValidIPServiceImpl"
+		id="giisValidIpService" depends-on="giisValidIpDAO" >
+		<property name="giisValidIpDAO" ref="giisValidIpDAO"></property>
+	</bean>
+	<!-- end giis valid ip -->
+
+	<!-- giis user - whofeih 01/22/2010 -->
+	<bean class="com.geniisys.common.dao.impl.GIISUserDAOImpl" id="giisUserDAO"
+		depends-on="sqlMapClient" >
+		<property name="sqlMapClient">
+			<ref local="sqlMapClient" />
+		</property>
+	</bean>
+	<bean class="com.geniisys.common.service.impl.GIISUserFacadeServiceImpl"
+		id="giisUserFacadeService" depends-on="giisUserDAO,dbSequenceUtil">
+		<property name="giisUserDAO" ref="giisUserDAO" />
+		<property name="dbSequenceUtil" ref="dbSequenceUtil" />
+		<property name="giisValidIpDAO" ref="giisValidIpDAO" />
+		<!-- added property by alfie, 01.19.2011 -->
+		<property name="giacModulesService"	ref = "giacModulesService"/> 
+	</bean>
+	<!-- end of giis user -->
+
+	<!-- giis_transaction - Whofeih 01.27.10 -->
+	<bean class="com.geniisys.common.dao.impl.GIISTransactionDAOImpl"
+		id="giisTransactionDAO" depends-on="sqlMapClient" >
+		<property name="sqlMapClient" ref="sqlMapClient"></property>
+	</bean>
+	<bean class="com.geniisys.common.service.impl.GIISTransactionServiceImpl"
+		id="giisTransactionService" depends-on="giisTransactionDAO" >
+		<property name="giisTransactionDAO" ref="giisTransactionDAO"></property>
+	</bean>
+	<!-- end giis_user_group -->
+
+	<!-- giis_user_grp_dtl - Whofeih 01.28.10 -->
+	<bean class="com.geniisys.common.dao.impl.GIISUserGrpDtlDAOImpl"
+		id="giisUserGrpDtlDAO" depends-on="sqlMapClient" >
+		<property name="sqlMapClient" ref="sqlMapClient"></property>
+	</bean>
+	<bean class="com.geniisys.common.service.impl.GIISUserGrpDtlServiceImpl"
+		id="giisUserGrpDtlService" depends-on="giisUserGrpDtlDAO" >
+		<property name="giisUserGrpDtlDAO" ref="giisUserGrpDtlDAO"></property>
+	</bean>
+	<!-- end giis_user_grp_dtl -->
+
+	<!-- giis_user_grp_line - Whofeih 01.28.10 -->
+	<bean class="com.geniisys.common.dao.impl.GIISUserGrpLineDAOImpl"
+		id="giisUserGrpLineDAO" depends-on="sqlMapClient" >
+		<property name="sqlMapClient" ref="sqlMapClient"></property>
+	</bean>
+	<bean class="com.geniisys.common.service.impl.GIISUserGrpLineServiceImpl"
+		id="giisUserGrpLineService" depends-on="giisUserGrpLineDAO" >
+		<property name="giisUserGrpLineDAO" ref="giisUserGrpLineDAO"></property>
+	</bean>
+	<!-- end giis_user_grp_line -->
+	
+	<!-- giisPeril - bryan 02.15.10 -->
+	<bean class="com.geniisys.common.dao.impl.GIISPerilDAOImpl" id="giisPerilDAO"
+		depends-on="sqlMapClient" >
+		<property name="sqlMapClient" ref="sqlMapClient"></property>
+	</bean>
+	<bean class="com.geniisys.common.service.impl.GIISPerilServiceImpl"
+		id="giisPerilService" depends-on="giisPerilDAO" >
+		<property name="giisPerilDAO" ref="giisPerilDAO"></property>
+	</bean>
+	<!-- end giisPeril -->
+	
+	<!-- GIISTariffRatesHdrService bry 06.16.2010-->
+	<bean class="com.geniisys.common.dao.impl.GIISTariffRatesHdrDAOImpl"
+		id="giisTariffRatesHdrDAO" depends-on="sqlMapClient" >
+		<property name="sqlMapClient" ref="sqlMapClient"></property>
+	</bean>
+	<bean
+		class="com.geniisys.common.service.impl.GIISTariffRatesHdrServiceImpl"
+		id="giisTariffRatesHdrService" depends-on="giisTariffRatesHdrDAO">
+		<property name="giisTariffRatesHdrDAO" ref="giisTariffRatesHdrDAO" />
+	</bean>
+	
+	<!-- rencela begin giistaxservice	-->
+	<bean class="com.geniisys.common.dao.impl.GIISTaxPerilDAOImpl"
+		  id="giisTaxPerilDAO" depends-on="sqlMapClient" >
+		  <property name="sqlMapClient" ref="sqlMapClient"></property>
+	</bean>
+	
+	<bean class="com.geniisys.common.service.impl.GIISTaxPerilServiceImpl"
+		  id="giisTaxPerilService" depends-on="giisTaxPerilDAO" >
+		  <property name="giisTaxPerilDAO" ref="giisTaxPerilDAO"></property>
+    </bean>	
+			
+<!--	GENIISYS ENTITY BEANS END	-->
+	
+	<!-- Custom Password Encoder bean -->
+	<bean id="passwordEncoder" class="com.geniisys.security.GeniisysSpringPasswordEncoder" />
+	<!-- end Custom Password Encoder bean -->
+
+	<!-- Jdbc Dao Impl bean -->
+	<bean class="org.springframework.security.core.userdetails.jdbc.JdbcDaoImpl"
+		id="jdbcDaoImpl">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	<!-- end Jdbc Dao Impl bean -->
+		
+	<!-- GIISReinsurer - emman 11/11/2010 -->
+	<bean class="com.geniisys.common.dao.impl.GIISReinsurerDAOImpl"
+		id="giisReinsurerDAO" depends-on="sqlMapClient" >
+		<property name="sqlMapClient">
+			<ref local="sqlMapClient" />
+		</property>
+	</bean>
+	<bean class="com.geniisys.common.service.impl.GIISReinsurerServiceImpl"
+		id="giisReinsurerService" depends-on="giisReinsurerDAO" >
+		<property name="giisReinsurerDAO" ref="giisReinsurerDAO" />
+	</bean>
+	<!-- end of GIISIntermediary -->
+		
+	<!-- giisGeninInfo - jerome 01.10.2011 -->
+	<bean class="com.geniisys.common.dao.impl.GIISGeninInfoDAOImpl" id="giisGeninInfoDAO"
+		depends-on="sqlMapClient">
+		<property name="sqlMapClient" ref="sqlMapClient"></property>
+	</bean>
+	<bean class="com.geniisys.common.service.impl.GIISGeninInfoServiceImpl"
+		id="giisGeninInfoService" depends-on="giisGeninInfoDAO">
+		<property name="giisGeninInfoDAO" ref="giisGeninInfoDAO"></property>
+	</bean>
+	<!-- end giisGeninInfo -->
+	
+	<!-- giisEndtText - grace 05.06.2011 -->
+	<bean class="com.geniisys.common.dao.impl.GIISEndtTextDAOImpl" id="giisEndtTextDAO"
+		depends-on="sqlMapClient">
+		<property name="sqlMapClient" ref="sqlMapClient"></property>
+	</bean>
+	<bean class="com.geniisys.common.service.impl.GIISEndtTextServiceImpl"
+		id="giisEndtTextService" depends-on="giisEndtTextDAO">
+		<property name="giisEndtTextDAO" ref="giisEndtTextDAO"></property>
+	</bean>
+	<!-- end giisEndtText -->
+
+	<!-- Custom user details -->
+	<bean id="userDetailsService" class="com.geniisys.security.GeniisysUserDetailsService">
+		<property name="userDetailsService" ref="jdbcDaoImpl" />
+		<property name="passwordEncoder" ref="passwordEncoder" />
+	</bean>
+	<!-- end Custom user details -->
+	
+	<!-- GIISUserGrpHist - angelo 01.12.2011 -->
+	<bean class="com.geniisys.common.dao.impl.GIISUserGrpHistDAOImpl" id="giisUserGrpHistDAO"
+		depends-on="sqlMapClient">
+		<property name="sqlMapClient" ref="sqlMapClient" ></property>	
+	</bean>
+	<bean class="com.geniisys.common.service.impl.GIISUserGrpHistServiceImpl" id="giisUserGrpHistService"
+		depends-on="giisUserGrpHistDAO">
+		<property name="giisUserGrpHistDao" ref="giisUserGrpHistDAO"></property>	
+	</bean>
+	<!-- end giisUserGrpHist -->	
+	
+	<!-- GIISCurrency - emman 02/09/2011 -->
+	<bean class="com.geniisys.common.dao.impl.GIISCurrencyDAOImpl"
+		id="giisCurrencyDAO" depends-on="sqlMapClient" >
+		<property name="sqlMapClient">
+			<ref local="sqlMapClient" />
+		</property>
+	</bean>
+	<bean class="com.geniisys.common.service.impl.GIISCurrencyServiceImpl"
+		id="giisCurrencyService" depends-on="giisCurrencyDAO" >
+		<property name="giisCurrencyDAO" ref="giisCurrencyDAO" />
+	</bean>
+	<!-- end of GIISCurrency -->
+	
+	<!-- GIISFunds - emman 03/30/2011 -->
+	<bean class="com.geniisys.common.dao.impl.GIISFundsDAOImpl"
+		id="giisFundsDAO" depends-on="sqlMapClient" >
+		<property name="sqlMapClient">
+			<ref local="sqlMapClient" />
+		</property>
+	</bean>
+	<bean class="com.geniisys.common.service.impl.GIISFundsServiceImpl"
+		id="giisFundsService" depends-on="giisFundsDAO" >
+		<property name="giisFundsDAO" ref="giisFundsDAO" />
+	</bean>
+	<!-- end of GIISFunds -->
+	
+	<!--  GIISInspector - angelo 04.11.2011 -->
+	<bean class="com.geniisys.common.dao.impl.GIISInspectorDAOImpl"
+		id="giisInspectorDAO" depends-on="sqlMapClient" >
+		<property name="sqlMapClient">
+			<ref local="sqlMapClient" />
+		</property>
+	</bean>
+	<bean class="com.geniisys.common.service.impl.GIISInspectorServiceImpl"
+		id="giisInspectorService" depends-on="giisInspectorDAO" >
+		<property name="giisInspectorDAO" ref="giisInspectorDAO" />
+	</bean>
+	<!--  End of GIISInpector -->
+	
+	<!-- andrew 07.25.2011 -->
+	<bean class="com.geniisys.common.dao.impl.GIISEventDAOImpl"
+		id="giisEventDAO" depends-on="sqlMapClient">
+		<property name="sqlMapClient">
+			<ref local="sqlMapClient" />
+		</property>	
+	</bean>
+	<bean class="com.geniisys.common.service.impl.GIISEventServiceImpl"
+		id="giisEventService" depends-on="giisEventDAO">
+		<property name="giisEventDAO" ref="giisEventDAO" />
+	</bean>
+	
+	<!--  -->
+	<bean class="com.geniisys.giis.dao.impl.GIISEventModuleDAOImpl" id="giisEventModuleDAO" depends-on="sqlMapClient">
+		<property name="sqlMapClient" ref="sqlMapClient"></property>
+	</bean>
+	<bean class="com.geniisys.giis.service.impl.GIISEventModuleServiceImpl" id="giisEventModuleService" depends-on="giisEventModuleDAO">
+		<property name="giisEventModuleDAO" ref="giisEventModuleDAO"></property>
+	</bean>
+	<!--  -->
+	
+	<!-- bonok :: 04.18.2012 -->
+	<bean class="com.geniisys.common.dao.impl.GIISDocumentDAOImpl"
+		id="giisDocumentDAO" depends-on="sqlMapClient">
+		<property name="sqlMapClient">
+			<ref local="sqlMapClient"/>
+		</property>	
+	</bean>
+	<bean class="com.geniisys.common.service.impl.GIISDocumentServiceImpl"
+		id="giisDocumentService" depends-on="sqlMapClient">
+		<property name="giisDocumentDAO" ref="giisDocumentDAO" />	
+	</bean>
+	
+	<!--  GIPIInspDataWc - angelo 04.12.2011 -->
+	<bean class="com.geniisys.gipi.dao.impl.GIPIInspDataWcDAOImpl"
+		id="gipiInspDataWcDAO" depends-on="sqlMapClient" >
+		<property name="sqlMapClient">
+			<ref local="sqlMapClient" />
+		</property>
+	</bean>
+	<bean class="com.geniisys.gipi.service.impl.GIPIInspDataWcServiceImpl"
+		id="gipiInspDataWcService" depends-on="gipiInspDataWcDAO" >
+		<property name="gipiInspDataWcDAO" ref="gipiInspDataWcDAO" />
+	</bean>
+	<!--  End of GIPIInspDataWc -->
+
+	<!--  GIPIInspDataDtl - angelo 04.19.2011 -->
+	<bean class="com.geniisys.gipi.dao.impl.GIPIInspDataDtlDAOImpl"
+		id="gipiInspDataDtlDAO" depends-on="sqlMapClient">
+		<property name="sqlMapClient">
+			<ref local="sqlMapClient" />
+		</property>	
+	</bean>
+	<bean class="com.geniisys.gipi.service.impl.GIPIInspDataDtlServiceImpl"
+		id="gipiInspDataDtlService" depends-on="gipiInspDataDtlDAO">
+		<property name="gipiInspDataDtlDAO" ref="gipiInspDataDtlDAO" />
+	</bean>
+	<!--  End of GIPIInspDataDtl -->
+	
+	<!--  GIEXExpiry - robert 09.09.2011 -->
+	<bean class="com.geniisys.giex.dao.impl.GIEXExpiryDAOImpl" id="giexExpiryDAO"
+		depends-on="sqlMapClient" >
+		<property name="sqlMapClient">
+			<ref local="sqlMapClient" />
+		</property>
+	</bean>
+	<bean class="com.geniisys.giex.service.impl.GIEXExpiryServiceImpl"
+		id="giexExpiryService" depends-on="giexExpiryDAO" >
+		<property name="giexExpiryDAO" ref="giexExpiryDAO" />
+	</bean>
+	<!--  End of GIEXExpiry -->
+	
+	<!--  GIEXExpiriesV - robert 09.19.2011 -->
+	<bean class="com.geniisys.giex.dao.impl.GIEXExpiriesVDAOImpl" id="giexExpiriesVDAO"
+		depends-on="sqlMapClient" >
+		<property name="sqlMapClient">
+			<ref local="sqlMapClient" />
+		</property>
+	</bean>
+	<bean class="com.geniisys.giex.service.impl.GIEXExpiriesVServiceImpl"
+		id="giexExpiriesVService" depends-on="giexExpiriesVDAO" >
+		<property name="giexExpiriesVDAO" ref="giexExpiriesVDAO" />
+	</bean>
+	<!--  End of GIEXExpiriesV -->
+	
+	<!--  GIEXItmperil - robert 10.03.2011 -->
+	<bean class="com.geniisys.giex.dao.impl.GIEXItmperilDAOImpl" id="GIEXItmperilDAO"
+		depends-on="sqlMapClient" >
+		<property name="sqlMapClient">
+			<ref local="sqlMapClient" />
+		</property>
+	</bean>
+	<bean class="com.geniisys.giex.service.impl.GIEXItmperilServiceImpl"
+		id="giexItmperilService" depends-on="giexItmperilDAO" >
+		<property name="giexItmperilDAO" ref="giexItmperilDAO" />
+	</bean>
+	<!--  End of GIEXItmperil -->
+	
+	<!-- CGRefCodes - emman 08/10/2011 -->
+	<bean class="com.geniisys.common.dao.impl.CGRefCodesDAOImpl"
+		id="cgRefCodesDAO" depends-on="sqlMapClient" >
+		<property name="sqlMapClient">
+			<ref local="sqlMapClient" />
+		</property>
+	</bean>
+	<bean class="com.geniisys.common.service.impl.CGRefCodesServiceImpl"
+		id="cgRefCodesService" depends-on="cgRefCodesDAO" >
+		<property name="cgRefCodesDAO" ref="cgRefCodesDAO" />
+	</bean>
+	<!-- end of GIISCurrency -->
+	
+	<!-- andrew 09.29.2011 -->
+	<bean class="com.geniisys.common.dao.impl.GIISEventModUserDAOImpl"
+		id="giisEventModUserDAO" depends-on="sqlMapClient" >
+		<property name="sqlMapClient">
+			<ref local="sqlMapClient" />
+		</property>
+	</bean>
+	<bean class="com.geniisys.common.service.impl.GIISEventModUserServiceImpl"
+		id="giisEventModUserService" depends-on="giisEventModUserDAO" >
+		<property name="giisEventModUserDAO" ref="giisEventModUserDAO" />
+	</bean>
+	
+	<!--  GIEXPackExpiry - bonok 04.17.2012 -->
+	<bean class="com.geniisys.giex.dao.impl.GIEXPackExpiryDAOImpl" id="giexPackExpiryDAO"
+		depends-on="sqlMapClient" >
+		<property name="sqlMapClient">
+			<ref local="sqlMapClient" />
+		</property>
+	</bean>
+	<bean class="com.geniisys.giex.service.impl.GIEXPackExpiryServiceImpl"
+		id="giexPackExpiryService" depends-on="giexPackExpiryDAO" >
+		<property name="giexPackExpiryDAO" ref="giexPackExpiryDAO" />
+	</bean>
+	<!--  End of GIEXPackExpiry -->
+	
+	<!-- SMS - Marco - 01-22-2013 -->
+	<bean class="com.geniisys.giex.dao.impl.GIEXSmsDtlDAOImpl" 
+		id="giexSmsDtlDAO" depends-on="sqlMapClient">
+		<property name="sqlMapClient" ref="sqlMapClient"></property>
+	</bean>
+	<bean class="com.geniisys.giex.service.impl.GIEXSmsDtlServiceImpl" 
+		id="giexSmsDtlService" depends-on="giexSmsDtlDAO">
+		<property name="giexSmsDtlDAO" ref="giexSmsDtlDAO"></property>
+	</bean>
+	<!-- End of SMS -->
+	
+	<!-- GIISRecoveryType Shan 03.15.2013 -->
+	<bean class="com.geniisys.common.dao.impl.GIISRecoveryTypeDAOImpl" id="giisRecoveryTypeDAO" depends-on="sqlMapClient">
+		<property name="sqlMapClient" ref="sqlMapClient"></property>
+	</bean>
+	<bean class="com.geniisys.common.service.impl.GIISRecoveryTypeServiceImpl" id="giisRecoveryTypeService" 
+		depends-on="giisRecoveryTypeDAO">
+		<property name="giisRecoveryTypeDAO" ref="giisRecoveryTypeDAO"></property>
+	</bean>
+	<!-- end of GIISRecoveryType -->
+	
+	<!-- GISMUserRoute Fons 11.22.2013 -->
+	<bean class="com.geniisys.gism.dao.impl.GISMUserRouteDAOImpl" id="gismUserRouteDAO" depends-on="sqlMapClient">
+		<property name="sqlMapClient" ref="sqlMapClient"></property>
+	</bean>
+	<bean class="com.geniisys.gism.service.impl.GISMUserRouteServiceImpl" id="gismUserRouteService" depends-on="gismUserRouteDAO">
+		<property name="gismUserRouteDAO" ref="gismUserRouteDAO"></property>
+	</bean>
+	<!-- end of GISMUserRoute -->
+	
+	<bean class="com.geniisys.gipi.dao.impl.COCAuthenticationDAOImpl" id="cocAuthenticationDAO" depends-on="sqlMapClient">
+		<property name="sqlMapClient" ref="sqlMapClient"></property>
+	</bean>
+	<bean class="com.geniisys.gipi.service.impl.COCAuthenticationServiceImpl" id="cocAuthenticationService" 
+		depends-on="cocAuthenticationDAO">
+		<property name="cocAuthenticationDAO" ref="cocAuthenticationDAO"></property>
+	</bean>
+	
+	<bean class="com.geniisys.csv.util.CSVUtil" id="CsvUtil"
+		depends-on="sqlMapClient" >
+		<property name="sqlMapClient">
+			<ref local="sqlMapClient" />
+		</property>
+	</bean>
+	
+	<!-- Spring Security -->
+	<security:http auto-config='true'>
+		<!--
+			Add the following line to define pages to be accessed through https
+			requires-channel can be: 'http', 'https', or 'any'. 'any' means
+			either http or https. The port mappings are used for use of
+			non-standard ports
+		-->
+		<!--
+			<security:intercept-url pattern="/secure/**" access="ROLE_USER"
+			requires-channel="https"/>
+		-->
+
+		<security:port-mappings>
+			<security:port-mapping http="9080" https="9443" />
+		</security:port-mappings>
+
+
+		<!-- URL intercept pattern -->
+
+		<security:intercept-url pattern="/pages/*"
+			access="IS_AUTHENTICATED_ANONYMOUSLY" />
+
+		<security:intercept-url pattern="/pages/common/**"
+			access="IS_AUTHENTICATED_ANONYMOUSLY" />
+
+		<!--
+			<security:intercept-url pattern="/pages/index.jsp"
+			access="IS_AUTHENTICATED_ANONYMOUSLY"/> <security:intercept-url
+			pattern="/pages/login.jsp" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
+		-->
+
+		<security:intercept-url pattern="/pages/**"
+			access="ROLE_USER,ROLE_ADMIN" />
+
+
+		<!-- Add the following line to define the login page -->
+		<security:form-login login-page='/pages/index.jsp' />
+	</security:http>
+
+	<!--
+		When adding this declaration, add aspectjrt-1.6.5.jar and
+		aspectjweaver-1.6.5.jar to lib
+	-->
+	<!--	<security:global-method-security secured-annotations="enabled">-->
+	<!--
+		<security:protect-pointcut expression="execution(*
+		com.onlinebisyo.*.*.*(..))" access="ROLE_USER,ROLE_ADMIN"/>
+	-->
+	<!--
+		<security:protect-pointcut expression="execution(*
+		com.onlinebisyo.*.*(..))" access="ROLE_USER,ROLE_ADMIN"/>
+	-->
+	<!--	</security:global-method-security>-->
+
+	<!-- Authentication manager with database -->
+	<security:authentication-manager alias="authenticationManager">
+		<security:authentication-provider
+			user-service-ref="userDetailsService">
+		</security:authentication-provider>
+	</security:authentication-manager>
+	
+	<bean class="com.geniisys.common.service.impl.GeniisysServiceImpl" id="geniisysService"/>	
+</beans>

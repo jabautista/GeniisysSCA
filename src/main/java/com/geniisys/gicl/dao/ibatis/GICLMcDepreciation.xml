@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GICLMcDepreciation">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GICLMcDepreciation" type="com.geniisys.gicl.entity.GICLMcDepreciation"/>
+	
+	<resultMap class="java.util.HashMap" id="gicls059SublineLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="subline_cd"			property="sublineCd" />
+		<result column="subline_name"	    property="sublineName" />
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="gicls059LossExpLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="loss_exp_cd"			property="lossExpCd" />
+		<result column="loss_exp_desc"			property="lossExpDesc" />
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="gicls059McDepreciationMap" extends="BaseEntity.TableGridResultMap">
+		<result column="special_part_cd"	property="specialPartCd" />
+		<result column="loss_exp_desc"		property="lossExpDesc" />
+		<result column="mc_year_fr"			property="mcYearFr" />
+		<result column="orig_mc_year_fr"	property="origMcYearFr" />
+		<result column="rate"				property="rate" />
+		<result column="subline_cd"			property="sublineCd" />
+		<result column="remarks"			property="remarks" />
+		<result column="user_id"			property="userId" />
+		<result column="last_update"		property="lastUpdate" />
+	</resultMap>
+	
+	<select id="getGICLS059SublineLOV" resultMap="gicls059SublineLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(gicls059_pkg.get_giis_subline_list(#findText#))
+					  	<isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="sublineCd">
+								ORDER BY subline_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="sublineName">
+								ORDER BY subline_name
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>
+						  )a,
+					   (SELECT COUNT(*) count_
+						  FROM TABLE(gicls059_pkg.get_giis_subline_list(#findText#))
+		                  ) b)
+		 WHERE rownum_ BETWEEN #from# AND #to# 
+	</select>
+	
+	<select id="getGICLS059LossExpLOV" resultMap="gicls059LossExpLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(gicls059_pkg.get_giis_loss_exp_list(#findText#))
+					  	<isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="lossExpCd">
+								ORDER BY loss_exp_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="lossExpDesc">
+								ORDER BY loss_exp_desc
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>
+						  )a,
+					   (SELECT COUNT(*) count_
+						  FROM TABLE(gicls059_pkg.get_giis_loss_exp_list(#findText#))
+		                  ) b)
+		 WHERE rownum_ BETWEEN #from# AND #to# 
+	</select>
+	
+	<select id="getGicls059RecList" resultMap="gicls059McDepreciationMap">
+		SELECT * 
+			FROM (SELECT rownum rownum_,
+						 b.count_,
+						 a.*
+					FROM (SELECT * 
+							FROM TABLE (gicls059_pkg.get_rec_list (#sublineCd#))
+							<isNotNull property="filter">
+								WHERE 1=1
+								<isNotEmpty prepend="AND"  property="specialPartCd">
+									UPPER(special_part_cd) like UPPER(#specialPartCd#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="lossExpDesc">
+									UPPER(loss_exp_desc) like UPPER(#lossExpDesc#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="mcYearFr">
+									mc_year_fr like #mcYearFr#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="rate">
+									rate like #rate#
+								</isNotEmpty>
+							</isNotNull>
+					 		<isEqual property="sortColumn" compareValue="specialPartCd lossExpDesc">
+								ORDER BY special_part_cd 
+								<isNotNull property="sortColumn">
+							          <isEqual property="ascDescFlg" compareValue="ASC">
+							              	ASC
+							           </isEqual>
+							           <isEqual property="ascDescFlg" compareValue="DESC">
+							            	DESC
+							           </isEqual>
+							    </isNotNull>, 
+							            loss_exp_desc
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="mcYearFr">
+								ORDER BY mc_year_fr
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="rate">
+								ORDER BY rate
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>) a, 
+							(SELECT count(*) count_
+							   FROM TABLE (gicls059_pkg.get_rec_list (#sublineCd#))
+						   	<isNotNull property="filter">
+								WHERE 1=1
+								<isNotEmpty prepend="AND"  property="specialPartCd">
+									UPPER(special_part_cd) like UPPER(#specialPartCd#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="lossExpDesc">
+									UPPER(loss_exp_desc) like UPPER(#lossExpDesc#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="mcYearFr">
+									mc_year_fr like #mcYearFr#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="rate">
+									rate like #rate#
+								</isNotEmpty>
+							</isNotNull>
+							 ) b)
+		WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="setGICLMcDepreciation" parameterClass="GICLMcDepreciation">
+	    DECLARE
+	    	v_rec gicl_mc_depreciation%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+
+ 			v_rec.special_part_cd := #specialPartCd#;
+ 			v_rec.mc_year_fr := #mcYearFr#;
+ 			v_rec.rate := #rate#;
+ 			v_rec.subline_cd := #sublineCd#;
+ 			v_rec.remarks := #remarks#;
+ 			v_rec.user_id := #userId#;
+
+ 			gicls059_pkg.set_rec(v_rec,#origMcYearFr#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<delete id="delGICLMcDepreciation" parameterClass="GICLMcDepreciation">
+		BEGIN
+ 			gicls059_pkg.del_rec(#sublineCd#,#specialPartCd#,#origMcYearFr#);
+ 		END;
+ 	</delete>
+ 	
+ 	<procedure id="valAddGICLMcDepreciation" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			gicls059_pkg.val_add_rec(#sublineCd#,#specialPartCd#,#mcYearFr#);
+ 		END;
+ 	</procedure> 	
+</sqlMap>

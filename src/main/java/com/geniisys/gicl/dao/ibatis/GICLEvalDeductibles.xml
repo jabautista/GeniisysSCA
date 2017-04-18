@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GICLEvalDeductibles">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GICLEvalDeductibles" type="com.geniisys.gicl.entity.GICLEvalDeductibles"/>
+	
+	<resultMap class="GICLEvalDeductibles" 	id="GICLEvalDeductiblesResultMap">
+		<result property="evalId"			column="EVAL_ID"/>
+		<result property="dedCd"			column="DED_CD"/>
+		<result property="dspExpDesc"		column="DSP_EXP_DESC"/>
+		<result property="sublineCd"		column="SUBLINE_CD"/>
+		<result property="noOfUnit"			column="NO_OF_UNIT"/>
+		<result property="dedBaseAmt"		column="DED_BASE_AMT"/>
+		<result property="dedAmt"			column="DED_AMT"/>
+		<result property="dedRate"			column="DED_RT"/>
+		<result property="dedText"			column="DED_TEXT"/>
+		<result property="payeeTypeCd"		column="PAYEE_TYPE_CD"/>
+		<result property="payeeCd"			column="PAYEE_CD"/>
+		<result property="dspCompanyDesc"	column="DSP_COMPANY_DESC"/>
+		<result property="netTag"			column="NET_TAG"/>
+		<result property="userId"			column="USER_ID"/>
+		<result property="lastUpdate"		column="LAST_UPDATE"/>
+		<result property="rowNum"			column="ROWNUM_"/>
+		<result property="rowCount"			column="COUNT_"/>
+	</resultMap>
+	
+	<select id="getGiclEvalDeductibles" resultMap="GICLEvalDeductiblesResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GICL_EVAL_DEDUCTIBLES_PKG.get_gicl_eval_deductibles_list(#evalId#))
+		          		<isEqual property="sortColumn" compareValue="dspExpDesc">
+			            	ORDER BY dsp_exp_desc
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="dspCompanyDesc">
+			            	ORDER BY dsp_company_desc
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="noOfUnit">
+			            	ORDER BY no_of_unit
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="dedRate">
+			            	ORDER BY ded_rt
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="dedBaseAmt">
+			            	ORDER BY ded_base_amt
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="dedAmt">
+			            	ORDER BY ded_amt
+			          	</isEqual>
+			           	<isNotNull property="sortColumn">
+			              	<isEqual property="ascDescFlg" compareValue="ASC">
+			              		ASC
+			              	</isEqual>
+			              	<isEqual property="ascDescFlg" compareValue="DESC">
+			              		DESC
+			              	</isEqual>
+			            </isNotNull>  
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GICL_EVAL_DEDUCTIBLES_PKG.get_gicl_eval_deductibles_list(#evalId#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="setGiclEvalDeductibles" parameterClass="GICLEvalDeductibles">
+		BEGIN
+		    giis_users_pkg.app_user := #userId#;
+		    GICL_EVAL_DEDUCTIBLES_PKG.set_gicl_eval_deductibles
+		        (#evalId#,        #dedCd#,    #sublineCd#,    #noOfUnit#,
+		         #dedBaseAmt#,    #dedAmt#,   #dedRate#,      #dedText#,
+		         #payeeTypeCd#,   #payeeCd#,  #netTag#,       #userId#);
+		END;
+	</procedure>
+	
+	<procedure id="insertGiclEvalDeductibles" parameterClass="GICLEvalDeductibles">
+		BEGIN
+		    giis_users_pkg.app_user := #userId#;
+		    GICL_EVAL_DEDUCTIBLES_PKG.insert_gicl_eval_deductibles
+		        (#evalId#,        #dedCd#,    #sublineCd#,    #noOfUnit#,
+		         #dedBaseAmt#,    #dedAmt#,   #dedRate#,      #dedText#,
+		         #payeeTypeCd#,   #payeeCd#,  #netTag#,       #userId#);
+		END;
+	</procedure>
+	
+	<procedure id="deleteGiclEvalDeductibles" parameterClass="java.util.HashMap">
+		BEGIN
+		    giis_users_pkg.app_user := #userId#;
+			GICL_EVAL_DEDUCTIBLES_PKG.delete_gicl_eval_deductibles
+		        (#evalId#,        #dedCd#,         #sublineCd#,    
+		         #noOfUnit#,      #dedBaseAmt#,    #dedAmt#,   
+		         #dedRate#,       #payeeTypeCd#,   #payeeCd#);
+		END;
+	</procedure>
+	
+	<procedure id="updateDeductibleOfMcEval" parameterClass="java.util.HashMap">
+		BEGIN
+		    giis_users_pkg.app_user := #userId#;
+			GICL_EVAL_DEDUCTIBLES_PKG.update_deductible_of_mc_eval(#evalId#);
+		END;
+	</procedure>
+	
+	<procedure id="applyDeductiblesForMcEval" parameterClass="java.util.HashMap">
+		BEGIN
+		    giis_users_pkg.app_user := #userId#;
+			GICL_EVAL_DEDUCTIBLES_PKG.apply_eval_deductibles
+			(#evalId#,    #dedNoOfAcc#, #payeeTypeCd#, #payeeCd#,  
+			#dedBaseAmt#, #lineCd#,     #sublineCd#,   #polIssCd#,
+			#issueYy#,    #polSeqNo#,   #renewNo#,     #lossDate#, 
+			#itemNo#,     #perilCd#);
+		END;
+	</procedure>
+	
+</sqlMap>

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GICLR206ER_TRTY_DTLS" language="groovy" pageWidth="990" pageHeight="12" columnWidth="990" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="Crosstab Data Text" isDefault="false" hAlign="Center"/>
+	<parameter name="P_CLAIM_ID" class="java.lang.Integer"/>
+	<parameter name="P_SESSION_ID" class="java.lang.String"/>
+	<parameter name="P_ISS_CD" class="java.lang.String"/>
+	<parameter name="P_LINE_CD" class="java.lang.String"/>
+	<parameter name="P_SUBLINE_CD" class="java.lang.String"/>
+	<parameter name="P_LOSS_YEAR" class="java.lang.Integer"/>
+	<parameter name="P_BUSS_SOURCE" class="java.lang.String"/>
+	<parameter name="P_RI_CD" class="java.math.BigDecimal"/>
+	<parameter name="P_GRP_SEQ_NO" class="java.math.BigDecimal"/>
+	<queryString>
+		<![CDATA[select * from table(giclr206er_pkg.get_giclr_206er_share($P{P_CLAIM_ID}, $P{P_SESSION_ID}, $P{P_ISS_CD}, $P{P_LINE_CD}, $P{P_SUBLINE_CD}, $P{P_LOSS_YEAR}, $P{P_BUSS_SOURCE}, $P{P_RI_CD})) WHERE RI_CD = $P{P_RI_CD}]]>
+	</queryString>
+	<field name="PD_LOSS4" class="java.math.BigDecimal"/>
+	<field name="TREATY_NAME" class="java.lang.String"/>
+	<field name="TRTY_RI_NAME" class="java.lang.String"/>
+	<field name="GRP_SEQ_NO" class="java.math.BigDecimal"/>
+	<field name="ROW_1" class="java.lang.String"/>
+	<field name="RI_CD" class="java.math.BigDecimal"/>
+	<summary>
+		<band height="12" splitType="Stretch">
+			<crosstab>
+				<reportElement x="0" y="0" width="990" height="12"/>
+				<rowGroup name="TRTY_RI_NAME" width="0" totalPosition="End">
+					<bucket>
+						<bucketExpression class="java.lang.String"><![CDATA[$F{TRTY_RI_NAME}]]></bucketExpression>
+					</bucket>
+					<crosstabRowHeader>
+						<cellContents backcolor="#F0F8FF" mode="Opaque"/>
+					</crosstabRowHeader>
+					<crosstabTotalRowHeader>
+						<cellContents backcolor="#BFE1FF" mode="Opaque"/>
+					</crosstabTotalRowHeader>
+				</rowGroup>
+				<columnGroup name="GRP_SEQ_NO" height="0">
+					<bucket>
+						<bucketExpression class="java.math.BigDecimal"><![CDATA[$F{GRP_SEQ_NO}]]></bucketExpression>
+					</bucket>
+					<crosstabColumnHeader>
+						<cellContents backcolor="#F0F8FF" mode="Opaque"/>
+					</crosstabColumnHeader>
+					<crosstabTotalColumnHeader>
+						<cellContents/>
+					</crosstabTotalColumnHeader>
+				</columnGroup>
+				<measure name="PD_LOSS4Measure" class="java.math.BigDecimal" calculation="Sum">
+					<measureExpression><![CDATA[$F{PD_LOSS4}]]></measureExpression>
+				</measure>
+				<measure name="P_GRP_SEQ_NO" class="java.math.BigDecimal">
+					<measureExpression><![CDATA[$P{P_GRP_SEQ_NO}]]></measureExpression>
+				</measure>
+				<crosstabCell width="55" height="11">
+					<cellContents>
+						<textField isStretchWithOverflow="true" pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+							<reportElement style="Crosstab Data Text" x="0" y="0" width="54" height="11" isPrintWhenDetailOverflows="true">
+								<printWhenExpression><![CDATA[$V{P_GRP_SEQ_NO} == $V{GRP_SEQ_NO}]]></printWhenExpression>
+							</reportElement>
+							<textElement textAlignment="Right">
+								<font fontName="Arial" size="7"/>
+							</textElement>
+							<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{PD_LOSS4Measure}]]></textFieldExpression>
+						</textField>
+					</cellContents>
+				</crosstabCell>
+				<crosstabCell width="55" height="0" rowTotalGroup="TRTY_RI_NAME">
+					<cellContents backcolor="#FFFFFF" mode="Opaque"/>
+				</crosstabCell>
+			</crosstab>
+		</band>
+	</summary>
+</jasperReport>

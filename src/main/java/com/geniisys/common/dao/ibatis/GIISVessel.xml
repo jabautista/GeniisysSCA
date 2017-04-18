@@ -1,0 +1,1010 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISVessel">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="giisVessel" type="com.geniisys.common.entity.GIISVessel"/>
+	
+	<resultMap class="giisVessel" id="GIISVesselLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="vesselCd"		column="VESSEL_CD" />
+		<result property="vesselName"	column="VESSEL_NAME" />
+		<result property="vesselFlag"	column="VESSEL_FLAG" />
+		<result property="plateNo"		column="VESSEL_PLATE_NO" />
+		<result property="motorNo"		column="VESSEL_MOTOR_NO" />
+		<result property="serialNo"		column="VESSEL_SERIAL_NO"/>
+		<result property="vesselType"	column="VESSEL_TYPE"/> <!-- Patrick -->
+	</resultMap>
+	
+	<resultMap class="giisVessel" id="GIISVesselMHResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="vesselCd"			column="VESSEL_CD" />
+		<result property="vesselName"		column="VESSEL_NAME" />
+		<result property="vesselFlag"		column="VESSEL_FLAG" />
+		<result property="vesselOldName"	column="VESSEL_OLD_NAME" />
+		<result property="vestypeCd" 		column="VESTYPE_CD" />
+		<result property="vestypeDesc"		column="VESTYPE_DESC" />
+		<result property="propelSw" 		column="PROPEL_SW" />
+		<result property="hullTypeCd" 		column="HULL_TYPE_CD" />
+		<result property="hullTypeDesc"		column="HULL_DESC" />
+		<result property="grossTon" 		column="GROSS_TON" />
+		<result property="yearBuilt" 		column="YEAR_BUILT" />
+		<result property="vessClassCd" 		column="VESS_CLASS_CD" />
+		<result property="vessClassDesc"	column="VESS_CLASS_DESC" />		
+		<result property="regOwner" 		column="REG_OWNER" />
+		<result property="regPlace" 		column="REG_PLACE" />
+		<result property="noCrew" 			column="NO_CREW" />	
+		<result property="netTon" 			column="NET_TON" />
+		<result property="deadweight" 		column="DEADWEIGHT" />
+		<result property="crewNat" 			column="CREW_NAT" />
+		<result property="vesselBreadth" 	column="VESSEL_BREADTH" />
+		<result property="vesselDepth" 		column="VESSEL_DEPTH" />
+		<result property="vesselLength" 	column="VESSEL_LENGTH" />
+		<result property="dryPlace" 		column="DRY_PLACE" />
+		<result property="dryDate" 			column="DRY_DATE" />
+	</resultMap>
+	
+	<resultMap class="giisVessel" id="GIISVesselAVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="vesselCd"			column="VESSEL_CD" />
+		<result property="vesselName"		column="VESSEL_NAME" />
+		<result property="vesselFlag"		column="VESSEL_FLAG" />
+		<result property="vesselOldName"	column="VESSEL_OLD_NAME" />
+		<result property="rpcNo"			column="VESSEL_RPC_NO" />
+		<result property="airTypeCd"		column="VESSEL_AIR_TYPE_CD" />
+		<result property="airDesc"			column="VESSEL_AIR_DESC" />
+		<result property="noOfPass"			column="VESSEL_NO_PASS" />
+	</resultMap>
+	
+	<resultMap id="getAircraftNameLOVMap" class="giisVessel" extends="BaseEntity.TableGridResultMap">
+	  	<result column="VESSEL_CD" 					property="vesselCd" />
+	  	<result column="VESSEL_NAME"				property="vesselName"/>
+   		<result column="RPC_NO"						property="rpcNo"	/>
+	  	<result column="VESSEL_FLAG"				property="vesselFlag"/>
+   		<result column="AIR_DESC"						property="airDesc"	/>
+  	</resultMap>
+  	
+  	<resultMap id="vesselDescResultMap" class="giisVessel" extends="BaseEntity.TableGridResultMap">
+	  	<result column="VESSEL_CD" 					property="vesselCd" />
+	  	<result column="VESSEL_NAME"				property="vesselName"/>
+  	</resultMap>
+	
+	<select id="getVesselLOV" resultMap="GIISVesselLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giis_vessel_pkg.get_vessel_carrier_list_tg(#parId#, #findText#))
+						  <isNotNull property="notIn">
+						  	WHERE vessel_cd NOT IN $notIn$
+						  </isNotNull>
+						  <isNull property="sortColumn">
+							ORDER BY vessel_name ASC
+						  </isNull>
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="vesselCd">
+								ORDER BY vessel_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="vesselName">
+								ORDER BY vessel_name
+							</isEqual>							
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(giis_vessel_pkg.get_vessel_carrier_list_tg(#parId#, #findText#))
+						   <isNotNull property="notIn">
+						  	WHERE vessel_cd NOT IN $notIn$
+						  </isNotNull>) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getHullVesselLOV" resultMap="GIISVesselMHResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giis_vessel_pkg.get_marine_hull_vessel_tg(#parId#, #itemNo#, #findText#))						  
+						  <isNull property="sortColumn">
+							ORDER BY vessel_name ASC
+						  </isNull>
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="vesselCd">
+								ORDER BY vessel_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="vesselName">
+								ORDER BY vessel_name
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="vesselOldName">
+								ORDER BY vessel_old_name
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="vestypeDesc">
+								ORDER BY vestype_desc
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="hullTypeDesc">
+								ORDER BY hull_desc
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="noCrew">
+								ORDER BY no_crew
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="netTon">
+								ORDER BY net_ton
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="deadweight">
+								ORDER BY deadweight
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="crewNat">
+								ORDER BY crew_nat
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="dryPlace">
+								ORDER BY dry_place
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="dryDate">
+								ORDER BY dry_date
+							</isEqual>							
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(giis_vessel_pkg.get_marine_hull_vessel_tg(#parId#, #itemNo#, #findText#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getAviationVesselLOV" resultMap="GIISVesselAVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giis_vessel_pkg.get_aviation_vessel_tg(#findText#))
+						  <isNotNull property="notIn">
+						  	WHERE vessel_cd NOT IN $notIn$
+						  </isNotNull>						  
+						  <isNull property="sortColumn">
+							ORDER BY vessel_name ASC
+						  </isNull>
+						  <isNotNull property="sortColumn">							
+							<isEqual property="sortColumn" compareValue="vesselName">
+								ORDER BY vessel_name
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="rpcNo">
+								ORDER BY vessel_rpc_no
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="airDesc">
+								ORDER BY vessel_air_desc
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="vesselCd">
+								ORDER BY vessel_cd
+							</isEqual>	
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(giis_vessel_pkg.get_aviation_vessel_tg(#findText#))
+						   <isNotNull property="notIn">
+						  	WHERE vessel_cd NOT IN $notIn$
+						  </isNotNull>) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGIISVesselLOV" resultMap="GIISVesselLOVResultMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+		  			   b.count_,
+		  			   a.*
+		  		  FROM (SELECT *
+		  		  		  FROM TABLE (GIIS_VESSEL_PKG.get_vessel_list5(#findText#))
+		  		  		  <isNotNull property="notIn">
+		                  		WHERE VESSEL_CD NOT IN $notIn$
+		                  </isNotNull>
+		  		  		  <isEqual property="sortColumn" compareValue="vesselName">
+		  		  		  		ORDER BY vessel_name
+		  		  		  </isEqual>
+		  		  		  <isEqual property="sortColumn" compareValue="vesselType">
+		  		  		  		ORDER BY vessel_type
+		  		  		  </isEqual>
+		  		  		  <isEqual property="sortColumn" compareValue="plateNo">
+		  		  		  		ORDER BY vessel_plate_no
+		  		  		  </isEqual>
+		  		  		  <isEqual property="sortColumn" compareValue="motorNo">
+		  		  		  		ORDER BY vessel_motor_no
+		  		  		  </isEqual>
+		  		  		   <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		  		  		  ) a,
+		  		  		(SELECT count(*) count_
+		  		  		   FROM TABLE (giis_vessel_pkg.get_vessel_list5(#findText#))
+		  		  		   <isNotNull property="notIn">
+		                  		WHERE VESSEL_CD NOT IN $notIn$
+		                   </isNotNull>) b)
+		WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getAircraftNameLOV" resultMap="getAircraftNameLOVMap">
+		 SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giis_vessel_pkg.get_aviation_lov)
+		                  <isNotNull property="findText">
+		                  	WHERE UPPER(vessel_cd) LIKE UPPER(#findText#)
+		                  </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giis_vessel_pkg.get_aviation_lov)
+		                  <isNotNull property="findText">
+		                  	WHERE UPPER(vessel_cd) LIKE UPPER(#findText#)
+		                  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getAircraftNameLOV2" resultMap="getAircraftNameLOVMap" parameterClass="java.util.HashMap">
+		 SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giis_vessel_pkg.get_aviation_lov2(#findText#))
+		                  <isNotNull property="notIn">
+						  	WHERE vessel_cd NOT IN $notIn$
+						  </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giis_vessel_pkg.get_aviation_lov2(#findText#))
+		                  <isNotNull property="notIn">
+						  	WHERE vessel_cd NOT IN $notIn$
+						  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getMarineHullLOV" resultMap="GIISVesselMHResultMap">
+		 SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giis_vessel_pkg.get_marine_hull_lov)
+		                  <isNotNull property="findText">
+		                  	WHERE UPPER(vessel_name) LIKE UPPER(#findText#)
+		                  </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giis_vessel_pkg.get_marine_hull_lov)
+		                  <isNotNull property="findText">
+		                  	WHERE UPPER(vessel_name) LIKE UPPER(#findText#)
+		                  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getVesselDescLOV" parameterClass="java.util.HashMap" resultMap="vesselDescResultMap">
+		 SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giis_vessel_pkg.get_quote_vessel_list(#quoteId#))
+		                  <isNotNull property="findText">
+		                  	WHERE UPPER(vessel_name) LIKE UPPER(#findText#)
+		                  </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giis_vessel_pkg.get_quote_vessel_list(#quoteId#))
+		                  <isNotNull property="findText">
+		                  	WHERE UPPER(vessel_name) LIKE UPPER(#findText#)
+		                  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="giisVessel" id="giisAircraftResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="vessel_cd"    		property="vesselCd"/>
+		<result column="vessel_name"  		property="vesselName"/>
+		<result column="vessel_old_name"  	property="vesselOldName"/>
+		<result column="rpc_no"    			property="rpcNo"/>
+		<result column="year_built"  		property="yearBuilt"/>
+		<result column="air_type_cd"    	property="airTypeCd"/>
+		<result column="air_desc"    		property="airDesc"/>
+		<result column="no_crew"  			property="noCrew"/>
+		<result column="no_pass"    		property="noPass"/>
+		<result column="user_id"     		property="userId"/>
+		<result column="last_update" 		property="lastUpdate"/>
+		<result column="remarks"     		property="remarks"/>
+	</resultMap>
+	
+	<select id="getGiiss049RecList" resultMap="giisAircraftResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss049_pkg.get_rec_list)
+		  	      <isNotNull property="filter">
+		  	      	WHERE 1 = 1 
+		  	      		<isNotEmpty prepend="AND" property="vesselCd">
+		  	      			UPPER(vessel_cd) LIKE UPPER(#vesselCd#)
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="vesselName">
+                            UPPER(vessel_name) LIKE UPPER(#vesselName#)
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="vesselOldName">
+                        	 UPPER(vessel_old_name) LIKE UPPER(#vesselOldName#)
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="rpcNo">
+                            UPPER(rpc_no) LIKE UPPER(#rpcNo#)
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="yearBuilt">
+                        	year_built = #yearBuilt#
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="airDesc">
+                            UPPER(air_desc) LIKE UPPER(#airDesc#)
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="noCrew">
+                        	no_crew = #noCrew#
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="noPass">
+                            no_pass = #noPass#
+                        </isNotEmpty>
+		  	      </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="vesselCd">
+			              		ORDER BY vessel_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="vesselName">
+			              		ORDER BY vessel_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="vesselOldName">
+			              		ORDER BY vessel_old_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="rpcNo">
+			              		ORDER BY rpc_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="yearBuilt">
+			              		ORDER BY year_built
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="airDesc">
+			              		ORDER BY air_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="noCrew">
+			              		ORDER BY no_crew
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="noPass">
+			              		ORDER BY no_pass
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss049_pkg.get_rec_list)
+		                  <isNotNull property="filter">
+				  	      	WHERE 1 = 1 
+				  	      		<isNotEmpty prepend="AND" property="vesselCd">
+				  	      			UPPER(vessel_cd) LIKE UPPER(#vesselCd#)
+		                        </isNotEmpty>
+		                        <isNotEmpty prepend="AND" property="vesselName">
+		                            UPPER(vessel_name) LIKE UPPER(#vesselName#)
+		                        </isNotEmpty>
+		                        <isNotEmpty prepend="AND" property="vesselOldName">
+		                        	 UPPER(vessel_old_name) LIKE UPPER(#vesselOldName#)
+		                        </isNotEmpty>
+		                        <isNotEmpty prepend="AND" property="rpcNo">
+		                            UPPER(rpc_no) LIKE UPPER(#rpcNo#)
+		                        </isNotEmpty>
+		                        <isNotEmpty prepend="AND" property="yearBuilt">
+		                        	year_built = #yearBuilt#
+		                        </isNotEmpty>
+		                        <isNotEmpty prepend="AND" property="airDesc">
+		                            UPPER(air_desc) LIKE UPPER(#airDesc#)
+		                        </isNotEmpty>
+		                        <isNotEmpty prepend="AND" property="noCrew">
+		                        	no_crew = #noCrew#
+		                        </isNotEmpty>
+		                        <isNotEmpty prepend="AND" property="noPass">
+		                            no_pass = #noPass#
+		                        </isNotEmpty>
+				  	      </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setAircraft" parameterClass="giisVessel">
+	    DECLARE
+	    	v_rec giis_vessel%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.vessel_cd 		:= #vesselCd#;
+ 			v_rec.vessel_name 		:= #vesselName#;
+ 			v_rec.vessel_old_name 	:= #vesselOldName#;
+ 			v_rec.rpc_no 			:= #rpcNo#;
+ 			v_rec.year_built 		:= #yearBuilt#;
+ 			v_rec.air_type_cd 		:= #airTypeCd#;
+ 			v_rec.no_crew 			:= #noCrew#;
+ 			v_rec.no_pass 			:= #noPass#;
+ 			v_rec.user_id 			:= #userId#;
+ 			v_rec.remarks 			:= #remarks#;
+ 			
+ 			giiss049_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<!-- <procedure id="valDeleteAirType" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss048_pkg.val_del_rec(#recId#);
+ 		END;
+ 	</procedure> -->
+ 	
+ 	<select id="valDeleteAircraft" resultClass="java.lang.String">
+		SELECT giiss049_pkg.val_del_rec(#vesselCd#)FROM dual							
+	</select>
+ 	
+ 	<procedure id="valAddAircraft" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss049_pkg.val_add_rec(#recId#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delAircraft" parameterClass="java.lang.String">
+		BEGIN
+ 			giiss049_pkg.del_rec(#vesselCd#);
+ 		END;
+ 	</delete>
+ 	
+ 	<resultMap class="java.util.HashMap" id="giiss049LOVMap" extends="BaseEntity.TableGridResultMap">
+		<result property="airTypeCd" 		column="air_type_cd" />
+		<result property="airDesc" 			column="air_desc" />
+		<result property="rowNum" 			column="rownum_"/>
+		<result property="rowCount" 		column="count_"/>
+	</resultMap>
+	
+	<select id="getGiiss049LOV" resultMap="giiss049LOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giiss049_pkg.get_giiss049_lov(#search#))
+		                 <isNotNull property="findText">
+					         WHERE (UPPER(air_type_cd) LIKE (#findText#) 
+					         	 OR UPPER(air_desc) LIKE UPPER(#findText#)
+					         	 )
+				         </isNotNull>          
+			          	  <isNotNull property="sortColumn">
+			                  <isEqual property="sortColumn" compareValue="airTypeCd">
+				              		ORDER BY air_type_cd
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="airDesc">
+				              		ORDER BY air_desc
+				              </isEqual>
+				          	  <isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              </isNotNull>
+				          </isNotNull>    
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (giiss049_pkg.get_giiss049_lov(#search#))
+			              <isNotNull property="findText">
+					          WHERE (UPPER(air_type_cd) LIKE (#findText#) 
+					         	 OR UPPER(air_desc) LIKE UPPER(#findText#)
+					         	 )
+				          </isNotNull> 
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<parameterMap class="map" id="validateAirTypeCdMap">
+		<parameter property="airTypeCd"	jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="INOUT"/>
+		<parameter property="airDesc"	jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="INOUT"/>
+	</parameterMap>
+	
+	<procedure id="validateAirTypeCd" parameterMap="validateAirTypeCdMap">
+		BEGIN
+ 			giiss049_pkg.validate_air_type_cd(?,?);
+ 		END;
+	</procedure>
+
+<!--Gzelle 11.28.2013-->
+	<resultMap class="giisVessel" id="inlandVehicleResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="vessel_cd"    		property="vesselCd"/>
+		<result column="vessel_name"  		property="vesselName"/>
+		<result column="reg_owner"  		property="regOwner"/>
+		<result column="plate_no"  			property="plateNo"/>
+		<result column="motor_no"  			property="motorNo"/>
+		<result column="serial_no"  		property="serialNo"/>
+		<result column="origin"  			property="origin"/>
+		<result column="destination"  		property="destination"/>
+		<result column="user_id"     		property="userId"/>
+		<result column="last_update" 		property="lastUpdate"/>
+		<result column="remarks"     		property="remarks"/>
+	</resultMap>
+	
+	<select id="getGiiss050RecList" resultMap="inlandVehicleResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss050_pkg.get_rec_list)
+		  	      <isNotNull property="filter">
+		  	      	WHERE 1 = 1 
+		  	      		<isNotEmpty prepend="AND" property="vesselCd">
+		  	      			UPPER(vessel_cd) LIKE UPPER(#vesselCd#)
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="vesselName">
+                            UPPER(vessel_name) LIKE UPPER(#vesselName#)
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="regOwner">
+                        	 UPPER(reg_owner) LIKE UPPER(#regOwner#)
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="plateNo">
+                            UPPER(plate_no) LIKE UPPER(#plateNo#)
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="motorNo">
+                        	 UPPER(motor_no) LIKE UPPER(#motorNo#)
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="serialNo">
+                            UPPER(serial_no) LIKE UPPER(#serialNo#)
+                        </isNotEmpty>
+                         <isNotEmpty prepend="AND" property="origin">
+                        	 UPPER(origin) LIKE UPPER(#origin#)
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="destination">
+                            UPPER(destination) LIKE UPPER(#destination#)
+                        </isNotEmpty>
+		  	      </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="vesselCd">
+			              		ORDER BY vessel_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="vesselName">
+			              		ORDER BY vessel_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="regOwner">
+			              		ORDER BY reg_owner
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="plateNo">
+			              		ORDER BY plate_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="motorNo">
+			              		ORDER BY motor_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="serialNo">
+			              		ORDER BY serial_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="origin">
+			              		ORDER BY origin
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="destination">
+			              		ORDER BY destination
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss050_pkg.get_rec_list)
+		                <isNotNull property="filter">
+		  	      			WHERE 1 = 1 
+		  	      		<isNotEmpty prepend="AND" property="vesselCd">
+		  	      			UPPER(vessel_cd) LIKE UPPER(#vesselCd#)
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="vesselName">
+                            UPPER(vessel_name) LIKE UPPER(#vesselName#)
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="regOwner">
+                        	 UPPER(reg_owner) LIKE UPPER(#regOwner#)
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="plateNo">
+                            UPPER(plate_no) LIKE UPPER(#plateNo#)
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="motorNo">
+                        	 UPPER(motor_no) LIKE UPPER(#motorNo#)
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="serialNo">
+                            UPPER(serial_no) LIKE UPPER(#serialNo#)
+                        </isNotEmpty>
+                         <isNotEmpty prepend="AND" property="origin">
+                        	 UPPER(origin) LIKE UPPER(#origin#)
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="destination">
+                            UPPER(destination) LIKE UPPER(#destination#)
+                        </isNotEmpty>
+		  	      </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setInlandVehicle" parameterClass="giisVessel">
+	    DECLARE
+	    	v_rec giis_vessel%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.vessel_cd 	:= #vesselCd#;
+ 			v_rec.vessel_name 	:= #vesselName#;
+ 			v_rec.reg_owner 	:= #regOwner#;
+ 			v_rec.plate_no		:= #plateNo#;
+ 			v_rec.motor_no 		:= #motorNo#;
+ 			v_rec.serial_no		:= #serialNo#;
+ 			v_rec.origin 		:= #origin#;
+ 			v_rec.destination 	:= #destination#;
+ 			v_rec.user_id 		:= #userId#;
+ 			v_rec.remarks 		:= #remarks#;
+ 			
+ 			Giiss050_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure> 
+ 	
+ 	<procedure id="valDeleteInlandVehicle" parameterClass="java.lang.String">
+ 		BEGIN
+ 			Giiss050_pkg.val_del_rec(#recId#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddInlandVehicle" parameterClass="java.lang.String">
+ 		BEGIN
+ 			Giiss050_pkg.val_add_rec(#recId#);
+ 		END;
+ 	</procedure>	
+ 	
+	<delete id="delInlandVehicle" parameterClass="java.lang.String">
+		BEGIN
+ 			Giiss050_pkg.del_rec(#hullTypeCd#);
+ 		END;
+ 	</delete>
+	
+<!-- GIISS039 : shan 12.02.2013 -->
+	<resultMap class="java.util.HashMap" id="giiss039VestypeLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="vestypeCd"	column="VESTYPE_CD"/>
+		<result property="vestypeDesc"	column="VESTYPE_DESC"/>
+	</resultMap>
+	
+	<select id="getGIISS039VestypeLOV" resultMap="giiss039VestypeLOVResultMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIISS039_PKG.GET_VESTYPE_LOV)
+		                  <isNotNull property="findText">
+			              		WHERE UPPER(vestype_cd) LIKE UPPER(#findText#) 
+			              		   OR  UPPER(vestype_desc) LIKE UPPER(#findText#) 
+			              </isNotNull>
+			              <isNull property="findText">
+			              		WHERE UPPER(vestype_cd) LIKE UPPER(#searchString#) 
+			              		   OR UPPER(vestype_desc) LIKE UPPER(#searchString#) 
+			              </isNull>
+			              <isNotNull property="sortColumn">
+			          	  	  <isEqual property="sortColumn" compareValue="vestypeCd">
+				              		ORDER BY vestype_cd
+				              </isEqual>
+			                  <isEqual property="sortColumn" compareValue="vestypeDesc">
+				              		ORDER BY vestype_desc
+				              </isEqual>	
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (GIISS039_PKG.GET_VESTYPE_LOV)
+		                  <isNotNull property="findText">
+			              		WHERE UPPER(vestype_cd) LIKE UPPER(#findText#) 
+			              		   OR  UPPER(vestype_desc) LIKE UPPER(#findText#) 
+			              </isNotNull>
+			              <isNull property="findText">
+			              		WHERE UPPER(vestype_cd) LIKE UPPER(#searchString#) 
+			              		   OR UPPER(vestype_desc) LIKE UPPER(#searchString#) 
+			              </isNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="giiss039VessClassLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="vessClassCd"		column="VESS_CLASS_CD"/>
+		<result property="vessClassDesc"	column="VESs_CLASS_DESC"/>
+	</resultMap>
+	
+	<select id="getGIISS039VessClassLOV" resultMap="giiss039VessClassLOVResultMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIISS039_PKG.GET_VESS_CLASS_LOV)
+		                  <isNotNull property="findText">
+			              		WHERE UPPER(vess_class_cd) LIKE UPPER(#findText#) 
+			              		   OR  UPPER(vess_class_desc) LIKE UPPER(#findText#) 
+			              </isNotNull>
+			              <isNull property="findText">
+			              		WHERE UPPER(vess_class_cd) LIKE UPPER(#searchString#) 
+			              		   OR UPPER(vess_class_desc) LIKE UPPER(#searchString#) 
+			              </isNull>
+			              <isNotNull property="sortColumn">
+			          	  	  <isEqual property="sortColumn" compareValue="vessClassCd">
+				              		ORDER BY vess_class_cd
+				              </isEqual>
+			                  <isEqual property="sortColumn" compareValue="vessClassDesc">
+				              		ORDER BY vess_class_desc
+				              </isEqual>	
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (GIISS039_PKG.GET_VESS_CLASS_LOV)
+		                  <isNotNull property="findText">
+			              		WHERE UPPER(vess_class_cd) LIKE UPPER(#findText#) 
+			              		   OR  UPPER(vess_class_desc) LIKE UPPER(#findText#) 
+			              </isNotNull>
+			              <isNull property="findText">
+			              		WHERE UPPER(vess_class_cd) LIKE UPPER(#searchString#) 
+			              		   OR UPPER(vess_class_desc) LIKE UPPER(#searchString#) 
+			              </isNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="giiss039HullTypeLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="hullTypeCd"	column="HULL_TYPE_CD"/>
+		<result property="hullDesc"		column="HULL_DESC"/>
+	</resultMap>
+	
+	<select id="getGIISS039HullTypeLOV" resultMap="giiss039HullTypeLOVResultMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIISS039_PKG.GET_HULL_TYPE_LOV)
+		                  <isNotNull property="findText">
+			              		WHERE UPPER(hull_type_cd) LIKE UPPER(#findText#) 
+			              		   OR  UPPER(hull_desc) LIKE UPPER(#findText#) 
+			              </isNotNull>
+			              <isNull property="findText">
+			              		WHERE UPPER(hull_type_cd) LIKE UPPER(#searchString#) 
+			              		   OR UPPER(hull_desc) LIKE UPPER(#searchString#) 
+			              </isNull>
+			              <isNotNull property="sortColumn">
+			          	  	  <isEqual property="sortColumn" compareValue="hullTypeCd">
+				              		ORDER BY hull_type_cd
+				              </isEqual>
+			                  <isEqual property="sortColumn" compareValue="hullDesc">
+				              		ORDER BY hull_desc
+				              </isEqual>	
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (GIISS039_PKG.GET_HULL_TYPE_LOV)
+		                  <isNotNull property="findText">
+			              		WHERE UPPER(hull_type_cd) LIKE UPPER(#findText#) 
+			              		   OR  UPPER(hull_desc) LIKE UPPER(#findText#) 
+			              </isNotNull>
+			              <isNull property="findText">
+			              		WHERE UPPER(hull_type_cd) LIKE UPPER(#searchString#) 
+			              		   OR UPPER(hull_desc) LIKE UPPER(#searchString#) 
+			              </isNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+
+	<resultMap class="giisVessel" id="giiss039ResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="vesselCd"			column="VESSEL_CD" />
+		<result property="vesselName"		column="VESSEL_NAME" />
+		<result property="vesselFlag"		column="VESSEL_FLAG" />
+		<result property="vesselOldName"	column="VESSEL_OLD_NAME" />
+		<result property="vestypeCd" 		column="VESTYPE_CD" />
+		<result property="vestypeDesc"		column="VESTYPE_DESC" />
+		<result property="vessClassCd" 		column="VESS_CLASS_CD" />
+		<result property="vessClassDesc"	column="VESS_CLASS_DESC" />	
+		<result property="hullTypeCd" 		column="HULL_TYPE_CD" />
+		<result property="hullTypeDesc"		column="HULL_DESC" />
+		<result property="regOwner" 		column="REG_OWNER" />
+		<result property="regPlace" 		column="REG_PLACE" />
+		<result property="yearBuilt" 		column="YEAR_BUILT" />	
+		<result property="dryPlace" 		column="DRY_PLACE" />
+		<result property="dryDate" 			column="DRY_DATE" />
+		<result property="crewNat" 			column="CREW_NAT" />
+		<result property="engineType"		column="ENGINE_TYPE"/>
+		<result property="noPass" 			column="NO_PASS" />	
+		<result property="grossTon" 		column="GROSS_TON" />
+		<result property="netTon" 			column="NET_TON" />
+		<result property="deadweight" 		column="DEADWEIGHT" />
+		<result property="noCrew" 			column="NO_CREW" />	
+		<result property="rpcNo"			column="RPC_NO"/>
+		<result property="vesselBreadth" 	column="VESSEL_BREADTH" />
+		<result property="vesselDepth" 		column="VESSEL_DEPTH" />
+		<result property="vesselLength" 	column="VESSEL_LENGTH" />
+		<result property="hullSw" 			column="HULL_SW" />
+		<result property="propelSw" 		column="PROPEL_SW" />
+		<result property="remarks"			column="REMARKS"/>
+		<result property="userId"			column="USER_ID"/>
+		<result property="lastUpdate"		column="LAST_UPDATE"/>
+	</resultMap>
+	
+	<select id="getGiiss039RecList" resultMap="giiss039ResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss039_pkg.get_rec_list(#vesselCd#, #vesselName#))
+		  	      <isNotNull property="filter">
+		  	      	WHERE 1 = 1 
+                        <isNotEmpty prepend="AND" property="vesselOldName">
+                            UPPER(vessel_old_name) LIKE UPPER(#vesselOldName#)
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="regOwner">
+                        	 UPPER(reg_owner) LIKE UPPER(#regOwner#)
+                        </isNotEmpty>
+                         <isNotEmpty prepend="AND" property="vestypeDesc">
+                        	 UPPER(vestype_desc) LIKE UPPER(#vestypeDesc#)
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="vessClassDesc">
+                            UPPER(vess_class_desc) LIKE UPPER(#vessClassDesc#)
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="hullTypeDesc">
+                            UPPER(hull_desc) LIKE UPPER(#hullTypeDesc#)
+                        </isNotEmpty>
+		  	      </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="vesselCd">
+			              		ORDER BY vessel_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="vesselName">
+			              		ORDER BY vessel_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="regOwner">
+			              		ORDER BY reg_owner
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="vesselOldName">
+			              		ORDER BY vessel_old_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="vestypeDesc">
+			              		ORDER BY vestype_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="vessClassDesc">
+			              		ORDER BY vess_class_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="hullTypeDesc">
+			              		ORDER BY hull_desc
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss039_pkg.get_rec_list(#vesselCd#, #vesselName#))
+				  	      <isNotNull property="filter">
+				  	      	WHERE 1 = 1 
+		                        <isNotEmpty prepend="AND" property="vesselOldName">
+		                            UPPER(vessel_old_name) LIKE UPPER(#vesselOldName#)
+		                        </isNotEmpty>
+		                        <isNotEmpty prepend="AND" property="regOwner">
+		                        	 UPPER(reg_owner) LIKE UPPER(#regOwner#)
+		                        </isNotEmpty>
+		                         <isNotEmpty prepend="AND" property="vestypeDesc">
+		                        	 UPPER(vestype_desc) LIKE UPPER(#vestypeDesc#)
+		                        </isNotEmpty>
+		                        <isNotEmpty prepend="AND" property="vessClassDesc">
+		                            UPPER(vess_class_desc) LIKE UPPER(#vessClassDesc#)
+		                        </isNotEmpty>
+		                        <isNotEmpty prepend="AND" property="hullTypeDesc">
+		                            UPPER(hull_desc) LIKE UPPER(#hullTypeDesc#)
+		                        </isNotEmpty>
+		                   </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setVessel" parameterClass="giisVessel">
+	    DECLARE
+	    	v_rec giis_vessel%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_PKG.app_user := #userId#;
+ 			
+ 			v_rec.hull_sw			:= #hullSw#;
+ 			v_rec.propel_sw			:= #propelSw#;
+ 			v_rec.vessel_cd 		:= #vesselCd#;
+ 			v_rec.vessel_name 		:= #vesselName#;
+ 			v_rec.vessel_old_name	:= #vesselOldName#;
+ 			v_rec.vestype_cd		:= #vestypeCd#;
+ 			v_rec.vess_class_cd		:= #vessClassCd#;
+ 			v_rec.hull_type_cd		:= #hullTypeCd#; 			
+ 			v_rec.reg_owner 		:= #regOwner#;
+ 			v_rec.reg_place			:= #regPlace#;
+ 			v_rec.year_built		:= #yearBuilt#;
+ 			v_rec.dry_date			:= #dryDate#;
+ 			v_rec.dry_place			:= #dryPlace#;
+ 			v_rec.crew_nat			:= #crewNat#;
+ 			v_rec.engine_type		:= #engineType#;
+ 			v_rec.no_pass			:= #noPass#;
+ 			v_rec.no_crew			:= #noCrew#;
+ 			v_rec.gross_ton			:= #grossTon#;
+ 			v_rec.net_ton			:= #netTon#;
+ 			v_rec.deadweight		:= #deadweight#;
+ 			v_rec.vessel_flag		:= #vesselFlag#;
+ 			v_rec.rpc_no			:= #rpcNo#;
+ 			v_rec.vessel_breadth	:= #vesselBreadth#;
+ 			v_rec.vessel_length		:= #vesselLength#;
+ 			v_rec.vessel_depth		:= #vesselDepth#; 			
+ 			v_rec.user_id 			:= #userId#;
+ 			v_rec.remarks 			:= #remarks#;
+ 			
+ 			GIISS039_PKG.set_rec(v_rec);
+ 		END;
+ 	</procedure> 
+ 	
+ 	<procedure id="valDeleteVessel" parameterClass="java.lang.String">
+ 		BEGIN
+ 			GIISS039_PKG.val_del_rec(#vesselCd#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddVessel" parameterClass="java.lang.String">
+ 		BEGIN
+ 			GIISS039_PKG.val_add_rec(#vesselCd#);
+ 		END;
+ 	</procedure>	
+ 	
+	<delete id="delVessel" parameterClass="java.lang.String">
+		BEGIN
+ 			GIISS039_PKG.del_rec(#vesselCd#);
+ 		END;
+ 	</delete>
+	
+<!-- end GIISS039 -->
+</sqlMap>

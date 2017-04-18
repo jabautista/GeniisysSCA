@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIReminder">
+
+	<typeAlias alias="GIPIReminderClass" type="com.geniisys.gipi.entity.GIPIReminder"/>
+	
+	<resultMap class="GIPIReminderClass" id="GIPIReminderClassResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="parId" 		column="PAR_ID"/>
+		<result property="claimId" 		column="CLAIM_ID"/>
+		<result property="item" 		column="ITEM"/>
+		<result property="noteType" 	column="NOTE_TYPE"/>
+		<result property="noteSubject" 	column="NOTE_SUBJECT"/>
+		<result property="noteText" 	column="NOTE_TEXT"/>
+		<result property="alarmUser" 	column="ALARM_USER"/>
+		<result property="alarmFlag" 	column="ALARM_FLAG"/>
+		<result property="alarmDate" 	column="ALARM_DATE"/>
+		<result property="createDate" 	column="DATE_CREATED"/>
+		<result property="userId" 		column="USER_ID"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="GIPIS208ReminderClassResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="policyId" 		column="policy_id"/>
+		<result property="policyNo" 		column="policy_no"/>
+		<result property="noteSubject" 		column="note_subject"/>
+		<result property="dspTypeStatus" 	column="dsp_type_status"/>
+		<result property="alarmUser" 		column="alarm_user"/>
+		<result property="alarmDate" 		column="alarm_date"/>
+		<result property="userId" 			column="user_id"/>
+		<result property="lastUpdate" 		column="last_update"/>
+		<result property="ackDate" 			column="ack_date"/>
+	</resultMap>
+
+	<select id="getGIPIReminderListing" resultMap="GIPIReminderClassResultMap">
+			SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIPI_REMINDER_PKG.get_gipi_reminder_listing(#userId#))
+		                  <isEqual property="dateMode" compareValue="0">
+		                  	WHERE TRUNC(date_created) BETWEEN
+		                  </isEqual>
+		                  <isEqual property="dateMode" compareValue="1">
+		                  	WHERE TRUNC(alarm_date) BETWEEN
+		                  </isEqual>		               
+		                  <isEqual property="rangeMode" compareValue="0">
+			              	TO_DATE('$date$', 'MM-DD-YYYY') AND TRUNC(SYSDATE)
+			              </isEqual>
+			              <isEqual property="rangeMode" compareValue="1">
+			              	TO_DATE('$dateFrom$', 'MM-DD-YYYY') AND TO_DATE($dateTo$, 'MM-DD-YYYY')
+			               </isEqual>   
+		                  <isEqual property="sortColumn" compareValue="noteSubject">
+			              		ORDER BY note_subject
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIPI_REMINDER_PKG.get_gipi_reminder_listing(#userId#))
+		                  <isEqual property="dateMode" compareValue="0">
+		                  	WHERE TRUNC(date_created) BETWEEN
+		                  </isEqual>
+		                  <isEqual property="dateMode" compareValue="1">
+		                  	WHERE TRUNC(alarm_date) BETWEEN
+		                  </isEqual>		               
+		                  <isEqual property="rangeMode" compareValue="0">
+			              	TO_DATE('$date$', 'MM-DD-YYYY') AND TRUNC(SYSDATE)
+			              </isEqual>
+			              <isEqual property="rangeMode" compareValue="1">
+			              	TO_DATE('$dateFrom$', 'MM-DD-YYYY') AND TO_DATE('$dateTo$', 'MM-DD-YYYY')
+			               </isEqual>   
+		                  )b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<!-- J. Diago 08.22.2013 For GIUTS034 Mini Reminder -->
+	<resultMap class="java.util.HashMap" id="getGIPIReminderDetailsMap" extends="BaseEntity.TableGridResultMap">
+		<result property="noteType"         		column="note_type"/>
+		<result property="noteSubject"         		column="note_subject"/>
+		<result property="noteText"         		column="note_text"/>
+		<result property="alarmFlag"         		column="alarm_flag"/>
+		<result property="renewFlag"         		column="renew_flag"/>
+		<result property="alarmUser"         		column="alarm_user"/>
+		<result property="alarmDate"         		column="alarm_date"/>
+		<result property="ackDate"         		    column="ack_date"/>
+		<result property="userId"         		    column="user_id"/>
+		<result property="lastUpdate"         		column="last_update"/>
+		<result property="dbTag"         		    column="db_tag"/>
+	</resultMap>
+	
+	<select id="getGIPIReminderDetails" resultMap="getGIPIReminderDetailsMap">
+		SELECT *
+  	      FROM (SELECT ROWNUM rownum_, b.count_, a.*
+                  FROM (SELECT *
+                          FROM TABLE (giuts034_pkg.get_reminder_list(#parId#, #claimId#))
+                        <isNotNull property="filter">
+                        	WHERE 1 = 1
+                        	<isNotEmpty prepend="AND" property="noteSubject">
+								note_subject LIKE #noteSubject#
+							</isNotEmpty>
+                        </isNotNull>
+                        <isEqual property="sortColumn" compareValue="noteSubject">
+		              		ORDER BY note_subject
+			            </isEqual>
+			            <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	</isNotNull>
+                          ) a,
+               (SELECT COUNT (*) count_
+                  FROM TABLE (giuts034_pkg.get_reminder_list(#parId#, #claimId#))
+                  <isNotNull property="filter">
+                        WHERE 1 = 1
+                        <isNotEmpty prepend="AND" property="noteSubject">
+							note_subject LIKE #noteSubject#
+						</isNotEmpty>
+                   </isNotNull>
+                  ) b)
+         WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="getAlarmUserLOVMap" extends="BaseEntity.TableGridResultMap">
+        <result column="user_id"                     	property="userId" />
+        <result column="user_name"                 		property="userName" />
+        <result column="rownum_"                        property="rowNum"/>
+        <result column="count_"                         property="rowCount"/>
+    </resultMap>
+    
+	<select id="getAlarmUserLOV" resultMap="getAlarmUserLOVMap" parameterClass="java.util.HashMap">
+        SELECT * 
+          FROM (SELECT a.*, b.count_, rownum rownum_
+                  FROM (SELECT * FROM TABLE (GIUTS034_PKG.GET_ALARM_USERS_LOV(#alarmUser#))
+                          <isNotNull property="findText">
+                              WHERE UPPER(user_id) LIKE UPPER(NVL(#findText# || '%', user_id))
+                                 OR UPPER(user_name) LIKE UPPER(NVL(#findText# || '%', user_name))
+                          </isNotNull>
+                          <isNotNull property="sortColumn">
+                              <isEqual property="sortColumn" compareValue="userId">
+                                  ORDER BY user_id
+                              </isEqual>
+                              <isEqual property="sortColumn" compareValue="userName">
+                                  ORDER BY user_name
+                              </isEqual>
+                              <isEqual property="ascDescFlg" compareValue="ASC">
+                                  ASC
+                              </isEqual>
+                              <isEqual property="ascDescFlg" compareValue="DESC">
+                                  DESC
+                              </isEqual>
+                          </isNotNull>
+                          ) a,
+                          (SELECT count(*) count_ FROM TABLE (GIUTS034_PKG.GET_ALARM_USERS_LOV(#alarmUser#))
+                           <isNotNull property="findText">
+                              WHERE UPPER(user_id) LIKE UPPER(NVL(#findText# || '%', user_id))
+                                 OR UPPER(user_name) LIKE UPPER(NVL(#findText# || '%', user_name))
+                           </isNotNull>
+                          ) b          
+          )
+         WHERE rownum_ BETWEEN #from# AND #to#
+    </select>
+    
+	<procedure id="setGIPIReminder" parameterClass="com.geniisys.gipi.entity.GIPIReminder">
+		DECLARE
+		  v_reminder GIPI_REMINDER%ROWTYPE;
+		BEGIN
+		  giis_users_pkg.app_user := #appUser#;
+		  		 
+		  v_reminder.par_id 		:= #parId#;
+		  v_reminder.claim_id 		:= #claimId#;
+		  v_reminder.note_subject 	:= #noteSubject#;
+		  v_reminder.note_text      := #noteText#;
+		  v_reminder.note_type      := #noteType#;
+		  v_reminder.alarm_user     := #alarmUser#;
+		  v_reminder.alarm_date     := #alarmDate#;
+		  v_reminder.renew_flag     := #renewFlag#;
+		  giuts034_pkg.insert_reminder(v_reminder);
+		END;
+	</procedure>
+	
+	<resultMap class="java.util.HashMap" id="validateAlarmUserMap">
+		<result column="count" 		property="count"/>
+		<result column="user_id" 	property="userId"/>
+	</resultMap>
+	
+	<select id="validateAlarmUser" resultMap="validateAlarmUserMap">
+		SELECT * FROM TABLE(GIUTS034_PKG.VALIDATE_ALARM_USER(#alarmUser#))		
+	</select>
+	
+	<select id="getGipis208RecList" resultMap="GIPIS208ReminderClassResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(gipis208_pkg.get_rec_list(#noteSubject#,#dateOpt#,#dateAsOf#,#dateFrom#,#dateTo#,#noteType#,#alarmFlag#,#parId#))
+		  	      		<isNotNull property="filter">
+							WHERE 1=1	
+							  <isNotEmpty prepend="AND"  property="status">
+							  	upper(status) LIKE upper(#dspTypeStatus#)
+							  </isNotEmpty>
+							  <isNotEmpty prepend="AND"  property="policyNo">
+								policy_no LIKE upper(#policyNo#)
+						  	  </isNotEmpty>
+						</isNotNull>
+						<isNotNull property="sortColumn">	
+		                	<isEqual property="sortColumn" compareValue="noteSubject">
+			              		ORDER BY note_subject
+			              	</isEqual>
+			              	<isEqual property="sortColumn" compareValue="dspTypeStatus">
+			              		ORDER BY dsp_type_status
+			             	 </isEqual>
+			              	<isEqual property="sortColumn" compareValue="policyNo">
+			              		ORDER BY policy_no
+			              	</isEqual>			          	 
+			              	<isEqual property="ascDescFlg" compareValue="ASC">
+			              		ASC
+			              	</isEqual>
+			              	<isEqual property="ascDescFlg" compareValue="DESC">
+			              		DESC
+			              	</isEqual>
+			         	</isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(gipis208_pkg.get_rec_list(#noteSubject#,#dateOpt#,#dateAsOf#,#dateFrom#,#dateTo#,#noteType#,#alarmFlag#,#parId#))
+		                  	<isNotNull property="filter">
+								WHERE 1=1	
+								<isNotEmpty prepend="AND"  property="status">
+							  		upper(status) LIKE upper(#dspTypeStatus#)
+							  	</isNotEmpty>
+							  	<isNotEmpty prepend="AND"  property="policyNo">
+									policy_no LIKE upper(#policyNo#)
+						  	  	</isNotEmpty>
+							</isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<!-- start SR-19555 : shan 07.07.2015 -->
+	<select id="getClaimParId" parameterClass="java.lang.String" resultClass="java.lang.Integer">
+		SELECT GIUTS034_PKG.GET_CLAIM_PAR_ID(#claimId#)
+  		  FROM dual
+	</select>
+	
+	<!-- end SR-19555 : shan 07.07.2015 -->
+</sqlMap>

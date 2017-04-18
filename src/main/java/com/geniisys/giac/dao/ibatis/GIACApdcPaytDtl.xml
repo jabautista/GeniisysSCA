@@ -1,0 +1,638 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="GIACApdcPaytDtl">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIACApdcPaytEntryDtlsClass" type="com.geniisys.giac.entity.GIACApdcPaytDtl" />
+	
+	<resultMap id="GIACApdcPaytEntryDtlsResultMap" class="GIACApdcPaytEntryDtlsClass">
+		<result column="apdc_id"						property="apdcId" />
+		<result column="pdc_id"							property="pdcId" />
+		<result column="item_no"						property="itemNo" />
+		<result column="bank_cd"						property="bankCd" />
+		<result column="bank_name"						property="bankName" />
+		<result column="bank_sname"						property="bankSname" />
+		<result column="check_class"					property="checkClass" />
+		<result column="check_class_desc"				property="checkClassDesc" />
+		<result column="check_no"						property="checkNo" />
+		<result column="check_date"						property="checkDate" />
+		<result column="check_amt"						property="checkAmt" />
+		<result column="currency_cd"					property="currencyCd" />
+		<result column="currency_name"					property="currencyName" />
+		<result column="currency_desc"					property="currencyDesc" />
+		<result column="currency_rt"					property="currencyRt" />
+		<result column="fcurrency_amt"					property="fcurrencyAmt" />
+		<result column="tin"							property="tin" />
+		<result column="check_flag"						property="checkFlag" />
+		<result column="check_status"					property="checkStatus" />
+		<result column="user_id"						property="userId" />
+		<result column="gacc_tran_id"					property="gaccTranId" />
+		<result column="last_update"					property="lastUpdate" />
+		<result column="gross_amt"						property="grossAmt" />
+		<result column="commission_amt"					property="commissionAmt" />
+		<result column="vat_amt"						property="vatAmt" />
+		<result column="fc_gross_amt"					property="fcGrossAmt" />
+		<result column="fc_tax_amt"						property="fcTaxAmt" />
+		<result column="replace_date"					property="replaceDate" />
+		<result column="pay_mode"						property="payMode" />
+		<result column="intm_no"						property="intmNo" />
+		<result column="dcb_no"							property="dcbNo" />
+		<result column="bank_branch"					property="bankBranch" />
+		<result column="remarks"						property="remarks" />
+		<result column="payor"							property="payor" />
+		<result column="address_1"						property="address1" />
+		<result column="address_2"						property="address2" />
+		<result column="address_3"						property="address3" />
+		<result column="intermediary"					property="intermediary" />
+		<result column="particulars"					property="particulars" />
+		<result column="or_flag"				     	property="orFlag" />
+		<result column="rownum_" 						property="rowNum"/>
+		<result column="count_" 						property="rowCount"/>
+	</resultMap>
+	
+	<parameterMap class="map" id="paytDtlAssdMap">
+		<parameter property="appUser"		jdbcType="VARCHAR"		javaType="java.lang.String"			mode="IN" />
+		<parameter property="issCd"			jdbcType="VARCHAR"		javaType="java.lang.String"			mode="IN" />
+		<parameter property="premSeqNo"		jdbcType="NUMBER"		javaType="java.lang.Integer"		mode="IN" />
+		<parameter property="policyNo"		jdbcType="VARCHAR"		javaType="java.lang.String"			mode="OUT" />
+		<parameter property="assdName"		jdbcType="VARCHAR"		javaType="java.lang.String" 		mode="OUT" />
+		<parameter property="currencyCd"	jdbcType="VARCHAR"		javaType="java.lang.String"			mode="OUT" />
+	</parameterMap>
+	
+	<select id="getApdcPaytDtlTableGrid" parameterClass="java.util.HashMap" resultMap="GIACApdcPaytEntryDtlsResultMap">
+		SELECT /*+ NO_CPU_COSTING */ * 
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIAC_APDC_PAYT_DTL_PKG.get_giac_apdc_payt_dtl(#apdcId#))) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIAC_APDC_PAYT_DTL_PKG.get_giac_apdc_payt_dtl(#apdcId#))) b
+
+				   )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getApdcPaytDtlListing" parameterClass="java.lang.Integer" resultClass="java.lang.Integer">
+		SELECT pdc_id FROM TABLE(GIAC_APDC_PAYT_DTL_PKG.get_giac_apdc_payt_dtl(#apdcId#))
+	</select>
+
+	<procedure id="gpdcPremPostQuery" parameterMap="paytDtlAssdMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			GPDC_PREM_POST_QUERY(?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<select id="checkGeneratedOR" parameterClass="java.lang.Integer" resultClass="java.lang.String">
+		SELECT check_generated_or(#apdcId#) FROM DUAL
+	</select>
+	
+	<select id="generatePdcId" resultClass="java.lang.Integer">
+		SELECT apdc_payt_dtl_pdc_id_s.NEXTVAL FROM DUAL
+	</select>
+	
+	<insert id="setGiacApdcPaytDtl" parameterClass="GIACApdcPaytEntryDtlsClass">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			GIAC_APDC_PAYT_DTL_PKG.set_giac_apdc_payt_dtl(#apdcId#, #pdcId#, #itemNo#, #bankCd#, #checkClass#, #checkNo#, #checkDate#,
+														  #checkAmt#, #currencyCd#, #currencyRt#, #fcurrencyAmt#, #particulars#, #payor#,
+														  #address1#, #address2#, #address3#, #tin#, #checkFlag#, #grossAmt#, #commissionAmt#,
+														  #vatAmt#, #fcGrossAmt#, #fcCommAmt#, #fcTaxAmt#, #replaceDate#, #payMode#, #intmNo#, #bankBranch#);											  
+		END;
+	</insert>
+	
+	<delete id="deleteGiacApdcPaytDtl" parameterClass="java.lang.Integer">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			GIAC_APDC_PAYT_DTL_PKG.delete_giac_apdc_payt_dtl(#pdcId#);
+		END;
+	</delete>
+	
+	<update id="cancelApdcPaytDtl" parameterClass="java.lang.Integer">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			GIAC_APDC_PAYT_DTL_PKG.cancel_apdc_payt_dtl(#pdcId#);
+		END;
+	</update>
+	
+	<update id="updateApdcPaytDtlStatus" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			GIAC_APDC_PAYT_DTL_PKG.update_apdc_payt_dtl_status(#pdcId#, #checkFlag#);
+		END;
+	</update>
+	
+	<select id="getApdcSw" parameterClass="java.lang.Integer" resultClass="java.lang.Integer">
+		SELECT giac_apdc_payt_dtl_pkg.check_if_from_apdc(#tranId#) FROM dual
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="getGiacs091FundLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result property="fundCd"	column="fund_cd" />
+		<result property="fundDesc"	column="fund_desc" />
+	</resultMap>
+	
+	<!-- added by apollo cruz 09.16.2015 sr#20107 -->
+	<select id="getGiacs091FundLOV" resultMap="getGiacs091FundLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giacs091_pkg.get_fund_lov(#userId#, #findText#))          
+			          	  <isNotNull property="sortColumn">
+			                  <isEqual property="sortColumn" compareValue="fundCd">
+				              		ORDER BY fund_cd
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="fundDesc">
+				              		ORDER BY fund_desc
+				              </isEqual>
+				          	  <isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              </isNotNull>
+				          </isNotNull>    
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (giacs091_pkg.get_fund_lov(#userId#, #findText#)) 
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="getGiacs091FundsMap" >
+		<result property="fundCd"	column="fund_cd" />
+		<result property="fundDesc"	column="fund_desc" />
+	</resultMap>
+	
+	<select id="getGiacs091Funds" resultMap="getGiacs091FundsMap">
+		SELECT * FROM TABLE (giacs091_pkg.get_fund_lov(#userId#, ''))
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="getGiacs091BranchLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result property="branchCd"			column="branch_cd" />
+		<result property="branchName"		column="branch_name" />
+		<result property="rowNum" 			column="rownum_"/>
+		<result property="rowCount" 		column="count_"/>
+	</resultMap>
+	
+	<select id="getGiacs091BranchLOV" resultMap="getGiacs091BranchLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giacs091_pkg.get_giacs091_branch_lov(#search#, #userId#, #fundCd#))
+		                 <isNotNull property="findText">
+					         WHERE (UPPER(branch_cd) LIKE UPPER(#findText#)
+					         	 OR UPPER(branch_name) LIKE UPPER(#findText#)
+					         	 )
+				         </isNotNull>          
+			          	  <isNotNull property="sortColumn">
+			                  <isEqual property="sortColumn" compareValue="branchCd">
+				              		ORDER BY branch_cd
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="branchName">
+				              		ORDER BY branch_name
+				              </isEqual>
+				          	  <isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              </isNotNull>
+				          </isNotNull>    
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (giacs091_pkg.get_giacs091_branch_lov(#search#, #userId#, #fundCd#))
+			              <isNotNull property="findText">
+					          WHERE (UPPER(branch_cd) LIKE UPPER(#findText#)
+					         	 OR UPPER(branch_name) LIKE UPPER(#findText#)
+					         	 )
+				          </isNotNull> 
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="getGiacs091RecListMap" extends="BaseEntity.TableGridResultMap">
+		<result column="apdc_id"    	property="apdcId"/>
+		<result column="pdc_id"  		property="pdcId"/>
+		<result column="bank_cd"     	property="bankCd"/>
+		<result column="bank_branch" 	property="bankBranch"/>
+		<result column="item_no"     	property="itemNo"/>
+		<result column="check_class"    property="checkClass"/>
+		<result column="check_no"  		property="checkNo"/>
+		<result column="check_date"     property="checkDate"/>
+		<result column="check_amt" 		property="checkAmt"/>
+		<result column="currency_cd"    property="currencyCd"/>
+		<result column="currency_rt"    property="currencyRt"/>
+		<result column="check_flag"  	property="checkFlag"/>
+		<result column="gross_amt"     	property="grossAmt"/>
+		<result column="commission_amt" property="commissionAmt"/>
+		<result column="vat_amt"     	property="vatAmt"/>
+		<result column="gacc_tran_id"   property="gaccTranId"/>
+		<result column="payor"  		property="payor"/>
+		<result column="address_1"     	property="address1"/>
+		<result column="address_2" 		property="address2"/>
+		<result column="address_3"     	property="address3"/>
+		<result column="tin"    		property="tin"/>
+		<result column="particulars"  	property="particulars"/>
+		<result column="pay_mode"     	property="payMode"/>
+		<result column="intm_no" 		property="intmNo"/>
+		<result column="fc_comm_amt"    property="fcCommAmt"/>
+		<result column="fc_gross_amt"   property="fcGrossAmt"/>
+		<result column="fc_tax_amt"  	property="fcTaxAmt"/>
+		<result column="remarks"     	property="remarks"/>
+		<result column="bank_sname" 	property="bankSname"/>
+		<result column="short_name"     property="shortName"/>
+		<result column="currency_desc"  property="currencyDesc"/>
+		<result column="convert_rt"  	property="convertRt"/>
+		<result column="nbt_status"     property="nbtStatus"/>
+		<result column="nbt_apdc_no" 	property="nbtApdcNo"/>
+		<result column="fcurrency_amt" 	property="fcurrencyAmt"/>
+	</resultMap>
+	
+	<select id="getGiacs091RecList" resultMap="getGiacs091RecListMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(GIACS091_pkg.get_giacs091_list(#extractDate#, #fundCd#, #branchCd#))
+		  	      <isNotNull property="filter">
+		  	      	WHERE 1 = 1 
+		  	      		<isNotEmpty prepend="AND" property="bankSname">
+		  	      			UPPER(bank_sname) LIKE UPPER(#bankSname#)
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="bankBranch">
+                            UPPER(bank_branch) LIKE UPPER(#bankBranch#)
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="checkClass">
+		  	      			UPPER(check_class) LIKE UPPER(#checkClass#)
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="nbtApdcNo">
+                            UPPER(nbt_apdc_no) LIKE UPPER(#nbtApdcNo#)
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="checkNo">
+		  	      			(check_no) = (#checkNo#)
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="checkDate">
+                            (check_date) = TO_DATE(#checkDate#, 'MM-DD-YYYY')
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="checkAmt">
+		  	      			(check_amt) = (#checkAmt#)
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="shortName">
+                            UPPER(short_name) LIKE UPPER(#shortName#)
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="nbtStatus">
+                            UPPER(nbt_status) LIKE UPPER(#nbtStatus#)
+                        </isNotEmpty>
+		  	      </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="bankSname">
+			              		ORDER BY bank_sname
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="bankBranch">
+			              		ORDER BY bank_branch
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="checkClass">
+			              		ORDER BY check_class
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="nbtApdcNo">
+			              		ORDER BY nbt_apdc_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="checkNo">
+			              		ORDER BY check_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="checkDate">
+			              		ORDER BY check_date
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="checkAmt">
+			              		ORDER BY check_amt
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="shortName">
+			              		ORDER BY short_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="nbtStatus">
+			              		ORDER BY nbt_status
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GIACS091_pkg.get_giacs091_list(#extractDate#, #fundCd#, #branchCd#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setDatedChecks" parameterClass="GIACApdcPaytEntryDtlsClass">
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			GIACS091_pkg.set_giacs091_rec(#pdcId#, #remarks#, #userId#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="setOrParticulars" parameterClass="java.util.HashMap">
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			GIACS091_pkg.set_or_particulars(#pdcId#, #payor#, #address1#, #address2#, #address3#, #tin#, #intmNo#, #particulars#, #userId#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<resultMap class="java.util.HashMap" id="getGiacs091RecDetailsListMap" extends="BaseEntity.TableGridResultMap">
+		<result column="pdc_id"  			property="pdcId"/>
+		<result column="transaction_type"   property="transactionType"/>
+		<result column="iss_cd" 			property="issCd"/>
+		<result column="prem_seq_no"     	property="premSeqNo"/>
+		<result column="inst_no"    		property="instNo"/>
+		<result column="collection_amt"  	property="collectionAmt"/>
+		<result column="user_id"     		property="userId"/>
+		<result column="last_update" 		property="lastUpdate"/>
+		<result column="currency_cd"    	property="currencyCd"/>
+		<result column="currency_rt"    	property="currencyRt"/>
+		<result column="premium_amt"  		property="premiumAmt"/>
+		<result column="tax_amt"     		property="taxAmt"/>
+		<result column="fcurrency_amt" 		property="fcurrencyAmt"/>
+		<result column="dsp_assured" 		property="dspAssured"/>
+		<result column="dsp_policy_no"     	property="dspPolicyNo"/>
+		<result column="dsp_currency_desc"  property="dspCurrencyDesc"/>
+	</resultMap>
+	
+	<select id="getDatedChecksDetails" resultMap="getGiacs091RecDetailsListMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(GIACS091_pkg.get_giacs091_details_list(#pdcId#))
+		  	      <isNotNull property="filter">
+		  	      	WHERE 1 = 1 
+		  	      		<isNotEmpty prepend="AND" property="transactionType">
+		  	      			(transaction_type) = (#transactionType#)
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="issCd">
+                            UPPER(iss_cd) LIKE UPPER(#issCd#)
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="premSeqNo">
+		  	      			(prem_seq_no) = (#premSeqNo#)
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="instNo">
+                            (inst_no) = (#instNo#)
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="collectionAmt">
+		  	      			(collection_amt) = (#collectionAmt#)
+                        </isNotEmpty>
+		  	      </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="transactionType">
+			              		ORDER BY transaction_type
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="issCd">
+			              		ORDER BY iss_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="premSeqNo">
+			              		ORDER BY prem_seq_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="instNo">
+			              		ORDER BY inst_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="collectionAmt">
+			              		ORDER BY collection_amt
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GIACS091_pkg.get_giacs091_details_list(#pdcId#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<resultMap class="java.util.HashMap" id="getGiacs091BankCdLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="bank_cd"		property="bankCd" />
+		<result column="bank_name"		property="bankName" />
+		<result column="rownum_" 		property="rowNum"/>
+		<result column="count_" 		property="rowCount"/>
+	</resultMap>
+	
+	<select id="getGiacs091BankCdLOV" resultMap="getGiacs091BankCdLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giacs091_pkg.get_giacs091_bank_lov(#search#))
+		                 <isNotNull property="findText">
+					         WHERE (UPPER(bank_cd) LIKE UPPER(#findText#)
+					         	 OR UPPER(bank_name) LIKE UPPER(#findText#)
+					         	 )
+				         </isNotNull>          
+			          	  <isNotNull property="sortColumn">
+			                  <isEqual property="sortColumn" compareValue="bankCd">
+				              		ORDER BY bank_cd
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="bankName">
+				              		ORDER BY bank_name
+				              </isEqual>
+				          	  <isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              </isNotNull>
+				          </isNotNull>    
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (giacs091_pkg.get_giacs091_bank_lov(#search#))
+			              <isNotNull property="findText">
+					          WHERE (UPPER(bank_cd) LIKE UPPER(#findText#)
+					         	 OR UPPER(bank_name) LIKE UPPER(#findText#)
+					         	 )
+				          </isNotNull> 
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="getGiacs091BankAcctLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="bank_acct_cd"	property="bankAcctCd" />
+		<result column="bank_acct_no"	property="bankAcctNo" />
+		<result column="bank_acct_type"	property="bankAcctType" />
+		<result column="branch_cd"		property="branchCd" />
+		<result column="rownum_" 		property="rowNum"/>
+		<result column="count_" 		property="rowCount"/>
+	</resultMap>
+	
+	<select id="getGiacs091BankAcctLOV" resultMap="getGiacs091BankAcctLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giacs091_pkg.get_giacs091_bank_acct_lov(#search#, #bankCd#))
+		                 <isNotNull property="findText">
+					         WHERE (UPPER(bank_acct_cd) LIKE UPPER(#findText#)
+					         	 OR UPPER(bank_acct_no) LIKE UPPER(#findText#)
+					         	 )
+				         </isNotNull>          
+			          	  <isNotNull property="sortColumn">
+			                  <isEqual property="sortColumn" compareValue="bankAcctCd">
+				              		ORDER BY bank_acct_cd
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="bankAcctNo">
+				              		ORDER BY bank_acct_no
+				              </isEqual>
+				          	  <isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              </isNotNull>
+				          </isNotNull>    
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (giacs091_pkg.get_giacs091_bank_acct_lov(#search#, #bankCd#))
+			             <isNotNull property="findText">
+					         WHERE (UPPER(bank_acct_cd) LIKE UPPER(#findText#)
+					         	 OR UPPER(bank_acct_no) LIKE UPPER(#findText#)
+					         	 )
+				         </isNotNull>  
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<parameterMap class="map" id="giacs091MultipleORMap">
+		<parameter property="appUser"	jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="IN"/>
+		<parameter property="checkDate"	jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="IN"/>
+		<parameter property="pdcId"		jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="IN"/>
+		<parameter property="bankCd"	jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="IN"/>
+		<parameter property="bankAcctCd"	jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="IN"/>
+		<parameter property="message"	jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="OUT"/>
+		<parameter property="userId"	jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="IN"/>
+	</parameterMap>
+	
+	<procedure id="giacs091MultipleOR" parameterMap="giacs091MultipleORMap">
+ 		BEGIN
+ 			giis_users_pkg.app_user := ?;
+ 			GIACS091_pkg.multiple_OR(?, TO_NUMBER(?), ?, ?, ?, ?);
+ 		END;
+ 	</procedure>
+ 	
+ 	<parameterMap class="map" id="giacs091GroupOrMap">
+		<parameter property="checkDate"		jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+		<parameter property="pdcId"			jdbcType="VARCHAR"	javaType="java.lang.String" mode="IN"/>
+		<parameter property="bankCd"		jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+		<parameter property="bankAcctCd"	jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+		<parameter property="appUser"		jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+	 	<parameter property="tranId"		jdbcType="VARCHAR"	javaType="java.lang.String" mode="OUT"/>
+		<parameter property="particulars"	jdbcType="VARCHAR"	javaType="java.lang.String"	mode="OUT"/>
+		<parameter property="message"		jdbcType="VARCHAR"	javaType="java.lang.String"	mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="giacs091GroupOr" parameterMap="giacs091GroupOrMap">
+ 		BEGIN
+ 			GIACS091_pkg.group_or(?, TO_NUMBER(?), ?, ?, ?, ?, ?, ?);
+ 		END;
+ 	</procedure>
+ 	
+ 	<parameterMap class="map" id="giacs091ProcessGroupOrMap">
+ 		<parameter property="appUser"		jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+		<parameter property="pdcId"			jdbcType="VARCHAR"	javaType="java.lang.String" mode="IN"/>
+		<parameter property="bankCd"		jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+		<parameter property="bankAcctCd"	jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+		<parameter property="userId"		jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+	 	<parameter property="tranId"		jdbcType="VARCHAR"	javaType="java.lang.String" mode="IN"/>
+		<parameter property="particulars"	jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+		<parameter property="itemNo"		jdbcType="NUMBER"	javaType="java.lang.Integer"	mode="IN"/>
+	</parameterMap>
+	
+	<procedure id="giacs091ProcessGroupOr" parameterMap="giacs091ProcessGroupOrMap">
+ 		BEGIN
+ 			giis_users_pkg.app_user := ?;
+ 			GIACS091_pkg.process_group_or(TO_NUMBER(?), ?, ?, ?, ?, ?, ?);
+ 		END;
+ 	</procedure>
+ 	
+ 	<parameterMap class="map" id="giacs091GetDcbNoMap">
+		<parameter property="pdcId"		jdbcType="VARCHAR"	javaType="java.lang.String" mode="IN"/>
+		<parameter property="checkDate"	jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+		<parameter property="message"	jdbcType="VARCHAR"	javaType="java.lang.String"	mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="giacs091GetDcbNo" parameterMap="giacs091GetDcbNoMap">
+ 		BEGIN
+ 			GIACS091_pkg.validate_dcb_no(TO_NUMBER(?), ?, ?);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="giacs091CreateDcbNo" parameterClass="java.util.HashMap">
+ 		BEGIN		     
+ 			GIACS091_pkg.create_dcb_no(#pdcId#, #checkDate#, #appUser#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<parameterMap class="map" id="giacs091DefaultBankMap">
+		<parameter property="pdcId"		jdbcType="VARCHAR"	javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="appUser"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="bankCd"	jdbcType="VARCHAR"	javaType="java.lang.String" 	mode="OUT"/>
+		<parameter property="bankAcctCd"	jdbcType="VARCHAR"	javaType="java.lang.String"	mode="OUT"/>
+		<parameter property="bankName"	jdbcType="VARCHAR"	javaType="java.lang.String" 	mode="OUT"/>
+		<parameter property="bankAcctNo"	jdbcType="VARCHAR"	javaType="java.lang.String"	mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="giacs091DefaultBank" parameterMap="giacs091DefaultBankMap">
+ 		BEGIN
+ 			GIACS091_pkg.default_deposit_bank(TO_NUMBER(?), ?, ?, ?, ?, ?);
+ 		END;
+ 	</procedure>
+ 	
+ 	<parameterMap class="map" id="giacs091GroupOrFinalMap">
+		<parameter property="pdcId"		jdbcType="VARCHAR"	javaType="java.lang.String" mode="IN"/>
+		<parameter property="tranId"	jdbcType="VARCHAR"	javaType="java.lang.String" mode="IN"/>
+		<parameter property="checkDate"	jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+		<parameter property="appUser"	jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+		<parameter property="message"	jdbcType="VARCHAR"	javaType="java.lang.String"	mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="giacs091GroupOrFinal" parameterMap="giacs091GroupOrFinalMap">
+ 		BEGIN
+ 			GIACS091_pkg.group_final_update(TO_NUMBER(?), ?, ?, ?, ?);
+ 		END;
+ 	</procedure>
+	
+	<procedure id="valDelApdc" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			GIAC_APDC_PAYT_DTL_PKG.val_del_apdc(#pdcId#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<select id="giacs091ValidateTransactionDate" resultClass="java.lang.String">
+ 		SELECT giacs091_pkg.validate_transaction_date(#fundCd#, #branchCd#, #checkDate#) FROM DUAL
+ 	</select>
+ 	<!-- added by MarkS SR5881 12.13.2016 -->
+ 	<select id="giacs091CheckSOABalance" resultClass="java.lang.String">
+ 		SELECT giacs091_pkg.check_soa_balance_due(#pdcId#) FROM DUAL
+ 	</select>
+ 	
+</sqlMap>

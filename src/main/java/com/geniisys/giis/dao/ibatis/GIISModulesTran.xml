@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISModulesTran">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<resultMap id="giisModulesTranResultMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result property="incTag" 		column="inc_tag" />
+		<result property="moduleId" 	column="module_id" />
+		<result property="moduleDesc" 	column="module_desc" />
+		<result property="dspAccessTag" column="dsp_access_tag" />
+		<result property="dspAccessTagDesc" column="dsp_access_tag_desc" />
+		<result property="tranCd"		column="tran_cd" />
+		<result property="userId"		column="user_id" />
+		<result property="lastUpdate"   column="last_update" />
+	</resultMap>
+  
+  	<select id="getUserGroupModules" resultMap ="giisModulesTranResultMap">
+  		SELECT *
+		  FROM (SELECT rownum rownum_, b.count_, a.* 
+		          FROM (SELECT *
+		          		  FROM TABLE(GIISS040_PKG.get_modules_tran(#tranCd#, #userGrp#, #moduleId#, #moduleDesc#, #dspAccessTagDesc#))
+		          		  <isNotNull property="filter">
+							WHERE 1 = 1  							
+								<isNotEmpty prepend="AND" property="dspAccessTagDesc">
+									UPPER(dsp_access_tag_desc) = UPPER(#dspAccessTagDesc#)
+								</isNotEmpty>
+						  </isNotNull>
+		          		  <isEqual property="sortColumn" compareValue="moduleId">
+			              		ORDER BY module_id
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="moduleDesc">
+			              		ORDER BY module_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="dspAccessTagDesc">
+			              		ORDER BY dsp_access_tag_desc
+			              </isEqual> 
+			              <isEqual property="sortColumn" compareValue="incTag">
+			              		ORDER BY inc_tag
+			              </isEqual> 
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIISS040_PKG.get_modules_tran(#tranCd#, #userGrp#, #moduleId#, #moduleDesc#, #dspAccessTagDesc#))
+		                  <isNotNull property="filter">
+							WHERE 1 = 1  							
+								<isNotEmpty prepend="AND" property="dspAccessTagDesc">
+									UPPER(dsp_access_tag_desc) = UPPER(#dspAccessTagDesc#)
+								</isNotEmpty>
+						  </isNotNull>
+		                ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+	
+</sqlMap>

@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap>
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<parameterMap class="map" id="checkInstNo">
+		<parameter property="premSeqNo"		jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="issCd"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN" />
+		<parameter property="instNo"		jdbcType="VARCHAR"	javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="recCount"		jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="OUT" />
+		<parameter property="msgAlert"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT" />
+	</parameterMap>
+	
+	<resultMap class="com.geniisys.gipi.entity.GIPIInstallment" id="instNoResultMap">
+		<result property="issCd" 			column="iss_cd" />
+		<result property="premSeqNo"		column="prem_seq_no" />
+		<result property="instNo"			column="inst_no" />
+	</resultMap>
+	
+	<resultMap class="java.util.Date" id="dateDue">
+		<result column="due_date" property="dueDate"></result>
+	</resultMap>
+	
+	<parameterMap class="map" id="getUnpaidPremiumDtlsMap">
+		<parameter property="lineCd"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN" />
+		<parameter property="sublineCd"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN" />
+		<parameter property="polIssCd"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN" />
+		<parameter property="issueYy"		jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="polSeqNo"		jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="renewNo"		jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="issCd"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN" />
+		<parameter property="clmFileDate"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN" />
+		<parameter property="premSeqNo"		jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="OUT" />
+		<parameter property="balanceAmtDue"	jdbcType="NUMERIC"	javaType="java.math.BigDecimal"	mode="OUT" /> <!-- change by steven 10.08.2012 from: INTEGER  to: NUMERIC--> 
+		<parameter property="currType"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT" />
+		<parameter property="validateUnpaid"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT" />
+		<parameter property="message"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT" />
+	</parameterMap>
+	
+	<procedure id="checkInstNo" parameterMap="checkInstNo" parameterClass="java.util.HashMap">
+		{CALL check_instno(?,?,?,?,?)}
+	</procedure>
+	
+	<select id="getDaysDue" resultClass="java.lang.Integer" parameterClass="java.util.HashMap"> 
+		SELECT gipi_installment_pkg.get_date_due(#instNo#, #premSeqNo#, #issCd#, #tranDate#) daysDue FROM DUAL
+	</select>
+	
+	<select id="getInstNoList" parameterClass="java.util.HashMap" resultMap="instNoResultMap">
+		SELECT * FROM TABLE (gipi_installment_pkg.get_inst_no_list(#issCd#, #premSeqNo#))
+	</select>
+	
+	<procedure id="getUnpaidPremiumDtls" parameterMap="getUnpaidPremiumDtlsMap">
+		{CALL gipi_installment_pkg.get_unpaid_premiums_dtls(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}
+	</procedure>
+	
+	<select id="checkInstNoGIACS007"  parameterClass="java.util.HashMap"  resultClass="java.lang.Integer">
+  		SELECT b150.inst_no
+        FROM gipi_installment b150
+       WHERE b150.iss_cd      	= #issCd#
+         AND b150.prem_seq_no = #premSeqNo#
+         AND b150.inst_no     		= #instNo#
+  	</select>  
+  	
+  	<resultMap class="com.geniisys.gipi.entity.GIPIInstallment" id="getInvoicePaytermsInfoMap" extends="BaseEntity.TableGridResultMap">
+		<result property="issCd" 				column="iss_cd" />
+		<result property="premSeqNo"			column="prem_seq_no" />
+		<result property="instNo"				column="inst_no" />
+		<result property="itmGrp" 				column="item_grp" />
+		<result property="sharePercentage"		column="share_pct" />
+		<result property="taxAmount"			column="tax_amt" />
+		<result property="premAmount"			column="prem_amt" />
+		<result property="dueDateStr"			column="due_date" />
+	</resultMap>
+	<select id="getInvoicePaytermsInfo" parameterClass="map" resultMap="getInvoicePaytermsInfoMap">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+						 b.count_, 
+						 a.*
+					FROM (SELECT *
+							FROM TABLE (GIPI_INSTALLMENT_PKG.get_invoice_payterm(#issCd#, #premSeqNo#, #itemGrp#))
+							<isNotNull property="filter">
+						      WHERE 1=1
+              			        <isNotEmpty prepend="AND" property="instNo">
+              					  inst_no = #instNo#
+              			        </isNotEmpty>
+              			        <isNotEmpty prepend="AND" property="dueDateStr">
+              					  TO_DATE(due_date, 'mm-dd-yyyy') = TO_DATE(#dueDateStr#, 'mm-dd-yyyy') <!-- UPPER(due_date) LIKE UPPER(#dueDateStr#) -->
+              			        </isNotEmpty>
+              			        <isNotEmpty prepend="AND" property="sharePercentage">
+              					  share_pct = #sharePercentage#
+              			        </isNotEmpty>
+              			        <isNotEmpty prepend="AND" property="taxAmount">
+              					 tax_amt = #taxAmount#
+              			        </isNotEmpty>
+              			         <isNotEmpty prepend="AND" property="premAmount">
+              					  prem_amt = #premAmount#
+              			        </isNotEmpty>
+                   		  	</isNotNull>
+                   		  	<isNotNull property="sortColumn">
+								<isEqual property="sortColumn" compareValue="instNo">
+									ORDER BY inst_no
+								</isEqual>
+								<isEqual property="sortColumn" compareValue="dueDateStr">
+									ORDER BY due_date
+								</isEqual>
+								<isEqual property="sortColumn" compareValue="sharePercentage">
+									ORDER BY share_pct
+								</isEqual>
+								<isEqual property="sortColumn" compareValue="taxAmount">
+									ORDER BY tax_amt
+								</isEqual>
+								<isEqual property="sortColumn" compareValue="premAmount">
+									ORDER BY prem_amt
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>
+						) a,
+						(SELECT count(*) count_
+						   FROM TABLE (GIPI_INSTALLMENT_PKG.get_invoice_payterm(#issCd#, #premSeqNo#, #itemGrp#))
+							<isNotNull property="filter">
+						      WHERE 1=1
+              			        <isNotEmpty prepend="AND" property="instNo">
+              					  inst_no = #instNo#
+              			        </isNotEmpty>
+              			        <isNotEmpty prepend="AND" property="dueDateStr">
+              					  TO_DATE(due_date, 'mm-dd-yyyy') = TO_DATE(#dueDateStr#, 'mm-dd-yyyy') <!-- UPPER(due_date) LIKE UPPER(#dueDateStr#) -->
+              			        </isNotEmpty>
+              			        <isNotEmpty prepend="AND" property="sharePercentage">
+              					  share_pct = #sharePercentage#
+              			        </isNotEmpty>
+              			        <isNotEmpty prepend="AND" property="taxAmount">
+              					  tax_amt = #taxAmount#
+              			        </isNotEmpty>
+              			         <isNotEmpty prepend="AND" property="premAmount">
+              					  prem_amt = #premAmount#
+              			        </isNotEmpty>
+                   		  	</isNotNull>
+						   ) b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+</sqlMap>	

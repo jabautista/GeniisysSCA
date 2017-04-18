@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GISMMessagesSent">
+
+	<resultMap id="gismMessagesSentMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result column="MSG_ID"				property="msgId"/>
+		<result column="MESSAGE"			property="message"/>
+		<result column="DATE_SENT"			property="dateSent"/>
+		<result column="MESSAGE_STATUS"		property="messageStatus"/>
+		<result column="PRIORITY"			property="priority"/>
+		<result column="SET_DATE"			property="setDate"/>
+		<result column="REMARKS"			property="remarks"/>
+		<result column="SCHED_DATE"			property="schedDate"/>
+		<result column="LAST_UPDATE"		property="lastUpdate"/>
+		<result column="USER_ID"			property="userId"/>
+		<result column="BDAY_SW"			property="bdaySw"/>
+		<result column="PRIORITY_DESC"		property="priorityDesc"/>
+		<result column="STATUS_DESC"		property="statusDesc"/>
+		<result column="DSP_SCHED_DATE"		property="dspSchedDate"/>
+		<result column="DSP_SET_DATE"		property="dspSetDate"/>
+		<result column="DSP_LAST_UPDATE"	property="dspLastUpdate"/>
+	</resultMap>
+	
+	<resultMap id="messageDetailsMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result column="USER_GROUP"			property="userGroup"/>
+		<result column="RECIPIENT_NAME"		property="recipientName"/>
+		<result column="CELLPHONE_NO"		property="cellphoneNo"/>
+		<result column="STATUS_DESC"		property="statusDesc"/>
+	</resultMap>
+	
+	<resultMap id="createdMessagesMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result column="MSG_ID"				property="msgId"/>
+		<result column="DSP_SET_DATE"		property="dspSetDate"/>
+		<result column="DSP_SET_TIME"		property="dspSetTime"/>
+		<result column="MESSAGE"			property="message"/>
+		<result column="SCHED_DATE"			property="schedDate"/>
+		<result column="PRIORITY"			property="priority"/>
+		<result column="PRIORITY_DESC"		property="priorityDesc"/>
+		<result column="REMARKS"			property="remarks"/>
+		<result column="LAST_UPDATE"		property="lastUpdate"/>
+		<result column="USER_ID"			property="userId"/>
+		<result column="BDAY_SW"			property="bdaySw"/>
+	</resultMap>
+	
+	<resultMap id="createdMessagesDtlMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result column="MSG_ID"				property="msgId"/>
+		<result column="DTL_ID"				property="dtlId"/>
+		<result column="STATUS_SW"			property="statusSw"/>
+		<result column="GROUP_CD"			property="groupCd"/>
+		<result column="GROUP_NAME"			property="groupName"/>
+		<result column="RECIPIENT_NAME"		property="recipientName"/>
+		<result column="CELLPHONE_NO"		property="cellphoneNo"/>
+		<result column="PK_COLUMN_VALUE"	property="pkColumnValue"/>
+	</resultMap>
+	
+	<resultMap id="recipientListMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result column="GROUP_CD"			property="groupCd"/>
+		<result column="GROUP_NAME"			property="groupName"/>
+		<result column="RECIPIENT"			property="recipientName"/>
+		<result column="CELLPHONE_NO"		property="cellphoneNo"/>
+		<result column="PK_COLUMN_VALUE"	property="pkColumnValue"/>
+	</resultMap>
+	
+	<select id="getMessagesSent" parameterClass="java.util.HashMap" resultMap="gismMessagesSentMap">
+		SELECT *
+          FROM (SELECT ROWNUM rownum_,
+            		   b.count_,
+            		   a.*
+                  FROM (SELECT *
+                          FROM TABLE(GISM_MESSAGES_SENT_PKG.get_gism_messages_sent(#userId#, #status#, #msgId#, #priorityDesc#,
+                          															#dspSchedDate#, #dspSetDate#, #message#, #remarks#))
+                         WHERE NVL(TO_CHAR(sched_date, 'mm-dd-yyyy'), '*') LIKE NVL(#dspSchedDate#, NVL(TO_CHAR(sched_date, 'mm-dd-yyyy'), '*'))
+                           AND NVL(TO_CHAR(set_date, 'mm-dd-yyyy'), '*') LIKE NVL(#dspSetDate#, NVL(TO_CHAR(set_date, 'mm-dd-yyyy'), '*'))
+                          	<isEqual property="sortColumn" compareValue="msgId">
+								ORDER BY msg_id
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="dspSchedDate">
+								ORDER BY dsp_sched_date
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="dspSetDate">
+								ORDER BY dsp_set_date
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="priorityDesc">
+								ORDER BY priority_desc
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="statusDesc">
+								ORDER BY status_desc
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>) a,
+               (SELECT COUNT(*) count_
+                  FROM TABLE(GISM_MESSAGES_SENT_PKG.get_gism_messages_sent(#userId#, #status#, #msgId#, #priorityDesc#,
+                          															#dspSchedDate#, #dspSetDate#, #message#, #remarks#))
+				 WHERE NVL(TO_CHAR(sched_date, 'mm-dd-yyyy'), '*') LIKE NVL(#dspSchedDate#, NVL(TO_CHAR(sched_date, 'mm-dd-yyyy'), '*'))
+                   AND NVL(TO_CHAR(set_date, 'mm-dd-yyyy'), '*') LIKE NVL(#dspSetDate#, NVL(TO_CHAR(set_date, 'mm-dd-yyyy'), '*'))
+				) b)
+          WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getMessageDetails" parameterClass="java.util.HashMap" resultMap="messageDetailsMap">
+		SELECT *
+          FROM (SELECT ROWNUM rownum_,
+            		   b.count_,
+            		   a.*
+                  FROM (SELECT *
+                          FROM TABLE(GISM_MESSAGES_SENT_PKG.get_message_details(#messageId#, #recipientName#, #cellphoneNo#))
+                         WHERE UPPER(NVL(user_group, '*')) LIKE UPPER(NVL(#userGroup#, NVL(user_group, '*')))
+                           AND UPPER(NVL(status_desc, '*')) LIKE UPPER(NVL(#statusDesc#, NVL(status_desc, '*')))
+                          	<isEqual property="sortColumn" compareValue="userGroup">
+								ORDER BY user_group
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="recipientName">
+								ORDER BY recipient_name
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="cellphoneNo">
+								ORDER BY cellphone_no
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="statusDesc">
+								ORDER BY status_desc
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>) a,
+               (SELECT COUNT(*) count_
+                  FROM TABLE(GISM_MESSAGES_SENT_PKG.get_message_details(#messageId#, #recipientName#, #cellphoneNo#))
+                 WHERE UPPER(NVL(user_group, '*')) LIKE UPPER(NVL(#userGroup#, NVL(user_group, '*')))
+                   AND UPPER(NVL(status_desc, '*')) LIKE UPPER(NVL(#statusDesc#, NVL(status_desc, '*')))
+				) b)
+          WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="resendMessage" parameterClass="java.util.HashMap">
+		BEGIN
+			GIIS_USERS_PKG.app_user := #userId#;
+			GISM_MESSAGES_SENT_PKG.resend_message(#messageId#, #userId#);
+		END;
+	</procedure>
+	
+	<select id="getCreatedMessages" parameterClass="java.util.HashMap" resultMap="createdMessagesMap">
+		SELECT *
+          FROM (SELECT ROWNUM rownum_,
+            		   b.count_,
+            		   a.*
+                  FROM (SELECT *
+                          FROM TABLE(GISM_MESSAGES_SENT_PKG.get_created_messages(#userId#, #message#, #schedDate#, #priorityDesc#))
+                          	<isEqual property="sortColumn" compareValue="message">
+								ORDER BY message
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="schedDate">
+								ORDER BY sched_date
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="priorityDesc">
+								ORDER BY priority_desc
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>) a,
+               (SELECT COUNT(*) count_
+                  FROM TABLE(GISM_MESSAGES_SENT_PKG.get_created_messages(#userId#, #message#, #schedDate#, #priorityDesc#))
+				) b)
+          WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getCreatedMessagesDtl" parameterClass="java.util.HashMap" resultMap="createdMessagesDtlMap">
+		SELECT *
+          FROM (SELECT ROWNUM rownum_,
+            		   b.count_,
+            		   a.*
+                  FROM (SELECT *
+                          FROM TABLE(GISM_MESSAGES_SENT_PKG.get_created_messages_dtl(#messageId#, #recipientName#, #cellphoneNo#))
+                         WHERE UPPER(NVL(group_name, '***')) LIKE UPPER(NVL(#groupName#, NVL(group_name, '***')))
+                          	<isEqual property="sortColumn" compareValue="groupName">
+								ORDER BY group_name
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="recipientName">
+								ORDER BY recipient_name
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="cellphoneNo">
+								ORDER BY cellphone_no
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>) a,
+               (SELECT COUNT(*) count_
+                  FROM TABLE(GISM_MESSAGES_SENT_PKG.get_created_messages_dtl(#messageId#, #recipientName#, #cellphoneNo#))
+                 WHERE UPPER(NVL(group_name, '***')) LIKE UPPER(NVL(#groupName#, NVL(group_name, '***')))
+				) b)
+          WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getRecipientList" parameterClass="java.util.HashMap" resultMap="recipientListMap">
+		SELECT *
+          FROM (SELECT ROWNUM rownum_,
+            		   b.count_,
+            		   a.*
+                  FROM (SELECT *
+                          FROM TABLE(GISM_RECIPIENT_GROUP_PKG.get_gisms004_recipient_lov(#groupCd#, #bdaySw#, 
+                          										TO_DATE(#fromDate#, 'mm-dd-yyyy'), TO_DATE(#toDate#, 'mm-dd-yyyy'),
+                          										#default#, #globe#, #smart#, #sun#))
+                          	<isEqual property="sortColumn" compareValue="recipient">
+								ORDER BY recipient
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="cellphoneNo">
+								ORDER BY cellphone_no
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>) a,
+               (SELECT COUNT(*) count_
+                  FROM TABLE(GISM_RECIPIENT_GROUP_PKG.get_gisms004_recipient_lov(#groupCd#, #bdaySw#,
+                  												TO_DATE(#fromDate#, 'mm-dd-yyyy'), TO_DATE(#toDate#, 'mm-dd-yyyy'),
+                          										#default#, #globe#, #smart#, #sun#))
+				) b)
+          WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="cancelMessage" parameterClass="java.util.HashMap">
+		BEGIN
+			GIIS_USERS_PKG.app_user := #userId#;
+			GISM_MESSAGES_SENT_PKG.cancel_message(#messageId#, #userId#);
+		END;
+	</procedure>
+	
+	<select id="getMessageId" resultClass="java.lang.Integer">
+		SELECT gism_messages_sent_msg_id_s.NEXTVAL
+  	  	  FROM dual
+	</select>
+	
+	<procedure id="setMessage" parameterClass="java.util.HashMap">
+		BEGIN
+			GIIS_USERS_PKG.app_user := #userId#;
+			GISM_MESSAGES_SENT_PKG.set_message(#msgId#, #message#, #priority#, #remarks#, #schedDate#, #bdaySw#);
+		END;
+	</procedure>
+	
+	<procedure id="deleteMessage" parameterClass="java.util.HashMap">
+		BEGIN
+			GISM_MESSAGES_SENT_PKG.delete_message(#msgId#);
+		END;
+	</procedure>
+	
+	<procedure id="setDetail" parameterClass="java.util.HashMap">
+		BEGIN
+			GIIS_USERS_PKG.app_user := #userId#;
+			GISM_MESSAGES_SENT_PKG.set_detail(#msgId#, #dtlId#, #groupCd#, #pkColumnValue#, #recipientName#, #cellphoneNo#, #statusSw#);
+		END;
+	</procedure>
+	
+	<procedure id="deleteDetail" parameterClass="java.util.HashMap">
+		BEGIN
+			GISM_MESSAGES_SENT_PKG.delete_detail(#msgId#, #dtlId#);
+		END;
+	</procedure>
+	
+	<select id="validateCellphoneNo" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT GISM_MESSAGES_SENT_PKG.validate_mobile_number(#cellphoneNo#, #provider#)
+		  FROM DUAL
+	</select>
+
+</sqlMap>

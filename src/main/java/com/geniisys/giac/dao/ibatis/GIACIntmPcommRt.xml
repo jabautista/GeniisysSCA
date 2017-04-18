@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIACIntmPcommRt">
+    <typeAlias alias="giacIntmPcommRt" type="com.geniisys.giac.entity.GIACIntmPcommRt"/>
+    
+    <resultMap class="giacIntmPcommRt" id="giacIntmPcommRtListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="intm_no"        		property="intmNo"/>
+		<result column="line_cd"        		property="lineCd"/>
+		<result column="line_name"        		property="lineName"/>
+		<result column="mgt_exp_rt"        		property="mgtExpRt"/>
+		<result column="prem_res_rt"        	property="premResRt"/>
+		<result column="ln_comm_rt"        		property="lnCommRt"/>
+		<result column="profit_comm_rt"        	property="profitCommRt"/>
+		<result column="remarks"     			property="remarks"/>
+		<result column="user_id"     			property="userId"/>
+		<result column="last_update" 			property="lastUpdate"/>
+	</resultMap>
+	
+    <select id="getGiacs334RecList" resultMap="giacIntmPcommRtListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giacs334_pkg.get_rec_list(#intmNo#, #lineCd#, #mgtExpRt#, #premResRt#, #lnCommRt#, #profitCommRt#))
+		  	              <isEqual property="sortColumn" compareValue="lineCd">
+			              		ORDER BY line_cd
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="mgtExpRt">
+			              		ORDER BY mgt_exp_rt
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="premResRt">
+			              		ORDER BY prem_res_rt
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="lnCommRt">
+			              		ORDER BY ln_comm_rt
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="profitCommRt">
+			              		ORDER BY profit_comm_rt
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giacs334_pkg.get_rec_list(#intmNo#, #lineCd#, #mgtExpRt#, #premResRt#, #lnCommRt#, #profitCommRt#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+    <resultMap id="getGiacs334IntmLovResultMap" class="java.util.HashMap"  extends="BaseEntity.TableGridResultMap">
+	  	<result column="intm_no"	property="intmNo"/>
+	  	<result column="intm_name"	property="intmName"/>
+  	</resultMap>
+  	
+    <select id="getGiacs334IntmLov" resultMap="getGiacs334IntmLovResultMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+					   b.count_, 
+					   a.* 
+				  FROM (SELECT * 
+						  FROM TABLE (giacs334_pkg.get_intm_lov(#userId#, #findText#))
+						  <isEqual property="sortColumn" compareValue="intmNo">
+								ORDER BY intm_no
+						  </isEqual>
+						  <isEqual property="sortColumn" compareValue="intmName">
+								ORDER BY intm_name
+						  </isEqual>
+						  <isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+						  </isNotNull>
+						  ) a, 
+					   (SELECT count(*) count_ 
+						  FROM TABLE (giacs334_pkg.get_intm_lov(#userId#, #findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+    <resultMap id="getGiacs334LineLovResultMap" class="java.util.HashMap"  extends="BaseEntity.TableGridResultMap">
+	  	<result column="line_cd"	property="lineCd"/>
+	  	<result column="line_name"	property="lineName"/>
+  	</resultMap>
+  	
+    <select id="getGiacs334LineLov" resultMap="getGiacs334LineLovResultMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+					   b.count_, 
+					   a.* 
+				  FROM (SELECT * 
+						  FROM TABLE (giacs334_pkg.get_line_lov(#userId#, #findText#))
+						  <isEqual property="sortColumn" compareValue="lineCd">
+								ORDER BY line_cd
+						  </isEqual>
+						  <isEqual property="sortColumn" compareValue="lineName">
+								ORDER BY line_name
+						  </isEqual>
+						  <isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+						  </isNotNull>
+						  ) a, 
+					   (SELECT count(*) count_ 
+						  FROM TABLE (giacs334_pkg.get_line_lov(#userId#, #findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+    <procedure id="valAddIntmPcommRt" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giacs334_pkg.val_add_rec(#intmNo#, #lineCd#);
+ 		END;
+ 	</procedure>
+ 	
+    <procedure id="setIntmPcommRt" parameterClass="giacIntmPcommRt">
+	    DECLARE
+	    	v_rec giac_intm_pcomm_rt%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.intm_no := #intmNo#;
+ 			v_rec.line_cd := #lineCd#;
+ 			v_rec.mgt_exp_rt := #mgtExpRt#;
+ 			v_rec.prem_res_rt := #premResRt#;
+ 			v_rec.ln_comm_rt := #lnCommRt#;
+ 			v_rec.profit_comm_rt := #profitCommRt#;
+ 			v_rec.remarks := #remarks#;
+ 			v_rec.user_id := #userId#;
+ 			
+ 			giacs334_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+    <delete id="delIntmPcommRt" parameterClass="giacIntmPcommRt">
+		BEGIN
+ 			giacs334_pkg.del_rec(#intmNo#, #lineCd#);
+ 		END;
+ 	</delete>
+</sqlMap>

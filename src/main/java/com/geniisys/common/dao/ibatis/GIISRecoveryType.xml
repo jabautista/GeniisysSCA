@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="GIISRecoveryType">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+
+	<typeAlias alias="GIISRecoveryTypeClass" type="com.geniisys.common.entity.GIISRecoveryType"/>
+
+	<resultMap class="GIISRecoveryTypeClass" id="GIISRecoveryTypeResultMap">
+		<result column="rec_type_cd" 			property="recTypeCd" />
+		<result column="rec_type_desc" 			property="recTypeDesc" />
+		<result column="remarks" 				property="remarks" />
+		<result column="cpi_rec_no" 			property="cpiRecNo" />
+		<result column="cpi_branch_cd" 			property="cpiBranchCd" />
+		<result column="user_id" 				property="userId" />
+		<result column="last_update" 			property="lastUpdate" />
+	</resultMap>
+
+	<resultMap id="GIISRecoveryTypeResultMapGrid" class="GIISRecoveryTypeClass" extends="GIISRecoveryTypeResultMap">
+  		<result column="rownum_" 			property="rowNum" />
+		<result column="count_"				property="rowCount"/>
+  	</resultMap>
+
+	<select id="getGiisRecoveryTypeLOV" resultMap="GIISRecoveryTypeResultMapGrid">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               COUNT(1) OVER() count_, <!-- added by MarkS 11.24.2016 SR5845 optimization -->
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIIS_RECOVERY_TYPE_PKG.get_giis_recovery_type)    
+		          		 <isNull property="findText">
+		                	WHERE UPPER(rec_type_desc) LIKE UPPER(#searchString#)
+		          			OR UPPER(rec_type_cd) LIKE UPPER(#searchString#)
+		                </isNull>
+		                <isNotNull property="findText">
+		                	WHERE UPPER(rec_type_desc) LIKE UPPER(#findText#)
+		          			OR UPPER(rec_type_cd) LIKE UPPER(#findText#)
+		                </isNotNull>           
+			          	  <isNotNull property="sortColumn">
+				          	  <isEqual property="sortColumn" compareValue="recTypeCd">
+				              		ORDER BY rec_type_cd
+				              </isEqual>
+			                  <isEqual property="sortColumn" compareValue="recTypeDesc">
+				              		ORDER BY rec_type_desc
+				              </isEqual>	
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+		 <!-- commented out by MarkS 11.24.2016 SR5845 optimization -->
+		 <!-- SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIIS_RECOVERY_TYPE_PKG.get_giis_recovery_type)    
+		          		 <isNull property="findText">
+		                	WHERE UPPER(rec_type_desc) LIKE UPPER(#searchString#)
+		          			OR UPPER(rec_type_cd) LIKE UPPER(#searchString#)
+		                </isNull>
+		                <isNotNull property="findText">
+		                	WHERE UPPER(rec_type_desc) LIKE UPPER(#findText#)
+		          			OR UPPER(rec_type_cd) LIKE UPPER(#findText#)
+		                </isNotNull>           
+			          	  <isNotNull property="sortColumn">
+				          	  <isEqual property="sortColumn" compareValue="recTypeCd">
+				              		ORDER BY rec_type_cd
+				              </isEqual>
+			                  <isEqual property="sortColumn" compareValue="recTypeDesc">
+				              		ORDER BY rec_type_desc
+				              </isEqual>	
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GIIS_RECOVERY_TYPE_PKG.get_giis_recovery_type)
+		                 <isNull property="findText">
+		                	WHERE UPPER(rec_type_desc) LIKE UPPER(#searchString#)
+		          			OR UPPER(rec_type_cd) LIKE UPPER(#searchString#)
+		                </isNull>
+		                <isNotNull property="findText">
+		                	WHERE UPPER(rec_type_desc) LIKE UPPER(#findText#)
+		          			OR UPPER(rec_type_cd) LIKE UPPER(#findText#)
+		                </isNotNull>    
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to# -->
+		 
+	</select>
+	
+	<parameterMap class="map" id="getRecTypeDescGicls201Map">
+		<parameter property="recTypeCd"		jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+		<parameter property="recTypeDesc"	jdbcType="VARCHAR"	javaType="java.lang.String"	mode="OUT"/>
+		<parameter property="found"			jdbcType="VARCHAR"	javaType="java.lang.String"	mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="getRecTypeDescGicls201" parameterMap="getRecTypeDescGicls201Map">
+		CALL GIIS_RECOVERY_TYPE_PKG.get_rec_type_desc_gicls201(?, ?, ?)
+	</procedure>
+	
+	<resultMap class="GIISRecoveryTypeClass" id="gicls101RecListMap" extends="BaseEntity.TableGridResultMap">
+		<result column="rec_type_cd" 			property="recTypeCd" />
+		<result column="rec_type_desc" 			property="recTypeDesc" />
+		<result column="remarks" 				property="remarks" />
+		<result column="user_id" 				property="userId" />
+		<result column="last_update" 			property="lastUpdate" />
+	</resultMap>
+	
+	<select id="getGicls101RecList" resultMap="gicls101RecListMap">
+		SELECT * 
+			FROM (SELECT rownum rownum_,
+						 b.count_,
+						 a.*
+					FROM (SELECT * 
+							FROM TABLE (gicls101_pkg.get_rec_list (#recTypeCd#, #recTypeDesc#))
+							<isEqual property="sortColumn" compareValue="recTypeCd">
+								ORDER BY rec_type_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="recTypeDesc">
+								ORDER BY rec_type_desc
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>) a, 
+							(SELECT count(*) count_
+							   FROM TABLE (gicls101_pkg.get_rec_list (#recTypeCd#, #recTypeDesc#))
+							 ) b)
+		WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="setRecoveryType" parameterClass="GIISRecoveryTypeClass">
+	    DECLARE
+	    	v_rec giis_recovery_type%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.rec_type_cd := #recTypeCd#;
+ 			v_rec.rec_type_desc := #recTypeDesc#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			gicls101_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteRecoveryType" parameterClass="java.lang.String">
+ 		BEGIN
+ 			gicls101_pkg.val_del_rec(#recId#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddRecoveryType" parameterClass="java.lang.String">
+ 		BEGIN
+ 			gicls101_pkg.val_add_rec(#recId#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delRecoveryType" parameterClass="java.lang.String">
+		BEGIN
+ 			gicls101_pkg.del_rec(#jvTranCd#);
+ 		END;
+ 	</delete>
+</sqlMap>

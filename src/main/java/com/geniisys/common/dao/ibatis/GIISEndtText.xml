@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GIISEndtText">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+
+	<typeAlias alias="GIISEndtTextCLass" type="com.geniisys.common.entity.GIISEndtText"/>	
+	<typeAlias alias="GIISEndtText"      type="com.geniisys.common.entity.GIISEndtText"/>
+	
+	<resultMap class="GIISEndtText" id="giisEndtTextListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="endt_id"        	property="endtId"/>
+		<result column="endt_cd"        	property="endtCd"/>
+		<result column="endt_title"        	property="endtTitle"/>
+		<result column="endt_text"        	property="endtText"/>
+		<result column="user_id"     		property="userId"/>
+		<result column="last_update" 		property="lastUpdate"/>
+		<result column="remarks"     		property="remarks"/>
+		<result column="active_tag"  		property="activeTag"/>
+	</resultMap>
+
+	<resultMap class="GIISEndtTextCLass" id="GIISEndtTextResultMap">
+		<result column="ENDT_CD" 			property="endtCd"/>
+		<result column="ENDT_TITLE" 		property="endtTitle"/>
+		<result column="ENDT_TEXT"   		property="endtText"/>
+	</resultMap>
+	
+	<resultMap class="GIISEndtTextCLass" id="GIISEndtTextLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="ENDT_CD" 			property="endtCd"/>
+		<result column="ENDT_TITLE" 		property="endtTitle"/>
+		<result column="ENDT_TEXT"   		property="endtText"/>
+	</resultMap>
+	
+	<select id="getEndtTextList" resultMap="GIISEndtTextResultMap" parameterClass="java.util.HashMap">
+		select * from table(giis_endttext_pkg.get_endttext_list(#keyword#))
+	</select>
+	
+	<select id="getEndtTextLOV" resultMap="GIISEndtTextLOVMap" parameterClass="java.util.HashMap">
+		SELECT * 
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT endt_cd, ESCAPE_VALUE(endt_title) endt_title, ESCAPE_VALUE(endt_text) endt_text FROM TABLE(giis_endttext_pkg.get_endttext_list(#keyword#))
+		                  <isEqual property="sortColumn" compareValue="endtCd">
+			              		ORDER BY endt_cd
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="endtTitle">
+			              		ORDER BY endt_title
+			              </isEqual>		
+			              <isEqual property="sortColumn" compareValue="endtText">
+			              		ORDER BY endt_text
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giis_endttext_pkg.get_endttext_list(#keyword#))) b
+		                ) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiiss104RecList" resultMap="giisEndtTextListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss104_pkg.get_rec_list(#endtId#, #endtCd#, #endtTitle#, #endtText#))
+		                  <isEqual property="sortColumn" compareValue="endtId">
+			              		ORDER BY endt_id
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="endtCd">
+			              		ORDER BY endt_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="endtTitle">
+			              		ORDER BY endt_title
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="endtText">
+			              		ORDER BY endt_text
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss104_pkg.get_rec_list(#endtId#, #endtCd#, #endtTitle#, #endtText#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<procedure id="valAddEndtText" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss104_pkg.val_add_rec(#endtCd#);
+ 		END;
+ 	</procedure>
+ 	
+	<procedure id="setAddEndtText" parameterClass="GIISEndtText">
+	    DECLARE
+	    	v_rec giis_endttext%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.endt_id := #endtId#;
+ 			v_rec.endt_cd := #endtCd#;
+ 			v_rec.endt_title := #endtTitle#;
+ 			v_rec.endt_text := #endtText#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			v_rec.active_tag := #activeTag#;
+ 			
+ 			giiss104_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+	<delete id="delEndtText" parameterClass="GIISEndtText">
+		BEGIN
+ 			giiss104_pkg.del_rec(#endtId#);
+ 		END;
+ 	</delete>
+ 	
+ 	<!-- Gzelle 02062015 -->
+	<procedure id="valDelEndtText" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss104_pkg.val_del_rec(#endtCd#);
+ 		END;
+ 	</procedure> 	
+</sqlMap>

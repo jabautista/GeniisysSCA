@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIACCommSlipExt">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIACCommSlipExtClass" type="com.geniisys.giac.entity.GIACCommSlipExt"/>
+	
+	<resultMap class="GIACCommSlipExtClass" id="commSlipResultMap">
+		<result column="REC_ID"					property="recId"/>
+		<result column="GACC_TRAN_ID"			property="gaccTranId"/>
+		<result column="COMM_SLIP_PREF"			property="commSlipPref"/>
+		<result column="COMM_SLIP_NO"			property="commSlipNo"/>
+		<result column="INTM_NO"				property="intmNo"/>
+		<result column="REF_INTM_CD"			property="refIntmCd"/>
+		<result column="ISS_CD"					property="issCd"/>
+		<result column="PREM_SEQ_NO"			property="premSeqNo"/>
+		<result column="BILL_NO"				property="billNo"/>
+		<result column="COMM_AMT"				property="commAmt"/>
+		<result column="WTAX_AMT"				property="wtaxAmt"/>
+		<result column="INPUT_VAT_AMT"			property="inputVatAmt"/>
+		<result column="NET_AMT"				property="netAmt"/>
+		<result column="COMM_SLIP_FLAG"			property="commSlipFlag"/>
+		<result column="COMM_SLIP_TAG" 			property="commSlipTag"/>
+		<result column="COMMISSION_SLIP_NO"		property="commissionSlipNo"/>
+	</resultMap>
+	
+	<resultMap class="GIACCommSlipExtClass" id="commSlipTGMap" extends="BaseEntity.TableGridResultMap">
+		<result column="REC_ID"					property="recId"/>
+		<result column="GACC_TRAN_ID"			property="gaccTranId"/>
+		<result column="COMM_SLIP_PREF"			property="commSlipPref"/>
+		<result column="COMM_SLIP_NO"			property="commSlipNo"/>
+		<result column="INTM_NO"				property="intmNo"/>
+		<result column="REF_INTM_CD"			property="refIntmCd"/>
+		<result column="ISS_CD"					property="issCd"/>
+		<result column="PREM_SEQ_NO"			property="premSeqNo"/>
+		<result column="BILL_NO"				property="billNo"/>
+		<result column="COMM_AMT"				property="commAmt"/>
+		<result column="WTAX_AMT"				property="wtaxAmt"/>
+		<result column="INPUT_VAT_AMT"			property="inputVatAmt"/>
+		<result column="NET_AMT"				property="netAmt"/>
+		<result column="COMM_SLIP_FLAG"			property="commSlipFlag"/>
+		<result column="COMM_SLIP_TAG" 			property="commSlipTag"/>
+		<result column="COMMISSION_SLIP_NO"		property="commissionSlipNo"/>
+	</resultMap>
+	
+	<parameterMap class="map" id="extractCommSlipMap">
+		<parameter property="gaccTranId" 	jdbcType="INTEGER" javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="userId" 		jdbcType="VARCHAR" javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="vpdc" 			jdbcType="VARCHAR" javaType="java.lang.String" 	mode="OUT"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="getCommSlipParamMap">
+		<parameter property="gaccTranId" 	jdbcType="INTEGER" javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="userId" 		jdbcType="VARCHAR" javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="vpdc" 			jdbcType="VARCHAR" javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="commSlipPref"	jdbcType="VARCHAR" javaType="java.lang.String" 	mode="OUT"/>
+		<parameter property="commSlipNo" 	jdbcType="INTEGER" javaType="java.lang.Integer"	mode="OUT"/>
+		<parameter property="mesg" 			jdbcType="VARCHAR" javaType="java.lang.String" 	mode="OUT"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="confirmPrintGIACS154Map">
+		<parameter property="tranId" 		jdbcType="INTEGER" 	javaType="java.lang.Integer" 	mode="IN"/>
+		<parameter property="commSlipPref"	jdbcType="VARCHAR"  javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="commSlipNo" 	jdbcType="INTEGER"  javaType="java.lang.Integer"	mode="IN"/>
+		<parameter property="commSlipDate"	jdbcType="DATE" 	javaType="java.util.Date"   	mode="IN"/>
+	</parameterMap>
+	
+	<procedure id="getCommSlipRecords" resultMap="commSlipResultMap">
+		SELECT * FROM TABLE(GIAC_COMM_SLIP_EXT_PKG.get_comm_slip_ext(#gaccTranId#))
+	</procedure>
+	
+	<resultMap class="java.util.HashMap" id="giacs201FundLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="fund_cd"     		property="fundCd"/>
+		<result column="fund_desc"     		property="fundDesc"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="giacs201BranchLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="branch_cd"     		property="branchCd"/>
+		<result column="branch_name"     	property="branchName"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="batchCommSlipMap" extends="BaseEntity.TableGridResultMap">
+		<result column="iss_cd"				property="issCd" />
+		<result column="gacc_tran_id"		property="gaccTranId" />
+		<result column="dsp_or_no"			property="dspOrNo" />
+		<result column="intm_no"			property="intmNo" />
+		<result column="comm_amt"			property="commAmt" />
+		<result column="wtax_amt"			property="wtaxAmt" />
+		<result column="input_vat_amt"		property="inputVatAmt" />
+		<result column="net_amt"			property="netAmt" />
+		<result column="or_pref"			property="orPref" />
+		<result column="or_no"				property="orNo" />
+		<result column="intm_name"			property="intmName" />
+		<result column="generate_flag"		property="generateFlag" />
+		<result column="printed_flag"		property="printedFlag" />
+		<result column="comm_slip_pref"		property="commSlipPref" />
+		<result column="comm_slip_no"		property="commSlipNo" />
+	</resultMap>
+	
+	<parameterMap id="commSlipNoMap" class="map">
+		<parameter property="fundCd"	    jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN" />
+		<parameter property="branchCd"	    jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN" />
+		<parameter property="userId"	    jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN" />
+		<parameter property="defCsPref"	    jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT" />
+		<parameter property="defCsSeqNo"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT" />
+	</parameterMap>
+	
+	<resultMap class="java.util.HashMap" id="batchCommSlipReportMap">
+		<result column="gacc_tran_id"		property="gaccTranId" />
+		<result column="branch_cd"			property="branchCd" />
+		<result column="intm_no"			property="intmNo" />
+		<result column="cs_no"				property="csNo" />
+		<result column="cs_pref"			property="csPref" />
+	</resultMap>
+	
+	<parameterMap id="generateCommSlipNoMap" class="map">
+		<parameter property="commSlipPref"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN" />
+		<parameter property="commSlipSeq"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN" />
+		<parameter property="count"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT" />
+	</parameterMap>
+	
+	<parameterMap id="updateCommSlipMap" class="map">
+		<parameter property="userId"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN" />
+		<parameter property="fundCd"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN" />
+		<parameter property="branchCd"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN" />
+		<parameter property="gaccTranId"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN" />
+		<parameter property="intmNo"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN" />
+		<parameter property="commSlipPref"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="INOUT" />
+		<parameter property="commSlipSeq"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="INOUT" />
+		<parameter property="userId"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN" />
+	</parameterMap>
+	
+	<select id="getCommSlipTG" parameterClass="java.util.HashMap" resultMap="commSlipTGMap">
+		SELECT *
+          FROM (SELECT ROWNUM rownum_,
+            		   b.count_,
+            		   a.*
+                  FROM (SELECT *
+                          FROM TABLE(GIAC_COMM_SLIP_EXT_PKG.get_comm_slip_ext(#gaccTranId#))
+                          	<isEqual property="sortColumn" compareValue="commissionSlipNo">
+								ORDER BY commission_slip_no
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="intmNo">
+								ORDER BY intm_no
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="billNo">
+								ORDER BY bill_no
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="commAmt">
+								ORDER BY comm_amt
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="wtaxAmt">
+								ORDER BY wtax_amt
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="inputVatAmt">
+								ORDER BY input_vat_amt
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="netAmt">
+								ORDER BY net_amt
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>) a,
+               (SELECT COUNT(*) count_
+                  FROM TABLE(GIAC_COMM_SLIP_EXT_PKG.get_comm_slip_ext(#gaccTranId#))
+				) b)
+          WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="extractCommSlip" parameterMap="extractCommSlipMap">
+	<!-- 	BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			GIAC_COMM_SLIP_EXT_PKG.extract_comm_slip();
+		END; -->
+		{CALL GIAC_COMM_SLIP_EXT_PKG.extract_comm_slip(?, ?, ?)}
+	</procedure>
+	
+	<procedure id="getCommPrintValues" parameterMap="getCommSlipParamMap">
+		{CALL GIAC_COMM_SLIP_EXT_PKG.get_comm_print_values(?, ?, ?, ?, ?, ?)}
+	</procedure>
+	
+	<procedure id="confirmCSPrintingGIACS154" parameterMap="confirmPrintGIACS154Map">
+		{CALL CONFIRM_PRINTING_GIACS154(?, ?, ?, ?)}
+	</procedure>
+	
+	<procedure id="updateCommSlipTags" parameterClass="GIACCommSlipExtClass">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			GIAC_COMM_SLIP_EXT_PKG.set_valid_comm_slip_tag(#gaccTranId#, #intmNo#, #recId#, #issCd#, #premSeqNo#);
+		END;
+	</procedure>
+	
+	<procedure id="resetCommSlipTags" parameterClass="java.lang.Integer">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			GIAC_COMM_SLIP_EXT_PKG.reset_comm_slip_tag(#tranId#);
+		END;
+	</procedure>
+	
+	<select id="getGiacs250FundLOV" resultMap="giacs201FundLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giacs250_pkg.get_fund_lov(#userId#, #findText#))
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="fundCd">
+								ORDER BY fund_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="fundDesc">
+								ORDER BY fund_desc
+							</isEqual>							
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(giacs250_pkg.get_fund_lov(#userId#, #findText#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiacs250BranchLOV" resultMap="giacs201BranchLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giacs250_pkg.get_branch_lov(#userId#, #findText#))
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="branchCd">
+								ORDER BY branch_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="branchName">
+								ORDER BY branch_name
+							</isEqual>							
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(giacs250_pkg.get_branch_lov(#userId#, #findText#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getBatchCommSlip" resultMap="batchCommSlipMap">
+		SELECT *
+	      FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+					      FROM TABLE(giacs250_pkg.get_batch_comm_slip_listing(#orPref#, #orNo#, #intmNo#, #commAmt#, #wtaxAmt#, #inputVatAmt#, #netAmt#))
+				<isNotNull property="sortColumn">
+					<isEqual property="sortColumn" compareValue="orPref orNo">
+						ORDER BY or_pref, or_no
+					</isEqual>
+					<isEqual property="sortColumn" compareValue="commSlipPref commSlipNo">
+						ORDER BY comm_slip_pref, comm_slip_no
+					</isEqual>
+					<isEqual property="sortColumn" compareValue="intmNo">
+						ORDER BY intm_no
+					</isEqual>
+					<isEqual property="sortColumn" compareValue="commAmt">
+						ORDER BY comm_amt
+					</isEqual>
+					<isEqual property="sortColumn" compareValue="wtaxAmt">
+						ORDER BY wtax_amt
+					</isEqual>
+					<isEqual property="sortColumn" compareValue="inputVatAmt">
+						ORDER BY input_vat_amt
+					</isEqual>
+					<isEqual property="sortColumn" compareValue="netAmt">
+						ORDER BY net_amt
+					</isEqual>
+					<isEqual property="ascDescFlg" compareValue="ASC">
+						ASC
+					</isEqual>
+					<isEqual property="ascDescFlg" compareValue="DESC">
+						DESC
+					</isEqual>
+				</isNotNull>) a,
+				(SELECT count(*) count_
+				  FROM TABLE(giacs250_pkg.get_batch_comm_slip_listing(#orPref#, #orNo#, #intmNo#, #commAmt#, #wtaxAmt#, #inputVatAmt#, #netAmt#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="populateBatchCommSlip" parameterClass="java.util.HashMap">
+		BEGIN
+			giacs250_pkg.populate_batch_comm_slip_temp(#fundCd#, #branchCd#, #orNo#, #orPref#);
+		END;
+	</procedure>
+	
+	<procedure id="getCommSlipNo" parameterMap="commSlipNoMap">
+		CALL giacs250_pkg.get_comm_slip_seq(?, ?, ?, ?, ?)
+	</procedure>
+	
+	<procedure id="tagAllCommSlip" parameterClass="java.util.HashMap">
+		CALL giacs250_pkg.tag_all(#orPref#, #orNo#, #intmNo#, #commAmt#, #wtaxAmt#, #inputVatAmt#, #netAmt#)
+	</procedure>
+	
+	<procedure id="untagAllCommSlip">
+		CALL giacs250_pkg.untag_all()
+	</procedure>
+	
+	<procedure id="generateCommSlipNo" parameterMap="generateCommSlipNoMap">
+		CALL giacs250_pkg.generate_comm_slip_numbers(?, ?, ?)
+	</procedure>
+	
+	<procedure id="saveGenerateFlag" parameterClass="java.util.HashMap">
+		CALL giacs250_pkg.save_generate_flag(#gaccTranId#, #intmNo#, #generateFlag#)
+	</procedure>
+	
+	<select id="getBatchCommSlipReports" parameterClass="java.util.HashMap" resultMap="batchCommSlipReportMap">
+		SELECT *
+		  FROM TABLE(giacs250_pkg.get_batch_comm_slip_reports)
+	</select>
+
+	<procedure id="updateCommSlip" parameterMap="updateCommSlipMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			giacs250_pkg.update_comm_slip_ext(?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<procedure id="clearCommSlipNo" parameterClass="java.util.HashMap">
+		CALL giacs250_pkg.clear_comm_slip_no(#gaccTranId#, #intmNo#)
+	</procedure>
+	
+</sqlMap>

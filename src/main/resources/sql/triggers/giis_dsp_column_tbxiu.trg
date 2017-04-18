@@ -1,0 +1,13 @@
+DROP TRIGGER CPI.GIIS_DSP_COLUMN_TBXIU;
+
+CREATE OR REPLACE TRIGGER CPI.GIIS_DSP_COLUMN_TBXIU
+       BEFORE INSERT OR UPDATE
+       ON CPI.GIIS_DSP_COLUMN        FOR EACH ROW
+DECLARE
+      BEGIN
+        :NEW.user_id     := NVL (giis_users_pkg.app_user, USER);
+        :NEW.last_update := SYSDATE;
+      END;
+/
+
+

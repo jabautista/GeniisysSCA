@@ -1,0 +1,1405 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="GIACChartOfAccts">
+	<cacheModel type="MEMORY" id="oneDaylClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIACChartOfAcctsClass" type="com.geniisys.giac.entity.GIACChartOfAccts"/>
+	
+    <resultMap id="GlAcctListingMap" class="GIACChartOfAcctsClass">
+		<result column="gl_acct_category" 		property="glAcctCategory"/>
+		<result column="gl_control_acct" 		property="glControlAcct"/>
+		<result column="gl_sub_acct_1" 			property="glSubAcct1"/>
+		<result column="gl_sub_acct_2" 			property="glSubAcct2"/>
+		<result column="gl_sub_acct_3" 			property="glSubAcct3"/>
+		<result column="gl_sub_acct_4" 			property="glSubAcct4"/>
+		<result column="gl_sub_acct_5" 			property="glSubAcct5"/>
+		<result column="gl_sub_acct_6" 			property="glSubAcct6"/>
+		<result column="gl_sub_acct_7" 			property="glSubAcct7"/>
+		<result column="gl_acct_name" 			property="glAcctName"/>
+		<result column="gl_acct_id" 			property="glAcctId"/>
+		<result column="gslt_sl_type_cd" 		property="gsltSlTypeCd"/>
+	</resultMap>
+	
+	<resultMap class="GIACChartOfAcctsClass" id="getGlAcctsLOVResultMap" extends="GlAcctListingMap">
+		<result property="rowNum" 			column="rownum_" />
+		<result property="rowCount" 		column="count_" />
+	</resultMap>
+	
+	<resultMap class="GIACChartOfAcctsClass" id="getAcctCodesChartLOVResultMap" extends="GlAcctListingMap">
+		<result property="dspAcctCd" 		column="dsp_acct_cd"/>
+		<result property="rowNum" 		column="rownum_" />
+		<result property="rowCount" 		column="count_" />
+	</resultMap>
+	
+	<resultMap id="getPayeeNamesLOVMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result property="payeeNo" 				column="payee_no"/>
+		<result property="payeeFirstName" 		column="payee_first_name"/>
+		<result property="payeeMiddleName" 		column="payee_middle_name"/>
+		<result property="payeeLastName" 		column="payee_last_name"/>
+		<result property="rowNum" 				column="rownum_" />
+		<result property="rowCount" 			column="count_" />
+	</resultMap>
+
+	<resultMap id="GlAcctLOV2ResultMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result column="gl_acct_category" 		property="glAcctCategory"/>
+		<result column="gl_control_acct" 		property="glControlAcct"/>
+		<result column="gl_sub_acct_1" 			property="glSubAcct1"/>
+		<result column="gl_sub_acct_2" 			property="glSubAcct2"/>
+		<result column="gl_sub_acct_3" 			property="glSubAcct3"/>
+		<result column="gl_sub_acct_4" 			property="glSubAcct4"/>
+		<result column="gl_sub_acct_5" 			property="glSubAcct5"/>
+		<result column="gl_sub_acct_6" 			property="glSubAcct6"/>
+		<result column="gl_sub_acct_7" 			property="glSubAcct7"/>
+		<result column="gl_acct_name" 			property="glAcctName"/>
+		<result column="gl_acct_id" 			property="glAcctId"/>
+		<result column="gl_acct_no"				property="glAcctNo"/>
+		<result column="gl_acct_type"			property="glAcctType"/>
+	</resultMap>
+	<select id="getGlAcctListing2" resultMap="GlAcctListingMap">
+		SELECT * FROM TABLE(giac_chart_of_accts_pkg.get_gl_acct_list2(#glAcctName#))
+	</select>
+	
+	<select id="getPayeeNamesLOV" parameterClass="java.util.HashMap" resultMap="getPayeeNamesLOVMap">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+						a.*,
+						b.count_ FROM(SELECT *
+								FROM (SELECT payee_no,payee_first_name,payee_middle_name,payee_last_name
+										FROM giis_payees
+											WHERE payee_class_cd = #payeeClassCd#)
+												WHERE payee_no LIKE NVL(#findText#, payee_no)
+												OR UPPER(payee_first_name) LIKE UPPER(NVL(#findText#, payee_first_name))
+												OR UPPER(payee_middle_name) LIKE UPPER(NVL(#findText#, payee_middle_name))
+												OR UPPER(payee_last_name) LIKE UPPER(NVL(#findText#, payee_last_name))
+								<isEqual property="sortColumn" compareValue="payeeNo">
+				          			ORDER BY payee_no
+					          	</isEqual>
+								<isEqual property="sortColumn" compareValue="payeeFirstName">
+					          		ORDER BY payee_first_name
+					          	</isEqual>
+					          	<isEqual property="sortColumn" compareValue="payeeMiddleName">
+				          			ORDER BY payee_middle_name
+					          	</isEqual>
+								<isEqual property="sortColumn" compareValue="payeeLastName">
+					          		ORDER BY payee_last_name
+					          	</isEqual>
+								<isNotNull property="sortColumn">
+			              			<isEqual property="ascDescFlg" compareValue="ASC">
+			              				ASC
+			              			</isEqual>
+			              			<isEqual property="ascDescFlg" compareValue="DESC">
+			              				DESC
+			              			</isEqual>
+			              		</isNotNull>)a,
+								(SELECT count(*) count_
+									FROM (SELECT payee_no,payee_first_name,payee_middle_name,payee_last_name
+										FROM giis_payees
+												WHERE payee_class_cd = #payeeClassCd#)
+												WHERE payee_no LIKE NVL(#findText#, payee_no)
+												OR UPPER(payee_first_name) LIKE UPPER(NVL(#findText#, payee_first_name))
+												OR UPPER(payee_middle_name) LIKE UPPER(NVL(#findText#, payee_middle_name))
+												OR UPPER(payee_last_name) LIKE UPPER(NVL(#findText#, payee_last_name)))b)
+										WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getAcctCodesChartLOV" parameterClass="java.util.HashMap" resultMap="getAcctCodesChartLOVResultMap">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+				a.*,
+				b.count_ FROM(SELECT *
+			FROM (SELECT gl_acct_category, gl_control_acct, gl_sub_acct_1,
+									 gl_sub_acct_2, gl_sub_acct_3, gl_sub_acct_4,
+									 gl_sub_acct_5, gl_sub_acct_6, gl_sub_acct_7,
+									 gl_acct_name, gl_acct_id,gslt_sl_type_cd, gl_acct_category||gl_control_acct||gl_sub_acct_1||
+									 gl_sub_acct_2||gl_sub_acct_3||gl_sub_acct_4||
+									 gl_sub_acct_5||gl_sub_acct_6||gl_sub_acct_7 dsp_acct_cd
+								FROM giac_chart_of_accts
+								WHERE leaf_tag = 'Y')
+				WHERE dsp_acct_cd LIKE UPPER(NVL(#findText#, dsp_acct_cd))
+					OR UPPER(gl_acct_name) LIKE UPPER(NVL(#findText#, dsp_acct_cd))
+					<isEqual property="sortColumn" compareValue="glAcctName">
+				          		ORDER BY gl_acct_name
+				          	</isEqual>
+							<isEqual property="sortColumn" compareValue="dspAcctCd">
+				          		ORDER BY dsp_acct_cd
+				          	</isEqual>
+						<isNotNull property="sortColumn">
+			              			<isEqual property="ascDescFlg" compareValue="ASC">
+			              				ASC
+			              			</isEqual>
+			              			<isEqual property="ascDescFlg" compareValue="DESC">
+			              				DESC
+			              			</isEqual>
+			              		</isNotNull>)a,
+				(SELECT count(*) count_
+								FROM (SELECT gl_acct_category, gl_control_acct, gl_sub_acct_1,
+									 gl_sub_acct_2, gl_sub_acct_3, gl_sub_acct_4,
+									 gl_sub_acct_5, gl_sub_acct_6, gl_sub_acct_7,
+									 gl_acct_name, gl_acct_id,gslt_sl_type_cd, gl_acct_category||gl_control_acct||gl_sub_acct_1||
+									 gl_sub_acct_2||gl_sub_acct_3||gl_sub_acct_4||
+									 gl_sub_acct_5||gl_sub_acct_6||gl_sub_acct_7 dsp_acct_cd
+								FROM giac_chart_of_accts
+								WHERE leaf_tag = 'Y')
+				WHERE dsp_acct_cd LIKE UPPER(NVL(#findText#, dsp_acct_cd))
+						OR gl_acct_name LIKE UPPER(NVL(#findText#, gl_acct_name)))b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="validateAcctCodeInputVat" parameterClass="java.util.HashMap" resultMap="GlAcctListingMap">
+		SELECT * FROM TABLE(giac_chart_of_accts_pkg.CHECK_ACCOUNT_CD(
+	            #glAcctCategory#, #glControlAcct#, #glSubAcct1#,         
+	            #glSubAcct2#, #glSubAcct3#, #glSubAcct4#,
+	            #glSubAcct5#, #glSubAcct6#, #glSubAcct7#))
+	</procedure>
+	
+	<procedure id="getGlAcctListing3" resultMap="GlAcctListingMap" parameterClass="java.util.HashMap">
+		SELECT * FROM TABLE(GIAC_CHART_OF_ACCTS_PKG.get_gl_acct_list_GIACS030(
+	            #glAcctCategory#, #glControlAcct#, #glSubAcct1#,         
+	            #glSubAcct2#, #glSubAcct3#, #glSubAcct4#,
+	            #glSubAcct5#, #glSubAcct6#, #glSubAcct7#, #keyword#))
+	    ORDER BY gl_acct_category, gl_control_acct
+	</procedure>
+	
+	<!-- old -->
+	<procedure id="getGlAcctListing4" parameterClass="java.util.HashMap" resultMap="GlAcctListingMap">
+		SELECT * FROM TABLE(giac_chart_of_accts_pkg.get_gl_acct_list4(
+	            #glAcctCategory#, #glControlAcct#, #glSubAcct1#,         
+	            #glSubAcct2#, #glSubAcct3#, #glSubAcct4#,
+	            #glSubAcct5#, #glSubAcct6#, #glSubAcct7#, ''))
+	</procedure>
+	
+	<select id="searchGlAcctListing" resultMap="GlAcctListingMap" parameterClass="java.lang.String">
+		SELECT * FROM TABLE(giac_chart_of_accts_pkg.search_gl_acct_list(#keyword#))
+	</select>
+	
+	<select id="getGlAcctsLOV" resultMap="getGlAcctsLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE (giac_chart_of_accts_pkg.get_gl_acct_listing(#glAcctCategory#, #glControlAcct#,
+		          			#glSubAcct1#, #glSubAcct2#, #glSubAcct3#, #glSubAcct4#, #glSubAcct5#, #glSubAcct6#, 
+		          			#glSubAcct7#, #findText#))
+		          	    <isNotNull property="notIn">
+  		 				  	WHERE gl_acct_id NOT IN $notIn$
+  		 				 </isNotNull>        
+			          	<isEqual property="sortColumn" compareValue="glAcctCategory">
+			          		ORDER BY gl_acct_category
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="glControlAcct">
+			          		ORDER BY gl_control_acct
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="glSubAcct1">
+			          		ORDER BY gl_sub_acct_1
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="glSubAcct2">
+			          		ORDER BY gl_sub_acct_2
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="glSubAcct3">
+			          		ORDER BY gl_sub_acct_3
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="glSubAcct4">
+			          		ORDER BY gl_sub_acct_4
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="glSubAcct5">
+			          		ORDER BY gl_sub_acct_5
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="glSubAcct6">
+			          		ORDER BY gl_sub_acct_6
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="glSubAcct7">
+			          		ORDER BY gl_sub_acct_7
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="glAcctName">
+			          		ORDER BY gl_acct_name
+			          	</isEqual>
+			          	<isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	</isNotNull>) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giac_chart_of_accts_pkg.get_gl_acct_listing(#glAcctCategory#, #glControlAcct#,
+		          			#glSubAcct1#, #glSubAcct2#, #glSubAcct3#, #glSubAcct4#, #glSubAcct5#, #glSubAcct6#, 
+		          			#glSubAcct7#, #findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getChartOfAcctsLOV" resultMap="getGlAcctsLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE (giac_chart_of_accts_pkg.get_gl_acct_list_GIACS030(#glAcctCategory#, #glControlAcct#,
+		          			#glSubAcct1#, #glSubAcct2#, #glSubAcct3#, #glSubAcct4#, #glSubAcct5#, #glSubAcct6#, 
+		          			#glSubAcct7#, #findText#))
+		          	     <isNotNull property="notIn">
+  		 				  	WHERE gl_acct_id NOT IN $notIn$
+  		 				 </isNotNull>       
+			          	<isEqual property="sortColumn" compareValue="glAcctCategory glControlAcct glSubAcct1 glSubAcct2 glSubAcct3 glSubAcct4 glSubAcct5 glSubAcct6 glSubAcct7">
+			          		ORDER BY gl_acct_category
+			          		 <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_control_acct
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_1
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_2
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_3
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_4
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_5
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_6
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_7
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="gsltSlTypeCd">
+			          		ORDER BY gslt_sl_type_cd
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="glAcctId">
+			          		ORDER BY gl_acct_id
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="glAcctName">
+			          		ORDER BY gl_acct_name
+			          	</isEqual>
+			          	<isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	</isNotNull>) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giac_chart_of_accts_pkg.get_gl_acct_list_GIACS030(#glAcctCategory#, #glControlAcct#,
+		          			#glSubAcct1#, #glSubAcct2#, #glSubAcct3#, #glSubAcct4#, #glSubAcct5#, #glSubAcct6#, 
+		          			#glSubAcct7#, #findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getAccountCodeLOV" resultMap="getGlAcctsLOVResultMap">
+		SELECT *
+			  FROM (SELECT rownum rownum_, 
+			               b.count_, 
+			               a.* 
+			          FROM (SELECT * FROM TABLE(giac_chart_of_accts_pkg.get_gl_acct_list4(
+									            #glAcctCategory#, #glControlAcct#, #glSubAcct1#,         
+									            #glSubAcct2#, #glSubAcct3#, #glSubAcct4#,
+									            #glSubAcct5#, #glSubAcct6#, #glSubAcct7#,
+									            #findText#)) 
+						<isEqual property="sortColumn" compareValue="glAcctCategory glControlAcct glSubAcct1 glSubAcct2 glSubAcct3 glSubAcct4 glSubAcct5 glSubAcct6 glSubAcct7">
+			          		ORDER BY gl_acct_category
+			          		<isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_control_acct
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_1
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_2
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_3
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_4
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_5
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_6
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_7
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="glAcctName">
+			          		ORDER BY gl_acct_name
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="gsltSlTypeCd">
+			          		ORDER BY gslt_sl_type_cd
+			          	</isEqual>
+			          	<isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	</isNotNull>
+		              	)a,
+			               (SELECT count(*) count_ 
+			                  FROM TABLE(giac_chart_of_accts_pkg.get_gl_acct_list4(
+							            #glAcctCategory#, #glControlAcct#, #glSubAcct1#,         
+							            #glSubAcct2#, #glSubAcct3#, #glSubAcct4#,
+							            #glSubAcct5#, #glSubAcct6#, #glSubAcct7#,
+							            #findText#))) b) 
+		WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGlAcctsGIACS230LOV" resultMap="GlAcctLOV2ResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giac_chart_of_accts_pkg.get_gl_acct_list_GIACS230(#glAcctCategory#, #glControlAcct#, #glSubAcct1#,
+		          			   		 #glSubAcct2#, #glSubAcct3#, #glSubAcct4#, #glSubAcct5#, #glSubAcct6#, #glSubAcct7#))
+		          		<isNotNull property="findText">
+		                  	WHERE UPPER(gl_acct_no) LIKE UPPER(#findText#)
+		                  	   OR UPPER(gl_acct_name) LIKE UPPER(#findText#)
+		                </isNotNull>
+		                <isNull property="findText">
+		                  	WHERE UPPER(gl_acct_no) LIKE UPPER(#searchString#)
+		                  	   OR UPPER(gl_acct_name) LIKE UPPER(#searchString#)
+		                </isNull>
+		          	    <isNotNull property="notIn">
+  		 				  	WHERE gl_acct_id NOT IN $notIn$
+  		 				 </isNotNull>        
+			          	<isEqual property="sortColumn" compareValue="glAcctCategory">
+			          		ORDER BY gl_acct_category
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="glControlAcct">
+			          		ORDER BY gl_control_acct
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="glSubAcct1">
+			          		ORDER BY gl_sub_acct_1
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="glSubAcct2">
+			          		ORDER BY gl_sub_acct_2
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="glSubAcct3">
+			          		ORDER BY gl_sub_acct_3
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="glSubAcct4">
+			          		ORDER BY gl_sub_acct_4
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="glSubAcct5">
+			          		ORDER BY gl_sub_acct_5
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="glSubAcct6">
+			          		ORDER BY gl_sub_acct_6
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="glSubAcct7">
+			          		ORDER BY gl_sub_acct_7
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="glAcctNo">
+			          		ORDER BY gl_acct_no
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="glAcctName">
+			          		ORDER BY gl_acct_name
+			          	</isEqual>
+			          	<isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	</isNotNull>) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giac_chart_of_accts_pkg.get_gl_acct_list_GIACS230(#glAcctCategory#, #glControlAcct#,
+		          			#glSubAcct1#, #glSubAcct2#, #glSubAcct3#, #glSubAcct4#, #glSubAcct5#, #glSubAcct6#, #glSubAcct7#))		          		
+		          		<isNotNull property="findText">
+		                  	WHERE UPPER(gl_acct_no) LIKE UPPER(#findText#)
+		                  	   OR UPPER(gl_acct_name) LIKE UPPER(#findText#)
+		                </isNotNull>
+		                <isNull property="findText">
+		                  	WHERE UPPER(gl_acct_no) LIKE UPPER(#searchString#)
+		                  	   OR UPPER(gl_acct_name) LIKE UPPER(#searchString#)
+		                </isNull>
+		               ) b
+		         ) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGIACS060GLAcctCdLOV" resultMap="GlAcctLOV2ResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giac_chart_of_accts_pkg.get_giacs060_gl_acct_code(#glAcctCategory#, #glControlAcct#, 
+		                  #glSubAcct1#, #glSubAcct2#, #glSubAcct3#, #glSubAcct4#, #glSubAcct5#, #glSubAcct6#, #glSubAcct7#, #glAcctName#))
+		          		<!-- <isNotNull property="findText">
+		                  	WHERE UPPER(gl_acct_no) LIKE UPPER(#findText#)
+		                  	   OR UPPER(gl_acct_name) LIKE UPPER(#findText#)
+		                  </isNotNull>   -->    
+			          	<isEqual property="sortColumn" compareValue="glAcctCategory">
+			          		ORDER BY gl_acct_category
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="glControlAcct">
+			          		ORDER BY gl_control_acct
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="glSubAcct1">
+			          		ORDER BY gl_sub_acct_1
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="glSubAcct2">
+			          		ORDER BY gl_sub_acct_2
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="glSubAcct3">
+			          		ORDER BY gl_sub_acct_3
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="glSubAcct4">
+			          		ORDER BY gl_sub_acct_4
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="glSubAcct5">
+			          		ORDER BY gl_sub_acct_5
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="glSubAcct6">
+			          		ORDER BY gl_sub_acct_6
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="glSubAcct7">
+			          		ORDER BY gl_sub_acct_7
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="glAcctName">
+			          		ORDER BY gl_acct_name
+			          	</isEqual>
+			          	<isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	</isNotNull>) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giac_chart_of_accts_pkg.get_giacs060_gl_acct_code(#glAcctCategory#, #glControlAcct#, 
+		                  #glSubAcct1#, #glSubAcct2#, #glSubAcct3#, #glSubAcct4#, #glSubAcct5#, #glSubAcct6#, #glSubAcct7#, #glAcctName#))		          		
+		          		<!-- <isNotNull property="findText">
+		                  	WHERE UPPER(gl_acct_no) LIKE UPPER(#findText#)
+		                  	   OR UPPER(gl_acct_name) LIKE UPPER(#findText#)
+		                  </isNotNull> -->
+		               ) b
+		         ) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+    <resultMap id="GlAcctCodeLOVResultMap" class="GIACChartOfAcctsClass" extends="BaseEntity.TableGridResultMap">
+		<result column="gl_acct_category" 		property="glAcctCategory"/>
+		<result column="gl_control_acct" 		property="glControlAcct"/>
+		<result column="gl_sub_acct_1" 			property="glSubAcct1"/>
+		<result column="gl_sub_acct_2" 			property="glSubAcct2"/>
+		<result column="gl_sub_acct_3" 			property="glSubAcct3"/>
+		<result column="gl_sub_acct_4" 			property="glSubAcct4"/>
+		<result column="gl_sub_acct_5" 			property="glSubAcct5"/>
+		<result column="gl_sub_acct_6" 			property="glSubAcct6"/>
+		<result column="gl_sub_acct_7" 			property="glSubAcct7"/>
+		<result column="gl_acct_name" 			property="glAcctName"/>
+		<result column="gl_acct_id" 			property="glAcctId"/>
+		<result column="gslt_sl_type_cd" 		property="gsltSlTypeCd"/>
+		<result column="sl_type_name" 			property="dspSlTypeName"/>
+	</resultMap>	
+	
+	<select id="getGlAcctCodeLOV" resultMap="GlAcctCodeLOVResultMap">
+		SELECT *
+			  FROM (SELECT rownum rownum_, 
+			               b.count_, 
+			               a.* 
+			          FROM (SELECT * FROM TABLE(giac_chart_of_accts_pkg.get_gl_acct_lov(
+									            #glAcctCategory#, #glControlAcct#, #glSubAcct1#,         
+									            #glSubAcct2#, #glSubAcct3#, #glSubAcct4#,
+									            #glSubAcct5#, #glSubAcct6#, #glSubAcct7#,
+									            #findText#)) 
+						<isEqual property="sortColumn" compareValue="glAcctCategory glControlAcct glSubAcct1 glSubAcct2 glSubAcct3 glSubAcct4 glSubAcct5 glSubAcct6 glSubAcct7">
+			          		ORDER BY gl_acct_category
+			          		<isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_control_acct
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_1
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_2
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_3
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_4
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_5
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_6
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_7
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="glAcctName">
+			          		ORDER BY gl_acct_name
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="gsltSlTypeCd">
+			          		ORDER BY gslt_sl_type_cd
+			          	</isEqual>
+			          	<isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	</isNotNull>
+		              	)a,
+			               (SELECT count(*) count_ 
+			                  FROM TABLE(giac_chart_of_accts_pkg.get_gl_acct_lov(
+							            #glAcctCategory#, #glControlAcct#, #glSubAcct1#,         
+							            #glSubAcct2#, #glSubAcct3#, #glSubAcct4#,
+							            #glSubAcct5#, #glSubAcct6#, #glSubAcct7#,
+							            #findText#))) b) 
+		WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGlAcctCodeLOV2" resultMap="GlAcctCodeLOVResultMap">
+		SELECT *
+			  FROM (SELECT rownum rownum_, 
+			               b.count_, 
+			               a.* 
+			          FROM (SELECT * FROM TABLE(giac_chart_of_accts_pkg.get_gl_acct_lov2(
+									            #glAcctCategory#, #glControlAcct#, #glSubAcct1#,         
+									            #glSubAcct2#, #glSubAcct3#, #glSubAcct4#,
+									            #glSubAcct5#, #glSubAcct6#, #glSubAcct7#,
+									            #findText#)) 
+						<isEqual property="sortColumn" compareValue="glAcctCategory glControlAcct glSubAcct1 glSubAcct2 glSubAcct3 glSubAcct4 glSubAcct5 glSubAcct6 glSubAcct7">
+			          		ORDER BY gl_acct_category
+			          		<isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_control_acct
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_1
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_2
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_3
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_4
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_5
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_6
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_7
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="glAcctName">
+			          		ORDER BY gl_acct_name
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="gsltSlTypeCd">
+			          		ORDER BY gslt_sl_type_cd
+			          	</isEqual>
+			          	<isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	</isNotNull>
+		              	)a,
+			               (SELECT count(*) count_ 
+			                  FROM TABLE(giac_chart_of_accts_pkg.get_gl_acct_lov2(
+							            #glAcctCategory#, #glControlAcct#, #glSubAcct1#,         
+							            #glSubAcct2#, #glSubAcct3#, #glSubAcct4#,
+							            #glSubAcct5#, #glSubAcct6#, #glSubAcct7#,
+							            #findText#))) b) 
+		WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+<!--Gzelle 1.2.2014-->
+    <resultMap id="giacChartOfAcctsListResultMap" class="GIACChartOfAcctsClass" extends="BaseEntity.TableGridResultMap">
+    	<result column="gl_acct_id" 			property="glAcctId"/>
+		<result column="gl_acct_category" 		property="glAcctCategory"/>
+		<result column="gl_control_acct" 		property="glControlAcct"/>
+		<result column="gl_sub_acct_1" 			property="glSubAcct1"/>
+		<result column="gl_sub_acct_2" 			property="glSubAcct2"/>
+		<result column="gl_sub_acct_3" 			property="glSubAcct3"/>
+		<result column="gl_sub_acct_4" 			property="glSubAcct4"/>
+		<result column="gl_sub_acct_5" 			property="glSubAcct5"/>
+		<result column="gl_sub_acct_6" 			property="glSubAcct6"/>
+		<result column="gl_sub_acct_7" 			property="glSubAcct7"/>
+		<result column="gl_acct_name" 			property="glAcctName"/>
+		<result column="gl_acct_sname" 			property="glAcctSname"/>
+		<result column="leaf_tag"		 		property="leafTag"/>
+		<result column="gslt_sl_type_cd" 		property="gsltSlTypeCd"/>
+		<result column="dsp_sl_type_name" 		property="dspSlTypeName"/>
+		<result column="dr_cr_tag"		 		property="drCrTag"/>
+		<result column="acct_type"		 		property="acctType"/>
+		<result column="ref_acct_cd"		 	property="refAcctCd"/>
+		<result column="user_id"      			property="userId"/>
+		<result column="last_update"  			property="lastUpdate"/>
+	</resultMap>
+
+	<resultMap class="java.util.HashMap" id="slTypeRecListLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="gslt_sl_type_cd" 		property="gsltSlTypeCd"/>
+		<result column="dsp_sl_type_name" 		property="dspSlTypeName"/>
+	</resultMap>	
+
+	<resultMap class="java.util.HashMap" id="acctTypeRecListLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="rv_low_value" 		property="rvLowValue"/>
+		<result column="rv_meaning" 		property="rvMeaning"/>
+	</resultMap>	
+
+    <resultMap id="giacChartOfAcctsChildResultMap" class="java.util.HashMap"  extends="BaseEntity.TableGridResultMap">
+    	<result column="gl_acct_id" 			property="glAcctId"/>
+		<result column="gl_acct_category" 		property="glAcctCategory"/>
+		<result column="gl_control_acct" 		property="glControlAcct"/>
+		<result column="gl_sub_acct_1" 			property="glSubAcct1"/>
+		<result column="gl_sub_acct_2" 			property="glSubAcct2"/>
+		<result column="gl_sub_acct_3" 			property="glSubAcct3"/>
+		<result column="gl_sub_acct_4" 			property="glSubAcct4"/>
+		<result column="gl_sub_acct_5" 			property="glSubAcct5"/>
+		<result column="gl_sub_acct_6" 			property="glSubAcct6"/>
+		<result column="gl_sub_acct_7" 			property="glSubAcct7"/>
+		<result column="gl_acct_name" 			property="glAcctName"/>
+		<result column="gl_acct_sname" 			property="glAcctSname"/>
+		<result column="leaf_tag"		 		property="leafTag"/>
+		<result column="gslt_sl_type_cd" 		property="gsltSlTypeCd"/>
+		<result column="dsp_sl_type_name" 		property="dspSlTypeName"/>
+		<result column="dr_cr_tag"		 		property="drCrTag"/>
+		<result column="acct_type"		 		property="acctType"/>
+		<result column="ref_acct_cd"		 	property="refAcctCd"/>
+		<result column="user_id"      			property="userId"/>
+		<result column="last_update"  			property="lastUpdate"/>
+	</resultMap>
+	
+    <resultMap id="giacChartOfAcctsChildListResultMap" class="java.util.HashMap">
+    	<result column="gl_acct_id" 			property="glAcctId"/>
+		<result column="gl_acct_category" 		property="glAcctCategory"/>
+		<result column="gl_control_acct" 		property="glControlAcct"/>
+		<result column="gl_sub_acct_1" 			property="glSubAcct1"/>
+		<result column="gl_sub_acct_2" 			property="glSubAcct2"/>
+		<result column="gl_sub_acct_3" 			property="glSubAcct3"/>
+		<result column="gl_sub_acct_4" 			property="glSubAcct4"/>
+		<result column="gl_sub_acct_5" 			property="glSubAcct5"/>
+		<result column="gl_sub_acct_6" 			property="glSubAcct6"/>
+		<result column="gl_sub_acct_7" 			property="glSubAcct7"/>
+		<result column="gl_acct_name" 			property="glAcctName"/>
+		<result column="gl_acct_sname" 			property="glAcctSname"/>
+		<result column="leaf_tag"		 		property="leafTag"/>
+		<result column="gslt_sl_type_cd" 		property="gsltSlTypeCd"/>
+		<result column="dsp_sl_type_name" 		property="dspSlTypeName"/>
+		<result column="dr_cr_tag"		 		property="drCrTag"/>
+		<result column="acct_type"		 		property="acctType"/>
+		<result column="ref_acct_cd"		 	property="refAcctCd"/>
+		<result column="user_id"      			property="userId"/>
+		<result column="last_update"  			property="lastUpdate"/>
+		<result column="rownum"  				property="rownum"/>
+	</resultMap>
+	
+	<parameterMap class="map" id="valAddChartOfAcctsParameterMap">
+		<parameter property="tran"				jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="glAcctCategory"	jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="glControlAcct"		jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="glSubAcct1" 		jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="glSubAcct2"		jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="glSubAcct3"		jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="glSubAcct4" 		jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="glSubAcct5" 		jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="glSubAcct6" 		jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="glSubAcct7" 		jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="glAcctId"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+	</parameterMap>				
+	
+	<select id="checkGiacs311UserFunction" parameterClass="java.lang.String" resultClass="java.lang.String">
+		SELECT giacs311_pkg.check_user_function(#userId#) FROM DUAL
+	</select>		
+	
+	<select id="getGiacs311RecList" resultMap="giacChartOfAcctsListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giacs311_pkg.get_rec_list(#queryLevel#))
+		  	      		  <isNotNull property="filter">
+							WHERE 1=1
+								<isNotEmpty prepend="AND"  property="glAcctCategory">
+									UPPER(gl_acct_category) LIKE UPPER(#glAcctCategory#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="glControlAcct">
+									UPPER(gl_control_acct) LIKE UPPER(#glControlAcct#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="glSubAcct1">
+									UPPER(gl_sub_acct_1) LIKE UPPER(#glSubAcct1#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="glSubAcct2">
+									UPPER(gl_sub_acct_2) LIKE UPPER(#glSubAcct2#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="glSubAcct3">
+									UPPER(gl_sub_acct_3) LIKE UPPER(#glSubAcct3#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="glSubAcct4">
+									UPPER(gl_sub_acct_4) LIKE UPPER(#glSubAcct4#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="glSubAcct5">
+									UPPER(gl_sub_acct_5) LIKE UPPER(#glSubAcct5#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="glSubAcct6">
+									UPPER(gl_sub_acct_6) LIKE UPPER(#glSubAcct6#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="glSubAcct7">
+									UPPER(gl_sub_acct_7) LIKE UPPER(#glSubAcct7#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="glAcctName">
+									UPPER(gl_acct_name) LIKE UPPER(#glAcctName#)
+								</isNotEmpty>
+						</isNotNull>		  	      
+		                  <isEqual property="sortColumn" compareValue="glAcctCategory glControlAcct glSubAcct1 glSubAcct2 glSubAcct3 glSubAcct4 glSubAcct5 glSubAcct6 glSubAcct7">
+			          		ORDER BY gl_acct_category
+			          		<isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_control_acct
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_1
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_2
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_3
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_4
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_5
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_6
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_7
+			          	  </isEqual>
+			              <isEqual property="sortColumn" compareValue="glAcctName">
+			              		ORDER BY gl_acct_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giacs311_pkg.get_rec_list(#queryLevel#))
+		  	      		  <isNotNull property="filter">
+							WHERE 1=1
+								<isNotEmpty prepend="AND"  property="glAcctCategory">
+									UPPER(gl_acct_category) LIKE UPPER(#glAcctCategory#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="glControlAcct">
+									UPPER(gl_control_acct) LIKE UPPER(#glControlAcct#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="glSubAcct1">
+									UPPER(gl_sub_acct_1) LIKE UPPER(#glSubAcct1#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="glSubAcct2">
+									UPPER(gl_sub_acct_2) LIKE UPPER(#glSubAcct2#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="glSubAcct3">
+									UPPER(gl_sub_acct_3) LIKE UPPER(#glSubAcct3#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="glSubAcct4">
+									UPPER(gl_sub_acct_4) LIKE UPPER(#glSubAcct4#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="glSubAcct5">
+									UPPER(gl_sub_acct_5) LIKE UPPER(#glSubAcct5#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="glSubAcct6">
+									UPPER(gl_sub_acct_6) LIKE UPPER(#glSubAcct6#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="glSubAcct7">
+									UPPER(gl_sub_acct_7) LIKE UPPER(#glSubAcct7#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="glAcctName">
+									UPPER(gl_acct_name) LIKE UPPER(#glAcctName#)
+								</isNotEmpty>
+						</isNotNull>		                  
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+
+	<select id="getGiacs311SlTypeRecList" resultMap="slTypeRecListLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(giacs311_pkg.get_sl_type_rec_list)		                 
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(gslt_sl_type_cd) LIKE UPPER(#findText#)
+		                		OR UPPER(dsp_sl_type_name) LIKE UPPER(#findText#)			         		
+			             	</isNotNull>
+			             	<isNull property="findText">
+		                		WHERE UPPER(gslt_sl_type_cd) LIKE UPPER(#search#)
+		                		OR UPPER(dsp_sl_type_name) LIKE UPPER(#search#)			         		
+			             	</isNull>	             
+			              	<isEqual property="sortColumn" compareValue="gsltSlTypeCd">
+			              		ORDER BY gslt_sl_type_cd
+			              	</isEqual>
+			              	<isEqual property="sortColumn" compareValue="dspSlTypeName">
+			              		ORDER BY dsp_sl_type_name
+			              	</isEqual>		              		                     		              		                      
+			          	  	<isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	</isNotNull>
+		                  ) a, 
+		               (SELECT count (*) count_ 
+		                  FROM TABLE(giacs311_pkg.get_sl_type_rec_list)		                 
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(gslt_sl_type_cd) LIKE UPPER(#findText#)
+		                		OR UPPER(dsp_sl_type_name) LIKE UPPER(#findText#)			         		
+			             	</isNotNull>		
+			             	<isNull property="findText">
+		                		WHERE UPPER(gslt_sl_type_cd) LIKE UPPER(#search#)
+		                		OR UPPER(dsp_sl_type_name) LIKE UPPER(#search#)			         		
+			             	</isNull>
+			             	) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>		
+
+	<select id="getGiacs311AcctTypeRecList" resultMap="acctTypeRecListLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(giacs311_pkg.get_acct_type_rec_list(#acctType#))		                 
+		                  	<isNull property="findText">
+				                WHERE UPPER(rv_low_value) LIKE UPPER(#search#)
+		                		OR UPPER(rv_meaning) LIKE UPPER(#search#)		                    		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(rv_low_value) LIKE UPPER(#findText#)
+		                		OR UPPER(rv_meaning) LIKE UPPER(#findText#)			         		
+			             	</isNotNull>		             
+			              	<isEqual property="sortColumn" compareValue="rvLowValue">
+			              		ORDER BY rv_low_value
+			              	</isEqual>
+			              	<isEqual property="sortColumn" compareValue="rvMeaning">
+			              		ORDER BY rv_meaning
+			              	</isEqual>		              		                     		              		                      
+			          	  	<isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	</isNotNull>
+		                  ) a, 
+		               (SELECT count (*) count_ 
+		                  FROM TABLE(giacs311_pkg.get_acct_type_rec_list(#acctType#))		                 
+		                  	<isNull property="findText">
+				                WHERE UPPER(rv_low_value) LIKE UPPER(#search#)
+		                		OR UPPER(rv_meaning) LIKE UPPER(#search#)		                    		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(rv_low_value) LIKE UPPER(#findText#)
+		                		OR UPPER(rv_meaning) LIKE UPPER(#findText#)			         		
+			             	</isNotNull>		
+			             	) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGlMotherAcct" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT giacs311_pkg.get_gl_mother_acct(#glAcctId#,#level#) FROM DUAL
+	</select>
+	
+	<select id="getChildRec" resultMap="giacChartOfAcctsChildResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giacs311_pkg.get_child_rec_list(#glAcctId#,#motherGlAcctId#,#level#))
+		  	      		  <isNotNull property="filter">
+							WHERE 1=1
+								<isNotEmpty prepend="AND"  property="glAcctCategory">
+									UPPER(gl_acct_category) LIKE UPPER(#glAcctCategory#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="glControlAcct">
+									UPPER(gl_control_acct) LIKE UPPER(#glControlAcct#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="glSubAcct1">
+									UPPER(gl_sub_acct_1) LIKE UPPER(#glSubAcct1#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="glSubAcct2">
+									UPPER(gl_sub_acct_2) LIKE UPPER(#glSubAcct2#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="glSubAcct3">
+									UPPER(gl_sub_acct_3) LIKE UPPER(#glSubAcct3#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="glSubAcct4">
+									UPPER(gl_sub_acct_4) LIKE UPPER(#glSubAcct4#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="glSubAcct5">
+									UPPER(gl_sub_acct_5) LIKE UPPER(#glSubAcct5#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="glSubAcct6">
+									UPPER(gl_sub_acct_6) LIKE UPPER(#glSubAcct6#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="glSubAcct7">
+									UPPER(gl_sub_acct_7) LIKE UPPER(#glSubAcct7#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="glAcctName">
+									UPPER(gl_acct_name) LIKE UPPER(#glAcctName#)
+								</isNotEmpty>
+						</isNotNull>		  	      
+		                  <isEqual property="sortColumn" compareValue="glAcctCategory glControlAcct glSubAcct1 glSubAcct2 glSubAcct3 glSubAcct4 glSubAcct5 glSubAcct6 glSubAcct7">
+			          		ORDER BY gl_acct_category
+			          		<isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_control_acct
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_1
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_2
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_3
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_4
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_5
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_6
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_7
+			          	  </isEqual>
+			              <isEqual property="sortColumn" compareValue="glAcctName">
+			              		ORDER BY gl_acct_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giacs311_pkg.get_child_rec_list(#glAcctId#,#motherGlAcctId#,#level#))
+		  	      		  <isNotNull property="filter">
+							WHERE 1=1
+								<isNotEmpty prepend="AND"  property="glAcctCategory">
+									UPPER(gl_acct_category) LIKE UPPER(#glAcctCategory#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="glControlAcct">
+									UPPER(gl_control_acct) LIKE UPPER(#glControlAcct#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="glSubAcct1">
+									UPPER(gl_sub_acct_1) LIKE UPPER(#glSubAcct1#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="glSubAcct2">
+									UPPER(gl_sub_acct_2) LIKE UPPER(#glSubAcct2#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="glSubAcct3">
+									UPPER(gl_sub_acct_3) LIKE UPPER(#glSubAcct3#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="glSubAcct4">
+									UPPER(gl_sub_acct_4) LIKE UPPER(#glSubAcct4#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="glSubAcct5">
+									UPPER(gl_sub_acct_5) LIKE UPPER(#glSubAcct5#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="glSubAcct6">
+									UPPER(gl_sub_acct_6) LIKE UPPER(#glSubAcct6#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="glSubAcct7">
+									UPPER(gl_sub_acct_7) LIKE UPPER(#glSubAcct7#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="glAcctName">
+									UPPER(gl_acct_name) LIKE UPPER(#glAcctName#)
+								</isNotEmpty>
+						</isNotNull>		                  
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>		
+
+	<select id="getChildRecList" resultMap="giacChartOfAcctsChildListResultMap">
+		SELECT rownum, a.* FROM TABLE(giacs311_pkg.get_child_rec_list(#glAcctId#,#motherGlAcctId#,#level#))a
+	</select>
+
+	<select id="getIncrementedLevel" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT giacs311_pkg.get_incremented_level(#glAcctId#,#level#) FROM DUAL
+	</select>	
+		
+	<procedure id="setChartOfAccts" parameterClass="GIACChartOfAcctsClass">
+	    DECLARE
+	    	v_rec giac_chart_of_accts%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.gl_acct_id		:= #glAcctId#;
+ 			v_rec.gl_acct_category 	:= #glAcctCategory#;
+ 			v_rec.gl_control_acct  	:= #glControlAcct#;
+ 			v_rec.gl_sub_acct_1 	:= #glSubAcct1#;
+ 			v_rec.gl_sub_acct_2 	:= #glSubAcct2#;
+ 			v_rec.gl_sub_acct_3 	:= #glSubAcct3#;
+ 			v_rec.gl_sub_acct_4 	:= #glSubAcct4#;
+ 			v_rec.gl_sub_acct_5 	:= #glSubAcct5#;
+ 			v_rec.gl_sub_acct_6 	:= #glSubAcct6#;
+ 			v_rec.gl_sub_acct_7 	:= #glSubAcct7#;
+ 			v_rec.gl_acct_name 		:= #glAcctName#;
+ 			v_rec.gl_acct_sname 	:= #glAcctSname#;
+ 			v_rec.leaf_tag 			:= #leafTag#;
+ 			v_rec.gslt_sl_type_cd 	:= #gsltSlTypeCd#;
+ 			v_rec.dr_cr_tag 		:= #drCrTag#;
+ 			v_rec.acct_type 		:= #acctType#;
+ 			v_rec.ref_acct_cd 		:= #refAcctCd#;
+ 			v_rec.user_id 	   		:= #userId#;
+ 			
+ 			giacs311_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valUpdateChartOfAccts" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giacs311_pkg.val_update_rec(#recId#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddChartOfAccts" parameterMap="valAddChartOfAcctsParameterMap">
+ 		BEGIN
+ 			giacs311_pkg.val_add_rec(?,?,?,?,?,?,?,?,?,?,?);
+ 		END;
+ 	</procedure> 	
+
+ 	<procedure id="valDelChartOfAccts" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giacs311_pkg.val_del_rec(#recId#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delChartOfAccts" parameterClass="java.lang.String">
+		BEGIN
+ 			giacs311_pkg.del_rec(#glAcctId#);
+ 		END;
+ 	</delete>
+<!--END-->	
+</sqlMap>

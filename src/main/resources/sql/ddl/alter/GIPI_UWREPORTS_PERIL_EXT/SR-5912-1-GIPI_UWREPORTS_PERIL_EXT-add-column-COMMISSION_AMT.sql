@@ -1,0 +1,27 @@
+SET SERVEROUTPUT ON
+
+DECLARE
+   V_EXISTS   VARCHAR2 (1) := 'N';
+BEGIN
+   FOR X
+      IN (SELECT 1
+            FROM all_tab_cols
+           WHERE     OWNER = 'CPI'
+                 AND TABLE_NAME = 'GIPI_UWREPORTS_PERIL_EXT'
+                 AND COLUMN_NAME = 'COMMISSION_AMT')
+   LOOP
+      V_eXISTS := 'Y';
+   END LOOP;
+
+   IF V_EXISTS = 'Y'
+   THEN
+      DBMS_OUTPUT.PUT_LINE (
+         'Column COMMISSION_AMT already exists in table CPI.GIPI_UWREPORTS_PERIL_EXT.');
+   ELSE
+      EXECUTE IMMEDIATE
+         'ALTER TABLE CPI.GIPI_UWREPORTS_PERIL_EXT ADD COMMISSION_AMT NUMBER(20,2)';
+
+      DBMS_OUTPUT.PUT_LINE (
+         'Column COMMISSION_AMT successfully added to table CPI.GIPI_UWREPORTS_PERIL_EXT.');
+   END IF;
+END;

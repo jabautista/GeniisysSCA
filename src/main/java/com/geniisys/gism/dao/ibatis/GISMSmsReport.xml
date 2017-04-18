@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GISMSmsReport">
+	<cacheModel id="oneDayClient" type="MEMORY">
+    	<flushInterval hours="24"/>
+    	<property name="reference-type" value="WEAK"/>
+  	</cacheModel>
+  	
+	<parameterMap class="map" id="populateSmsReportPrintMap">
+		<parameter property="fromDate"	jdbcType="VARCHAR"	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="toDate"	jdbcType="VARCHAR"	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="asOfDate"	jdbcType="VARCHAR"	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="user"		jdbcType="VARCHAR"	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="recGlobe"	jdbcType="VARCHAR"	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="recSmart"	jdbcType="VARCHAR"	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="recSun"	jdbcType="VARCHAR"	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="sentGlobe"	jdbcType="VARCHAR"	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="sentSmart"	jdbcType="VARCHAR"	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="sentSun"	jdbcType="VARCHAR"	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="recTotal"	jdbcType="VARCHAR"	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="sentTotal"	jdbcType="VARCHAR"	javaType="java.lang.String"  mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="populateSmsReportPrint" parameterMap="populateSmsReportPrintMap">
+		CALL GISMS012_PKG.populate_sms_report(?,?,?,?,?,?,?,?,?,?,?,?)
+	</procedure>
+	
+	<parameterMap class="map" id="validateGisms012UserMap">
+		<parameter property="user"		jdbcType="VARCHAR"	javaType="java.lang.String"  mode="INOUT"/>
+		<parameter property="userName"	jdbcType="VARCHAR"	javaType="java.lang.String"  mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="validateGisms012User" parameterMap="validateGisms012UserMap">
+		CALL GISMS012_PKG.validate_gisms012_user(?,?)
+	</procedure>
+
+	<resultMap class="java.util.HashMap" id="getGISMS012UserListLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result property="user" 			column="user_id" />
+		<result property="userName" 		column="user_name" />
+		<result property="rowNum" 			column="rownum_"/>
+		<result property="rowCount" 		column="count_"/>
+	</resultMap>
+	
+	<select id="getGISMS012UserListLOV" resultMap="getGISMS012UserListLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GISMS012_PKG.get_user_list_lov(#user#))
+		                 <isNotNull property="findText">
+					         WHERE (UPPER(user_id) LIKE UPPER(#findText#) 
+					         	 OR UPPER(user_name) LIKE UPPER(#findText#)
+					         	 )
+				         </isNotNull>          
+			          	  <isNotNull property="sortColumn">
+			                  <isEqual property="sortColumn" compareValue="user">
+				              		ORDER BY user_id
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="userName">
+				              		ORDER BY user_name
+				              </isEqual>
+				          	  <isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              </isNotNull>
+				          </isNotNull>    
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (GISMS012_PKG.get_user_list_lov(#user#))
+			              <isNotNull property="findText">
+					          WHERE (UPPER(user_id) LIKE UPPER(#findText#) 
+					         	 OR UPPER(user_name) LIKE UPPER(#findText#)
+					         	 )
+				          </isNotNull> 
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>	
+</sqlMap>

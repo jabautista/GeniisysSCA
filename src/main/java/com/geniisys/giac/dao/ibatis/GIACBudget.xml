@@ -1,0 +1,359 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GIACBudget">
+    <cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference_type" value="WEAK" />
+	</cacheModel>
+    
+	<typeAlias alias="giacBudget" type="com.geniisys.giac.entity.GIACBudget"/>
+	
+	<resultMap class="giacBudget" id="giacBudgetResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="year" 	    	column="year"/>
+		<result property="glAcctId" 	    column="gl_acct_id"/>
+		<result property="dtlAcctId" 	    column="dtl_acct_Id"/>
+		<result property="budget" 	    	column="budget"/>
+		<result property="remarks" 			column="remarks"/>
+		<result property="userId" 			column="user_id"/>
+		<result property="lastUpdate" 		column="last_update"/>
+	</resultMap>
+	
+	<select id="getGiacBudgetYear" resultMap="giacBudgetResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giacs510_pkg.get_budget_year_list(#year#))
+		                  <isEqual property="sortColumn" compareValue="year">
+			              		ORDER BY year
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giacs510_pkg.get_budget_year_list(#year#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="giacBudgetPerYearResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="year" 	    	column="year"/>
+		<result property="glAcctId" 	    column="gl_acct_id"/>
+		<result property="budget" 	    	column="budget"/>
+		<result property="remarks" 			column="remarks"/>
+		<result property="glAccountNo" 		column="gl_account_no"/>
+		<result property="glAcctName" 		column="gl_acct_name"/>
+		<result property="glAcctCategory" 	column="gl_acct_category"/>
+		<result property="glControlAcct" 	column="gl_control_acct"/>
+		<result property="glSubAcct1" 		column="gl_sub_acct_1"/>
+		<result property="glSubAcct2" 		column="gl_sub_acct_2"/>
+		<result property="glSubAcct3" 		column="gl_sub_acct_3"/>
+		<result property="glSubAcct4" 		column="gl_sub_acct_4"/>
+		<result property="glSubAcct5" 		column="gl_sub_acct_5"/>
+		<result property="glSubAcct6" 		column="gl_sub_acct_6"/>
+		<result property="glSubAcct7" 		column="gl_sub_acct_7"/>
+		<result property="userId" 			column="user_id"/>
+		<result property="lastUpdate" 		column="last_update"/>
+	</resultMap>
+	
+	<select id="getGiacBudgetPerYear" resultMap="giacBudgetPerYearResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giacs510_pkg.get_budget_peryear_list(#year#, #glAccountNo#, #glAcctName#, #budget#))
+		                  <isEqual property="sortColumn" compareValue="glAccountNo">
+			              		ORDER BY gl_account_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="glAcctName">
+			              		ORDER BY gl_acct_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="budget">
+			              		ORDER BY budget
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giacs510_pkg.get_budget_peryear_list(#year#, #glAccountNo#, #glAcctName#, #budget#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<procedure id="valAddBudgetYear" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giacs510_pkg.val_add_budgetyear(#year#);
+ 		END;
+ 	</procedure>
+ 	
+	<resultMap class="java.util.HashMap" id="copyBudgetPushedLovYearMap">
+		<result property="year" 			column="year"/>
+	</resultMap>
+	
+	<select id="copyBudgetPushedLovYear" resultMap="copyBudgetPushedLovYearMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		          FROM (SELECT * 
+		  		   		  FROM TABLE(giacs510_pkg.get_budgetyear_lov)
+		  		   		 <isNotNull property="findText">
+							WHERE year LIKE UPPER(#findText#)
+						 </isNotNull>
+                         <isEqual property="sortColumn" compareValue="year">
+                                ORDER BY year
+                         </isEqual>
+		  				 <isNotNull property="sortColumn">
+                                 <isEqual property="ascDescFlg" compareValue="ASC">
+                                     ASC
+                                 </isEqual> 
+                                 <isEqual property="ascDescFlg" compareValue="DESC">
+                                     DESC
+                                 </isEqual>
+                         </isNotNull> 
+		  		   		) a,
+		          	   (SELECT count(*) count_ 
+		  		   		  FROM TABLE(giacs510_pkg.get_budgetyear_lov)
+		  		   		 <isNotNull property="findText">
+							WHERE year LIKE UPPER(#findText#)
+						 </isNotNull>) b
+               )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<parameterMap id="copyBudgetParameterMap" class="map">
+	    <parameter property="year"				jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+	    <parameter property="copiedYear"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+	    <parameter property="userId"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+	</parameterMap>
+	
+	<procedure id="copyBudget" parameterMap="copyBudgetParameterMap">
+		BEGIN
+			giacs510_pkg.copy_budget(?, ?, ?);
+		END;
+	</procedure>
+	
+	<resultMap class="java.util.HashMap" id="getGLAcctLOVMap" extends="BaseEntity.TableGridResultMap">
+	    <result property="glAccountNo" 		column="gl_account_no"/>
+		<result property="glAcctId" 	    column="gl_acct_id"/>
+		<result property="glAcctName" 		column="gl_acct_name"/>
+		<result property="glAcctCategory" 	column="gl_acct_category"/>
+		<result property="glControlAcct" 	column="gl_control_acct"/>
+		<result property="glSubAcct1" 		column="gl_sub_acct_1"/>
+		<result property="glSubAcct2" 		column="gl_sub_acct_2"/>
+		<result property="glSubAcct3" 		column="gl_sub_acct_3"/>
+		<result property="glSubAcct4" 		column="gl_sub_acct_4"/>
+		<result property="glSubAcct5" 		column="gl_sub_acct_5"/>
+		<result property="glSubAcct6" 		column="gl_sub_acct_6"/>
+		<result property="glSubAcct7" 		column="gl_sub_acct_7"/>
+	</resultMap>
+	
+	<select id="getGLAcctLOV" resultMap="getGLAcctLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * 
+		  	              FROM TABLE(giacs510_pkg.get_glacct_lov(#table#, #year#, #glAccountNo#, #glAcctName#,
+		  	                                                     #glAcctCat#, #glAcctControlAcct#, #glSubAcct1#, 
+		  	                                                     #glSubAcct2#, #glSubAcct3#, #glSubAcct4#, #glSubAcct5#,
+		  	                                                     #glSubAcct6#, #glSubAcct7#))
+		  	             WHERE 1 = 1
+		  	               AND gl_acct_category = NVL(#glDtlAcctCat#, gl_acct_category)
+		  	               AND gl_control_acct = NVL(#glDtlAcctControlAcct#, gl_control_acct)
+		  	               AND gl_sub_acct_1 = NVL(#glDtlSubAcct1#, gl_sub_acct_1)
+		  	               AND gl_sub_acct_2 = NVL(#glDtlSubAcct2#, gl_sub_acct_2)
+		  	               AND gl_sub_acct_3 = NVL(#glDtlSubAcct3#, gl_sub_acct_3)
+		  	               AND gl_sub_acct_4 = NVL(#glDtlSubAcct4#, gl_sub_acct_4)
+		  	               AND gl_sub_acct_5 = NVL(#glDtlSubAcct5#, gl_sub_acct_5)
+		  	               AND gl_sub_acct_6 = NVL(#glDtlSubAcct6#, gl_sub_acct_6)
+		  	               AND gl_sub_acct_7 = NVL(#glDtlSubAcct7#, gl_sub_acct_7)
+		                  <isEqual property="sortColumn" compareValue="glAccountNo">
+			              		ORDER BY gl_account_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="glAcctName">
+			              		ORDER BY gl_acct_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giacs510_pkg.get_glacct_lov(#table#, #year#, #glAccountNo#, #glAcctName#,
+		  	                                                     #glAcctCat#, #glAcctControlAcct#, #glSubAcct1#, 
+		  	                                                     #glSubAcct2#, #glSubAcct3#, #glSubAcct4#, #glSubAcct5#,
+		  	                                                     #glSubAcct6#, #glSubAcct7#))
+		  	             WHERE 1 = 1
+		  	               AND gl_acct_category = NVL(#glDtlAcctCat#, gl_acct_category)
+		  	               AND gl_control_acct = NVL(#glDtlAcctControlAcct#, gl_control_acct)
+		  	               AND gl_sub_acct_1 = NVL(#glDtlSubAcct1#, gl_sub_acct_1)
+		  	               AND gl_sub_acct_1 = NVL(#glDtlSubAcct1#, gl_sub_acct_1)
+		  	               AND gl_sub_acct_2 = NVL(#glDtlSubAcct2#, gl_sub_acct_2)
+		  	               AND gl_sub_acct_3 = NVL(#glDtlSubAcct3#, gl_sub_acct_3)
+		  	               AND gl_sub_acct_4 = NVL(#glDtlSubAcct4#, gl_sub_acct_4)
+		  	               AND gl_sub_acct_5 = NVL(#glDtlSubAcct5#, gl_sub_acct_5)
+		  	               AND gl_sub_acct_6 = NVL(#glDtlSubAcct6#, gl_sub_acct_6)
+		  	               AND gl_sub_acct_7 = NVL(#glDtlSubAcct7#, gl_sub_acct_7)
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<delete id="delBudgetPerYear" parameterClass="giacBudget">
+		BEGIN
+			giacs510_pkg.delete_budget(#year#, #glAcctId#);
+		END;
+	</delete>
+	
+	<procedure id="valDeleteBudgetPerYear" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giacs510_pkg.val_delete_budget_peryear(#glAcctId#, #year#);
+ 		END;
+ 	</procedure>
+ 	
+	<procedure id="setBudgetPerYear" parameterClass="giacBudget">
+ 		BEGIN		  
+ 			giis_users_pkg.app_user := #userId#;	
+ 								
+			giacs510_pkg.set_budget_peryear(#year#, #glAcctId#, #budget#, #remarks#, #userId#);
+ 		END;
+ 	</procedure>
+ 	
+	<resultMap class="java.util.HashMap" id="validateGLAcctNoResultMap">
+		<result column="exist" 				property="exist"/>
+		<result column="gl_acct_id" 		property="glAcctId"/>
+		<result column="gl_acct_name" 		property="glAcctName"/>
+	</resultMap>
+	
+	<select id="validateGLAcctNo" resultMap="validateGLAcctNoResultMap">
+		SELECT * FROM TABLE(giacs510_pkg.validate_glacctno(#year#, #table#, #glAcctCat#, #glAcctControlAcct#, #glSubAcct1#,
+		                                                   #glSubAcct2#, #glSubAcct3#, #glSubAcct4#, #glSubAcct5#,
+		                                                   #glSubAcct6#, #glSubAcct7#))	
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="giacBudgetPerYearDtlResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="year" 	    		column="year"/>
+		<result property="glAcctId" 	    	column="gl_acct_id"/>
+		<result property="dtlAcctId" 	    	column="dtl_acct_id"/>
+		<result property="glAccountNo" 			column="gl_account_no"/>
+		<result property="glAcctName" 			column="gl_acct_name"/>
+		<result property="glAcctCategory" 		column="gl_acct_category"/>
+		<result property="glControlAcct" 		column="gl_control_acct"/>
+		<result property="glSubAcct1" 			column="gl_sub_acct_1"/>
+		<result property="glSubAcct2" 			column="gl_sub_acct_2"/>
+		<result property="glSubAcct3" 			column="gl_sub_acct_3"/>
+		<result property="glSubAcct4" 			column="gl_sub_acct_4"/>
+		<result property="glSubAcct5" 			column="gl_sub_acct_5"/>
+		<result property="glSubAcct6" 			column="gl_sub_acct_6"/>
+		<result property="glSubAcct7" 			column="gl_sub_acct_7"/>
+	</resultMap>
+	
+	<select id="giacBudgetPerYearDtl" resultMap="giacBudgetPerYearDtlResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giacs510_pkg.get_budgetdtl_peryear_list(#year#, #glAcctId#, #glAccountNo#, #glAcctName#))
+		                  <isEqual property="sortColumn" compareValue="glAccountNo">
+			              		ORDER BY gl_account_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="glAcctName">
+			              		ORDER BY gl_acct_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giacs510_pkg.get_budgetdtl_peryear_list(#year#, #glAcctId#, #glAccountNo#, #glAcctName#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<procedure id="setBudgetDtlPerYear" parameterClass="giacBudget">
+ 		BEGIN		  
+ 			giis_users_pkg.app_user := #userId#;	
+ 								
+			giacs510_pkg.set_budgetdtl_peryear(#year#, #glAcctId#, #dtlAcctId#, #userId#);
+ 		END;
+ 	</procedure>
+ 	
+	<delete id="delBudgetDtlPerYear" parameterClass="giacBudget">
+		BEGIN
+			giacs510_pkg.delete_budgetdtl(#year#, #glAcctId#, #dtlAcctId#);
+		END;
+	</delete>
+	
+	<resultMap class="java.util.HashMap" id="checkExistMap">
+		<result column="exist" 				property="exist"/>
+	</resultMap>
+	
+	<select id="checkExistBeforeExtractGiacs510" resultMap="checkExistMap">
+		SELECT * FROM TABLE(giacs510_pkg.check_exist_giacs510(#year#))	
+	</select>
+	
+	<parameterMap id="extractGiacs510Map" class="map">
+	    <parameter property="year"			    jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+	    <parameter property="dateBasis"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+	    <parameter property="tranFlag"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+        <parameter property="userId"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+        <parameter property="exist"			    jdbcType="VARCHAR"		javaType="java.lang.String"	    mode="OUT" />
+    </parameterMap>
+    
+	<procedure id="extractGiacs510" parameterMap="extractGiacs510Map">
+		BEGIN
+			giacs510_pkg.extract_giacs510(?, ?, ?, ? , ?);
+		END;
+	</procedure>
+	
+	<resultMap class="java.util.HashMap" id="viewNoDtlMap" extends="BaseEntity.TableGridResultMap">
+	    <result property="glAccountNo" 		column="gl_account_no"/>
+		<result property="glAcctName" 		column="gl_acct_name"/>
+	</resultMap>
+	
+	<select id="viewNoDtl" resultMap="viewNoDtlMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * 
+		  	              FROM TABLE(giacs510_pkg.get_gl_nodtl(#year#, #glAccountNo#, #glAcctName#))
+		                  <isEqual property="sortColumn" compareValue="glAccountNo">
+			              		ORDER BY gl_account_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="glAcctName">
+			              		ORDER BY gl_acct_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giacs510_pkg.get_gl_nodtl(#year#, #glAccountNo#, #glAcctName#)))b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+</sqlMap>

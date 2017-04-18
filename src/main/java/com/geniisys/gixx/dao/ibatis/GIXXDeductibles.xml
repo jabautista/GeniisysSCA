@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIXXDeducitbles" >
+	<typeAlias alias="GIXXDeductibles" type="com.geniisys.gixx.entity.GIXXDeductibles" />
+	
+	<resultMap id="getGIXXItemDeductiblesMap" class="GIXXDeductibles" >
+		<result column="EXTRACT_ID"				property="extractId" />
+		<result column="POLICY_ID"				property="policyId" />
+		<result column="DED_DEDUCTIBLE_CD"		property="dedDeductibleCd" />
+		<result column="ITEM_NO"				property="itemNo" />
+		<result column="DED_LINE_CD"			property="dedLineCd" />
+		<result column="DED_SUBLINE_CD"			property="dedSublineCd" />
+		<result column="DEDUCTIBLE_AMT"			property="deductibleAmt" />
+		<result column="TOTAL_DEDUCTIBLE_AMT"	property="totalDeductibleAmt" />
+		<result column="DEDUCTIBLE_NAME"		property="deductibleTitle" />
+		<result column="DEDUCTIBLE_RT"			property="deductibleRt" />
+		<result column="DEDUCTIBLE_TEXT"		property="deductibleText" />
+		
+		<result property="rowNum"				column="rownum_"/>
+		<result property="rowCount"				column="count_"/>
+	</resultMap>
+	
+	<select id="getGIXXItemDeductibles" resultMap="getGIXXItemDeductiblesMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, b.count_, a.*
+		  		  FROM (SELECT * FROM TABLE(gixx_deductibles_pkg.get_item_deductibles(#extractId#, #itemNo#))) a,
+		  		  	   (SELECT count(*) count_ FROM TABLE (gixx_deductibles_pkg.get_item_deductibles(#extractId#, #itemNo#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#		
+	</select>
+	
+	<select id="getGIXXEnDeductibles" resultMap="getGIXXItemDeductiblesMap" parameterClass="java.util.HashMap">
+		SELECT *       
+          FROM (SELECT rownum rownum_ ,b.count_,a.*     
+                  FROM (SELECT * FROM TABLE(GIXX_DEDUCTIBLES_PKG.get_en_deductibles(#extractId#, #itemNo#))) a,
+	               	   (SELECT count(*) count_ FROM TABLE(GIXX_DEDUCTIBLES_PKG.get_en_deductibles(#extractId#, #itemNo#))) b)
+	     WHERE rownum_ BETWEEN NVL(#from#,rownum_) AND NVL(#to#,rownum_)
+	</select>
+
+</sqlMap>

@@ -1,0 +1,486 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISTariffRatesHdr">
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+
+	<typeAlias alias="GIISTariffRatesHdr" type="com.geniisys.common.entity.GIISTariffRatesHdr" />
+
+	<resultMap id="GIISTariffRatesHdrMap" class="GIISTariffRatesHdr">
+		<result column="PREM_TAG"		property="premTag"/>
+		<result column="TARF_SW"		property="tarfSw"/>
+		<result column="TARIFF_CD"		property="tariffCd"/>
+	</resultMap>
+	
+	<select id="getTariffDetailsFI" resultMap="GIISTariffRatesHdrMap">
+		SELECT * FROM TABLE(GIIS_TARIFF_RATES_HDR_PKG.get_tariff_details_fi(#lineCd#, #sublineCd#, #perilCd#, #itemNo#, #parId#))
+	</select>
+	
+	<select id="getTariffDetailsMC" resultMap="GIISTariffRatesHdrMap">
+		SELECT * FROM TABLE(GIIS_TARIFF_RATES_HDR_PKG.get_tariff_details_fi(#coverageCd#, #lineCd#, #sublineCd#, #perilCd#, #itemNo#, #parId#))
+	</select>
+
+<!-- GIISS106 : shan 01.06.2014 -->	
+	<resultMap class="java.util.HashMap" id="giiss106LineLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="LINE_CD" 	property="lineCd"/>
+		<result column="LINE_NAME" 	property="lineName"/>
+	</resultMap>
+	
+	<select id="getGiiss106LineLOV" resultMap="giiss106LineLOVMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giiss106_pkg.get_line_lov(#userId#))
+		                  <isNotNull property="findText">
+		                  	WHERE UPPER(line_cd) LIKE UPPER(#findText#)
+		                  	   OR UPPER(line_name) LIKE UPPER(#findText#)
+		                  </isNotNull>
+		                  <isNull property="findText">
+		                  	WHERE UPPER(line_cd) LIKE UPPER(NVL(#searchString#, line_Cd))
+		                  	   OR UPPER(line_name) LIKE UPPER(NVL(#searchString#, line_Name))
+		                  </isNull>
+		                  <isEqual property="sortColumn" compareValue="lineCd">
+			              		ORDER BY line_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="lineName">
+			              		ORDER BY line_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giiss106_pkg.get_line_lov(#userId#))
+		                  <isNotNull property="findText">
+		                  	WHERE UPPER(line_cd) LIKE UPPER(#findText#)
+		                  	   OR UPPER(line_name) LIKE UPPER(#findText#)
+		                  </isNotNull>
+		                  <isNull property="findText">
+		                  	WHERE UPPER(line_cd) LIKE UPPER(NVL(#searchString#, line_Cd))
+		                  	   OR UPPER(line_name) LIKE UPPER(NVL(#searchString#, line_Name))
+		                  </isNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="giiss106MotortypeLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="TYPE_CD" 			property="typeCd"/>
+		<result column="MOTOR_TYPE_DESC" 	property="motortypeDesc"/>
+	</resultMap>
+	
+	<select id="getGiiss106MotortypeLOV" resultMap="giiss106MotortypeLOVMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giiss106_pkg.get_motortype_lov(#sublineCd#))
+		                  <isNotNull property="findText">
+		                  	WHERE UPPER(type_cd) LIKE UPPER(#findText#)
+		                  	   OR UPPER(motor_type_desc) LIKE UPPER(#findText#)
+		                  </isNotNull>
+		                  <isNull property="findText">
+		                  	WHERE UPPER(type_cd) LIKE UPPER(NVL(#searchString#, type_Cd))
+		                  	   OR UPPER(motor_type_desc) LIKE UPPER(NVL(#searchString#, motor_type_desc))
+		                  </isNull>
+		                  <isEqual property="sortColumn" compareValue="typeCd">
+			              		ORDER BY type_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="motortypeDesc">
+			              		ORDER BY motor_type_desc
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giiss106_pkg.get_motortype_lov(#sublineCd#))
+		                  <isNotNull property="findText">
+		                  	WHERE UPPER(type_cd) LIKE UPPER(#findText#)
+		                  	   OR UPPER(motor_type_desc) LIKE UPPER(#findText#)
+		                  </isNotNull>
+		                  <isNull property="findText">
+		                  	WHERE UPPER(type_cd) LIKE UPPER(NVL(#searchString#, type_Cd))
+		                  	   OR UPPER(motor_type_desc) LIKE UPPER(NVL(#searchString#, motor_type_desc))
+		                  </isNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="GIISTariffRatesHdr" id="giiss106ResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="LINE_CD" 			property="lineCd"/>
+		<result column="LINE_NAME" 			property="lineName"/>
+		<result column="SUBLINE_CD"			property="sublineCd"/>
+		<result column="SUBLINE_NAME"		property="sublineName"/>
+		<result column="PERIL_CD" 			property="perilCd"/>
+		<result column="PERIL_NAME"			property="perilName"/>
+		<result column="SUBLINE_TYPE_CD"	property="sublineTypeCd"/>
+		<result column="SUBLINE_TYPE_DESC"	property="sublineTypeDesc"/>
+		<result column="MOTORTYPE_CD"		property="motortypeCd"/>
+		<result column="MOTOR_TYPE_DESC"	property="motortypeDesc"/>
+		<result column="CONSTRUCTION_CD"	property="constructionCd"/>
+		<result column="CONSTRUCTION_DESC"	property="constructionDesc"/>
+		<result column="TARIFF_ZONE" 		property="tariffZone"/>
+		<result column="TARIFF_ZONE_DESC"	property="tariffZoneDesc"/>
+		<result column="COVERAGE_CD"		property="coverageCd"/>
+		<result column="COVERAGE_DESC"		property="coverageDesc"/>
+		<result column="TARF_CD" 			property="tarfCd"/>
+		<result column="TARF_DESC" 			property="tarfDesc"/>
+		<result column="TARIFF_CD" 			property="tariffCd"/>
+		<result column="DEFAULT_PREM_TAG"	property="defaultPremTag"/>
+		<result column="REMARKS" 			property="remarks"/>
+		<result column="USER_ID" 			property="userId"/>
+		<result column="LAST_UPDATE"		property="lastUpdate"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="giiss106ResultMap2" extends="giiss106ResultMap">
+		<result column="REC_EXIST"  		property="recExist"/>
+		<result column="TARIFF_DTL_CD"		property="tariffDtlCd"/>
+		<result column="SI_DEDUCTIBLE"		property="siDeductible"/>
+		<result column="FIXED_PREMIUM"		property="fixedPremium"/>
+		<result column="EXCESS_RATE"		property="excessRate"/>
+		<result column="LOADING_RATE"		property="loadingRate"/>
+		<result column="DISCOUNT_RATE"		property="discountRate"/>
+		<result column="ADDITIONAL_PREMIUM"	property="additionalPremium"/>
+		<result column="TARIFF_RATE"		property="tariffRate"/>
+		<result column="REMARKS_2" 			property="remarks2"/>
+		<result column="USER_ID_2" 			property="userId2"/>
+		<result column="LAST_UPDATE_2"		property="lastUpdate2"/>
+	</resultMap>
+	
+	<select id="getGiiss106RecList" resultMap="giiss106ResultMap2">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss106_pkg.get_tariff_hdr_list(#moduleId#, #userId#))
+		  	      		  <isNotNull property="filter">
+		  	      		  	WHERE 1=1
+		  	      		  		<isNotEmpty prepend="AND" property="lineCd">
+		  	      		  			UPPER(line_cd) LIKE UPPER(#lineCd#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="lineName">
+		  	      		  			UPPER(line_name) LIKE UPPER(#lineName#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="sublineCd">
+		  	      		  			UPPER(subline_cd) LIKE UPPER(#sublineCd#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="sublineName">
+		  	      		  			UPPER(subline_name) LIKE UPPER(#sublineName#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="perilCd">
+		  	      		  			peril_cd = #perilCd#
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="perilName">
+		  	      		  			UPPER(peril_name) LIKE UPPER(#perilName#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="sublineTypeCd">
+		  	      		  			UPPER(subline_type_cd) LIKE UPPER(#sublineTypeCd#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="sublineTypeDesc">
+		  	      		  			UPPER(subline_type_desc) LIKE UPPER(#sublineTypeDesc#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="motortypeCd">
+		  	      		  			motortype_cd = #motortypeCd#
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="motortypeDesc">
+		  	      		  			UPPER(motor_type_desc) LIKE UPPER(#motortypeDesc#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="constructionCd">
+		  	      		  			UPPER(construction_cd) LIKE UPPER(#constructionCd#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="constructionDesc">
+		  	      		  			UPPER(construction_desc) LIKE UPPER(#constructionDesc#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="tariffZone">
+		  	      		  			UPPER(tariff_zone) LIKE UPPER(#tariffZone#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="tariffZoneDesc">
+		  	      		  			UPPER(tariff_zone_desc) LIKE UPPER(#tariffZoneDesc#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="coverageCd">
+		  	      		  			coverage_cd = #coverageCd#
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="coverageDesc">
+		  	      		  			UPPER(coverage_desc) LIKE UPPER(#coverageDesc#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="tarfCd">
+		  	      		  			UPPER(tarf_cd) LIKE UPPER(#tarfCd#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="tarfDesc">
+		  	      		  			UPPER(tarf_desc) LIKE UPPER(#tarfDesc#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="tariffCd">
+		  	      		  			tariff_cd = #tariffCd#
+		  	      		  		</isNotEmpty>
+		  	      		  </isNotNull>
+		  	      		  <isEqual property="sortColumn" compareValue="tariffCd">
+			              		ORDER BY tariff_cd
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="lineCd lineName">
+			              		ORDER BY line_cd 
+			              			<isNotNull property="sortColumn">
+					              		<isEqual property="ascDescFlg" compareValue="ASC">
+					              			ASC
+					              		</isEqual>
+					              		<isEqual property="ascDescFlg" compareValue="DESC">
+					              			DESC
+					              		</isEqual>
+					              </isNotNull>,
+					              line_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="sublineCd sublineName">
+			              		ORDER BY subline_cd
+			              			<isNotNull property="sortColumn">
+					              		<isEqual property="ascDescFlg" compareValue="ASC">
+					              			ASC
+					              		</isEqual>
+					              		<isEqual property="ascDescFlg" compareValue="DESC">
+					              			DESC
+					              		</isEqual>
+					              </isNotNull>,
+					              subline_name
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="perilCd perilName">
+			              		ORDER BY peril_cd
+			              			<isNotNull property="sortColumn">
+					              		<isEqual property="ascDescFlg" compareValue="ASC">
+					              			ASC
+					              		</isEqual>
+					              		<isEqual property="ascDescFlg" compareValue="DESC">
+					              			DESC
+					              		</isEqual>
+					              </isNotNull>,
+					              peril_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="coverageCd coverageDesc">
+			              		ORDER BY coverage_cd 
+			              			<isNotNull property="sortColumn">
+					              		<isEqual property="ascDescFlg" compareValue="ASC">
+					              			ASC
+					              		</isEqual>
+					              		<isEqual property="ascDescFlg" compareValue="DESC">
+					              			DESC
+					              		</isEqual>
+					              </isNotNull>,
+					              coverage_desc
+			              </isEqual>			              
+			              <isEqual property="sortColumn" compareValue="sublineTypeCd sublineTypeDesc">
+			              		ORDER BY subline_type_cd 
+			              			<isNotNull property="sortColumn">
+					              		<isEqual property="ascDescFlg" compareValue="ASC">
+					              			ASC
+					              		</isEqual>
+					              		<isEqual property="ascDescFlg" compareValue="DESC">
+					              			DESC
+					              		</isEqual>
+					              </isNotNull>,
+					              subline_type_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="motortypeCd motortypeDesc">
+			              		ORDER BY motortype_cd 
+			              			<isNotNull property="sortColumn">
+					              		<isEqual property="ascDescFlg" compareValue="ASC">
+					              			ASC
+					              		</isEqual>
+					              		<isEqual property="ascDescFlg" compareValue="DESC">
+					              			DESC
+					              		</isEqual>
+					              </isNotNull>,
+					              motor_type_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="constructionCd constructionDesc">
+			              		ORDER BY construction_cd 
+			              			<isNotNull property="sortColumn">
+					              		<isEqual property="ascDescFlg" compareValue="ASC">
+					              			ASC
+					              		</isEqual>
+					              		<isEqual property="ascDescFlg" compareValue="DESC">
+					              			DESC
+					              		</isEqual>
+					              </isNotNull>,
+					              construction_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="tariffZone tariffZoneDesc">
+			              		ORDER BY tariff_zone 
+			              			<isNotNull property="sortColumn">
+					              		<isEqual property="ascDescFlg" compareValue="ASC">
+					              			ASC
+					              		</isEqual>
+					              		<isEqual property="ascDescFlg" compareValue="DESC">
+					              			DESC
+					              		</isEqual>
+					              </isNotNull>,
+					              tariff_zone_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="tarfCd tarfDesc">
+			              		ORDER BY tarf_cd 
+			              			<isNotNull property="sortColumn">
+					              		<isEqual property="ascDescFlg" compareValue="ASC">
+					              			ASC
+					              		</isEqual>
+					              		<isEqual property="ascDescFlg" compareValue="DESC">
+					              			DESC
+					              		</isEqual>
+					              </isNotNull>,
+					              tarf_desc
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss106_pkg.get_tariff_hdr_list(#moduleId#, #userId#))
+		  	      		  <isNotNull property="filter">
+		  	      		  	WHERE 1=1
+		  	      		  		<isNotEmpty prepend="AND" property="lineCd">
+		  	      		  			UPPER(line_cd) LIKE UPPER(#lineCd#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="lineName">
+		  	      		  			UPPER(line_name) LIKE UPPER(#lineName#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="sublineCd">
+		  	      		  			UPPER(subline_cd) LIKE UPPER(#sublineCd#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="sublineName">
+		  	      		  			UPPER(subline_name) LIKE UPPER(#sublineName#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="perilCd">
+		  	      		  			peril_cd = #perilCd#
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="perilName">
+		  	      		  			UPPER(peril_name) LIKE UPPER(#perilName#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="sublineTypeCd">
+		  	      		  			UPPER(subline_type_cd) LIKE UPPER(#sublineTypeCd#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="sublineTypeDesc">
+		  	      		  			UPPER(subline_type_desc) LIKE UPPER(#sublineTypeDesc#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="motortypeCd">
+		  	      		  			motortype_cd = #motortypeCd#
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="motortypeDesc">
+		  	      		  			UPPER(motor_type_desc) LIKE UPPER(#motortypeDesc#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="constructionCd">
+		  	      		  			UPPER(construction_cd) LIKE UPPER(#constructionCd#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="constructionDesc">
+		  	      		  			UPPER(construction_desc) LIKE UPPER(#constructionDesc#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="tariffZone">
+		  	      		  			UPPER(tariff_zone) LIKE UPPER(#tariffZone#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="tariffZoneDesc">
+		  	      		  			UPPER(tariff_zone_desc) LIKE UPPER(#tariffZoneDesc#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="coverageCd">
+		  	      		  			coverage_cd = #coverageCd#
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="coverageDesc">
+		  	      		  			UPPER(coverage_desc) LIKE UPPER(#coverageDesc#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="tarfCd">
+		  	      		  			UPPER(tarf_cd) LIKE UPPER(#tarfCd#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="tarfDesc">
+		  	      		  			UPPER(tarf_desc) LIKE UPPER(#tarfDesc#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="tariffCd">
+		  	      		  			tariff_cd = #tariffCd#
+		  	      		  		</isNotEmpty>
+		  	      		  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<select id="getGiiss106AllRecList" resultMap="giiss106ResultMap2">
+		SELECT '1' rownum_,
+   			   '1' count_,
+   			    a.* FROM TABLE(giiss106_pkg.get_tariff_hdr_list(#moduleId#, #userId#)) a
+		  	      		  
+	</select>
+	
+	<select id="getTariffCdNoSequence" resultClass="java.lang.Integer">
+		SELECT  TARIFF_CD_S.NEXTVAL FROM SYS.DUAL
+	</select>
+	
+	<parameterMap class="GIISTariffRatesHdr" id="setTariffRatesHdrMap">
+	    <parameter property="userId"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="tariffCd"		jdbcType="NUMERIC"		javaType="java.lang.Integer"	mode="INOUT" />
+		<parameter property="lineCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="sublineCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="perilCd"		jdbcType="NUMERIC"		javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="tariffZone"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="coverageCd"	jdbcType="NUMERIC"		javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="sublineTypeCd"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="motortypeCd"	jdbcType="NUMERIC"		javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="tarfCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="constructionCd" jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="defaultPremTag" jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="remarks"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="userId"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="remarks2"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="fixedPremium"		jdbcType="NUMERIC"		javaType="java.math.BigDecimal"	mode="IN" />
+		<parameter property="siDeductible"		jdbcType="NUMERIC"		javaType="java.math.BigDecimal"	mode="IN" />
+		<parameter property="excessRate"		jdbcType="NUMERIC"		javaType="java.math.BigDecimal"	mode="IN" />
+		<parameter property="loadingRate"		jdbcType="NUMERIC"		javaType="java.math.BigDecimal"	mode="IN" />
+		<parameter property="discountRate"		jdbcType="NUMERIC"		javaType="java.math.BigDecimal"	mode="IN" />
+		<parameter property="tariffRate"		jdbcType="NUMERIC"		javaType="java.math.BigDecimal"	mode="IN" />
+		<parameter property="additionalPremium"	jdbcType="NUMERIC"		javaType="java.math.BigDecimal"	mode="IN" />
+		<parameter property="tariffDtlCd"		jdbcType="NUMERIC"		javaType="java.lang.Integer"	mode="INOUT" />
+	</parameterMap>
+	
+	<procedure id="setTariffRatesHdr" parameterMap="setTariffRatesHdrMap">
+ 		BEGIN
+ 			giis_users_pkg.app_user := ?;	   <!-- added by steven 08.07.2014 -->		     
+ 			giiss106_pkg.set_rec_hdr(?,?,?,?,?,?,?,?,?,?,?,?,?,
+ 									 ?,?,?,?,?,?,?,?,?);
+ 		END;
+ 	</procedure>
+	
+	<procedure id="valAddTariffRatesHdr" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss106_pkg.val_add_rec_hdr(#lineCd#, #sublineCd#, #perilCd#, #tariffZone#, #coverageCd#, #sublineTypeCd#, 
+ 										 #motortypeCd#, #tarfCd#, #constructionCd#);
+ 		END;
+ 	</procedure> 	
+ 	
+ 	<procedure id="valDeleteTariffRatesHdr" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss106_pkg.val_del_rec_hdr(#tariffCd#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="delTariffRatesHdr" parameterClass="GIISTariffRatesHdr">
+ 		BEGIN
+ 			giiss106_pkg.del_rec_hdr(#tariffCd#);
+ 		END;
+ 	</procedure>
+	
+<!-- end GIISS106 : shan -->
+	
+</sqlMap>

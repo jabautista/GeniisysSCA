@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISNonRenewReason">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIISNonRenewReasonClass" type="com.geniisys.common.entity.GIISNonRenewReason"/>
+  	
+  	<resultMap id="getNonRenewalCdListingMap" class="GIISNonRenewReasonClass" >  
+	   	<result property="nonRenReasonCd" column="non_ren_reason_cd"/>
+  		<result property="nonRenReasonDesc" column="non_ren_reason_desc"/>
+		<result property="rowNum"			column="ROWNUM_"/>
+		<result property="rowCount"			column="COUNT_"/>
+   </resultMap>
+   
+   <parameterMap class="map" id="validateReasonCdMap">
+		<parameter property="nonRenReasonCd" jdbcType="VARCHAR"  javaType="java.lang.String"  mode="IN"/>
+		<parameter property="nonRenReason"   	 jdbcType="VARCHAR"  javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="msg"   						 jdbcType="VARCHAR"  javaType="java.lang.String"  mode="OUT"/>
+	</parameterMap>
+  	
+  	 <select id="getNonRenewalCdLOV" resultMap="getNonRenewalCdListingMap" parameterClass="java.util.HashMap">
+		 SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giis_non_renew_reason_pkg.get_non_renewal_cd (#lineCd#))
+						  <isNotNull property="findText">
+		                  	WHERE UPPER(non_ren_reason_cd) LIKE UPPER(#findText#)
+		                  	   OR UPPER(non_ren_reason_desc) LIKE UPPER(#findText#)
+		                  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="nonRenReasonCd">
+			              		ORDER BY non_ren_reason_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="nonRenReasonDesc">
+			              		ORDER BY non_ren_reason_desc
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giis_non_renew_reason_pkg.get_non_renewal_cd (#lineCd#))
+		                  <isNotNull property="findText">
+		                  	WHERE UPPER(non_ren_reason_cd) LIKE UPPER(#findText#)
+		                  	   OR UPPER(non_ren_reason_desc) LIKE UPPER(#findText#)
+		                  </isNotNull>
+						  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="validateReasonCd"  parameterMap="validateReasonCdMap">
+		CALL giis_non_renew_reason_pkg.validate_reason_cd(?, ?, ?)
+	</procedure>
+
+<!--Gzelle 11.26.2013-->
+	<resultMap class="GIISNonRenewReasonClass" id="giisNonRenewReasonListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="non_ren_reason_cd"     property="nonRenReasonCd"/>
+		<result column="non_ren_reason_desc"  property="nonRenReasonDesc"/>
+		<result column="line_cd"     property="lineCd"/>
+		<result column="user_id"     property="userId"/>
+		<result column="last_update" property="lastUpdate"/>
+		<result column="remarks"     property="remarks"/>
+		<result column="active_tag"     property="activeTag"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="giisNonRenewReasonLineLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="line_cd"     property="lineCd"/>
+		<result column="line_name"     property="lineName"/>
+	</resultMap>
+	
+	<parameterMap class="java.util.HashMap" id="valAddNonRenewReasonParametersMap">
+		<parameter property="recId"		jdbcType="VARCHAR"	javaType="java.lang.String" mode="IN"/>
+		<parameter property="recDesc"	jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+	</parameterMap>
+
+	<select id="getGiiss210LineRecList" resultMap="giisNonRenewReasonLineLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(giiss210_pkg.get_line_rec_list(#userId#))		                 
+		                  	<isNull property="findText">
+				                 WHERE UPPER(TO_CHAR(line_cd)) LIKE UPPER(#search#)	
+		                			OR UPPER(line_name) LIKE UPPER(#search#)			                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(TO_CHAR(line_cd)) LIKE UPPER(#findText#)	
+		                			OR UPPER(line_name) LIKE UPPER(#findText#)				         		
+			             	</isNotNull>		             
+			              	<isEqual property="sortColumn" compareValue="lineCd">
+			              		ORDER BY line_cd
+			              	</isEqual>	
+			              	<isEqual property="sortColumn" compareValue="lineName">
+			              		ORDER BY line_name
+			              	</isEqual>			              		                      
+			          	  	<isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	</isNotNull>
+		                  ) a, 
+		               (SELECT count (*) count_ 
+		                  FROM TABLE(giiss210_pkg.get_line_rec_list(#userId#))		                 
+		                  	<isNull property="findText">
+				                WHERE UPPER(TO_CHAR(line_cd)) LIKE UPPER(#search#)	
+		                			OR UPPER(line_name) LIKE UPPER(#search#)				                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(TO_CHAR(line_cd)) LIKE UPPER(#findText#)	
+		                			OR UPPER(line_name) LIKE UPPER(#findText#)				         		
+			             	</isNotNull>		
+			             	) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+
+	
+	<select id="getGiiss210RecList" resultMap="giisNonRenewReasonListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss210_pkg.get_rec_list(#userId#))
+		  	      		  <isNotNull property="filter">
+							WHERE 1=1
+								<isNotEmpty prepend="AND"  property="nonRenReasonCd">
+									UPPER(non_ren_reason_cd) LIKE UPPER(#nonRenReasonCd#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="nonRenReasonDesc">
+									UPPER(non_ren_reason_desc) LIKE UPPER(#nonRenReasonDesc#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="lineCd">
+									UPPER(line_cd) LIKE UPPER(#lineCd#)
+								</isNotEmpty>
+						  </isNotNull>		  	      
+		                  <isEqual property="sortColumn" compareValue="nonRenReasonCd">
+			              		ORDER BY non_ren_reason_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="nonRenReasonDesc">
+			              		ORDER BY non_ren_reason_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="lineCd">
+			              		ORDER BY line_cd
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss210_pkg.get_rec_list(#userId#))
+						 <isNotNull property="filter">
+							WHERE 1=1
+								<isNotEmpty prepend="AND"  property="nonRenReasonCd">
+									UPPER(non_ren_reason_cd) LIKE UPPER(#nonRenReasonCd#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="nonRenReasonDesc">
+									UPPER(non_ren_reason_desc) LIKE UPPER(#nonRenReasonDesc#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="lineCd">
+									UPPER(line_cd) LIKE UPPER(#lineCd#)
+								</isNotEmpty>
+						  </isNotNull>		 		                  
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setNonRenewReason" parameterClass="GIISNonRenewReasonClass">
+	    DECLARE
+	    	v_rec giis_non_renew_reason%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.non_ren_reason_cd := #nonRenReasonCd#;
+ 			v_rec.non_ren_reason_desc := #nonRenReasonDesc#;
+ 			v_rec.line_cd := #lineCd#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			v_rec.active_tag := #activeTag#;
+ 			
+ 			giiss210_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteNonRenewReason" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss210_pkg.val_del_rec(#recId#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddNonRenewReason" parameterMap="valAddNonRenewReasonParametersMap">
+ 		BEGIN
+ 			giiss210_pkg.val_add_rec(?,?);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delNonRenewReason" parameterClass="java.lang.String">
+		BEGIN
+ 			giiss210_pkg.del_rec(#nonRenReasonCd#);
+ 		END;
+ 	</delete>
+<!--END-->	
+	
+</sqlMap>	

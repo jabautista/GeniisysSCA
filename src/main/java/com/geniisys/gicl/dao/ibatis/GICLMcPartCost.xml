@@ -1,0 +1,366 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GICLMcPartCost">
+	
+	<typeAlias alias="giclMcPartCost" type="com.geniisys.gicl.entity.GICLMcPartCost"/>
+  	
+	<resultMap class="java.util.HashMap" id="giclMcPartCostListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="car_company_cd"   property="carCompanyCd"/>
+		<result column="make_cd"   	   property="makeCd"/>
+		<result column="loss_exp_cd"   property="lossExpCd"/>
+		<result column="loss_exp_desc" property="lossExpDesc"/>
+		<result column="part_cost_id"  property="partCostId"/>
+		<result column="model_year"    property="modelYear"/>
+		<result column="eff_date_org"  property="effDateOrg"/>
+		<result column="orig_amt"      property="origAmt"/>
+		<result column="eff_date_surp" property="effDateSurp"/>
+		<result column="surp_amt"      property="surpAmt"/>
+		<result column="user_id"       property="userId"/>
+		<result column="last_update"   property="lastUpdate"/>
+		<result column="remarks"       property="remarks"/>
+	</resultMap>
+
+	<resultMap class="java.util.HashMap" id="companyRecListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="car_company_cd" property="carCompanyCd"/>
+		<result column="car_company"    property="carCompany"/>
+	</resultMap>	
+	
+	<resultMap class="java.util.HashMap" id="makeRecListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="make_cd" property="makeCd"/>
+		<result column="make"    property="make"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="modelYearRecListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="model_year" property="modelYear"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="historyRecListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="loss_exp_cd" 	property="lossExpCd"/>
+		<result column="loss_exp_desc"  property="lossExpDesc"/>
+		<result column="hist_no" 		property="histNo"/>
+		<result column="orig_amt" 		property="origAmt"/>
+		<result column="surp_amt" 		property="surpAmt"/>
+		<result column="entry_date" 	property="entryDate"/>
+		<result column="user_id" 		property="userId"/>
+	</resultMap>
+
+	<select id="getGicls058CarCompanyLOV" resultMap="companyRecListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(gicls058_pkg.get_company_rec_list)		                 
+		                  	<isNull property="findText">
+				                 WHERE TO_CHAR(car_company_cd) LIKE #search#			                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(TO_CHAR(car_company_cd)) LIKE UPPER(#findText#)	
+		                			OR UPPER(car_company) LIKE UPPER(#findText#)				         		
+			             	</isNotNull>		             
+			              	<isEqual property="sortColumn" compareValue="carCompanyCd">
+			              		ORDER BY car_company_cd
+			              	</isEqual>	
+			              	<isEqual property="sortColumn" compareValue="carCompany">
+			              		ORDER BY car_company
+			              	</isEqual>			              		                      
+			          	  	<isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	</isNotNull>
+		                  ) a, 
+		               (SELECT count (*) count_ 
+		                  FROM TABLE(gicls058_pkg.get_company_rec_list)		                 
+		                  	<isNull property="findText">
+				                 WHERE TO_CHAR(car_company_cd) LIKE #search#			                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(TO_CHAR(car_company_cd)) LIKE UPPER(#findText#)	
+		                			OR UPPER(car_company) LIKE UPPER(#findText#)			  				         		
+			             	</isNotNull>		
+			             	) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>	
+
+	<select id="getGicls058MakeLOV" resultMap="makeRecListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(gicls058_pkg.get_make_rec_list(#carCompanyCd#))		                 
+		                  	<isNull property="findText">
+				                WHERE TO_CHAR(make_cd) LIKE #search#	                    		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(TO_CHAR(make_cd)) LIKE UPPER(#findText#)	
+		                			OR UPPER(make) LIKE UPPER(#findText#)				         		
+			             	</isNotNull>		             
+			              	<isEqual property="sortColumn" compareValue="makeCd">
+			              		ORDER BY make_cd
+			              	</isEqual>	
+			              	<isEqual property="sortColumn" compareValue="make">
+			              		ORDER BY make
+			              	</isEqual>			              		                      
+			          	  	<isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	</isNotNull>
+		                  ) a, 
+		               (SELECT count (*) count_ 
+		                  FROM TABLE(gicls058_pkg.get_make_rec_list(#carCompanyCd#))		                 
+		                  	<isNull property="findText">
+				                 WHERE TO_CHAR(make_cd) LIKE #search#				                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(TO_CHAR(make_cd)) LIKE UPPER(#findText#)	
+		                			OR UPPER(make) LIKE UPPER(#findText#)			  				         		
+			             	</isNotNull>		
+			             	) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>	
+		
+	<select id="getGicls058ModelYearLOV" resultMap="modelYearRecListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(gicls058_pkg.get_model_year_rec_list(#carCompanyCd#,#makeCd#))		                 
+		                  	<isNull property="findText">
+				                WHERE model_year LIKE #search#	                    		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(model_year) LIKE UPPER(#findText#)			         		
+			             	</isNotNull>		             
+			              	<isEqual property="sortColumn" compareValue="modelYear">
+			              		ORDER BY model_year
+			              	</isEqual>		              		                      
+			          	  	<isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	</isNotNull>
+		                  ) a, 
+		               (SELECT count (*) count_ 
+		                  FROM TABLE(gicls058_pkg.get_model_year_rec_list(#carCompanyCd#,#makeCd#))		                 
+		                  	<isNull property="findText">
+				                 WHERE model_year LIKE #search#				                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(model_year) LIKE UPPER(#findText#)			  				         		
+			             	</isNotNull>		
+			             	) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGicls058HistoryRecList" resultMap="historyRecListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(gicls058_pkg.get_history_rec_list(#partCostId#))
+		  	      		  <isNotNull property="filter">
+							WHERE 1=1
+								<isNotEmpty prepend="AND"  property="histNo">
+									hist_no = #histNo#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="origAmt">
+									orig_amt = #origAmt#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="surpAmt">
+									surp_amt = #surpAmt#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="entryDate">
+									TO_DATE(entry_date,'MM-DD-YYYY') = TO_DATE(#entryDate#,'MM-DD-YYYY')
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="userId">
+									UPPER(user_id) LIKE UPPER(#userId#)
+								</isNotEmpty>
+						</isNotNull>
+		                  <isEqual property="sortColumn" compareValue="histNo">
+			              		ORDER BY hist_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="origAmt">
+			              		ORDER BY orig_amt
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="surpAmt">
+			              		ORDER BY surp_amt
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="entryDate">
+			              		ORDER BY TO_DATE(entry_date,'MM-DD-YYYY')
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="userId">
+			              		ORDER BY user_id
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(gicls058_pkg.get_history_rec_list(#partCostId#))
+		                  <isNotNull property="filter">
+							WHERE 1=1
+								<isNotEmpty prepend="AND"  property="histNo">
+									hist_no = #histNo#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="origAmt">
+									orig_amt = #origAmt#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="surpAmt">
+									surp_amt = #surpAmt#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="entryDate">
+									TO_DATE(entry_date,'MM-DD-YYYY') = TO_DATE(#entryDate#,'MM-DD-YYYY')
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="userId">
+									UPPER(user_id) LIKE UPPER(#userId#)
+								</isNotEmpty>
+						</isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>			
+	
+	<select id="getGicls058RecList" resultMap="giclMcPartCostListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(gicls058_pkg.get_rec_list(#carCompanyCd#,#makeCd#,#modelYear#))
+		  	      		  <isNotNull property="filter">
+							WHERE 1=1
+								<isNotEmpty prepend="AND"  property="lossExpCd">
+									UPPER(loss_exp_cd) LIKE UPPER(#lossExpCd#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="lossExpDesc">
+									UPPER(loss_exp_desc) LIKE UPPER(#lossExpDesc#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="effDateOrg">
+									TO_DATE(eff_date_org,'MM-DD-YYYY') = TO_DATE(#effDateOrg#,'MM-DD-YYYY')
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="origAmt">
+									orig_amt = #origAmt#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="effDateSurp">
+									TO_DATE(eff_date_surp,'MM-DD-YYYY') = TO_DATE(#effDateSurp#,'MM-DD-YYYY')
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="surpAmt">
+									surp_amt = #surpAmt#
+								</isNotEmpty>
+						</isNotNull>
+		                  <isEqual property="sortColumn" compareValue="lossExpCd lossExpDesc">
+			              		ORDER BY loss_exp_cd
+			              		<isNotNull property="sortColumn">
+					              		<isEqual property="ascDescFlg" compareValue="ASC">
+					              			ASC
+					              		</isEqual>
+					              		<isEqual property="ascDescFlg" compareValue="DESC">
+					              			DESC
+					              		</isEqual>
+					              </isNotNull>,
+					              loss_exp_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="effDateOrg">
+			              		ORDER BY TO_DATE(eff_date_org,'MM-DD-YYYY')
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="origAmt">
+			              		ORDER BY orig_amt
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="effDateSurp">
+			              		ORDER BY TO_DATE(eff_date_surp,'MM-DD-YYYY')
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="surpAmt">
+			              		ORDER BY surp_amt
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(gicls058_pkg.get_rec_list(#carCompanyCd#,#makeCd#,#modelYear#))
+		                  <isNotNull property="filter">
+							WHERE 1=1
+								<isNotEmpty prepend="AND"  property="lossExpCd">
+									UPPER(loss_exp_cd) LIKE UPPER(#lossExpCd#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="lossExpDesc">
+									UPPER(loss_exp_desc) LIKE UPPER(#lossExpDesc#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="effDateOrg">
+									TO_DATE(eff_date_org,'MM-DD-YYYY') = TO_DATE(#effDateOrg#,'MM-DD-YYYY')
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="origAmt">
+									orig_amt = #origAmt#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="effDateSurp">
+									TO_DATE(eff_date_surp,'MM-DD-YYYY') = TO_DATE(#effDateSurp#,'MM-DD-YYYY')
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="surpAmt">
+									surp_amt = #surpAmt#
+								</isNotEmpty>
+						</isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setMcPartCost" parameterClass="giclMcPartCost">
+	    DECLARE
+	    	v_rec gicl_mc_part_cost%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.part_cost_id := #partCostId#;
+ 			v_rec.model_year := #modelYear#;
+ 			v_rec.car_company_cd := #carCompanyCd#;
+ 			v_rec.make_cd := #makeCd#;
+ 			v_rec.loss_exp_cd := #lossExpCd#;
+ 			v_rec.orig_amt := #origAmt#;
+ 			v_rec.surp_amt := #surpAmt#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			gicls058_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteMcPartCost" parameterClass="java.lang.String">
+ 		BEGIN
+ 			gicls058_pkg.val_del_rec(#recId#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddMcPartCost" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			gicls058_pkg.val_add_rec(#carCompanyCd#,#makeCd#,#modelYear#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delMcPartCost" parameterClass="java.lang.Integer">
+		BEGIN
+ 			gicls058_pkg.del_rec(#partCostId#);
+ 		END;
+ 	</delete>
+ 	
+ 	<select id="valModelYear" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+ 		SELECT gicls058_pkg.check_model_year(#carCompanyCd#,#makeCd#) FROM DUAL
+ 	</select>
+</sqlMap>

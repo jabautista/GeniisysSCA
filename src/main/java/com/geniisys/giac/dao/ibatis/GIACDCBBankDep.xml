@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIACDCBBankDep">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<resultMap class="java.util.HashMap" id="gdbdListTableGridMap">
+		<result column="gacc_tran_id"		property="gaccTranId" />
+		<result column="fund_cd"			property="fundCd" />
+		<result column="branch_cd"			property="branchCd" />
+		<result column="dcb_year"			property="dcbYear" />
+		<result column="dcb_no"				property="dcbNo" />
+		<result column="dcb_date"			property="dcbDate" />
+		<result column="item_no"			property="itemNo" />
+		<result column="bank_cd"			property="bankCd" />
+		<result column="bank_acct_cd"		property="bankAcctCd" />
+		<result column="bank_acct"			property="bankAcct" />
+		<result column="pay_mode"			property="payMode" />
+		<result column="amount"				property="amount" />
+		<result column="currency_cd"		property="currencyCd" />
+		<result column="dsp_curr_sname"		property="dspCurrSname" />
+		<result column="foreign_curr_amt"	property="foreignCurrAmt" />
+		<result column="currency_rt"		property="currencyRt" />
+		<result column="old_dep_amt"		property="oldDepAmt" />
+		<result column="adj_amt"			property="adjAmt" />
+		<result column="dsp_bank_name"		property="dspBankName" />
+		<result column="dsp_bank_acct_no"	property="dspBankAcctNo" />
+		<result column="remarks"			property="remarks" />
+		<result column="rownum_" 			property="rowNum" />
+		<result column="count_"				property="rowCount"/>
+	</resultMap>
+	
+	<select id="getGdbdListTableGrid" resultMap="gdbdListTableGridMap" parameterClass="java.util.HashMap">
+		SELECT *
+			  FROM (SELECT rownum rownum_, 
+			               b.count_, 
+			               a.* 
+			          FROM (SELECT * 
+			                  FROM TABLE (giac_dcb_bank_dep_pkg.get_gdbd_list(#gaccTranId#)) <!-- SR#18447; John Dolon; 05.25.2015 -->
+			                  <isEqual property="sortColumn" compareValue="itemNo">
+			              		ORDER BY item_no
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="dspBankName dspBankAcctNo">
+				              		ORDER BY dsp_bank_name, dsp_bank_acct_no
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="payMode">
+			              		ORDER BY pay_mode
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="amount">
+				              		ORDER BY amount
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="dspCurrSname">
+			              		ORDER BY dsp_curr_sname
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="foreignCurrAmt">
+				              		ORDER BY foreign_curr_amt
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="currencyRt">
+			              		ORDER BY currency_rt
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="oldDepAmt">
+				              		ORDER BY old_dep_amt
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="adjAmt">
+				              		ORDER BY adj_amt
+				              </isEqual>
+				          	  <isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              </isNotNull>) a, 
+			               (SELECT count(*) count_
+			                  FROM TABLE (giac_dcb_bank_dep_pkg.get_gdbd_list(#gaccTranId#))) b) 
+			 WHERE rownum_ BETWEEN #from# AND #to#
+			 ORDER BY ITEM_NO ASC <!-- dren 08.03.2015 : SR 0017729 - Sort by item_no -->
+	</select>
+	
+	<select id="populateGiacs035Gdbd" resultMap="gdbdListTableGridMap" parameterClass="java.util.HashMap">
+		SELECT *
+			  FROM (SELECT rownum rownum_, 
+			               b.count_, 
+			               a.* 
+			          FROM (SELECT * 
+			                  FROM TABLE (giac_dcb_bank_dep_pkg.populate_giacs035_gdbd(#gibrBranchCd#, #gfunFundCd#, #dcbYear#, #dcbNo#, #dcbDate#))) a, 
+			               (SELECT count(*) count_
+			                  FROM TABLE (giac_dcb_bank_dep_pkg.populate_giacs035_gdbd(#gibrBranchCd#, #gfunFundCd#, #dcbYear#, #dcbNo#, #dcbDate#))) b) 
+			 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<insert id="setGIACDCBBankDep" parameterClass="com.geniisys.giac.entity.GIACDCBBankDep">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GIAC_DCB_BANK_DEP_PKG.set_giac_dcb_bank_dep(#gaccTranId#, #fundCd#, #branchCd#, #dcbYear#,
+														#dcbNo#, #dcbDate#, #itemNo#, #bankCd#,
+														#bankAcctCd#, #payMode#, #amount#, #currencyCd#,
+														#foreignCurrAmt#, #currencyRt#, #oldDepAmt#, #adjAmt#,
+														#remarks#, #userId#, SYSDATE);
+		END;
+	</insert>
+	
+	<delete id="deleteGIACDCBBankDep" parameterClass="com.geniisys.giac.entity.GIACDCBBankDep">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GIAC_DCB_BANK_DEP_PKG.del_giac_dcb_bank_dep(#gaccTranId#, #fundCd#, #branchCd#, #dcbYear#,
+														#dcbNo#, #itemNo#);
+		END;
+	</delete>
+	
+	<resultMap class="java.util.HashMap"  id="GIACS281BankAcctLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="bankAcctCd"	column="bank_acct_cd" />
+		<result property="bankSname" 	column="bank_sname" />
+		<result property="bankAcct"		column="bank_acct" />
+		<result property="branchCd"		column="branch_cd" />
+	</resultMap>
+	
+	<select id="getGIACS281BankAcctLOV" resultMap="GIACS281BankAcctLOVResultMap">
+		SELECT *
+            FROM (SELECT ROWNUM rownum_, b.count_, a.*
+                  FROM (SELECT *
+                          FROM TABLE(GIAC_DCB_BANK_DEP_PKG.get_giacs281_bank_acct_lov)
+                          <isNull property="findText">
+                             WHERE UPPER(bank_acct_cd) LIKE UPPER(NVL(#searchString#, bank_acct_cd))
+                                OR UPPER(bank_acct) LIKE UPPER(NVL(#searchString#, bank_acct))
+                          </isNull>
+                          <isNotNull property="findText">
+                             WHERE UPPER(bank_acct_cd) LIKE UPPER(NVL(#findText#, bank_acct_cd))
+                                OR UPPER(bank_acct) LIKE UPPER(NVL(#findText#, bank_acct))
+                          </isNotNull>
+                            <isEqual property="sortColumn" compareValue="bankAcctCd">
+                                     ORDER BY bank_acct_cd
+                            </isEqual>
+                            <isEqual property="sortColumn" compareValue="bankSname">
+                                     ORDER BY bank_sname
+                            </isEqual>
+                            <isEqual property="sortColumn" compareValue="bankAcct">
+                                     ORDER BY bank_acct
+                            </isEqual>
+                            <isEqual property="sortColumn" compareValue="branchCd">
+                                     ORDER BY branch_cd
+                            </isEqual>
+                            <isNotNull property="sortColumn">
+                                 <isEqual property="ascDescFlg" compareValue="ASC">
+                                     ASC
+                                 </isEqual>
+                                 <isEqual property="ascDescFlg" compareValue="DESC">
+                                     DESC
+                                 </isEqual>
+                            </isNotNull>) a,
+               (SELECT COUNT (*) count_
+                  FROM TABLE (GIAC_DCB_BANK_DEP_PKG.get_giacs281_bank_acct_lov)
+                          <isNull property="findText">
+                             WHERE UPPER(bank_acct_cd) LIKE UPPER(NVL(#searchString#, bank_acct_cd))
+                                OR UPPER(bank_acct) LIKE UPPER(NVL(#searchString#, bank_acct))
+                          </isNull>
+                          <isNotNull property="findText">
+                             WHERE UPPER(bank_acct_cd) LIKE UPPER(NVL(#findText#, bank_acct_cd))
+                                OR UPPER(bank_acct) LIKE UPPER(NVL(#findText#, bank_acct))
+                          </isNotNull>
+                          ) b)
+          WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="GIACS035BankLOVMap" extends="BaseEntity.TableGridResultMap"> <!-- SR#18447; John Dolon; 05.25.2015 -->
+		<result property="bankCd"		column="bank_cd" />
+		<result property="bankName" 	column="bank_name" />
+	</resultMap>
+	
+	<select id="getGIACS035BankLOV" resultMap="GIACS035BankLOVMap" parameterClass="java.util.HashMap">
+		SELECT * FROM TABLE (GIAC_DCB_BANK_DEP_PKG.get_giacs035_bank_lov(#findText#, #sortColumn#, #ascDescFlg#, #from#, #to#))
+	</select>
+	
+	<procedure id="refreshDCB" parameterClass="java.util.HashMap"> <!-- SR#18447; John Dolon; 05.25.2015 -->
+		BEGIN
+			GIIS_USERS_PKG.app_user := #userId#;
+			GIAC_DCB_BANK_DEP_PKG.refresh_dcb(#gaccTranId#, #branchCd#, #fundCd#, #dcbYear#, #dcbNo#, #dcbDate#, #userId#, #moduleName#);  <!-- dren 08.03.2015 : SR 0017729 - Additional parameter for Refresh DCB -->
+		END;
+	</procedure>
+</sqlMap>

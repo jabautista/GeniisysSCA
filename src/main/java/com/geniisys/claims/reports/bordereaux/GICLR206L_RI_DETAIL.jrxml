@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GICLR206L_RI_DETAIL" language="groovy" pageWidth="1500" pageHeight="768" columnWidth="1500" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="2.593742460100003"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="Crosstab Data Text" isDefault="false" hAlign="Center"/>
+	<parameter name="P_CLAIM_ID" class="java.lang.Integer"/>
+	<parameter name="P_SESSION_ID" class="java.lang.String"/>
+	<parameter name="P_BUSS_SOURCE" class="java.lang.String"/>
+	<parameter name="P_ISS_CD" class="java.lang.String"/>
+	<parameter name="P_LINE_CD" class="java.lang.String"/>
+	<parameter name="P_SUBLINE_CD" class="java.lang.String"/>
+	<parameter name="P_LOSS_YEAR" class="java.lang.Integer"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT * FROM TABLE(GICLR206L_PKG.GET_RI_DETAIL($P{P_SESSION_ID},$P{P_CLAIM_ID},$P{P_BUSS_SOURCE},$P{P_ISS_CD},$P{P_LINE_CD},$P{P_SUBLINE_CD},$P{P_LOSS_YEAR}))]]>
+	</queryString>
+	<field name="TRTY_NAME" class="java.lang.String"/>
+	<field name="RI_NAME" class="java.lang.String"/>
+	<field name="RI_SHR" class="java.math.BigDecimal"/>
+	<field name="DUMMY_MEASURE" class="java.math.BigDecimal"/>
+	<field name="RI_CD" class="java.math.BigDecimal"/>
+	<field name="TRTY_RI_CD" class="java.math.BigDecimal"/>
+	<field name="TRTY_SHR_PCT" class="java.math.BigDecimal"/>
+	<field name="GRP_SEQ_NO" class="java.math.BigDecimal"/>
+	<variable name="V_TOTAL_SHARE" class="java.math.BigDecimal" resetType="Group" resetGroup="GRP_TREATY_NAME" calculation="Sum">
+		<variableExpression><![CDATA[$F{TRTY_SHR_PCT}]]></variableExpression>
+	</variable>
+	<group name="GRP_TREATY_NAME">
+		<groupExpression><![CDATA[$F{TRTY_NAME}]]></groupExpression>
+		<groupHeader>
+			<band height="9">
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="0" width="134" height="9"/>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{TRTY_NAME}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="16">
+				<textField pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement x="84" y="7" width="50" height="9"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_TOTAL_SHARE}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="84" y="0" width="50" height="7"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="6"/>
+					</textElement>
+					<text><![CDATA[--------------------------------]]></text>
+				</staticText>
+				<subreport>
+					<reportElement x="138" y="0" width="56" height="16"/>
+					<subreportParameter name="SUBREPORT_DIR">
+						<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="P_LINE_CD">
+						<subreportParameterExpression><![CDATA[$P{P_LINE_CD}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="P_CLAIM_ID">
+						<subreportParameterExpression><![CDATA[$P{P_CLAIM_ID}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="P_RI_CD"/>
+					<subreportParameter name="P_SUBLINE_CD">
+						<subreportParameterExpression><![CDATA[$P{P_SUBLINE_CD}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="P_BUSS_SOURCE">
+						<subreportParameterExpression><![CDATA[$P{P_BUSS_SOURCE}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="P_LOSS_YEAR">
+						<subreportParameterExpression><![CDATA[$P{P_LOSS_YEAR}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="P_GRP_SEQ_NO">
+						<subreportParameterExpression><![CDATA[$F{GRP_SEQ_NO}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="P_SESSION_ID">
+						<subreportParameterExpression><![CDATA[$P{P_SESSION_ID}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="P_ISS_CD">
+						<subreportParameterExpression><![CDATA[$P{P_ISS_CD}]]></subreportParameterExpression>
+					</subreportParameter>
+					<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					<subreportExpression class="java.lang.String"><![CDATA[$P{SUBREPORT_DIR} + "GICLR206L_RI_SUM.jasper"]]></subreportExpression>
+				</subreport>
+			</band>
+		</groupFooter>
+	</group>
+	<group name="GRP_TRTY_RI_CD">
+		<groupExpression><![CDATA[$F{TRTY_NAME}+$F{TRTY_RI_CD}]]></groupExpression>
+		<groupHeader>
+			<band height="9">
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="0" width="80" height="9"/>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{RI_NAME}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement x="84" y="0" width="50" height="9"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{RI_SHR}]]></textFieldExpression>
+				</textField>
+				<subreport>
+					<reportElement x="138" y="0" width="56" height="9"/>
+					<subreportParameter name="SUBREPORT_DIR">
+						<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="P_LINE_CD">
+						<subreportParameterExpression><![CDATA[$P{P_LINE_CD}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="P_CLAIM_ID">
+						<subreportParameterExpression><![CDATA[$P{P_CLAIM_ID}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="P_RI_CD">
+						<subreportParameterExpression><![CDATA[$F{RI_CD}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="P_SUBLINE_CD">
+						<subreportParameterExpression><![CDATA[$P{P_SUBLINE_CD}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="P_BUSS_SOURCE">
+						<subreportParameterExpression><![CDATA[$P{P_BUSS_SOURCE}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="P_LOSS_YEAR">
+						<subreportParameterExpression><![CDATA[$P{P_LOSS_YEAR}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="P_GRP_SEQ_NO">
+						<subreportParameterExpression><![CDATA[$F{GRP_SEQ_NO}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="P_SESSION_ID">
+						<subreportParameterExpression><![CDATA[$P{P_SESSION_ID}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="P_ISS_CD">
+						<subreportParameterExpression><![CDATA[$P{P_ISS_CD}]]></subreportParameterExpression>
+					</subreportParameter>
+					<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					<subreportExpression class="java.lang.String"><![CDATA[$P{SUBREPORT_DIR} + "GICLR206L_RI_SHR.jasper"]]></subreportExpression>
+				</subreport>
+			</band>
+		</groupHeader>
+	</group>
+	<columnHeader>
+		<band height="16">
+			<staticText>
+				<reportElement x="0" y="9" width="80" height="7"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="6"/>
+				</textElement>
+				<text><![CDATA[-------------------------------------------------------------------]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="0" width="80" height="9"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[Treaty Reinsurer]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="84" y="0" width="50" height="9"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[Share Pct]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="84" y="9" width="50" height="7"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="6"/>
+				</textElement>
+				<text><![CDATA[----------------------------]]></text>
+			</staticText>
+			<subreport>
+				<reportElement x="138" y="0" width="56" height="16"/>
+				<subreportParameter name="SUBREPORT_DIR">
+					<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_LINE_CD">
+					<subreportParameterExpression><![CDATA[$P{P_LINE_CD}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_CLAIM_ID">
+					<subreportParameterExpression><![CDATA[$P{P_CLAIM_ID}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_RI_CD">
+					<subreportParameterExpression><![CDATA[]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_SUBLINE_CD">
+					<subreportParameterExpression><![CDATA[$P{P_SUBLINE_CD}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_BUSS_SOURCE">
+					<subreportParameterExpression><![CDATA[$P{P_BUSS_SOURCE}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_LOSS_YEAR">
+					<subreportParameterExpression><![CDATA[$P{P_LOSS_YEAR}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_SESSION_ID">
+					<subreportParameterExpression><![CDATA[$P{P_SESSION_ID}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_ISS_CD">
+					<subreportParameterExpression><![CDATA[$P{P_ISS_CD}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression class="java.lang.String"><![CDATA[$P{SUBREPORT_DIR} + "GICLR206L_RI_HEADER.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</columnHeader>
+</jasperReport>

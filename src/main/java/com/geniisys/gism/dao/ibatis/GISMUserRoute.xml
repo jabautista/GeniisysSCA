@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GISMUserRoute">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GISMUserRoute" type="com.geniisys.gism.entity.GISMUserRoute"/>
+
+	<resultMap class="GISMUserRoute" id="gismUserRouteListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="keyword"     		property="keyword"/>	
+		<result column="remarks"   			property="remarks"/>
+		<result column="validate_pin"     	property="validatePin"/>
+		<result column="pin_sw"     		property="pinSw"/>
+		<result column="restrict_number"  	property="restrictNumber"/>
+		<result column="number_sw"  		property="numberSw"/>
+		<result column="valid_sw"    		property="validSw"/>
+		<result column="user_id"    		property="userId"/>
+		<result column="last_update"    	property="lastUpdate"/>
+	</resultMap>		
+	
+	<select id="getGisms010RecList" resultMap="gismUserRouteListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(gisms010_pkg.get_rec_list(#keyword#, #remarks#, #validatePin#, #restrictNumber#, #validSw#))
+		                  <isEqual property="sortColumn" compareValue="keyword">
+			              		ORDER BY keyword
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="remarks">
+			              		ORDER BY remarks
+			              </isEqual>
+			                  <isEqual property="sortColumn" compareValue="validatePin">
+			              		ORDER BY validate_pin
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="restrictNumber">
+			              		ORDER BY restrict_number
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="validSw">
+			              		ORDER BY valid_sw
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(gisms010_pkg.get_rec_list(#keyword#, #remarks#, #validatePin#, #restrictNumber#, #validSw#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setUserRoute" parameterClass="GISMUserRoute">
+	    DECLARE
+	    	v_rec gism_user_route%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.keyword := #keyword#;
+ 			v_rec.remarks := #remarks#;
+ 			v_rec.validate_pin := #validatePin#;
+ 			v_rec.restrict_number := #restrictNumber#;
+ 			v_rec.valid_sw := #validSw#;
+ 			v_rec.user_id := #userId#;
+ 			
+ 			gisms010_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure> 
+</sqlMap>

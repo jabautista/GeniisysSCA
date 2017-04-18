@@ -1,0 +1,372 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISLossCtgry">
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIISLossCtgryClass" type="com.geniisys.common.entity.GIISLossCtgry"/>
+
+	<resultMap class="GIISLossCtgryClass" id="GIISLossCtgryResultMap">
+		<result column="line_cd" 			property="lineCd" />
+		<result column="loss_cat_cd" 		property="lossCatCd" />			
+	  	<result column="loss_cat_des"		property="lossCatDesc"/>
+	  	<result column="loss_cat_group" 	property="lossCatGrp" />
+	  	<result column="remarks" 			property="remarks" />
+	  	<result column="total_tag" 			property="totalTag" />
+	  	<result column="peril_cd" 			property="perilCd" />
+	</resultMap>
+
+	<resultMap id="GIISLossCtgryResultMapGrid" class="GIISLossCtgryClass" extends="GIISLossCtgryResultMap">
+  		<result column="rownum_" 			property="rowNum" />
+		<result column="count_"				property="rowCount"/>
+  	</resultMap>
+
+	<resultMap id="lossCatMap" class="java.util.HashMap">
+  		<result column="loss_cat_cd" 		property="id" />			
+	  	<result column="loss_cat_des"		property="desc"	/>	
+  		<result column="rownum_" 			property="rowNum" />
+		<result column="count_"				property="rowCount"/>
+  	</resultMap>
+  	
+  	<select id="getLossCatDtlLOV" resultMap="GIISLossCtgryResultMapGrid">
+  		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(giis_loss_ctgry_pkg.get_loss_cat(#lineCd#))    
+				         <isNotNull property="findText">
+				         WHERE UPPER(loss_cat_cd) LIKE UPPER(#findText#) OR UPPER(loss_cat_des) LIKE UPPER(#findText#)
+				         </isNotNull>          
+			          	  <isNotNull property="sortColumn">
+				          	  <isEqual property="sortColumn" compareValue="lossCatCd">
+				              		ORDER BY loss_cat_cd
+				              </isEqual>
+			                  <isEqual property="sortColumn" compareValue="lossCatDesc">
+				              		ORDER BY loss_cat_des
+				              </isEqual>	
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giis_loss_ctgry_pkg.get_loss_cat(#lineCd#))
+		                 <isNotNull property="findText">
+				         WHERE (UPPER(loss_cat_cd) LIKE UPPER(#findText#) OR UPPER(loss_cat_des) LIKE UPPER(#findText#))
+				         </isNotNull>   
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+  	
+  	<select id="getLossCatDtl2" resultMap="GIISLossCtgryResultMapGrid">
+  		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(giis_loss_ctgry_pkg.get_loss_cat(#lineCd#, #perilCd#))              
+			          	  <isNotNull property="findText">
+		                  WHERE UPPER(loss_cat_cd) LIKE UPPER(#findText#) OR UPPER(loss_cat_des) LIKE UPPER(#findText#)
+		             	  </isNotNull>
+			          	  <isNotNull property="sortColumn">
+				          	  <isEqual property="sortColumn" compareValue="lossCatCd">
+				              		ORDER BY loss_cat_cd
+				              </isEqual>
+			                  <isEqual property="sortColumn" compareValue="lossCatDesc">
+				              		ORDER BY loss_cat_des
+				              </isEqual>	
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giis_loss_ctgry_pkg.get_loss_cat(#lineCd#, #perilCd#))
+		                  <isNotNull property="findText">
+		                  WHERE (UPPER(loss_cat_cd) LIKE UPPER(#findText#) OR UPPER(loss_cat_des) LIKE UPPER(#findText#))
+		             	  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+  	
+  	<select id="getLossCatCdDtlLOV" resultMap="lossCatMap">
+  		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(giis_loss_ctgry_pkg.get_loss_cat_cd(#lineCd#)) 
+		          		 <isNull property="findText">
+		          		 WHERE UPPER(loss_cat_cd) LIKE UPPER(#filterDesc#) OR UPPER(loss_cat_des) LIKE UPPER(#filterDesc#)
+		          		 </isNull>  
+				         <isNotNull property="findText">
+				         WHERE UPPER(loss_cat_cd) LIKE UPPER(#findText#) OR UPPER(loss_cat_des) LIKE UPPER(#findText#)
+				         </isNotNull>          
+			          	 <isNotNull property="sortColumn">
+				          	<isEqual property="sortColumn" compareValue="lossCatCd">
+				              	ORDER BY loss_cat_cd
+				            </isEqual>
+			                <isEqual property="sortColumn" compareValue="lossCatDesc">
+				              	ORDER BY loss_cat_des
+				            </isEqual>	
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giis_loss_ctgry_pkg.get_loss_cat_cd(#lineCd#))
+		                 <isNotNull  property="findText">
+				         WHERE (UPPER(loss_cat_cd) LIKE UPPER(#findText#) OR UPPER(loss_cat_des) LIKE UPPER(#findText#))
+				         </isNotNull>   
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+  	
+  	<select id="getLossCatLOV" resultMap="lossCatMap">
+  		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(giis_loss_ctgry_pkg.get_loss_cat_lov(#lineCd#, nvl(#findText#, #searchString#)))      
+			          	 <isNotNull property="sortColumn">
+				          	<isEqual property="sortColumn" compareValue="id">
+				              	ORDER BY loss_cat_cd
+				            </isEqual>
+			                <isEqual property="sortColumn" compareValue="desc">
+				              	ORDER BY loss_cat_des
+				            </isEqual>	
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giis_loss_ctgry_pkg.get_loss_cat_lov(#lineCd#, nvl(#findText#, #searchString#)))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+  	
+<!-- GICLS105 : shan 10.23.2013 -->
+<resultMap class="java.util.HashMap" id="gicls105PerilResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="peril_cd" 			property="perilCd" />
+		<result column="peril_name" 		property="perilName" />	
+	</resultMap>
+	
+	<select id="getGicls105PerilLOV" resultMap="gicls105PerilResultMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * 
+		                  FROM TABLE (GIIS_PERIL_PKG.GET_PERIL_LIST(#lineCd#))
+		  	      		  <isNotNull property="findText">
+		                  	WHERE UPPER(peril_cd) LIKE UPPER(#findText#)
+		                  	   OR UPPER(peril_name) LIKE UPPER(#findText#)
+		                  </isNotNull>
+		                  <isNull property="findText">
+		                  	WHERE UPPER(peril_cd) LIKE UPPER(NVL(#searchString#, peril_cd))
+		                  	   OR UPPER(peril_name) LIKE UPPER(NVL(#searchString#, peril_name))
+		                  </isNull>
+			              <isEqual property="sortColumn" compareValue="perilCd">
+			              		ORDER BY peril_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="perilName">
+			              		ORDER BY peril_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIIS_PERIL_PKG.GET_PERIL_LIST(#lineCd#))
+		  	      		  <isNotNull property="findText">
+		                  	WHERE UPPER(peril_cd) LIKE UPPER(#findText#)
+		                  	   OR UPPER(peril_name) LIKE UPPER(#findText#)
+		                  </isNotNull>
+		                  <isNull property="findText">
+		                  	WHERE UPPER(peril_cd) LIKE UPPER(NVL(#searchString#, peril_cd))
+		                  	   OR UPPER(peril_name) LIKE UPPER(NVL(#searchString#, peril_name))
+		                  </isNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="gicls105ResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="line_cd" 			property="lineCd" />
+		<result column="loss_cat_cd" 		property="lossCatCd" />			
+	  	<result column="loss_cat_desc"		property="lossCatDesc"/>
+	  	<result column="loss_cat_group" 	property="lossCatGrp" />
+	  	<result column="total_tag" 			property="totalTag" />
+	  	<result column="peril_cd" 			property="perilCd" />
+	  	<result column="peril_name" 		property="perilName" />
+	  	<result column="remarks" 			property="remarks" />
+	  	<result column="user_id" 			property="userId" />
+	  	<result column="last_update" 		property="lastUpdate" />
+	</resultMap>
+	
+	<select id="getGicls105RecList" resultMap="gicls105ResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(gicls105_pkg.get_rec_list(#lineCd#, #lossCatCd#, #lossCatDesc#, #totalTag#))
+		  	      		  <isNotNull property="filter">
+		  	      		  	WHERE 1=1
+		  	      		  		<isNotEmpty prepend="AND" property="perilCd">
+		  	      		  			peril_cd = #perilCd#
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="perilName">
+		  	      		  			UPPER(peril_name) LIKE UPPER(#perilName#)
+		  	      		  		</isNotEmpty>
+		  	      		  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="totalTag">
+			              		ORDER BY total_tag
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="lossCatCd">
+			              		ORDER BY loss_cat_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="lossCatDesc">
+			              		ORDER BY loss_cat_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="perilCd perilName">
+			              		ORDER BY peril_cd
+			              			<isNotNull property="sortColumn">
+					              		<isEqual property="ascDescFlg" compareValue="ASC">
+					              			ASC
+					              		</isEqual>
+					              		<isEqual property="ascDescFlg" compareValue="DESC">
+					              			DESC
+					              		</isEqual>
+					              </isNotNull>,
+					              peril_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(gicls105_pkg.get_rec_list(#lineCd#, #lossCatCd#, #lossCatDesc#, #totalTag#))
+		  	      		  <isNotNull property="filter">
+		  	      		  	WHERE 1=1
+		  	      		  		<isNotEmpty prepend="AND" property="perilCd">
+		  	      		  			peril_cd = #perilCd#
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="perilName">
+		  	      		  			UPPER(peril_name) LIKE UPPER(#perilName#)
+		  	      		  		</isNotEmpty>
+		  	      		  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setLossCtgry" parameterClass="GIISLossCtgryClass">
+	    DECLARE
+	    	v_rec giis_loss_ctgry%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.line_cd := #lineCd#;
+ 			v_rec.loss_cat_cd := #lossCatCd#;
+ 			v_rec.loss_cat_des := #lossCatDesc#;
+ 			v_rec.total_tag := #totalTag#;
+ 			v_rec.peril_cd := #perilCd#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			gicls105_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteLossCtgry" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			gicls105_pkg.val_del_rec(#lineCd#, #lossCatCd#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddLossCtgry" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			gicls105_pkg.val_add_rec(#lineCd#, #lossCatCd#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delLossCtgry" parameterClass="java.util.HashMap">
+		BEGIN
+ 			gicls105_pkg.del_rec(#lineCd#, #lossCatCd#);
+ 		END;
+ 	</delete>
+
+<!-- end GICLS105 : shan 10.23.2013 -->
+
+	<resultMap class="java.util.HashMap" id="GICLS056LossCatLovResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="loss_cat_cd" property="lossCatCd" />
+		<result column="loss_cat_des" property="lossCatDes" />
+	</resultMap>
+	
+	<select id="getGicls056LossCatLov" resultMap="GICLS056LossCatLovResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(gicls056_pkg.get_loss_cat_lov(#lineCd#))
+		  	      	<isNotEmpty property="findText">
+		  	      		WHERE UPPER(loss_cat_cd) LIKE UPPER(#findText#)
+		  	      		OR UPPER(loss_cat_des) LIKE UPPER(#findText#)
+		  	      	</isNotEmpty>
+		  	      	<isNotEmpty property="filterText">
+		  	      		WHERE UPPER(loss_cat_cd) LIKE UPPER(#filterText#)
+		  	      		OR UPPER(loss_cat_des) LIKE UPPER(#filterText#)
+		  	      	</isNotEmpty>
+					<isEqual property="sortColumn" compareValue="lossCatCd">
+						ORDER BY loss_cat_cd
+					</isEqual>
+					<isEqual property="sortColumn" compareValue="lossCatDes">
+						ORDER BY loss_cat_des
+					</isEqual>
+		          		<isNotNull property="sortColumn">
+	            	  		<isEqual property="ascDescFlg" compareValue="ASC">
+			              		ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+	             	</isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(gicls056_pkg.get_loss_cat_lov(#lineCd#))
+					<isNotEmpty property="findText">
+		  	      		WHERE UPPER(loss_cat_cd) LIKE UPPER(#findText#)
+		  	      		OR UPPER(loss_cat_des) LIKE UPPER(#findText#)
+		  	      	</isNotEmpty>
+		  	      	<isNotEmpty property="filterText">
+		  	      		WHERE UPPER(loss_cat_cd) LIKE UPPER(#filterText#)
+		  	      		OR UPPER(loss_cat_des) LIKE UPPER(#filterText#)
+		  	      	</isNotEmpty>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+</sqlMap>	

@@ -1,0 +1,568 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIACCommPayts">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<resultMap class="com.geniisys.giac.entity.GIACCommPayts" id="GIACCommPaytsMap">
+		<result column="gacc_tran_id" 				property="gaccTranId"/>
+		<result column="bill_gacc_tran_id" 			property="billGaccTranId"/>	<!-- shan 10.03.2014 -->
+		<result column="tran_type" 					property="tranType"/>
+		<result column="iss_cd" 					property="issCd"/>
+		<result column="prem_seq_no" 				property="premSeqNo"/>
+		<result column="intm_no" 					property="intmNo"/>
+		<result column="dsp_line_cd" 				property="dspLineCd"/>
+		<result column="dsp_assd_name" 				property="dspAssdName"/>
+		<result column="comm_amt" 					property="commAmt"/>
+		<result column="input_vat_amt" 				property="inputVATAmt"/>
+		<result column="wtax_amt" 					property="wtaxAmt"/>
+		<result column="drv_comm_amt" 				property="drvCommAmt"/>
+		<result column="print_tag" 					property="printTag"/>
+		<result column="def_comm_tag" 				property="defCommTag"/>
+		<result column="particulars" 				property="particulars"/>
+		<result column="currency_cd" 				property="currencyCd"/>
+		<result column="curr_desc"	 				property="currDesc"/>
+		<result column="convert_rate" 				property="convertRate"/>
+		<result column="foreign_curr_amt" 			property="foreignCurrAmt"/>
+		<result column="parent_intm_no"				property="parentIntmNo"/>
+		<result column="user_id" 					property="userId"/>
+		<result column="last_update" 				property="lastUpdate"/>
+		<result column="comm_tag" 					property="commTag"/>
+		<result column="record_no" 					property="recordNo"/>
+		<result column="disb_comm" 					property="disbComm"/>
+		<result column="dsp_policy_id" 				property="dspPolicyId"/>
+		<result column="dsp_intm_name" 				property="dspIntmName"/>
+		<result column="dsp_assd_no" 				property="dspAssdNo"/>
+		<result column="record_seq_no" 				property="recordSeqNo"/> <!-- added by robert SR 19752 07.28.15  -->
+	</resultMap>
+	
+	<resultMap class="com.geniisys.common.entity.CGRefCodes" id="tranTypeLOVMap">
+		<result column="rv_low_value"				property="rvLowValue"/>
+		<result column="rv_meaning"					property="rvMeaning"/>
+	</resultMap>
+	
+	<resultMap class="com.geniisys.common.entity.GIISISSource" id="issCdLOVMap">
+		<result column="iss_cd" 				property="issCd"/>
+		<result column="iss_name" 				property="issName"/>
+		<result column="user_iss_cd_access" 	property="acctIssCd"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="billNoListMap">
+		<result column="ho_prem" 				property="hoPrem"/>
+		<result column="prem_seq_no"			property="premSeqNo"/>
+		<result column="iss_cd"	 				property="issCd"/>
+		<result column="bill"	 				property="bill"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="getGcopInvResultMap">
+		<result column="bill_gacc_tran_id"		property="billGaccTranId"/>
+		<result column="bill_no"				property="billNo"/>
+		<result column="iss_cd"					property="issCd"/>
+		<result column="prem_seq_no"			property="premSeqNo"/>
+		<result column="intm_no"				property="intmNo"/>
+		<result column="intm_name"				property="intmName"/>
+		<result column="comm_amt"				property="commAmt"/>
+		<result column="invat_amt"				property="invatAmt"/>
+		<result column="wtax"					property="wtax"/>
+		<result column="ncomm_amt"				property="ncommAmt"/>
+		<result column="chk_tag_enable"			property="chkTagEnable"/>
+	</resultMap>
+	
+	<parameterMap class="map" id="getGIACS020BasicVarValuesMap">
+		<parameter property="gaccTranId"			jdbcType="NUMBER"		javaType="java.lang.Integer"	mode="IN"/>
+		<parameter property="userId"				jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="commPayableParam"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="varAssdNo"				jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="varIntmNo"				jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="varItemNo"				jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="varItemNo2"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="varItemNo3"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="varLineCd"				jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="varModuleId"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="varGenType"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="varSlTypeCd1"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="varSlTypeCd2"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="varSlTypeCd3"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="varInputVATParam"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="isUserExist"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="tranSourceCommTag"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="tranTypeLOV"			jdbcType="ORACLECURSOR" javaType="java.sql.ResultSet"   mode="OUT" resultMap="tranTypeLOVMap"/>
+		<parameter property="issCdLOV"				jdbcType="ORACLECURSOR"	javaType="java.sql.ResultSet"	mode="OUT" resultMap="issCdLOVMap"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="giacs020GetGIPICommInvoiceMap">
+		<parameter property	="issCd"				jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property	="premSeqNo"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property	="intmNo"				jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property	="convertRate"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="INOUT"/>
+		<parameter property	="currencyCd"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="INOUT"/>
+		<parameter property	="iCommAmt"				jdbcType="VARCHAR"		javaType="java.lang.String"		mode="INOUT"/>
+		<parameter property	="iWtax"				jdbcType="VARCHAR"		javaType="java.lang.String"		mode="INOUT"/>
+		<parameter property	="currDesc"				jdbcType="VARCHAR"		javaType="java.lang.String"		mode="INOUT"/>
+		<parameter property	="defFgnCurr"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="INOUT"/>
+		<parameter property	="message"				jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="validateGIACS020IntmNoMap">
+		<parameter property="billGaccTranId"		jdbcType="VARCHAR"		javaType="java.lang.String"	mode="IN"/>	<!-- shan 10.02.2014 -->
+		<parameter property="intmNo"				jdbcType="VARCHAR"		javaType="java.lang.String"	mode="IN"/>
+		<parameter property="gaccTranId"			jdbcType="VARCHAR"		javaType="java.lang.String"	mode="IN"/>
+		<parameter property="tranType"				jdbcType="VARCHAR"		javaType="java.lang.String"	mode="IN"/>
+		<parameter property="issCd"					jdbcType="VARCHAR"		javaType="java.lang.String"	mode="IN"/>
+		<parameter property="premSeqNo"				jdbcType="VARCHAR"		javaType="java.lang.String"	mode="IN"/>
+		<parameter property="commTag"				jdbcType="VARCHAR"		javaType="java.lang.String"	mode="IN"/>
+		<parameter property="defCommTagDisplayed"	jdbcType="VARCHAR"		javaType="java.lang.String"	mode="IN"/>
+		<parameter property="commAmt"				jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="wtaxAmt"				jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="inputVATAmt"			jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="defCommTag"			jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="convertRate"			jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="currencyCd"			jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="currDesc"				jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="foreignCurrAmt"		jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="defWtaxAmt"			jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="drvCommAmt"			jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="defCommAmt"			jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="defInputVAT"			jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="dspPolicyId"			jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="dspIntmName"			jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="dspAssdNo"				jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="dspAssdName"			jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="dspLineCd"				jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="varVATRt"				jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="varClrRec"				jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="varVPolFlag"			jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="varHasPremium"			jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="varCPremiumAmt"		jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="varInvPremAmt"			jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="varOtherCharges"		jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="varNotarialFee"		jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="varPdPremAmt"			jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="varPctPrem"			jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="varCgDummy"			jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="varCommPayableParam"	jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="varMaxInputVAT"		jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="varLastWtax"			jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="varInvoiceButt"		jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="varPrevCommAmt"		jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="varPrevWtaxAmt"		jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="varPrevInputVat"		jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="varPTranType"			jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="varPTranId"			jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="varRCommAmt"			jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="varICommAmt"			jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="varPCommAmt"			jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="varRWtax"				jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="varFdrvCommAmt"		jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="varDefFgnCurr"			jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="varIWtax"				jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="varPWtax"				jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="varVarTranType"		jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="varInputVATParam"		jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="varCFireNow"			jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="controlVCommAmt"		jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="controlSumInpVAT"		jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="controlVInputVAT"		jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="controlSumCommAmt"		jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="controlSumWtaxAmt"		jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="controlVWtaxAmt"		jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="controlSumNetCommAmt"	jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="policyStatus"			jdbcType="VARCHAR"		javaType="java.lang.String"	mode="OUT"/>
+		<parameter property="gipiInvoiceExist"		jdbcType="VARCHAR"		javaType="java.lang.String"	mode="OUT"/>
+		<parameter property="invCommFullyPaid"		jdbcType="VARCHAR"		javaType="java.lang.String"	mode="OUT"/>
+		<parameter property="validCommAmt"			jdbcType="VARCHAR"		javaType="java.lang.String"	mode="OUT"/>
+		<parameter property="policyFullyPaid"		jdbcType="VARCHAR"		javaType="java.lang.String"	mode="OUT"/>
+		<parameter property="invalidTranType1or2"	jdbcType="VARCHAR"		javaType="java.lang.String"	mode="OUT"/>
+		<parameter property="invalidTranType3or4"	jdbcType="VARCHAR"		javaType="java.lang.String"	mode="OUT"/>
+		<parameter property="noTranType"			jdbcType="VARCHAR"		javaType="java.lang.String"	mode="OUT"/>
+		<parameter property="pdPrem"				jdbcType="VARCHAR"		javaType="java.lang.String"	mode="OUT"/>
+		<parameter property="policyOverride"		jdbcType="VARCHAR"		javaType="java.lang.String"	mode="OUT"/>
+		<parameter property="psPdPremAmt"			jdbcType="VARCHAR"		javaType="java.lang.String"	mode="OUT"/>
+		<parameter property="psTotPremAmt"			jdbcType="VARCHAR"		javaType="java.lang.String"	mode="OUT"/>
+		<parameter property="message"				jdbcType="VARCHAR"		javaType="java.lang.String"	mode="OUT"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="giacs020Param2MgmtCompMap">
+		<parameter property="appUser"					jdbcType="VARCHAR"		javaType="java.lang.String"	mode="IN"/>
+		<parameter property="issCd"					jdbcType="VARCHAR"		javaType="java.lang.String"	mode="IN"/>
+		<parameter property="premSeqNo"				jdbcType="VARCHAR"		javaType="java.lang.String"	mode="IN"/>
+		<parameter property="intmNo"				jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="commAmt"				jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="wtaxAmt"				jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="drvCommAmt"			jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="defCommAmt"			jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="varMaxInputVAT"		jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="varVATRt"				jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="varClrRec"				jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="validCommAmt"			jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="mgmtPdPremAmt"			jdbcType="VARCHAR"		javaType="java.lang.String"	mode="IN"/>
+		<parameter property="mgmtTotPremAmt"		jdbcType="VARCHAR"		javaType="java.lang.String"	mode="IN"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="giacs020IntmNoPostTextMap">
+		<parameter property="appUser"				jdbcType="VARCHAR"		javaType="java.lang.String"	mode="IN"/>
+		<parameter property="commAmt"				jdbcType="VARCHAR"		javaType="java.lang.String"	mode="IN"/>
+		<parameter property="premSeqNo"				jdbcType="VARCHAR"		javaType="java.lang.String"	mode="IN"/>
+		<parameter property="intmNo"				jdbcType="VARCHAR"		javaType="java.lang.String"	mode="IN"/>
+		<parameter property="issCd"					jdbcType="VARCHAR"		javaType="java.lang.String"	mode="IN"/>
+		<parameter property="wtaxAmt"				jdbcType="VARCHAR"		javaType="java.lang.String"	mode="IN"/>
+		<parameter property="defCommTag"			jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="varLastWtax"			jdbcType="VARCHAR"		javaType="java.lang.String"	mode="INOUT"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="giacs020CompSummaryMap">
+		<parameter property="appUser"			jdbcType="VARCHAR"		javaType="String"		mode="IN"/>
+		<parameter property="defCommTag"			jdbcType="VARCHAR"		javaType="String"		mode="IN"/>
+		<parameter property="premSeqNo"				jdbcType="VARCHAR"		javaType="String"		mode="IN"/>
+		<parameter property="intmNo"				jdbcType="VARCHAR"		javaType="String"		mode="IN"/>
+		<parameter property="issCd"					jdbcType="VARCHAR"		javaType="String"		mode="IN"/>
+		<parameter property="tranType"				jdbcType="VARCHAR"		javaType="String"		mode="IN"/>
+		<parameter property="convertRate"			jdbcType="VARCHAR"		javaType="String"		mode="INOUT"/>
+		<parameter property="currencyCd"			jdbcType="VARCHAR"		javaType="String"		mode="INOUT"/>
+		<parameter property="currDesc"				jdbcType="VARCHAR"		javaType="String"		mode="INOUT"/>
+		<parameter property="inputVATAmt"			jdbcType="VARCHAR"		javaType="String"		mode="INOUT"/>
+		<parameter property="commAmt"				jdbcType="VARCHAR"		javaType="String"		mode="INOUT"/>
+		<parameter property="wtaxAmt"				jdbcType="VARCHAR"		javaType="String"		mode="INOUT"/>
+		<parameter property="foreignCurrAmt"		jdbcType="VARCHAR"		javaType="String"		mode="INOUT"/>
+		<parameter property="defInputVAT"			jdbcType="VARCHAR"		javaType="String"		mode="INOUT"/>
+		<parameter property="drvCommAmt"			jdbcType="VARCHAR"		javaType="String"		mode="INOUT"/>
+		<parameter property="defCommAmt"			jdbcType="VARCHAR"		javaType="String"		mode="INOUT"/>
+		<parameter property="defWtaxAmt"			jdbcType="VARCHAR"		javaType="String"		mode="INOUT"/>
+		<parameter property="varCgDummy"			jdbcType="VARCHAR"		javaType="String"		mode="INOUT"/>
+		<parameter property="varPrevCommAmt"		jdbcType="VARCHAR"		javaType="String"		mode="INOUT"/>
+		<parameter property="varPrevWtaxAmt"		jdbcType="VARCHAR"		javaType="String"		mode="INOUT"/>
+		<parameter property="varPrevInputVAT"		jdbcType="VARCHAR"		javaType="String"		mode="INOUT"/>
+		<parameter property="varPTranType"			jdbcType="VARCHAR"		javaType="String"		mode="INOUT"/>
+		<parameter property="varPTranId"			jdbcType="VARCHAR"		javaType="String"		mode="INOUT"/>
+		<parameter property="varRCommAMt"			jdbcType="VARCHAR"		javaType="String"		mode="INOUT"/>
+		<parameter property="varICommAmt"			jdbcType="VARCHAR"		javaType="String"		mode="INOUT"/>
+		<parameter property="varPCommAmt"			jdbcType="VARCHAR"		javaType="String"		mode="INOUT"/>
+		<parameter property="varRWtax"				jdbcType="VARCHAR"		javaType="String"		mode="INOUT"/>
+		<parameter property="varFdrvCommAmt"		jdbcType="VARCHAR"		javaType="String"		mode="INOUT"/>
+		<parameter property="varDefFgnCurr"			jdbcType="VARCHAR"		javaType="String"		mode="INOUT"/>
+		<parameter property="varPctPrem"			jdbcType="VARCHAR"		javaType="String"		mode="IN"/>
+		<parameter property="varIWtax"				jdbcType="VARCHAR"		javaType="String"		mode="INOUT"/>
+		<parameter property="varPWtax"				jdbcType="VARCHAR"		javaType="String"		mode="INOUT"/>
+		<parameter property="varVarTranType"		jdbcType="VARCHAR"		javaType="String"		mode="INOUT"/>
+		<parameter property="varVATRt"				jdbcType="VARCHAR"		javaType="String"		mode="INOUT"/>
+		<parameter property="varInputVATParam"		jdbcType="VARCHAR"		javaType="String"		mode="INOUT"/>
+		<parameter property="varHasPremium"			jdbcType="VARCHAR"		javaType="String"		mode="INOUT"/>
+		<parameter property="varClrRec"				jdbcType="VARCHAR"		javaType="String"		mode="INOUT"/>
+		<parameter property="controlVCommAmt"		jdbcType="VARCHAR"		javaType="String"		mode="INOUT"/>
+		<parameter property="controlSumInpVAT"		jdbcType="VARCHAR"		javaType="String"		mode="INOUT"/>
+		<parameter property="controlVInputVAT"		jdbcType="VARCHAR"		javaType="String"		mode="INOUT"/>
+		<parameter property="controlSumCommAmt"		jdbcType="VARCHAR"		javaType="String"		mode="INOUT"/>
+		<parameter property="controlSumWtaxAmt"		jdbcType="VARCHAR"		javaType="String"		mode="INOUT"/>
+		<parameter property="controlVWtaxAmt"		jdbcType="VARCHAR"		javaType="String"		mode="INOUT"/>
+		<parameter property="controlSumNetCommAmt"	jdbcType="VARCHAR"		javaType="String"		mode="INOUT"/>
+		<parameter property="invalidTranType1or2"	jdbcType="VARCHAR"		javaType="String"		mode="OUT"/>
+		<parameter property="invalidTranType3or4"	jdbcType="VARCHAR"		javaType="String"		mode="OUT"/>
+		<parameter property="noTranType"			jdbcType="VARCHAR"		javaType="String"		mode="OUT"/>
+		<parameter property="invCommFullyPaid"		jdbcType="VARCHAR"		javaType="String"		mode="INOUT"/>
+		<parameter property="message"				jdbcType="VARCHAR"		javaType="String"		mode="INOUT"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="getCommPaytsDefPremPctMap">
+		<parameter property="issCd"				jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="premSeqNo"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="varInvPremAmt"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="INOUT"/>
+		<parameter property="varOtherCharges"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="INOUT"/>
+		<parameter property="varNotarialFee"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="INOUT"/>
+		<parameter property="varPdPremAmt"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="INOUT"/>
+		<parameter property="varCPremiumAmt"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="INOUT"/>
+		<parameter property="varHasPremium"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="INOUT"/>
+		<parameter property="varClrRec"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="INOUT"/>
+		<parameter property="varPctPrem"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="INOUT"/>
+		<parameter property="varPdPrem"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="INOUT"/>
+		<parameter property="message"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="INOUT"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="preInsertGIACS020CommPaytsMap">
+		<parameter property="appUser"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="gaccTranId"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="intmNo"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="parentIntmNo"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="INOUT"/>
+		<parameter property="commTag"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="recordNo"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="INOUT"/>
+		<parameter property="message"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="executeGIACS020PostFormsCommitParamMap">
+		<parameter property="appUser"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="globalTranSource"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="globalOrFlag"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="gaccBranchCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="gaccFundCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="gaccTranId"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="issCd"				jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="premSeqNo"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="intmNo"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="recordNo"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="disbComm"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="drvCommAmt"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="currencyCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="convertRate"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="varModuleName"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="varModuleId"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="varGenType"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="varCommTakeUp"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="INOUT"/>
+		<parameter property="varVItemNum"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="INOUT"/>
+		<parameter property="varVBillNo"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="INOUT"/>
+		<parameter property="varVIssueCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="INOUT"/>
+		<parameter property="varSlTypeCd1"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="varSlTypeCd2"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="varSlTypeCd3"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="message"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="chkGcopInvChkTagParamMap">
+		<parameter property="appUser"				jdbcType="VARCHAR"		javaType="java.lang.String"		mode="INOUT"/>
+		<parameter property="checked"				jdbcType="VARCHAR"		javaType="java.lang.String"		mode="INOUT"/>
+		<parameter property="issCd"					jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="premSeqNo"				jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="commTagDisplayed"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="tranType"				jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="varCommPayableParam"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="message"				jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="giacs020KeyDelrecParamMap">
+		<parameter property="appUser"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="issCd"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="premSeqNo"		jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="IN"/>
+		<parameter property="intmNo"		jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="IN"/>
+		<parameter property="commAmt"		jdbcType="NUMERIC"		javaType="java.math.BigDecimal"	mode="IN"/>
+		<parameter property="message"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+	</parameterMap>
+	
+	<insert id="setGIACCommPayts" parameterClass="com.geniisys.giac.entity.GIACCommPayts">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GIAC_COMM_PAYTS_PKG.set_giac_comm_payts(#gaccTranId#, #intmNo#, #issCd#, #premSeqNo#,
+													#tranType#, #commAmt#, #wtaxAmt#, #inputVATAmt#,
+													#userId#, SYSDATE, #particulars#, #currencyCd#,
+													#convertRate#, #foreignCurrAmt#, #defCommTag#, #printTag#,
+													#parentIntmNo#, #commTag#, #recordNo#, #disbComm#, #recordSeqNo#); <!-- robert SR 19752 07.28.15 --> 
+		END;
+	</insert>
+	
+	<delete id="deleteGIACCommPayts" parameterClass="com.geniisys.giac.entity.GIACCommPayts">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GIAC_COMM_PAYTS_PKG.del_giac_comm_payts(#gaccTranId#, #intmNo#, #issCd#, #premSeqNo#, #commTag#, #recordNo#, #recordSeqNo#); <!-- robert SR 19752 07.28.15 --> 
+		END;
+	</delete>
+	
+	<procedure id="getGIACCommPayts" parameterClass="java.lang.Integer" resultMap="GIACCommPaytsMap">
+		SELECT * FROM TABLE(giac_comm_payts_pkg.get_giac_comm_payts(#gaccTranId#))
+	</procedure>
+	
+	<procedure id="getGIACS020BasicVarValues" parameterMap="getGIACS020BasicVarValuesMap">
+		CALL GIAC_COMM_PAYTS_PKG.get_giacs020_basic_var_values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	</procedure>
+	
+	<procedure id="getBillNoList" parameterClass="java.util.HashMap" resultMap="billNoListMap">
+		SELECT * FROM TABLE(GIAC_COMM_PAYTS_PKG.get_bill_no_list(#tranType#, #issCd#, #gaccTranId#, #keyword#))
+	</procedure>
+	
+	<procedure id="giacs020GetGIPICommInvoice" parameterMap="giacs020GetGIPICommInvoiceMap">
+		CALL GIAC_COMM_PAYTS_PKG.get_gipi_comm_invoice (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	</procedure>
+	
+	<procedure id="chkModifiedComm" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT GIAC_COMM_PAYTS_PKG.chk_modified_comm(#premSeqNo#, #issCd#) FROM dual
+	</procedure>
+	
+	<procedure id="validateGIACS020IntmNo"	parameterMap="validateGIACS020IntmNoMap">
+		CALL giacs020_validate_intm_no(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	</procedure>
+	
+	<procedure id="giacs020Param2MgmtComp"	parameterMap="giacs020Param2MgmtCompMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			GIAC_COMM_PAYTS_PKG.param2_mgmt_comp(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<procedure id="giacs020IntmNoPostText"	parameterMap="giacs020IntmNoPostTextMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			GIAC_COMM_PAYTS_PKG.giacs020_intm_no_post_text(?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<procedure id="getCommPaytsDefPremPct" parameterMap="getCommPaytsDefPremPctMap">
+		CALL GIAC_COMM_PAYTS_PKG.get_def_prem_pct(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	</procedure>
+	
+	<procedure id="giacs020CompSummary" parameterMap="giacs020CompSummaryMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			GIAC_COMM_PAYTS_PKG.giacs020_comp_summary(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<procedure id="preInsertGIACS020CommPayts" parameterMap="preInsertGIACS020CommPaytsMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			GIAC_COMM_PAYTS_PKG.giacs020_pre_insert_comm_payts(?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	<!-- added by robert SR 19752 07.28.15 --> 
+	<parameterMap class="map" id="getRecordSeqNoMap">
+		<parameter property="gaccTranId"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="intmNo"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="issCd"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="premSeqNo"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="commTag"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="recordNo"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="recordSeqNo"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="getRecordSeqNo" parameterMap="getRecordSeqNoMap">
+		BEGIN
+			GIAC_COMM_PAYTS_PKG.get_record_seq_no(?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<procedure id="renumberCommPayts" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			GIAC_COMM_PAYTS_PKG.RENUMBER_COMM_PAYTS(#gaccTranId#);
+		END;
+	</procedure>
+	<!-- end robert SR 19752 07.28.15 --> 
+	<procedure id="executeGIACS020PostFormsCommit" parameterMap="executeGIACS020PostFormsCommitParamMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			giacs020_post_forms_commit(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<procedure id="getGcopInv" parameterClass="java.util.HashMap" resultMap="getGcopInvResultMap">
+		SELECT * FROM TABLE(get_gcop_inv(#tranType#, #issCd#, #premSeqNo#, #intmNo#, #intmName#, #varVFromSums#, #keyword#, #onLOV#, #getNoPremPayt#, #userId#))
+		<isNotNull property="notIn">	<!-- to remove newly added record but not yet saved : shan 09.18.2014 -->
+			WHERE (bill_gacc_tran_id || '-' || prem_seq_no || '-' || intm_no) NOT IN $notIn$
+		</isNotNull>
+	</procedure>
+	
+	<procedure id="chkGcopInvChkTag" parameterMap="chkGcopInvChkTagParamMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			GIAC_COMM_PAYTS_PKG.check_gcop_inv_chk_tag(?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<procedure id="giacs020KeyDelrec" parameterMap="giacs020KeyDelrecParamMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			GIAC_COMM_PAYTS_PKG.giacs020_key_delrec(?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<parameterMap class="map" id="checkRelCommWUnprintedOrMap">
+		<parameter property="gaccTranId"	jdbcType="INTEGER"  	javaType="java.lang.Integer"	mode="IN"/>
+		<parameter property="issCd"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="premSeqNo"		jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="IN"/>
+		<parameter property="refNo"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="message"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="checkRelCommWUnprintedOr" parameterMap = "checkRelCommWUnprintedOrMap">
+		CALL GIAC_COMM_PAYTS_PKG.check_rel_comm_w_unprinted_or(?,?,?,?,?)
+	</procedure>
+	
+	<parameterMap class="map" id="giacs020Param2FullPremPaytMap">
+		<parameter property="appUser"				jdbcType="VARCHAR"		javaType="java.lang.String"	mode="IN"/>
+		<parameter property="issCd"					jdbcType="VARCHAR"		javaType="java.lang.String"	mode="IN"/>
+		<parameter property="premSeqNo"				jdbcType="VARCHAR"		javaType="java.lang.String"	mode="IN"/>
+		<parameter property="intmNo"				jdbcType="VARCHAR"		javaType="java.lang.String"	mode="IN"/>
+		<parameter property="commAmt"				jdbcType="VARCHAR"		javaType="java.lang.String"	mode="OUT"/>
+		<parameter property="wtaxAmt"				jdbcType="VARCHAR"		javaType="java.lang.String"	mode="OUT"/>
+		<parameter property="inputVATAmt"			jdbcType="VARCHAR"		javaType="java.lang.String"	mode="OUT"/>
+		<parameter property="defCommAmt"			jdbcType="VARCHAR"		javaType="java.lang.String"	mode="OUT"/>
+		<parameter property="defInputVAT"			jdbcType="VARCHAR"		javaType="java.lang.String"	mode="OUT"/>
+		<parameter property="drvCommAmt"			jdbcType="VARCHAR"		javaType="java.lang.String"	mode="OUT"/>
+		<parameter property="varMaxInputVAT"		jdbcType="VARCHAR"		javaType="java.lang.String"	mode="OUT"/>
+		<parameter property="varClrRec"				jdbcType="VARCHAR"		javaType="java.lang.String"	mode="OUT"/>
+		<parameter property="varMessage"			jdbcType="VARCHAR"		javaType="java.lang.String"	mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="giacs020Param2FullPremPayt"	parameterMap="giacs020Param2FullPremPaytMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			GIAC_COMM_PAYTS_PKG.param2_full_prem_payt(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<!-- start : SR-4185, 4274, 4275, 4276, 4277 [GIACS020] : shan 05.20.2015  -->
+	<resultMap class="java.util.HashMap" id="getGiacs020IssCdLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="iss_cd"				property="issCd" />
+		<result column="iss_name"			property="issName" />
+		<result column="user_iss_cd_access"	property="userIssCdAccess" />
+	</resultMap>
+	
+		<select id="getGiacs020IssCdLOV" resultMap="getGiacs020IssCdLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE(GIIS_ISSOURCE_PKG.get_iss_cd_for_comm_invoice(#moduleId#, #userId#))
+	                      <isNotNull property="findText">
+	                             WHERE UPPER(iss_cd) LIKE UPPER(NVL(#findText#, iss_cd))
+	                                OR UPPER(iss_name) LIKE UPPER(NVL(#findText#, iss_name))
+                          </isNotNull>            
+		                  <isEqual property="sortColumn" compareValue="issCd">
+			              		ORDER BY iss_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="issName">
+			              		ORDER BY iss_name
+			              </isEqual>			                      
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*)  count_ 
+		                  FROM (SELECT *
+           						  FROM TABLE(GIIS_ISSOURCE_PKG.get_iss_cd_for_comm_invoice(#moduleId#, #userId#))
+	                          <isNotNull property="findText">
+	                             WHERE UPPER(iss_cd) LIKE UPPER(NVL(#findText#, iss_cd))
+	                                OR UPPER(iss_name) LIKE UPPER(NVL(#findText#, iss_name))
+	                          </isNotNull>)) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="validateGIACS020BillNo" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT GIAC_COMM_PAYTS_PKG.validate_bill_no(#tranType#, #issCd#, #premSeqNo#)
+		  FROM dual
+	</select>
+	<!-- end: SR-4185, 4274, 4275, 4276, 4277 [GIACS020] : shan 05.20.2015  -->
+	
+<!-- 	<procedure id="checkingIfPaidOrUnpaid"	parameterClass="java.util.HashMap"> -->
+<!-- 		BEGIN -->
+<!-- 			GIAC_COMM_PAYTS_PKG.check_if_paid_or_unpaid(#issCd#, #premSeqNo#); -->
+<!-- 		END; -->
+<!--  	</procedure>  Commented out by - Jerome Bautista 03.04.2016 SR 21279 -->
+
+    <select id="checkingIfPaidOrUnpaid" parameterClass="java.util.HashMap" resultClass="java.lang.String"> <!-- Added by Jerome Bautista 03.04.2016 SR 21279 -->
+     	SELECT GIAC_COMM_PAYTS_PKG.check_if_paid_or_unpaid(#issCd#, #premSeqNo#)
+     	  FROM dual
+    </select>
+    
+    <procedure id="checkCommPaytStatus" parameterClass="java.lang.Integer">
+ 		BEGIN
+ 			giac_comm_payts_pkg.check_comm_payt_status(#gaccTranId#);
+ 		END;
+ 	</procedure>
+</sqlMap>

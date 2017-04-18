@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="GICLReserveRids">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+
+	<typeAlias alias="GICLReserveRidsClass" type="com.geniisys.gicl.entity.GICLReserveRids"/>
+	
+	<resultMap class="GICLReserveRidsClass" id="GICLReserveRidsResultMap">
+		<result property="riCd" column="ri_cd"/>
+		<result property="riName" column="ri_name"/>
+		<result property="shrRiPct" column="shr_ri_pct"/>
+		<result property="shrLossRiResAmt" column="shr_loss_ri_res_amt"/>
+		<result property="shrExpRiResAmt" column="shr_exp_ri_res_amt"/>
+		<result property="claimId" column="claim_id"/>
+		<result property="itemNo" column="item_no"/>
+		<result property="histSeqNo" column="hist_seq_no"/>		
+	</resultMap>	
+	
+	<resultMap class="GICLReserveRidsClass" id="GICLReserveRidsResultMapGrid" extends="GICLReserveRidsResultMap">
+		<result column="rownum_" property="rowNum" />
+		<result column="count_" property="rowCount" />
+	</resultMap>
+	
+	<select id="getResRidsGrid" resultMap="GICLReserveRidsResultMapGrid">
+		SELECT *
+			  FROM (SELECT rownum rownum_, 
+			               b.count_, a.*
+			          FROM (SELECT * 
+			                  FROM TABLE (GICL_RESERVE_RIDS_PKG.get_res_rids(#claimId#, #lineCd#, #itemNo#, #histSeqNo#,#clmDistNo#,#grpSeqNo#,#clmResHistId#))
+			                  <isEqual property="sortColumn" compareValue="riCd">
+			              		ORDER BY ri_cd
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="riCd riName">
+			              		ORDER BY ri_cd
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="riName">
+			              		ORDER BY ri_name
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="shrRiPct">
+			              		ORDER BY shr_ri_pct
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="shrLossRiResAmt">
+			              		ORDER BY shr_loss_ri_res_amt
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="shrExpRiResAmt">
+			              		ORDER BY shr_exp_ri_res_amt
+				              </isEqual>
+				              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	  </isNotNull>
+			                  ) a, 
+			               (SELECT count(*) count_
+			                  FROM TABLE (GICL_RESERVE_RIDS_PKG.get_res_rids(#claimId#, #lineCd#, #itemNo#, #histSeqNo#,#clmDistNo#,#grpSeqNo#,#clmResHistId#))          	
+			                ) b
+			 ) WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="saveReserveRids" parameterClass="GICLReserveRidsClass">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			gicl_reserve_rids_pkg.save_reserve_rids(
+				#claimId#, #clmResHistId#, #clmDistNo#, #grpSeqNo#, 
+				#riCd#,	#lineCd#, #distYear#, #itemNo#, #perilCd#, #histSeqNo#, 
+				#userId#, #acctTrtyType#, #printRiCd#, #shrRiPct#, #shrLossRiResAmt#, 
+				#shrExpRiResAmt#, #shareType#, #plaId#, 
+				#shrRiPctReal#, #resPlaId#, #groupedItemNo#
+			);
+		END;
+	</procedure>
+</sqlMap>

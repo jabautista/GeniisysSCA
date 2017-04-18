@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIItemVes">
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIPIItemVes" type="com.geniisys.gipi.entity.GIPIItemVes"/>
+	
+	<resultMap class="GIPIItemVes" id="marineHullsMap">
+		<result property="policyId" 			column="policy_id"/>
+		<result property="policyNo" 			column="policy_no"/>
+		<result property="vesselCd" 			column="vessel_cd"/>
+		<result property="vesselName" 			column="vessel_name"/>
+		<result property="rowNum" 		column="rownum_"/>
+		<result property="rowCount" 	column="count_"/>
+	</resultMap>
+	
+	<select id="getMarineHulls" resultMap="marineHullsMap" parameterClass="java.util.HashMap">
+		SELECT *
+  		  FROM (SELECT rownum rownum_,b.count_,a.*
+          		  FROM (SELECT * FROM TABLE(GIPI_ITEM_VES_PKG.get_marine_hulls)
+          		  <isNotNull property="sortColumn">
+              		<isEqual property="sortColumn" compareValue="vesselCd">
+	              		ORDER BY vessel_cd
+	                </isEqual>
+	                <isEqual property="sortColumn" compareValue="vesselName">
+	              		ORDER BY vessel_name
+	                </isEqual>
+	                <isEqual property="sortColumn" compareValue="policyNo">
+	              		ORDER BY policy_no
+	                </isEqual>
+              		<isEqual property="ascDescFlg" compareValue="ASC">
+              			ASC
+              		</isEqual>
+              		<isEqual property="ascDescFlg" compareValue="DESC">
+              			DESC
+              		</isEqual>
+	              </isNotNull>) a,
+               		   (SELECT count(*) count_ FROM TABLE(GIPI_ITEM_VES_PKG.get_marine_hulls)) b)
+ 		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="GIPIItemVes" id="GIPIItemVesResultMap">
+		<result column="policy_id" 			property="policyId" />
+		<result column="item_no" 			property="itemNo" />
+		<result column="vessel_cd" 			property="vesselCd" />
+		<result column="vessel_flag" 		property="vesselFlag" />
+		<result column="vessel_name"		property="vesselName" />
+		<result column="vessel_old_name"	property="vesselOldName" />
+		<result column="vestype_desc"		property="vesTypeDesc" />
+		<result column="propel_sw" 			property="propelSw" />
+		<result column="vess_class_desc"	property="vessClassDesc" />
+		<result column="hull_desc" 			property="hullDesc" />
+		<result column="reg_owner" 			property="regOwner" />
+		<result column="reg_place" 			property="regPlace" />
+		<result column="gross_ton" 			property="grossTon" />
+		<result column="year_built" 		property="yearBuilt" />
+		<result column="deadweight" 		property="deadWeight" />
+		<result column="crew_nat" 			property="crewNat" />
+		<result column="vessel_length" 		property="vesselLength" />
+		<result column="vessel_breadth" 	property="vesselBreadth" />
+		<result column="vessel_depth" 		property="vesselDepth" />
+		<result column="dry_place" 			property="dryPlace" />
+		<result column="dry_date" 			property="dryDate" />
+		<result column="rec_flag" 			property="recFlag" />
+		<result column="deduct_text" 		property="deductText" />
+		<result column="geog_limit" 		property="geogLimit" />
+	</resultMap>	
+	
+	<select id="getGIPIItemVesForEndt" resultMap="GIPIItemVesResultMap">
+	<!-- andrew - 07152015 - SR 19741 -->
+		SELECT 	policy_id, item_no, vessel_cd, vessel_flag, propel_sw, 	
+				vessel_name, 
+				vessel_old_name,
+				vestype_desc,  
+				vess_class_desc,
+				hull_desc, 
+				reg_owner, 
+				reg_place,
+				dry_place,
+				deduct_text, 
+				geog_limit,
+				gross_ton, year_built, crew_nat, vessel_length, vessel_breadth, 
+				vessel_depth, dry_date, rec_flag, deadweight
+		FROM TABLE(GIPI_ITEM_VES_PKG.get_gipi_item_ves(#policyId#, #itemNo#))
+	</select>	
+	<resultMap class="GIPIItemVes" id="itemVesInfoMap">
+		<result property="policyId" 		column="policy_id"/>
+		<result property="itemNo" 			column="item_no"/>
+		<result property="dryDate" 			column="dry_date"/>
+		<result property="recFlag" 			column="rec_flag"/>
+		<result property="dryPlace" 		column="dry_place"/>
+		<result property="vesselCd" 		column="vessel_cd"/>
+		<result property="geogLimit" 		column="geog_limit"/>
+		<result property="deductText" 		column="deduct_text"/>
+
+		<result property="vesTypeDesc" 		column="vestype_desc"/>
+		<result property="vesselName" 		column="vessel_name"/>
+		<result property="regOwner" 		column="reg_owner"/>
+		<result property="grossTon" 		column="gross_ton"/>
+		<result property="netTon" 			column="net_ton"/>
+		<result property="deadWeight" 		column="deadweight"/>
+		<result property="hullDesc" 		column="hull_desc"/>
+		<result property="vesselLength" 	column="vessel_length"/>
+		<result property="vesselOldName" 	column="vessel_old_name"/>
+		<result property="vessClassDesc" 	column="vess_class_desc"/>
+        <result property="vesselBreadth" 	column="vessel_breadth"/>
+        <result property="vesselDepth" 		column="vessel_depth"/>
+        <result property="yearBuilt" 		column="year_built"/>
+        <result property="regPlace" 		column="reg_place"/>
+        <result property="noCrew" 			column="no_crew"/>
+        <result property="crewNat" 			column="crew_nat"/>
+        <result property="itemTitle" 		column="item_title"/>
+        <result property="propelSwDesc" 	column="propel_sw_desc"/>
+ 
+	</resultMap>
+	<select id="getItemVesInfo" resultMap="itemVesInfoMap" parameterClass="java.util.HashMap">
+		SELECT *  FROM TABLE (gipi_item_ves_pkg.get_item_ves_info(#policyId#,#itemNo#))
+	</select>
+</sqlMap>

@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISRiTypeDocs">
+	
+	<typeAlias alias="giisRiTypeDocs" type="com.geniisys.common.entity.GIISRiTypeDocs"/>
+  	
+	<resultMap class="giisRiTypeDocs" id="giisRiTypeDocsResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="ri_type"   		property="riType"/>
+		<result column="doc_cd"    		property="docCd"/>
+		<result column="doc_name"  		property="docName"/>
+		<result column="user_id"     	property="userId"/>
+		<result column="last_update" 	property="lastUpdate"/>
+		<result column="remarks"     	property="remarks"/>
+	</resultMap>
+	
+	<select id="getGiiss074RecList" resultMap="giisRiTypeDocsResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss074_pkg.get_rec_list(#riType#))
+		  	      <isNotNull property="filter">
+		  	      	WHERE 1 = 1 
+		  	      		<isNotEmpty prepend="AND" property="docCd">
+		  	      			UPPER(doc_cd) LIKE UPPER(#docCd#)
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="docName">
+                            UPPER(doc_name) LIKE UPPER(#docName#)
+                        </isNotEmpty>
+		  	      </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="docCd">
+			              		ORDER BY doc_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="docName">
+			              		ORDER BY doc_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss074_pkg.get_rec_list(#riType#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setRiDocType" parameterClass="giisRiTypeDocs">
+	    DECLARE
+	    	v_rec giis_ri_type_docs%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.ri_type := #riType#;
+ 			v_rec.doc_cd := #docCd#;
+ 			v_rec.doc_name := #docName#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			giiss074_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<select id="valDeleteRiDocType" resultClass="java.lang.String">
+		SELECT giiss074_pkg.val_del_rec(#riType#, #docCd#) FROM dual							
+	</select>
+	
+	<parameterMap class="map" id="riDocTypeMap">
+		<parameter property="riType"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="docCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+	</parameterMap>
+ 	
+ 	<procedure id="valAddRiDocType" parameterMap="riDocTypeMap">
+ 		BEGIN
+ 			giiss074_pkg.val_add_rec(?,?);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delRiDocType" parameterClass="giisRiTypeDocs">
+		BEGIN
+ 			giiss074_pkg.del_rec(#riType#, #docCd#);
+ 		END;
+ 	</delete>
+ 	
+ 	<resultMap class="java.util.HashMap" id="giiss074LOVMap" extends="BaseEntity.TableGridResultMap">
+		<result property="riType" 			column="ri_type" />
+		<result property="riTypeDesc" 		column="ri_type_desc" />
+		<result property="rowNum" 			column="rownum_"/>
+		<result property="rowCount" 		column="count_"/>
+	</resultMap>
+	
+	<select id="getGiiss074LOV" resultMap="giiss074LOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giiss074_pkg.get_giiss074_lov(#search#))
+		                 <isNotNull property="findText">
+					         WHERE (UPPER(ri_type) LIKE UPPER(#findText#) 
+					         	 OR UPPER(ri_type_desc) LIKE UPPER(#findText#)
+					         	 )
+				         </isNotNull>          
+			          	  <isNotNull property="sortColumn">
+			                  <isEqual property="sortColumn" compareValue="riType">
+				              		ORDER BY ri_type
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="riTypeDesc">
+				              		ORDER BY ri_type_desc
+				              </isEqual>
+				          	  <isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              </isNotNull>
+				          </isNotNull>    
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (giiss074_pkg.get_giiss074_lov(#search#))
+			              <isNotNull property="findText">
+					          WHERE (UPPER(ri_type) = (#findText#) 
+					         	 OR UPPER(ri_type_desc) LIKE UPPER(#findText#)
+					         	 )
+				          </isNotNull> 
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<parameterMap class="map" id="validateRiTypeMap">
+		<parameter property="riType"	 jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="INOUT"/>
+		<parameter property="riTypeDesc" jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="validateRiType" parameterMap="validateRiTypeMap">
+		BEGIN
+ 			giiss074_pkg.validate_ri_type(?,?);
+ 		END;
+	</procedure>
+</sqlMap>

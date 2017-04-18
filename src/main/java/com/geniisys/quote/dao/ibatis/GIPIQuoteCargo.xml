@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap>
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIPIQuoteCargoClass" type="com.geniisys.quote.entity.GIPIQuoteCargo" />
+	
+	<resultMap id="GIPIQuoteCargoMap" class="GIPIQuoteCargoClass">
+		<result column="QUOTE_ID" 			property="quoteId" />
+		<result column="ITEM_NO" 			property="itemNo" />
+		<result column="VESSEL_CD" 			property="vesselCd" />
+		<result column="GEOG_CD" 			property="geogCd" />
+		<result column="CARGO_CLASS_CD" 	property="cargoClassCd" />
+		<result column="VOYAGE_NO" 			property="voyageNo" />
+		<result column="BL_AWB" 			property="blAwb" />
+		<result column="ORIGIN" 			property="origin" />
+		<result column="DESTN" 				property="destn" />
+		<result column="ETD" 				property="etd" />
+		<result column="ETA" 				property="eta" />
+		<result column="CARGO_TYPE" 		property="cargoType" />
+		<result column="PACK_METHOD" 		property="packMethod" />
+		<result column="TRANSHIP_ORIGIN"	property="transhipOrigin" />
+		<result column="TRANSHIP_DESTINATION" property="transhipDestination" />
+		<result column="LC_NO" 				property="lcNo" />
+		<result column="USER_ID" 			property="userId" />
+		<result column="LAST_UPDATE" 		property="lastUpdate" />
+		<result column="PRINT_TAG" 			property="printTag" />
+		<result column="GEOG_DESC" 			property="dspGeogDesc" />
+		<result column="VESSEL_NAME" 		property="dspVesselName" />
+		<result column="CARGO_CLASS_DESC" 	property="dspCargoClassDesc" />
+		<result column="CARGO_TYPE_DESC" 	property="dspCargoTypeDesc" />
+		<result column="PRINT_TAG_DESC" 	property="dspPrintTagDesc" />
+	</resultMap>
+	
+	<select id="getGIPIQuoteMNItemDetails" resultMap="GIPIQuoteCargoMap" parameterClass="java.util.HashMap">
+		SELECT 
+			quote_id,               item_no,                    geog_cd,
+		    ESCAPE_VALUE(geog_desc) geog_desc,                  ESCAPE_VALUE(vessel_cd) vessel_cd, 
+		    ESCAPE_VALUE(vessel_name) vessel_name,              cargo_class_cd,
+		    ESCAPE_VALUE(cargo_class_desc) cargo_class_desc,    ESCAPE_VALUE(cargo_type) cargo_type,
+		    ESCAPE_VALUE(cargo_type_desc) cargo_type_desc,      ESCAPE_VALUE(pack_method) pack_method,
+		    ESCAPE_VALUE(bl_awb) bl_awb,                        ESCAPE_VALUE(tranship_origin) tranship_origin, 
+		    ESCAPE_VALUE(tranship_destination) tranship_destination,  ESCAPE_VALUE(voyage_no) voyage_no, 
+		    ESCAPE_VALUE(lc_no) lc_no,  etd,     eta,           print_tag,
+		    ESCAPE_VALUE(print_tag_desc) print_tag_desc,        ESCAPE_VALUE(origin) origin,
+		    ESCAPE_VALUE(destn) destn,  ESCAPE_VALUE(user_id) user_id, last_update 
+		FROM TABLE(Gipi_Quote_Item_Dtls.Get_Gipi_Quote_MN2(#quoteId#, #itemNo#))
+	</select>
+	
+	<procedure id="saveGIPIQuoteMNItem" parameterClass="GIPIQuoteCargoClass">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			Gipi_Quote_Item_Dtls.Set_Gipi_Quote_MN(#quoteId#,#itemNo#,#geogCd#,
+				#vesselCd#,#cargoClassCd#,#cargoType#,#packMethod#,#blAwb#,
+				#transhipOrigin#,#transhipDestination#,#voyageNo#,#lcNo#,#etd#,
+				#eta#,#printTag#,#origin#,#destn#);
+		END;
+	</procedure>
+	
+</sqlMap>

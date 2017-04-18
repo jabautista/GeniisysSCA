@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIRIDistFrpsWdistFrpsV">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIRIDistFrpsWdistFrpsV" type="com.geniisys.giri.entity.GIRIDistFrpsWdistFrpsV" />
+	
+	<resultMap class="GIRIDistFrpsWdistFrpsV" id="GIRIDistFrpsWdistFrpsVMap">
+		<result property="parPolicyId"  column="par_policy_id" />
+		<result property="parId" 		column="par_id" />
+		<result property="lineCd" 		column="line_cd" />
+		<result property="frpsYy" 		column="frps_yy" />
+		<result property="frpsSeqNo" 	column="frps_seq_no" />
+		<result property="issCd" 		column="iss_cd" />
+		<result property="parYy" 		column="par_yy" />
+		<result property="parSeqNo" 	column="par_seq_no" />
+		<result property="quoteSeqNo" 	column="quote_seq_no" />
+		<result property="sublineCd" 	column="subline_cd" />
+		<result property="issueYy" 		column="issue_yy" />
+		<result property="polSeqNo" 	column="pol_seq_no" />
+		<result property="renewNo" 		column="renew_no" />
+		<result property="endtIssCd" 	column="endt_iss_cd" />
+		<result property="endtYy" 		column="endt_yy" />
+		<result property="endtSeqNo" 	column="endt_seq_no" />
+		<result property="assdName" 	column="assd_name" />
+		<result property="effDate" 		column="eff_date" />
+		<result property="expiryDate" 	column="expiry_date" />
+		<result property="distNo" 		column="dist_no" />
+		<result property="distSeqNo" 	column="dist_seq_no" />
+		<result property="totFacSpct" 	column="tot_fac_spct" />
+		<result property="tsiAmt" 		column="tsi_amt" />
+		<result property="totFacTsi" 	column="tot_fac_tsi" />
+		<result property="premAmt" 		column="prem_amt" />
+		<result property="totFacPrem" 	column="tot_fac_prem" />
+		<result property="currencyDesc" column="currency_desc" />
+		<result property="distFlag" 	column="dist_flag" />
+		<result property="premWarrSw" 	column="prem_warr_sw" />
+		<result property="endtType" 	column="endt_type" />
+		<result property="riFlag" 		column="ri_flag" />
+		<result property="inceptDate" 	column="incept_date" />
+		<result property="opGroupNo" 	column="op_group_no" />
+		<result property="totFacSpct2" 	column="tot_fac_spct2" />
+		<result property="createDate" 	column="create_date" />
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" 	id="getDistFrpsWDistFrpsVMap" extends="GIRIDistFrpsWdistFrpsVMap">
+        <result column="giri_wfrps_ri_count"        property="giriWfrpsRiCount" />
+        <result column="ri_btn"                     property="riBtn" />
+        <result column="dist_by_tsi_prem"           property="distByTsiPrem" />
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="getDistFrpsWDistFrpsVMapGrid" extends="getDistFrpsWDistFrpsVMap">
+		<result property="rowNum"			column="ROWNUM_"/>
+		<result property="rowCount"			column="COUNT_"/>
+		<result property="frpsNo"			column="frps_no"/>
+		<result property="parNo"			column="par_no"/>
+		<result property="endtNo"			column="endt_no"/>
+		<result property="parType"			column="par_type"/>
+		<result property="policyNo"			column="policy_no"/>
+	</resultMap>
+	
+	<select id="getWdistFrpsVDtls" parameterClass="java.util.HashMap" resultMap="GIRIDistFrpsWdistFrpsVMap">
+		SELECT * FROM TABLE(GIRI_DISTFRPS_WDISTFRPS_V_PKG.get_wdistfrps_v_dtls(#lineCd#, #frpsYy#, #frpsSeqNo#))
+	</select>
+	
+	<select id="getDistFrpsWDistFrpsV" parameterClass="java.util.HashMap" resultMap="getDistFrpsWDistFrpsVMap">
+		SELECT * FROM TABLE(GIRI_DISTFRPS_WDISTFRPS_V_PKG.get_giri_distfrps_wdistfrps_v(#lineCd#, #frpsYy#, #frpsSeqNo#, #module#, #userId#))
+	</select>
+	
+	<select id="getDistFrpsWDistFrpsVLOV" parameterClass="java.util.HashMap" resultMap="getDistFrpsWDistFrpsVMapGrid">
+		SELECT tab.*, DECODE(par_type, 'P', null, endt_iss_cd || '-' || TO_CHAR (endt_yy, '09') || '-' || TO_CHAR (endt_seq_no, '000009')) endt_no
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*,
+		               a.line_cd
+                         || '-'
+                         || TO_CHAR (a.frps_yy, '09')
+                         || '-'
+                         || TO_CHAR (a.frps_seq_no, '00000009') frps_no, 
+                            a.line_cd
+                         || '-'
+                         || a.iss_cd
+                         || '-'
+                         || TO_CHAR (a.par_yy, '09')
+                         || '-'
+                         || TO_CHAR (a.par_seq_no, '000009')
+                         || '-'
+                         || TO_CHAR (a.quote_seq_no, '09') par_no,  
+                         (SELECT par_type 
+                            FROM gipi_parlist
+                           WHERE par_id = a.par_id) par_type,
+                         get_policy_no (a.par_policy_id) policy_no
+		          FROM (SELECT * 
+		                  FROM TABLE (GIRI_DISTFRPS_WDISTFRPS_V_PKG.get_giri_distfrps_wdistfrps_v(#lineCd#, #frpsYy#, #frpsSeqNo#, #moduleId#, #userId#))
+		                  <isNotNull property="findText">
+		                  WHERE (
+		                  		UPPER(line_cd) LIKE UPPER(#findText#) OR
+		                  		UPPER(frps_yy) LIKE UPPER(#findText#) OR
+		                  		UPPER(frps_seq_no) LIKE UPPER(#findText#) OR
+		                  		UPPER(iss_cd) LIKE UPPER(#findText#) OR
+		                  		UPPER(par_yy) LIKE UPPER(#findText#) OR
+		                  		UPPER(par_seq_no) LIKE UPPER(#findText#) OR
+		                  		UPPER(quote_seq_no) LIKE UPPER(#findText#) OR
+		                  		UPPER(subline_cd) LIKE UPPER(#findText#) OR
+		                  		UPPER(renew_no) LIKE UPPER(#findText#) OR
+		                  		UPPER(endt_iss_cd) LIKE UPPER(#findText#) OR
+		                  		UPPER(endt_yy) LIKE UPPER(#findText#) OR 
+		                  		UPPER(line_cd
+				                         || '-'
+				                         || TO_CHAR (frps_yy, '09')
+				                         || '-'
+				                         || TO_CHAR (frps_seq_no, '00000009')) LIKE UPPER(#findText#) OR 
+				                UPPER(line_cd
+				                         || '-'
+				                         || iss_cd
+				                         || '-'
+				                         || TO_CHAR (par_yy, '09')
+				                         || '-'
+				                         || TO_CHAR (par_seq_no, '000009')
+				                         || '-'
+				                         || TO_CHAR (quote_seq_no, '09')) LIKE UPPER(#findText#) OR      
+				                UPPER(endt_iss_cd || '-' || TO_CHAR (endt_yy, '09') || '-' || TO_CHAR (endt_seq_no, '000009')) LIKE UPPER(#findText#) OR
+				                UPPER(get_policy_no (par_policy_id)) LIKE UPPER(#findText#)              
+		                  		)
+		                  </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIRI_DISTFRPS_WDISTFRPS_V_PKG.get_giri_distfrps_wdistfrps_v(#lineCd#, #frpsYy#, #frpsSeqNo#, #moduleId#, #userId#))
+		                  <isNotNull property="findText">
+		                  WHERE (
+		                  		UPPER(line_cd) LIKE UPPER(#findText#) OR
+		                  		UPPER(frps_yy) LIKE UPPER(#findText#) OR
+		                  		UPPER(frps_seq_no) LIKE UPPER(#findText#) OR
+		                  		UPPER(iss_cd) LIKE UPPER(#findText#) OR
+		                  		UPPER(par_yy) LIKE UPPER(#findText#) OR
+		                  		UPPER(par_seq_no) LIKE UPPER(#findText#) OR
+		                  		UPPER(quote_seq_no) LIKE UPPER(#findText#) OR
+		                  		UPPER(subline_cd) LIKE UPPER(#findText#) OR
+		                  		UPPER(renew_no) LIKE UPPER(#findText#) OR
+		                  		UPPER(endt_iss_cd) LIKE UPPER(#findText#) OR
+		                  		UPPER(endt_yy) LIKE UPPER(#findText#) OR
+		                  		UPPER(line_cd
+				                         || '-'
+				                         || TO_CHAR (frps_yy, '09')
+				                         || '-'
+				                         || TO_CHAR (frps_seq_no, '00000009')) LIKE UPPER(#findText#) OR 
+				                UPPER(line_cd
+				                         || '-'
+				                         || iss_cd
+				                         || '-'
+				                         || TO_CHAR (par_yy, '09')
+				                         || '-'
+				                         || TO_CHAR (par_seq_no, '000009')
+				                         || '-'
+				                         || TO_CHAR (quote_seq_no, '09')) LIKE UPPER(#findText#) OR      
+				                UPPER(endt_iss_cd || '-' || TO_CHAR (endt_yy, '09') || '-' || TO_CHAR (endt_seq_no, '000009')) LIKE UPPER(#findText#) OR
+				                UPPER(get_policy_no (par_policy_id)) LIKE UPPER(#findText#)
+		                  		)
+		                  </isNotNull>
+		                  ) b
+		             ) tab 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+			  <isNotNull property="sortColumn">
+          	  	  <isEqual property="sortColumn" compareValue="frpsNo">
+	              		ORDER BY frps_no
+	              </isEqual>
+                  <isEqual property="sortColumn" compareValue="parNo">
+	              		ORDER BY par_no
+	              </isEqual>
+	              <isEqual property="sortColumn" compareValue="policyNo">
+	              		ORDER BY policy_no
+	              </isEqual>
+	              <isEqual property="sortColumn" compareValue="endtNo">
+	              		ORDER BY endt_no
+	              </isEqual>
+              		<isEqual property="ascDescFlg" compareValue="ASC">
+              			ASC
+              		</isEqual>
+              		<isEqual property="ascDescFlg" compareValue="DESC">
+              			DESC
+              		</isEqual>
+              </isNotNull>
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="getDistFrpsWDistFrpsV2Map" extends="getDistFrpsWDistFrpsVMap">
+		<result property="frpsNo"			column="frps_no"/>
+		<result property="parNo"			column="par_no"/>
+		<result property="endtNo"			column="endt_no"/>
+		<result property="parType"			column="par_type"/>
+		<result property="policyNo"			column="policy_no"/>
+	</resultMap>
+	
+	<select id="getDistFrpsWDistFrpsV2" parameterClass="java.util.HashMap" resultMap="getDistFrpsWDistFrpsV2Map">
+		SELECT tab.*, DECODE(par_type, 'P', null, endt_iss_cd || '-' || TO_CHAR (endt_yy, '09') || '-' || TO_CHAR (endt_seq_no, '000009')) endt_no
+		  FROM (SELECT a.*,
+		               a.line_cd
+                         || '-'
+                         || TO_CHAR (a.frps_yy, '09')
+                         || '-'
+                         || TO_CHAR (a.frps_seq_no, '00000009') frps_no, 
+                            a.line_cd
+                         || '-'
+                         || a.iss_cd
+                         || '-'
+                         || TO_CHAR (a.par_yy, '09')
+                         || '-'
+                         || TO_CHAR (a.par_seq_no, '000009')
+                         || '-'
+                         || TO_CHAR (a.quote_seq_no, '09') par_no,  
+                         (SELECT par_type 
+                            FROM gipi_parlist
+                           WHERE par_id = a.par_id) par_type,
+                         get_policy_no (a.par_policy_id) policy_no
+		          FROM (SELECT * 
+		                  FROM TABLE (GIRI_DISTFRPS_WDISTFRPS_V_PKG.get_giri_distfrps_wdistfrps_v(#lineCd#, #frpsYy#, #frpsSeqNo#, #moduleId#, #userId#))		                  
+		                  ) a
+		             ) tab 
+	</select>	
+</sqlMap>	

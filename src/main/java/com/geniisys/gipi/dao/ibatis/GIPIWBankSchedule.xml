@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIWBankSchedule">
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIPIWBankScheduleClass" type="com.geniisys.gipi.entity.GIPIWBankSchedule" />
+	
+	<resultMap class="GIPIWBankScheduleClass" id="gipiWBankScheduleMap">
+		<result column="PAR_ID" 			property="parId"/>
+		<result column="BANK_ITEM_NO" 		property="bankItemNoC"/>
+		<result column="BANK_ITEM_NO1" 		property="bankItemNo"/>
+		<result column="BANK" 				property="bank"/>
+		<result column="INCLUDE_TAG" 		property="includeTag"/>
+		<result column="BANK_ADDRESS" 		property="bankAddress"/>
+		<result column="CASH_IN_VAULT" 		property="cashInVault"/>
+		<result column="CASH_IN_TRANSIT" 	property="cashInTransit"/>
+		<result column="REMARKS" 			property="remarks"/>
+	</resultMap>
+
+	<select id="getWBankSchedule" resultMap="gipiWBankScheduleMap">
+		SELECT * FROM TABLE(GIPI_WBANK_SCHEDULE_PKG.get_gipi_wbank_schedule(#parId#, NULL))
+	</select>
+	
+	<procedure id="deleteWBankSched" parameterClass="java.util.HashMap">
+		BEGIN
+			GIPI_WBANK_SCHEDULE_PKG.delete_gipi_wbank(#parId#, #bankItemNo#);
+		END;
+	</procedure>
+	
+	<insert id="insertWBankSched" parameterClass="com.geniisys.gipi.entity.GIPIWBankSchedule">
+		BEGIN
+			GIPI_WBANK_SCHEDULE_PKG.set_gipi_wbanksched(#parId#
+  							   ,#bankItemNo#
+							   ,#bank#
+							   ,#includeTag#
+							   ,#bankAddress#
+							   ,#cashInVault#
+							   ,#cashInTransit#
+							   ,#remarks#);
+		END;
+	</insert>
+
+</sqlMap>

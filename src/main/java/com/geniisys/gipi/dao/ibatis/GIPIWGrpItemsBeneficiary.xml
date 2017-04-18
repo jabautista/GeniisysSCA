@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIWGrpItemsBeneficiary">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIPIWGrpItemsBeneficiary" type="com.geniisys.gipi.entity.GIPIWGrpItemsBeneficiary"/>
+	
+	<resultMap class="GIPIWGrpItemsBeneficiary" id="GIPIWGrpItemsBeneficiaryMap">
+		<result column="par_id" 				property="parId"/>
+		<result column="item_no" 				property="itemNo"/>
+		<result column="grouped_item_no" 		property="groupedItemNo"/>
+		<result column="beneficiary_no" 		property="beneficiaryNo"/>
+		<result column="beneficiary_name" 		property="beneficiaryName"/>
+		<result column="beneficiary_addr" 		property="beneficiaryAddr"/>
+		<result column="relation" 				property="relation"/>
+		<result column="date_of_birth" 			property="dateOfBirth"/>
+		<result column="age" 					property="age"/>
+		<result column="civil_status" 			property="civilStatus"/>
+		<result column="sex" 					property="sex"/>
+	</resultMap>
+	
+	<resultMap class="GIPIWGrpItemsBeneficiary" id="GrpItemsBeneficiaryByItemGrpItemTableGridResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="PAR_ID" 				property="parId"/>
+		<result column="ITEM_NO" 				property="itemNo"/>
+		<result column="GROUPED_ITEM_NO" 		property="groupedItemNo"/>
+		<result column="BENEFICIARY_NO" 		property="beneficiaryNo"/>
+		<result column="BENEFICIARY_NAME" 		property="beneficiaryName"/>
+		<result column="BENEFICIARY_ADDR" 		property="beneficiaryAddr"/>
+		<result column="RELATION" 				property="relation"/>
+		<result column="DATE_OF_BIRTH" 			property="dateOfBirth"/>
+		<result column="AGE" 					property="age"/>
+		<result column="CIVIL_STATUS" 			property="civilStatus"/>
+		<result column="SEX" 					property="sex"/>
+		<result column="CIVIL_STATUS_DESC"		property="civilStatusDesc" />
+	</resultMap>
+	
+	<parameterMap class="map" id="validateBenNoMap">
+		<parameter property="parId"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="itemNo"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="groupedItemNo"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="beneficiaryNo"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="message"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="getGIPIWGrpItemsBeneficiary" resultMap="GIPIWGrpItemsBeneficiaryMap">
+		SELECT * FROM TABLE(GIPI_WGRP_ITEM_BENEFICIARY_PKG.get_gipi_wgrp_item_benificiary(#parId#,#itemNo#))
+	</procedure>
+	
+	<procedure id="getGIPIWGrpItemsBeneficiary2" resultMap="GIPIWGrpItemsBeneficiaryMap">
+		SELECT * FROM TABLE(GIPI_WGRP_ITEM_BENEFICIARY_PKG.get_gipi_wgrp_itm_benificiary2(#parId#))
+	</procedure>
+	
+	<procedure id="retGrpItmsGipiWGrpItemsBeneficiary" resultMap="GIPIWGrpItemsBeneficiaryMap">
+		SELECT * FROM TABLE(GIPI_WGRP_ITEM_BENEFICIARY_PKG.rgitm_gipi_wgrpitem_ben(#parId#, #policyId#, #itemNo#, #groupedItemNo#))
+	</procedure>
+	
+	<insert id="setGIPIWGrpItemsBeneficiary" parameterClass="com.geniisys.gipi.entity.GIPIWGrpItemsBeneficiary">
+		BEGIN
+			GIPI_WGRP_ITEM_BENEFICIARY_PKG.set_gipi_wgrp_item_benificiary(
+					#parId#,#itemNo#,#groupedItemNo#,#beneficiaryNo#,
+					#beneficiaryName#,#beneficiaryAddr#,#relation#,#dateOfBirth#,
+					#age#,#civilStatus#,#sex#
+					);
+		END;
+	</insert>
+	
+	<procedure id="delGIPIWGrpItemsBeneficiary" parameterClass="java.util.HashMap">
+		BEGIN
+			GIPI_WGRP_ITEM_BENEFICIARY_PKG.del_gipi_wgrp_item_ben3(#parId#,#itemNo#,#groupedItemNo#,#beneficiaryNo#);
+		END;
+	</procedure>
+	
+	<procedure id="delGIPIWGrpItemsBeneficiary2" parameterClass="java.util.HashMap">
+		BEGIN
+			GIPI_WGRP_ITEM_BENEFICIARY_PKG.del_gipi_wgrp_item_ben2(#parId#,#itemNo#,#groupedItemNo#);
+		END;
+	</procedure>
+	
+	<select id="getGrpItemsBeneficiaryTableGrid" resultMap="GrpItemsBeneficiaryByItemGrpItemTableGridResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(gipi_wgrp_item_beneficiary_pkg.get_gipi_wgrp_item_ben_tg(#parId#, #itemNo#, #groupedItemNo#, #beneficiaryName#))
+						  <isNull property="sortColumn">
+							ORDER BY beneficiary_no ASC
+						  </isNull>
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="beneficiaryNo">
+								ORDER BY beneficiary_no
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="beneficiaryName">
+								ORDER BY beneficiary_name
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="sex">
+								ORDER BY sex
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="civilStatus">
+								ORDER BY civil_status
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="beneficiaryAddr">
+								ORDER BY beneficiary_addr
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="dateOfBirth">
+								ORDER BY date_of_birth
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="age">
+								ORDER BY age
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="relation">
+								ORDER BY relation
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="civilStatusDesc"> <!-- added by robert 09262013 -->
+								ORDER BY CIVIL_STATUS_DESC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(gipi_wgrp_item_beneficiary_pkg.get_gipi_wgrp_item_ben_tg(#parId#, #itemNo#, #groupedItemNo#, #beneficiaryName#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="showGrpItemsBenOverlay" resultMap="GrpItemsBeneficiaryByItemGrpItemTableGridResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(GIPI_WGRP_ITEM_BENEFICIARY_PKG.get_group_beneficiary_listing(#parId#, #itemNo#, #groupedItemNo#,
+						  									#beneficiaryNo#, #beneficiaryName#, #sex#, #relation#, #civilStatus#,
+						  									#dateOfBirth#, #age#, #beneficiaryAddr#))
+						<isEqual property="sortColumn" compareValue="beneficiaryNo">
+		              		ORDER BY beneficiary_no
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="beneficiaryName">
+		              		ORDER BY beneficiary_name
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="sex">
+		              		ORDER BY sex
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="relation">
+		              		ORDER BY relation
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="civilStatus">
+		              		ORDER BY civil_status
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="dateOfBirth">
+		              		ORDER BY date_of_birth
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="age">
+		              		ORDER BY age
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="beneficiaryAddr">
+		              		ORDER BY beneficiary_addr
+			            </isEqual>
+			            <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	</isNotNull>) a, 
+						(SELECT COUNT(*) count_
+						   FROM TABLE(GIPI_WGRP_ITEM_BENEFICIARY_PKG.get_group_beneficiary_listing(#parId#, #itemNo#, #groupedItemNo#,
+						   										#beneficiaryNo#, #beneficiaryName#, #sex#, #relation#, #civilStatus#,
+						  										#dateOfBirth#, #age#, #beneficiaryAddr#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="validateBenNo" parameterMap="validateBenNoMap">
+		CALL GIPI_WGRP_ITEM_BENEFICIARY_PKG.validate_ben_no(?, ?, ?, ?, ?)
+	</procedure>
+	<!-- added by MarkS SR21720 10.5.2016 to handle checking of unique beneficiary no. from all item_no(enrollee) not by grouped_item_no(per enrollee) -->
+	<procedure id="validateBenNo2" parameterMap="validateBenNoMap">
+		CALL GIPI_WGRP_ITEM_BENEFICIARY_PKG.validate_ben_no2(?, ?, ?, ?, ?)
+	</procedure>
+	<!-- END SR21720 --> 
+</sqlMap>	

@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIUWWitemds">
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIUWWitemdsClass" type="com.geniisys.giuw.entity.GIUWWitemds"/>
+	
+	<resultMap class="GIUWWitemdsClass" id="GIUWWitemdsResultMap">
+		<result column="dist_no" 					property="distNo"/>
+		<result column="dist_seq_no" 				property="distSeqNo"/>
+		<result column="item_no" 					property="itemNo"/>
+		<result column="tsi_amt" 					property="tsiAmt"/>
+		<result column="prem_amt" 					property="premAmt"/>
+		<result column="ann_tsi_amt" 				property="annTsiAmt"/>
+		<result column="arc_ext_data" 				property="arcExtData"/>
+		<result column="nbt_item_title" 			property="nbtItemTitle"/>
+		<result column="nbt_item_desc" 				property="nbtItemDesc"/>
+		<result column="dsp_pack_line_cd" 			property="dspPackLineCd"/>
+		<result column="dsp_pack_subline_cd" 		property="dspPackSublineCd"/>
+		<result column="item_grp" 					property="itemGrp"/>
+		<result column="nbt_currency_cd" 			property="nbtCurrencyCd"/>
+		<result column="dsp_currency_rt" 			property="dspCurrencyRt"/>
+		<result column="dsp_short_name" 			property="dspShortName"/>
+		<result column="orig_dist_seq_no" 			property="origDistSeqNo"/>
+	</resultMap>
+	
+	<resultMap class="GIUWWitemdsClass" id="GIUWWitemdsTableGridMap">
+		<result column="dist_no" 					property="distNo"/>
+		<result column="dist_seq_no" 				property="distSeqNo"/>
+		<result column="item_no" 					property="itemNo"/>
+		<result column="tsi_amt" 					property="tsiAmt"/>
+		<result column="prem_amt" 					property="premAmt"/>
+		<result column="ann_tsi_amt" 				property="annTsiAmt"/>
+		<result column="arc_ext_data" 				property="arcExtData"/>
+		<result column="nbt_item_title" 			property="nbtItemTitle"/>
+		<result column="nbt_item_desc" 				property="nbtItemDesc"/>
+		<result column="dsp_pack_line_cd" 			property="dspPackLineCd"/>
+		<result column="dsp_pack_subline_cd" 		property="dspPackSublineCd"/>
+		<result column="item_grp" 					property="itemGrp"/>
+		<result column="nbt_currency_cd" 			property="nbtCurrencyCd"/>
+		<result column="dsp_currency_rt" 			property="dspCurrencyRt"/>
+		<result column="dsp_short_name" 			property="dspShortName"/>
+		<result column="orig_dist_seq_no" 			property="origDistSeqNo"/>
+		<result column="ROWNUM_" 					property="rowNum" />			
+		<result column="COUNT_"						property="rowCount"/>
+		<result column="max_dist_seq_no"			property="maxDistSeqNo" />   <!--  jhing 12.05.2014 added field -->
+		<result column="cnt_per_dist_grp"			property="cntPerDistGrp" />   <!--  jhing 12.05.2014 added field -->
+	</resultMap>
+ 	
+ 	<!--  added by jhing 12.05.2014 for batch soln to FULLWEB SIT SR0003785, SR0003784, SR0003783, SR0003721, SR0003712, SR0003451, SR0003720, SR0002871 -->
+	<resultMap class="java.util.HashMap" id="GIUWWitemdsDistinctDistGrps">
+		<result column="dist_seq_no" 				property="distSeqNo"/>
+		<result column="item_grp" 					property="itemGrp"/>
+	</resultMap> 
+	
+	<select id="getGiuwWitemds" resultMap="GIUWWitemdsResultMap">
+		SELECT * FROM TABLE(GIUW_WITEMDS_PKG.get_giuw_witemds(#parId#, #distNo#))
+	</select>
+	
+	<insert id="setGIUWWitemds" parameterClass="GIUWWitemdsClass">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GIUW_WITEMDS_PKG.set_giuw_witemds(
+				#distNo#,     #distSeqNo#,
+                #itemNo#,     #tsiAmt#,
+                #premAmt#,    #annTsiAmt#,
+                #arcExtData#, #origDistSeqNo#,
+                #itemGrp#
+				);
+		END;
+	</insert>
+	
+	<insert id="preUpdateGIUWWitemds" parameterClass="GIUWWitemdsClass">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GIUW_WITEMDS_PKG.pre_update_giuw_witemds(
+				#distNo#,     #distSeqNo#,
+                #tsiAmt#,	  #premAmt#,    
+                #annTsiAmt#,  #itemGrp#
+				);
+		END;
+	</insert>
+	
+	<insert id="postUpdateGIUWWitemds" parameterClass="GIUWWitemdsClass">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GIUW_WITEMDS_PKG.post_update_giuw_witemds(
+				#distNo#,     #origDistSeqNo#,
+                #tsiAmt#,	  #premAmt#,    
+                #annTsiAmt#	
+				);
+		END;
+	</insert>
+	
+	<delete id="delGIUWWitemds" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GIUW_WITEMDS_PKG.del_giuw_witemds(#distNo#, #distSeqNo#);
+		END;
+	</delete>
+	
+	<!--  added by jhing 12.01.2014 for GIUWS010 -->
+	<delete id="delGIUWWitemds2" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GIUW_WITEMDS_PKG.del_giuw_witemds(#distNo#, #distSeqNo#, #itemNo#);
+		END;
+	</delete>	
+	
+	<procedure id="preCommitGIUWS001" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GIUW_WITEMDS_PKG.pre_commit_giuws(#distNo#);
+		END;
+	</procedure>
+	
+	<procedure id="createRegroupedDistRecs" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GIUW_WITEMDS_PKG.CREATE_REGROUPED_DIST_RECS(
+				#distNo#, #parId#, #lineCd#, #sublineCd#,
+				#issCd#, #packPolFlag#, #itemGrp#, #polFlag#, #parType#
+				);
+		END;
+	</procedure>
+	
+	<select id="getGiuwWitemdsForDistrFinal" resultMap="GIUWWitemdsTableGridMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIUW_WITEMDS_PKG.get_giuw_witemds_for_distr(#policyId#, #distNo#))) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIUW_WITEMDS_PKG.get_giuw_witemds_for_distr(#policyId#, #distNo#))) b) 
+		         WHERE rownum_ BETWEEN #from# AND #to#   <!--  jhing 12.05.2014 added rownum_ checking -->											         
+	</select>
+	
+	<procedure id="postWitemdsDtlGiuws015" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GIUW_WITEMDS_PKG.post_witemds_dtl_giuws015(#batchId#, #distNo#);
+		END;	
+	</procedure>
+	
+	<procedure id="transferWitemds" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GIUW_WITEMDS_PKG.transfer_witemds(#distNo#);
+		END;	
+	</procedure>	
+	
+   <!--  added by jhing 12.05.2014 for batch soln to FULLWEB SIT SR0003785, SR0003784, SR0003783, SR0003721, SR0003712, SR0003451, SR0003720, SR0002871  -->
+   <select id="getGiuwWitemdsOthPageDistGrps" resultMap="GIUWWitemdsDistinctDistGrps" parameterClass="java.util.HashMap">
+	   SELECT distinct dist_seq_no, item_grp
+          FROM (SELECT rownum rownum_, 
+                       b.count_, 
+                       a.* 
+                  FROM (SELECT * 
+                          FROM TABLE (GIUW_WITEMDS_PKG.get_giuw_witemds_for_distr(#policyId#, #distNo#))) a, 
+                       (SELECT count(*) count_ 
+                          FROM TABLE (GIUW_WITEMDS_PKG.get_giuw_witemds_for_distr(#policyId#, #distNo#))) b) 
+                 WHERE rownum_ NOT between #from# AND #to#      
+                 ORDER BY dist_seq_no, item_grp		
+									         
+	</select>	
+		
+</sqlMap>	

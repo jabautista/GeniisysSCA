@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIQuoteItmperil">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIPIQuoteItmperil" type="com.geniisys.quote.entity.GIPIQuoteItmperil"/>
+	
+	<resultMap id="itemPerilListingMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result property="perilQuoteId" 		column="QUOTE_ID"/>
+		<result property="perilItemNo" 			column="ITEM_NO"/>
+		<result property="perilCd" 				column="PERIL_CD"/>
+		<result property="perilName" 			column="PERIL_NAME"/>
+		<result property="perilSname" 			column="PERIL_SNAME"/>
+		<result property="perilPremRt" 			column="PREM_RT"/>
+		<result property="perilTsiAmt" 			column="TSI_AMT"/>
+		<result property="perilPremAmt" 		column="PREM_AMT"/>
+		<result property="perilCompRem" 		column="COMP_REM"/>
+		<result property="perilType" 			column="PERIL_TYPE"/>
+		<result property="perilBasicPerilCd" 	column="BASIC_PERIL_CD"/>
+		<result property="perilPrtFlag" 		column="PRT_FLAG"/>
+		<result property="perilLineCd" 			column="LINE_CD"/>
+		<result property="perilDedFlag" 		column="DED_FLAG"/>
+	</resultMap>
+	
+	<resultMap id="itemPerilMap" class="java.util.HashMap">
+		<result property="perilQuoteId" 		column="QUOTE_ID"/>
+		<result property="perilItemNo" 			column="ITEM_NO"/>
+		<result property="perilCd" 				column="PERIL_CD"/>
+		<result property="perilName" 			column="PERIL_NAME"/>
+		<result property="perilPremRt" 			column="PREM_RT"/>
+		<result property="perilTsiAmt" 			column="TSI_AMT"/>
+		<result property="perilPremAmt" 		column="PREM_AMT"/>
+		<result property="perilCompRem" 		column="COMP_REM"/>
+		<result property="perilType" 			column="PERIL_TYPE"/>
+		<result property="perilBasicPerilCd" 	column="BASIC_PERIL_CD"/>
+		<result property="perilPrtFlag" 		column="PRT_FLAG"/>
+		<result property="perilLineCd" 			column="LINE_CD"/>
+	</resultMap>
+	
+	<select id="getPerilInfoListing" resultMap="itemPerilListingMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*
+		          FROM (SELECT * 
+		                  FROM TABLE (GIPI_QUOTE_ITMPERIL_PKG.get_item_peril_listing(#quoteId#, #itemNo#, #lineCd#, #packLineCd#, #perilName#, #perilPremRt#, #perilTsiAmt#, #perilPremAmt#, #perilCompRem#))
+			            <isEqual property="sortColumn" compareValue="perilName">
+		              		ORDER BY peril_name
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="perilPremRt">
+		              		ORDER BY prem_rt
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="perilTsiAmt">
+		              		ORDER BY tsi_amt
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="perilPremAmt">
+		              		ORDER BY prem_amt
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="perilCompRem">
+		              		ORDER BY comp_rem
+			            </isEqual>
+			            <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	</isNotNull>) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIPI_QUOTE_ITMPERIL_PKG.get_item_peril_listing(#quoteId#, #itemNo#, #lineCd#, #packLineCd#, #perilName#, #perilPremRt#, #perilTsiAmt#, #perilPremAmt#, #perilCompRem#))) b)
+		WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="getItmperils" resultMap="itemPerilMap" parameterClass="java.util.HashMap">
+		SELECT * FROM TABLE (GIPI_QUOTE_ITMPERIL_PKG.get_item_peril_listing(#quoteId#, #itemNo#, #lineCd#, #packLineCd#,
+																			#perilName#, #perilPremRt#, #perilTsiAmt#, #perilPremAmt#, #perilCompRem#))
+	</procedure>
+	
+	<insert id="setGIIMM002PerilInfo" parameterClass="GIPIQuoteItmperil">
+		BEGIN
+			GIIS_USERS_PKG.app_user := #appUser#;
+			GIPI_QUOTE_ITMPERIL_PKG.set_giimm002_peril_info(
+				#perilQuoteId#, #perilItemNo#, #perilCd#, #perilPremRt#, #perilTsiAmt#, #perilPremAmt#,
+				#perilCompRem#, #perilType#, #perilBasicPerilCd#, #perilPrtFlag#, #perilLineCd#
+			);
+		END;
+	</insert>
+	
+	<delete id="deleteGIIMM002PerilInfo" parameterClass="GIPIQuoteItmperil">
+		BEGIN
+			GIIS_USERS_PKG.app_user := #appUser#;
+			GIPI_QUOTE_ITMPERIL_PKG.del_giimm002_peril_info(#perilQuoteId#, #perilItemNo#, #perilCd#);
+		END;
+	</delete>
+	
+</sqlMap>

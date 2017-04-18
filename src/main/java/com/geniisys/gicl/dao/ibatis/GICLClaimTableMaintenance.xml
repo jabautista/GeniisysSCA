@@ -1,0 +1,600 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GICLClaimPayee">
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24"/>
+	    <property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="giclClaimPayee" type="com.geniisys.gicl.entity.GICLClaimPayee"/>
+	<typeAlias alias="giclClaimStatus" type="com.geniisys.gicl.entity.GICLClaimStatus"/>
+	
+	<resultMap class="java.util.HashMap" id="ClaimPayeeClassResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="payeeClassCd" column="payee_class_cd"/>
+		<result property="classDesc" column="class_desc"/>
+		<result property="payeeClassTag" column="payee_class_tag"/>		
+		<result property="payeeClassTagDesc" column="payee_class_tag_desc"/>	
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="ClaimPayeeInfoResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="payeeClassCd" column="payee_class_cd"/>
+		<result property="payeeNo" column="payee_no"/>
+		<result property="payeeLastName" column="payee_last_name"/>
+		<result property="payeeFirstName" column="payee_first_name"/>
+		<result property="payeeMiddleName" column="payee_middle_name"/>
+		<result property="tin" column="tin"/>
+		<result property="mailAddr1" column="mail_addr1"/>
+		<result property="mailAddr2" column="mail_addr2"/>	
+		<result property="mailAddr3" column="mail_addr3"/>		
+		<result property="mailingAddress" column="mailing_address"/>
+		<result property="remarks" column="remarks"/>
+		<result property="userId" column="user_id"/>
+		<result property="refPayeeCd" column="ref_payee_cd"/>	
+		<result property="contactPers" column="contact_pers"/>	
+		<result property="designation" column="designation"/>
+		<result property="cpNo" column="cp_no"/>
+		<result property="sunNo" column="sun_no"/>
+		<result property="globeNo" column="globe_no"/>
+		<result property="smartNo" column="smart_no"/>
+		<result property="phoneNo" column="phone_no"/>
+		<result property="faxNo" column="fax_no"/>
+		<result property="masterPayeeNo" column="master_payee_no"/>
+		<result property="masterPayeeName" column="master_payee_name"/>
+		<result property="bankCd" column="bank_cd"/>
+		<result property="bankName" column="bank_name"/>
+		<result property="bankBranch" column="bank_branch"/>
+		<result property="bankAcctType" column="bank_acct_type"/>
+		<result property="bankAcctTyp" column="bank_acct_typ"/>
+		<result property="bankAcctName" column="bank_acct_name"/>
+		<result property="bankAcctNo" column="bank_acct_no"/>
+		<result property="bankAcctAppDate" column="bank_acct_app_date"/>
+		<result property="bankAcctAppTag" column="bank_acct_app_tag"/>
+		<result property="bankAcctAppUser" column="bank_acct_app_user"/>
+		<result property="allowTag" column="allow_tag"/>
+		<result property="lastUpdate" column="last_update"/>
+	</resultMap>
+	
+	<resultMap id="GICLS150MasterPayeeLOVResultMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result property="payeeNo" 			column="payee_no"/>
+		<result property="payee"	column="payee"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="ValidateMobileNoResultMap">
+		<result property="message" column="message"/>
+		<result property="defCheck" column="def_check"/>	
+	</resultMap>
+	
+	<resultMap id="GICLS150BnkAcctTypeLOVResultMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result property="rvLowValue"		column="rv_low_value"/>
+		<result property="rvMeaning" 		column="rv_meaning"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="BankAcctHstryFieldResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="field" column="field"/>		
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="BankAcctHstryValueResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="field" column="field"/>
+		<result property="oldValue" column="old_value"/>
+		<result property="newValue" column="new_value"/>
+		<result property="userId" column="user_id"/>
+		<result property="lastUpdate" column="last_update"/>	
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="BankAcctDtlsResultMap">
+		<result property="bankCd" column="bank_cd"/>
+		<result property="bankName" column="bank_name"/>
+		<result property="bankBranch" column="bank_branch"/>
+		<result property="bankAcctType" column="bank_acct_type"/>
+		<result property="bankAcctTyp" column="bank_acct_typ"/>
+		<result property="bankAcctName" column="bank_acct_name"/>
+		<result property="bankAcctNo" column="bank_acct_no"/>
+		<result property="bankAcctAppDate" column="bank_acct_app_date"/>
+		<result property="bankAcctAppTag" column="bank_acct_app_tag"/>
+		<result property="bankAcctAppUser" column="bank_acct_app_user"/>
+	</resultMap>
+			
+	<select id="getClaimPayeeClass" resultMap="ClaimPayeeClassResultMap">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+						 b.count_, 
+						 a.*
+					FROM (SELECT *
+							FROM TABLE (GICLS150_PKG.get_clm_payee_class(#payeeClassCd#,#classDesc#))		
+							<isNotNull property="filter">
+								WHERE 1 = 1 
+	 								<isNotEmpty prepend="AND" property="payeeClassCd">
+										UPPER(payee_class_cd) LIKE UPPER(#payeeClassCd#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="classDesc">
+										UPPER(class_desc) LIKE UPPER(#classDesc#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="payeeClassTagDesc">
+										UPPER(payee_class_tag_desc) LIKE UPPER(#payeeClassTagDesc#)
+									</isNotEmpty> 								
+							</isNotNull>					
+							<isEqual property="sortColumn" compareValue="payeeClassCd classDesc payeeClassTagDesc">
+								ORDER BY payee_class_cd
+							</isEqual>							
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>
+						) a,
+						(SELECT count(*) count_
+						   FROM TABLE (GICLS150_PKG.get_clm_payee_class(#payeeClassCd#,#classDesc#))						 		
+							<isNotNull property="filter">
+								WHERE 1 = 1 
+	 								<isNotEmpty prepend="AND" property="payeeClassCd">
+										UPPER(payee_class_cd) LIKE UPPER(#payeeClassCd#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="classDesc">
+										UPPER(class_desc) LIKE UPPER(#classDesc#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="payeeClassTagDesc">
+										UPPER(payee_class_tag_desc) LIKE UPPER(#payeeClassTagDesc#)
+									</isNotEmpty> 								
+							</isNotNull>								  
+						   ) b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+		
+	<select id="getClaimPayeeInfo" resultMap="ClaimPayeeInfoResultMap">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+						 b.count_, 
+						 a.*
+					FROM (SELECT *
+							FROM TABLE (GICLS150_PKG.get_clm_payee_info(#payeeClassCd#))
+							<isNotNull property="filter">
+								WHERE 1 = 1 
+	 								<isNotEmpty prepend="AND" property="allowTag">
+										UPPER(allow_tag) LIKE UPPER(#allowTag#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="payeeNo">
+										payee_no = #payeeNo#
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="payeeLastName">
+										UPPER(payee_last_name) LIKE UPPER(#payeeLastName#)
+									</isNotEmpty> 	
+									<isNotEmpty prepend="AND" property="payeeFirstName">
+										UPPER(payee_first_name) LIKE UPPER(#payeeFirstName#)
+									</isNotEmpty> 	
+									<isNotEmpty prepend="AND" property="payeeMiddleName">
+										UPPER(payee_middle_name) LIKE UPPER(#payeeMiddleName#)
+									</isNotEmpty> 	
+									<isNotEmpty prepend="AND" property="tin">
+										UPPER(tin) LIKE UPPER(#tin#)
+									</isNotEmpty> 	
+									<isNotEmpty prepend="AND" property="mailingAddress">
+										UPPER(mailing_address) LIKE UPPER(#mailingAddress#)
+									</isNotEmpty> 							
+							</isNotNull>	
+							<isEqual property="sortColumn" compareValue="payeeClassCd classDesc payeeClassTagDesc">
+								ORDER BY payee_class_cd
+							</isEqual>	
+							<isEqual property="sortColumn" compareValue="allowTag">
+								ORDER BY allow_tag
+							</isEqual>								
+							<isEqual property="sortColumn" compareValue="payeeNo">
+								ORDER BY payee_no
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="payeeLastName">
+								ORDER BY payee_last_name
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="payeeFirstName">
+								ORDER BY payee_first_name
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="payeeMiddleName">
+								ORDER BY payee_middle_name
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="tin">
+								ORDER BY tin
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="mailingAddress">
+								ORDER BY mailing_address
+							</isEqual>									
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>
+						) a,
+						(SELECT count(*) count_
+						   FROM TABLE (GICLS150_PKG.get_clm_payee_info(#payeeClassCd#))
+						   <isNotNull property="filter">
+								WHERE 1 = 1 
+	 								<isNotEmpty prepend="AND" property="allowTag">
+										UPPER(allow_tag) LIKE UPPER(#allowTag#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="payeeNo">
+										payee_no = #payeeNo#
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="payeeLastName">
+										UPPER(payee_last_name) LIKE UPPER(#payeeLastName#)
+									</isNotEmpty> 	
+									<isNotEmpty prepend="AND" property="payeeFirstName">
+										UPPER(payee_first_name) LIKE UPPER(#payeeFirstName#)
+									</isNotEmpty> 	
+									<isNotEmpty prepend="AND" property="payeeMiddleName">
+										UPPER(payee_middle_name) LIKE UPPER(#payeeMiddleName#)
+									</isNotEmpty> 	
+									<isNotEmpty prepend="AND" property="tin">
+										UPPER(tin) LIKE UPPER(#tin#)
+									</isNotEmpty> 	
+									<isNotEmpty prepend="AND" property="mailingAddress">
+										UPPER(mailing_address) LIKE UPPER(#mailingAddress#)
+									</isNotEmpty> 							
+							</isNotNull>						  
+						   ) b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+		
+	<select id="getGICLS150MasterPayeeLov" resultMap="GICLS150MasterPayeeLOVResultMap">
+		 SELECT *
+		  FROM (SELECT rownum rownum_, b.count_, a.* 
+		          FROM (SELECT * FROM TABLE (GICLS150_PKG.get_master_payee_lov_list(#payeeClassCd#))
+				     <isNull property="findText">
+						 WHERE UPPER(payee) LIKE UPPER(#searchString#)
+						 OR payee_no LIKE #searchString#					                      		
+					 </isNull>   
+				     <isNotNull property="findText">
+		                 WHERE UPPER(payee) LIKE UPPER(#findText#)
+		         		 OR payee_no LIKE #findText#
+		             </isNotNull>
+		             <isEqual property="sortColumn" compareValue="payeeNo">
+		              	 ORDER BY payee_no
+		             </isEqual>
+					 <isEqual property="sortColumn" compareValue="payee">
+					     ORDER BY payee
+					 </isEqual>
+					 <isNotNull property="sortColumn">
+						 <isEqual property="ascDescFlg" compareValue="ASC">
+						 	ASC
+						 </isEqual>
+						 <isEqual property="ascDescFlg" compareValue="DESC">
+						 	DESC
+						 </isEqual>
+					 </isNotNull>
+		     ) a, (SELECT count(*) count_ 
+		             FROM TABLE (GICLS150_PKG.get_master_payee_lov_list(#payeeClassCd#))
+					     <isNull property="findText">
+							 WHERE UPPER(payee) LIKE UPPER(#searchString#)
+							 OR payee_no LIKE #searchString#					                      		
+						 </isNull>  
+						 <isNotNull property="findText">
+			                    WHERE UPPER(payee) LIKE UPPER(#findText#)
+			         		 	OR payee_no LIKE #findText#
+			             </isNotNull>
+		    ) b)WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+		
+	<select id="getBankAcctTypeLOV" resultMap="GICLS150BnkAcctTypeLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (CG_REF_CODES_PKG.get_cg_ref_codes_list(#domain#))		
+		                    <isNull property="findText">
+				                 WHERE UPPER(rv_meaning) LIKE UPPER(#searchString#)
+				         		 OR UPPER(rv_low_value) LIKE UPPER(#searchString#)
+			             	</isNull>                  	
+		                	<isNotNull property="findText">
+				                 WHERE UPPER(rv_meaning) LIKE UPPER(#findText#)
+				         		 OR UPPER(rv_low_value) LIKE UPPER(#findText#)
+			             	</isNotNull>
+		                  	<isEqual property="sortColumn" compareValue="rvLowValue">
+			              		ORDER BY rv_low_value
+			              	</isEqual>
+			              	<isEqual property="sortColumn" compareValue="rvMeaning">
+			              		ORDER BY rv_meaning
+			              	</isEqual>			                      
+			          	  	<isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	</isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (CG_REF_CODES_PKG.get_cg_ref_codes_list(#domain#))
+		                    <isNull property="findText">
+				                 WHERE UPPER(rv_meaning) LIKE UPPER(#searchString#)
+				         		 OR UPPER(rv_low_value) LIKE UPPER(#searchString#)
+			             	</isNull>   
+		                  	<isNotNull property="findText">
+				                 WHERE UPPER(rv_meaning) LIKE UPPER(#findText#)
+				         		 OR UPPER(rv_low_value) LIKE UPPER(#findText#)
+			             	</isNotNull>
+			             	) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>	
+				
+	<select id="getBankAcctHstryField" resultMap="BankAcctHstryFieldResultMap">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+						 b.count_, 
+						 a.*
+					FROM (SELECT *
+							FROM TABLE (GICLS150_PKG.get_bank_acct_hstry_field(#payeeClassCd#,#payeeNo#))												
+							<isNotNull property="filter">
+								WHERE 1 = 1 
+	 								<isNotEmpty prepend="AND" property="field">
+										UPPER(field) LIKE UPPER(#field#)
+									</isNotEmpty>														
+							</isNotNull>
+							<isEqual property="sortColumn" compareValue="field">
+								ORDER BY field
+							</isEqual>														
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>
+						) a,
+						(SELECT count(*) count_
+						   FROM TABLE (GICLS150_PKG.get_bank_acct_hstry_field(#payeeClassCd#,#payeeNo#))
+						   <isNotNull property="filter">
+								WHERE 1 = 1 
+	 								<isNotEmpty prepend="AND" property="field">
+										UPPER(field) LIKE UPPER(#field#)
+									</isNotEmpty>														
+							</isNotNull>						   						  
+						   ) b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	
+	
+	<select id="getBankAcctHstryValue" resultMap="BankAcctHstryValueResultMap">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+						 b.count_, 
+						 a.*
+					FROM (SELECT *
+							FROM TABLE (GICLS150_PKG.get_bank_acct_hstry_value(#payeeClassCd#,#payeeNo#,#field#))
+							<isNotNull property="filter">
+								WHERE 1 = 1 
+	 								<isNotEmpty prepend="AND" property="oldValue">
+										UPPER(old_value) LIKE UPPER(#oldValue#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="newValue">
+										UPPER(new_value) LIKE UPPER(#newValue#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="userId">
+										UPPER(user_id) LIKE UPPER(#userId#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="lastUpdate">
+										UPPER(last_update) LIKE UPPER(#lastUpdate#)
+									</isNotEmpty>														
+							</isNotNull>							
+							<isEqual property="sortColumn" compareValue="field">
+								ORDER BY field
+							</isEqual>	
+							<isEqual property="sortColumn" compareValue="oldValue">
+								ORDER BY old_value
+							</isEqual>	
+							<isEqual property="sortColumn" compareValue="newValue">
+								ORDER BY new_value
+							</isEqual>	
+							<isEqual property="sortColumn" compareValue="userId">
+								ORDER BY user_id
+							</isEqual>	
+							<isEqual property="sortColumn" compareValue="lastUpdate">
+								ORDER BY last_update
+							</isEqual>								
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>
+						) a,
+						(SELECT count(*) count_
+						   FROM TABLE (GICLS150_PKG.get_bank_acct_hstry_value(#payeeClassCd#,#payeeNo#,#field#))
+						   <isNotNull property="filter">
+								WHERE 1 = 1 
+	 								<isNotEmpty prepend="AND" property="oldValue">
+										UPPER(old_value) LIKE UPPER(#oldValue#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="newValue">
+										UPPER(new_value) LIKE UPPER(#newValue#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="userId">
+										UPPER(user_id) LIKE UPPER(#userId#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="lastUpdate">
+										UPPER(last_update) LIKE UPPER(#lastUpdate#)
+									</isNotEmpty>														
+							</isNotNull>								  
+						   ) b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="BankAcctApprovalsResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="payeeNo" column="payee_no"/>
+		<result property="payeeLastName" column="payee_last_name"/>		
+		<result property="bankCd" column="bank_cd"/>
+		<result property="bankName" column="bank_name"/>
+		<result property="bankBranch" column="bank_branch"/>
+		<result property="bankAcctType" column="bank_acct_type"/>
+		<result property="bankAcctTyp" column="bank_acct_typ"/>
+		<result property="bankAcctName" column="bank_acct_name"/>
+		<result property="bankAcctNo" column="bank_acct_no"/>
+		<result property="bankAcctAppTag" column="bank_acct_app_tag"/>
+		<result property="bankAcctAppUser" column="bank_acct_app_user"/>
+		<result property="bankAcctAppDate" column="bank_acct_app_date"/>
+	</resultMap>
+	
+	<select id="getBankAcctApprovals" resultMap="BankAcctApprovalsResultMap">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+						 b.count_, 
+						 a.*
+					FROM (SELECT payee_no, payee_last_name, bank_cd, bank_name, bank_branch,
+							bank_acct_type, bank_acct_typ, bank_acct_name, bank_acct_no, bank_acct_app_tag,
+							bank_acct_app_user, bank_acct_app_date
+							FROM TABLE (GICLS150_PKG.get_bank_acct_approvals(#payeeClassCd#))	
+							<isNotNull property="filter">
+								WHERE 1 = 1 
+	 								<isNotEmpty prepend="AND" property="payeeNo">
+										payee_no = #payeeNo#
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="payeeLastName">
+										UPPER(payee_last_name) LIKE UPPER(#payeeLastName#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="bankName">
+										UPPER(bank_name) LIKE UPPER(#bankName#)
+									</isNotEmpty> 	
+									<isNotEmpty prepend="AND" property="bankBranch">
+										UPPER(bank_branch) LIKE UPPER(#bankBranch#)
+									</isNotEmpty> 	
+									<isNotEmpty prepend="AND" property="bankAcctTyp">
+										UPPER(bank_acct_typ) LIKE UPPER(#bankAcctTyp#)
+									</isNotEmpty> 	
+									<isNotEmpty prepend="AND" property="bankAcctName">
+										UPPER(bank_acct_name) LIKE UPPER(#bankAcctName#)
+									</isNotEmpty> 	
+									<isNotEmpty prepend="AND" property="bankAcctNo">
+										UPPER(bank_acct_no) LIKE UPPER(#bankAcctNo#)
+									</isNotEmpty> 							
+							</isNotNull>						
+							<isEqual property="sortColumn" compareValue="payeeNo">
+								ORDER BY payee_no
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="payeeLastName">
+								ORDER BY payee_last_name
+							</isEqual>	
+							<isEqual property="sortColumn" compareValue="bankName">
+								ORDER BY bank_name
+							</isEqual>	
+							<isEqual property="sortColumn" compareValue="bankBranch">
+								ORDER BY bank_branch
+							</isEqual>														
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>
+						) a,
+						(SELECT count(*) count_
+						   FROM TABLE (GICLS150_PKG.get_bank_acct_approvals(#payeeClassCd#))
+						   <isNotNull property="filter">
+								WHERE 1 = 1 
+	 								<isNotEmpty prepend="AND" property="payeeNo">
+										payee_no = #payeeNo#
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="payeeLastName">
+										UPPER(payee_last_name) LIKE UPPER(#payeeLastName#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="bankName">
+										UPPER(bank_name) LIKE UPPER(#bankName#)
+									</isNotEmpty> 	
+									<isNotEmpty prepend="AND" property="bankBranch">
+										UPPER(bank_branch) LIKE UPPER(#bankBranch#)
+									</isNotEmpty> 	
+									<isNotEmpty prepend="AND" property="bankAcctTyp">
+										UPPER(bank_acct_typ) LIKE UPPER(#bankAcctTyp#)
+									</isNotEmpty> 	
+									<isNotEmpty prepend="AND" property="bankAcctName">
+										UPPER(bank_acct_name) LIKE UPPER(#bankAcctName#)
+									</isNotEmpty> 	
+									<isNotEmpty prepend="AND" property="bankAcctNo">
+										UPPER(bank_acct_no) LIKE UPPER(#bankAcctNo#)
+									</isNotEmpty> 							
+							</isNotNull>							  
+						   ) b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<insert id="setGICLS150ClaimPayee" parameterClass="giclClaimPayee">
+		DECLARE
+  			v_payees   giis_payees%ROWTYPE;	  	  
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			
+			v_payees.payee_no := #payeeNo#;	 
+  			v_payees.payee_class_cd := #payeeClassCd#;	
+  			v_payees.payee_last_name := #payeeLastName#;	 
+  			v_payees.mail_addr1 := #mailAddr1#;	 
+  			v_payees.tin := #tin#;	 
+  			v_payees.allow_tag := #allowTag#;	 
+  			v_payees.payee_first_name := #payeeFirstName#;	 
+  			v_payees.payee_middle_name := #payeeMiddleName#;	 
+  			v_payees.mail_addr2 := #mailAddr2#;
+  			v_payees.mail_addr3 := #mailAddr3#;	
+  			v_payees.contact_pers := #contactPers#;	
+  			v_payees.designation := #designation#;	
+  			v_payees.phone_no := #phoneNo#;	
+  			v_payees.remarks := #remarks#;	
+  			v_payees.fax_no := #faxNo#;	
+  			v_payees.cp_no := #cpNo#;	
+  			v_payees.sun_no := #sunNo#;	
+  			v_payees.smart_no := #smartNo#;	
+  			v_payees.globe_no := #globeNo#;	
+  			v_payees.ref_payee_cd := #refPayeeCd#;		
+  			v_payees.master_payee_no := #masterPayeeNo#;
+  			v_payees.user_id := #userId#;
+  						 
+  			 						
+			GICLS150_PKG.set_gicls150_claim_payee(v_payees);
+		END;	
+	</insert>
+	
+	<update id="updateBankAcctDtls" parameterClass="giclClaimPayee">
+		DECLARE
+  			v_payees   giis_payees%ROWTYPE;	
+		BEGIN
+			v_payees.payee_class_cd := #payeeClassCd#;
+  			v_payees.payee_no := #payeeNo#;
+  			v_payees.bank_cd := #bankCd#;
+  			v_payees.bank_branch := #bankBranch#;
+  			v_payees.bank_acct_type := #bankAcctType#;
+  			v_payees.bank_acct_name := #bankAcctName#;
+  			v_payees.bank_acct_no := #bankAcctNo#;
+  			v_payees.bank_acct_app_date := #bankAcctAppDate#;
+  			v_payees.bank_acct_app_tag := #bankAcctAppTag#;
+  			v_payees.bank_acct_app_user := #bankAcctAppUser#;
+  			v_payees.user_id := #userId#;
+  			
+			giis_users_pkg.app_user := #userId#;
+			GICLS150_PKG.update_bank_acct_dtls(v_payees);
+		END;	
+	</update>
+	
+	<update id="approveBankAcctDtls" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GICLS150_PKG.approve_bank_acct_dtls(
+				#payeeClassCd#, #payeeNo#, 			
+				#bankAcctAppTag#, #userId#);
+		END;	
+	</update>
+		
+	<select id="validateMobileNo" resultMap="ValidateMobileNoResultMap">
+		SELECT * FROM TABLE (GICLS150_PKG.validate_mobile_number(#param#,#field#,#ctype#))							
+	</select>	
+	
+	<select id="getBankAcctDtls" resultMap="BankAcctDtlsResultMap">
+  		SELECT * FROM TABLE(gicls150_pkg.get_bank_acct_dtls(#payeeClassCd#,#payeeNo#))
+ 	</select>
+</sqlMap>

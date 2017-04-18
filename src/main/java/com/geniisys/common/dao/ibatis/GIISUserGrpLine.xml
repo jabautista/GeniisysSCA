@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISUserGrpLine">
+
+	<typeAlias alias="GIISUserGrpLine" type="com.geniisys.common.entity.GIISUserGrpLine" />
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+
+	<resultMap id="GIISUserGrpLineMap" class="GIISUserGrpLine">
+		<result column="USER_GRP" 		property="userGrp" />
+		<result column="TRAN_CD" 		property="tranCd" />
+		<result column="ISS_CD" 		property="issCd" />
+		<result column="LINE_CD" 		property="lineCd" />
+		<result column="LINE_NAME" 		property="lineName" />
+		<result column="USER_ID" 		property="userId" />
+		<result column="LAST_UPDATE" 	property="lastUpdate" />
+		<result column="REMARKS" 		property="remarks" />
+		<result column="CREATE_USER" 	property="createUser" />
+		<result column="CREATE_DATE" 	property="createDate" />
+	</resultMap>
+	
+	<resultMap id="giiss041UserGrpLinesMap" class="GIISUserGrpLine" extends="BaseEntity.TableGridResultMap">
+		<result column="USER_GRP" 		property="userGrp" />
+		<result column="TRAN_CD" 		property="tranCd" />
+		<result column="ISS_CD" 		property="issCd" />
+		<result column="LINE_CD" 		property="lineCd" />
+		<result column="LINE_NAME" 		property="lineName" />
+		<result column="REMARKS" 		property="remarks" />
+		<result column="USER_ID" 		property="userId" />
+		<result column="LAST_UPDATE" 	property="lastUpdate" />
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="giss041LineLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="line_cd"     		property="lineCd"/>
+		<result column="line_name"     		property="lineName"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="allLineCodesMap">
+		<result column="line_cd"     		property="lineCd"/>
+		<result column="line_name"     		property="lineName"/>
+	</resultMap>
+
+	<select id="getGiisUserGrpLineList" resultMap="GIISUserGrpLineMap" parameterClass="java.lang.String">
+		select user_grp, 							tran_cd, 		iss_cd, 		escape_value(line_cd) line_cd, 
+		       escape_value(line_name) line_name, 	remarks, 		user_id, 		last_update, 
+		       create_user, 						create_date
+	   		   from table(GIIS_USER_GRP_LINE_PKG.get_giis_user_grp_line_list(#userGrp#))
+  	</select>
+  	
+  	<insert id="setGiisUserGrpLine" parameterClass="GIISUserGrpLine">
+  		BEGIN
+  			giis_users_pkg.app_user := #userId#;
+  			GIIS_USER_GRP_LINE_PKG.set_giis_user_grp_line(#userGrp#, #tranCd#, #lineCd#, #issCd#, #remarks#, #userId#);
+  		END;
+  	</insert>
+  	
+  	<delete id="deleteGiisUserGrpLine" parameterClass="java.lang.Integer">
+  		BEGIN
+  			giis_users_pkg.app_user := #appUser#;
+  			GIIS_USER_GRP_LINE_PKG.del_giis_user_grp_line(#userGrp#);
+  		END;
+  	</delete>
+
+	<resultMap id="giisUserGrpLineResultMap" class="giisUserGrpLine" extends="BaseEntity.TableGridResultMap">
+		<result column="line_cd"	property="lineCd" />
+		<result column="line_name"	property="lineName" />
+	</resultMap>	
+	
+	<select id="getUserGrpLine"  resultMap="giisUserGrpLineResultMap">
+		SELECT *
+		   FROM (SELECT rownum rownum_, 
+		                b.count_, 
+		                a.* 
+		           FROM (SELECT * 
+		                   FROM TABLE (GIISS040_PKG.get_user_grp_line(#userGrp#, #tranCd#, #issCd#, #lineCd#, #lineName#))
+		                  <isEqual property="sortColumn" compareValue="lineCd">
+			              		ORDER BY line_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="lineName">
+			              		ORDER BY line_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               	  (SELECT count(*) count_ 
+		                     FROM TABLE (GIISS040_PKG.get_user_grp_line(#userGrp#, #tranCd#, #issCd#, #lineCd#, #lineName#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiiss041UserGrpLines" resultMap="giiss041UserGrpLinesMap">
+		 SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss041_pkg.get_user_grp_line_list(#userGrp#, #tranCd#, #issCd#, #lineCd#, #lineName#))
+	                  <isEqual property="sortColumn" compareValue="lineCd">
+		              		ORDER BY line_cd
+		              </isEqual>
+		              <isEqual property="sortColumn" compareValue="lineName">
+		              		ORDER BY line_name
+		              </isEqual>
+		          	  <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              </isNotNull>
+	                  ) a, 
+	               (SELECT count(*) count_ 
+	                  FROM TABLE(giiss041_pkg.get_user_grp_line_list(#userGrp#, #tranCd#, #issCd#, #lineCd#, #lineName#))
+	                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiss041LineLOV" resultMap="giss041LineLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giiss041_pkg.get_line_lov(#findText#))
+						 WHERE line_cd NOT IN (SELECT b.line_cd
+						 						 FROM giis_user_grp_line b
+												WHERE b.user_grp = #userGrp#
+                  								  AND b.iss_cd = #issCd#
+                  								  AND b.tran_cd = #tranCd#
+                  							   <isNotEmpty property="notInDeleted">
+											  	  AND b.line_cd NOT IN $notInDeleted$
+											   </isNotEmpty>)
+						  <isNotNull property="notIn">
+					  		AND line_cd NOT IN $notIn$
+					  	  </isNotNull>
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="lineCd">
+								ORDER BY line_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="lineName">
+								ORDER BY line_name
+							</isEqual>							
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(giiss041_pkg.get_line_lov(#findText#))
+						  WHERE line_cd NOT IN (SELECT b.line_cd
+						 						  FROM giis_user_grp_line b
+												 WHERE b.user_grp = #userGrp#
+                  								   AND b.iss_cd = #issCd#
+                  								   AND b.tran_cd = #tranCd#
+                  							    <isNotEmpty property="notInDeleted">
+											  	   AND b.line_cd NOT IN $notInDeleted$
+											    </isNotEmpty>)
+						  <isNotNull property="notIn">
+					  		AND line_cd NOT IN $notIn$
+					  	  </isNotNull>) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="valDeleteLineGiiss041" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss041_pkg.val_del_user_grp_line(#userGrp#, #tranCd#, #issCd#, #lineCd#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<delete id="delUserGrpLine" parameterClass="GIISUserGrpLine">
+		BEGIN
+ 			giiss041_pkg.del_user_grp_line(#userGrp#, #tranCd#, #issCd#, #lineCd#);
+ 		END;
+ 	</delete>
+ 	
+ 	<procedure id="setUserGrpLine" parameterClass="GIISUserGrpLine">
+	    DECLARE
+	    	v_rec giis_user_grp_line%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.user_grp := #userGrp#;
+ 			v_rec.line_cd := #lineCd#;
+ 			v_rec.iss_cd := #issCd#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+			v_rec.tran_cd := #tranCd#;
+			
+ 			giiss041_pkg.set_user_grp_line(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<select id="getAllLineCodesGiiss041" resultMap="allLineCodesMap">
+ 		SELECT *
+  		  FROM TABLE(giiss041_pkg.get_line_lov(null))
+ 	     WHERE line_cd NOT IN (SELECT line_cd
+                                 FROM giis_user_grp_line
+                       		    WHERE user_grp = #userGrp#
+                         		  AND tran_cd = #tranCd#
+                         		  AND iss_cd = #issCd#
+                         		  <isNotEmpty property="notInDeleted">
+                         		  AND line_cd NOT IN $notInDeleted$
+                         		  </isNotEmpty>)
+		<isNotEmpty property="notIn">
+   		   AND line_cd NOT IN $notIn$
+		</isNotEmpty>
+ 	</select>
+	
+</sqlMap>

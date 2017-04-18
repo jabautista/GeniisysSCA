@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISBancArea">
+  
+  <typeAlias alias="GIISBancArea" type="com.geniisys.common.entity.GIISBancArea"/>
+    
+  <resultMap class="java.util.HashMap" id="GIISBancAreaListResultMap" extends="BaseEntity.TableGridResultMap">
+    <result column="area_cd"     	property="areaCd"/>
+    <result column="area_desc"  	property="areaDesc"/>
+    <result column="user_id"     	property="userId"/>
+    <result column="last_update"	property="lastUpdate"/>
+    <result column="remarks"     	property="remarks"/>
+    <result column="eff_date"     	property="effDate"/>
+  </resultMap>
+  
+  <select id="getGiiss215RecList" resultMap="GIISBancAreaListResultMap">
+    SELECT *
+      FROM (SELECT rownum rownum_, 
+                   b.count_, 
+                   a.*  
+              FROM (SELECT * FROM TABLE(giiss215_pkg.get_rec_list(#areaCd#, #areaDesc#, #effDate#))
+                      <isEqual property="sortColumn" compareValue="areaCd">
+                        ORDER BY area_cd
+                    </isEqual>
+                    <isEqual property="sortColumn" compareValue="areaDesc">
+                        ORDER BY area_desc
+                    </isEqual>
+                    <isEqual property="sortColumn" compareValue="effDate">
+                        ORDER BY eff_date
+                    </isEqual>
+                    <isNotNull property="sortColumn">
+                        <isEqual property="ascDescFlg" compareValue="ASC">
+                          ASC
+                        </isEqual>
+                        <isEqual property="ascDescFlg" compareValue="DESC">
+                          DESC
+                        </isEqual>
+                    </isNotNull>
+                      ) a, 
+                   (SELECT count(*) count_ 
+                      FROM TABLE(giiss215_pkg.get_rec_list(#areaCd#, #areaDesc#, #effDate#))
+                      ) b) 
+     WHERE rownum_ BETWEEN #from# AND #to#  
+  </select> 
+  
+  <procedure id="saveGiiss215" parameterClass="GIISBancArea">
+      DECLARE
+        v_rec giis_banc_area%ROWTYPE;
+    BEGIN        
+      giis_users_pkg.app_user := #userId#;
+      
+      v_rec.area_cd := #areaCd#;
+      v_rec.area_desc := #areaDesc#;
+      v_rec.eff_date := #effDate#;
+      v_rec.user_id := #userId#;
+      v_rec.remarks := #remarks#;
+      
+      giiss215_pkg.set_rec(v_rec);
+    END;
+  </procedure>
+  
+  <procedure id="giiss215ValAddRec" parameterClass="map">
+    BEGIN
+      giiss215_pkg.val_add_rec(#areaCd#, #areaDesc#);
+    END;
+  </procedure>
+  
+  <resultMap class="java.util.HashMap" id="Giiss215HistResMap" extends="BaseEntity.TableGridResultMap">
+    <result column="area_cd"     	property="areaCd"/>
+    <result column="old_eff_date"     	property="oldEffDate"/>
+    <result column="new_eff_date"     	property="newEffDate"/>
+    <result column="user_id"     	property="userId"/>
+    <result column="last_update"	property="lastUpdate"/>
+    
+  </resultMap>
+  
+  <select id="getGiiss215Hist" resultMap="Giiss215HistResMap">
+    SELECT *
+      FROM (SELECT rownum rownum_, 
+                   b.count_, 
+                   a.*  
+              FROM (SELECT * FROM TABLE(giiss215_pkg.get_hist(#areaCd#))
+              		<isNotNull property="filter">
+						WHERE 1 = 1 
+						<isNotEmpty prepend="AND" property="oldEffDate">
+							TRUNC(old_eff_date) = TO_DATE(#oldEffDate#, 'mm-dd-yyyy')
+						</isNotEmpty>
+						<isNotEmpty prepend="AND" property="newEffDate">
+							TRUNC(new_eff_date) = TO_DATE(#newEffDate#, 'mm-dd-yyyy')
+						</isNotEmpty>
+						<isNotEmpty prepend="AND" property="userId">
+							UPPER(user_id) LIKE UPPER(#userId#)
+						</isNotEmpty>
+						<isNotEmpty prepend="AND" property="lastUpdate">
+							TRUNC(last_update) = TO_DATE(#lastUpdate#, 'mm-dd-yyyy')
+						</isNotEmpty>
+					</isNotNull>
+                    <isEqual property="sortColumn" compareValue="oldEffDate">
+                        ORDER BY old_eff_date
+                    </isEqual>
+                    <isEqual property="sortColumn" compareValue="newEffDate">
+                        ORDER BY new_eff_date
+                    </isEqual>
+                    <isEqual property="sortColumn" compareValue="userId">
+                        ORDER BY user_id
+                    </isEqual>
+                    <isEqual property="sortColumn" compareValue="lastUpdate">
+                        ORDER BY last_update
+                    </isEqual>
+                    <isNotNull property="sortColumn">
+                        <isEqual property="ascDescFlg" compareValue="ASC">
+                          ASC
+                        </isEqual>
+                        <isEqual property="ascDescFlg" compareValue="DESC">
+                          DESC
+                        </isEqual>
+                    </isNotNull>
+                      ) a, 
+                   (SELECT count(*) count_ 
+                      FROM TABLE(giiss215_pkg.get_hist(#areaCd#))
+                      <isNotNull property="filter">
+						WHERE 1 = 1 
+						<isNotEmpty prepend="AND" property="oldEffDate">
+							TRUNC(old_eff_date) = TO_DATE(#oldEffDate#, 'mm-dd-yyyy')
+						</isNotEmpty>
+						<isNotEmpty prepend="AND" property="newEffDate">
+							TRUNC(new_eff_date) = TO_DATE(#newEffDate#, 'mm-dd-yyyy')
+						</isNotEmpty>
+						<isNotEmpty prepend="AND" property="userId">
+							UPPER(user_id) LIKE UPPER(#userId#)
+						</isNotEmpty>
+						<isNotEmpty prepend="AND" property="lastUpdate">
+							TRUNC(last_update) = TO_DATE(#lastUpdate#, 'mm-dd-yyyy')
+						</isNotEmpty>
+					</isNotNull>
+                      ) b) 
+     WHERE rownum_ BETWEEN #from# AND #to#  
+  </select>
+  
+  <resultMap class="java.util.HashMap" id="GIISS216AreaLovResMap" extends="BaseEntity.TableGridResultMap">
+    <result column="area_cd"     	property="areaCd"/>
+    <result column="area_desc"  	property="areaDesc"/>
+  </resultMap>
+  
+  <select id="getGiiss216AreaLov" resultMap="GIISS216AreaLovResMap">
+    SELECT *
+      FROM (SELECT rownum rownum_, 
+                   b.count_, 
+                   a.*  
+              FROM (SELECT * FROM TABLE(giis_banc_area_pkg.get_giis_banc_area_list)
+              	WHERE 1=1
+              		<isNotEmpty prepend="AND" property="findText">
+              			   (TO_CHAR(area_cd) LIKE NVL(#findText#, TO_CHAR(area_cd))
+              			   OR UPPER(area_desc) LIKE UPPER(NVL(#findText#, area_desc)))
+              		</isNotEmpty>
+              		<isNotEmpty prepend="AND" property="filterText">
+              			(TO_CHAR(area_cd) LIKE NVL(#filterText#, TO_CHAR(area_cd))
+              			   OR UPPER(area_desc) LIKE UPPER(NVL(#filterText#, area_desc)))
+              		</isNotEmpty>
+                      <isEqual property="sortColumn" compareValue="areaCd">
+                        ORDER BY area_cd
+                    </isEqual>
+                    <isEqual property="sortColumn" compareValue="areaDesc">
+                        ORDER BY area_desc
+                    </isEqual>
+                    <isNotNull property="sortColumn">
+                        <isEqual property="ascDescFlg" compareValue="ASC">
+                          ASC
+                        </isEqual>
+                        <isEqual property="ascDescFlg" compareValue="DESC">
+                          DESC
+                        </isEqual>
+                    </isNotNull>
+                      ) a, 
+                   (SELECT count(*) count_ 
+                      FROM TABLE(giis_banc_area_pkg.get_giis_banc_area_list)
+                      WHERE 1 = 1
+                      <isNotEmpty prepend="AND" property="findText">
+              			   (TO_CHAR(area_cd) LIKE NVL(#findText#, TO_CHAR(area_cd))
+              			   OR UPPER(area_desc) LIKE UPPER(NVL(#findText#, area_desc)))
+              		</isNotEmpty>
+              		<isNotEmpty prepend="AND" property="filterText">
+              			(TO_CHAR(area_cd) LIKE NVL(#filterText#, TO_CHAR(area_cd))
+              			   OR UPPER(area_desc) LIKE UPPER(NVL(#filterText#, area_desc)))
+              		</isNotEmpty>
+                      ) b) 
+     WHERE rownum_ BETWEEN #from# AND #to#  
+  </select>
+  
+</sqlMap>

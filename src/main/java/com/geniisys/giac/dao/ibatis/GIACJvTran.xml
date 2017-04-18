@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIACJvTran">
+	
+	<typeAlias alias="giacJvTran" type="com.geniisys.giac.entity.GIACJvTran"/>
+  	
+	<resultMap class="giacJvTran" id="giacJvTranListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="jv_tran_cd"     property="jvTranCd"/>
+		<result column="jv_tran_desc"  property="jvTranDesc"/>
+		<result column="jv_tran_tag"  property="jvTranTag"/>
+		<result column="user_id"     property="userId"/>
+		<result column="last_update" property="lastUpdate"/>
+		<result column="remarks"     property="remarks"/>
+	</resultMap>
+	
+	<select id="getGiacs323RecList" resultMap="giacJvTranListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giacs323_pkg.get_rec_list(#jvTranCd#, #jvTranDesc#, #dspJvTranTag#))
+		                  <isEqual property="sortColumn" compareValue="jvTranCd">
+			              		ORDER BY jv_tran_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="jvTranDesc">
+			              		ORDER BY jv_tran_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="dspJvTranTag">
+			              		ORDER BY jv_tran_tag
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giacs323_pkg.get_rec_list(#jvTranCd#, #jvTranDesc#, #dspJvTranTag#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setJvTran" parameterClass="giacJvTran">
+	    DECLARE
+	    	v_rec giac_jv_trans%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.jv_tran_cd := #jvTranCd#;
+ 			v_rec.jv_tran_desc := #jvTranDesc#;
+ 			v_rec.jv_tran_tag := #jvTranTag#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			giacs323_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteJvTran" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giacs323_pkg.val_del_rec(#recId#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddJvTran" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giacs323_pkg.val_add_rec(#recId#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delJvTran" parameterClass="java.lang.String">
+		BEGIN
+ 			giacs323_pkg.del_rec(#jvTranCd#);
+ 		END;
+ 	</delete>
+</sqlMap>

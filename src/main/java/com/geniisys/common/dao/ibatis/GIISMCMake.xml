@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISMCMake">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIISMCMake" type="com.geniisys.common.entity.GIISMCMake"/>
+	
+	<resultMap class="GIISMCMake" id="GIISMCMakeLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="carCompanyCd" column="CAR_COMPANY_CD" />
+		<result property="carCompany"	column="CAR_COMPANY"	/>
+		<result property="makeCd"		column="MAKE_CD" />
+		<result property="make"			column="MAKE" />		
+	</resultMap>
+	
+	<select id="getMakeLOV" parameterClass="java.util.HashMap" resultMap="GIISMCMakeLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giis_mc_make_pkg.get_make_list_subl_car_cd_tg(#sublineCd#, #carCompanyCd#, #findText#))
+						  <isNull property="sortColumn">
+							ORDER BY make ASC
+						  </isNull>
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="makeCd">
+								ORDER BY make_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="make">
+								ORDER BY make
+							</isEqual>							
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(giis_mc_make_pkg.get_make_list_subl_car_cd_tg(#sublineCd#, #carCompanyCd#, #findText#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getMakeLOV2" parameterClass="java.util.HashMap" resultMap="GIISMCMakeLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giis_mc_make_pkg.get_make_list_by_cmpny_cd(#carCompanyCd#))
+						  <isNotNull property="findText">
+		                  	WHERE UPPER(make) LIKE UPPER(#findText#)
+		                  </isNotNull>
+					   )a,
+					   (SELECT COUNT(*) count_
+						  FROM TABLE(giis_mc_make_pkg.get_make_list_by_cmpny_cd(#carCompanyCd#))
+						  <isNotNull property="findText">
+		                  	WHERE UPPER(make) LIKE UPPER(#findText#)
+		                  </isNotNull>
+		                  ) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="GIISMCMake" id="GIISS103RecListMap" extends="BaseEntity.TableGridResultMap">
+		<result column="make_cd"     			property="makeCd"/>
+		<result column="make"     				property="make"/>
+		<result column="car_company_cd"     	property="carCompanyCd"/>
+		<result column="car_company"     		property="carCompany"/>
+		<result column="subline_cd"     		property="sublineCd"/>
+		<result column="subline_name"     		property="sublineName"/>
+		<result column="no_of_pass"     		property="noOfPass"/>
+		<result column="remarks"     			property="remarks"/>
+		<result column="user_id"     			property="userId"/>
+		<result column="last_update"     		property="lastUpdate"/>
+		<result column="dsp_last_update"     	property="dspLastUpdate"/>
+	</resultMap>
+	
+	<resultMap class="com.geniisys.common.entity.GIISMCEngineSeries" id="GIISS103EngineListMap" extends="BaseEntity.TableGridResultMap">
+		<result column="make_cd"     			property="makeCd"/>
+		<result column="car_company_cd"     	property="carCompanyCd"/>
+		<result column="series_cd"     			property="seriesCd"/>
+		<result column="engine_series"     		property="engineSeries"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="sublineLovMap" extends="BaseEntity.TableGridResultMap">
+		<result column="subline_cd"     		property="sublineCd"/>
+		<result column="subline_name"     		property="sublineName"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="companyLovMap" extends="BaseEntity.TableGridResultMap">
+		<result column="car_company_cd"     	property="carCompanyCd"/>
+		<result column="car_company"     		property="carCompany"/>
+	</resultMap>
+	
+	<select id="getGIISS103RecList" resultMap="GIISS103RecListMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss103_pkg.get_make_listing(#makeCd#, #make#, #noOfPass#, #sublineCd#, #carCompanyCd#))
+		                  <isEqual property="sortColumn" compareValue="makeCd">
+			              		ORDER BY make_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="make">
+			              		ORDER BY TRIM(make)
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="noOfPass">
+			              		ORDER BY no_of_pass
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="sublineCd">
+			              		ORDER BY subline_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="carCompanyCd">
+			              		ORDER BY car_company_cd
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss103_pkg.get_make_listing(#makeCd#, #make#, #noOfPass#, #sublineCd#, #carCompanyCd#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<select id="getGIISS103SublineLov" resultMap="sublineLovMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giiss103_pkg.get_subline_lov(#findText#))
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="sublineCd">
+								ORDER BY subline_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="sublineName">
+								ORDER BY subline_name
+							</isEqual>							
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(giiss103_pkg.get_subline_lov(#findText#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGIISS103CompanyLov" resultMap="companyLovMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giiss103_pkg.get_company_lov(#findText#))
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="carCompanyCd">
+								ORDER BY car_company_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="carCompany">
+								ORDER BY car_company
+							</isEqual>							
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(giiss103_pkg.get_company_lov(#findText#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="valAddMcMake" parameterClass="java.util.HashMap">
+	<!-- andrew - 08052015 - SR 19241 -->
+ 		BEGIN
+ 			giiss103_pkg.val_add_rec(#action#, #makeCd#, #carCompanyCd#, #make#, #sublineCd#, #noOfPass#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteMcMake" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss103_pkg.val_del_rec(#makeCd#, #carCompanyCd#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="setMcMake" parameterClass="GIISMCMake">
+	    DECLARE
+	    	v_rec giis_mc_make%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.make_cd := #makeCd#;
+			v_rec.make := #make#;
+			v_rec.car_company_cd := #carCompanyCd#;
+			v_rec.subline_cd := #sublineCd#;
+			v_rec.no_of_pass := #noOfPass#;
+			v_rec.remarks := #remarks#;
+			v_rec.user_id := #userId#;
+ 			
+ 			giiss103_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<delete id="delMcMake" parameterClass="java.util.HashMap">
+		BEGIN
+ 			giiss103_pkg.del_rec(#makeCd#, #carCompanyCd#);
+ 		END;
+ 	</delete>
+	
+	<select id="getGIISS103EngineList" resultMap="GIISS103EngineListMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss103_pkg.get_eng_listing(#makeCd#, #carCompanyCd#, #seriesCd#, #engineSeries#))
+		                  <isEqual property="sortColumn" compareValue="seriesCd">
+			              		ORDER BY series_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="engineSeries">
+			              		ORDER BY engine_series
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss103_pkg.get_eng_listing(#makeCd#, #carCompanyCd#, #seriesCd#, #engineSeries#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<procedure id="valAddMcEngine" parameterClass="java.util.HashMap">
+	<!-- andrew - 08052015 - SR 19241 -->	
+ 		BEGIN
+ 			giiss103_pkg.val_add_eng(#action#, #makeCd#, #carCompanyCd#, #seriesCd#, #engineSeries#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteMcEngine" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss103_pkg.val_del_eng(#makeCd#, #carCompanyCd#, #seriesCd#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="setMcEngine" parameterClass="com.geniisys.common.entity.GIISMCEngineSeries">
+	    DECLARE
+	    	v_rec giis_mc_eng_series%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.make_cd := #makeCd#;
+			v_rec.car_company_cd := #carCompanyCd#;
+			v_rec.series_cd := #seriesCd#;
+			v_rec.engine_series := #engineSeries#;
+			v_rec.user_id := #userId#;
+ 			
+ 			giiss103_pkg.set_eng(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<delete id="delMcEngine" parameterClass="java.util.HashMap">
+		BEGIN
+ 			giiss103_pkg.del_eng(#makeCd#, #carCompanyCd#, #seriesCd#);
+ 		END;
+ 	</delete>
+	
+</sqlMap>

@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="gipiQuotePictures">
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+
+	<typeAlias alias="GIPIQuotePicturesClass" type="com.geniisys.quote.entity.GIPIQuotePictures"/>
+
+	<resultMap id="gipiQuotePictures" class="GIPIQuotePicturesClass">
+		<result column="QUOTE_ID" 		property="quoteId" />
+		<result column="ITEM_NO" 		property="itemNo" />
+		<result column="FILE_PATH" 		property="filePath" />
+		<result column="FILE_NAME" 		property="fileName" />
+		<result column="FILE_TYPE" 		property="fileType" />
+		<result column="FILE_EXT" 		property="fileExt" />
+		<result column="REMARKS" 		property="remarks" />
+	</resultMap>
+	
+	<select id="getAttachedMedia" resultMap="gipiQuotePictures">
+		SELECT quote_id, item_no, file_path, file_name, 
+		       file_type, file_ext, remarks  <!-- removed ESCAPE_VALUE(remarks), Halley 10.10.13 -->
+		FROM TABLE(Gipi_Quote_Pictures_Pkg.get_gipi_quote_pictures2(#quoteId#))
+	</select>
+	
+	<insert id="saveQuotationAttachment" parameterClass="GIPIQuotePicturesClass">
+		DECLARE
+			picture GIPI_QUOTE_PICTURES%ROWTYPE;
+		BEGIN
+			picture.quote_id			:= #quoteId#;
+			picture.item_no			:= #itemNo#;
+			picture.file_name		:= #filePath#;
+			picture.file_type			:= #fileType#;
+			picture.file_ext			:= #fileExt#;
+			picture.remarks			:= #remarks#;
+			picture.user_id			:= #appUser#;
+			picture.last_update	:= SYSDATE;
+			giis_users_pkg.app_user := #appUser#;
+			Gipi_Quote_Pictures_Pkg.set_gipi_quote_pic(picture);
+		END;
+		<!-- BEGIN
+  			giis_users_pkg.app_user := #appUser#;
+  			Gipi_Quote_Pictures_Pkg.set_gipi_quote_pic2(
+	  		#quoteId#,    #itemNo#,    #filePath# || '/' || #fileName#, 
+	  		#fileType#,    #fileExt#,   #remarks#,  #appUser#,  SYSDATE);
+  		END; -->
+	</insert>
+	
+	<procedure id="deleteQuotationAttachment" parameterClass="GIPIQuotePicturesClass">
+		BEGIN
+			Gipi_Quote_Pictures_Pkg.del_gipi_quote_pic(#quoteId#, #itemNo#,  #filePath#);
+		END;
+	</procedure>
+
+	<resultMap class="GIPIQuotePicturesClass" id="attachedMediaTGMap" extends="BaseEntity.TableGridResultMap">
+		<result column="QUOTE_ID" 		property="quoteId" />
+		<result column="ITEM_NO" 		property="itemNo" />
+		<result column="FILE_PATH" 		property="filePath" />
+		<result column="FILE_NAME" 		property="fileName" />
+		<result column="REMARKS" 		property="remarks" />	
+	</resultMap>
+	
+	<select id="getAttachedMediaTG" parameterClass="java.util.HashMap" resultMap="attachedMediaTGMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(gipi_quote_pictures_pkg.get_gipi_quote_picture_list(#quoteId#, #itemNo#, #fileName#, #remarks#))
+						  <isNotNull property="remarks">
+								WHERE UPPER(remarks) LIKE UPPER(#remarks#) 
+						  </isNotNull>
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="fileName">
+								ORDER BY file_name
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="remarks">
+								ORDER BY remarks
+							</isEqual>							
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(gipi_quote_pictures_pkg.get_gipi_quote_picture_list(#quoteId#, #itemNo#, #fileName#, #remarks#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap id="getAttachmentListResultMap" class="GIPIQuotePicturesClass">
+		<result property="quoteId" column="QUOTE_ID" />
+		<result property="itemNo" column="ITEM_NO" />
+		<result property="fileName" column="FILE_NAME" />
+	</resultMap>
+	
+	<select id="getAttachmentList2" resultMap="getAttachmentListResultMap">
+		SELECT *
+		  FROM TABLE(gipi_quote_pictures_pkg.get_attachment_list(#quoteId#, #itemNo#))
+	</select>
+	
+	<procedure id="deleteItemAttachments" parameterClass="java.util.HashMap">
+		BEGIN
+			GIPI_QUOTE_PICTURES_PKG.delete_item_attachments(#quoteId#, #itemNo#);
+		END;
+	</procedure>
+	
+</sqlMap>

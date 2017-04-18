@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIACWholdingTaxes">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="giacWholdingTax" type="com.geniisys.giac.entity.GIACWholdingTaxes"/>
+	
+	<parameterMap class="map" id="validateGIACS022WhtaxCodeMap">
+		<parameter property="whtaxCode"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="birTaxCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="percentRate"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="whtaxDesc"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="whtaxId"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="slRequired"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="message"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="validateGIACS022WhtaxCode" parameterMap="validateGIACS022WhtaxCodeMap">
+		{CALL GIAC_WHOLDING_TAXES_PKG.validate_giacs022_whtax_code(?, ?, ?, ?, ?, ?, ?)}
+	</procedure>
+	
+	<select id="validateItemNoGIACS022" parameterClass="java.util.HashMap" resultClass="String">
+		SELECT 'N' DATA FROM TABLE(GIAC_TAXES_WHELD_PKG.get_giac_taxes_wheld(#gaccTranId#))
+   			WHERE item_no = #itemNo#
+	</select>
+	
+	<resultMap class="giacWholdingTax" id="GIACWhtaxListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="whtax_id"           	property="whtaxId"/>
+		<result column="gibr_gfun_fund_cd"		property="gibrGfunFundCd"/>
+		<result column="gibr_branch_cd"   		property="gibrBranchCd"/>
+		<result column="whtax_code"           	property="whtaxCode"/>
+		<result column="whtax_desc"         	property="whtaxDesc"/>
+		<result column="user_id"          		property="userId"/>
+		<result column="last_update"      		property="lastUpdate"/>
+		<result column="ind_corp_tag"        	property="indCorpTag"/>
+		<result column="remarks"          		property="remarks"/>
+		<result column="bir_tax_cd"          	property="birTaxCd"/>
+		<result column="percent_rate"          	property="percentRate"/>
+		<result column="start_dt"          		property="startDt"/>
+		<result column="end_dt"          		property="endDt"/>
+		<result column="gl_acct_id"          	property="glAcctId"/>
+		<result column="sl_type_cd"          	property="slTypeCd"/>
+		<result column="dsp_sl_type_name"       property="dspSlTypeName"/>
+		<result column="dsp_gl_acct_category"   property="dspGlAcctCategory"/>
+		<result column="dsp_gl_control_acct"    property="dspGlControlAcct"/>
+		<result column="dsp_gl_sub_acct_1"      property="dspGlSubAcct1"/>
+		<result column="dsp_gl_sub_acct_2"      property="dspGlSubAcct2"/>
+		<result column="dsp_gl_sub_acct_3"      property="dspGlSubAcct3"/>
+		<result column="dsp_gl_sub_acct_4"      property="dspGlSubAcct4"/>
+		<result column="dsp_gl_sub_acct_5"      property="dspGlSubAcct5"/>
+		<result column="dsp_gl_sub_acct_6"      property="dspGlSubAcct6"/>
+		<result column="dsp_gl_sub_acct_7"      property="dspGlSubAcct7"/>
+		<result column="dsp_gl_acct_name"       property="dspGlAcctName"/>
+	</resultMap>
+	
+	<select id="getGiacs318WhtaxList" resultMap="GIACWhtaxListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giacs318_pkg.get_whtax_list(#fundCd#, #branchCd#, #indCorpTag#, #whtaxCode#, #whtaxDesc#, #birTaxCd#, #percentRate#))
+		                  <isEqual property="sortColumn" compareValue="whtaxCode">
+			              		ORDER BY whtax_code
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="whtaxDesc">
+			              		ORDER BY whtax_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="birTaxCd">
+			              		ORDER BY bir_tax_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="indCorpTag">
+			              		ORDER BY ind_corp_tag
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="percentRate">
+			              		ORDER BY percent_rate
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giacs318_pkg.get_whtax_list(#fundCd#, #branchCd#, #indCorpTag#, #whtaxCode#, #whtaxDesc#, #birTaxCd#, #percentRate#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setWhtax" parameterClass="giacWholdingTax">
+	    DECLARE
+	    	v_rec giac_wholding_taxes%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.whtax_id := #whtaxId#;
+ 			v_rec.gibr_gfun_fund_cd := #gibrGfunFundCd#;
+ 			v_rec.gibr_branch_cd := #gibrBranchCd#;
+ 			v_rec.whtax_code := #whtaxCode#;
+ 			v_rec.whtax_desc := #whtaxDesc#;
+ 			v_rec.ind_corp_tag := #indCorpTag#;
+ 			v_rec.bir_tax_cd := #birTaxCd#;
+ 			v_rec.percent_rate := #percentRate#;
+ 			v_rec.start_dt := TO_DATE(#startDt#, 'MM-DD-YYYY');
+ 			v_rec.end_dt := TO_DATE(#endDt#, 'MM-DD-YYYY');
+ 			v_rec.gl_acct_id := #glAcctId#;
+ 			v_rec.sl_type_cd := #slTypeCd#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			giacs318_pkg.set_whtax(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteWhtax" parameterClass="java.lang.Integer">
+ 		BEGIN
+ 			giacs318_pkg.val_del_whtax(#whtaxId#);
+ 		END;
+ 	</procedure>
+ 	
+	<delete id="delWhtax" parameterClass="java.lang.Integer">
+		BEGIN
+ 			giacs318_pkg.del_whtax(#whtaxId#);
+ 		END;
+ 	</delete> 	
+	
+	<select id="getGiacs318AllRec" resultMap="GIACWhtaxListResultMap">
+		SELECT rownum rownum_,
+			   '1' count_,
+			   a.*
+					FROM (SELECT * 
+							FROM TABLE (giacs318_pkg.get_whtax_list(#fundCd#, #branchCd#, #indCorpTag#, #whtaxCode#, #whtaxDesc#, #birTaxCd#, #percentRate#))) a
+	</select>
+</sqlMap>

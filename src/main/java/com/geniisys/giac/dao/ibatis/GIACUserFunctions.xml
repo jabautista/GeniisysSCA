@@ -1,0 +1,345 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIACUserFunctions">
+	
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIACUserFunctionsClass" type="com.geniisys.giac.entity.GIACUserFunctions"/>
+	
+	<procedure id="checkIfUserHasFunction" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT giac_user_functions_pkg.check_if_user_has_function(#functionCd#, #moduleName#, #userId#)
+  		  FROM dual
+	</procedure>
+	
+	<select id="checkOverdueUser" resultClass="java.lang.String" parameterClass="java.util.HashMap">
+		SELECT giac_user_functions_pkg.check_overdue(#functionName#, #moduleId#, #userId#)
+  		  FROM dual
+	</select>
+	
+	<procedure id="checkIfUserHasFunction3" parameterClass="map" resultClass="String">
+		SELECT giac_user_functions_pkg.validate_user3(#userId#, #functionCd#, #moduleName#, #validTag#)
+  		  FROM dual
+	</procedure>
+	
+<!-- GIACS315 : shan 12.16.2013 -->
+	<resultMap class="java.util.HashMap" id="giacs315ModuleLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="module_id"    		property="moduleId"/>
+		<result column="module_name" 		property="moduleName"/>
+		<result column="scrn_rep_name" 		property="scrnRepName"/>
+	</resultMap>
+	
+	<select id="getGiacs315ModuleLOV" resultMap="giacs315ModuleLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIACS315_PKG.GET_MODULE_LOV)
+		                 <isNotNull property="findText">
+					         WHERE UPPER(module_name) LIKE UPPER(#findText#) 
+					            OR UPPER(scrn_rep_name) LIKE UPPER(#findText#)
+				         </isNotNull>  
+				         <isNull property="findText">
+					         WHERE UPPER(module_name) LIKE UPPER(#searchString#) 
+					            OR UPPER(scrn_rep_name) LIKE UPPER(#searchString#)
+				         </isNull>          
+			          	  <isNotNull property="sortColumn">
+			                  <isEqual property="sortColumn" compareValue="moduleName">
+				              		ORDER BY module_name
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="scrnRepName">
+				              		ORDER BY scrn_rep_name
+				              </isEqual>			
+				          	  <isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              </isNotNull>
+				          </isNotNull>    
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE(GIACS315_PKG.GET_MODULE_LOV)
+			                 <isNotNull property="findText">
+						         WHERE UPPER(module_name) LIKE UPPER(#findText#) 
+						            OR UPPER(scrn_rep_name) LIKE UPPER(#findText#)
+					         </isNotNull>  
+					         <isNull property="findText">
+						         WHERE UPPER(module_name) LIKE UPPER(#searchString#) 
+						            OR UPPER(scrn_rep_name) LIKE UPPER(#searchString#)
+					         </isNull>      
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="giacs315FunctionLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="function_code" 		property="functionCode"/>
+		<result column="function_name" 		property="functionName"/>
+		<result column="function_desc"    	property="functionDesc"/>
+	</resultMap>
+	
+	<select id="getGiacs315FunctionLOV" resultMap="giacs315FunctionLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIACS315_PKG.GET_FUNCTION_LOV(#moduleId#))
+		                 <isNotNull property="findText">
+					         WHERE UPPER(function_code) LIKE UPPER(#findText#) 
+					            OR UPPER(function_name) LIKE UPPER(#findText#)
+					            OR UPPER(function_desc) LIKE UPPER(#findText#)
+				         </isNotNull>  
+				         <isNull property="findText">
+					         WHERE UPPER(function_code) LIKE UPPER(#searchString#)  
+					            OR UPPER(function_name) LIKE UPPER(#searchString#)
+					            OR UPPER(function_desc) LIKE UPPER(#searchString#)
+				         </isNull>          
+			          	  <isNotNull property="sortColumn">        
+			                  <isEqual property="sortColumn" compareValue="functionCode">
+				              		ORDER BY function_code
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="functionName">
+				              		ORDER BY function_name
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="functionDesc">
+				              		ORDER BY function_desc
+				              </isEqual>
+				          	  <isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              </isNotNull>
+				          </isNotNull>    
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (GIACS315_PKG.GET_FUNCTION_LOV(#moduleId#))
+			                 <isNotNull property="findText">
+						         WHERE UPPER(function_code) LIKE UPPER(#findText#) 
+						            OR UPPER(function_name) LIKE UPPER(#findText#)
+						            OR UPPER(function_desc) LIKE UPPER(#findText#)
+					         </isNotNull>  
+					         <isNull property="findText">
+						         WHERE UPPER(function_code) LIKE UPPER(#searchString#)  
+						            OR UPPER(function_name) LIKE UPPER(#searchString#)
+						            OR UPPER(function_desc) LIKE UPPER(#searchString#)
+					         </isNull>        
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="giacs315UserLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="USER_ID"		property="userId"/>
+		<result column="USER_NAME"		property="userName"/>
+	</resultMap>
+	
+	<select id="getGiacs315UserLOV" resultMap="giacs315UserLOVMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIACS315_PKG.GET_USER_LOV)
+		                  <isNotNull property="findText">
+		              		   WHERE UPPER(user_id) like upper(#findText#)
+		              		      OR UPPER(user_name) like upper(#findText#)
+			              </isNotNull>
+			              <isNull property="findText">
+		              		   WHERE UPPER(user_id) like upper(#searchString#)
+		              		      OR UPPER(user_name) like upper(#searchString#)
+			              </isNull>
+			              <isNotNull property="sortColumn">
+			                  <isEqual property="sortColumn" compareValue="userId">
+				              		ORDER BY user_id
+				              </isEqual>	
+			                  <isEqual property="sortColumn" compareValue="userName">
+				              		ORDER BY user_name
+				              </isEqual>	
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (GIACS315_PKG.GET_USER_LOV)
+			                  <isNotNull property="findText">
+			              		   WHERE UPPER(user_id) like upper(#findText#)
+			              		      OR UPPER(user_name) like upper(#findText#)
+				              </isNotNull>
+				              <isNull property="findText">
+			              		   WHERE UPPER(user_id) like upper(#searchString#)
+			              		      OR UPPER(user_name) like upper(#searchString#)
+				              </isNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="GIACUserFunctionsClass" id="giacs315ResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="MODULE_ID" 			property="moduleId"/>
+		<result column="FUNCTION_CODE" 		property="functionCode"/>
+		<result column="USER_ID" 			property="userId"/>
+		<result column="USER_NAME" 			property="userName"/>
+		<result column="USER_FUNCTION_ID" 	property="userFunctionId"/>
+		<result column="VALID_TAG" 			property="validTag"/>
+		<result column="DSP_VALID_TAG" 		property="dspValidTag"/>
+		<result column="VALIDITY_DT" 		property="validityDt"/>
+		<result column="TERMINATION_DT" 	property="terminationDt"/>
+		<result column="REMARKS" 			property="remarks"/>
+		<result column="TRAN_USER_ID" 		property="tranUserId"/>
+		<result column="LAST_UPDATE" 		property="lastUpdate"/>
+	</resultMap>
+	
+	<select id="getGiacs315RecList" resultMap="giacs315ResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIACS315_PKG.GET_REC_LIST(#moduleId#, #functionCode#))
+		                  <isNotNull property="filter">
+		  	      		  	WHERE 1=1
+		  	      		  		<isNotEmpty prepend="AND" property="userId">
+		  	      		  			UPPER(user_id) LIKE UPPER(#userId#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="userName">
+		  	      		  			UPPER(user_name) LIKE UPPER(#userName#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="dspValidTag">
+		  	      		  			UPPER(dsp_valid_tag) LIKE UPPER(#dspValidTag#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="validityDt">
+		  	      		  			validity_dt = TO_DATE(#validityDt#, 'MM-DD-RRRR')
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="terminationDt">
+		  	      		  			termination_dt = TO_DATE(#terminationDt#, 'MM-DD-RRRR')
+		  	      		  		</isNotEmpty>
+		  	      		  </isNotNull>       
+			          	  <isNotNull property="sortColumn">
+			                  <isEqual property="sortColumn" compareValue="userId">
+				              		ORDER BY user_id
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="userName">
+				              		ORDER BY user_name
+				              </isEqual>				              
+			                  <isEqual property="sortColumn" compareValue="dspValidTag">
+				              		ORDER BY dsp_valid_tag
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="validityDt">
+				              		ORDER BY validity_dt
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="terminationDt">
+				              		ORDER BY termination_dt
+				              </isEqual>
+				          	  <isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              </isNotNull>
+				          </isNotNull>    
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE(GIACS315_PKG.GET_REC_LIST(#moduleId#, #functionCode#))
+			                  <isNotNull property="filter">
+			  	      		  	WHERE 1=1
+			  	      		  		<isNotEmpty prepend="AND" property="userId">
+			  	      		  			UPPER(user_id) LIKE UPPER(#userId#)
+			  	      		  		</isNotEmpty>
+			  	      		  		<isNotEmpty prepend="AND" property="userName">
+			  	      		  			UPPER(user_name) LIKE UPPER(#userName#)
+			  	      		  		</isNotEmpty>
+			  	      		  		<isNotEmpty prepend="AND" property="dspValidTag">
+			  	      		  			UPPER(dsp_valid_tag) LIKE UPPER(#dspValidTag#)
+			  	      		  		</isNotEmpty>
+			  	      		  		<isNotEmpty prepend="AND" property="validityDt">
+			  	      		  			validity_dt = TO_DATE(#validityDt#, 'MM-DD-RRRR')
+			  	      		  		</isNotEmpty>
+			  	      		  		<isNotEmpty prepend="AND" property="terminationDt">
+			  	      		  			termination_dt = TO_DATE(#terminationDt#, 'MM-DD-RRRR')
+			  	      		  		</isNotEmpty>
+			  	      		  </isNotNull>     
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getUserFunctionsSeq" resultClass="java.lang.Integer">
+		SELECT user_functions_seq.NEXTVAL
+          FROM dual
+	</select>
+	
+	<procedure id="setUserFunction" parameterClass="GIACUserFunctionsClass">
+	    DECLARE
+	    	v_rec GIAC_USER_FUNCTIONS%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #tranUserId#;
+ 			
+ 			v_rec.module_id 		:= #moduleId#;
+ 			v_rec.function_code 	:= #functionCode#;
+ 			v_rec.user_id	 		:= #userId#;
+ 			v_rec.user_function_id	:= #userFunctionId#;
+ 			v_rec.valid_tag 		:= #validTag#;
+ 			v_rec.validity_dt		:= #validityDt#;
+ 			v_rec.termination_dt	:= #terminationDt#;
+ 			v_rec.tran_user_id 		:= #tranUserId#;
+ 			v_rec.remarks 			:= #remarks#;
+ 			
+ 			giacs315_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<delete id="delUserFunction" parameterClass="GIACUserFunctionsClass">
+		BEGIN
+ 			giacs315_pkg.del_rec(#moduleId#, #functionCode#, #userId#, #userFunctionId#);
+ 		END;
+ 	</delete>
+ 	
+ 	<!-- 
+	<procedure id="valDeleteUserFunction" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giacs315_pkg.val_del_rec(#moduleId#, #functionCode#, #userId#, #userFunctionId#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddUserFunction" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giacs315_pkg.val_add_rec(#moduleId#, #functionCode#, #userId#, #userFunctionId#);
+ 		END;
+ 	</procedure> 
+	 -->
+	 
+	 <select id="getScrnRepNameGiacs315" parameterClass="java.lang.Integer" resultClass="java.lang.String">
+	 	SELECT scrn_rep_name
+          FROM GIAC_MODULES
+         WHERE module_id = #moduleId#
+	 </select>
+	 
+<!-- end GIACS315 -->
+
+	<parameterMap class="map" id="checkUserFunctionValidityMap">
+		<parameter property="userId"			jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="IN"/>
+		<parameter property="validityDate"		jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="OUT"/>
+		<parameter property="terminationDate"	jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="OUT"/>
+		<parameter property="validTag"			jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="checkUserFunctionValidity" parameterMap="checkUserFunctionValidityMap">
+		BEGIN
+ 			GIAC_USER_FUNCTIONS_PKG.check_user_validity(?,?,?,?);
+ 		END;
+	</procedure>
+</sqlMap>

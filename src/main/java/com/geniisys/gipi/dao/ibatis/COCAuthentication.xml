@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="COCAuthentication">
+
+	<parameterMap class="map" id="defaultCOCAuthMap">
+		<parameter property="authNo" 		jdbcType="VARCHAR" 		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="cocafUser"		jdbcType="VARCHAR" 		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="cocNo"			jdbcType="VARCHAR" 		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="errMsg"		jdbcType="VARCHAR" 		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="itemNo"		jdbcType="NUMBER" 		javaType="java.math.BigDecimal"	mode="IN"/>
+		<parameter property="policyId"		jdbcType="NUMBER" 		javaType="java.math.BigDecimal"	mode="IN"/>
+		<parameter property="regDate"		jdbcType="DATE" 		javaType="java.util.Date"		mode="IN"/>
+		<parameter property="lastUserId" 	jdbcType="VARCHAR" 		javaType="java.lang.String"		mode="IN"/>
+	</parameterMap>
+	
+	
+	<resultMap class="java.util.HashMap" id="getCOCAuthenticationDetailsMap">
+		<result column="policy_id"		property="policyId" />
+		<result column="cocaf_user"		property="username" />
+		<result column="cocaf_pwd"		property="password" />
+		<result column="reg_type"		property="regType" />
+		<result column="coc_no"			property="cocNo" />
+		<result column="item_no"		property="itemNo" />
+		<result column="plate_no"		property="plateNo" />
+		<result column="mv_file_no"		property="mvFileNo" />
+		<result column="motor_no"		property="engineNo" />
+		<result column="serial_no"		property="chassisNo" />
+		<result column="incept_date"	property="inceptionDate" />
+		<result column="expiry_date"	property="expiryDate" />
+		<result column="mv_type"		property="mvType" />
+		<result column="mv_prem_type"	property="mvPremType" />
+		<result column="tax_type"		property="taxType" />
+		<result column="assd_name"		property="assuredName" />
+		<result column="assd_tin"		property="assuredTin" />
+	</resultMap>
+	
+	<select id="getCOCAuthenticationDetails" parameterClass="java.util.HashMap" resultMap="getCOCAuthenticationDetailsMap">
+		SELECT * FROM TABLE	(GIPI_COC_AUTH_PKG.GET_COC_AUTHENTICATION(#userId#, #parId#, #useDefaultTin#))
+	</select>
+	
+	<select id="getPackCOCAuthenticationDetails" parameterClass="java.util.HashMap" resultMap="getCOCAuthenticationDetailsMap">
+		SELECT * FROM TABLE	(GIPI_COC_AUTH_PKG.GET_PACK_COC_AUTHENTICATION(#userId#, #parId#, #useDefaultTin#))
+	</select>
+	
+	
+	<procedure id="setCOCAuthentication" parameterMap="defaultCOCAuthMap">
+		BEGIN
+			GIPI_COC_AUTH_PKG.SET_COC_AUTHENTICATION(?, ?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	
+</sqlMap>

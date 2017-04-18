@@ -1,0 +1,600 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISDefaultOneRisk">
+    
+    <typeAlias alias="giisDefaultDist" type="com.geniisys.giis.entity.GIISDefaultDist"/>
+    <typeAlias alias="giisDefaultDistDtl" type="com.geniisys.giis.entity.GIISDefaultDistDtl"/>
+    <typeAlias alias="giisDefaultDistGroup" type="com.geniisys.giis.entity.GIISDefaultDistGroup"/>
+    
+    <resultMap class="giisDefaultDist" id="giisDefaultDistListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="default_no"        			property="defaultNo"/>
+		<result column="line_cd"        			property="lineCd"/>
+		<result column="dsp_line_name"        		property="dspLineName"/>
+		<result column="default_type"        		property="defaultType"/>
+		<result column="dsp_default_name"        	property="dspDefaultName"/>
+		<result column="dist_type"        			property="distType"/>
+		<result column="dsp_dist_name"       		property="dspDistName"/>
+		<result column="subline_cd"        			property="sublineCd"/>
+		<result column="dsp_subline_name"        	property="dspSublineName"/>
+		<result column="iss_cd"        				property="issCd"/>
+		<result column="dsp_iss_name"        		property="dspIssName"/>
+	</resultMap>
+	
+    <resultMap class="giisDefaultDistDtl" id="giisDefaultDistDtlListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="default_no"        			property="defaultNo"/>
+		<result column="line_cd"        			property="lineCd"/>
+		<result column="share_cd"        			property="shareCd"/>
+		<result column="share_pct"        			property="sharePct"/>
+		<result column="subline_cd"        			property="sublineCd"/>
+		<result column="iss_cd"        				property="issCd"/>
+		<result column="range_to"        			property="rangeTo"/>
+		<result column="range_from"        			property="rangeFrom"/>
+	</resultMap>
+	
+    <resultMap class="giisDefaultDistDtl" id="giisDefaultDistDtlListResultMap2" extends="BaseEntity.TableGridResultMap">
+		<result column="default_no"        			property="defaultNo"/>
+		<result column="range_to"        			property="rangeTo"/>
+		<result column="range_from"        			property="rangeFrom"/>
+		<!-- <result column="line_cd"        			property="lineCd"/>
+		<result column="share_cd"        			property="shareCd"/> -->
+		<result property="rowNum"					column="ROWNUM_"/>
+		<result property="rowCount"					column="COUNT_"/>
+	</resultMap>
+	
+    <resultMap class="giisDefaultDistGroup" id="giisDefaultDistGroupListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="default_no"        			property="defaultNo"/>
+		<result column="line_cd"        			property="lineCd"/>
+		<result column="share_cd"        			property="shareCd"/>
+		<result column="dsp_treaty_name"        	property="dspTreatyName"/>
+		<result column="sequence"        			property="sequence"/>
+		<result column="share_pct"        			property="sharePct"/>
+		<result column="share_amt1"        			property="shareAmt1"/>
+		<result column="remarks"        			property="remarks"/>
+		<result column="user_id"     				property="userId"/>
+		<result column="last_update" 				property="lastUpdate"/>
+	</resultMap>
+    
+    <resultMap class="java.util.HashMap" id="giisDefaultDistGroupAllListResultMap" extends="giisDefaultDistGroupListResultMap">
+		<result column="total_share_pct"        	property="totalSharePct"/>
+	</resultMap>
+	
+    <select id="getGiisDefaultDistRecList" resultMap="giisDefaultDistListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * 
+		  	              FROM TABLE(giiss065_pkg.get_giisdefaultdist_list(#lineCd#, #sublineCd#, #issCd#, #distType#, #defaultType#, #defaultNo#, #userId#))
+		                   <isNotNull property="filter">
+						  	 WHERE 1=1
+					  			<isNotEmpty prepend="AND" property="dspLineName">
+					  				UPPER(dsp_line_name) LIKE UPPER(#dspLineName#)
+					  			</isNotEmpty>
+					  			<isNotEmpty prepend="AND" property="dspSublineName">
+					  				UPPER(dsp_subline_name) LIKE UPPER(#dspSublineName#)
+					  			</isNotEmpty>
+					  			<isNotEmpty prepend="AND" property="dspIssName">
+					  				UPPER(dsp_iss_name) LIKE UPPER(#dspIssName#)
+					  			</isNotEmpty>
+					  			<isNotEmpty prepend="AND" property="dspDistName">
+					  				UPPER(dsp_dist_name) LIKE UPPER(#dspDistName#)
+					  			</isNotEmpty>
+					  			<isNotEmpty prepend="AND" property="dspDefaultName">
+					  				UPPER(dsp_default_name) LIKE UPPER(#dspDefaultName#)
+					  			</isNotEmpty>
+			  			  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="lineCd">
+			              		ORDER BY line_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="dspLineName">
+			              		ORDER BY dsp_line_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="sublineCd">
+			              		ORDER BY subline_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="dspSublineName">
+			              		ORDER BY dsp_subline_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="issCd">
+			              		ORDER BY iss_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="dspIssName">
+			              		ORDER BY dsp_iss_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="distType">
+			              		ORDER BY dist_type
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="dspDistName">
+			              		ORDER BY dsp_dist_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="defaultType">
+			              		ORDER BY default_type
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="dspDefaultName">
+			              		ORDER BY dsp_default_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="defaultNo">
+			              		ORDER BY default_no
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		  	              FROM TABLE(giiss065_pkg.get_giisdefaultdist_list(#lineCd#, #sublineCd#, #issCd#, #distType#, #defaultType#, #defaultNo#, #userId#))
+		                	<isNotNull property="filter">
+						  	 WHERE 1=1
+					  			<isNotEmpty prepend="AND" property="dspLineName">
+					  				UPPER(dsp_line_name) LIKE UPPER(#dspLineName#)
+					  			</isNotEmpty>
+					  			<isNotEmpty prepend="AND" property="dspSublineName">
+					  				UPPER(dsp_subline_name) LIKE UPPER(#dspSublineName#)
+					  			</isNotEmpty>
+					  			<isNotEmpty prepend="AND" property="dspIssName">
+					  				UPPER(dsp_iss_name) LIKE UPPER(#dspIssName#)
+					  			</isNotEmpty>
+					  			<isNotEmpty prepend="AND" property="dspDistName">
+					  				UPPER(dsp_dist_name) LIKE UPPER(#dspDistName#)
+					  			</isNotEmpty>
+					  			<isNotEmpty prepend="AND" property="dspDefaultName">
+					  				UPPER(dsp_default_name) LIKE UPPER(#dspDefaultName#)
+					  			</isNotEmpty>
+			  			  </isNotNull>
+		                )b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<select id="getGiisDefaultDistAllList" resultMap="giisDefaultDistListResultMap">
+		SELECT '1' rownum_, '1' count_, a.* FROM TABLE(giiss065_pkg.get_giisdefaultdist_list(#lineCd#, #sublineCd#, #issCd#, #distType#, #defaultType#, #defaultNo#, #userId#)) a
+	</select>
+    
+    <resultMap id="getGiiss065LineLovResultMap" class="java.util.HashMap"  extends="BaseEntity.TableGridResultMap">
+	  	<result column="line_cd"	property="lineCd"/>
+	  	<result column="line_name"	property="lineName"/>
+  	</resultMap>
+  	
+    <select id="getGiiss065LineLov" resultMap="getGiiss065LineLovResultMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+					   b.count_, 
+					   a.* 
+				  FROM (SELECT * 
+						  FROM TABLE (giiss065_pkg.get_giiss065_line_lov(#issCd#, #userId#, #findText#))
+						  <isEqual property="sortColumn" compareValue="lineCd">
+								ORDER BY line_cd
+						  </isEqual>
+						  <isEqual property="sortColumn" compareValue="lineName">
+								ORDER BY line_name
+						  </isEqual>
+						  <isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+						  </isNotNull>
+						  ) a, 
+					   (SELECT count(*) count_ 
+						  FROM TABLE (giiss065_pkg.get_giiss065_line_lov(#issCd#, #userId#, #findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+    <resultMap id="getGiiss065SublineLovResultMap" class="java.util.HashMap"  extends="BaseEntity.TableGridResultMap">
+	  	<result column="subline_cd"		property="sublineCd"/>
+	  	<result column="subline_name"	property="sublineName"/>
+  	</resultMap>
+  	
+    <select id="getGiiss065SublineLov" resultMap="getGiiss065SublineLovResultMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+					   b.count_, 
+					   a.* 
+				  FROM (SELECT * 
+						  FROM TABLE (giiss065_pkg.get_giiss065_subline_lov(#lineCd#, #findText#))
+						  <isEqual property="sortColumn" compareValue="sublineCd">
+								ORDER BY subline_cd
+						  </isEqual>
+						  <isEqual property="sortColumn" compareValue="sublineName">
+								ORDER BY subline_name
+						  </isEqual>
+						  <isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+						  </isNotNull>
+						  ) a, 
+					   (SELECT count(*) count_ 
+						  FROM TABLE (giiss065_pkg.get_giiss065_subline_lov(#lineCd#, #findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+    <resultMap id="getGiiss065IssLovResultMap" class="java.util.HashMap"  extends="BaseEntity.TableGridResultMap">
+	  	<result column="iss_cd"		property="issCd"/>
+	  	<result column="iss_name"	property="issName"/>
+  	</resultMap>
+  	
+    <select id="getGiiss065IssLov" resultMap="getGiiss065IssLovResultMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+					   b.count_, 
+					   a.* 
+				  FROM (SELECT * 
+						  FROM TABLE (giiss065_pkg.get_giiss065_iss_lov(#lineCd#, #userId#, #findText#))
+						  <isEqual property="sortColumn" compareValue="issCd">
+								ORDER BY iss_cd
+						  </isEqual>
+						  <isEqual property="sortColumn" compareValue="issName">
+								ORDER BY iss_name
+						  </isEqual>
+						  <isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+						  </isNotNull>
+						  ) a, 
+					   (SELECT count(*) count_ 
+						  FROM TABLE (giiss065_pkg.get_giiss065_iss_lov(#lineCd#, #userId#, #findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+    <resultMap id="getGiiss065DistTypeLovResultMap" class="java.util.HashMap"  extends="BaseEntity.TableGridResultMap">
+	  	<result column="dist_type"		property="distType"/>
+	  	<result column="dist_name"		property="distName"/>
+  	</resultMap>
+  	
+    <select id="getGiiss065DistTypeLov" resultMap="getGiiss065DistTypeLovResultMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+					   b.count_, 
+					   a.* 
+				  FROM (SELECT * 
+						  FROM TABLE (giiss065_pkg.get_giiss065_disttype_lov(#findText#))
+						  <isEqual property="sortColumn" compareValue="distType">
+								ORDER BY dist_type
+						  </isEqual>
+						  <isEqual property="sortColumn" compareValue="distName">
+								ORDER BY dist_name
+						  </isEqual>
+						  <isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+						  </isNotNull>
+						  ) a, 
+					   (SELECT count(*) count_ 
+						  FROM TABLE (giiss065_pkg.get_giiss065_disttype_lov(#findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+    <resultMap id="getGiiss065DefaultTypeLovResultMap" class="java.util.HashMap"  extends="BaseEntity.TableGridResultMap">
+	  	<result column="default_type"		property="defaultType"/>
+	  	<result column="default_name"		property="defaultName"/>
+  	</resultMap>
+  	
+    <select id="getGiiss065DefaultTypeLov" resultMap="getGiiss065DefaultTypeLovResultMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+					   b.count_, 
+					   a.* 
+				  FROM (SELECT * 
+						  FROM TABLE (giiss065_pkg.get_giiss065_defaulttype_lov(#findText#))
+						  <isEqual property="sortColumn" compareValue="defaultType">
+								ORDER BY default_type
+						  </isEqual>
+						  <isEqual property="sortColumn" compareValue="defaultName">
+								ORDER BY default_name
+						  </isEqual>
+						  <isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+						  </isNotNull>
+						  ) a, 
+					   (SELECT count(*) count_ 
+						  FROM TABLE (giiss065_pkg.get_giiss065_defaulttype_lov(#findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+    <procedure id="valAddDefaultDistRec" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss065_pkg.val_adddefaultdist_rec(#lineCd#, #sublineCd#, #issCd#);
+ 		END;
+ 	</procedure>
+ 	
+    <procedure id="valDelDefaultDistRec" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss065_pkg.val_deldefaultdist_rec(#defaultNo#);
+ 		END;
+ 	</procedure>
+ 	
+    <procedure id="valExistingDistPerilRecord" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss065_pkg.val_existingperilrecord_rec(#defaultNo#, #lineCd#);
+ 		END;
+ 	</procedure>
+ 	
+    <procedure id="setGIISDefaultDist" parameterClass="giisDefaultDist">
+	    DECLARE
+	    	v_rec giis_default_dist%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.default_no := #defaultNo#;
+ 			v_rec.line_cd := #lineCd#;
+ 			v_rec.subline_cd := #sublineCd#;
+ 			v_rec.iss_cd := #issCd#;
+ 			v_rec.dist_type := #distType#;
+ 			v_rec.default_type := #defaultType#;
+ 			v_rec.user_id := #userId#;
+ 			
+ 			giiss065_pkg.set_giisdefaultdist_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+    <delete id="delGIISDefaultDist" parameterClass="giisDefaultDist">
+		BEGIN
+ 			giiss065_pkg.del_giisdefaultdist_rec(#defaultNo#);
+ 		END;
+ 	</delete>
+ 	
+    <select id="getGiisDefaultDistGroupRecList" resultMap="giisDefaultDistGroupAllListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* ,
+		               (SELECT SUM(share_pct) FROM TABLE(giiss065_pkg.get_giisdefaultdistgroup_list(#defaultNo#, #sequence#, #dspTreatyName#, #sharePct#, #shareAmt1#))) total_share_pct 
+		  	      FROM (SELECT * 
+		  	              FROM TABLE(giiss065_pkg.get_giisdefaultdistgroup_list(#defaultNo#, #sequence#, #dspTreatyName#, #sharePct#, #shareAmt1#))
+		                  <isEqual property="sortColumn" compareValue="sequence">
+			              		ORDER BY sequence
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="dspTreatyName">
+			              		ORDER BY dsp_treaty_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="sharePct">
+			              		ORDER BY share_pct
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="shareAmt1">
+			              		ORDER BY share_amt1
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		  	              FROM TABLE(giiss065_pkg.get_giisdefaultdistgroup_list(#defaultNo#, #sequence#, #dspTreatyName#, #sharePct#, #shareAmt#))
+		                )b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<select id="getAllGiisDefaultDistGroupRecList" resultMap="giisDefaultDistGroupAllListResultMap">
+		SELECT '1' rownum_, 
+		       '1' count_, 
+		        a.* ,
+		       '1' total_share_pct 
+		       		FROM TABLE(giiss065_pkg.get_giisdefaultdistgroup_list(#defaultNo#, #sequence#, #dspTreatyName#, #sharePct#, #shareAmt1#)) a
+	</select>
+	
+    <resultMap id="getGiiss065ShareLovResultMap" class="java.util.HashMap"  extends="BaseEntity.TableGridResultMap">
+	  	<result column="share_cd"		property="shareCd"/>
+	  	<result column="share_name"		property="shareName"/>
+  	</resultMap>
+  	
+    <select id="getGiiss065Share01Lov" resultMap="getGiiss065ShareLovResultMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+					   b.count_, 
+					   a.* 
+				  FROM (SELECT * 
+						  FROM TABLE (giiss065_pkg.get_giiss065_share01_lov(#lineCd#, #findText#))
+						  <isEqual property="sortColumn" compareValue="shareCd">
+								ORDER BY share_cd
+						  </isEqual>
+						  <isEqual property="sortColumn" compareValue="shareName">
+								ORDER BY share_name
+						  </isEqual>
+						  <isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+						  </isNotNull>
+						  ) a, 
+					   (SELECT count(*) count_ 
+						  FROM TABLE (giiss065_pkg.get_giiss065_share01_lov(#lineCd#, #findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+    <select id="getGiiss065Share999Lov" resultMap="getGiiss065ShareLovResultMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+					   b.count_, 
+					   a.* 
+				  FROM (SELECT * 
+						  FROM TABLE (giiss065_pkg.get_giiss065_share999_lov(#lineCd#, #findText#))
+						  <isEqual property="sortColumn" compareValue="shareCd">
+								ORDER BY share_cd
+						  </isEqual>
+						  <isEqual property="sortColumn" compareValue="shareName">
+								ORDER BY share_name
+						  </isEqual>
+						  <isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+						  </isNotNull>
+						  ) a, 
+					   (SELECT count(*) count_ 
+						  FROM TABLE (giiss065_pkg.get_giiss065_share999_lov(#lineCd#, #findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+    <procedure id="valAddDefaultDistGroupRec" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss065_pkg.val_adddefaultdistgroup_rec(#defaultNo#, #shareCd#);
+ 		END;
+ 	</procedure>
+ 	
+    <procedure id="setGIISDefaultDistGroup" parameterClass="giisDefaultDistGroup">
+	    DECLARE
+	    	v_rec giis_default_dist_group%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.default_no := #defaultNo#;
+ 			v_rec.line_cd := #lineCd#;
+ 			v_rec.share_cd := #shareCd#;
+ 			v_rec.sequence := #sequence#;
+ 			v_rec.share_pct := #sharePct#;
+ 			v_rec.share_amt1 := #shareAmt1#;
+ 			v_rec.remarks := #remarks#;
+ 			v_rec.user_id := #userId#;
+ 			
+ 			giiss065_pkg.set_giisdefaultdistgroup_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+    <delete id="delGIISDefaultDistGroup" parameterClass="giisDefaultDistGroup">
+		BEGIN
+ 			giiss065_pkg.del_giisdefaultdistgroup_rec(#defaultNo#, #sequence#);
+ 		END;
+ 	</delete>
+ 	
+    <select id="getGiisDefaultDistDtlRecList" resultMap="giisDefaultDistDtlListResultMap2">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * 
+		  	              FROM TABLE(giiss065_pkg.get_giisdefaultdistdtl_list(#defaultNo#))
+		                  <isEqual property="sortColumn" compareValue="rangeFrom">
+			              		ORDER BY range_from
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="rangeTo">
+			              		ORDER BY range_to
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		  	              FROM TABLE(giiss065_pkg.get_giisdefaultdistdtl_list(#defaultNo#))
+		                )b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+    <select id="getGiiss065DefaultNo" resultClass="java.lang.Integer">
+    	SELECT default_dist_default_no_s.NEXTVAL
+    	  FROM DUAL    
+    </select>
+    
+    <resultMap class="java.util.HashMap" id="validateSaveExistResultMap">
+		<result column="v_exists" 	property="vExists"/>
+	</resultMap>
+    
+    <select id="validateSaveExist" resultMap="validateSaveExistResultMap">
+		SELECT * FROM TABLE(giiss065_pkg.validate_save_exist(#lineCd#, #sublineCd#, #issCd#, #distType#, #defaultType#))		
+	</select>
+ 	
+ 	<parameterMap class="java.util.HashMap" id="getMaxSequenceNoMap">
+ 		<parameter property="defaultNo"    jdbcType="NUMBER"    javaType="java.lang.Integer" mode="IN"/>
+ 		<parameter property="sequence"     jdbcType="NUMERIC"     javaType="java.lang.Integer" mode="OUT"/>
+ 	</parameterMap>
+ 	
+    <procedure id="getMaxSequenceNo" parameterMap="getMaxSequenceNoMap">
+	   	 {CALL giiss065_pkg.get_max_sequence_no(?,?)}
+	</procedure>
+ 	
+ 	<procedure id="setGIISDefaultDistDtl" parameterClass="giisDefaultDistDtl"> <!-- Added by Jerome SR 5552 -->
+	    DECLARE
+	    	v_rec giis_default_dist_dtl%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.default_no := #defaultNo#;
+ 			v_rec.line_cd := #lineCd#;
+ 			v_rec.share_cd := #shareCd#;
+ 			v_rec.share_pct := #sharePct#;
+ 			v_rec.range_from := #rangeFrom#;
+ 			v_rec.range_to := #rangeTo#;
+ 			v_rec.user_id := #userId#;
+ 			
+ 			giiss065_pkg.set_giisdefaultdistdtl_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<delete id="delGIISDefaultDistDtl" parameterClass="giisDefaultDistDtl"> <!-- Added by Jerome SR 5552 -->
+		BEGIN
+ 			giiss065_pkg.del_giisdefaultdistdtl_rec(#defaultNo#, #rangeFrom#, #rangeTo#);
+ 		END;
+ 	</delete>
+ 	
+ 	<select id="getGiisDefaultDistGroupRecList2" resultMap="giisDefaultDistGroupAllListResultMap"> <!-- Added by Jerome SR 5552 -->
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* ,
+		               (SELECT SUM(share_pct) FROM TABLE(giiss065_pkg.get_giisdefaultdistgroup_list2(#defaultNo#, #sequence#, #dspTreatyName#, #sharePct#, #shareAmt1#, #rangeFrom#, #rangeTo#))) total_share_pct 
+		  	      FROM (SELECT * 
+		  	              FROM TABLE(giiss065_pkg.get_giisdefaultdistgroup_list2(#defaultNo#, #sequence#, #dspTreatyName#, #sharePct#, #shareAmt1#, #rangeFrom#, #rangeTo#))
+		                  <isEqual property="sortColumn" compareValue="sequence">
+			              		ORDER BY sequence
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="dspTreatyName">
+			              		ORDER BY dsp_treaty_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="sharePct">
+			              		ORDER BY share_pct
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="shareAmt1">
+			              		ORDER BY share_amt1
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		  	              FROM TABLE(giiss065_pkg.get_giisdefaultdistgroup_list2(#defaultNo#, #sequence#, #dspTreatyName#, #sharePct#, #shareAmt#, #rangeFrom#, #rangeTo#))
+		                )b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+</sqlMap>

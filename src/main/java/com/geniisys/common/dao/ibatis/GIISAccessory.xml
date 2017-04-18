@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISAccessory">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIISAccessory" type="com.geniisys.common.entity.GIISAccessory"/>
+	
+	<resultMap class="GIISAccessory" id="GIISAccessoryLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="accessoryCd"		column="ACCESSORY_CD" />
+		<result property="accessoryDesc"	column="ACCESSORY_DESC" />
+		<result property="accAmt"			column="ACC_AMT" />
+	</resultMap>
+	
+	<resultMap class="GIISAccessory" id="giisAccessoryListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="accessory_cd"   property="accessoryCd"/>	
+		<result column="accessory_desc" property="accessoryDesc"/>
+		<result column="acc_amt"   		property="accAmt"/>
+		<result column="remarks"     	property="remarks"/>
+		<result column="user_id"     	property="userId"/>
+		<result column="last_update"    property="lastUpdate"/>
+	</resultMap>
+	
+	<select id="getAccessoryLOV" parameterClass="java.util.HashMap" resultMap="GIISAccessoryLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giis_accessory_pkg.get_accessory_list_tg(#findText#))
+						  	<isNotNull property="notIn">
+						  		WHERE accessory_cd NOT IN $notIn$
+						  	</isNotNull>
+						  	<isEqual property="sortColumn" compareValue="accessoryCd">
+								ORDER BY accessory_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="accessoryDesc">
+								ORDER BY accessory_desc
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="accAmt">
+								ORDER BY acc_amt
+							</isEqual>
+						  	<isNotNull property="sortColumn">							
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+						  	</isNotNull>
+						  ) a,
+					   (SELECT COUNT(*) count_
+						  FROM TABLE(giis_accessory_pkg.get_accessory_list_tg(#findText#))) b)
+				  WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiiss107RecList" resultMap="giisAccessoryListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss107_pkg.get_rec_list(#accessoryCd#, #accessoryDesc#))
+		                  <isNotNull property="filter">
+							WHERE 1 = 1  							
+								<isNotEmpty prepend="AND" property="accAmt">
+									acc_amt = TO_NUMBER(#accAmt#)
+								</isNotEmpty>
+						  </isNotNull>	
+		                  <isEqual property="sortColumn" compareValue="accessoryCd">
+			              		ORDER BY accessory_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="accessoryDesc">
+			              		ORDER BY accessory_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="accAmt">
+			              		ORDER BY acc_amt
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss107_pkg.get_rec_list(#accessoryCd#, #accessoryDesc#))
+		                    <isNotNull property="filter">
+								WHERE 1 = 1  							
+									<isNotEmpty prepend="AND" property="accAmt">
+										acc_amt = TO_NUMBER(#accAmt#)
+									</isNotEmpty>
+						  	</isNotNull>	
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setAccessory" parameterClass="GIISAccessory">
+	    DECLARE
+	    	v_rec giis_accessory%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.accessory_cd := #accessoryCd#;
+ 			v_rec.accessory_desc := #accessoryDesc#;
+ 			v_rec.acc_amt := #accAmt#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			giiss107_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteAccessory" parameterClass="java.lang.Integer">
+ 		BEGIN
+ 			giiss107_pkg.val_del_rec(#recId#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddAccessory" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss107_pkg.val_add_rec(#accessoryDesc#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delAccessory" parameterClass="java.lang.Integer">
+		BEGIN
+ 			giiss107_pkg.del_rec(#accessoryCd#);
+ 		END;
+ 	</delete>
+</sqlMap>

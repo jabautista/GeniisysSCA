@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report name" pageWidth="206" pageHeight="842" columnWidth="206" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="2.1435888100000016"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="P_PAID_AMT1" class="java.math.BigDecimal"/>
+	<parameter name="P_PAID_AMT2" class="java.math.BigDecimal"/>
+	<parameter name="P_DEDUCTIBLE_CD" class="java.lang.String"/>
+	<parameter name="P_BATCH_DV_ID" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT NVL((SELECT SUM(dtl_amt) FROM TABLE(giac_batch_dv_reports_pkg.get_loss_exp($P{P_BATCH_DV_ID}))), 0)
++
+NVL((SELECT SUM(dtl_amt) FROM TABLE(giac_batch_dv_reports_pkg.get_loss_exp2($P{P_BATCH_DV_ID}))), 0)  GROSS_PAID_AMT FROM DUAL]]>
+	</queryString>
+	<field name="GROSS_PAID_AMT" class="java.math.BigDecimal"/>
+	<variable name="GROSS_PAID_AMT" class="java.math.BigDecimal">
+		<variableExpression><![CDATA[$F{GROSS_PAID_AMT}]]></variableExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="13" splitType="Stretch">
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="0" y="0" width="206" height="13" isRemoveLineWhenBlank="true"/>
+				<textElement textAlignment="Right">
+					<font fontName="SansSerif" isBold="true" pdfFontName="Helvetica" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{GROSS_PAID_AMT}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

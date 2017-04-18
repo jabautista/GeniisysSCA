@@ -1,0 +1,600 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIACReplenishDv">
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+
+	<typeAlias alias="GIACReplenishDv" type="com.geniisys.giac.entity.GIACReplenishDv"/>
+	
+	<resultMap class="GIACReplenishDv" id="GIACReplenishDvClass">
+		<result property="replenishId" column="replenish_id"/>
+		<result property="branchCd" column="branch_Cd"/>
+		<result property="replenishSeqNo" column="replenish_Seq_No"/>
+		<result property="revolvingFundAmt" column="revolving_Fund_Amt"/>
+		<result property="replenishmentAmt" column="replenishment_Amt"/>
+		<result property="replenishTranId" column="replenish_Tran_Id"/>
+		<result property="createBy" column="create_By"/>
+		<result property="createDate" column="create_Date"/>
+		<result property="replenishYear" column="replenish_Year"/>
+		<result property="strCreateDate" column="str_create_date"/>
+	</resultMap>
+	
+	<resultMap id="replenishNoLOVMap" class="java.util.HashMap" extends="GIACReplenishDvClass">
+		<result property="replenishNo" column="replenish_no"/>
+		<result column="rownum_" 		property="rowNum" />
+		<result column="count_"			property="rowCount"/>
+	</resultMap>
+	
+	<select id="getReplenishNoLOV" resultMap="replenishNoLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giac_replenish_dv_pkg.GET_REPLINISH_NO_LOV(#findText#))
+		                  <isEqual property="sortColumn" compareValue="issCd">
+			              		ORDER BY issue_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="replenishNo">
+			              		ORDER BY replenish_no 
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="replenishmentAmt">
+			              		ORDER BY replenishment_amt 
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giac_replenish_dv_pkg.GET_REPLINISH_NO_LOV(#findText#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="giacs016RfDetailListMap">
+		<result property="dspDvPref" column="dsp_dv_pref"/>
+		<result property="dspDvNo" column="dsp_dv_no"/>
+		<result property="dspBranchCd" column="dsp_branch_cd"/>
+		<result property="dspCheckPrefSuf" column="dsp_check_pref_suf"/>
+		<result property="dspCheckNo" column="dsp_check_no"/>
+		<result property="dspDocumentCd" column="dsp_document_cd"/>
+		<result property="dspReqBranch" column="dsp_req_branch"/>
+		<result property="dspLineCd" column="dsp_line_cd"/>
+		<result property="dspDocYear" column="dsp_doc_year"/>
+		<result property="dspDocMm" column="dsp_doc_mm"/>
+		<result property="dspDocSeqNo" column="dsp_doc_seq_no"/>
+		<result property="dspPayee" column="dsp_payee"/>
+		<result property="dspParticulars" column="dsp_particulars"/>
+		<result property="dspIncludeTag" column="dsp_include_tag"/>
+		<result property="dspAmount" column="dsp_amount"/>
+		<result property="dvTranId" column="dv_tran_id"/>
+		<result property="checkItemNo" column="check_item_no"/>	<!-- shan 10.09.2014 -->
+		<result column="rownum_" 		property="rowNum" />
+		<result column="count_"			property="rowCount"/>
+	</resultMap>
+	
+	<select id="getGiacs016RfDetailListTG" resultMap="giacs016RfDetailListMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giac_replenish_dv_pkg.get_giacs016_rf_detail_list(#replenishId#,#findText#))
+		                  <isNotNull property="filter">
+		                  	WHERE 1=1
+							<isNotEmpty prepend="AND"  property="dspDvPref">
+								to_upper(dsp_dv_pref) LIKE upper(#dspDvPref#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="dspDvNo">
+								dsp_dv_no LIKE #dspDvNo#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="dspCheckPrefSuf">
+								to_upper(dsp_check_ref_suf) LIKE upper(#dspCheckPrefSuf#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="dspCheckNo">
+								dsp_check_no LIKE #dspCheckNo#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="dspDocumentCd">
+								to_upper(dsp_document_cd) LIKE upper(#dspDocumentCd#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="dspReqBranch">
+								to_upper(dsp_req_branch) LIKE upper(#dspReqBranch#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="dspLineCd">
+								to_upper(dsp_line_cd) LIKE upper(#dspLineCd#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="dspDocYear">
+								dsp_doc_year LIKE #dspDocYear#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="dspDocMm">
+								dsp_doc_mm LIKE #dspDocMm#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="dspDocSeqNo">
+								dsp_doc_seq_no LIKE #dspDocSeqNo#
+							</isNotEmpty>
+		                  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="dspDvPref dspDvNo">
+			              		ORDER BY dsp_dv_pref, dsp_dv_no
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="dspCheckPrefSuf dspCheckNo">
+			              		ORDER BY dsp_check_pref_suf, dsp_check_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="dspDocumentCd dspReqBranch dspLineCd dspDocYear dspDocMm dspDocSeqNo">
+			              		ORDER BY dsp_document_cd, dsp_req_branch, dsp_line_cd, dsp_doc_year, dsp_doc_mm, dsp_doc_seq_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="dspAmount">
+			              		ORDER BY dsp_amount
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giac_replenish_dv_pkg.get_giacs016_rf_detail_list(#replenishId#,#findText#))
+		                   <isNotNull property="filter">
+		                  	WHERE 1=1
+							<isNotEmpty prepend="AND"  property="dspDvPref">
+								to_upper(dsp_dv_pref) LIKE upper(#dspDvPref#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="dspDvNo">
+								dsp_dv_no LIKE #dspDvNo#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="dspCheckPrefSuf">
+								to_upper(dsp_check_ref_suf) LIKE upper(#dspCheckPrefSuf#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="dspCheckNo">
+								dsp_check_no LIKE #dspCheckNo#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="dspDocumentCd">
+								to_upper(dsp_document_cd) LIKE upper(#dspDocumentCd#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="dspReqBranch">
+								to_upper(dsp_req_branch) LIKE upper(#dspReqBranch#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="dspLineCd">
+								to_upper(dsp_line_cd) LIKE upper(#dspLineCd#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="dspDocYear">
+								dsp_doc_year LIKE #dspDocYear#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="dspDocMm">
+								dsp_doc_mm LIKE #dspDocMm#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="dspDocSeqNo">
+								dsp_doc_seq_no LIKE #dspDocSeqNo#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="dspAmount">
+								amount LIKE #dspAmount#
+							</isNotEmpty>
+		                  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<parameterMap class="java.util.HashMap" id="getRfDetailAmountsMap">
+		<parameter property="replenishId" jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/> 
+		<parameter property="dspRequestedAmt" jdbcType="NUMERIC" 	javaType="java.math.BigDecimal"  mode="OUT"/>
+		<parameter property="dspDisapprovedAmt" jdbcType="NUMERIC" 	javaType="java.math.BigDecimal"  mode="OUT"/>
+		<parameter property="dspApprovedAmt" jdbcType="NUMERIC" 	javaType="java.math.BigDecimal"  mode="OUT"/>
+		
+	</parameterMap>
+	
+	<procedure id="getRfDetailAmounts" parameterMap="getRfDetailAmountsMap">
+		BEGIN
+			giac_replenish_dv_pkg.get_rf_detail_amounts(?,?,?,?);
+		END;
+	</procedure>
+	
+	<procedure id="updateIncludeTag" parameterClass="map">
+		BEGIN
+			giac_replenish_dv_pkg.update_include_tag(#replenishId#,#dvTranId#,#checkItemNo#,#dspIncludeTag#);
+		END;
+	</procedure>
+	
+	<parameterMap class="map" id="getGIACS086AcctEntPostQueryMap">
+     	<parameter property="replenishId"		 jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="totalDebitAmt"  jdbcType="NUMERIC"	    javaType="java.math.BigDecimal"	mode="OUT" />
+		<parameter property="totalCreditAmt" jdbcType="NUMERIC"	    javaType="java.math.BigDecimal"	mode="OUT" />
+     </parameterMap>
+     
+     <procedure id="getGIACS016AcctEntPostQuery" parameterMap="getGIACS086AcctEntPostQueryMap">
+     	BEGIN
+			giac_replenish_dv_pkg.giacs016_acct_ent_post_query(?,?,?);
+		END;
+     </procedure>
+     
+	<resultMap class="java.util.HashMap" id="replenishmentBranchLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="branch_cd"				property="branchCd" />
+		<result column="branch_name"			property="branchName" />
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="replenishmentMainResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="replenishId" 		column="replenish_id"/>
+		<result property="branchCd" 		column="branch_cd"/>
+		<result property="branch" 			column="branch"/>
+		<result property="checkDateFrom" 	column="check_date_from"/>
+		<result property="checkDateTo" 		column="check_date_to"/>
+		<result property="replenishmentNo" 	column="replenishment_no"/>
+		<result property="replenishSeqNo" 	column="replenish_seq_no"/>
+		<result property="replenishYear" 	column="replenish_year"/>
+		<result property="revolvingFundAmt" column="revolving_fund_amt"/>
+		<result property="replenishmentAmt" column="replenishment_amt"/>
+		<result property="replenishTranId" 	column="replenish_tran_id"/>
+		<result property="createBy" 		column="create_by"/>
+		<result property="createDate" 		column="create_date"/>
+	</resultMap>
+
+	<resultMap class="java.util.HashMap" id="replenishmentIdMainResultMap">
+		<result property="replenishId" 		column="replenish_id"/>
+		<result property="branchCd" 		column="branch_cd"/>
+		<result property="branch" 			column="branch"/>
+		<result property="checkDateFrom" 	column="check_date_from"/>
+		<result property="checkDateTo" 		column="check_date_to"/>
+		<result property="replenishmentNo" 	column="replenishment_no"/>
+		<result property="replenishSeqNo" 	column="replenish_seq_no"/>
+		<result property="replenishYear" 	column="replenish_year"/>
+		<result property="revolvingFundAmt" column="revolving_fund_amt"/>
+		<result property="replenishmentAmt" column="replenishment_amt"/>
+		<result property="replenishTranId" 	column="replenish_tran_id"/>
+		<result property="createBy" 		column="create_by"/>
+		<result property="createDate" 		column="create_date"/>
+	</resultMap>	
+	
+    <resultMap class="GIACReplenishDv" id="replenishmentDetailResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="replenishId" 	column="replenish_id"/>
+		<result property="replenishSw"  column="replenish_sw"/>
+		<result property="checkDate"    column="check_date"/>
+		<result property="dvTranId" 	column="dv_tran_id"/>
+		<result property="dvNo" 		column="dv_no"/>
+		<result property="checkNo" 		column="check_no"/>
+		<result property="requestNo" 	column="request_no"/>
+		<result property="itemNo" 		column="check_item_no"/>
+		<result property="payee" 		column="payee"/>
+		<result property="particulars" 	column="particulars"/>
+		<result property="amount" 		column="amount"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="replenishmentAcctEntriesResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="glAcctCode"	column="gl_acct_code"/>
+		<result property="slCode"		column="sl_cd"/>
+		<result property="debitAmt"		column="debit_amt"/>
+		<result property="creditAmt"	column="credit_amt"/>
+		<result property="glAcctName"	column="gl_acct_name"/>
+		<result property="slName"		column="sl_name"/>
+		<result property="replenishId"	column="replenish_id"/>
+		<result property="totalDebit" 	column="total_debit"/>
+		<result property="totalCredit" 	column="total_credit"/>
+		<result property="balance" 		column="balance"/>
+	</resultMap>
+	
+	<select id="getReplenishmentBranchLOV" resultMap="replenishmentBranchLOVResultMap">
+	    SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT *
+		                  FROM TABLE(giacs081_pkg.get_replenishment_branch(#branch#, #appUser#))
+			          	  <isNotNull property="findText">
+		                  WHERE (UPPER(branch_cd) LIKE UPPER(#findText#) 
+		                  	 		OR UPPER(branch_name) LIKE UPPER(#findText#))
+		             	  </isNotNull>
+			          	  <isNotNull property="sortColumn">
+			          	  	  <isEqual property="sortColumn" compareValue="branchCd">
+				              		ORDER BY branch_cd
+				              </isEqual>
+			                  <isEqual property="sortColumn" compareValue="branchName">
+				              		ORDER BY branch_name
+				              </isEqual>	
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">	
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+							) a,
+							(SELECT count(*) count_
+							FROM TABLE(giacs081_pkg.get_replenishment_branch(#branch#, #appUser#))
+							<isNotNull property="findText">
+			                  WHERE (UPPER(branch_cd) LIKE UPPER(#findText#) 
+			                  		OR UPPER(branch_name) LIKE UPPER(#findText#))
+			             	</isNotNull>
+			                ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>	
+     
+	<select id="getReplenishmentListing" resultMap="replenishmentMainResultMap">
+	    SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT *
+		                  FROM TABLE(giacs081_pkg.get_replenishment(#userId#))	<!-- added parameter : shan 10.08.2014 -->
+						  <isNotNull property="filter">
+		                  	WHERE 1=1
+							<isNotEmpty prepend="AND"  property="branch">
+								UPPER(branch) LIKE UPPER(#branch#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="checkDateFrom">
+								check_date_from = #checkDateFrom#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="checkDateTo">
+								check_date_to = #checkDateTo#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="replenishmentNo">
+								UPPER(replenishment_no) LIKE UPPER(#replenishmentNo#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="revolvingFundAmt">
+								revolving_fund_amt = #revolvingFundAmt#
+							</isNotEmpty>
+		                  </isNotNull>
+			              <isEqual property="sortColumn" compareValue="branch">
+			              		ORDER BY branch
+			              </isEqual>
+			          	  <isEqual property="sortColumn" compareValue="checkDateFrom">
+			              		ORDER BY check_date_from
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="checkDateTo">
+			              		ORDER BY check_date_to
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="replenishmentNo">
+			              		ORDER BY replenishment_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="revolvingFundAmt">
+			              		ORDER BY revolving_fund_amt
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>		                  
+							) a,
+						(SELECT count(*) count_ 
+							FROM TABLE(giacs081_pkg.get_replenishment(#userId#))	<!-- added parameter : shan 10.08.2014 -->
+						  	<isNotNull property="filter">
+		                  	 WHERE 1=1
+							  <isNotEmpty prepend="AND"  property="branch">
+								UPPER(branch) LIKE UPPER(#branch#)
+							  </isNotEmpty>
+							  <isNotEmpty prepend="AND"  property="checkDateFrom">
+								check_date_from = #checkDateFrom#
+							  </isNotEmpty>
+							  <isNotEmpty prepend="AND"  property="checkDateTo">
+								check_date_to = #checkDateTo#
+							  </isNotEmpty>
+							  <isNotEmpty prepend="AND"  property="replenishmentNo">
+								 UPPER(replenishment_no) LIKE UPPER(#replenishmentNo#)
+							  </isNotEmpty>
+							  <isNotEmpty prepend="AND"  property="revolvingFundAmt">
+								 revolving_fund_amt = #revolvingFundAmt#
+							  </isNotEmpty>
+			                </isNotNull>							
+			                ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>	     
+
+	<select id="getReplenishmentDetail" resultMap="replenishmentDetailResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giacs081_pkg.get_replenishment_details(#replenishId#,#branchCd#,#checkDateFrom#,#checkDateTo#,#modifyRec#))
+		                  <isNotNull property="filter">
+		                  	WHERE 1=1
+							<isNotEmpty prepend="AND"  property="checkDate">
+								TO_DATE(check_date,'MM-DD-YYYY') = TO_DATE(#checkDate#,'MM-DD-YYYY')
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="dvNo">
+								UPPER(dv_no) LIKE UPPER(#dvNo#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="checkNo">
+								UPPER(check_no) LIKE UPPER(#checkNo#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="requestNo">
+								UPPER(request_no) LIKE UPPER(#requestNo#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="payee">
+								UPPER(payee) LIKE UPPER(#payee#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="particulars">
+								UPPER(particulars) LIKE UPPER(#particulars#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="amount">
+								amount = #amount#
+							</isNotEmpty>
+		                  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="replenishSw">
+		                  		ORDER BY replenish_sw
+		                  </isEqual>
+			              <isEqual property="sortColumn" compareValue="checkDate">
+			              		ORDER BY TO_DATE(check_date,'MM-DD-YYYY')
+			              </isEqual>
+			          	  <isEqual property="sortColumn" compareValue="dvNo">
+			              		ORDER BY dv_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="checkNo">
+			              		ORDER BY check_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="requestNo">
+			              		ORDER BY request_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="payee">
+			              		ORDER BY payee
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="particulars">
+			              		ORDER BY particulars
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="amount">
+			              		ORDER BY amount
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giacs081_pkg.get_replenishment_details(#replenishId#,#branchCd#,#checkDateFrom#,#checkDateTo#,#modifyRec#))
+		                  <isNotNull property="filter">
+		                  	WHERE 1=1
+							<isNotEmpty prepend="AND"  property="checkDate">
+								TO_DATE(check_date,'MM-DD-YYYY') = TO_DATE(#checkDate#,'MM-DD-YYYY')
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="dvNo">
+								UPPER(dv_no) LIKE UPPER(#dvNo#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="checkNo">
+								UPPER(check_no) LIKE UPPER(#checkNo#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="requestNo">
+								UPPER(request_no) LIKE UPPER(#requestNo#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="payee">
+								UPPER(payee) LIKE UPPER(#payee#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="particulars">
+								UPPER(particulars) LIKE UPPER(#particulars#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="amount">
+								amount = #amount#
+							</isNotEmpty>
+		                  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>	
+
+	<select id="getReplenishmentAcctEntries" resultMap="replenishmentAcctEntriesResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giacs081_pkg.get_rep_acct_entries(#tranId#))
+			              <isEqual property="sortColumn" compareValue="glAcctCode">
+			              		ORDER BY gl_acct_code
+			              </isEqual>
+			          	  <isEqual property="sortColumn" compareValue="slCode">
+			              		ORDER BY sl_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="debitAmt">
+			              		ORDER BY debit_amt
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="creditAmt">
+			              		ORDER BY credit_amt
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giacs081_pkg.get_rep_acct_entries(#tranId#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+		
+	<select id="getReplenishmentSumAcctEntries" resultMap="replenishmentAcctEntriesResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giacs081_pkg.get_rep_sum_acct_entries(#replenishId#))
+			              <isEqual property="sortColumn" compareValue="glAcctCode">
+			              		ORDER BY gl_acct_code
+			              </isEqual>
+			          	  <isEqual property="sortColumn" compareValue="slCode">
+			              		ORDER BY sl_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="debitAmt">
+			              		ORDER BY debit_amt
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="creditAmt">
+			              		ORDER BY credit_amt
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giacs081_pkg.get_rep_sum_acct_entries(#replenishId#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>	
+	
+	<procedure id="saveReplenishmentMasterRecord" parameterClass="java.util.HashMap">
+  		BEGIN
+  			giis_users_pkg.app_user := #appUser#;
+  			giacs081_pkg.set_replenish_master_record(#branchCd#,#revolvingFund#,#totalTagged#,#appUser#);
+  		END;
+  	</procedure>	
+
+	<procedure id="updateRevolvingFund" parameterClass="java.util.HashMap">
+  		BEGIN
+  			giis_users_pkg.app_user := #appUser#;
+  			giacs081_pkg.set_rev_fund(#replenishId#,#revolvingFund#);
+  		END;
+  	</procedure>
+
+  	<procedure id="saveReplenishment" parameterClass="java.util.HashMap">
+  		BEGIN
+  			giis_users_pkg.app_user := #appUser#;
+  			giacs081_pkg.set_replenish_dv(#replenishId#,#revolvingFund#,#totalTagged#,#appUser#);
+  		END;
+  	</procedure>
+  	
+  	<procedure id="saveReplenishmentDetail" parameterClass="java.util.HashMap">
+  		BEGIN
+  			giis_users_pkg.app_user := #appUser#;
+  			giacs081_pkg.set_replenish_detail(#replenishId#,#tranId#,#itemNo#,#amount#);
+  		END;
+  	</procedure>  	
+
+  	<select id="getCurrReplenishmentId" resultMap="replenishmentIdMainResultMap">
+		SELECT * FROM TABLE(giacs081_pkg.get_replenishment(#userId#))	<!-- added parameter : shan 10.08.2014 -->
+		 WHERE replenish_id =  (SELECT MAX(replenish_id) FROM TABLE(giacs081_pkg.get_replenishment(#userId#)) 	<!-- added parameter : shan 10.08.2014 -->
+                        		 WHERE branch_cd = #branchCd#)
+	</select>  	
+  			
+  	<select id="checkReplenishmentPaytReq" parameterClass="java.util.HashMap" resultClass="java.lang.String">	<!-- shan 10.09.2014 -->
+ 		SELECT '1'
+ 		  FROM giac_payt_requests_dtl
+ 		 WHERE replenish_id = #replenishId#
+ 	</select>
+ 	
+ 	<select id="getRevolvingFund" parameterClass="java.util.HashMap" resultClass="java.math.BigDecimal">	<!-- shan 10.10.2014 -->
+ 		SELECT revolving_fund_amt
+ 		  FROM TABLE(giacs081_pkg.get_replenishment(#userId#))	
+		 WHERE replenish_id = #replenishId#
+ 	</select>
+</sqlMap>

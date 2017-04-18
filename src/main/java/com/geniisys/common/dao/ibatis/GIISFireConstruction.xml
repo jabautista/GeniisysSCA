@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISFireConstruction">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIISFireConstruction" type="com.geniisys.fire.entity.GIISFireConstruction"/>
+	
+	<resultMap class="GIISFireConstruction" id="GIISFireConstructionLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="constructionCd"	column="CONSTRUCTION_CD" />
+		<result property="constructionDesc"	column="CONSTRUCTION_DESC" />
+	</resultMap>
+	
+	<select id="getFireConstructionLOV" resultMap="GIISFireConstructionLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giis_fire_construction_pkg.get_fire_construction_list)
+						  <isNotNull property="findText">
+		                  	WHERE UPPER(CONSTRUCTION_DESC) LIKE UPPER(#findText#)
+		                  </isNotNull>
+					   )a,
+					   (SELECT COUNT(*) count_
+						  FROM TABLE(giis_fire_construction_pkg.get_fire_construction_list)
+						  <isNotNull property="findText">
+		                  	WHERE UPPER(CONSTRUCTION_DESC) LIKE UPPER(#findText#)
+		                  </isNotNull>
+		                  ) b)
+		 WHERE rownum_ BETWEEN #from# AND #to# 
+	</select>
+	
+	
+	<resultMap class="GIISFireConstruction" id="giiss098RecListMap" extends="BaseEntity.TableGridResultMap">
+		<result column="construction_cd" 	property="constructionCd" />
+		<result column="construction_desc" 	property="constructionDesc" />
+		<result column="remarks" 			property="remarks" />
+		<result column="user_id" 			property="userId" />
+		<result column="last_update" 		property="lastUpdate" />
+	</resultMap>
+	
+	<select id="getGiiss098RecList" resultMap="giiss098RecListMap">
+		SELECT * 
+			FROM (SELECT rownum rownum_,
+						 b.count_,
+						 a.*
+					FROM (SELECT * 
+							FROM TABLE (giiss098_pkg.get_rec_list (#constructionCd#,#constructionDesc#))
+							<isEqual property="sortColumn" compareValue="constructionCd">
+								ORDER BY construction_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="constructionDesc">
+								ORDER BY construction_desc
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>) a, 
+							(SELECT count(*) count_
+							   FROM TABLE (giiss098_pkg.get_rec_list (#constructionCd#,#constructionDesc#))
+							 ) b)
+		WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiiss098AllRec" resultMap="giiss098RecListMap">
+		SELECT rownum rownum_,
+			   '1' count_,
+			   a.*
+					FROM (SELECT * 
+							FROM TABLE (giiss098_pkg.get_rec_list (#constructionCd#,#constructionDesc#))) a
+	</select>
+	
+	<procedure id="setGIISFireConstruction" parameterClass="GIISFireConstruction">
+	    DECLARE
+	    	v_rec giis_fire_construction%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+
+ 			v_rec.construction_cd := #constructionCd#;
+ 			v_rec.construction_desc := #constructionDesc#;
+ 			v_rec.remarks := #remarks#;
+ 			v_rec.user_id := #userId#;
+ 			
+ 			giiss098_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteGIISFireConstruction" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss098_pkg.val_del_rec(#recId#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddGIISFireConstruction" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss098_pkg.val_add_rec(#recId#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delGIISFireConstruction" parameterClass="java.lang.String">
+		BEGIN
+ 			giiss098_pkg.del_rec(#recId#);
+ 		END;
+ 	</delete>
+ 	
+ 	<select id="getGiiss106ConstructionLOV" resultMap="GIISFireConstructionLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giis_fire_construction_pkg.get_fire_construction_list)
+						  <isNotNull property="findText">
+		                  	WHERE UPPER(CONSTRUCTION_DESC) LIKE UPPER(#findText#)
+		                  	   OR UPPER(construction_cd) LIKE UPPER(#findText#)
+		                  </isNotNull>
+		                  <isNull property="findText">
+		                  	WHERE UPPER(construction_desc) LIKE UPPER(NVL(#searchString#, construction_desc))
+		                  	   OR UPPER(construction_cd) LIKE UPPER(NVL(#searchString#, construction_cd))
+		                  </isNull>
+		                  <isEqual property="sortColumn" compareValue="constructionCd">
+			              		ORDER BY construction_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="constructionDesc">
+			              		ORDER BY construction_desc
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+					   )a,
+					   (SELECT COUNT(*) count_
+						  FROM TABLE(giis_fire_construction_pkg.get_fire_construction_list)
+						  <isNotNull property="findText">
+		                  	WHERE UPPER(CONSTRUCTION_DESC) LIKE UPPER(#findText#)
+		                  	   OR UPPER(construction_cd) LIKE UPPER(#findText#)
+		                  </isNotNull>
+		                  <isNull property="findText">
+		                  	WHERE UPPER(construction_desc) LIKE UPPER(NVL(#searchString#, construction_desc))
+		                  	   OR UPPER(construction_cd) LIKE UPPER(NVL(#searchString#, construction_cd))
+		                  </isNull>
+		                  ) b)
+		 WHERE rownum_ BETWEEN #from# AND #to# 
+	</select>
+</sqlMap>

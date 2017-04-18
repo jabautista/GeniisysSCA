@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GIISAdjuster">
+
+	<typeAlias alias="GIISAdjuster" type="com.geniisys.common.entity.GIISAdjuster"/>
+	
+	<select id="checkPrivAdjExist" resultClass="java.lang.String">
+		SELECT giis_adjuster_pkg.check_priv_adj_exist(#adjCompanyCd#)
+		  FROM dual
+	</select>
+	
+	
+	<!-- for GICLS210: Private Adjuster Maintenance -->
+	<resultMap class="GIISAdjuster" id="giisAdjusterListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="ADJ_COMPANY_CD"   	property="adjCompanyCd"/>
+		<result column="PRIV_ADJ_CD" 		property="privAdjCd"/>
+		<result column="PAYEE_NAME" 		property="payeeName"/>
+		<result column="MAIL_ADDR" 			property="mailAddr"/>
+		<result column="BILL_ADDR" 			property="billAddr"/>
+		<result column="DESIGNATION" 		property="designation"/>
+		<result column="CONTACT_PERS" 		property="contactPers"/>
+		<result column="PHONE_NO" 			property="phoneNo"/>
+		<result column="USER_ID"     		property="userId"/>
+		<result column="LAST_UPDATE" 		property="lastUpdate"/>
+		<result column="REMARKS"     		property="remarks"/>
+	</resultMap>
+	
+	<select id="getGicls210RecList" resultMap="giisAdjusterListResultMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(Gicls210_pkg.get_rec_list(#adjCompanyCd#, #privAdjCd#, #payeeName#))
+		                  <isEqual property="sortColumn" compareValue="adjCompanyCd">
+			              		ORDER BY adj_company_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="privAdjCd">
+			              		ORDER BY priv_adj_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="payeeName">
+			              		ORDER BY payee_name
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(Gicls210_pkg.get_rec_list(#adjCompanyCd#, #privAdjCd#, #payeeName#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setAdjuster" parameterClass="GIISAdjuster">
+	    DECLARE
+	    	v_rec giis_adjuster%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.adj_company_cd 	:= #adjCompanyCd#;
+ 			v_rec.priv_adj_cd 		:= #privAdjCd#;
+ 			v_rec.payee_name		:= #payeeName#;
+ 			v_rec.payee_class_cd	:= #payeeClassCd#;
+ 			v_rec.mail_addr			:= #mailAddr#;
+ 			v_rec.bill_addr			:= #billAddr#;
+ 			v_rec.contact_pers		:= #contactPers#;
+ 			v_rec.designation		:= #designation#;
+ 			v_rec.phone_no			:= #phoneNo#;
+ 			v_rec.user_id 			:= #userId#;
+ 			v_rec.remarks 			:= #remarks#;
+ 			
+ 			Gicls210_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteAdjuster" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			Gicls210_pkg.val_del_rec(#adjCompanyCd#, #privAdjCd#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddAdjuster" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			Gicls210_pkg.val_add_rec(#adjCompanyCd#, #privAdjCd#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delAdjuster" parameterClass="GIISAdjuster">
+		BEGIN
+ 			Gicls210_pkg.del_rec(#adjCompanyCd#, #privAdjCd#);
+ 		END;
+ 	</delete>
+ 	
+ 	<select id="getLastPrivAdjNo" resultClass="java.lang.Integer" parameterClass="java.lang.Integer">
+ 		SELECT Gicls210_pkg.get_last_priv_adj(#adjCompanyCd#)
+ 		  FROM dual
+ 	</select>
+</sqlMap>

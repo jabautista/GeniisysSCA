@@ -1,0 +1,642 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIInspData">
+	
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIPIInspData" type="com.geniisys.gipi.entity.GIPIInspData"/>
+	<typeAlias alias="GIPIInspReportAttachMedia" type="com.geniisys.gipi.entity.GIPIInspReportAttachMedia" />
+	 
+	<resultMap id="GIPIInspDataMap1" class="GIPIInspData">
+		<result column="insp_no"			property="inspNo"/>
+		<result column="status"				property="status"/>
+		<result column="date_insp"			property="dateInsp"/>
+		<result column="insp_cd"	 		property="inspCd"/>
+		<result column="insp_name"			property="inspName"/>
+		<result column="assd_no"			property="assdNo"/>
+		<result column="assd_name"			property="assdName"/>
+		<result column="intm_no"			property="intmNo"/>
+		<result column="intm_name"			property="intmName"/>
+	</resultMap>
+	
+	<resultMap id="GIPIInspDataMap" class="GIPIInspData">
+	 	<result column="item_no" 			property="itemNo"/>
+		 <result column="item_title"		property="itemTitle"/>
+		 <result column="item_desc"		 	property="itemDesc"/>
+		 <result column="loc_risk1"	 		property="locRisk1"/>
+		 <result column="loc_risk2"			property="locRisk2"/>
+		 <result column="loc_risk3"			property="locRisk3"/>
+		 <result column="front"				property="front"/>
+		 <result column="left"				property="left"/>
+		 <result column="right"				property="right"/>
+		 <result column="rear"				property="rear"/>
+		 <result column="tsi_amt"			property="tsiAmt"/>
+		 <result column="prem_rate"			property="premRate"/>  
+		 <result column="tarf_cd"		 	property="tarfCd"/>
+		 <result column="tariff_zone"		property="tariffZone"/>
+		 <result column="eq_zone"		 	property="eqZone"/>
+		 <result column="flood_zone"		property="floodZone"/>
+		 <result column="typhoon_zone"		property="typhoonZone"/> 
+		 <result column="occupancy_cd"		property="occupancyCd"/>
+		 <result column="occupancy_remarks"	property="occupancyRemarks"/>
+		 <result column="construction_cd"	property="constructionCd"/> 
+		 <result column="construction_remarks" property="constructionRemarks"/>
+		 <result column="block_id"			property="blockId"/>
+		 <result column="approved_by"		property="approvedBy"/> 
+		 <result column="date_approved"		property="dateApproved"/> 
+		 <result column="remarks"			property="remarks"/>
+		 <result column="block_no"			property="blockNo"/>
+		 <result column="district_no"		property="districtNo"/>
+		 <result column="city"				property="city"/>
+		 <result column="province"			property="province"/>
+		 <result column="province_cd"		property="provinceCd"/>
+		 <result column="city_cd"			property="cityCd"/>
+		 <!-- Added by MarkS 02/10/2017 SR5919 -->
+		 <result column="latitude"			property="latitude"/>
+		 <result column="longitude"			property="longitude"/>
+		 <!-- end SR5919 -->
+    </resultMap>
+    
+    <resultMap id="inspDataOtherDtlsMap" class="GIPIInspData">
+    	 <result column="risk_grade"			  property="riskGrade" />
+    	 <result column="peril_option1"			  property="perilOption1" />
+    	 <result column="peril_option1_bldg_rate" property="perilOption1BldgRate" />
+    	 <result column="peril_option1_cont_rate" property="perilOption1ContRate" />
+    	 <result column="peril_option2"			  property="perilOption2" />
+    	 <result column="peril_option2_bldg_rate" property="perilOption2BldgRate" />
+    	 <result column="peril_option2_cont_rate" property="perilOption2ContRate" />
+    </resultMap>
+    
+    <resultMap id="GIPIInspData1ResultMap" class="GIPIInspData">
+    	<result column="insp_no"			property="inspNo"/>
+		<result column="status"				property="status"/>
+		<result column="date_insp"			property="dateInsp"/>
+		<result column="insp_cd"	 		property="inspCd"/>
+		<result column="insp_name"			property="inspName"/>
+		<result column="assd_no"			property="assdNo"/>
+		<result column="assd_name"			property="assdName"/>
+		<result column="intm_no"			property="intmNo"/>
+		<result column="intm_name"			property="intmName"/>
+		<result column="date_approved"		property="dateApproved"/>
+		<result column="approved_by"		property="approvedBy"/>
+		<result column="remarks"		    property="remarks"/> 
+		<result column="rownum_"			property="rowNum"/>
+		<result column="count_"				property="rowCount"/>
+    </resultMap>
+    
+   	<resultMap id="gipiInspPicture" class="GIPIInspReportAttachMedia">
+		<result column="INSP_NO"		property="id" />
+		<result column="ITEM_NO"		property="itemNo" />
+		<result column="FILE_NAME" 		property="fileName" />
+		<result column="FILE_TYPE" 		property="fileType" />
+		<result column="FILE_EXT" 		property="fileExt" />
+		<result column="REMARKS" 		property="remarks" />
+		<result column="SKETCH_TAG" 	property="sketchTag" />
+		<result column="LAST_UPDATE" 	property="lastUpdate" />
+		<result column="USER_ID" 		property="userId" />
+		<result column="rownum_"		property="rowNum"/>
+		<result column="count_"			property="rowCount"/>
+	</resultMap>
+    
+    <select id="showAttachMedia" resultMap="gipiInspPicture" parameterClass="map">
+    	SELECT *
+    	  FROM (SELECT rownum rownum_,
+    	               b.count_,
+    	               a.*
+    	          FROM (SELECT *
+    	                 FROM TABLE(GIPI_INSP_PICTURES_PKG.get_gipi_insp_pictures(#genericId#, #itemNo#))
+    	                <isEqual property="sortColumn" compareValue="fileName2">
+			              	ORDER BY FILE_NAME
+				        </isEqual>
+				        <isEqual property="sortColumn" compareValue="remarks">
+			              	ORDER BY REMARKS
+				        </isEqual>
+		              	<isNotNull property="sortColumn">
+	              			<isEqual property="ascDescFlg" compareValue="ASC">
+	              				ASC
+	              			</isEqual>
+	              			<isEqual property="ascDescFlg" compareValue="DESC">
+	              				DESC
+	              			</isEqual>
+	              	  	</isNotNull>) a,
+    	               (SELECT count(*) count_
+    	                   FROM TABLE(GIPI_INSP_PICTURES_PKG.get_gipi_insp_pictures(#genericId#, #itemNo#))) b)
+         WHERE rownum_ between #from# AND #to#
+    </select>
+    <select id="getGipiInspData1TableGrid" resultMap="GIPIInspData1ResultMap">
+    	SELECT *
+    	  FROM (SELECT rownum rownum_,
+    	               b.count_,
+    	               a.*
+    	          FROM (SELECT *
+    	                  FROM TABLE (GIPI_INSPECTION_PKG.get_gipi_insp_data1)
+   	                  <isNotNull property="filter">
+						WHERE 1 = 1 
+							<isNotEmpty prepend="AND" property="inspName">
+								upper(insp_name) LIKE upper(#inspName#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="assdName">
+								upper(assd_name) LIKE upper(#assdName#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="inspNo">
+								insp_no LIKE #inspNo#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="strDateInsp">
+								TO_CHAR(date_insp, 'MM/DD/YYYY') LIKE #strDateInsp#
+							</isNotEmpty>
+						</isNotNull>
+    	                <isEqual property="sortColumn" compareValue="inspNo">
+			              	ORDER BY insp_no
+				        </isEqual>
+		              	<isEqual property="sortColumn" compareValue="strDateInsp">
+		              		ORDER BY date_insp
+		              	</isEqual>
+		              	<isEqual property="sortColumn" compareValue="status">
+		              		ORDER BY status
+		             	 </isEqual>
+		              	<isEqual property="sortColumn" compareValue="inspName">
+		              		ORDER BY insp_name
+		              	</isEqual>
+		              	<isEqual property="sortColumn" compareValue="assdName">
+		              		ORDER BY assd_name
+		              	</isEqual>
+		              	<isNotNull property="sortColumn">
+	              			<isEqual property="ascDescFlg" compareValue="ASC">
+	              				ASC
+	              			</isEqual>
+	              			<isEqual property="ascDescFlg" compareValue="DESC">
+	              				DESC
+	              			</isEqual>
+	              	  	</isNotNull>) a,
+    	               (SELECT count(*) count_
+    	                  FROM TABLE (GIPI_INSPECTION_PKG.get_gipi_insp_data1)
+    	                  <isNotNull property="filter">
+							WHERE 1 = 1 
+								<isNotEmpty prepend="AND" property="inspName">
+									upper(insp_name) LIKE upper(#inspName#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="assdName">
+									upper(assd_name) LIKE upper(#assdName#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="inspNo">
+									insp_no LIKE #inspNo#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND" property="strDateInsp">
+									TO_CHAR(date_insp, 'MM/DD/YYYY') LIKE #strDateInsp#
+								</isNotEmpty>
+							</isNotNull>
+    	                  ) b)
+         WHERE rownum_ between #from# AND #to#
+    </select>
+    
+    <select id="getGipiInspData1" parameterClass="java.lang.String" resultMap="GIPIInspDataMap1">
+    	SELECT * FROM TABLE(GIPI_INSPECTION_PKG.get_gipi_insp_data1)
+    		WHERE UPPER(insp_name) LIKE #keyword#
+    		   OR UPPER(assd_name) LIKE #keyword#
+    		   OR UPPER(intm_name) LIKE #keyword# 
+    </select>
+    
+    <select id="getInspDataItemInfo" parameterClass="java.lang.Integer" resultMap="GIPIInspDataMap">
+    	SELECT * FROM TABLE(GIPI_INSPECTION_PKG.get_gipi_insp_data(#inspNo#))
+    </select>
+
+    <procedure id="saveGipiInspData" parameterClass="GIPIInspData">
+    	BEGIN
+    		giis_users_pkg.app_user := #appUser#;
+    		GIPI_INSPECTION_PKG.update_gipi_insp_data_table(#inspNo#, #itemNo#, #itemDesc#, #blockId#, #assdNo#, #assdName#,
+		           											#locRisk1#, #locRisk2# , #locRisk3#, #occupancyCd#, #occupancyRemarks#,
+														    #constructionCd#, #constructionRemarks#, #front#, #left#, #right#, #rear#,
+														    #wcCd#, #tarfCd#, #tariffZone#, #eqZone#, #floodZone#, #typhoonZone#,
+														    #premRate#, #tsiAmt#, #intmNo#, #inspCd#, #dateInsp#, #userId#,
+														    #dateApproved#, #parId#, #quoteId#, #itemTitle#,
+														    #status#, #itemGrp#, #remarks#, #arcExtData#, #userId#,
+														    <!-- Added by MarkS 02/09/2017 SR5919 -->
+														    #latitude#,#longitude#
+														    <!-- end SR5919 -->
+														    );
+		END;
+    </procedure>
+	
+	<delete id="deleteInspectionItem" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			GIPI_INSPECTION_PKG.delete_item(#itemNo#,#inspNo#);
+		END;
+	</delete> 
+	
+	
+	<delete id="deleteGipiInspData" parameterClass="java.lang.Integer">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			GIPI_INSPECTION_PKG.delete_gipi_insp_data(#inspNo#);
+		END;
+	</delete>
+
+	<!-- temporary -->	
+	<select id="getBlockId" parameterClass="map" resultClass="java.lang.String">
+		SELECT GIIS_BLOCK_PKG.get_block_id(#provinceCd#, #cityCd#, #districtNo#, #blockNo#) FROM DUAL
+	</select>
+	
+	<select id="generateInspNo" resultClass="java.lang.Integer">
+		SELECT gipi_insp_data_insp_no_seq.NEXTVAL FROM dual
+	</select>
+	
+	<select id="getInspOtherDtls" parameterClass="map" resultMap="inspDataOtherDtlsMap">
+		SELECT * FROM TABLE (GIPI_INSPECTION_PKG.get_insp_otherdtls(#inspNo#, #itemNo#))
+	</select> 
+	
+	<procedure id="setInspOtherDtls" parameterClass="GIPIInspData">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			GIPI_INSPECTION_PKG.set_insp_otherdtls(#inspNo#, #itemNo#, #riskGrade#,
+												   #perilOption1#, #perilOption1BldgRate#, #perilOption1ContRate#,
+												   #perilOption2#, #perilOption2BldgRate#, #perilOption2ContRate#);
+		END;
+	</procedure>
+	
+	<resultMap class="GIPIInspData" id="getQuoteInpsListMap">
+		<result column="item_no" 			property="itemNo"/>
+		<result column="insp_no"		 	property="inspNo"/>
+		<result column="insp_name"			property="inspName"/>
+		<result column="assd_name"			property="assdName"/>
+		<result column="item_desc"		 	property="itemDesc"/>
+		<result column="province"			property="province"/>
+		<result column="city"				property="city"/>	
+		<result column="district_desc" 		property="districtDesc"/>	
+		<result column="block_desc" 		property="blockDesc"/>
+		<result column="loc_risk1"	 		property="locRisk1"/>
+		<result column="loc_risk2"			property="locRisk2"/>
+		<result column="loc_risk3"			property="locRisk3"/>
+		<result column="province_cd"		property="provinceCd"/>
+		<result column="district_no"		property="districtNo"/>	
+		<result column="block_no"			property="blockNo"/>
+		<result column="rownum_" 		property="rowNum"/>
+		<result column="count_" 		property="rowCount"/>
+	</resultMap>
+	
+	<select id="getQuoteInpsList" parameterClass="map" resultMap="getQuoteInpsListMap">
+		SELECT *
+		  FROM (SELECT ROWNUM rownum_, a.*, b.count_
+		          FROM (SELECT *
+		                  FROM TABLE
+		                          (gipi_inspection_pkg.get_quote_inspection_list (#assdNo#, #findText#)
+		                          )
+                          		<isEqual property="sortColumn" compareValue="quoteNo">
+		              		   		 ORDER BY quote_no
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="assdName">
+				              		ORDER BY assd_name
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="inspName">
+				              		ORDER BY insp_name
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="itemDesc">
+				              		ORDER BY item_desc
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="province">
+				              		ORDER BY  province
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="city">
+				              		ORDER BY  city
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="districtDesc">
+				              		ORDER BY  district_desc
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="blockDesc">
+				              		ORDER BY  block_desc
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="locRisk1">
+				              		ORDER BY  loc_risk1
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="locRisk2">
+				              		ORDER BY  loc_risk2
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="locRisk3">
+				              		ORDER BY  loc_risk3
+				              </isEqual>
+				              <isNotNull property="sortColumn">
+				              	  <isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              	  </isEqual>
+				              	  <isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              	  </isEqual>
+			              	  </isNotNull>                                 			
+		                          ) a,
+		               (SELECT COUNT (*) count_
+		                  FROM TABLE
+		                          (gipi_inspection_pkg.get_quote_inspection_list (#assdNo#, #findText#)
+		                          )
+		                          ) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="saveGIPIInspPicture2" parameterClass="GIPIInspReportAttachMedia">
+		DECLARE
+			insppicture GIPI_INSP_PICTURES%ROWTYPE;
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			
+			insppicture.INSP_NO			:= #id#;
+			insppicture.ITEM_NO			:= #itemNo#;
+			insppicture.FILE_NAME		:= #fileName#;
+			insppicture.FILE_TYPE		:= #fileType#;
+			insppicture.FILE_EXT		:= #fileExt#;
+			insppicture.REMARKS	   		:= #remarks#;
+			insppicture.SKETCH_TAG	   	:= #sketchTag#;
+			insppicture.USER_ID			:= #userId#;
+			
+			GIPI_INSP_PICTURES_PKG.set_gipi_insp_pictures(insppicture);
+		END;
+	</procedure>
+	
+	<procedure id="deleteGIPIInspPictures2" parameterClass="GIPIInspReportAttachMedia">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			GIPI_INSP_PICTURES_PKG.del_gipi_insp_pictures2(#id#, #itemNo#,#fileName#);
+		END;
+	</procedure>
+	
+	<resultMap class="java.util.HashMap"  id="getApprovedInspectionListMap">
+		<result column="ASSD_NAME" 		  property="assdName"/>
+		<result column="ITEM_NO" 		  property="itemNo"/>
+		<result column="STATUS" 		  property="status"/>
+		<result column="INSP_NO" 		  property="inspNo"/>
+		<result column="BLOCK_ID" 		  property="blockId"/>
+		<result column="INSP_NAME" 		  property="inspName"/>
+		<result column="ITEM_TITLE" 	  property="itemTitle"/>
+		<result column="ITEM_DESC" 		  property="itemDesc"/>
+		<result column="PROVINCE_CD" 	  property="provinceCd"/>
+		<result column="PROVINCE" 		  property="province"/>
+		<result column="CITY_CD" 		  property="cityCd"/>
+		<result column="CITY" 			  property="city"/>
+		<result column="DISTRICT_NO" 	  property="districtNo"/>
+		<result column="DISTRICT_DESC" 	  property="districtDesc"/>
+		<result column="LOC_RISK1" 		  property="locRisk1"/>
+		<result column="LOC_RISK2" 		  property="locRisk2"/>
+		<result column="LOC_RISK3" 		  property="locRisk3"/>
+		<result column="rownum_" 		  property="rowNum"/>
+		<result column="count_" 		  property="rowCount"/>
+	</resultMap>
+	
+	<select id="getApprovedInspectionList" parameterClass="map" resultMap="getApprovedInspectionListMap">
+		SELECT *
+		  FROM (SELECT ROWNUM rownum_, a.*, b.count_
+				  FROM (SELECT *
+						  FROM TABLE(gipi_inspection_pkg.get_approved_inspection_list(#parId#, #assdNo#, #findText#))
+								                                 			
+						) a,
+					   (SELECT COUNT (*) count_
+						  FROM TABLE
+								  (gipi_inspection_pkg.get_approved_inspection_list(#parId#, #assdNo#, #findText#))
+						) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap"  id="getApprovedInspectionListMap2">
+		<result column="INSP_NO" 		  property="inspNo"/>
+		<result column="INSP_CD" 		  property="inspCd"/>
+		<result column="INSP_NAME" 		  property="inspName"/>
+		<result column="ASSD_NO" 		  property="assdNo"/>
+		<result column="ASSD_NAME" 		  property="assdName"/>
+		<result column="INTM_NO" 		  property="intmNo"/>
+		<result column="INTM_NAME" 		  property="intmName"/>
+		<result column="LOC_RISK1" 		  property="locRisk1"/>
+		<result column="LOC_RISK2" 		  property="locRisk2"/>
+		<result column="LOC_RISK3" 		  property="locRisk3"/>
+		<result column="LOC_OF_RISK" 	  property="locOfRisk"/>
+		<result column="rownum_" 		  property="rowNum"/>
+		<result column="count_" 		  property="rowCount"/>
+	</resultMap>
+	
+	<select id="getApprovedInspectionList2" parameterClass="map" resultMap="getApprovedInspectionListMap2">
+		SELECT *
+		  FROM (SELECT ROWNUM rownum_, a.*, b.count_
+				  FROM (SELECT *
+						  FROM TABLE(gipi_inspection_pkg.get_approved_inspection_list_2(#parId#, #assdNo#, #findText#))
+						<isEqual property="sortColumn" compareValue="inspNo">
+			              	ORDER BY insp_no
+				        </isEqual>
+		              	<isEqual property="sortColumn" compareValue="inspName">
+		              		ORDER BY insp_name
+		              	</isEqual>
+		              	<isEqual property="sortColumn" compareValue="assdName">
+		              		ORDER BY assd_name
+		              	</isEqual>
+		              	<isEqual property="sortColumn" compareValue="locRisk1">
+		              		ORDER BY loc_risk1
+		              	</isEqual>
+		              	<isEqual property="sortColumn" compareValue="locRisk2">
+		              		ORDER BY loc_risk2
+		              	</isEqual>
+		              	<isEqual property="sortColumn" compareValue="locRisk3">
+		              		ORDER BY loc_risk3
+		              	</isEqual>
+		              	<isEqual property="sortColumn" compareValue="locOfRisk">
+		              		ORDER BY loc_of_risk
+		              	</isEqual>
+		              	<isNotNull property="sortColumn">
+	              			<isEqual property="ascDescFlg" compareValue="ASC">
+	              				ASC
+	              			</isEqual>
+	              			<isEqual property="ascDescFlg" compareValue="DESC">
+	              				DESC
+	              			</isEqual>
+	              	  	</isNotNull>		                                 			
+						) a,
+					   (SELECT COUNT (*) count_
+						  FROM TABLE
+								  (gipi_inspection_pkg.get_approved_inspection_list_2(#parId#, #assdNo#, #findText#))
+						) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="GIPIInspData" 	id="getInspectionRepMap">
+		<result column="insp_no"		property="inspNo"/>
+		<result column="item_no" 		property="itemNo"/>
+		<result column="item_title"		property="itemTitle"/>
+		<result column="item_desc"		property="itemDesc"/>
+		<result column="block_id"		property="blockId"/>
+		<result column="insp_cd"		property="inspCd"/>
+	</resultMap>
+	
+	<select id="getInspectionRep" parameterClass="java.util.HashMap" resultMap="getInspectionRepMap">
+		SELECT insp_no,    item_no,  item_title,     
+		       item_desc,  block_id, insp_cd        
+		  FROM GIPI_INSP_DATA
+		 WHERE insp_no = #inspNo#
+	</select>
+	
+	<procedure id="saveParWItemFromInspection" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GIPI_INSPECTION_PKG.save_par_witem_from_inspection(#parId#, #inspNo#, #itemNo#, #itemTitle#, #itemDesc#, #blockId#);
+		END;
+	</procedure>
+	
+	<procedure id="saveWfireitmFromInspection" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GIPI_INSPECTION_PKG.save_wfireitm_from_inspection(#parId#, #inspNo#, #itemNo#, #blockId#, #inspCd#);
+		END;
+	</procedure>
+	
+	<procedure id="saveWpicturesFromInspection" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GIPI_INSPECTION_PKG.save_wpictures_from_inspection(#parId#, #inspNo#, #itemNo#);
+		END;
+	</procedure>
+	
+	<resultMap class="java.util.HashMap" id="getQuoteInpsListMap2">
+		<result column="insp_no"		 	property="inspNo"/>
+		<result column="insp_name"			property="inspName"/>
+		<result column="assd_name"			property="assdName"/>
+		<result column="loc_risk1"	 		property="locRisk1"/>
+		<result column="loc_risk2"			property="locRisk2"/>
+		<result column="loc_risk3"			property="locRisk3"/>
+		<result column="loc_risk"			property="locRisk"/>
+		<result column="rownum_" 			property="rowNum"/>
+		<result column="count_" 			property="rowCount"/>
+	</resultMap>
+	
+	<select id="getQuoteInspList" parameterClass="map" resultMap="getQuoteInpsListMap2">
+		SELECT *
+		  FROM (SELECT ROWNUM rownum_,
+		  			   a.*,
+		  			   b.count_
+				  FROM (SELECT *
+						  FROM TABLE(GIPI_INSPECTION_PKG.get_quote_inspection_list2(#assdNo#, #findText#))
+						  	<isNotNull property="findText">			<!--Added by Gzelle 04.11.2014 MAC SIT-->
+								WHERE 1=1
+								<isNotEmpty prepend="AND"  property="findText">
+									(TO_CHAR(insp_no) LIKE #findText# OR
+									 upper(insp_name) LIKE upper(#findText#) OR
+									 upper(assd_name) LIKE upper(#findText#) OR
+									 upper(loc_risk) LIKE upper(#findText#))
+								</isNotEmpty>
+							</isNotNull>
+						<isEqual property="sortColumn" compareValue="inspNo">
+			              	ORDER BY insp_no
+				        </isEqual>
+		              	<isEqual property="sortColumn" compareValue="inspName">
+		              		ORDER BY insp_name
+		              	</isEqual>
+		              	<isEqual property="sortColumn" compareValue="assdName">
+		              		ORDER BY assd_name
+		              	</isEqual>
+		              	<isEqual property="sortColumn" compareValue="locRisk">
+		              		ORDER BY loc_risk
+		              	</isEqual>
+		              	<isNotNull property="sortColumn">
+	              			<isEqual property="ascDescFlg" compareValue="ASC">
+	              				ASC
+	              			</isEqual>
+	              			<isEqual property="ascDescFlg" compareValue="DESC">
+	              				DESC
+	              			</isEqual>
+	              	  	</isNotNull>		                                 			
+						) a,
+					   (SELECT COUNT (*) count_
+						  FROM TABLE(GIPI_INSPECTION_PKG.get_quote_inspection_list2(#assdNo#, #findText#))
+						  	<isNotNull property="findText">			<!--Added by Gzelle 04.11.2014 MAC SIT-->
+								WHERE 1=1
+								<isNotEmpty prepend="AND"  property="findText">
+									(TO_CHAR(insp_no) LIKE #findText# OR
+									 upper(insp_name) LIKE upper(#findText#) OR
+									 upper(assd_name) LIKE upper(#findText#) OR
+									 upper(loc_risk) LIKE upper(#findText#))
+								</isNotEmpty>
+							</isNotNull>
+						) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<insert id="saveQuoteInspectionDetails2" parameterClass="java.util.HashMap">
+		BEGIN
+			GIIS_USERS_PKG.app_user := #appUser#;
+			GIPI_INSPECTION_PKG.save_quote_inspection(#quoteId#, #inspNo#, #itemNo#, #appUser#);
+		END;
+	</insert>
+	
+	<procedure id="updateInspReportStatus" parameterClass="java.util.HashMap">
+		BEGIN
+			GIIS_USERS_PKG.app_user := #userId#;
+			GIPI_INSPECTION_PKG.update_inspection_status(#parId#);
+		END;
+	</procedure>
+	
+	<procedure id="resetInspReportStatus" parameterClass="java.util.HashMap">
+		BEGIN
+			GIIS_USERS_PKG.app_user := #userId#;
+			GIPI_INSPECTION_PKG.set_status_to_approved(#parId#);
+		END;
+	</procedure>
+	
+	<procedure id="updateGipiInspDataParent" parameterClass="java.util.HashMap">
+		BEGIN
+			GIIS_USERS_PKG.app_user := #userId#;
+			GIPI_INSPECTION_PKG.update_parent_record(#inspNo#, #assdNo#, #assdName#, #intmNo#, #inspCd#, #remarks#, #status#, #userId#);
+		END;
+	</procedure>
+	
+	<resultMap class="java.util.HashMap" id="getAttachmentsResultMap">
+		<result property="inspNo" column="insp_no" />
+		<result property="itemNo" column="item_no" />
+		<result property="fileName" column="file_name" />
+	</resultMap>
+	
+	<select id="getAttachments" resultMap="getAttachmentsResultMap">
+		SELECT *
+		  FROM TABLE(GIPI_INSP_PICTURES_PKG.get_attachments(#inspNo#, #itemNo#))
+	</select>
+	
+	<resultMap id="getAttachmentByQuoteResultMap" class="GIPIQuotePictures">
+		<result property="quoteId"	column="QUOTE_ID" />
+		<result property="itemNo"	column="ITEM_NO" />
+		<result property="fileName"	column="FILE_NAME" />
+	</resultMap>
+	
+	<select id="getAttachmentByQuote" resultMap="getAttachmentByQuoteResultMap">
+		SELECT *
+		  FROM TABLE(GIPI_QUOTE_PICTURES_PKG.get_attachment_by_quote(#quoteId#))
+	</select>
+	
+	<procedure id="updateFileName2" parameterClass="java.util.HashMap">
+		BEGIN
+			GIPI_QUOTE_PICTURES_PKG.update_file_name2(#quoteId#, #itemNo#, #oldFileName#, #newFileName#);
+		END;
+	</procedure>
+	
+	<resultMap id="getAttachmentByParResultMap" class="java.util.HashMap">
+		<result property="parId"	column="PAR_ID" />
+		<result property="itemNo"	column="ITEM_NO" />
+		<result property="fileName"	column="FILE_NAME" />
+	</resultMap>
+	
+	<select id="getAttachmentByPar" resultMap="getAttachmentByParResultMap">
+		SELECT *
+		  FROM TABLE(GIPI_WPICTURES_PKG.get_attachment_by_par(#parId#))
+	</select>
+	
+	<resultMap id="getInspItemAttachmentsResultMap" class="java.lang.String">
+		<result property="fileName" column="file_name" />
+	</resultMap>
+	
+	<select id="getInspItemAttachments" resultMap="getInspItemAttachmentsResultMap">
+		SELECT file_name
+		  FROM TABLE(gipi_insp_pictures_pkg.get_attachments(#inspNo#, #itemNo#))
+	</select>
+	
+	<procedure id="updateFileName3" parameterClass="java.util.HashMap">
+		BEGIN
+			GIPI_WPICTURES_PKG.update_file_name3(#parId#, #itemNo#, #oldFileName#, #newFileName#);
+		END;
+	</procedure>
+	
+</sqlMap>

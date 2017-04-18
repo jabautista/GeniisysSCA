@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIWItemDiscount">
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GipiWItemDiscountClass" type="com.geniisys.gipi.entity.GIPIWItemDiscount"/>
+	
+	<resultMap class="GipiWItemDiscountClass" id="selectGIPIWItemDiscountMap">
+		<result column="PAR_ID" 			property="parId"/>
+		<result column="LINE_CD" 			property="lineCd"/>
+		<result column="ITEM_NO" 			property="itemNo"/>
+		<result column="ITEM_TITLE" 		property="itemTitle"/>
+		<result column="SUBLINE_CD" 		property="sublineCd"/>
+		<result column="DISC_RT" 			property="discountRt"/>
+		<result column="DISC_AMT" 			property="discountAmt"/>
+		<result column="NET_GROSS_TAG" 		property="netGrossTag"/>
+		<result column="ORIG_PREM_AMT" 		property="origPremAmt"/>
+		<result column="SEQUENCE" 			property="sequenceNo"/>
+		<result column="REMARKS" 			property="remarks"/>
+		<result column="NET_PREM_AMT" 		property="netPremAmt"/>
+		<result column="SURCHARGE_RT" 		property="surchargeRt"/>
+		<result column="SURCHARGE_AMT" 		property="surchargeAmt"/>
+	</resultMap>
+	
+	<parameterMap class="map" id="getOrigItemPremMap">
+		<parameter property="parId"			    jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="itemNo"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="msgAlert"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="origPremAmt"		jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="netPremAmt"		jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="getNetItemPremMap">
+		<parameter property="parId"			    jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="itemNo"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="discTotal"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="surcTotal"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="deleteDiscountAtItemMap">
+		<parameter property="parId"			    jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="itemNo"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="origItemNo"		jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="sequence"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="var"			    jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="addDiscountItemMap">
+		<parameter property="parId"			    jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="itemNo"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="lineCd"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="discRt"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="netGrossTag"	    jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="sublineCd"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="sequence"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="surcRt"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="discAmt"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="surcAmt"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+	</parameterMap>
+	
+	
+	<procedure id="deleteGIPIWItemDiscount" parameterClass="java.lang.Integer">
+		BEGIN
+			Gipi_Witem_Discount_Pkg.del_gipi_witem_discount(#parId#);
+		END;	
+	</procedure>
+	
+	<procedure id="selectGIPIWItemDiscount" resultMap="selectGIPIWItemDiscountMap" parameterClass="java.util.HashMap">
+		SELECT * FROM TABLE(Gipi_Witem_Discount_Pkg.get_gipi_witem_discount(#parId#))
+	</procedure>
+	
+	<insert id="setGipiWItemDiscount" parameterClass="GipiWItemDiscountClass">
+		DECLARE
+			disc Gipi_Witem_Discount%ROWTYPE; 
+		BEGIN
+			disc.par_id 		:= #parId#;
+			disc.line_cd 		:= #lineCd#;
+			disc.item_no	    := #itemNo#;
+			disc.subline_cd 	:= #sublineCd#;
+			disc.disc_rt 		:= #discountRt#;
+			disc.disc_amt		:= #discountAmt#;
+			disc.net_gross_tag  := #netGrossTag#;
+			disc.orig_prem_amt	:= #origPremAmt#;
+			disc.sequence		:= #sequenceNo#;
+			disc.remarks		:= #remarks#;
+			disc.net_prem_amt	:= #netPremAmt#;
+			disc.surcharge_rt	:= #surchargeRt#;
+			disc.surcharge_amt	:= #surchargeAmt#;
+			
+			Gipi_WItem_Discount_Pkg.set_gipi_witem_discount(disc);
+		END;
+	</insert>
+	
+	<procedure id="getOrigItemPrem" parameterMap="getOrigItemPremMap">
+		{ CALL Get_Orig_Item_Prem_Gipis143(?, ?, ?, ?, ?) }
+	</procedure>
+	
+	<procedure id="getNetItemPrem" parameterMap="getNetItemPremMap">
+		{ CALL get_net_item_prem_A_Gipis143(?, ?, ?, ?) }
+	</procedure>
+	
+	<procedure id="deleteDiscountAtItem" parameterMap="deleteDiscountAtItemMap">
+		{ CALL DELETE_DISCOUNT_AT_ITEM(?, ?, ?, ?, ?) }
+	</procedure>
+	
+	<procedure id="addDiscountItem" parameterMap="addDiscountItemMap">
+		{ CALL ADD_DISCOUNT_AT_ITEM(?, ?, ?, ?, ?, ?, ?, ?, ?, ?) }
+	</procedure>
+	
+</sqlMap>	

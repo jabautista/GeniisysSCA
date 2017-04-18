@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GICLReasons">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GICLReasonsClass" type="com.geniisys.gicl.entity.GICLReasons"/>
+		
+	<resultMap class="java.util.HashMap" id="ClmStatReasonsResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="reasonCd" 		column="reason_cd"/>
+		<result property="reasonDesc" 		column="reason_desc"/>
+		<result property="clmStatCd" 		column="clm_stat_cd"/>		
+		<result property="remarks" 			column="remarks"/>	
+		<result property="userId" 			column="user_id"/>	
+		<result property="lastUpdate" 		column="last_update"/>	
+		<result property="clmStatDesc" 		column="clm_stat_desc"/>	
+	</resultMap> 
+  	
+  	<resultMap class="java.util.HashMap" id="GICLReasonsLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="clmStatCd" 		column="clm_stat_cd"/>
+		<result property="clmStatDesc" 		column="clm_stat_desc"/>		
+		<result property="clmStatType" 		column="clm_stat_type"/>		
+	</resultMap>
+	
+  	<select id="showClmStatReasonsMaintenance" resultMap="ClmStatReasonsResultMap">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+						 b.count_, 
+						 a.*
+					FROM (SELECT *
+							FROM TABLE (GICLS170_PKG.show_clm_stat_reasons)		
+							<isNotNull property="filter">
+								WHERE 1 = 1 
+	 								<isNotEmpty prepend="AND" property="reasonCd">
+										UPPER(reason_cd) LIKE UPPER(#reasonCd#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="reasonDesc">
+										UPPER(reason_desc) LIKE UPPER(#reasonDesc#)
+									</isNotEmpty>	
+									<isNotEmpty prepend="AND" property="clmStatDesc">
+										UPPER(clm_stat_desc) LIKE UPPER(#clmStatDesc#)
+									</isNotEmpty>																
+							</isNotNull>					
+							<isEqual property="sortColumn" compareValue="reasonCd">
+								ORDER BY reason_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="reasonDesc">
+								ORDER BY reason_desc
+							</isEqual>		
+							<isEqual property="sortColumn" compareValue="clmStatDesc">
+								ORDER BY clm_stat_desc
+							</isEqual>				
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>
+						) a,
+						(SELECT count(*) count_
+						   FROM TABLE (GICLS170_PKG.show_clm_stat_reasons)						 		
+							<isNotNull property="filter">
+								WHERE 1 = 1 
+	 								<isNotEmpty prepend="AND" property="reasonCd">
+										UPPER(reason_cd) LIKE UPPER(#reasonCd#)
+									</isNotEmpty>
+									<isNotEmpty prepend="AND" property="reasonDesc">
+										UPPER(reason_desc) LIKE UPPER(#reasonDesc#)
+									</isNotEmpty>	
+									<isNotEmpty prepend="AND" property="clmStatDesc">
+										UPPER(clm_stat_desc) LIKE UPPER(#clmStatDesc#)
+									</isNotEmpty>																
+							</isNotNull>							  
+						   ) b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getClmStatReasonsLOV" resultMap="GICLReasonsLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GICLS170_PKG.get_clm_stat_reasons_lov)		                 
+		                  	<isNull property="findText">
+				                 WHERE UPPER(clm_stat_cd) LIKE UPPER(#searchString#)
+				                 OR UPPER(clm_stat_desc) LIKE UPPER(#searchString#)	
+				                 OR UPPER(clm_stat_type) LIKE UPPER(#searchString#)					                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(clm_stat_cd) LIKE UPPER(#findText#)
+				                 OR UPPER(clm_stat_desc) LIKE UPPER(#findText#)	
+				                 OR UPPER(clm_stat_type) LIKE UPPER(#findText#)				  				         		
+			             	</isNotNull>		             
+			              	<isEqual property="sortColumn" compareValue="clmStatCd">
+			              		ORDER BY clm_stat_cd
+			              	</isEqual>	
+			              	<isEqual property="sortColumn" compareValue="clmStatDesc">
+			              		ORDER BY clm_stat_desc
+			              	</isEqual>	
+			              	<isEqual property="sortColumn" compareValue="clmStatType">
+			              		ORDER BY clm_stat_type
+			              	</isEqual>			              		                      
+			          	  	<isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	</isNotNull>
+		                  ) a, 
+		               (SELECT count (*) count_ 
+		                  FROM TABLE(GICLS170_PKG.get_clm_stat_reasons_lov)		                 
+		                  	<isNull property="findText">
+				                 WHERE UPPER(clm_stat_cd) LIKE UPPER(#searchString#)
+				                 OR UPPER(clm_stat_desc) LIKE UPPER(#searchString#)	
+				                 OR UPPER(clm_stat_type) LIKE UPPER(#searchString#)					                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(clm_stat_cd) LIKE UPPER(#findText#)
+				                 OR UPPER(clm_stat_desc) LIKE UPPER(#findText#)	
+				                 OR UPPER(clm_stat_type) LIKE UPPER(#findText#)				  				         		
+			             	</isNotNull>	
+			             	) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+		
+	<select id="validateReasonsInput" resultClass="java.lang.String">
+		SELECT GICLS170_PKG.validate_reasons_input(#txtField#,#inputString#,#reasonCd#,#clmStatCd#)FROM dual							
+	</select>
+	
+	<insert id="setClmStatReasons" parameterClass="GICLReasonsClass">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;						
+			GICLS170_PKG.set_clm_stat_reasons(
+				#reasonCd#, #reasonDesc#,
+				#clmStatCd#,#remarks#);
+		END;	
+	</insert>	
+	
+	<delete id="deleteInClmStatReasons" parameterClass="GICLReasonsClass">
+		BEGIN
+			GICLS170_PKG.delete_in_clm_stat_reasons(#reasonCd#);
+		END;
+	</delete>
+</sqlMap>	

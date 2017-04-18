@@ -1,0 +1,840 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIACChkDisbursement">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+
+	<typeAlias alias="GIACChkDisbursementClass" type="com.geniisys.giac.entity.GIACChkDisbursement"/>
+	
+	<resultMap class="GIACChkDisbursementClass" id="giacs016ChkDisbursementMap">
+		<result property="checkStat" 		column="check_stat"/>
+		<result property="checkDate" 		column="check_date"/>
+		<result property="checkPrefSuf" 	column="check_pref_suf"/>
+		<result property="checkNo" 			column="check_no"/>
+		<result property="gaccTranId" 		column="gacc_tran_id"/>
+		<result property="itemNo" 			column="item_no"/>
+		<result property="dspCheckFlagMean" column="dsp_check_flag_mean"/>
+		<result property="strCheckDate" 	column="str_check_date"/>
+	</resultMap>
+	
+	<select id="getGiacs016ChkDisbursement" resultMap="giacs016ChkDisbursementMap" parameterClass="Integer">
+		SELECT a.*, to_char(a.check_date,'mm-dd-yyyy')str_check_date FROM TABLE(giac_chk_disbursement_pkg.get_giacs016_chk_disbursement(#gaccTranId#)) a
+	</select>	
+	
+	<resultMap class="GIACChkDisbursementClass" id="getGIACS002ChkDisbursementMap" >
+		<result property="gaccTranId" 			column="gacc_tran_id"/>
+		<result property="itemNo" 				column="item_no"/>
+		<result property="checkDate" 			column="check_date"/>
+		<result property="strCheckDate" 		column="str_check_date"/>
+		<result property="checkPrintDate" 		column="check_print_date"/>
+		<result property="strCheckPrintDate" 	column="str_check_print_date"/>
+		<result property="checkPrefSuf" 		column="check_pref_suf"/>
+		<result property="checkNo" 				column="check_no"/>
+		
+		<result property="bankCd" 				column="bank_cd"/>
+		<result property="bankAcctCd" 			column="bank_acct_cd"/>
+		<result property="bankAcctNo" 			column="bank_acct_no"/>
+		<result property="dspBankSname" 		column="bank_sname"/>
+		
+		<result property="fCurrencyAmt"			column="fcurrency_amt" />
+		<result property="amount"				column="amount" />
+		<result property="totalAmount"			column="total_amount" />
+		<result property="currencyCd"			column="currency_cd" />
+		<result property="currencyRt"			column="currency_rt" />
+		<result property="dspCurrency"			column="dsp_short_name" />
+		
+		<result property="payee"				column="payee" />
+		<result property="payeeClassCd"			column="payee_class_cd" />
+		<result property="payeeNo"				column="payee_no" />
+		
+		<result property="checkStat" 			column="check_stat"/>
+		<result property="checkStatMean"		column="check_stat_mean" />		
+		<result property="checkClassMean"		column="check_class_mean" />
+		<result property="checkClass"			column="check_class" />
+		<result property="nbtDVParticulars"		column="particulars" />
+		<result property="disbMode"				column="disb_mode" />
+		
+		<result property="userId"				column="user_id" />
+		<result property="lastUpdate"			column="last_update" />
+		<result property="strLastUpdate2"		column="str_last_update" />
+		<result property="checkReceivedBy"			column="check_received_by" />
+		<result property="checkReleasedBy"			column="check_released_by" />
+		<result property="checkReleaseDate"			column="check_release_date" />
+		<result property="batchTag"					column="batch_tag" />
+		
+	</resultMap>
+	<select id="getGIACS002ChkDisbursementInfo" parameterClass="java.util.HashMap" resultMap="getGIACS002ChkDisbursementMap">
+		SELECT *
+		  FROM TABLE(GIAC_CHK_DISBURSEMENT_PKG.get_giacs002_chk_disb_info(#gaccTranId#))
+		 WHERE rownum = 1
+	</select>
+	
+	<resultMap id="chkDisbursementTG" class="java.util.HashMap" extends="getGIACS002ChkDisbursementMap">
+		<result column="rownum_" 		property="rowNum" />
+		<result column="count_"			property="rowCount"/>
+	</resultMap>
+	<select id="getGIACS002ChkDisbursementTG" resultMap="chkDisbursementTG" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, b.count_, a.*
+		  		  FROM (SELECT *
+		  		  		  FROM TABLE(GIAC_CHK_DISBURSEMENT_PKG.get_giacs002_chk_disb_info(#gaccTranId#))
+		  		  		   <isNotNull property="filter">
+		  		  		  WHERE 1=1
+		  		  		   		<isNotEmpty prepend="AND" property="itemNo">
+			  		         		itemNo = #itemNo#
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="bankCd">
+			  		         		bank_cd LIKE (#bankCd#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="bankAcctCd">
+			  		         		bank_acct_cd LIKE (#bankAcctCd#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="dspBankSname">
+			  		         		UPPER(bank_sname) LIKE UPPER(#dspBankSname#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="bankAcctNo">
+			  		         		UPPER(bank_acct_no) LIKE UPPER(#bankAcctNo#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="dspCurrency">
+			  		         		UPPER(dsp_short_name) LIKE UPPER(#dspCurrency#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="fCurrencyAmt">
+			  		         		fcurrency_amt = #fCurrencyAmt#
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="currencyRt">
+			  		         		currency_rt = #currencyRt#
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="amount">
+			  		         		amount = #amount#
+			  		         	</isNotEmpty>
+		  		  		   </isNotNull>
+		  		  		<isNotNull property="sortColumn">
+			  		  		<isEqual property="sortColumn" compareValue="itemNo">
+			              		ORDER BY item_no
+				            </isEqual>
+				            <isEqual property="sortColumn" compareValue="bankCd bankAcctCd dspBankSname bankAcctNo">
+			              		ORDER BY bank_cd, bank_acct_cd, bank_sname, bank_acct_no
+				            </isEqual>
+				            <isEqual property="sortColumn" compareValue="dspCurrency">
+			              		ORDER BY dsp_short_name
+				            </isEqual>
+				            <isEqual property="sortColumn" compareValue="fCurrencyAmt">
+			              		ORDER BY fcurrency_amt
+				            </isEqual>
+				            <isEqual property="sortColumn" compareValue="currencyRt">
+			              		ORDER BY currency_rt
+				            </isEqual>
+				            <isEqual property="sortColumn" compareValue="amount">
+			              		ORDER BY amount
+				            </isEqual>
+			            	<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>)a,
+		  		  		(SELECT count(*) count_ 
+		                  FROM TABLE(GIAC_CHK_DISBURSEMENT_PKG.get_giacs002_chk_disb_info(#gaccTranId#))
+		                 <isNotNull property="filter">
+		                 WHERE 1=1
+		                   		<isNotEmpty prepend="AND" property="itemNo">
+			  		         		itemNo = #itemNo#
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="bankCd">
+			  		         		bank_cd LIKE (#bankCd#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="bankAcctCd">
+			  		         		bank_acct_cd LIKE (#bankAcctCd#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="dspBankSname">
+			  		         		UPPER(bank_sname) LIKE UPPER(#dspBankSname#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="bankAcctNo">
+			  		         		UPPER(bank_acct_no) LIKE UPPER(#bankAcctNo#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="dspCurrency">
+			  		         		UPPER(dsp_short_name) LIKE UPPER(#dspCurrency#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="fCurrencyAmt">
+			  		         		fcurrency_amt = #fCurrencyAmt#
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="currencyRt">
+			  		         		currency_rt = #currencyRt#
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="amount">
+			  		         		amount = #amount#
+			  		         	</isNotEmpty>
+		  		  		   </isNotNull>
+		  		  		<isNotNull property="sortColumn">
+			  		  		<isEqual property="sortColumn" compareValue="itemNo">
+			              		ORDER BY item_no
+				            </isEqual>
+				            <isEqual property="sortColumn" compareValue="bankCd bankAcctCd dspBankSname bankAcctNo">
+			              		ORDER BY bank_cd, bank_acct_cd, bank_sname, bank_acct_no
+				            </isEqual>
+				            <isEqual property="sortColumn" compareValue="dspCurrency">
+			              		ORDER BY dsp_short_name
+				            </isEqual>
+				            <isEqual property="sortColumn" compareValue="fCurrencyAmt">
+			              		ORDER BY fcurrency_amt
+				            </isEqual>
+				            <isEqual property="sortColumn" compareValue="currencyRt">
+			              		ORDER BY currency_rt
+				            </isEqual>
+				            <isEqual property="sortColumn" compareValue="amount">
+			              		ORDER BY amount
+				            </isEqual>
+			            	<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) b)
+	</select>
+	
+	<select id="getDBItemNoList" resultClass="java.lang.String" parameterClass="java.util.HashMap">
+		SELECT '''' || item_no || ''''
+  		  FROM TABLE(GIAC_CHK_DISBURSEMENT_PKG.get_giacs002_chk_disb_info(#gaccTranId#))
+	</select>
+	
+	<!-- <insert id="setCheckDisb" parameterClass="GIACChkDisbursementClass">
+		DECLARE
+			v_check			giac_chk_disbursement%ROWTYPE;
+		BEGIN
+			v_check.gacc_tran_id 		:= #gaccTranId#,
+			v_check.item_no 			:= #itemNo#,
+			v_check.bank_cd 			:= #bankCd#,
+			v_check.bank_acct_cd 		:= #bankAcctCd#,
+			v_check.currency_cd 		:= #currencyCd#,
+			v_check.currency_rt 		:= #currencyRt#,
+			v_check.amount 				:= #amount#,
+			v_check.check_date 			:= TO_DATE(#strCheckDate#, 'mm-dd-yyyy');
+			v_check.check_pref_suf 		:= #checkPrefSuf#,
+			v_check.check_no 			:= #checkNo#,
+			v_check.check_stat 			:= #checkNo#,
+			v_check.check_class 		:= #checkClass#,
+			v_check.fcurrency_amt 		:= #fCurrencyAmt#,
+			v_check.payee_class_cd 		:= #payeeClassCd#,
+			v_check.payee_no 			:= #payeeNo#,
+			v_check.payee 				:= #payeeNo#,
+			v_check.user_id 			:= #userId#,
+			v_check.last_update 		:= SYSDATE;
+			v_check.particulars 		:= #nbtDVParticulars#,
+			v_check.check_release_date 	:= #checkReleaseDate#,
+			v_check.check_released_by 	:= #checkReleasedBy#,
+			v_check.check_received_by 	:= #checkReceivedBy#,
+			v_check.check_print_date 	:= #checkPrintDate#,
+			v_check.disb_mode 			:= #disbMode#,
+			
+			GIAC_CHK_DISBURSEMENT_PKG.set_chk_disb(v_check);
+		END;
+	</insert> -->
+	
+	<delete id="deleteCheckDisb" parameterClass="GIACChkDisbursementClass">
+		BEGIN
+			GIAC_CHK_DISBURSEMENT_PKG.del_chk_disb(#gaccTranId#, #itemNo#);
+		END;
+	</delete>
+	
+	<procedure id="updateGIACCheckNo" parameterClass="java.util.HashMap">
+		BEGIN
+			GIAC_CHK_DISBURSEMENT_PKG.update_giac_check_no(#checkNo#, #fundCd#, #branchCd#, #bankCd#, #bankAcctCd#, #checkPrefSuf#);
+		END;
+	</procedure>
+	
+	
+	<insert id="setCheckDisb" parameterClass="GIACChkDisbursementClass">
+		BEGIN
+			
+			GIAC_CHK_DISBURSEMENT_PKG.set_chk_disb(#gaccTranId#,		#itemNo#,			#bankCd#,			#bankAcctCd#,
+			 									   #currencyCd#,		#currencyRt#,		#amount#,			TO_DATE(#strCheckDate#, 'mm-dd-yyyy'),
+												   #checkPrefSuf#,		#checkNo#,			#checkStat#,		#checkClass#,
+												   #fCurrencyAmt#,		#payeeClassCd#,		#payeeNo#,			#payee#,
+												   #userId#,			SYSDATE,			#nbtDVParticulars#, #checkReleaseDate#,
+												   #checkReleasedBy#, 	#checkReceivedBy#,	#checkPrintDate#,	#disbMode#
+			);
+		END;
+	</insert>
+	
+	<parameterMap id="giacs002SpoilCheckMap" class="java.util.HashMap">
+		<parameter property="gaccTranId"				jdbcType="NUMERIC"  javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="itemNo"					jdbcType="NUMERIC"  javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="bankCd"					jdbcType="VARCHAR"  javaType="java.lang.String"	mode="IN" />
+		<parameter property="bankAcctCd"				jdbcType="VARCHAR"  javaType="java.lang.String"	mode="IN" />
+		<parameter property="checkDateStr"				jdbcType="VARCHAR"  javaType="java.lang.String"	mode="IN" />
+		<parameter property="checkPrefSuf"				jdbcType="VARCHAR"  javaType="java.lang.String"	mode="IN" />
+		<parameter property="checkNo"					jdbcType="NUMERIC"  javaType="java.lang.Long"	mode="IN" />
+		<parameter property="checkStat"					jdbcType="VARCHAR"  javaType="java.lang.String"	mode="IN" />
+		<parameter property="checkClass"				jdbcType="VARCHAR"  javaType="java.lang.String"	mode="IN" />
+		
+		<parameter property="currencyCd"				jdbcType="NUMERIC"  javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="fcurrencyAmt"				jdbcType="NUMERIC"  javaType="java.math.BigDecimal"	mode="IN" />
+		<parameter property="currencyRt"				jdbcType="NUMERIC"  javaType="java.lang.Float"	mode="IN" />
+		<parameter property="amount"					jdbcType="NUMERIC"  javaType="java.math.BigDecimal"	mode="IN" />
+		
+		<parameter property="printDateStr"				jdbcType="VARCHAR"  javaType="java.lang.String"	mode="IN" />
+		<parameter property="userId"					jdbcType="VARCHAR"  javaType="java.lang.String"	mode="INOUT" />
+		<parameter property="batchTag"					jdbcType="VARCHAR"  javaType="java.lang.String"	mode="IN" />
+		<parameter property="checkDVPrint"				jdbcType="VARCHAR"  javaType="java.lang.String"	mode="IN" />
+		<parameter property="tranFlag"					jdbcType="VARCHAR"  javaType="java.lang.String"	mode="IN" />
+		<parameter property="dvFlag"					jdbcType="VARCHAR"  javaType="java.lang.String"	mode="IN" />
+		<parameter property="lastUpdateStr"				jdbcType="VARCHAR"  javaType="java.lang.String"	mode="OUT" />
+		<parameter property="printTag"					jdbcType="VARCHAR"  javaType="java.lang.String"	mode="OUT" />
+		<parameter property="printTagMean"				jdbcType="VARCHAR"  javaType="java.lang.String"	mode="OUT" />
+		
+	</parameterMap>
+	<procedure id="giacs002SpoilCheck" parameterMap="giacs002SpoilCheckMap">
+		{ CALL GIAC_CHK_DISBURSEMENT_PKG.spoil_check(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) }
+	</procedure>
+	
+	<!-- <parameterMap id="getCheckCountParamMap">
+		<parameter property="gaccTranId"				jdbcType="NUMERIC"  javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="checkCount"				jdbcType="NUMERIC"  javaType="java.lang.Integer"	mode="OUT" />
+	</parameterMap> -->
+	<select id="getCheckCount" parameterClass="java.lang.Integer" resultClass="java.lang.Integer">
+		SELECT count(*) check_cnt
+		  FROM giac_chk_disbursement
+         WHERE gacc_tran_id = #gaccTranId#
+	</select>
+	
+	<resultMap id="CgRefCodesPayMode" class="com.geniisys.common.entity.CGRefCodes" extends="BaseEntity.TableGridResultMap">
+		<result column="RV_LOW_VALUE"		property="rvLowValue" />
+		<result column="RV_MEANING"		property="rvMeaning" />
+	</resultMap>
+	
+	<!-- for GIACS002 list of check class -->
+	<select id="getCheckClass3" resultMap="CgRefCodesPayMode" parameterClass="java.util.HashMap">
+  		SELECT *
+  		  FROM (SELECT rownum rownum_, b.count_, a.*
+  		          FROM (SELECT *
+  		                  FROM TABLE(cg_ref_codes_pkg.get_check_class_list3)
+  		                  <isNotNull property="findText">
+				          WHERE (UPPER(rv_low_value) LIKE UPPER(#findText#) 
+				         	 OR UPPER(rv_meaning) LIKE UPPER(#findText#)
+				         	 )
+				          </isNotNull>
+  		                  <isNotNull property="sortColumn">
+  		                  		<isEqual property="sortColumn" compareValue="rvLowValue">
+				              		ORDER BY rv_low_value
+					            </isEqual>
+					            <isEqual property="sortColumn" compareValue="rvMeaning">
+				              		ORDER BY rv_meaning
+					            </isEqual>
+					            <isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+  		                  </isNotNull>) a,
+  		  			   (SELECT count(*) count_
+  		  			      FROM TABLE(cg_ref_codes_pkg.get_check_class_list3)
+  		                  <isNotNull property="findText">
+				          WHERE (     UPPER(rv_low_value) LIKE UPPER(#findText#) 
+				         	 OR UPPER(rv_meaning) LIKE UPPER(#findText#)
+				         	 )
+				          </isNotNull>) b)
+  		 WHERE rownum_ BETWEEN NVL(#from#, rownum_) AND NVL(#to#, rownum_)  		  
+  	</select>
+  	
+  	<!-- for GIACS002 list of check stat -->
+	<select id="getCheckStat" resultMap="CgRefCodesPayMode" parameterClass="java.util.HashMap">
+  		SELECT *
+  		  FROM (SELECT rownum rownum_, b.count_, a.*
+  		          FROM (SELECT *
+  		                  FROM TABLE(cg_ref_codes_pkg.get_check_stat_list)
+  		                  <isNotNull property="findText">
+		                 WHERE 1 = 1
+		                 		<isNotEmpty prepend="AND" property="rvLowValue">
+			  		         		UPPER(rv_low_value) LIKE UPPER(#rvLowValue#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="rvMeaning">
+			  		         		UPPER(rv_meaning) LIKE UPPER(#rvMeaning#)
+			  		         	</isNotEmpty>
+  		                  </isNotNull>
+  		                  <isNotNull property="findText">
+				          WHERE (UPPER(rv_low_value) LIKE UPPER(#findText#) 
+				         	 OR UPPER(rv_meaning) LIKE UPPER(#findText#)
+				         	 )
+				          </isNotNull>
+  		                  <isNotNull property="sortColumn">
+  		                  		<isEqual property="sortColumn" compareValue="rvLowValue">
+				              		ORDER BY rv_low_value
+					            </isEqual>
+					            <isEqual property="sortColumn" compareValue="rvMeaning">
+				              		ORDER BY rv_meaning
+					            </isEqual>
+					            <isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+  		                  </isNotNull>) a,
+  		  			   (SELECT count(*) count_
+  		  			      FROM TABLE(cg_ref_codes_pkg.get_check_stat_list)
+  		  			      <isNotNull property="findText">
+		                 WHERE 1 = 1
+		                 		<isNotEmpty prepend="AND" property="rvLowValue">
+			  		         		UPPER(rv_low_value) LIKE UPPER(#rvLowValue#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="rvMeaning">
+			  		         		UPPER(rv_meaning) LIKE UPPER(#rvMeaning#)
+			  		         	</isNotEmpty>
+  		                  </isNotNull>
+  		                  <isNotNull property="findText">
+				          WHERE (UPPER(rv_low_value) LIKE UPPER(#findText#) 
+				         	 OR UPPER(rv_meaning) LIKE UPPER(#findText#)
+				         	 )
+				          </isNotNull>) b)
+  		 WHERE rownum_ BETWEEN NVL(#from#, rownum_) AND NVL(#to#, rownum_) 
+  	</select>
+  	
+  	<procedure id="valBeforeDelManualCheck" parameterClass="java.util.HashMap">
+	  	BEGIN
+	  		GIAC_CHK_DISBURSEMENT_PKG.bef_delete_manual_check(#fundCd#, #branchCd#, #bankCd#, #bankAcctCd#, #checkPrefSuf#);
+	  	END;
+  	</procedure>
+  	
+  	<procedure id="validateCheckNo" parameterClass="java.util.HashMap">
+  		BEGIN
+  			GIAC_CHK_DISBURSEMENT_PKG.validate_check_no(#checkNo#, #checkPrefSuf#, #bankCd#, #bankAcctCd#);
+  		END;
+  	</procedure>
+  	
+  	<procedure id="validateBankCd" parameterClass="java.util.HashMap">
+  		BEGIN
+  			GIAC_CHK_DISBURSEMENT_PKG.validate_bank_cd(#checkNo#, #checkPrefSuf#, #bankCd#, #bankAcctCd#);
+  		END;
+  	</procedure>
+	
+	<parameterMap class="java.util.HashMap" id="GIACS052ParamMap">
+		<parameter property="tranId" javaType="java.lang.Integer" jdbcType="INTEGER" mode="IN"/>
+		<parameter property="itemNo" javaType="java.lang.Integer" jdbcType="INTEGER" mode="OUT"/>
+		<parameter property="bankCd" javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT"/>
+		<parameter property="bankSname" javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT"/>
+		<parameter property="bankAcctCd" javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT"/>
+		<parameter property="bankAcctNo" javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT"/>
+		<parameter property="checkStat" javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT"/>
+		<parameter property="checkStatMean" javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT"/>
+		<parameter property="payee" javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT"/>
+		<parameter property="checkDate" javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT"/>
+		<parameter property="disbMode" javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT"/>
+		<parameter property="stillWithCheck" javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT"/>
+		<parameter property="genTransferNo" javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT"/>
+		<parameter property="editCheckNo" javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT"/>
+		<parameter property="allowDvPrinting" javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT"/>
+		<parameter property="dvApprovedBy" javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT"/>
+		<parameter property="dvFlag" javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT"/>
+		<parameter property="dvFlagMean" javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="giacs052NewFormInstance" parameterMap="GIACS052ParamMap">
+		BEGIN
+			giacs052_pkg.on_load_giacs052(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<resultMap class="java.util.HashMap" id="GIACS052ChecksLOVResultMap">
+		<result property="itemNo" 		column="item_no"/>
+		<result property="payee" 		column="payee"/>
+		<result property="bankCd" 		column="bank_cd"/>
+		<result property="bankSname" 	column="bank_sname"/>
+		<result property="bankAcctCd" 	column="bank_acct_cd"/>
+		<result property="bankAcctNo" 	column="bank_acct_no"/>
+		<result property="checkStat" 	column="check_stat"/>
+		<result property="checkStatMean" column="check_stat_mean"/>
+		<result property="amount" 		column="amount"/>
+		<result property="shortName" 	column="short_name"/>
+		<result property="checkDate" 	column="check_date"/>
+	</resultMap>	
+	
+	<select id="getGIACS052ChecksLOV" resultMap="GIACS052ChecksLOVResultMap">
+  		SELECT *
+  		  FROM (SELECT rownum rownum_, b.count_, a.*
+  		          FROM (SELECT *
+  		                  FROM TABLE(giacs052_pkg.get_checks_lov(#tranId#, #findText#))
+  		                  <isNotNull property="sortColumn">
+  		                  		<isEqual property="sortColumn" compareValue="itemNo">
+				              		ORDER BY item_no
+					            </isEqual>
+					            <isEqual property="sortColumn" compareValue="payee">
+				              		ORDER BY payee
+					            </isEqual>
+					            <isEqual property="sortColumn" compareValue="bankSname">
+				              		ORDER BY bank_sname
+					            </isEqual>		
+					            <isEqual property="sortColumn" compareValue="bankAcctNo">
+				              		ORDER BY bank_acct_no
+					            </isEqual>
+					            <isEqual property="sortColumn" compareValue="amount">
+				              		ORDER BY amount
+					            </isEqual>
+					            <isEqual property="sortColumn" compareValue="shortName">
+				              		ORDER BY short_name
+					            </isEqual>	
+								<isEqual property="sortColumn" compareValue="checkStatMean">
+				              		ORDER BY check_stat_mean
+					            </isEqual>	
+					            <isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+  		                  </isNotNull>) a,
+  		  			   (SELECT count(*) count_
+  		  			      FROM TABLE(giacs052_pkg.get_checks_lov(#tranId#, #findText#))
+  		  			      ) b)
+  		 WHERE rownum_ BETWEEN NVL(#from#, rownum_) AND NVL(#to#, rownum_) 
+  	</select>	
+	
+	<parameterMap class="java.util.HashMap" id="GIACS052DefaultCheckParamMap">
+		<parameter property="printPrsd" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="disbMode" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="bankCd" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="bankSname" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="bankAcctCd" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="printCheck" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="branchCd" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="fundCd" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="checkPref" javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT"/>
+		<parameter property="checkNo" javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT"/>
+		<parameter property="checkNoRequired" javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="getGiacs052DefaultCheck" parameterMap="GIACS052DefaultCheckParamMap">
+		BEGIN
+			giacs052_pkg.default_check(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<parameterMap class="java.util.HashMap" id="GIACS052PostPrintParamMap">
+		<parameter property="userId" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/> <!-- added by steven 09.17.2014 -->
+		<parameter property="tranId" javaType="java.lang.Integer" jdbcType="INTEGER" mode="IN"/>
+		<parameter property="fundCd" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="branchCd" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="itemNo" javaType="java.lang.Integer" jdbcType="INTEGER" mode="IN"/>
+		<parameter property="bankCd" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="bankAcctCd" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="userId" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="checkDvPrint" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="printDv" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="printCheck" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="checkDate" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="disbMode" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="dvFlag" javaType="java.lang.String" jdbcType="VARCHAR" mode="INOUT"/>
+		<parameter property="checkCnt" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="prtDv" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="prtChk" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="documentCd" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="chkPrefix" javaType="java.lang.String" jdbcType="VARCHAR" mode="INOUT"/>
+		<parameter property="checkNo" javaType="java.lang.String" jdbcType="VARCHAR" mode="INOUT"/>
+		<parameter property="stillWithCheck" javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT"/>
+		<parameter property="dvFlagMean" javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="giacs052ProcessAfterPrinting" parameterMap="GIACS052PostPrintParamMap">
+		BEGIN
+			giis_users_pkg.app_user := ?; <!-- added by steven 09.17.2014 -->
+			giacs052_pkg.process_aft_print(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, TO_DATE(?, 'MM-DD-YYYY'), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<parameterMap class="java.util.HashMap" id="GIACS052UpdateGiacParamMap">
+		<parameter property="tranId" javaType="java.lang.Integer" jdbcType="INTEGER" mode="IN"/>
+		<parameter property="branchCd" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="fundCd" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>		
+	</parameterMap>
+	
+	<procedure id="giacs052UpdateGiac" parameterMap="GIACS052UpdateGiacParamMap">
+		BEGIN
+			giacs052_pkg.update_giac(?, ?, ?);
+		END;
+	</procedure>
+	
+	<parameterMap class="java.util.HashMap" id="GIACS052SpoilCheckParamMap">
+		<parameter property="tranId" javaType="java.lang.Integer" jdbcType="INTEGER" mode="IN"/>
+		<parameter property="itemNo" javaType="java.lang.Integer" jdbcType="INTEGER" mode="IN"/>
+		<parameter property="fundCd" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="branchCd" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="userId" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="checkDvPrint" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="checkCnt" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+	</parameterMap>
+	
+	<procedure id="giacs052SpoilCheck" parameterMap="GIACS052SpoilCheckParamMap">
+		BEGIN
+			giacs052_pkg.spoil_check(?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<parameterMap class="java.util.HashMap" id="GIACS052RestoreCheckParamMap">
+		<parameter property="tranId" javaType="java.lang.Integer" jdbcType="INTEGER" mode="IN"/>
+		<parameter property="itemNo" javaType="java.lang.Integer" jdbcType="INTEGER" mode="IN"/>
+		<parameter property="fundCd" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="branchCd" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="userId" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="bankCd" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="bankAcctCd" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="checkDate" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>		
+		<parameter property="checkDvPrint" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="checkCnt" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="chkPrefix" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="checkNo" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+	</parameterMap>
+	
+	<procedure id="giacs052RestoreCheck" parameterMap="GIACS052RestoreCheckParamMap">
+		BEGIN
+			giacs052_pkg.restore_check(?, ?, ?, ?, ?, ?, ?, TO_DATE(?, 'MM-DD-YYYY'), ?, ?, ?, ?);
+		END;
+	</procedure>	
+	
+	<parameterMap class="java.util.HashMap" id="GIACS052CheckDupOrParamMap">
+		<parameter property="bankCd" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="bankAcctCd" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="chkPrefix" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="checkNo" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+	</parameterMap>
+	
+	<procedure id="giacs052CheckDupOr" parameterMap="GIACS052CheckDupOrParamMap">
+		BEGIN
+			giacs052_pkg.restore_check(?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<parameterMap class="java.util.HashMap" id="GIACS052USetCmDmPrintBtnParamMap">
+		<parameter property="tranId" 	 	 javaType="java.lang.Integer" jdbcType="INTEGER" mode="IN"/>
+		<parameter property="documentCd" 	 javaType="java.lang.String"  jdbcType="VARCHAR" mode="OUT"/>
+		<parameter property="cmDmTranId" 	 javaType="java.lang.String"  jdbcType="VARCHAR" mode="OUT"/>
+		<parameter property="memoStatus"     javaType="java.lang.String"  jdbcType="VARCHAR" mode="OUT"/>
+		<parameter property="printTag" 	 	 javaType="java.lang.String"  jdbcType="VARCHAR" mode="OUT"/>
+		<parameter property="cmTag" 	 	 javaType="java.lang.String"  jdbcType="VARCHAR" mode="OUT"/>
+		<parameter property="enablePrintBtn" javaType="java.lang.String"  jdbcType="VARCHAR" mode="OUT"/>		
+	</parameterMap>
+	
+	<procedure id="giacs052SetCmDmPrintBtn" parameterMap="GIACS052USetCmDmPrintBtnParamMap">
+		BEGIN
+			giacs052_pkg.set_cm_dm_print_btn(?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>	
+	
+	<resultMap id="checkBatchListMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result column="GACC_TRAN_ID"		property="gaccTranId"/>
+		<result column="CHECK_STAT"			property="checkStat"/>
+		<result column="CHECK_CLASS"		property="checkClass"/>
+		<result column="CURRENCY_CD"		property="currencyCd"/>
+		<result column="LAST_UPDATE"		property="lastUpdate"/>
+		<result column="CURRENCY_RT"		property="currencyRt"/>
+		<result column="AMOUNT"				property="amount"/>
+		<result column="FCURRENCY_AMT"		property="fcurrencyAmt"/>
+		<result column="ITEM_NO"			property="itemNo"/>
+		<result column="BANK_CD"			property="bankCd"/>
+		<result column="BANK_ACCT_CD"		property="bankAcctCd"/>
+		<result column="DSP_CHECK_DATE"		property="checkDate"/>
+		<result column="CHECK_PREF_SUF"		property="checkPrefSuf"/>
+		<result column="CHECK_NO"			property="checkNo"/>
+		<result column="BATCH_TAG"			property="batchTag"/>
+		<result column="DV_DATE"			property="dvDate"/>
+		<result column="DV_PREF"			property="dvPref"/>
+		<result column="DV_NO"				property="dvNo"/>
+		<result column="PAYEE"				property="payee"/>
+		<result column="PARTICULARS"		property="particulars"/>
+		<result column="PRINT_TAG"			property="printTag"/>
+		<result column="DOCUMENT_CD"		property="documentCd"/>
+		<result column="PAYT_BRANCH_CD"		property="paytBranchCd"/>
+		<result column="LINE_CD"			property="lineCd"/>
+		<result column="DOC_YEAR"			property="docYear"/>
+		<result column="DOC_MM"				property="docMm"/>
+		<result column="DOC_SEQ_NO"			property="docSeqNo"/>
+		<result column="CHECK_NUMBER"		property="checkNumber"/>
+		<result column="DV_NUMBER"			property="dvNumber"/>
+		<result column="REQUEST_NUMBER"		property="requestNumber"/>
+	</resultMap>
+	
+	<select id="getCheckBatchList" resultMap="checkBatchListMap" parameterClass="java.util.HashMap">
+		SELECT *
+          FROM (SELECT ROWNUM rownum_,
+            		   b.count_,
+            		   a.*
+                  FROM (SELECT *
+                          FROM TABLE(GIAC_CHK_DISBURSEMENT_PKG.get_check_batch_printing_list(#bankCd#, #bankAcctCd#, #checking#, #checkTag#, #tranIdGroup#, #branchCd#))
+                         WHERE NVL(TO_CHAR(dv_date, 'mm-dd-yyyy'), '*') = NVL(#dvDate#, NVL(TO_CHAR(dv_date, 'mm-dd-yyyy'), '*'))
+						   AND UPPER(NVL(check_number, '*')) LIKE UPPER(NVL(#checkNumber#, NVL(check_number, '*')))
+						   AND NVL(TO_CHAR(dsp_check_date, 'mm-dd-yyyy'), '*') = NVL(#checkDate#, NVL(TO_CHAR(dsp_check_date, 'mm-dd-yyyy'), '*'))
+						   AND UPPER(NVL(dv_number, '*')) LIKE UPPER(NVL(#dvNumber#, NVL(dv_number, '*')))
+						   AND UPPER(NVL(request_number, '*')) LIKE UPPER(NVL(#requestNumber#, NVL(request_number, '*')))
+						   <isNotNull property="inTranIdItemNo">	<!-- shan 09.30.2014 -->
+						   		AND (gacc_tran_id || '--' || item_no) IN $inTranIdItemNo$
+						   </isNotNull>
+                          	<isEqual property="sortColumn" compareValue="checkDate">
+								ORDER BY dsp_check_date
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="checkNumber">
+								ORDER BY check_number
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="dvDate">
+								ORDER BY dv_date
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="dvNumber">
+								ORDER BY dv_number
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="requestNumber">
+								ORDER BY request_number
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>) a,
+               (SELECT COUNT(*) count_
+                  FROM TABLE(GIAC_CHK_DISBURSEMENT_PKG.get_check_batch_printing_list(#bankCd#, #bankAcctCd#, #checking#, #checkTag#, #tranIdGroup#, #branchCd#))
+				 WHERE NVL(TO_CHAR(dv_date, 'mm-dd-yyyy'), '*') = NVL(#dvDate#, NVL(TO_CHAR(dv_date, 'mm-dd-yyyy'), '*'))
+				   AND UPPER(NVL(check_number, '*')) LIKE UPPER(NVL(#checkNumber#, NVL(check_number, '*')))
+				   AND NVL(TO_CHAR(dsp_check_date, 'mm-dd-yyyy'), '*') = NVL(#checkDate#, NVL(TO_CHAR(dsp_check_date, 'mm-dd-yyyy'), '*'))
+				   AND UPPER(NVL(dv_number, '*')) LIKE UPPER(NVL(#dvNumber#, NVL(dv_number, '*')))
+				   AND UPPER(NVL(request_number, '*')) LIKE UPPER(NVL(#requestNumber#, NVL(request_number, '*')))
+				   <isNotNull property="inTranIdItemNo">	<!-- shan 09.30.2014 -->
+				   		AND (gacc_tran_id || '--' || item_no) IN $inTranIdItemNo$
+				   </isNotNull>
+				) b)
+          WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<parameterMap class="java.util.HashMap" id="generateCheckMap">
+		<parameter property="fundCd" 	 	 javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="branchCd" 	 	 javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="bankSName" 	 javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="bankCd" 	 	 javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="bankAcctCd" 	 javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="chkPrefix" 	 javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT"/>
+		<parameter property="checkSeqNo" 	 javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="generateCheck" parameterMap="generateCheckMap">
+		BEGIN
+			GIAC_CHK_DISBURSEMENT_PKG.generate_check(?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<procedure id="validateSpoilCheck" parameterClass="java.util.HashMap">
+		BEGIN
+			GIAC_CHK_DISBURSEMENT_PKG.validate_spoil(#gaccTranId#, #itemNo#, #checkPrefSuf#, #checkNo#);
+		END;
+	</procedure>
+	
+	<procedure id="spoilCheckGIACS054" parameterClass="java.util.HashMap">
+		BEGIN
+			GIIS_USERS_PKG.app_user := #userId#;
+			GIAC_CHK_DISBURSEMENT_PKG.spoil_check_giacs054(#gaccTranId#, #itemNo#, #bankCd#, #bankAcctCd#, TO_DATE(#checkDate#, 'mm-dd-yyyy'),
+															#checkPrefSuf#, #checkNo#, #checkStat#, #checkClass#, #currencyCd#,
+															#fcurrencyAmt#, #currencyRt#, #amount#,
+															TO_DATE(#lastUpdate#, 'yyyy-mm-dd'), #userId#, #checkDvPrint#);
+		END;
+	</procedure>
+	
+	<select id="getCheckSeqNo" parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+		SELECT GIAC_CHK_DISBURSEMENT_PKG.get_check_seq_no(#fundCd#, #branchCd#, #bankCd#, #bankAcctCd#, #chkPrefix#)
+		  FROM DUAL
+	</select>
+	
+	<procedure id="validateCheckSeqNo" parameterClass="java.util.HashMap">
+		BEGIN
+			GIAC_CHK_DISBURSEMENT_PKG.validate_check_seq_no(#bankCd#, #bankAcctCd#, #checkPref#, #checkSeqNo#,  #branchCd#);
+		END;
+	</procedure>
+	
+	<procedure id="processPrintedChecks" parameterClass="java.util.HashMap">
+		BEGIN
+			GIIS_USERS_PKG.app_user := #userId#;
+			GIAC_CHK_DISBURSEMENT_PKG.process_printed_checks(#gaccTranId#, #itemNo#, TO_DATE(#checkDate#, 'mm-dd-yyyy'), #checkPrefSuf#, #checkNo#, #userId#, #checkDvPrint#);
+		END;
+	</procedure>
+	
+	<procedure id="updateCheckSeqNo" parameterClass="java.util.HashMap">
+		BEGIN
+			GIIS_USERS_PKG.app_user := #userId#;
+			GIAC_CHK_DISBURSEMENT_PKG.update_giac_check_no2(#fundCd#, #branchCd#, #bankCd#, #bankAcctCd#, #checkPref#,
+															#maxCheckSeqNo#, #userId#);
+		END;
+	</procedure>
+	
+	<procedure id="updatePrintedChecks" parameterClass="java.util.HashMap">
+		BEGIN
+			GIIS_USERS_PKG.app_user := #userId#;
+			GIAC_CHK_DISBURSEMENT_PKG.update_printed_checks(#gaccTranId#, #itemNo#, TO_DATE(#checkDate#, 'mm-dd-yyyy'), #checkPrefSuf#, #checkNo#, #checkDvPrint#);
+		END;
+	</procedure>
+	
+	<select id="checkDVPrintColumn" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT check_dv_print FROM giac_branches
+ 			WHERE branch_cd = #branchCd# 
+ 			  AND gfun_fund_cd = #fundCd#
+	</select>
+	<!-- added by MarkS 5.23.2016 SR-5484 -->
+	<resultMap class="java.util.HashMap" id="giacs052GetCmDmTranIdMemoStatMap">
+		<result property="cmDmTranId" 		column="gacc_tran_id"/>
+		<result property="memoStatus" 		column="memo_status"/>
+	</resultMap>
+	<select id="giacs052GetCmDmTranIdMemoStat" resultMap="giacs052GetCmDmTranIdMemoStatMap" parameterClass="java.lang.Integer">
+	    SELECT gacc_tran_id, memo_status
+        FROM giac_cm_dm
+        WHERE dv_tran_id = #gaccTranId#
+	</select>		   
+	<!-- END SR-5484 -->
+	<resultMap id="checkBatchListByParamMap" class="java.util.HashMap">
+		<result column="GACC_TRAN_ID"		property="gaccTranId"/>
+		<result column="CHECK_STAT"			property="checkStat"/>
+		<result column="CHECK_CLASS"		property="checkClass"/>
+		<result column="CURRENCY_CD"		property="currencyCd"/>
+		<result column="LAST_UPDATE"		property="lastUpdate"/>
+		<result column="CURRENCY_RT"		property="currencyRt"/>
+		<result column="AMOUNT"				property="amount"/>
+		<result column="FCURRENCY_AMT"		property="fcurrencyAmt"/>
+		<result column="ITEM_NO"			property="itemNo"/>
+		<result column="BANK_CD"			property="bankCd"/>
+		<result column="BANK_ACCT_CD"		property="bankAcctCd"/>
+		<result column="DSP_CHECK_DATE"		property="checkDate"/>
+		<result column="CHECK_PREF_SUF"		property="checkPrefSuf"/>
+		<result column="CHECK_NO"			property="checkNo"/>
+		<result column="BATCH_TAG"			property="batchTag"/>
+		<result column="DV_DATE"			property="dvDate"/>
+		<result column="DV_PREF"			property="dvPref"/>
+		<result column="DV_NO"				property="dvNo"/>
+		<result column="PAYEE"				property="payee"/>
+		<result column="PARTICULARS"		property="particulars"/>
+		<result column="PRINT_TAG"			property="printTag"/>
+		<result column="DOCUMENT_CD"		property="documentCd"/>
+		<result column="PAYT_BRANCH_CD"		property="paytBranchCd"/>
+		<result column="LINE_CD"			property="lineCd"/>
+		<result column="DOC_YEAR"			property="docYear"/>
+		<result column="DOC_MM"				property="docMm"/>
+		<result column="DOC_SEQ_NO"			property="docSeqNo"/>
+		<result column="CHECK_NUMBER"		property="checkNumber"/>
+		<result column="DV_NUMBER"			property="dvNumber"/>
+		<result column="REQUEST_NUMBER"		property="requestNumber"/>
+	</resultMap>
+	
+	<select id="getCheckBatchListByParam" resultMap="checkBatchListByParamMap" parameterClass="java.util.HashMap">
+		SELECT *
+          FROM TABLE(GIAC_CHK_DISBURSEMENT_PKG.get_check_batch_printing_list(#bankCd#, #bankAcctCd#, #checking#, #checkTag#, #tranIdGroup#, #branchCd#))
+         WHERE NVL(TO_CHAR(dv_date, 'mm-dd-yyyy'), '*') = NVL(#dvDate#, NVL(TO_CHAR(dv_date, 'mm-dd-yyyy'), '*'))
+		   AND UPPER(NVL(check_number, '*')) LIKE UPPER(NVL(#checkNumber#, NVL(check_number, '*')))
+		   AND NVL(TO_CHAR(dsp_check_date, 'mm-dd-yyyy'), '*') = NVL(#checkDate#, NVL(TO_CHAR(dsp_check_date, 'mm-dd-yyyy'), '*'))
+		   AND UPPER(NVL(dv_number, '*')) LIKE UPPER(NVL(#dvNumber#, NVL(dv_number, '*')))
+		   AND UPPER(NVL(request_number, '*')) LIKE UPPER(NVL(#requestNumber#, NVL(request_number, '*')))
+		    <isNotNull property="inTranIdItemNo">	<!-- shan 09.30.2014 -->
+		   		AND (gacc_tran_id || '--' || item_no) IN $inTranIdItemNo$
+		   </isNotNull>
+	</select>
+	
+</sqlMap>

@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GIPIBondSeqHist">
+
+	<typeAlias alias="GIPIBondSeqHistClass" type="com.geniisys.gipi.entity.GIPIBondSeqHist"/>
+	
+	<resultMap id="GIPIBondSeqHistMap" class="GIPIBondSeqHistClass" >
+	  	<result column="LINE_CD" 		property="lineCd" />
+	  	<result column="SUBLINE_CD"		property="sublineCd" />
+   		<result column="SEQ_NO"			property="seqNo" />
+   		<result column="PAR_ID"			property="parId" />
+   		<result column="USER_ID"		property="userId" />
+   		<result column="LAST_UPDATE"	property="lastUpdate" />
+   		<result column="REMARKS"		property="remarks" />
+		<result property="rowNum"		column="ROWNUM_"/>
+		<result property="rowCount"		column="COUNT_"/>
+  	</resultMap>
+	
+	<select id="getBondSeqNoList" resultClass="java.lang.Integer">
+		SELECT seq_no
+		  FROM TABLE(gipi_bond_seq_hist_pkg.get_bond_seq_list(#lineCd#, #sublineCd#, #parId#))
+	</select>
+	
+	<procedure id="updBondSeqHist">
+		{ CALL gipi_bond_seq_hist_pkg.upd_bond_seq_hist(#lineCd#, #sublineCd#, #seqNo#, #parId#) }
+	</procedure>
+	
+	<select id="validateBondSeq" resultClass="java.lang.Integer">
+		SELECT gipi_bond_seq_hist_pkg.validate_bond_seq(#lineCd#, #sublineCd#, #seqNo#, #parId#)
+		  FROM dual
+	</select>
+	
+	<select id="getBondSeqHistList" parameterClass="java.util.HashMap" resultMap="GIPIBondSeqHistMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (gipi_bond_seq_hist_pkg.get_bond_seq_histlist(#appUser#))
+		                  <dynamic prepend="WHERE ">
+				  		  	<isNotNull property="lineCd" prepend="AND">
+				  		  		line_cd like upper(#lineCd#)
+				  		  	</isNotNull>
+				  		  	<isNotNull property="sublineCd" prepend="AND">
+				  		  		subline_cd like upper(#sublineCd#)
+				  		  	</isNotNull>
+				  		  	<isNotNull property="parId" prepend="AND">
+				  		  		par_id like upper(#parId#)
+				  		  	</isNotNull>
+				  		  	<isNotNull property="seqNo" prepend="AND">
+				  		  		seq_no = to_number(#seqNo#)
+				  		  	</isNotNull>
+				  		  </dynamic>
+		                  <isEqual property="sortColumn" compareValue="lineCd">
+			              		ORDER BY line_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="sublineCd">
+			              		ORDER BY subline_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="seqNo">
+			              		ORDER BY seq_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="parId">
+			              		ORDER BY par_id
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="userId">
+			              		ORDER BY user_id
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="strLastUpdate">
+			              		ORDER BY last_update 
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="remarks">
+			              		ORDER BY remarks
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (gipi_bond_seq_hist_pkg.get_bond_seq_histlist(#appUser#))
+		                  <dynamic prepend="WHERE ">
+				  		  	<isNotNull property="lineCd" prepend="AND">
+				  		  		line_cd like upper(#lineCd#)
+				  		  	</isNotNull>
+				  		  	<isNotNull property="sublineCd" prepend="AND">
+				  		  		subline_cd like upper(#sublineCd#)
+				  		  	</isNotNull>
+				  		  	<isNotNull property="parId" prepend="AND">
+				  		  		par_id like upper(#parId#)
+				  		  	</isNotNull>
+				  		  	<isNotNull property="seqNo" prepend="AND">
+				  		  		seq_no = to_number(#seqNo#)
+				  		  	</isNotNull>
+				  		  </dynamic>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+</sqlMap>

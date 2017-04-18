@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIQuoteInvtax">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIPIQuoteInvtax" type="com.geniisys.quote.entity.GIPIQuoteInvtax"/>
+	
+	<resultMap class="GIPIQuoteInvtax" 	id="invoiceTaxListMap" extends="BaseEntity.TableGridResultMap">
+		<result property="quoteInvNo"			column="QUOTE_INV_NO"/>
+		<result property="lineCd"				column="LINE_CD"/>
+		<result property="issCd"				column="ISS_CD"/>
+		<result property="taxCd"				column="TAX_CD"/>
+		<result property="taxDesc"				column="TAX_DESC"/>
+		<result property="taxAmt"				column="TAX_AMT"/>
+		<result property="taxId"				column="TAX_ID"/>
+		<result property="rate"					column="RATE"/>
+		<result property="itemGrp"				column="ITEM_GRP"/>
+		<result property="fixedTaxAllocation"	column="FIXED_TAX_ALLOC"/>
+		<result property="taxAllocation"		column="TAX_ALLOCATION"/>
+		<result property="primarySw"			column="PRIMARY_SW"/>
+		<result property="perilSw"				column="PERIL_SW"/>
+		<result property="noRateTag"			column="NO_RATE_TAG"/>
+	</resultMap>
+	
+	<select id="getInvoiceTaxList" resultMap="invoiceTaxListMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*
+		          FROM (SELECT * 
+		                  FROM TABLE (GIPI_QUOTE_INVTAX_PKG.get_gipi_quote_invtax2(#quoteInvNo#, #issCd#, #taxAmt#, #taxDesc#))
+			            <isEqual property="sortColumn" compareValue="taxDesc">
+		              		ORDER BY tax_desc
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="taxAmt">
+		              		ORDER BY tax_amt
+			            </isEqual>
+			            <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	</isNotNull>) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIPI_QUOTE_INVTAX_PKG.get_gipi_quote_invtax2(#quoteInvNo#, #issCd#, #taxAmt#, #taxDesc#))) b)
+		WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<insert id="setGIIMM002InvTax" parameterClass="GIPIQuoteInvtax">
+		BEGIN
+			GIIS_USERS_PKG.app_user := #appUser#;
+			GIPI_QUOTE_INVTAX_PKG.set_gipi_quote_invtax(
+				#quoteId#, #quoteInvNo#, #lineCd#, #issCd#, #taxCd#, #taxAmt#,
+				#taxId#, #rate#, #itemGrp#, #fixedTaxAllocation#, #taxAllocation#
+			);
+		END;
+	</insert>
+  	
+  	<delete id="deleteGIIMM002InvTax" parameterClass="GIPIQuoteInvtax">
+		BEGIN
+			GIIS_USERS_PKG.app_user := #appUser#;
+			GIPI_QUOTE_INVTAX_PKG.delete_gipi_quote_invtax(#quoteInvNo#, #lineCd#, #issCd#, #taxCd#, #taxId#);
+		END;
+	</delete>
+	
+</sqlMap>

@@ -1,0 +1,593 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISPeril">
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+
+	<typeAlias alias="GIISPeril" type="com.geniisys.common.entity.GIISPeril" />
+	
+	<resultMap class="com.geniisys.common.entity.GIISPeril" id="defaultPerilMap">
+		<result column="PERIL_CD" 		property="perilCd"/>
+		<result column="PERIL_NAME" 	property="perilName"/>
+		<result column="LINE_CD" 		property="lineCd"/>
+		<result column="DEFAULT_TSI" 	property="defaultTsi"/>
+		<result column="DEFAULT_RATE" 	property="defaultRate"/>
+		<result column="PERIL_TYPE" 	property="perilType"/>
+		<result column="RI_COMM_RT" 	property="riCommRt"/>
+	</resultMap>
+	
+	<select id="checkIfPerilExists" resultClass="java.lang.String" parameterClass="java.util.HashMap">
+		SELECT GIIS_PERIL_PKG.check_default_peril_exists(#nbtSublineCd#, #lineCd#) FROM DUAL
+	</select>
+	
+	<select id="getDefaultPerils" resultMap="defaultPerilMap" parameterClass="java.util.HashMap">
+		SELECT * FROM TABLE(Giis_peril_pkg.get_default_perils(#lineCd#, #packLineCd#, #nbtSublineCd#, #packSublineCd#))
+	</select>
+	
+	<resultMap id="PerilLOVResultMap" class="com.geniisys.common.entity.GIISPeril" extends="BaseEntity.TableGridResultMap">
+		<result column="PERIL_NAME" 		property="perilName"/>
+		<result column="PERIL_SNAME" 		property="perilSname"/>
+		<result column="PERIL_TYPE" 		property="perilType"/>
+		<result column="BASC_PERL_CD" 		property="bascPerlCd"/>
+		<result column="BASIC_PERIL"		property="basicPeril"/>
+		<result column="BASIC_PERIL_NAME"	property="basicPerilName"/>
+		<result column="PRT_FLAG" 			property="prtFlag"/>
+		<result column="LINE_CD" 			property="lineCd"/>
+		<result column="PERIL_CD" 			property="perilCd"/>
+		<result column="DFLT_TSI" 			property="dfltTsi"/>
+		<result column="DFLT_TAG" 			property="dfltTag"/>
+		<result column="DFLT_RATE" 			property="dfltRate"/>
+		<result column="DEFAULT_TAG"		property="defaultTag"/>
+		<result column="DEFAULT_RATE"		property="defaultRate"/>
+		<result column="DEFAULT_TSI"		property="defaultTsi"/>
+		<result column="RI_COMM_RT" 		property="riCommRt"/>
+		<result column="WC_SW"				property="wcSw"/>
+		<result column="TARF_CD"			property="tarfCd"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="getDspPerilNameMap">
+		<result column="DSP_PERIL_NAME"				property="dspPerilName"/>
+		<result column="DSP_PERIL_SNAME"				property="dspPerilSname"/>
+		<result column="DSP_PERIL_TYPE"					property="dspPerilType"/>
+		<result column="DSP_BASC_PERL_CD"			property="dspBascPerlCd"/>
+		<result column="DSP_PERIL_SNAME2"			property="dspPerilSname2"/>
+		<result column="DSP_PRT_FLAG"					property="dspPrtFlag"/>
+		<result column="LINE_CD"								property="lineCd"/>
+		<result column="PERIL_CD"								property="perilCd"/>
+		<result column="ROWNUM_"          					property="rowNum"/>
+		<result column="COUNT_"								property="rowCount"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="getItmperilMap">
+		<result column="PERIL_CD"								property="perilCd"/>
+		<result column="PERIL_NAME"						property="perilName"/>
+		<result column="ROWNUM_"          					property="rowNum"/>
+		<result column="COUNT_"								property="rowCount"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="itmPerilLOVMAP" extends="BaseEntity.TableGridResultMap">
+		<result column="DSP_PERIL_NAME"			property="perilName"/>
+		<result column="DSP_PERIL_SNAME"		property="perilSname"/>
+		<result column="DSP_PERIL_TYPE"			property="perilType"/>
+		<result column="DSP_BASC_PERL_CD"		property="bascPerlCd"/>
+		<result column="DSP_PERIL_NAME2"		property="perilName2"/>
+		<result column="DSP_PERIL_SNAME2"		property="perilSname2"/>
+		<result column="DSP_PRT_FLAG"			property="prtFlag"/>
+		<result column="LINE_CD"				property="lineCd"/>
+		<result column="PERIL_CD"				property="perilCd"/>
+		<result column="DEFAULT_TAG"			property="defaultTag"/>
+		<result column="DEFAULT_RATE"			property="defaultRate"/>
+		<result column="DEFAULT_TSI"			property="defaultTsi"/>
+		<result column="WARRANTY_FLAG"			property="warrantyFlag"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="wOpenPerilLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="PERIL_CD"			property="perilCd"/>
+		<result column="PERIL_NAME"			property="perilName"/>
+		<result column="PERIL_SNAME"		property="perilSname"/>
+		<result column="PERIL_TYPE"			property="perilType"/>
+		<result column="BASC_PERL_CD"		property="bascPerlCd"/>
+		<result column="BASIC_PERIL_NAME"	property="bascPerlName"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="coveragePerilMap" extends="BaseEntity.TableGridResultMap">
+		<result column="PERIL_NAME"			property="perilName"/>
+		<result column="PERIL_SNAME"		property="perilSname"/>
+		<result column="PERIL_TYPE"			property="perilType"/>
+		<result column="RI_COMM_RT"			property="riCommRt"/>
+		<result column="BASC_PERL_CD"		property="bascPerlCd"/>
+		<result column="BASIC_PERIL"		property="basicPeril"/>
+		<result column="INTM_COMM_RT"		property="intmCommRt"/>
+		<result column="PRT_FLAG"			property="prtFlag"/>
+		<result column="LINE_CD"			property="lineCd"/>
+		<result column="PERIL_CD"			property="perilCd"/>
+		<result column="BASIC_PERIL_NAME"	property="basicPerilName"/>
+		<result column="WC_SW"				property="wcSw"/>
+		<result column="DEFAULT_TAG"		property="defaultTag"/>
+		<result column="DEFAULT_RATE"		property="defaultRate"/>
+	</resultMap>
+
+	<select id="getGIISPerilLOV" resultMap="PerilLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIIS_PERIL_PKG.get_peril_name8_list(#lineCd#, #sublineCd#, #perilType#, #findText#))
+ 		                  <isNotNull property="notIn">
+		                   WHERE peril_cd NOT IN $notIn$
+		                  </isNotNull> 
+		                  <isEqual property="sortColumn" compareValue="perilName">
+			              		ORDER BY peril_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="perilSname">
+			              		ORDER BY peril_sname
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="perilType">
+			              		ORDER BY peril_type
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="basicPeril">
+			              		ORDER BY basc_perl_cd
+			              </isEqual>
+						  <isEqual property="sortColumn" compareValue="perilCd">
+			              		ORDER BY peril_cd
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIIS_PERIL_PKG.get_peril_name8_list(#lineCd#, #sublineCd#, #perilType#, #findText#))
+ 		                  <isNotNull property="notIn">
+		                   WHERE peril_cd NOT IN $notIn$
+		                  </isNotNull> 
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGIISPerilByItemLOV" parameterClass="java.util.HashMap" resultMap="PerilLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giis_peril_pkg.get_peril_name_by_item_list(#parId#, #itemNo#, #lineCd#, #sublineCd#, #perilType#, #findText#))
+		                  <isNotNull property="notIn">
+		                   WHERE peril_cd NOT IN $notIn$
+		                  </isNotNull>		                  
+		                  <isEqual property="sortColumn" compareValue="perilName">
+			              		ORDER BY peril_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="perilSname">
+			              		ORDER BY peril_sname
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="perilType">
+			              		ORDER BY peril_type
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="bascPerlCd">
+			              		ORDER BY basc_perl_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="basicPeril">
+			              		ORDER BY basic_peril
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="perilCd">
+			              		ORDER BY peril_cd
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT COUNT(*) count_ 
+		                  FROM TABLE (giis_peril_pkg.get_peril_name_by_item_list(#parId#, #itemNo#, #lineCd#, #sublineCd#, #perilType#, #findText#))
+		                  <isNotNull property="notIn">
+		                   WHERE peril_cd NOT IN $notIn$
+		                  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getBeneficiaryPerilLOV" resultMap="PerilLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giis_peril_pkg.get_beneficiary_peril_list(#lineCd#, #sublineCd#, #findText#))
+		                  <isNotNull property="notIn">
+		                   WHERE peril_cd NOT IN $notIn$
+		                  </isNotNull>		                  
+		                  <isEqual property="sortColumn" compareValue="perilName">
+			              		ORDER BY peril_name
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT COUNT(*) count_ 
+		                  FROM TABLE (giis_peril_pkg.get_beneficiary_peril_list(#lineCd#, #sublineCd#, #findText#))
+		                  <isNotNull property="notIn">
+		                   WHERE peril_cd NOT IN $notIn$
+		                  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGroupedPerilLOV" parameterClass="java.util.HashMap" resultMap="PerilLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giis_peril_pkg.get_grouped_peril_list1(#parId#, #lineCd#, #sublineCd#, #perilType#, #findText#))
+		                  <isNotNull property="notIn">
+		                   WHERE peril_cd NOT IN $notIn$
+		                  </isNotNull>		                  
+		                  <isEqual property="sortColumn" compareValue="perilName">
+			              		ORDER BY peril_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="perilCd">
+			              		ORDER BY peril_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="lineCd">
+			              		ORDER BY line_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="perilType">
+			              		ORDER BY peril_type
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT COUNT(*) count_ 
+		                  FROM TABLE (giis_peril_pkg.get_grouped_peril_list1(#parId#, #lineCd#, #sublineCd#, #perilType#, #findText#))
+		                  <isNotNull property="notIn">
+		                   WHERE peril_cd NOT IN $notIn$
+		                  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>		
+	
+	<select id="getDspPerilNameLOV" resultMap="getDspPerilNameMap">
+		 SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giis_peril_pkg.get_peril_name9_list( #lineCd#, #sublineCd#))
+		                 WHERE 1 = 1
+		                  <isNotNull property="notIn">
+		                   AND peril_cd NOT IN $notIn$
+		                  </isNotNull>
+		                  <isNotEmpty property="findText">
+		                   AND (UPPER(dsp_peril_name) LIKE UPPER(#findText#)
+		                    OR UPPER(dsp_peril_sname) LIKE UPPER(#findText#)
+		                    OR UPPER(dsp_peril_sname2) LIKE UPPER(#findText#)
+		                    OR UPPER(dsp_peril_type) LIKE UPPER(#findText#)
+		                    OR UPPER(dsp_prt_flag) LIKE UPPER(#findText#)
+		                    OR TO_CHAR(peril_cd) = #findText#)
+		                  </isNotEmpty>
+			              <isEqual property="sortColumn" compareValue="dspPerilName">
+			              		ORDER BY DSP_PERIL_NAME
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="dspPerilSname">
+			              		ORDER BY DSP_PERIL_SNAME
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="dspPerilType">
+			              		ORDER BY DSP_PERIL_TYPE
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="dspBascPerlCd">
+			              		ORDER BY DSP_BASC_PERL_CD
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="dspPerilSname2">
+			              		ORDER BY DSP_PERIL_SNAME2
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="dspPrtFlag">
+			              		ORDER BY DSP_PRT_FLAG
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="lineCd">
+			              		ORDER BY LINE_CD
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="perilCd">
+			              		ORDER BY PERIL_CD
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giis_peril_pkg.get_peril_name9_list(#lineCd#, #sublineCd#))
+		                  WHERE 1 = 1
+		                  <isNotNull property="notIn">
+		                   AND peril_cd NOT IN $notIn$
+		                  </isNotNull>
+		                  <isNotEmpty property="findText">
+		                   AND (UPPER(dsp_peril_name) LIKE UPPER(#findText#)
+		                    OR UPPER(dsp_peril_sname) LIKE UPPER(#findText#)
+		                    OR UPPER(dsp_peril_sname2) LIKE UPPER(#findText#)
+		                    OR UPPER(dsp_peril_type) LIKE UPPER(#findText#)
+		                    OR UPPER(dsp_prt_flag) LIKE UPPER(#findText#)
+		                    OR TO_CHAR(peril_cd) = #findText#)
+		                  </isNotEmpty>) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getItmperilLOV" resultMap="getItmperilMap">
+		 SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giis_peril_pkg.get_itmperil_list(#policyId#, #itemNo#))
+			              <isEqual property="sortColumn" compareValue="perilName">
+			              		ORDER BY PERIL_NAME
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="perilCd">
+			              		ORDER BY PERIL_CD
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giis_peril_pkg.get_itmperil_list(#policyId#, #itemNo#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getDefaultRate" resultClass="java.lang.String" parameterClass="java.util.HashMap">
+		SELECT default_rate FROM giis_peril
+			WHERE NVL(default_tag , 'N') = 'Y'
+			      AND peril_cd = #perilCd#
+			      AND line_cd = #lineCd#
+	</select>
+	
+	<select id="getPerilNameLOV" resultMap="itmPerilLOVMAP">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIIS_PERIL_PKG.get_item_peril_lov(#quoteId#, #lineCd#, #packLineCd#, #sublineCd#, #packSublineCd#, #perilType#, #keyword#))
+		                  <isNotNull property="notIn">
+						  	WHERE peril_cd NOT IN $notIn$
+						  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="perilName">
+			              		ORDER BY dsp_peril_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="perilSname">
+			              		ORDER BY dsp_peril_sname
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="perilType">
+			              		ORDER BY dsp_peril_type
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="bascPerlCd">
+			              		ORDER BY dsp_basc_perl_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="perilCd">
+			              		ORDER BY peril_cd
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIIS_PERIL_PKG.get_item_peril_lov(#quoteId#, #lineCd#, #packLineCd#, #sublineCd#, #packSublineCd#, #perilType#, #keyword#))
+		                  <isNotNull property="notIn">
+						  	WHERE peril_cd NOT IN $notIn$
+						  </isNotNull>) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getWOpenPerilLOV" resultMap="wOpenPerilLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIIS_PERIL_PKG.get_peril_name_list_gipis005(#lineCd#, #sublineCd#, #perilType#, #findText#))
+		                  <isNotNull property="notIn">
+						  	WHERE peril_cd NOT IN $notIn$
+						  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="perilName">
+			              		ORDER BY peril_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="perilSname">
+			              		ORDER BY peril_sname
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="perilType">
+			              		ORDER BY peril_type
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIIS_PERIL_PKG.get_peril_name_list_gipis005(#lineCd#, #sublineCd#, #perilType#, #findText#))
+		                  <isNotNull property="notIn">
+						  	WHERE peril_cd NOT IN $notIn$
+						  </isNotNull>) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getCoveragePerilLOV" resultMap="coveragePerilMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIIS_PERIL_PKG.get_grouped_peril_list2(#parId#, #lineCd#, #sublineCd#, #perilType#, #findText#))
+		                  <isNotNull property="notIn">
+						  	WHERE peril_cd NOT IN ($notIn$)
+						  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="perilName">
+			              		ORDER BY peril_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="perilSname">
+			              		ORDER BY peril_sname
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="perilType">
+			              		ORDER BY peril_type
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="basicPerilName">
+			              		ORDER BY basic_peril_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="prtFlag">
+			              		ORDER BY prt_flag
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="basicPeril">
+			              		ORDER BY basic_peril
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="perilCd">
+			              		ORDER BY peril_cd
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIIS_PERIL_PKG.get_grouped_peril_list2(#parId#, #lineCd#, #sublineCd#, #perilType#, #findText#))
+		                  <isNotNull property="notIn">
+						  	WHERE peril_cd NOT IN ($notIn$)
+						  </isNotNull>) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="giiss106PerilLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="PERIL_CD" 		property="perilCd"/>
+		<result column="PERIL_NAME" 	property="perilName"/>
+	</resultMap>
+	
+	<select id="getGiiss106PerilLOV" resultMap="giiss106PerilLOVMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIIS_PERIL_PKG.GET_PERIL_LIST(#lineCd#))
+		                  <isNotNull property="findText">
+		                  	WHERE UPPER(peril_cd) LIKE UPPER(#findText#)
+		                  	   OR UPPER(peril_name) LIKE UPPER(#findText#)
+		                  </isNotNull>
+		                  <isNull property="findText">
+		                  	WHERE UPPER(peril_cd) LIKE UPPER(NVL(#searchString#, peril_cd))
+		                  	   OR UPPER(peril_name) LIKE UPPER(NVL(#searchString#, peril_name))
+		                  </isNull>
+		                  <isEqual property="sortColumn" compareValue="perilCd">
+			              		ORDER BY peril_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="perilName">
+			              		ORDER BY peril_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIIS_PERIL_PKG.GET_PERIL_LIST(#lineCd#))
+		                  <isNotNull property="findText">
+		                  	WHERE UPPER(peril_cd) LIKE UPPER(#findText#)
+		                  	   OR UPPER(peril_name) LIKE UPPER(#findText#)
+		                  </isNotNull>
+		                  <isNull property="findText">
+		                  	WHERE UPPER(peril_cd) LIKE UPPER(NVL(#searchString#, peril_cd))
+		                  	   OR UPPER(peril_name) LIKE UPPER(NVL(#searchString#, peril_name))
+		                  </isNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<!-- added by Gzelle 09092014 -->
+	<resultMap class="java.util.HashMap" id="packPlanPerilsResultMap">
+		<result property="parId"		column="par_id"/>
+		<result property="lineCd"		column="line_cd"/>
+		<result property="perilCd"		column="peril_cd"/>
+		<result property="perilName"	column="peril_name"/>
+		<result property="perilType"	column="peril_type"/>
+		<result property="premRt"		column="prem_rt"/>
+		<result property="tsiAmt"		column="tsi_amt"/>
+		<result property="premAmt"		column="prem_amt"/>
+		<result property="annTsiAmt"	column="ann_tsi_amt"/>
+		<result property="discountSw"	column="discount_sw"/>
+		<result property="prtFlag"		column="prt_flag"/>
+		<result property="riCommRt"		column="ri_comm_rt"/>
+		<result property="surchargeSw"	column="surcharge_sw"/>
+		<result property="noOfDays"		column="no_of_days"/>
+		<result property="baseAmt"		column="base_amt"/>
+		<result property="aggregateSw"	column="aggregate_sw"/>
+		<result property="bascPerlCd"	column="basc_perl_cd"/>	
+		<result property="tarfCd"		column="tarf_cd"/>
+		<result property="recFlag"		column="rec_flag"/>
+		<result property="compRem"		column="comp_rem"/>
+		<result property="asChargeSw"	column="as_charge_sw"/>
+	</resultMap>	
+	
+	<select id="getPackPlanPerils" resultMap="packPlanPerilsResultMap" parameterClass="java.util.HashMap">
+		SELECT * FROM TABLE(giis_peril_pkg.get_pack_plan_perils(#parId#))		                 
+	</select>
+	
+	<!-- added by Gzelle 11242014 -->
+	<select id="getDefPerilAmts" resultClass="java.lang.String" parameterClass="java.util.HashMap">
+		SELECT giis_peril_pkg.get_default_peril_amts(#parId#,#lineCd#,#sublineCd#,#perilCd#,#tsiAmt#,#coverageCd#,#sublineTypeCd#,#motortypeCd#,#tariffZone#,#tarfCd#,#constructionCd#) FROM DUAL	                 
+	</select>	
+	
+	<!-- added by Gzelle 12012014 -->
+	<select id="chkIfTariffPerilExsts" resultClass="java.lang.String" parameterClass="java.util.HashMap">
+		SELECT giis_peril_pkg.check_tariff_peril_exists(#parId#, #itemNo#, #lineCd#, #sublineCd#) FROM DUAL	                 
+	</select>
+
+	<!-- added by Gzelle 05252015 SR4347-->
+	<select id="chkPerilZoneType" resultClass="java.lang.String" parameterClass="java.util.HashMap">
+		SELECT giis_peril_pkg.check_peril_zone_type(#parPolId#, #itemNo#, #lineCd#, #perilCd#) FROM DUAL	                 
+	</select>		
+</sqlMap>

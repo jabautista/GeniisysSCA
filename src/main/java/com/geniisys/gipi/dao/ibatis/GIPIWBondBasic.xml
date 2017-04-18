@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIWBondBasic">
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIPIWBondBasicClass" type="com.geniisys.gipi.entity.GIPIWBondBasic" />
+	
+	<resultMap class="GIPIWBondBasicClass" id="gipiWBondBasicResultMap">
+		<result column="PAR_ID" 		property="parId"/>
+		<result column="OBLIGEE_NO" 	property="obligeeNo"/>
+		<result column="OBLIGEE_NAME" 	property="obligeeName"/>
+		<result column="PRIN_SIGNOR" 	property="prinSignor"/>
+		<result column="DESIGNATION" 	property="designation"/>
+		<result column="BOND_DTL" 		property="bondDtl"/>
+		<result column="INDEMNITY_TEXT" property="indemnityText"/>
+		<result column="NP_NAME" 		property="npName"/>
+		<result column="CLAUSE_TYPE" 	property="clauseType"/>
+		<result column="WAIVER_LIMIT" 	property="waiverLimit"/>
+		<result column="CONTRACT_DATE" 	property="contractDate"/>
+		<result column="CONTRACT_DTL" 	property="contractDtl"/>
+		<result column="PRIN_ID" 		property="prinId"/>
+		<result column="CO_PRIN_SW" 	property="coPrinSw"/>
+		<result column="NP_NO" 			property="npNo"/>
+		<result column="COLL_FLAG" 		property="collFlag"/>
+		<result column="PLAINTIFF_DTL"	property="plaintiffDtl"/>
+		<result column="DEFENDANT_DTL"	property="defendantDtl"/>
+		<result column="CIVIL_CASE_NO"	property="civilCaseNo"/>		
+	</resultMap>
+	
+	<select id="getGIPIWBondBasic" resultMap="gipiWBondBasicResultMap">
+		SELECT * FROM TABLE(GIPI_WBOND_BASIC_PKG.get_gipi_wbond_basic(#parId#))
+	</select>
+	
+	<select id="deleteBillRelatedTables2">
+		BEGIN
+			DELETE_BILL_RELATED_TABLES(#parId#);
+		END;
+	</select>
+	
+	<insert id="setGIPIWBondBasic" parameterClass="java.util.HashMap">
+		BEGIN
+			GIPI_WBOND_BASIC_PKG.set_gipi_wbond_basic (
+			    #parId#,
+				#obligeeNo#,
+				#bondDtl#,
+				#indemnityText#,
+				#clauseType#,	
+				#waiverLimit#,
+				TO_DATE(#contractDate#, 'MM-DD-YYYY'),
+				#contractDtl#,
+				#prinId#,
+				#coPrinSw#,
+				#npNo#,
+				#collFlag#,
+				#plaintiffDtl#,
+				#defendantDtl#,
+				#civilCaseNo#,
+				#valPeriod#,		<!-- shan 10.13.2014 -->
+				#valPeriodUnit#);	<!-- shan 10.13.2014 -->
+			COMMIT;
+		END;
+	</insert>
+	
+	<insert id="setGIPIWBondBasic1" parameterClass="java.util.HashMap">
+		BEGIN
+			GIPI_WBOND_BASIC_PKG.set_gipi_wbond_basic (
+			    #parId#,
+				#obligeeNo#,
+				#bondDtl#,
+				#indemnityText#,
+				#clauseType#,	
+				#waiverLimit#,
+				TO_DATE(#contractDate#, 'MM-DD-YYYY'),
+				#contractDtl#,
+				#prinId#,
+				#coPrinSw#,
+				#npNo#,
+				#collFlag#,
+				#plaintiffDtl#,
+				#defendantDtl#,
+				#civilCaseNo#,
+				#valPeriod#,
+				#valPeriodUnit#);
+			COMMIT;
+		END;
+	</insert>
+	
+	<select id="getBondBasicNewRecord" resultMap="gipiWBondBasicResultMap">
+		SELECT * FROM TABLE(GIPI_WBOND_BASIC_PKG.get_bond_basic_new_record(#parId#))
+	</select>
+	
+	<!-- shan 10.13.2014 -->
+	<resultMap class="java.util.HashMap" id="gipiWc20DtlResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="PAR_ID" 		property="parId"/>
+		<result column="ITEM_NO" 		property="itemNo"/>
+		<result column="PLATE_NO" 		property="plateNo"/>
+		<result column="MOTOR_NO" 		property="motorNo"/>
+		<result column="MAKE" 			property="make"/>
+		<result column="PSC_CASE_NO" 	property="pscCaseNo"/>	
+	</resultMap>
+	
+	<select id="getLandCarrierDtlList" resultMap="gipiWc20DtlResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(GIPI_WBOND_BASIC_PKG.GET_LAND_CARRIER_DTL(#parId#))
+		  	      		  <isNotNull property="filter">
+		  	      		  	WHERE 1=1
+		  	      		  		<isNotEmpty prepend="AND" property="itemNo">
+		  	      		  			item_no = #itemNo#
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="motorNo">
+		  	      		  			UPPER(motor_no) LIKE UPPER(#motorNo#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="plateNo">
+		  	      		  			UPPER(plate_no) LIKE UPPER(#plateNo#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="make">
+		  	      		  			UPPER(make) LIKE UPPER(#make#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="pscCaseNo">
+		  	      		  			UPPER(psc_case_no) LIKE UPPER(#pscCaseNo#)
+		  	      		  		</isNotEmpty>
+		  	      		  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="itemNo">
+			              		ORDER BY item_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="plateNo">
+			              		ORDER BY plate_no
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="motorNo">
+			              		ORDER BY motor_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="make">
+			              		ORDER BY make
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="pscCaseNo">
+			              		ORDER BY psc_case_no
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GIPI_WBOND_BASIC_PKG.GET_LAND_CARRIER_DTL(#parId#))
+		  	      		  <isNotNull property="filter">
+		  	      		  	WHERE 1=1
+		  	      		  		<isNotEmpty prepend="AND" property="itemNo">
+		  	      		  			item_no = #itemNo#
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="motorNo">
+		  	      		  			UPPER(motor_no) LIKE UPPER(#motorNo#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="plateNo">
+		  	      		  			UPPER(plate_no) LIKE UPPER(#plateNo#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="make">
+		  	      		  			UPPER(make) LIKE UPPER(#make#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="pscCaseNo">
+		  	      		  			UPPER(psc_case_no) LIKE UPPER(#pscCaseNo#)
+		  	      		  		</isNotEmpty>
+		  	      		  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setLandCarrierDtl" parameterClass="java.util.HashMap">
+	    DECLARE
+	    	v_rec GIPI_WC20_DTL%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.par_id := #parId#;
+ 			v_rec.item_no := #itemNo#;
+ 			v_rec.plate_no := #plateNo#;
+ 			v_rec.motor_no := #motorNo#;
+ 			v_rec.make := #make#;
+ 			v_rec.psc_case_no := #pscCaseNo#;
+ 			
+ 			GIPI_WBOND_BASIC_PKG.set_land_carrier_dtl(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddLandCarrierDtl" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			GIPI_WBOND_BASIC_PKG.val_add_land_carrier_dtl(#parId#, #itemNo#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delLandCarrierDtl" parameterClass="java.util.HashMap">
+		BEGIN
+ 			GIPI_WBOND_BASIC_PKG.del_land_carrier_dtl(#parId#, #itemNo#);
+ 		END;
+ 	</delete>
+ 	
+ 	<select id="getMaxItemNoLandCarrierDtl" parameterClass="java.lang.Integer" resultClass="java.lang.Integer">
+ 		SELECT NVL(MAX(item_no), 0) + 1
+ 		  FROM gipi_wc20_dtl
+ 		 WHERE par_id = #parId#
+ 	</select>
+	<!-- end 10.13.2014 -->
+</sqlMap>

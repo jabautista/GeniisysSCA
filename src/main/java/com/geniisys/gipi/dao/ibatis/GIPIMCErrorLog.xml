@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIMCErrorLog">
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+    <typeAlias alias="GIPIMCErrorLog" type="com.geniisys.gipi.entity.GIPIMCErrorLog"/>
+	 
+	<resultMap id="GIPIMCErrorLogMap" class="GIPIMCErrorLog">
+		<result column="UPLOAD_NO" 			property="uploadNo" />
+		<result column="FILENAME" 			property="fileName" />
+		<result column="ITEM_NO" 			property="itemNo" />
+		<result column="ITEM_TITLE" 		property="itemTitle" />
+		<result column="MOTOR_NO" 			property="motorNo" />
+		<result column="PLATE_NO" 			property="plateNo" />
+		<result column="SERIAL_NO" 			property="serialNo" />
+		<result column="USER_ID" 			property="userId" />
+		<result column="REMARKS" 			property="remarks" />
+		<result column="LAST_UPDATE"		property="lastUpdate" />
+		<result column="DSP_LAST_UPDATE"	property="dspLastUpdate" />
+	</resultMap> 
+
+	<select id="getGipiMCErrorList" parameterClass="java.lang.String" resultMap="GIPIMCErrorLogMap">
+		select upload_no,
+			   filename,
+			   item_no,
+			   item_title,
+			   motor_no,
+			   plate_no,
+			   serial_no,
+			   user_id,
+			   remarks,
+			   last_update,
+			   TO_CHAR(last_update, 'mm-dd-yyyy hh:mi:ss PM') dsp_last_update
+		  from table(Gipi_MC_Error_Log_Pkg.get_gipi_mc_error_log_list(#fileName#))
+	</select>
+	
+	<delete id="delGIPIMCErrorLog">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			DELETE FROM gipi_mc_error_log;
+		END;
+	</delete>
+	
+	<procedure id="setGIPIMCErrorLog" parameterClass="map">
+		BEGIN
+			GIPI_MC_ERROR_LOG_PKG.set_gipi_mc_error_log(
+				#uploadNo#, #fileName#, #itemNo#, #itemTitle#, #itemDesc#, #itemDesc2#,
+				#acquiredFrom#, #assignee#, #basicColorCd#, #carCompanyCd#, #cocAtcn#, #cocIssueDate#,
+				#cocSeqNo#, #cocSerialNo#, #cocType#, #cocYy#, #color#, #colorCd#,
+				#coverageCd#, #ctvTag#, #currencyCd#, #destination#, #estValue#, #modelYear#,
+				#make#, #makeCd#, #motType#, #motorNo#, #mvFileNo#, #noOfPass#,
+				#origin#, #plateNo#, #regionCd#, #repairLim#, #serialNo#, #seriesCd#,
+				#tariffZone#, #towing#, #typeOfBody#, #unladenWt#, #remarks#, #sublineTypeCd#,
+				#currencyRt#, #appUser#
+			);
+		END;
+	</procedure>
+		<!-- 
+		p_upload_no, p_filename, p_item_no, p_item_title, p_item_desc, p_item_desc2,
+            p_acquired_from, p_assignee, p_basic_color_cd, p_car_company_cd, p_coc_atcn,
+            p_coc_issue_date, p_coc_seq_no, p_coc_serial_no, p_coc_type, p_coc_yy, p_color, 
+            p_color_cd, p_coverage_cd, p_ctv_tag, p_currency_cd, p_destination, p_est_value, 
+            p_model_year, p_make, p_make_cd, p_mot_type, p_motor_no, p_mv_file_no, p_no_of_pass, 
+            p_origin, p_plate_no, p_region_cd, p_repair_lim, p_serial_no, p_series_cd,
+            p_tariff_zone, p_towing, p_type_of_body_cd, p_unladen_wt, p_remarks,
+            p_subline_type_cd, p_currency_rt, NVL(p_user_id, USER) -->
+            
+            
+	<resultMap id="GIPIMCErrorLogMap2" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result column="UPLOAD_NO" 			property="uploadNo" />
+		<result column="FILENAME" 			property="fileName" />
+		<result column="ITEM_NO" 			property="itemNo" />
+		<result column="ITEM_TITLE" 		property="itemTitle" />
+		<result column="MOTOR_NO" 			property="motorNo" />
+		<result column="PLATE_NO" 			property="plateNo" />
+		<result column="SERIAL_NO" 			property="serialNo" />
+		<result column="USER_ID" 			property="userId" />
+		<result column="REMARKS" 			property="remarks" />
+		<result column="LAST_UPDATE"		property="lastUpdate" />
+		<!-- <result column="DSP_LAST_UPDATE"	property="dspLastUpdate" /> -->
+	</resultMap> 
+
+	<select id="getGipiMCErrorList2" resultMap="GIPIMCErrorLogMap2">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+						 b.count_, 
+						 a.*
+					FROM (SELECT *
+							FROM TABLE (gipi_mc_error_log_pkg.get_gipi_mc_error_log_list(#fileName#))
+							<!-- <isNotNull property="filter">
+								WHERE 1 = 1 
+									<isNotEmpty prepend="AND" property="sublineCd">
+										UPPER(subline_cd) LIKE upper(#sublineCd#)
+									</isNotEmpty>
+							</isNotNull> -->
+							<isEqual property="sortColumn" compareValue="uploadNo">
+								ORDER BY upload_no
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="itemTitle">
+								ORDER BY item_title
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="motorNo">
+								ORDER BY motor_no
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="plateNo">
+								ORDER BY plate_no
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="serialNo">
+								ORDER BY serial_no
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>
+						) a,
+						(SELECT count(*) count_
+						   FROM TABLE (gipi_mc_error_log_pkg.get_gipi_mc_error_log_list(#fileName#))
+						   <!-- <isNotNull property="filter">
+								WHERE 1 = 1 
+									<isNotEmpty prepend="AND" property="sublineCd">
+										UPPER(subline_cd) LIKE upper(#sublineCd#)
+									</isNotEmpty>
+							</isNotNull> -->
+						   ) b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select>            
+	
+	
+</sqlMap>

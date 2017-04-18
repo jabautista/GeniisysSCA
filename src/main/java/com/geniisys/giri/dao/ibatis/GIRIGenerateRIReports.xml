@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIRIGenerateRIReports">
+	
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<resultMap id="defaultCurrencyResultMap" class="java.lang.Integer" >
+		<result column="CURRENCY_CD" property="defaultCurr"/>
+	</resultMap>
+	
+	<select id="getDefaultCurrencyGIRIS051" resultMap="defaultCurrencyResultMap" parameterClass="java.lang.Integer">
+		SELECT * FROM TABLE(Giis_Currency_Pkg.get_default_currency)
+	</select>
+	
+	<parameterMap id="validateBndRnwlMap" class="map">
+		<parameter property="lineCd" 	  	 jdbcType="VARCHAR"	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="binderYy" 	  	 jdbcType="INTEGER"	javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="binderSeqNo" 	 jdbcType="INTEGER"	javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="valid" 	  	 jdbcType="VARCHAR"	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="oldFnlBinderId" jdbcType="INTEGER" javaType="java.lang.Integer" mode="OUT"/>
+		<parameter property="fnlBinderId" 	 jdbcType="INTEGER" javaType="java.lang.Integer" mode="OUT"/>
+		<parameter property="return"		 jdbcType="INTEGER"	javaType="java.lang.Integer" mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="validateBndRnwl" parameterMap="validateBndRnwlMap">
+		CALL GIRI_RIREPORTS_PKG.validate_bond_rnwl(?, ?, ?, ?, ?, ?, ?)
+	</procedure>
+	
+	<parameterMap id="chkBndRcordsMap" class="map">
+		<parameter property="lineCd" 	  	  jdbcType="VARCHAR"	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="binderYy" 	  	  jdbcType="INTEGER"	javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="binderSeqNo" 	  jdbcType="INTEGER"	javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="isLineCd" 	  	  jdbcType="VARCHAR"	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="remarksSw"	  	  jdbcType="VARCHAR"	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="localCurr" 	  jdbcType="INTEGER"	javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="reversed" 	  	  jdbcType="VARCHAR"	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="replaced" 	  	  jdbcType="VARCHAR"	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="nbtGrp" 	  	  jdbcType="VARCHAR"	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="negated" 	  	  jdbcType="VARCHAR"	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="attention" 	  jdbcType="VARCHAR"	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="remarks" 	  	  jdbcType="VARCHAR"	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="bndrRemarks1" 	  jdbcType="VARCHAR"	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="bndrRemarks2" 	  jdbcType="VARCHAR"	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="bndrRemarks3" 	  jdbcType="VARCHAR"	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="readOnlyAttn" 	  jdbcType="VARCHAR"	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="enableReplaced"  jdbcType="VARCHAR"	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="enableNegated"   jdbcType="VARCHAR"	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="enableLocalCurr" jdbcType="VARCHAR"	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="visiblePrntOpt"  jdbcType="VARCHAR"	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="giriBinder"      jdbcType="VARCHAR"	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="giriGroupBinder" jdbcType="VARCHAR"	javaType="java.lang.String"  mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="checkBinderRecords" parameterMap="chkBndRcordsMap">
+		CALL GIRI_RIREPORTS_PKG.check_rireports_binder(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	</procedure>
+	
+	<parameterMap id="getGIRIR121FnlBinderIdMap" class="map">
+		<parameter property="version"		jdbcType="VARCHAR"	javaType="java.lang.String" mode="IN"/>
+		<parameter property="lineCd" 	  	jdbcType="VARCHAR"	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="binderYy" 	  	jdbcType="INTEGER"	javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="binderSeqNo" 	jdbcType="INTEGER"	javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="fnlBinderId"	jdbcType="INTEGER"  javaType="java.lang.Integer" mode="OUT"/>
+		<parameter property="policyId"		jdbcType="INTEGER"  javaType="java.lang.Integer" mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="getGIRIR121FnlBinderId" parameterMap="getGIRIR121FnlBinderIdMap">
+		CALL GIRI_RIREPORTS_PKG.get_girir121_fnl_binder_id(?, ?, ?, ?, ? , ?)
+	</procedure>
+	
+	<resultMap id="binderPerilDtlsResultMap" class="java.util.HashMap">
+		<result column="PERIL_SNAME" 		property="perilSName"/>
+		<result column="FNL_BINDER_ID" 		property="fnlBinderId"/>
+		<result column="PERIL_SEQ_NO" 		property="perilSeqNo"/>
+		<result column="RI_SHARE_PCT" 		property="riSharePct"/>
+		<result column="RI_TSI_AMT" 		property="riTsiAmt"/>
+		<result column="RI_PREM_AMT" 		property="riPremAmt"/>
+		<result column="RI_COMM_RT" 		property="riCommRt"/>
+		<result column="RI_COMM_AMT" 		property="riCommAmt"/>
+		<result column="RI_COMM_VAT" 		property="riCommVat"/>
+		<result column="RI_WHOLDING_VAT" 	property="riWholdingVat"/>
+		<result column="RI_PREM_VAT" 		property="riPremVat"/>
+		<result column="RI_PREM_TAX" 		property="riPremTax"/>
+		<result column="GROSS_PREM" 		property="grossPrem"/>
+		<result column="RI_SHARE_PCT" 		property="nbtRiSharePct"/>
+		<result column="RI_TSI_AMT" 		property="nbtRiTsiAmt"/>
+		<result column="RI_PREM_AMT" 		property="nbtRiPremAmt"/>
+		<result column="RI_COMM_RT" 		property="nbtRiCommRt"/>
+		<result column="RI_COMM_AMT" 		property="nbtRiCommAmt"/>
+		<result column="RI_COMM_VAT" 		property="nbtRiCommVat"/>
+		<result column="RI_WHOLDING_VAT" 	property="nbtRiWholdingVat"/>
+		<result column="RI_PREM_VAT" 		property="nbtRiPremVat"/>
+		<result column="RI_PREM_TAX" 		property="nbtRiPremTax"/>
+		<result column="GROSS_PREM" 		property="nbtGrossPrem"/>
+		<result column="ROWNUM_" 			property="rowNum"/>
+		<result column="COUNT_"				property="rowCount"/>
+	</resultMap>
+	
+	<select id="getGIRIBinderPerilDtls" resultMap="binderPerilDtlsResultMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM(SELECT a.*, b.count_, rownum rownum_		  			   
+		  		  FROM (SELECT * 
+		  		          FROM TABLE(GIRI_RIREPORTS_PKG.get_binder_peril_dtls(#lineCd#, #binderYy#, #binderSeqNo#)) 
+		  		        ) a,
+		  		       (SELECT count(*) count_
+		  		          FROM TABLE(GIRI_RIREPORTS_PKG.get_binder_peril_dtls(#lineCd#, #binderYy#, #binderSeqNo#)) 
+		  		       ) b
+		  	   )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<parameterMap id="updateGIRIBinderMap" class="map">
+		<parameter property="appUser" 	  	  jdbcType="VARCHAR"	javaType="java.lang.String"  mode="IN"/> <!-- added by robert 03.06.2015 --> 
+		<parameter property="lineCd" 	  	  jdbcType="VARCHAR"	javaType="java.lang.String"  mode="INOUT"/>
+		<parameter property="binderYy" 	  	  jdbcType="INTEGER"	javaType="java.lang.Integer" mode="INOUT"/>
+		<parameter property="binderSeqNo" 	  jdbcType="INTEGER"	javaType="java.lang.Integer" mode="INOUT"/>
+		<parameter property="reversed" 	  	  jdbcType="VARCHAR"	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="replaced" 	  	  jdbcType="VARCHAR"	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="negated" 	  	  jdbcType="VARCHAR"	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="attention" 	  jdbcType="VARCHAR"	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="remarks" 	  	  jdbcType="VARCHAR"	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="bndrRemarks1" 	  jdbcType="VARCHAR"	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="bndrRemarks2" 	  jdbcType="VARCHAR"	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="bndrRemarks3" 	  jdbcType="VARCHAR"	javaType="java.lang.String"  mode="IN"/>
+	</parameterMap>
+	
+	<procedure id="updateGIRIBinder" parameterMap="updateGIRIBinderMap">
+		BEGIN
+		    giis_users_pkg.app_user := ?; <!-- added by robert 03.06.2015 --> 
+			GIRI_RIREPORTS_PKG.update_giri_bnder(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<parameterMap id="updateGIRIGroupBinderMap" class="map">
+		<parameter property="lineCd" 	  	  jdbcType="VARCHAR"	javaType="java.lang.String"  mode="INOUT"/>
+		<parameter property="binderYy" 	  	  jdbcType="INTEGER"	javaType="java.lang.Integer" mode="INOUT"/>
+		<parameter property="binderSeqNo" 	  jdbcType="INTEGER"	javaType="java.lang.Integer" mode="INOUT"/>
+		<parameter property="reversed" 	  	  jdbcType="VARCHAR"	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="replaced" 	  	  jdbcType="VARCHAR"	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="remarks" 	  	  jdbcType="VARCHAR"	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="bndrRemarks1" 	  jdbcType="VARCHAR"	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="bndrRemarks2" 	  jdbcType="VARCHAR"	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="bndrRemarks3" 	  jdbcType="VARCHAR"	javaType="java.lang.String"  mode="IN"/>
+	</parameterMap>
+	
+	<procedure id="updateGIRIGroupBinder" parameterMap="updateGIRIGroupBinderMap">
+		CALL GIRI_RIREPORTS_PKG.update_giri_group_bnder(?, ?, ?, ?, ?, ?, ?, ?, ?)
+	</procedure>
+	
+	<select id="checkBinderReplaced" resultClass="java.lang.Integer">
+		SELECT GIRI_RIREPORTS_PKG.check_binder_replaced(#lineCd#, #binderYy#, #binderSeqNo#) FROM DUAL
+	</select>
+	
+	<select id="checkBinderNegated" resultClass="java.lang.Integer">
+		SELECT GIRI_RIREPORTS_PKG.check_binder_negated(#lineCd#, #binderYy#, #binderSeqNo#) FROM DUAL
+	</select>
+
+	<insert id="addBinderPerilPrintHist" parameterClass="java.util.HashMap">
+		BEGIN
+			GIRI_RIREPORTS_PKG.add_binder_peril_print_hist(#fnlBinderId#, #perilSeqNo#, #riSharePct#, #riTsiAmt#, #riPremAmt#, #riCommRt#, #riCommAmt#, #riCommVat#, #riWholdingTax#, #riPremVat#, #riPremTax#, #grossPrem#);
+		END;
+	</insert>
+	
+	<select id="getReinsurerCd" parameterClass="java.lang.String" resultClass="java.lang.Integer">
+		SELECT ri_cd 
+		  FROM GIIS_REINSURER
+		 WHERE ri_name = #riName#
+	</select>
+	
+	<select id="checkOARPrintDate" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT GIRI_RIREPORTS_PKG.check_oar_print_date(#riCd#, #lineCd#, #asOfDate#, #moreThan#, #lessThan#) FROM DUAL
+	</select>
+	
+	<parameterMap id="updateOARPrintDateMap" class="map">
+		<parameter property="riCd" 		jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="lineCd" 	jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="asOfDate" 	jdbcType="DATE" 	javaType="java.util.Date" 	 mode="IN"/>
+		<parameter property="moreThan" 	jdbcType="INTEGER" 	javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="lessThan" 	jdbcType="INTEGER" 	javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="printChk" 	jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+	</parameterMap>
+	
+	<procedure id="updateOARPrintDate" parameterMap="updateOARPrintDateMap">
+		CALL GIRI_RIREPORTS_PKG.update_oar_print_date(?, ?, ?, ?, ?, ?)
+	</procedure>
+	
+	<parameterMap id="validateRiSnameMap" class="map">
+		<parameter property="riSname" 	jdbcType="VARCHAR"	javaType="java.lang.String" 	mode="IN" />
+		<parameter property="riCd" 		jdbcType="INTEGER"	javaType="java.lang.Integer" 	mode="OUT" />
+		<parameter property="stat" 		jdbcType="VARCHAR"	javaType="java.lang.String" 	mode="OUT" />
+		<parameter property="msg" 		jdbcType="VARCHAR"	javaType="java.lang.String" 	mode="OUT" />
+	</parameterMap>
+	
+	<procedure id="validateRiSname" parameterMap="validateRiSnameMap">
+		CALL GIRI_RIREPORTS_PKG.validate_ri_sname(?, ?, ?, ?)
+	</procedure>
+	
+	<parameterMap id="extractInwTranMap" class="map">
+		<parameter property="lineCd"		jdbcType="VARCHAR"	javaType="java.lang.String"	 mode="IN"/>
+		<parameter property="riCd"			jdbcType="VARCHAR"	javaType="java.lang.String"	 mode="IN"/>
+		<parameter property="expiryMonth"	jdbcType="VARCHAR"	javaType="java.lang.String"	 mode="IN"/>
+		<parameter property="expiryYear"	jdbcType="VARCHAR"	javaType="java.lang.String"	 mode="IN"/>
+		<parameter property="acceptMonth"	jdbcType="VARCHAR"	javaType="java.lang.String"	 mode="IN"/>
+		<parameter property="acceptYear"	jdbcType="VARCHAR"	javaType="java.lang.String"	 mode="IN"/>
+		<parameter property="userId"		jdbcType="VARCHAR"	javaType="java.lang.String"	 mode="IN"/>
+		<parameter property="extractId"		jdbcType="INTEGER"	javaType="java.lang.Integer" mode="OUT"/>	
+	</parameterMap>
+
+	<procedure id="getExtractInwTran" parameterMap="extractInwTranMap">
+		CALL GIRI_RIREPORTS_PKG.extract_inw_tran(?, TRUNC(TO_NUMBER(?)), ?, TRUNC(TO_NUMBER(?)), ?, TRUNC(TO_NUMBER(?)), ?, ?) 
+	</procedure>
+	
+	<delete id="deleteGiixInwTran" parameterClass="java.util.HashMap">
+		DELETE gixx_inw_tran
+		 WHERE extract_id = #extractId#
+		   AND user_id = #userId#
+	</delete>
+	
+	<parameterMap class="map" id="getReciprocityDetails1Map">
+		<parameter property="userId"		jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+		<parameter property="inwardParam"	jdbcType="VARCHAR"	javaType="java.lang.String"	mode="OUT"/>
+		<parameter property="outwardParam"	jdbcType="VARCHAR"	javaType="java.lang.String"	mode="OUT"/>
+		<parameter property="fromDate"		jdbcType="VARCHAR"	javaType="java.lang.String"	mode="OUT"/>
+		<parameter property="toDate"		jdbcType="VARCHAR"	javaType="java.lang.String"	mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="getReciprocityDetails1" parameterMap="getReciprocityDetails1Map">
+		CALL GIRI_RIREPORTS_PKG.get_reciprocity_details1(?, ?, ?, ?, ?)
+	</procedure>
+	
+	<parameterMap class="map" id="getReciprocityDetails2Map">
+		<parameter property="userId"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="riCd"		jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="OUT"/>
+		<parameter property="riSname"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="getReciprocityDetails2" parameterMap="getReciprocityDetails2Map">
+		CALL GIRI_RIREPORTS_PKG.get_reciprocity_details2(?, ?, ?)
+	</procedure>
+	
+	<parameterMap class="map" id="getReciprocityInitialValuesMap">
+		<parameter property="userId"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="inwardParam"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="outwardParam"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="fromDate"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="toDate"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="riCd"			jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="OUT"/>
+		<parameter property="riSname"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="getReciprocityInitialValues" parameterMap="getReciprocityInitialValuesMap">
+		CALL GIRI_RIREPORTS_PKG.get_reciprocity_initial_values(?, ?, ?, ?, ?, ?, ?)
+	</procedure>
+	
+	<select id="getReciprocityRiCd" parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+		SELECT GIRI_RIREPORTS_PKG.get_reciprocity_ri_cd(#fromDate#, #toDate#, #inwardParam#, #outwardParam#, #userId#) FROM DUAL
+	</select>
+	
+	<parameterMap id="extractReciprocityMap" class="map">
+		<parameter property="riCd"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="fromDate"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="toDate"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="inwardParam"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="outwardParam"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="count1"		jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="OUT"/>
+		<parameter property="count2"		jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="extractReciprocity" parameterMap="extractReciprocityMap">
+		CALL GIRI_RIREPORTS_PKG.EXTRACT_RECIPROCITY(TRUNC(TO_NUMBER(?)), TRUNC(TO_DATE(?, 'MM-DD-YYYY')), TRUNC(TO_DATE(?, 'MM-DD-YYYY')), ?, ?, ?, ?)
+	</procedure>
+	
+	<select id="getExtractedReciprocity" parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+		SELECT GIRI_RIREPORTS_PKG.get_extracted_reciprocity(#fromDate#, #toDate#, #inwardParam#, #outwardParam#, #userId#) FROM DUAL
+	</select>
+	
+	<parameterMap class="map" id="updateApremMap">
+		<parameter property="riCd"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="fromDate"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="toDate"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="inwardParam"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="outwardParam"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="localCurr"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="userId"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="msg"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+		
+	</parameterMap>
+	
+	<procedure id="updateAprem" parameterMap="updateApremMap">
+		CALL GIRI_RIREPORTS_PKG.update_aprem(TRUNC(TO_NUMBER(?)), TRUNC(TO_DATE(?, 'MM-DD-YYYY')), TRUNC(TO_DATE(?, 'MM-DD-YYYY')), ?, ?, ?, ?, ?)
+	</procedure>
+	
+	<parameterMap id="updateCpremMap" class="map">
+		<parameter property="riCd"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="fromDate"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="toDate"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="inwardParam"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="outwardParam"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="localCurr"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="userId"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+	</parameterMap>
+	
+	<procedure id="updateCprem" parameterMap="updateCpremMap">
+		CALL GIRI_RIREPORTS_PKG.update_cprem(?, TRUNC(TO_DATE(?, 'MM-DD-YYYY')), TRUNC(TO_DATE(?, 'MM-DD-YYYY')), ?, ?, ?, ?)
+	</procedure>
+</sqlMap>

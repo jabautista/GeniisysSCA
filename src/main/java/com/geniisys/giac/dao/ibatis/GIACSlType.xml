@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GIACSlType">
+
+	<typeAlias alias="giacSlType" type="com.geniisys.giac.entity.GIACSlType"/>
+
+	<resultMap class="giacSlType" id="giacSlTypeResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="slTypeCd" 	column="sl_type_cd"/>
+		<result property="slTypeName" 	column="sl_type_name"/>
+		<result property="slTag" 		column="sl_tag"/>
+		<result property="dspSlTagMeaning" column="dsp_sl_tag_meaning"/>
+		<result property="remarks" 		column="remarks"/>
+		<result property="userId" 		column="user_id"/>
+		<result property="lastUpdate" 	column="last_update"/>
+	</resultMap>
+
+	<select id="getSlTypeList" resultMap="giacSlTypeResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giacs308_pkg.get_sl_type_list(#slTypeCd#, #slTypeName#, #dspSlTagMeaning#))
+		                  <isEqual property="sortColumn" compareValue="slTypeCd">
+			              		ORDER BY sl_type_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="slTypeName">
+			              		ORDER BY sl_type_name
+			              </isEqual>
+						  <isEqual property="sortColumn" compareValue="dspSlTagMeaning">
+			              		ORDER BY dsp_sl_tag_meaning
+			              </isEqual>   
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giacs308_pkg.get_sl_type_list(#slTypeCd#, #slTypeName#, #dspSlTagMeaning#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+
+	<procedure id="setSlType" parameterClass="giacSlType">
+	    DECLARE
+	    	v_rec giac_sl_types%ROWTYPE;
+ 		BEGIN		  
+ 			giis_users_pkg.app_user := #userId#;
+ 			   
+ 			v_rec.sl_type_cd := #slTypeCd#;
+ 			v_rec.sl_type_name := #slTypeName#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.sl_tag := #slTag#;
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			giacs308_pkg.set_sl_type(v_rec);
+ 		END;
+ 	</procedure>
+
+ 	<procedure id="valDeleteSlType" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giacs308_pkg.val_delete_sl_type(#slTypeCd#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddSlType" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giacs308_pkg.val_add_rec(#slTypeCd#);
+ 		END;
+ 	</procedure> 	
+
+	<delete id="delSlType" parameterClass="java.lang.String">
+		BEGIN
+ 			giacs308_pkg.del_sl_type(#slTypeCd#);
+ 		END;
+ 	</delete>
+
+</sqlMap>

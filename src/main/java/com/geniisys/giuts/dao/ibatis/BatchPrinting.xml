@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="BatchPrinting">
+
+	<resultMap class="java.util.HashMap" id="documentType">
+		<result column="doc_type"		property="docType"/>
+	</resultMap>
+	
+	<parameterMap class="java.util.HashMap" id="initializeVariableMap">
+		<parameter property="variableRi"		jdbcType="VARCHAR"	javaType="java.lang.String"	    mode="OUT"/>	
+		<parameter property="variableLcMc"		jdbcType="VARCHAR"	javaType="java.lang.String"	    mode="OUT"/>
+		<parameter property="variableScLto"		jdbcType="VARCHAR"	javaType="java.lang.String"	    mode="OUT"/>
+		<parameter property="variableLcSu"		jdbcType="VARCHAR"	javaType="java.lang.String"	    mode="OUT"/>
+		<parameter property="vBond"			    jdbcType="VARCHAR"	javaType="java.lang.String"	    mode="OUT"/>
+		<parameter property="vMotor"			jdbcType="VARCHAR"	javaType="java.lang.String"	    mode="OUT"/>
+	</parameterMap>
+		
+	<resultMap class="java.util.HashMap" id="getPolicyIdMap">
+		<result column="policy_id"		property="policyId"/>
+		<result column="line_cd"		property="lineCd"/>
+		<result column="report_id"		property="reportId"/>
+		<result column="extract_id"		property="extractId"/>
+	</resultMap>
+
+	<resultMap class="java.util.HashMap" id="getBinderIdMap">
+		<result column="fnl_binder_id"	property="fnlBinderId"/>
+		<result column="line_cd"		property="lineCd"/>
+		<result column="binder_yy"		property="binderYy"/>
+		<result column="binder_seq_no"	property="binderSeqNo"/>
+		<result column="report_id"		property="reportId"/>
+	</resultMap>
+
+	<resultMap class="java.util.HashMap" id="getBatchCoverNoteMap">
+		<result column="par_id"			property="parId"/>
+		<result column="line_cd"		property="lineCd"/>
+		<result column="report_id"		property="reportId"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="getBatchCocMap">
+	<result column="coc_serial_no"		property="cocSerialNo"/>
+		<result column="policy_id"		property="policyId"/>
+		<result column="item_no"		property="itemNo"/>
+		<result column="report_id"		property="reportId"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="getBatchInvoiceMap">
+		<result column="policy_id"		property="policyId"/>
+		<result column="line_cd"		property="lineCd"/>
+		<result column="endt_type"		property="endtType"/>
+		<result column="pack_pol_flag"	property="packPolFlag"/>
+		<result column="takeup_term"	property="takeupTerm"/>
+		<result column="report_id"		property="reportId"/>
+	</resultMap>
+		
+	<resultMap class="java.util.HashMap" id="getBatchRiInvoiceMap">
+		<result column="policy_id"		property="policyId"/>
+		<result column="line_cd"		property="lineCd"/>
+		<result column="report_id"		property="reportId"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="getBondsRenewalPolIdMap">
+		<result column="policy_id"		property="policyId"/>
+		<result column="line_cd"		property="lineCd"/>
+		<result column="issue_yy"		property="issueYy"/>
+		<result column="iss_cd"			property="issCd"/>
+		<result column="pol_seq_no"		property="polSeqNo"/>
+		<result column="renew_no"		property="renewNo"/>
+		<result column="subline_cd"		property="sublineCd"/>
+		<result column="report_id"		property="reportId"/>
+	</resultMap>
+	
+  	<resultMap class="java.util.HashMap" id="getRenewalPolIdMap">
+		<result column="policy_id"		property="policyId"/>
+		<result column="line_cd"		property="lineCd"/>
+		<result column="assd_no"		property="assdNo"/>
+		<result column="subline_cd"		property="sublineCd"/>
+		<result column="pol_seq_no"		property="polSeqNo"/>
+		<result column="par_id"			property="parId"/>
+		<result column="report_id"		property="reportId"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="getBondsPolicyPolIdMap">
+		<result column="policy_id"		property="policyId"/>
+		<result column="par_id"		property="parId"/>
+		<result column="par_type"		property="parType"/>
+		<result column="line_cd"		property="lineCd"/>
+		<result column="iss_cd"		property="issCd"/>
+		<result column="subline_cd"		property="sublineCd"/>
+		<result column="report_id"		property="reportId"/>
+	</resultMap>
+	
+	<select id="populateDocList" resultMap="documentType">
+		select * from table(gipis170_pkg.populate_doc_list)
+	</select>
+	
+	<select id="getPolicyEndtId" resultMap="getPolicyIdMap">
+		select * from table(gipis170_pkg.get_policy_endt_id(#printGroup#, #docList#, #pRi#, #assured#, #line#, #subline#, #issue#, #startSeq#, #endSeq#, #startDate#, #endDate#, #user#, #dateList#, #polEndt#, #bond#, #pLcSu#, #userId#))
+	</select>
+  	
+  	<select id="getBatchBinderId" resultMap="getBinderIdMap">
+  		select * from table(gipis170_pkg.get_binder_fnl_bndr_id(#printGroup#, #docList#, #assured#, #line#, #subline#, #issue#, #cedant#, #startSeq#, #endSeq#, #startDate#, #endDate#, #dateList#, #userId#))
+  	</select>
+  	
+  	<select id="getBatchCoverNote" resultMap="getBatchCoverNoteMap">
+  		select * from table(gipis170_pkg.get_covernote_par_id(#printGroup#, #docList#, #assured#, #line#, #subline#, #issue#, #startSeq#, #endSeq#, #startDate#, #endDate#, #dateList#, #userId#))
+  	</select>
+  	
+  	<select id="getBatchCoc" resultMap="getBatchCocMap">
+  		select * from table(gipis170_pkg.get_coc_serial_no(#printGroup#, #docList#, #assured#, #subline#, #issue#, #startSeq#, #endSeq#, #startDate#, #endDate#, #dateList#, #pLcMc#, #pScLto#, #pLto#, #user#, #userId#))
+  	</select>
+  	
+  	<select id="getBatchInvoice" resultMap="getBatchInvoiceMap">
+  		select * from table(gipis170_pkg.get_invoice_ri_pol_id(#printGroup#, #docList#, #assured#, #line#, #subline#, #issue#, #user#, #startSeq#, #endSeq#, #startDate#, #endDate#, #dateList#, #pLcSu#, #pBondPol#, #userId#))
+  	</select>
+  	
+  	<select id="getBatchRiInvoice" resultMap="getBatchRiInvoiceMap">
+  		select * from table(gipis170_pkg.get_invoice_ri(#printGroup#, #docList#, #assured#, #line#, #subline#, #issue#, #cedant#, #startSeq#, #endSeq#, #startDate#, #endDate#, #dateList#, #user#, #userId#))
+  	</select>
+
+  	<select id="getBondsRenewalPolId" resultMap="getBondsRenewalPolIdMap">
+  		select * from table(gipis170_pkg.get_bonds_renewal_pol_id(#printGroup#, #docList#, #assured#, #subline#, #issue#, #startSeq#, #endSeq#, #startDate#, #endDate#, #dateList#, #pLcSu#))
+  	</select>
+  	
+  	<select id="getRenewalPolId" resultMap="getRenewalPolIdMap">
+  		select * from table(gipis170_pkg.get_renewal_policy_id(#printGroup#, #docList#, #assured#, #line#, #subline#, #issue#, #startSeq#, #endSeq#, #startDate#, #endDate#, #dateList#))
+  	</select>
+      
+  	<select id="getBondsPolicyPolId" resultMap="getBondsPolicyPolIdMap">
+  		select * from table(gipis170_pkg.get_bonds_policy_pol_id(#printGroup#, #docList#, #assured#, #subline#, #issue#, #startSeq#, #endSeq#, #startDate#, #endDate#, #dateList#, #pRi#, #pLcSu#, #userId#))
+  	</select>
+  	
+	<procedure id="initializeVariable" parameterMap="initializeVariableMap">
+  		BEGIN
+  			gipis170_pkg.initialize_variables(?,?,?,?,?,?);
+  		END;
+  	</procedure> 
+	
+	<procedure id="extractPolDocRec" parameterClass="java.util.HashMap">
+		BEGIN
+			populate_gixx_tables.extract_poldoc_record(#policyId#, #extractId#);
+		END;	
+	</procedure>
+	
+   	<procedure id="deleteExtractTables" parameterClass="java.lang.Integer">
+  		BEGIN
+  			gipis170_pkg.delete_extract_tables(#extractId#);
+  		END;
+  	</procedure> 
+  	
+  	<procedure id="updatePolRec" parameterClass="java.lang.Integer">
+  		BEGIN
+  			gipis170_pkg.update_pol_rec(#policyId#);
+  		END;
+  	</procedure> 
+  	
+  	<procedure id="updateBinderRec" parameterClass="java.lang.Integer">
+  		BEGIN
+  			gipis170_pkg.update_binder(#binderId#);
+  			gipis170_pkg.update_frps(#binderId#);
+  		END;
+  	</procedure>
+  	 
+  	<procedure id="updateCoverNoteRec" parameterClass="java.lang.Integer">
+  		BEGIN
+  			gipis170_pkg.update_wpolbas(#parId#);
+  		END;
+  	</procedure>
+  
+  	<procedure id="updateCocRec" parameterClass="java.lang.Integer">
+  		BEGIN
+  			gipis170_pkg.update_item(#policyId#);
+  		END;
+  	</procedure>
+  	   
+  	<procedure id="updateInvoiceRec" parameterClass="java.lang.Integer">
+  		BEGIN
+  			gipis170_pkg.update_invoice(#policyId#);
+  		END;
+  	</procedure>
+  	
+</sqlMap>

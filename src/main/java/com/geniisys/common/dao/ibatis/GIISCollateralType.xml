@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISCollateralType">
+	<typeAlias alias="GIISCollateralTypeClass" type="com.geniisys.common.entity.GIISCollateralType"/>
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<!-- GIISS102 : shan 10.22.2013 -->
+	<resultMap class="GIISCollateralTypeClass" id="giiss102ResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="coll_type"     	property="collType"/>
+		<result column="coll_name"  	property="collName"/>
+		<result column="user_id"     	property="userId"/>
+		<result column="last_update" 	property="lastUpdate"/>
+		<result column="remarks"     	property="remarks"/>
+	</resultMap>
+	
+	<select id="getGiiss102RecList" resultMap="giiss102ResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss102_pkg.get_rec_list(#collType#, #collName#))
+		                  <isEqual property="sortColumn" compareValue="collType">
+			              		ORDER BY coll_type
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="collName">
+			              		ORDER BY coll_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss102_pkg.get_rec_list(#collType#, #collName#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setCollateralType" parameterClass="GIISCollateralTypeClass">
+	    DECLARE
+	    	v_rec giis_collateral_type%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.coll_type := #collType#;
+ 			v_rec.coll_name := #collName#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			giiss102_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteCollateralType" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss102_pkg.val_del_rec(#recId#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddCollateralType" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss102_pkg.val_add_rec(#recId#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delCollateralType" parameterClass="java.lang.String">
+		BEGIN
+ 			giiss102_pkg.del_rec(#collType#);
+ 		END;
+ 	</delete>
+<!-- end GIISS102 : shan 10.22.2013 -->
+
+</sqlMap>

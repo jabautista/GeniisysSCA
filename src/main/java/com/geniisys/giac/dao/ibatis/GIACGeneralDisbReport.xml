@@ -1,0 +1,1357 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIACGeneralDisbReport">
+
+	<!-- GIACS273 -->
+	<select id="getGIACS273InitialFundCd" resultClass="java.lang.String">
+		SELECT param_value_v
+    	  FROM giac_parameters
+   		 WHERE param_name LIKE 'FUND_CD' 
+	</select>
+	
+	<!-- end GIACS273 -->
+	
+	<!-- GIACS149 -->
+	<procedure id="giacs149WhenNewFormInstance" resultClass="java.lang.String">
+		BEGIN
+			GIACS149_PKG.when_new_form_instance(#vUpdate#, #fundCd#);
+		END;
+	</procedure>
+	
+	<resultMap class="java.util.HashMap" id="overrideCommVoucherResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="gfunFundCd"		column="gfun_fund_cd"/>
+		<result property="fundDesc"			column="fund_desc"/>
+		<result property="gibrBranchCd"		column="gibr_branch_cd"/>
+		<result property="branchName"		column="branch_name"/>
+		<result property="gaccTranId"		column="gacc_tran_id"/>
+		<result property="policyId"			column="policy_id"/>
+		<result property="policyNo"			column="policy_no"/>
+		<result property="issCd"			column="iss_cd"/>
+		<result property="premSeqNo"		column="prem_seq_no"/>
+		<result property="instNo"			column="inst_no"/>
+		<result property="transactionType"	column="transaction_type"/>
+		<result property="collectionAmt"	column="collection_amt"/>
+		<result property="premiumAmt"		column="premium_amt"/>
+		<result property="taxAmt"			column="tax_amt"/>
+		<result property="tranDate"		 	column="tran_date"/>
+		<result property="tranClass"		column="tran_class"/>
+		<result property="intmNo"			column="intm_no"/>
+		<result property="chldIntmNo"		column="chld_intm_no"/>
+		<result property="chldIntmName"		column="chld_intm_name"/>
+		<result property="assdNo"			column="assd_no"/>
+		<result property="assdName"			column="assd_name"/>
+		<result property="refNo"			column="ref_no"/>
+		<result property="dspRefNo"			column="dsp_ref_no"/>
+		<result property="commissionDue"	column="commission_due"/>
+		<result property="commissionAmt"	column="commission_amt"/>
+		<result property="netCommDue"		column="net_comm_due"/>
+		<result property="netCommAmtDue"	column="net_comm_amt_due"/>
+		<result property="premMinusOthers"	column="prem_minus_others"/>
+		<result property="printDate"		column="print_date"/>
+		<result property="printTag"			column="print_tag"/>
+		<result property="dspPrintTag"		column="dsp_print_tag"/>
+		<result property="inputVat"			column="input_vat"/>
+		<result property="advances"			column="advances"/>
+		<result property="varAdvances"		column="var_advances"/>
+		<result property="withholdingTax"	column="withholding_tax"/>
+		<result property="ocvNo"			column="ocv_no"/>
+		<result property="ocvPrefSuf"		column="ocv_pref_suf"/>
+		<result property="lastUpdate"		column="last_update"/>
+		<result property="notarialFee"		column="notarial_fee"/>
+		<result property="otherCharges"		column="other_charges"/>
+		<result property="userId"			column="user_id"/>
+		<result property="cancelTag"		column="cancel_tag"/>
+		<result property="grandTotalPrem"	column="grand_total_prem"/>
+		<result property="grandTotalComm"	column="grand_total_comm"/>
+		
+	</resultMap>
+	
+	<select id="getOverrideCommVoucherList" resultMap="overrideCommVoucherResultMap" parameterClass="java.util.HashMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_, b.grand_total_prem, b.grand_total_comm
+		  		  FROM (SELECT * FROM TABLE(GIACS149_PKG.get_comm_voucher_list(#intmNo#, #gfunFundCd#, #gibrBranchCd#,
+		  		  																#fromDate#, #toDate#, #workflowColValue#, #userId#))
+		  		 			<isNotNull property="filter">
+		  		 				WHERE 1=1
+		  		 				<isNotEmpty prepend="AND" property="tranDate">
+		  		 					TRUNC(tran_date) LIKE TO_DATE(#tranDate#, 'MM-DD-YYYY')
+		  		 				</isNotEmpty>
+		  		 				<isNotEmpty prepend="AND" property="dspRefNo">
+		  		 					UPPER(dsp_ref_no) LIKE UPPER(#dspRefNo#)
+		  		 				</isNotEmpty>
+		  		 				<isNotEmpty prepend="AND" property="policyNo">
+		  		 					UPPER(policy_no) LIKE UPPER(#policyNo#)
+		  		 				</isNotEmpty>
+		  		 				<isNotEmpty prepend="AND" property="issCd">
+		  		 					UPPER(iss_cd) LIKE UPPER(#issCd#)
+		  		 				</isNotEmpty>
+		  		 				<isNotEmpty prepend="AND" property="premSeqNo">
+		  		 					prem_seq_no = #premSeqNo#
+		  		 				</isNotEmpty>
+		  		 				<isNotEmpty prepend="AND" property="ocvPrefSuf">
+		  		 					UPPER(ocv_pref_suf) LIKE UPPER(#ocvPrefSuf#)
+		  		 				</isNotEmpty>
+		  		 				<isNotEmpty prepend="AND" property="ocvNo">
+		  		 					ocv_no = #ocvNo#
+		  		 				</isNotEmpty>
+		  		 				<isNotEmpty prepend="AND" property="tranClass">
+		  		 					UPPER(tran_class) LIKE UPPER(#tranClass#)
+		  		 				</isNotEmpty>
+		  		 				<isNotEmpty prepend="AND" property="premMinusOthers">
+		  		 					prem_minus_others = #premMinusOthers#
+		  		 				</isNotEmpty>
+		  		 				<isNotEmpty prepend="AND" property="netCommAmtDue">
+		  		 					net_comm_amt_due = #netCommAmtDue#
+		  		 				</isNotEmpty>
+		  		 				<isNotEmpty prepend="AND" property="printTag">
+		  		 					UPPER(print_tag) != UPPER(#printTag#) 
+		  		 				</isNotEmpty>
+		  		 			</isNotNull>
+		  		 			<isNotNull property="sortColumn">
+		  		 				<isEqual property="sortColumn" compareValue="dspPrintTag">
+		  		 					ORDER BY dsp_print_tag
+		  		 				</isEqual>
+		  		 				<isEqual property="sortColumn" compareValue="tranDate">
+		  		 					ORDER BY tran_date
+		  		 				</isEqual>		  		 				
+		  		 				<isEqual property="sortColumn" compareValue="dspRefNo">
+		  		 					ORDER BY dsp_ref_no
+		  		 				</isEqual>	  		 				
+		  		 				<isEqual property="sortColumn" compareValue="policyNo">
+		  		 					ORDER BY policy_no
+		  		 				</isEqual>	  		 				
+		  		 				<isEqual property="sortColumn" compareValue="issCd premSeqNo">
+		  		 					ORDER BY iss_cd, prem_seq_no
+		  		 				</isEqual>	
+		  		 				<isEqual property="sortColumn" compareValue="ocvPrefSuf ocvNo">
+		  		 					ORDER BY ocv_pref_suf, ocv_no
+		  		 				</isEqual>  		 				
+		  		 				<isEqual property="sortColumn" compareValue="tranClass">
+		  		 					ORDER BY tran_class
+		  		 				</isEqual>	  		 				
+		  		 				<isEqual property="sortColumn" compareValue="premMinusOthers">
+		  		 					ORDER BY prem_minus_others 
+		  		 				</isEqual>	  		 				
+		  		 				<isEqual property="sortColumn" compareValue="netCommAmtDue">
+		  		 					ORDER BY net_comm_amt_due
+		  		 				</isEqual>	  		 				
+		  		 				<isEqual property="ascDescFlg" compareValue="ASC">
+		  		 					ASC
+		  		 				</isEqual>	  		 				
+		  		 				<isEqual property="ascDescFlg" compareValue="DESC">
+		  		 					DESC
+		  		 				</isEqual>
+		  		 			</isNotNull>
+		  		  		)a,
+		  		  		(SELECT count(*) count_, SUM (prem_minus_others) grand_total_prem, SUM(net_comm_amt_due) grand_total_comm
+		  		  		   FROM TABLE(GIACS149_PKG.get_comm_voucher_list(#intmNo#, #gfunFundCd#, #gibrBranchCd#,
+		  		  																              #fromDate#, #toDate#, #workflowColValue#, #userId#))
+		  		 			<isNotNull property="filter">
+		  		 				WHERE 1=1
+		  		 				<isNotEmpty prepend="AND" property="tranDate">
+		  		 					TRUNC(tran_date) LIKE TO_DATE(#tranDate#, 'MM-DD-YYYY')
+		  		 				</isNotEmpty>
+		  		 				<isNotEmpty prepend="AND" property="dspRefNo">
+		  		 					UPPER(dsp_ref_no) LIKE UPPER(#dspRefNo#)
+		  		 				</isNotEmpty>
+		  		 				<isNotEmpty prepend="AND" property="policyNo">
+		  		 					UPPER(policy_no) LIKE UPPER(#policyNo#)
+		  		 				</isNotEmpty>
+		  		 				<isNotEmpty prepend="AND" property="issCd">
+		  		 					UPPER(iss_cd) LIKE UPPER(#issCd#)
+		  		 				</isNotEmpty>
+		  		 				<isNotEmpty prepend="AND" property="premSeqNo">
+		  		 					prem_seq_no = #premSeqNo#
+		  		 				</isNotEmpty>
+		  		 				<isNotEmpty prepend="AND" property="ocvPrefSuf">
+		  		 					UPPER(ocv_pref_suf) LIKE UPPER(#ocvPrefSuf#)
+		  		 				</isNotEmpty>
+		  		 				<isNotEmpty prepend="AND" property="ocvNo">
+		  		 					ocv_no = #ocvNo#
+		  		 				</isNotEmpty>
+		  		 				<isNotEmpty prepend="AND" property="tranClass">
+		  		 					UPPER(tran_class) LIKE UPPER(#tranClass#)
+		  		 				</isNotEmpty>
+		  		 				<isNotEmpty prepend="AND" property="premMinusOthers">
+		  		 					prem_minus_others = #premMinusOthers#
+		  		 				</isNotEmpty>
+		  		 				<isNotEmpty prepend="AND" property="netCommAmtDue">
+		  		 					net_comm_amt_due = #netCommAmtDue#
+		  		 				</isNotEmpty>
+		  		 				<isNotEmpty prepend="AND" property="printTag">
+		  		 					UPPER(print_tag) != UPPER(#printTag#) 
+		  		 				</isNotEmpty>
+		  		 			</isNotNull>
+		  		  		)b
+		  )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<parameterMap class="map" id="computeGIACS149TotalsMap">
+		<parameter property="intmNo"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="userId"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="taggedPrem"	jdbcType="NUMERIC"	javaType="java.math.BigDecimal"	mode="OUT"/>
+		<parameter property="taggedComm"	jdbcType="NUMERIC"	javaType="java.math.BigDecimal"	mode="OUT"/>
+		<parameter property="grandPrem"		jdbcType="NUMERIC"	javaType="java.math.BigDecimal"	mode="OUT"/>
+		<parameter property="grandComm"		jdbcType="NUMERIC"	javaType="java.math.BigDecimal"	mode="OUT"/>
+		<parameter property="fromDate"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="toDate"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+	</parameterMap>
+	
+	<procedure id="computeGIACS149Totals" parameterMap="computeGIACS149TotalsMap">
+		CALL GIACS149_PKG.compute_totals(?, ?, ?, ?, ?, ?, ?, ?)
+	</procedure>
+	
+	<resultMap class="java.util.HashMap" id="giacs149IntmLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="intmNo"		column="intm_no"/>
+		<result property="intmName"		column="intm_name"/>
+		<result property="coIntmType"	column="co_intm_type"/>
+		<result property="issCd"		column="iss_cd"/>
+		<result property="issName"		column="iss_name"/>
+	</resultMap>
+	
+	<select id="getGIACS149IntmLOV" resultMap="giacs149IntmLOVResultMap" parameterClass="java.util.HashMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		  		  FROM (SELECT * FROM TABLE(GIACS149_PKG.get_intm_lov(#workflowColVal#, #userId#, #keyword#))
+		  		  			<isNotNull property="findText">
+		  		  				WHERE (TO_CHAR(intm_no) LIKE UPPER(#findText#) 
+		  		  				       OR UPPER(intm_name) LIKE UPPER(#findText#) )
+		  		  			</isNotNull>
+		  		  			<isNull property="findText">
+		  		  				WHERE (TO_CHAR(intm_no) LIKE NVL(#searchString#, '%') 
+		  		  				       OR UPPER(intm_name) LIKE UPPER(NVL(#searchString#, '%')) )
+		  		  			</isNull>
+		  		  			<isNotNull property="sortColumn">
+		  		  				<isEqual property="sortColumn" compareValue="intmNo">
+		  		  					ORDER BY intm_no
+		  		  				</isEqual>
+		  		  				<isEqual property="sortColumn" compareValue="intmName">
+		  		  					ORDER BY intm_name
+		  		  				</isEqual>
+		  		  				<isEqual property="sortColumn" compareValue="coIntmType">
+		  		  					ORDER BY co_intm_type
+		  		  				</isEqual>
+		  		  				<isEqual property="ascDescFlg" compareValue="DESC">
+		  		  					ASC
+		  		  				</isEqual>
+		  		  				<isEqual property="ascDescFlg" compareValue="ASC">
+		  		  					DESC
+		  		  				</isEqual>
+		  		  			</isNotNull>
+		  		  		)a,
+		  		  		(SELECT count(*) count_ FROM TABLE(GIACS149_PKG.get_intm_lov(#workflowColVal#, #userId#, #keyword#))
+		  		  			<isNotNull property="findText">
+		  		  				WHERE (TO_CHAR(intm_no) LIKE UPPER(#findText#) 
+		  		  				       OR UPPER(intm_name) LIKE UPPER(#findText#) )
+		  		  			</isNotNull>
+		  		  			<isNull property="findText">
+		  		  				WHERE (TO_CHAR(intm_no) LIKE NVL(#searchString#, '%') 
+		  		  				       OR UPPER(intm_name) LIKE UPPER(NVL(#searchString#, '%')) )
+		  		  			</isNull>
+		  		  		)b
+		  )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="giacs149FundLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="fundCd"		column="fund_cd"/>
+		<result property="fundDesc"		column="fund_desc"/>
+		<!-- <result property="branchCd"		column="branch_cd"/>
+		<result property="branchName"	column="branch_name"/>  -->
+	</resultMap>
+	
+	<select id="getGIACS149FundLOV" resultMap="giacs149FundLOVResultMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		  		  FROM (SELECT * FROM TABLE(GIACS149_PKG.get_fund_lov(#keyword#, #userId#))
+		  		  			<isNotNull property="findText">
+		  		  				WHERE (UPPER(fund_cd) LIKE UPPER(#findText#) 
+		  		  				       OR UPPER(fund_desc) LIKE UPPER(#findText#)
+		  		  				       <!--  OR UPPER(branch_cd) LIKE UPPER(#findText#) 
+		  		  				       OR UPPER(branch_name) LIKE UPPER(#findText#) ) -->
+		  		  			</isNotNull>
+		  		  			<isNull property="findText">
+		  		  				WHERE (UPPER(fund_cd) LIKE UPPER(NVL(#searchString#, '%')) 
+		  		  				       OR UPPER(fund_desc) LIKE UPPER(NVL(#searchString#, '%')) )
+		  		  			</isNull>
+		  		  			<isNotNull property="sortColumn">
+		  		  				<isEqual property="sortColumn" compareValue="fundCd">
+		  		  					ORDER BY fund_cd
+		  		  				</isEqual>
+		  		  				<isEqual property="sortColumn" compareValue="fundDesc">
+		  		  					ORDER BY fund_desc
+		  		  				</isEqual>
+		  		  				<!-- <isEqual property="sortColumn" compareValue="branchCd">
+		  		  					ORDER BY branch_cd
+		  		  				</isEqual>
+		  		  				<isEqual property="sortColumn" compareValue="branchName">
+		  		  					ORDER BY branch_name
+		  		  				</isEqual>  -->
+		  		  				<isEqual property="ascDescFlg" compareValue="DESC">
+		  		  					ASC
+		  		  				</isEqual>
+		  		  				<isEqual property="ascDescFlg" compareValue="ASC">
+		  		  					DESC
+		  		  				</isEqual>
+		  		  			</isNotNull>
+		  		  		)a,
+		  		  		(SELECT count(*) count_ FROM TABLE(GIACS149_PKG.get_fund_lov(#keyword#, #userId#))
+		  		  			<isNotNull property="findText">
+		  		  				WHERE (UPPER(fund_cd) LIKE UPPER(#findText#) 
+		  		  				       OR UPPER(fund_desc) LIKE UPPER(#findText#)
+		  		  				       <!--  OR UPPER(branch_cd) LIKE UPPER(#findText#) 
+		  		  				       OR UPPER(branch_name) LIKE UPPER(#findText#) ) -->
+		  		  			</isNotNull>
+		  		  			<isNull property="findText">
+		  		  				WHERE (UPPER(fund_cd) LIKE UPPER(NVL(#searchString#, '%')) 
+		  		  				       OR UPPER(fund_desc) LIKE UPPER(NVL(#searchString#, '%')) )
+		  		  			</isNull>
+		  		  		)b
+		  )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="giacs149BranchLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="branchCd"		column="branch_cd"/>
+		<result property="branchName"	column="branch_name"/>
+	</resultMap>
+	
+	<select id="getGIACS149BranchLOV" resultMap="giacs149BranchLOVResultMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		  		  FROM (SELECT * FROM TABLE(GIACS149_PKG.get_branch_lov(#userId#, #keyword#))
+		  		  			<isNotNull property="findText">
+		  		  				WHERE (UPPER(branch_cd) LIKE UPPER(#findText#) 
+		  		  				       OR UPPER(branch_name) LIKE UPPER(#findText#) )
+		  		  			</isNotNull>
+		  		  			<isNotNull property="sortColumn">
+		  		  				<isEqual property="sortColumn" compareValue="branchCd">
+		  		  					ORDER BY branch_cd
+		  		  				</isEqual>
+		  		  				<isEqual property="sortColumn" compareValue="branchName">
+		  		  					ORDER BY branch_name
+		  		  				</isEqual>
+		  		  				<isEqual property="ascDescFlg" compareValue="DESC">
+		  		  					ASC
+		  		  				</isEqual>
+		  		  				<isEqual property="ascDescFlg" compareValue="ASC">
+		  		  					DESC
+		  		  				</isEqual>
+		  		  			</isNotNull>
+		  		  		)a,
+		  		  		(SELECT count(*) count_ FROM TABLE(GIACS149_PKG.get_branch_lov(#userId#, #keyword#))
+		  		  			<isNotNull property="findText">
+		  		  				WHERE (UPPER(branch_cd) LIKE UPPER(#findText#) 
+		  		  				       OR UPPER(branch_name) LIKE UPPER(#findText#) )
+		  		  			</isNotNull>
+		  		  		)b
+		  )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+		
+	<select id="countTaggedVouchers" parameterClass="java.lang.String" resultClass="java.lang.Integer">
+		SELECT COUNT(*)
+		  FROM GIAC_PARENT_COMM_VOUCHER	
+		 WHERE print_tag != 'N'
+		   AND intm_no = #intmNo#
+		   AND (NOT EXISTS (SELECT 1  <!-- Added by carloR SR-23129 10/6/2016 start -->
+                                   FROM giac_comm_payts
+                                  WHERE gacc_tran_id = giac_parent_comm_voucher.gacc_tran_id 
+                                    AND intm_no = giac_parent_comm_voucher.chld_intm_no
+                                    AND iss_cd = giac_parent_comm_voucher.iss_cd
+                                    AND prem_seq_no = giac_parent_comm_voucher.prem_seq_no)
+                      OR EXISTS (SELECT 1
+                                   FROM giac_comm_payts s, giac_acctrans t
+                                  WHERE 1=1 
+                                    AND s.gacc_tran_id = t.tran_id
+                                    AND s.gacc_tran_id > 0
+                                    AND s.gacc_tran_id = giac_parent_comm_voucher.gacc_tran_id
+                                    AND s.intm_no = giac_parent_comm_voucher.chld_intm_no
+                                    AND s.iss_cd = giac_parent_comm_voucher.iss_cd
+                                    AND s.prem_seq_no = giac_parent_comm_voucher.prem_seq_no
+                                    AND t.tran_flag != 'D'
+                                    AND NOT EXISTS(SELECT 1
+                                                     FROM giac_reversals c,
+                                                          giac_acctrans  d
+                                                    WHERE c.reversing_tran_id = d.tran_id
+                                                      AND d.tran_flag != 'D'
+                                                      AND c.gacc_tran_id = s.gacc_tran_id)) ) <!-- end -->
+	</select>
+
+	<procedure id="updateGIACS149DtlAmount" parameterClass="java.util.HashMap">
+		BEGIN
+			GIACS149_PKG.update_input_vat_advances(#gfunFundCd#, #gibrBranchCd#, #gaccTranId#, #transactionType#, #issCd#, #premSeqNo#,
+												   #instNo#, #intmNo#, #chldIntmNo#, #inputVat#, #advances#, #userId#);
+		END;
+	</procedure>
+	
+	<update id="updateGIACS149PrintTag" parameterClass="java.util.HashMap">
+		<!-- UPDATE GIAC_PARENT_COMM_VOUCHER
+           SET print_tag = #dspPrintTag#
+         WHERE UPPER(gfun_fund_cd) = UPPER(#gfunFundCd#)
+       	   AND UPPER(gibr_branch_cd) = UPPER(#gibrBranchCd#)
+           AND gacc_tran_id = #gaccTranId#
+           AND UPPER(transaction_type) = UPPER(#transactionType#)
+           AND UPPER(iss_cd) = UPPER(#issCd#)
+           AND prem_seq_no = #premSeqNo#
+           AND inst_no = #instNo#
+           AND intm_no = #intmNo#
+           AND chld_intm_no = #chldIntmNo# -->
+    	CALL GIACS149_PKG.update_print_tag(#intmNo#, #gfunFundCd#, #gibrBranchCd#, #fromDate#, #toDate#, #workflowColValue#, #userId#,
+    					#dspPrintTag#, #ocvNo#, #ocvPrefSuf#, #gaccTranId#, #transactionType#, #issCd#, #premSeqNo#, #instNo#, #chldIntmNo#)
+	</update>
+	
+	<resultMap class="java.util.HashMap" id="taggedRecordsGIACS149ResultMap">
+		<result property="gfunFundCd"		column="gfun_fund_cd"/>
+		<result property="fundDesc"			column="fund_desc"/>
+		<result property="gibrBranchCd"		column="gibr_branch_cd"/>
+		<result property="branchName"		column="branch_name"/>
+		<result property="gaccTranId"		column="gacc_tran_id"/>
+		<result property="policyId"			column="policy_id"/>
+		<result property="policyNo"			column="policy_no"/>
+		<result property="issCd"			column="iss_cd"/>
+		<result property="premSeqNo"		column="prem_seq_no"/>
+		<result property="instNo"			column="inst_no"/>
+		<result property="transactionType"	column="transaction_type"/>
+		<result property="collectionAmt"	column="collection_amt"/>
+		<result property="premiumAmt"		column="premium_amt"/>
+		<result property="taxAmt"			column="tax_amt"/>
+		<result property="tranDate"		 	column="tran_date"/>
+		<result property="tranClass"		column="tran_class"/>
+		<result property="intmNo"			column="intm_no"/>
+		<result property="chldIntmNo"		column="chld_intm_no"/>
+		<result property="chldIntmName"		column="chld_intm_name"/>
+		<result property="assdNo"			column="assd_no"/>
+		<result property="assdName"			column="assd_name"/>
+		<result property="refNo"			column="ref_no"/>
+		<result property="dspRefNo"			column="dsp_ref_no"/>
+		<result property="commissionDue"	column="commission_due"/>
+		<result property="commissionAmt"	column="commission_amt"/>
+		<result property="netCommDue"		column="net_comm_due"/>
+		<result property="netCommAmtDue"	column="net_comm_amt_due"/>
+		<result property="premMinusOthers"	column="prem_minus_others"/>
+		<result property="printDate"		column="print_date"/>
+		<result property="printTag"			column="print_tag"/>
+		<result property="dspPrintTag"		column="dsp_print_tag"/>
+		<result property="inputVat"			column="input_vat"/>
+		<result property="advances"			column="advances"/>
+		<result property="varAdvances"		column="var_advances"/>
+		<result property="withholdingTax"	column="withholding_tax"/>
+		<result property="ocvNo"			column="ocv_no"/>
+		<result property="ocvPrefSuf"		column="ocv_pref_suf"/>
+		<result property="lastUpdate"		column="last_update"/>
+		<result property="notarialFee"		column="notarial_fee"/>
+		<result property="otherCharges"		column="other_charges"/>
+		<result property="userId"			column="user_id"/>
+		<result property="cancelTag"		column="cancel_tag"/>
+	</resultMap>
+	
+	<select id="getTaggedRecordsGIACS149" resultMap="taggedRecordsGIACS149ResultMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM TABLE(GIACS149_PKG.get_comm_voucher_list(#intmNo#, #gfunFundCd#, #gibrBranchCd#, #fromDate#, #toDate#, #workflowColValue#, #userId#))
+		 WHERE print_tag = 'Y'
+	</select>
+	
+	<select id="getCvPrefGIACS149" resultClass="java.util.HashMap" parameterClass="java.util.HashMap">
+		SELECT branch_cd, doc_pref_suf   
+		  FROM giac_doc_sequence a,
+	  	   	   giis_user_grp_hdr b, 
+	       	   giis_users c 
+	 	 WHERE doc_name = 'OCV'
+	   	   AND a.branch_cd = b.grp_iss_cd
+	   	   AND a.fund_cd = #gfunFundCd#
+	   	   AND b.user_grp = c.user_grp
+	   	   AND c.user_id = #userId# 
+	</select>
+	
+	<parameterMap class="map" id="checkCvSeqGIACS149Map">
+		<parameter property="gfunFundCd"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="docName"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="userId"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="found"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="maxNo"			jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="checkCvSeqGIACS149" parameterMap="checkCvSeqGIACS149Map">
+		CALL GIACS149_PKG.check_cv_seq(?, ?, ?, ?, ?)
+	</procedure>
+		
+	<parameterMap class="map" id="updateVatGIACS149Map">		
+		<parameter property="gfunFundCd"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="gibrBranchCd"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="gaccTranId"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="transactionType"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="issCd"				jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="premSeqNo"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="instNo"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="intmNo"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="chldIntmNo"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="commissionDue"		jdbcType="NUMERIC"	javaType="java.math.BigDecimal"	mode="IN"/>
+	</parameterMap>
+	
+	<procedure id="updateVatGIACS149" parameterMap="updateVatGIACS149Map">
+		CALL GIACS149_PKG.update_vat(?, ?, ?, ?, ?, ?, ?, ?, ?, TO_NUMBER(?))
+	</procedure>
+	
+	<parameterMap class="map" id="populateCvSeqGIACS149Map">
+		<parameter property="userId"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="gfunFundCd"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="gibrBranchCd"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="gaccTranId"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="transactionType"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="issCd"				jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="premSeqNo"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="instNo"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="intmNo"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="chldIntmNo"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="cvNo"				jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="cvPref"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="docName"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="userId"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="voucherNo"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="INOUT"/>
+		<parameter property="voucherDate"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="reprint"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="populateCvSeqGIACS149" parameterMap="populateCvSeqGIACS149Map"> <!-- edited by steven 10.23.2014 -->
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			GIACS149_PKG.populate_cv_seq(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<resultMap class="java.util.HashMap" id="gpcvResultMap" >
+		<result property="gfunFundCd"		column="gfun_fund_cd"/>
+		<result property="gibrBranchCd"		column="gibr_branch_cd"/>
+		<result property="gaccTranId"		column="gacc_tran_id"/>
+		<result property="transactionType"	column="transaction_type"/>
+		<result property="issCd"			column="iss_cd"/>
+		<result property="premSeqNo"		column="prem_seq_no"/>
+		<result property="instNo"			column="inst_no"/>
+		<result property="intmNo"			column="intm_no"/>
+		<result property="chldIntmNo"		column="chld_intm_no"/>
+		<result property="refNo"			column="ref_no"/>
+		<result property="ocvNo"			column="ocv_no"/>
+		<result property="ocvPrefSuf"		column="ocv_pref_suf"/>
+		<result property="lastUpdate"		column="last_update"/>
+		<result property="userId"			column="user_id"/>
+		<result property="printDate"		column="print_date"/>
+	</resultMap>
+	
+	<select id="getGpcvGIACS149" resultMap="gpcvResultMap" parameterClass="java.lang.Integer">
+		SELECT * FROM TABLE(GIACS149_PKG.gpcv_get(#intmNo#))
+	</select>
+	
+	<procedure id="updateGpcvGIACS149"	parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GIACS149_PKG.update_gpcv(#gfunFundCd#, #gibrBranchCd#, #gaccTranId#, #transactionType#, #issCd#, #premSeqNo#, #instNo#, #intmNo#,
+									 #chldIntmNo#, #voucherNo#, #cvPref#, #userId#);
+		END;
+	</procedure>
+	
+	<procedure id="delWorkflowRecGIACS149" parameterClass="java.util.HashMap">
+		CALL GIACS149_PKG.delete_workflow_rec(#eventDesc#, #moduleId#, #userId#, #colValue#)
+	</procedure>
+	
+	<parameterMap class="map" id="gpcvRestoreMap">
+		<parameter property="gfunFundCd"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="gibrBranchCd"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="gaccTranId"		jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="IN"/>
+		<parameter property="transactionType"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="issCd"				jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="premSeqNo"			jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="IN"/>
+		<parameter property="instNo"			jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="IN"/>
+		<parameter property="intmNo"			jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="IN"/>
+		<parameter property="chldIntmNo"		jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="IN"/>	
+		<parameter property="printDate"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="ocvNo"				jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="ocvPrefSuf"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="refNo"				jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="lastUpdate"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="recUserId"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="userId"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="stat"				jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+	</parameterMap>
+	
+	<procedure id="gpcvRestoreGIACS149" parameterClass="map">
+		 BEGIN
+			giis_users_pkg.app_user := #appUser#;
+		  	GIACS149_PKG.gpcv_restore(#gfunFundCd#, #gibrBranchCd#, TO_NUMBER(#gaccTranId#), #transactionType#, #issCd#, TO_NUMBER(#premSeqNo#), 
+		 								TO_NUMBER(#instNo#), TO_NUMBER(#intmNo#), TO_NUMBER(#chldIntmNo#), #printDate#, #ocvNo#, #ocvPrefSuf#, 
+		 								#refNo#, #lastUpdate#, #userId#, #appUser#, #stat#);
+		 END;
+	</procedure>
+	
+	<procedure id="insertSpoiledOCV" parameterClass="map">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+		  	GIACS149_PKG.insert_spoiled_ocv(#intmNo#, #gfunFundCd#, #gibrBranchCd#, #appUser#, #voucherNo#, #voucherPrefSuf#, #commDue#, #netCommAmtDue#);
+		 END;
+	</procedure>
+	
+	<update id="updateUnprintedVoucher" parameterClass="java.util.HashMap">
+		UPDATE GIAC_PARENT_COMM_VOUCHER
+           SET ocv_no = #voucherNo#,
+			   ocv_pref_suf = #voucherPrefSuf#,
+			   print_date = SYSDATE,
+			   last_update = SYSDATE,
+			   user_id   = #userId#
+         WHERE 1=1
+           AND UPPER(gfun_fund_cd) = UPPER(#gfunFundCd#)
+       	   AND UPPER(gibr_branch_cd) = UPPER(#gibrBranchCd#)
+           AND gacc_tran_id = #gaccTranId#
+           AND UPPER(transaction_type) = UPPER(#transactionType#)
+           AND UPPER(iss_cd) = UPPER(#issCd#)
+           AND prem_seq_no = #premSeqNo#
+           AND inst_no = #instNo#
+           AND intm_no = #intmNo#
+           AND chld_intm_no = #chldIntmNo#
+	</update>
+	
+	<!-- <update id="updateDocSeqGIACS149" parameterClass="java.util.HashMap">
+		 UPDATE giac_doc_sequence
+           SET doc_seq_no = doc_seq_no - 1
+         WHERE doc_name =#docName#
+           AND NVL(doc_pref_suf, '-') =  NVL(#ocvPrefSuf#, NVL(doc_pref_suf, '-'))
+           AND branch_cd = #branchCd#
+           AND fund_cd = #gfunFundCd#         
+    </update>  -->
+    
+    <procedure id="updateDocSeqGIACS149" parameterClass="map">
+    	BEGIN
+    		GIACS149_PKG.update_doc_seq_no(#gfunFundCd#, #docName#, #ocvPrefSuf#, #userId#);
+    	END;
+    </procedure>
+	
+	<!-- end GIACS149 -->
+	
+	
+	<select id="getGiacs512CutOffDate" resultClass="java.lang.String" parameterClass="java.lang.String">
+		SELECT GIACS512_PKG.get_last_cutoff_date(#extractYear#)
+		  FROM dual
+	</select>	
+	
+	<select id="validateGiacs512BeforeExtract" resultClass="java.lang.String" parameterClass="java.util.HashMap">
+		SELECT GIACS512_PKG.validate_before_extract(#extractYear#, #intmNo#, #userId#, #type#)
+		  FROM dual
+	</select>	
+	
+	<select id="validateGiacs512BeforePrint" resultClass="java.lang.String" parameterClass="java.util.HashMap">
+		SELECT GIACS512_PKG.validate_before_print(#extractYear#, #userId#, #type#)
+		  FROM dual
+	</select>
+		
+	<parameterMap id="cpcExtractPremCommParamMap" class="map">
+		<parameter property="appUser" 			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="extractYear" 		jdbcType="NUMERIC"	javaType="java.lang.Integer"	mode="IN"/>
+		<parameter property="intmNo" 			jdbcType="NUMERIC"	javaType="java.lang.Integer"	mode="IN"/>
+		<parameter property="cutOffDate" 		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="userId" 			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="recordCount" 		jdbcType="NUMERIC"	javaType="java.lang.Integer"	mode="OUT"/>
+	</parameterMap>	
+	<parameterMap id="cpcExtractOsDtlLossPaidParamMap" class="map">
+		<parameter property="appUser" 			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="extractYear" 		jdbcType="NUMERIC"	javaType="java.lang.Integer"	mode="IN"/>
+		<parameter property="intmNo" 			jdbcType="NUMERIC"	javaType="java.lang.Integer"	mode="IN"/>
+		<parameter property="userId" 			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="recordCount" 		jdbcType="NUMERIC"	javaType="java.lang.Integer"	mode="OUT"/>
+	</parameterMap>	
+	
+	<procedure id="cpcExtractPremComm" parameterMap="cpcExtractPremCommParamMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			GIACS512_PKG.CPC_EXTRACT_PREM_COMM(?, ?, ?, ?, ?);
+		END;
+	</procedure>	
+	
+	<procedure id="cpcExtractOsDtl" parameterMap="cpcExtractOsDtlLossPaidParamMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			GIACS512_PKG.CPC_EXTRACT_OS_DTL(?, ?, ?, ?);
+		END;
+	</procedure>	
+	
+	<procedure id="cpcExtractLossPaid" parameterMap="cpcExtractOsDtlLossPaidParamMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			GIACS512_PKG.CPC_EXTRACT_LOSS_PAID(?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<select id="getGiacs190SlTypeCd" resultClass="String">
+		SELECT giacs190_pkg.get_sl_type_cd FROM DUAL
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="branchLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="branch_cd"			property="branchCd" />
+		<result column="branch_name"		property="branchName" />
+	</resultMap>
+	
+	<select id="getGiacs190BranchLOV" resultMap="branchLOVMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		          FROM (SELECT * 
+		  		   		  FROM TABLE(GIACS190_PKG.get_branch_lov(#userId#,#moduleId#))
+						 <isNotNull property="findText">
+							WHERE (UPPER(branch_cd) LIKE UPPER(#findText#)
+							OR UPPER(branch_name) LIKE UPPER(#findText#))
+						 </isNotNull>
+						 <isNull property="findText">
+							WHERE (UPPER(branch_cd) LIKE UPPER(#findText2#)
+							OR UPPER(branch_name) LIKE UPPER(#findText2#))
+						 </isNull>
+                         <isEqual property="sortColumn" compareValue="branchCd">
+                                ORDER BY branch_cd
+                         </isEqual>
+                          <isEqual property="sortColumn" compareValue="branchName">
+                                ORDER BY branch_name
+                         </isEqual>
+		  				 <isNotNull property="sortColumn">
+                                 <isEqual property="ascDescFlg" compareValue="ASC">
+                                     ASC
+                                 </isEqual> 
+                                 <isEqual property="ascDescFlg" compareValue="DESC">
+                                     DESC
+                                 </isEqual>
+                         </isNotNull> 
+		  		   		) a,
+		          	   (SELECT count(*) count_ 
+		  		   		  FROM TABLE(GIACS190_PKG.get_branch_lov(#userId#,#moduleId#))
+	  		   		     <isNotNull property="findText">
+							WHERE (UPPER(branch_cd) LIKE UPPER(#findText#)
+							OR UPPER(branch_name) LIKE UPPER(#findText#))
+						 </isNotNull>
+						 <isNull property="findText">
+							WHERE (UPPER(branch_cd) LIKE UPPER(#findText2#)
+							OR UPPER(branch_name) LIKE UPPER(#findText2#))
+						 </isNull>
+		  		   		) b
+               )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+
+<!--Gzelle 10.24.2013-->
+	<resultMap class="java.util.HashMap" id="intmTypeResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="intmType" 	column="intm_type"/>
+		<result property="intmDesc" 	column="intm_desc"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="intmResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="intmNo" 	 	column="intm_no"/>
+		<result property="intmName" 	column="intm_name"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="bankFilesResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="bankFileNo" 	column="bank_file_no"/>
+		<result property="bankFileName" column="bank_file_name"/>
+		<result property="extractDate"	column="extract_date"/>
+		<result property="paidSw"		column="paid_sw"/>
+	</resultMap>
+	
+	<parameterMap class="java.util.HashMap" id="invalidateParameterMap">
+		<parameter property="appUser"	jdbcType="VARCHAR"	javaType="java.lang.String" 	mode="IN"/>
+        <parameter property="asOfDate"	jdbcType="VARCHAR" 	javaType="java.lang.String"		mode="IN"/>
+        <parameter property="intmType"	jdbcType="VARCHAR" 	javaType="java.lang.String"		mode="IN"/>
+        <parameter property="intm"		jdbcType="VARCHAR" 	javaType="java.lang.Integer"	mode="IN"/>
+	</parameterMap>	
+
+	<parameterMap class="java.lang.String" id="deleteTempExtParameterMap">
+		<parameter property="appUser"	jdbcType="VARCHAR"	javaType="java.lang.String" 	mode="IN"/>
+	</parameterMap>	
+
+	<resultMap class="java.util.HashMap" id="recordsResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="viewSw" 		  column="view_sw"/>
+		<result property="parentIntmType" column="parent_intm_type"/>
+		<result property="parentIntmNo"   column="parent_intm_no"/>
+		<result property="parentIntmName" column="parent_intm_name"/>
+		<result property="netCommDue"	  column="net_comm_due"/>
+	</resultMap>	
+	
+	<resultMap class="java.util.HashMap" id="totalResultMap">
+		<result property="netCommDue"	  column="net_comm_due"/>
+	</resultMap>
+
+	<resultMap class="java.util.HashMap" id="detailsResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="billNo" 			column="bill_no"/>
+		<result property="grossPremium"		column="gross_premium"/>
+		<result property="premiumPaid" 		column="premium_paid"/>
+		<result property="peril" 			column="peril"/>
+		<result property="commissionRt" 	column="commission_rt"/>
+		<result property="commissionDue" 	column="commission_due"/>
+		<result property="wholdingTaxDue" 	column="wholding_tax_due"/>
+		<result property="inputVatDue" 		column="input_vat_due"/>
+		<result property="netCommDue" 		column="net_comm_due"/>
+		<result property="policyNo" 		column="policy_no"/>
+		<result property="assured" 			column="assured"/>
+		<result property="bankRefNo" 		column="bank_ref_no"/>
+		<result property="intmNo" 			column="intm_no"/>
+		<result property="intmName" 		column="intm_name"/>
+		<result property="orNo" 			column="or_no"/>
+	</resultMap>	
+
+	<resultMap class="java.util.HashMap" id="detailsTotalResultMap">
+		<result property="grossPremiumTotal"	column="gross_premium"/>
+		<result property="premiumPaidTotal" 	column="premium_paid"/>
+		<result property="commissionDueTotal" 	column="commission_due"/>
+		<result property="wholdingTaxDueTotal" 	column="wholding_tax_due"/>
+		<result property="inputVatDueTotal" 	column="input_vat_due"/>
+		<result property="netCommDueTotal" 		column="net_comm_due"/>
+	</resultMap>	
+	
+	<parameterMap class="java.util.HashMap" id="setBankFileParameterMap">
+		<parameter property="appUser"	 jdbcType="VARCHAR"	javaType="java.lang.String" 	mode="IN"/>
+        <parameter property="asOfDate"	 jdbcType="VARCHAR" javaType="java.lang.String"		mode="IN"/>
+        <parameter property="intmType"	 jdbcType="VARCHAR" javaType="java.lang.String"		mode="IN"/>
+        <parameter property="intm"		 jdbcType="VARCHAR" javaType="java.lang.Integer"	mode="IN"/>
+        <parameter property="bankFileNo" jdbcType="NUMBER" javaType="java.lang.Integer"		mode="IN"/>
+	</parameterMap>	
+			 
+	<parameterMap class="java.util.HashMap" id="setGiacBankCommPaytParameterMap">
+		<parameter property="appUser"		jdbcType="VARCHAR"	javaType="java.lang.String" 	mode="IN"/>
+        <parameter property="parentIntmNo"	jdbcType="VARCHAR" 	javaType="java.lang.Integer"		mode="IN"/>
+        <parameter property="bankFileNo"	jdbcType="NUMBER" 	javaType="java.lang.Integer"	mode="IN"/>
+	</parameterMap>				 
+
+	<parameterMap class="java.util.HashMap" id="insertToSummTableParameterMap">
+		<parameter property="appUser"		jdbcType="VARCHAR"	javaType="java.lang.String" 	mode="IN"/>
+        <parameter property="bankFileNo"	jdbcType="NUMBER" 	javaType="java.lang.Integer"	mode="IN"/>
+	</parameterMap>	
+		
+	<resultMap class="java.util.HashMap" id="fileResultMap">
+		<result property="textToWrite"	column="text_to_write"/>
+	</resultMap>
+				
+	<parameterMap class="java.util.HashMap" id="updateFileNameParameterMap">
+		<parameter property="appUser"		jdbcType="VARCHAR"	javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="fileName"		jdbcType="VARCHAR" 	javaType="java.lang.String"		mode="IN"/>
+        <parameter property="bankFileNo"	jdbcType="NUMBER" 	javaType="java.lang.Integer"	mode="IN"/>
+	</parameterMap>					
+			
+	<select id="getIntmTypeGIACS158" resultMap="intmTypeResultMap">
+		SELECT *
+  		  FROM (SELECT ROWNUM rownum_, b.count_, a.*
+  		  		  FROM (SELECT * FROM TABLE(giacs158_pkg.get_intm_type_lov)
+						<isNull property="findText">
+						 WHERE upper(intm_type) LIKE upper(NVL(#search#, intm_type))
+						</isNull>
+						<isNotNull property="findText">
+						 WHERE upper(intm_type) LIKE upper(#findText#)
+						    OR upper(intm_desc) LIKE upper(#findText#)
+						</isNotNull>
+	            	<isEqual property="sortColumn" compareValue="intmType">
+              			ORDER BY intm_type
+	            	</isEqual>
+	            	<isEqual property="sortColumn" compareValue="intmDesc">
+              			ORDER BY intm_desc
+	            	</isEqual>
+	            	<isNotNull property="sortColumn">
+              			<isEqual property="ascDescFlg" compareValue="ASC">
+              				ASC
+              			</isEqual>
+              			<isEqual property="ascDescFlg" compareValue="DESC">
+              				DESC
+              			</isEqual>
+              		</isNotNull>) a,
+              (SELECT count(*) count_
+	          	 FROM TABLE(giacs158_pkg.get_intm_type_lov)
+				 <isNull property="findText">
+				WHERE upper(intm_type) LIKE upper(NVL(#search#, intm_type))
+				 </isNull>
+				 <isNotNull property="findText">
+				WHERE upper(intm_type) LIKE upper(#findText#)
+				   OR upper(intm_desc) LIKE upper(#findText#)
+				 </isNotNull>
+				)b) 
+	    	WHERE rownum_ BETWEEN #from# AND #to# 	
+	</select>	
+
+	<select id="getIntmGIACS158" resultMap="intmResultMap">
+		SELECT *
+  		  FROM (SELECT ROWNUM rownum_, b.count_, a.*
+  		  		  FROM (SELECT * FROM TABLE(giacs158_pkg.get_intm_lov(#intmType#))
+						<isNull property="findText">
+						 WHERE intm_no = NVL(#search#, intm_no)
+						</isNull>
+						<isNotNull property="findText">
+						 WHERE intm_no = #findText#
+						</isNotNull>
+	            	<isEqual property="sortColumn" compareValue="intmNo">
+              			ORDER BY intm_no
+	            	</isEqual>
+	            	<isEqual property="sortColumn" compareValue="intmName">
+              			ORDER BY intm_name
+	            	</isEqual>
+	            	<isNotNull property="sortColumn">
+              			<isEqual property="ascDescFlg" compareValue="ASC">
+              				ASC
+              			</isEqual>
+              			<isEqual property="ascDescFlg" compareValue="DESC">
+              				DESC
+              			</isEqual>
+              		</isNotNull>) a,
+              (SELECT count(*) count_
+	          	 FROM TABLE(giacs158_pkg.get_intm_lov(#intmType#))
+				 <isNull property="findText">
+				  WHERE intm_no = NVL(#search#, intm_no)
+				 </isNull>
+				 <isNotNull property="findText">
+				  WHERE intm_no = #findText#
+				 </isNotNull>
+				)b) 
+	    	WHERE rownum_ BETWEEN #from# AND #to# 	
+	</select>	
+		
+	<select id="getBankFiles" resultMap="bankFilesResultMap">
+		SELECT *
+  		  FROM (SELECT ROWNUM rownum_, b.count_, a.*
+  		  		  FROM (SELECT * FROM TABLE(giacs158_pkg.get_bank_files)
+						<isNotNull property="filter">
+		                	WHERE 1 = 1							
+							<isNotEmpty prepend="AND" property="paidSw">
+								upper(paid_sw) LIKE upper(#paidSw#)	
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="bankFileNo">
+								upper(bank_file_no) LIKE upper(#bankFileNo#)	
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="bankFileName">
+								upper(bank_file_name) LIKE upper(#bankFileName#)	
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="extractDate">
+								extract_date = #extractDate#
+							</isNotEmpty>
+		                </isNotNull>
+	            		<isEqual property="sortColumn" compareValue="paidSw">
+              				ORDER BY paid_sw
+	            		</isEqual>
+	            		<isEqual property="sortColumn" compareValue="bankFileNo">
+              				ORDER BY bank_file_no
+	            		</isEqual>
+	            		<isEqual property="sortColumn" compareValue="bankFileName">
+              				ORDER BY bank_file_name
+	            		</isEqual>
+	            		<isEqual property="sortColumn" compareValue="extractDate">
+              				ORDER BY extract_date
+	            		</isEqual>
+	            		<isNotNull property="sortColumn">
+              				<isEqual property="ascDescFlg" compareValue="ASC">
+              					ASC
+              				</isEqual>
+              				<isEqual property="ascDescFlg" compareValue="DESC">
+              					DESC
+              				</isEqual>
+              			</isNotNull>) a,
+              (SELECT count(*) count_
+	          	  FROM TABLE(giacs158_pkg.get_bank_files)
+				 		<isNotNull property="filter">
+		                	WHERE 1 = 1							
+							<isNotEmpty prepend="AND" property="paidSw">
+								upper(paid_sw) LIKE upper(#paidSw#)	
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="bankFileNo">
+								upper(bank_file_no) LIKE upper(#bankFileNo#)	
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="bankFileName">
+								upper(bank_file_name) LIKE upper(#bankFileName#)	
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="extractDate">
+								extract_date = #extractDate#
+							</isNotEmpty>							
+		                </isNotNull>)b) 
+	    	WHERE rownum_ BETWEEN #from# AND #to# 	
+	</select>		
+
+  	<select id="checkViewRecords" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT giacs158_pkg.check_view_records(#asOfDate#,#intmType#,#intm#) FROM DUAL
+	</select>	
+	
+	<procedure id="invalidateBankFile" parameterMap="invalidateParameterMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			giacs158_pkg.invalidate_bank_file(?, ?, ?);
+		END;	
+	</procedure>
+	
+	<procedure id="deleteTempExt" parameterMap="deleteTempExtParameterMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			giacs158_pkg.delete_temp_ext;
+		END;	
+	</procedure>
+	
+	<procedure id="insertIntoTempTable" parameterMap="invalidateParameterMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			giacs158_pkg.insert_into_temp_table(?, ?, ?);
+		END;	
+	</procedure>
+
+	<select id="getTotalViaRecords" resultMap="totalResultMap">
+		(SELECT SUM(net_comm_due) net_comm_due FROM TABLE(giacs158_pkg.get_records))
+	</select>
+		
+	<select id="getRecords" resultMap="recordsResultMap">
+		SELECT *
+  		  FROM (SELECT ROWNUM rownum_, b.count_, a.*
+  		  		  FROM (SELECT * FROM TABLE(giacs158_pkg.get_records)
+						<isNotNull property="filter">
+		                	WHERE 1 = 1							
+							<isNotEmpty prepend="AND" property="parentIntmType">
+								upper(parent_intm_type) LIKE upper(#parentIntmType#)	
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="parentIntmName">
+								upper(parent_intm_name) LIKE upper(#parentIntmName#)	
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="netCommDue">
+								net_comm_due = #netCommDue#
+							</isNotEmpty>
+		                </isNotNull>
+	            		<isEqual property="sortColumn" compareValue="parentIntmType">
+              				ORDER BY parent_intm_type
+	            		</isEqual>
+	            		<isEqual property="sortColumn" compareValue="parentIntmName">
+              				ORDER BY parent_intm_name
+	            		</isEqual>
+	            		<isEqual property="sortColumn" compareValue="netCommDue">
+              				ORDER BY net_comm_due
+	            		</isEqual>
+	            		<isNotNull property="sortColumn">
+              				<isEqual property="ascDescFlg" compareValue="ASC">
+              					ASC
+              				</isEqual>
+              				<isEqual property="ascDescFlg" compareValue="DESC">
+              					DESC
+              				</isEqual>
+              			</isNotNull>) a,
+              (SELECT count(*) count_
+	          	  FROM TABLE(giacs158_pkg.get_records)
+				 		<isNotNull property="filter">
+		                	WHERE 1 = 1							
+							<isNotEmpty prepend="AND" property="parentIntmType">
+								upper(parent_intm_type) LIKE upper(#parentIntmType#)	
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="parentIntmName">
+								upper(parent_intm_name) LIKE upper(#parentIntmName#)	
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="netCommDue">
+								net_comm_due = #netCommDue#
+							</isNotEmpty>							
+		                </isNotNull>)b) 
+	    	WHERE rownum_ BETWEEN #from# AND #to# 	
+	</select>
+	
+	<select id="getTotalViaBankFile" resultMap="totalResultMap">
+		SELECT SUM(net_comm_due) net_comm_due FROM TABLE(giacs158_pkg.get_records_via_bank_file(#bankFileNo#))
+	</select>
+	
+	<select id="getRecordsViaBankFile" resultMap="recordsResultMap">
+		SELECT *
+  		  FROM (SELECT ROWNUM rownum_, b.count_, a.*
+  		  		  FROM (SELECT * FROM TABLE(giacs158_pkg.get_records_via_bank_file(#bankFileNo#))
+						<isNotNull property="filter">
+		                	WHERE 1 = 1							
+							<isNotEmpty prepend="AND" property="parentIntmType">
+								upper(parent_intm_type) LIKE upper(#parentIntmType#)	
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="parentIntmName">
+								upper(parent_intm_name) LIKE upper(#parentIntmName#)	
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="netCommDue">
+								net_comm_due = #netCommDue#
+							</isNotEmpty>
+		                </isNotNull>
+	            		<isEqual property="sortColumn" compareValue="parentIntmType">
+              				ORDER BY parent_intm_type
+	            		</isEqual>
+	            		<isEqual property="sortColumn" compareValue="parentIntmName">
+              				ORDER BY parent_intm_name
+	            		</isEqual>
+	            		<isEqual property="sortColumn" compareValue="netCommDue">
+              				ORDER BY net_comm_due
+	            		</isEqual>
+	            		<isNotNull property="sortColumn">
+              				<isEqual property="ascDescFlg" compareValue="ASC">
+              					ASC
+              				</isEqual>
+              				<isEqual property="ascDescFlg" compareValue="DESC">
+              					DESC
+              				</isEqual>
+              			</isNotNull>) a,
+              (SELECT count(*) count_
+	          	  FROM TABLE(giacs158_pkg.get_records_via_bank_file(#bankFileNo#))
+				 		<isNotNull property="filter">
+		                	WHERE 1 = 1							
+							<isNotEmpty prepend="AND" property="parentIntmType">
+								upper(parent_intm_type) LIKE upper(#parentIntmType#)	
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="parentIntmName">
+								upper(parent_intm_name) LIKE upper(#parentIntmName#)	
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="netCommDue">
+								net_comm_due = #netCommDue#
+							</isNotEmpty>							
+		                </isNotNull>)b) 
+	    	WHERE rownum_ BETWEEN #from# AND #to# 	
+	</select>
+			
+	<select id="getDetailsViaRecords" resultMap="detailsResultMap">
+		SELECT *
+  		  FROM (SELECT ROWNUM rownum_, b.count_, a.*
+  		  		  FROM (SELECT * FROM TABLE(giacs158_pkg.view_details_via_records(#asOfDate#,#parentIntmType#,#parentIntmNo#))
+						<isNotNull property="filter">
+		                	WHERE 1 = 1							
+							<isNotEmpty prepend="AND" property="billNo">
+								upper(bill_no) LIKE upper(#billNo#)	
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="grossPremium">
+								gross_premium = #grossPremium#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="premiumPaid">
+								premium_paid = #premiumPaid#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="peril">
+								upper(peril) LIKE upper(#peril#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="commissionRt">
+								commission_rt = #commissionRt#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="commissionDue">
+								commission_due = #commissionDue#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="wholdingTaxDue">
+								wholding_tax_due = #wholdingTaxDue#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="inputVatDue">
+								input_vat_due = #inputVatDue#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="netCommDue">
+								net_comm_due = #netCommDue#
+							</isNotEmpty>
+		                </isNotNull>
+	            		<isEqual property="sortColumn" compareValue="billNo">
+              				ORDER BY bill_no
+	            		</isEqual>
+	            		<isEqual property="sortColumn" compareValue="grossPremium">
+              				ORDER BY gross_premium
+	            		</isEqual>
+	            		<isEqual property="sortColumn" compareValue="premiumPaid">
+              				ORDER BY premium_paid
+	            		</isEqual>
+	            		<isEqual property="sortColumn" compareValue="peril">
+              				ORDER BY peril
+	            		</isEqual>
+	            		<isEqual property="sortColumn" compareValue="commissionRt">
+              				ORDER BY commission_rt
+	            		</isEqual>
+	            		<isEqual property="sortColumn" compareValue="commissionDue">
+              				ORDER BY commission_due
+	            		</isEqual>
+	            		<isEqual property="sortColumn" compareValue="wholdingTaxDue">
+              				ORDER BY wholding_tax_due
+	            		</isEqual>
+	            		<isEqual property="sortColumn" compareValue="inputVatDue">
+              				ORDER BY input_vat_due
+	            		</isEqual>
+	            		<isEqual property="sortColumn" compareValue="netCommDue">
+              				ORDER BY net_comm_due
+	            		</isEqual>
+	            		<isNotNull property="sortColumn">
+              				<isEqual property="ascDescFlg" compareValue="ASC">
+              					ASC
+              				</isEqual>
+              				<isEqual property="ascDescFlg" compareValue="DESC">
+              					DESC
+              				</isEqual>
+              			</isNotNull>) a,
+              (SELECT count(*) count_
+	          	  FROM TABLE(giacs158_pkg.view_details_via_records(#asOfDate#,#parentIntmType#,#parentIntmNo#))
+				 		<isNotNull property="filter">
+		                	WHERE 1 = 1							
+							<isNotEmpty prepend="AND" property="billNo">
+								upper(bill_no) LIKE upper(#billNo#)	
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="grossPremium">
+								gross_premium = #grossPremium#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="premiumPaid">
+								premium_paid = #premiumPaid#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="peril">
+								upper(peril) LIKE upper(#peril#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="commissionRt">
+								commission_rt = #commissionRt#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="commissionDue">
+								commission_due = #commissionDue#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="wholdingTaxDue">
+								wholding_tax_due = #wholdingTaxDue#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="inputVatDue">
+								input_vat_due = #inputVatDue#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="netCommDue">
+								net_comm_due = #netCommDue#
+							</isNotEmpty>							
+		                </isNotNull>)b) 
+	    	WHERE rownum_ BETWEEN #from# AND #to# 	
+	</select>
+		
+	<select id="getDetailsViaBankFiles" resultMap="detailsResultMap">
+		SELECT *
+  		  FROM (SELECT ROWNUM rownum_, b.count_, a.*
+  		  		  FROM (SELECT * FROM TABLE(giacs158_pkg.view_details_via_bank_files(#bankFileNo#,#parentIntmType#,#parentIntmNo#))
+						<isNotNull property="filter">
+		                	WHERE 1 = 1							
+							<isNotEmpty prepend="AND" property="billNo">
+								upper(bill_no) LIKE upper(#billNo#)	
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="grossPremium">
+								gross_premium = #grossPremium#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="premiumPaid">
+								premium_paid = #premiumPaid#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="peril">
+								upper(peril) LIKE upper(#peril#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="commissionRt">
+								commission_rt = #commissionRt#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="commissionDue">
+								commission_due = #commissionDue#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="wholdingTaxDue">
+								wholding_tax_due = #wholdingTaxDue#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="inputVatDue">
+								input_vat_due = #inputVatDue#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="netCommDue">
+								net_comm_due = #netCommDue#
+							</isNotEmpty>
+		                </isNotNull>
+	            		<isEqual property="sortColumn" compareValue="billNo">
+              				ORDER BY bill_no
+	            		</isEqual>
+	            		<isEqual property="sortColumn" compareValue="grossPremium">
+              				ORDER BY gross_premium
+	            		</isEqual>
+	            		<isEqual property="sortColumn" compareValue="premiumPaid">
+              				ORDER BY premium_paid
+	            		</isEqual>
+	            		<isEqual property="sortColumn" compareValue="peril">
+              				ORDER BY peril
+	            		</isEqual>
+	            		<isEqual property="sortColumn" compareValue="commissionRt">
+              				ORDER BY commission_rt
+	            		</isEqual>
+	            		<isEqual property="sortColumn" compareValue="commissionDue">
+              				ORDER BY commission_due
+	            		</isEqual>
+	            		<isEqual property="sortColumn" compareValue="wholdingTaxDue">
+              				ORDER BY wholding_tax_due
+	            		</isEqual>
+	            		<isEqual property="sortColumn" compareValue="inputVatDue">
+              				ORDER BY input_vat_due
+	            		</isEqual>
+	            		<isEqual property="sortColumn" compareValue="netCommDue">
+              				ORDER BY net_comm_due
+	            		</isEqual>
+	            		<isNotNull property="sortColumn">
+              				<isEqual property="ascDescFlg" compareValue="ASC">
+              					ASC
+              				</isEqual>
+              				<isEqual property="ascDescFlg" compareValue="DESC">
+              					DESC
+              				</isEqual>
+              			</isNotNull>) a,
+              (SELECT count(*) count_
+	          	  FROM TABLE(giacs158_pkg.view_details_via_bank_files(#bankFileNo#,#parentIntmType#,#parentIntmNo#))
+				 		<isNotNull property="filter">
+		                	WHERE 1 = 1							
+							<isNotEmpty prepend="AND" property="billNo">
+								upper(bill_no) LIKE upper(#billNo#)	
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="grossPremium">
+								gross_premium = #grossPremium#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="premiumPaid">
+								premium_paid = #premiumPaid#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="peril">
+								upper(peril) LIKE upper(#peril#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="commissionRt">
+								commission_rt = #commissionRt#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="commissionDue">
+								commission_due = #commissionDue#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="wholdingTaxDue">
+								wholding_tax_due = #wholdingTaxDue#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="inputVatDue">
+								input_vat_due = #inputVatDue#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="netCommDue">
+								net_comm_due = #netCommDue#
+							</isNotEmpty>							
+		                </isNotNull>)b) 
+	    	WHERE rownum_ BETWEEN #from# AND #to# 	
+	</select>
+
+	<select id="getDetailsTotalViaRecords" resultMap="detailsTotalResultMap">
+		SELECT SUM(gross_premium) gross_premium, SUM(premium_paid) premium_paid, SUM(commission_due) commission_due, SUM(wholding_tax_due) wholding_tax_due, SUM(input_vat_due) input_vat_due, SUM(net_comm_due) net_comm_due FROM TABLE(giacs158_pkg.view_details_via_records(#asOfDate#,#parentIntmType#,#parentIntmNo#))
+	</select>		
+
+	<select id="getDetailsTotalViaBankFiles" resultMap="detailsTotalResultMap">
+		SELECT SUM(gross_premium) gross_premium, SUM(premium_paid) premium_paid, SUM(commission_due) commission_due, SUM(wholding_tax_due) wholding_tax_due, SUM(input_vat_due) input_vat_due, SUM(net_comm_due) net_comm_due FROM TABLE(giacs158_pkg.view_details_via_bank_files(#bankFileNo#,#parentIntmType#,#parentIntmNo#))
+	</select>	
+
+  	<select id="getMaxBankFileNo" resultClass="java.lang.Integer">
+		SELECT giacs158_pkg.get_max_bank_file_no FROM DUAL
+	</select>		
+									
+	<procedure id="setBankFileNo" parameterMap="setBankFileParameterMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			giacs158_pkg.set_bank_file_no(?, ?, ?, ?);
+		END;	
+	</procedure>
+	
+	<procedure id="setGiacBankCommPayt" parameterMap="setGiacBankCommPaytParameterMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			giacs158_pkg.set_giac_bank_comm_payt(?, ?);
+		END;	
+	</procedure>
+										
+	<procedure id="insertIntoSummTable" parameterMap="insertToSummTableParameterMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			giacs158_pkg.insert_into_summ_table(?);
+		END;	
+	</procedure>
+	
+	<select id="getCompanyCode" resultClass="java.lang.String">
+		SELECT LPAD(NVL(giacp.v('COMPANY_CODE'),'0'),4,'0') FROM DUAL	
+	</select>
+
+	<select id="getSummaryForBank" parameterClass="java.util.HashMap" resultMap="fileResultMap">
+		SELECT * FROM TABLE(giacs158_pkg.generate_file(#bankFileNo#))
+	</select>	
+
+	<procedure id="updateFileName" parameterMap="updateFileNameParameterMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			giacs158_pkg.update_file_name(?,?);
+		END;	
+	</procedure>		
+<!--END-->	
+
+</sqlMap>

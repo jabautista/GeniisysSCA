@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GICLReqdDocs">
+	<typeAlias alias="GICLReqdDocsClass" type="com.geniisys.gicl.entity.GICLReqdDocs"/>
+	
+	<resultMap class="GICLReqdDocsClass" id="reqdDocsListingMap">
+		<result property="clmDocCd" column="clm_doc_cd"/>
+		<result property="clmDocDesc" column="clm_doc_desc"/>
+		<result property="docSbmttdDt" column="doc_sbmttd_dt"/> 
+		<result property="docCmpltdDt" column="doc_cmpltd_dt"/>
+		<result property="rcvdBy" column="rcvd_by"/>
+		<result property="frwdFr" column="frwd_fr"/>
+		<result property="frwdBy" column="frwd_by"/>
+		<result property="remarks" column="remarks"/>
+		<result property="userId" column="user_id"/>
+		<result property="lastUpdate" column="last_update"/>
+		<result property="lastupdate" column="lastupdate"/>
+		<result property="rowNum" 		column="rownum_"/>
+		<result property="rowCount" 	column="count_"/>
+	</resultMap>
+	
+	<select id="getDocumentTableGridListing" resultMap="reqdDocsListingMap">
+		 SELECT *       
+  		  FROM (SELECT rownum rownum_ ,b.count_,a.*     
+          		  FROM (select * from table(gicl_reqd_docs_pkg.get_document_listing(#claimId#))
+          		  		<isNotNull property="filter">
+							WHERE 1=1
+							<isNotEmpty prepend="AND" property="clmDocCd">
+							  UPPER(clm_doc_cd) LIKE UPPER(#clmDocCd#)
+						    </isNotEmpty>
+						    <isNotEmpty prepend="AND" property="clmDocDesc">
+							  UPPER(clm_doc_desc) LIKE UPPER(#clmDocDesc#)
+						    </isNotEmpty>
+						    <isNotEmpty prepend="AND" property="docSbmttdDt">
+							  doc_sbmttd_dt LIKE #docSbmttdDt#
+						    </isNotEmpty>
+						    <isNotEmpty prepend="AND" property="docCmpltdDt">
+							  doc_cmpltd_dt LIKE #docCmpltdDt#
+						    </isNotEmpty>
+						    <isNotEmpty prepend="AND" property="rcvdBy">
+							  UPPER(rcvd_by) LIKE UPPER(#rcvdBy#)
+						    </isNotEmpty>
+						    <isNotEmpty prepend="AND" property="frwdFr">
+							  UPPER(frwd_fr) LIKE UPPER(#frwdFr#)
+						    </isNotEmpty>
+						    <isNotEmpty prepend="AND" property="frwdBy">
+							  UPPER(frwd_by) LIKE UPPER(#frwdBy#)
+						    </isNotEmpty>
+						</isNotNull>
+		          	  	<isNotNull property="sortColumn">
+		          	  		<isEqual property="sortColumn" compareValue="clmDocCd clmDocDesc">
+			              		ORDER BY clm_doc_cd
+			              	</isEqual>
+			              	<isEqual property="sortColumn" compareValue="docSbmttdDt">
+				              	ORDER BY doc_sbmttd_dt
+			              	</isEqual>
+			              	<isEqual property="sortColumn" compareValue="docCmpltdDt">
+				              	ORDER BY doc_cmpltd_dt
+			              	</isEqual>
+			              	<isEqual property="sortColumn" compareValue="rcvdBy">
+				              	ORDER BY rcvd_by
+			              	</isEqual>
+			              	<isEqual property="sortColumn" compareValue="frwdFr frwdBy">
+				              	ORDER BY frwd_fr
+			              	</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+		              	</isNotNull>
+		              	) a,
+               		   (SELECT count(*) count_ FROM TABLE(gicl_reqd_docs_pkg.get_document_listing(#claimId#))
+               		   <isNotNull property="filter">
+							WHERE 1=1
+							<isNotEmpty prepend="AND" property="clmDocCd">
+							  UPPER(clm_doc_cd) LIKE UPPER(#clmDocCd#)
+						    </isNotEmpty>
+						    <isNotEmpty prepend="AND" property="clmDocDesc">
+							  UPPER(clm_doc_desc) LIKE UPPER(#clmDocDesc#)
+						    </isNotEmpty>
+						    <isNotEmpty prepend="AND" property="docSbmttdDt">
+							  doc_sbmttd_dt LIKE #docSbmttdDt#
+						    </isNotEmpty>
+						    <isNotEmpty prepend="AND" property="docCmpltdDt">
+							  doc_cmpltd_dt LIKE #docCmpltdDt#
+						    </isNotEmpty>
+						    <isNotEmpty prepend="AND" property="rcvdBy">
+							  UPPER(rcvd_by) LIKE UPPER(#rcvdBy#)
+						    </isNotEmpty>
+						    <isNotEmpty prepend="AND" property="frwdFr">
+							  UPPER(frwd_fr) LIKE UPPER(#frwdFr#)
+						    </isNotEmpty>
+						    <isNotEmpty prepend="AND" property="frwdBy">
+							  UPPER(frwd_by) LIKE UPPER(#frwdBy#)
+						    </isNotEmpty>
+						</isNotNull>) b)
+	</select>
+	 
+	<insert id="saveRequiredClaimDocs" parameterClass="map">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			gicl_reqd_docs_pkg.save_reqd_docs (
+								    #claimId#,
+								    #clmDocCd#,
+								    #lineCd#,
+								    #sublineCd#,
+								    #issCd#,
+								    to_date(#docSbmttdDt#,'MM-DD-YYYY'),
+								    to_date(#docCmpltdDt#,'MM-DD-YYYY'),
+								    #rcvdBy#,
+								    #frwdBy#,
+								    #frwdFr#,
+								    #remarks#,
+								    #userId#);
+		END;
+	</insert>
+	
+	<delete id="deleteRequireDocs" parameterClass="map">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			gicl_reqd_docs_pkg.del_reqd_docs(
+								    #claimId#,
+								    #clmDocCd#);
+		END;		
+	</delete>
+	
+	<resultMap class="java.util.HashMap" id="prePrintMap">
+		<result property="sendToCd" column="send_to_cd"/>
+		<result property="address" column="address"/>
+		<result property="attention" column="attention"/>
+		<result property="beginningText" column="beginning_text"/>
+		<result property="endingText" column="ending_text"/>
+	</resultMap>
+	
+	<select id="getPrePrintDetails" resultMap="prePrintMap">
+		select * from table(gicl_reqd_docs_pkg.get_pre_print_details(#assuredName#,#callOut#))
+	</select>
+
+	<select id="validateClmReqDocs" resultClass="java.lang.String">
+		SELECT gicl_reqd_docs_pkg.validate_clm_req_docs(#claimId#) FROM dual
+	</select>
+	
+</sqlMap>

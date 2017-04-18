@@ -1,0 +1,369 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIACEomRep">
+    
+    <typeAlias alias="giacEomRep" type="com.geniisys.common.entity.GIACEomRep"/>
+    <typeAlias alias="giacEomRepDtl" type="com.geniisys.common.entity.GIACEomRepDtl"/>
+    
+    <resultMap class="giacEomRep" id="giacEomRepListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="rep_cd"        		property="repCd"/>
+		<result column="rep_title"        	property="repTitle"/>
+		<result column="remarks"     		property="remarks"/>
+		<result column="user_id"     		property="userId"/>
+		<result column="last_update" 		property="lastUpdate"/>
+	</resultMap>
+	
+    <resultMap class="giacEomRepDtl" id="giacEomRepDtlListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="rep_cd"        				property="repCd"/>
+		<result column="rep_title"        			property="repTitle"/>
+		<result column="gl_acct_id"        			property="glAcctId"/>
+		<result column="gl_acct_name"        		property="glAcctName"/>
+		<result column="gl_acct_category"        	property="glAcctCategory"/>
+		<result column="gl_control_acct"        	property="glControlAcct"/>
+		<result column="gl_sub_acct_1"        		property="glSubAcct1"/>
+		<result column="gl_sub_acct_2"        		property="glSubAcct2"/>
+		<result column="gl_sub_acct_3"        		property="glSubAcct3"/>
+		<result column="gl_sub_acct_4"        		property="glSubAcct4"/>
+		<result column="gl_sub_acct_5"        		property="glSubAcct5"/>
+		<result column="gl_sub_acct_6"        		property="glSubAcct6"/>
+		<result column="gl_sub_acct_7"        		property="glSubAcct7"/>
+		<result column="gl_acct_no"        		    property="glAcctNo"/>
+		<result column="remarks"     				property="remarks"/>
+		<result column="user_id"     				property="userId"/>
+		<result column="last_update" 				property="lastUpdate"/>
+	</resultMap>
+    
+    <select id="getGiacs350RecList" resultMap="giacEomRepListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giacs350_pkg.get_rec_list(#repCd#, #repTitle#))
+		                  <isEqual property="sortColumn" compareValue="repCd">
+			              		ORDER BY rep_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="repTitle">
+			              		ORDER BY rep_title
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giacs350_pkg.get_rec_list(#repCd#, #repTitle#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+    <select id="getGiacs351RecList" resultMap="giacEomRepDtlListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giacs351_pkg.get_rec_list(#repCd#, #glAcctName#, #glAcctNo#))
+		  	      <isNotNull property="filter">
+		  	      	WHERE 1 = 1 
+		  	      		<isNotEmpty prepend="AND" property="glAcctCategory">
+                        	gl_acct_category = #glAcctCategory#
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="glControlAcct">
+                        	gl_control_acct = #glControlAcct#
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="glSubAcct1">
+                        	gl_sub_acct_1 = #glSubAcct1#
+                        </isNotEmpty>
+                         <isNotEmpty prepend="AND" property="glSubAcct2">
+                        	gl_sub_acct_2 = #glSubAcct2#
+                        </isNotEmpty>
+                         <isNotEmpty prepend="AND" property="glSubAcct3">
+                        	gl_sub_acct_3 = #glSubAcct3#
+                        </isNotEmpty>
+                         <isNotEmpty prepend="AND" property="glSubAcct4">
+                        	gl_sub_acct_4 = #glSubAcct4#
+                        </isNotEmpty>
+                         <isNotEmpty prepend="AND" property="glSubAcct5">
+                        	gl_sub_acct_5 = #glSubAcct5#
+                        </isNotEmpty>
+                         <isNotEmpty prepend="AND" property="glSubAcct6">
+                        	gl_sub_acct_6 = #glSubAcct6#
+                        </isNotEmpty>
+                         <isNotEmpty prepend="AND" property="glSubAcct7">
+                        	gl_sub_acct_7 = #glSubAcct7#
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="glAcctName">
+                        	gl_acct_name LIKE UPPER(#glAcctName#)
+                        </isNotEmpty>
+		  	      </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="glAcctCategory glControlAcct glSubAcct1 glSubAcct2 glSubAcct3 glSubAcct4 glSubAcct5 glSubAcct6 glSubAcct7">
+			              		ORDER BY gl_acct_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="glAcctName">
+			              		ORDER BY gl_acct_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giacs351_pkg.get_rec_list(#repCd#, #glAcctName#, #glAcctNo#))
+		                  <isNotNull property="filter">
+		  	      	WHERE 1 = 1 
+		  	      		<isNotEmpty prepend="AND" property="glAcctCategory">
+                        	gl_acct_category = #glAcctCategory#
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="glControlAcct">
+                        	gl_control_acct = #glControlAcct#
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="glSubAcct1">
+                        	gl_sub_acct_1 = #glSubAcct1#
+                        </isNotEmpty>
+                         <isNotEmpty prepend="AND" property="glSubAcct2">
+                        	gl_sub_acct_2 = #glSubAcct2#
+                        </isNotEmpty>
+                         <isNotEmpty prepend="AND" property="glSubAcct3">
+                        	gl_sub_acct_3 = #glSubAcct3#
+                        </isNotEmpty>
+                         <isNotEmpty prepend="AND" property="glSubAcct4">
+                        	gl_sub_acct_4 = #glSubAcct4#
+                        </isNotEmpty>
+                         <isNotEmpty prepend="AND" property="glSubAcct5">
+                        	gl_sub_acct_5 = #glSubAcct5#
+                        </isNotEmpty>
+                         <isNotEmpty prepend="AND" property="glSubAcct6">
+                        	gl_sub_acct_6 = #glSubAcct6#
+                        </isNotEmpty>
+                         <isNotEmpty prepend="AND" property="glSubAcct7">
+                        	gl_sub_acct_7 = #glSubAcct7#
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="glAcctName">
+                        	gl_acct_name LIKE UPPER(#glAcctName#)
+                        </isNotEmpty>
+		  	      </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+    <procedure id="valAddEomRep" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giacs350_pkg.val_add_rec(#repCd#);
+ 		END;
+ 	</procedure> 
+ 	
+    <procedure id="valDelEomRep" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giacs350_pkg.val_del_rec(#repCd#);
+ 		END;
+ 	</procedure>
+ 	
+    <delete id="delEomRep" parameterClass="giacEomRep">
+		BEGIN
+ 			giacs350_pkg.del_rec(#repCd#);
+ 		END;
+ 	</delete>
+ 	
+    <procedure id="setEomRep" parameterClass="giacEomRep">
+	    DECLARE
+	    	v_rec giac_eom_rep%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.rep_cd := #repCd#;
+ 			v_rec.rep_title := #repTitle#;
+ 			v_rec.remarks := #remarks#;
+ 			v_rec.user_id := #userId#;
+ 			
+ 			giacs350_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+    <resultMap class="java.util.HashMap" id="repLovMap">
+		<result column="rep_cd"		property="repCd" />
+		<result column="rep_title"	property="repTitle" />
+		<result column="rownum_"	property="rowNum" />
+		<result column="count_"		property="rowCount" />
+	</resultMap>
+	
+    <select id="getGiacs350RepLov" resultMap="repLovMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+					   b.count_, 
+					   a.* 
+				  FROM (SELECT * 
+						  FROM TABLE (giacs351_pkg.get_rep_lov(#moduleId#, #userId#, #findText#))
+						  <isEqual property="sortColumn" compareValue="repCd">
+								ORDER BY rep_cd
+						  </isEqual>
+						  <isEqual property="sortColumn" compareValue="repTitle">
+								ORDER BY rep_title
+						  </isEqual>
+						  <isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+						  </isNotNull>
+						  ) a, 
+					   (SELECT count(*) count_ 
+						  FROM TABLE (giacs351_pkg.get_rep_lov(#moduleId#, #userId#, #findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+    <procedure id="validateGLAcctNoGiacs351" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giacs351_pkg.val_glacctno_rec(#glAcctCategory#, #glAcctControlAcct#, #glSubAcct1#, #glSubAcct2#, #glSubAcct3#, #glSubAcct4#, #glSubAcct5#, #glSubAcct6#, #glSubAcct7#);
+ 		END;
+ 	</procedure>
+ 	
+    <resultMap class="java.util.HashMap" id="glAcctNoLovMap" extends="BaseEntity.TableGridResultMap">
+        <result column="gl_acct_category" 		property="glAcctCategory"/>
+		<result column="gl_control_acct" 		property="glControlAcct"/>
+		<result column="gl_sub_acct_1" 			property="glSubAcct1"/>
+		<result column="gl_sub_acct_2" 			property="glSubAcct2"/>
+		<result column="gl_sub_acct_3" 			property="glSubAcct3"/>
+		<result column="gl_sub_acct_4" 			property="glSubAcct4"/>
+		<result column="gl_sub_acct_5" 			property="glSubAcct5"/>
+		<result column="gl_sub_acct_6" 			property="glSubAcct6"/>
+		<result column="gl_sub_acct_7" 			property="glSubAcct7"/>
+		<result column="gl_acct_name" 			property="glAcctName"/>
+		<result column="gl_acct_id" 			property="glAcctId"/>
+	</resultMap>
+	
+    <select id="getGiacs351GlAcctLov" resultMap="glAcctNoLovMap" parameterClass="map">
+		SELECT *
+			  FROM (SELECT rownum rownum_, 
+			               b.count_, 
+			               a.* 
+			          FROM (SELECT * FROM TABLE(giacs351_pkg.get_gl_acct_lov(#findText#)) 
+						<isEqual property="sortColumn" compareValue="glAcctCategory glControlAcct glSubAcct1 glSubAcct2 glSubAcct3 glSubAcct4 glSubAcct5 glSubAcct6 glSubAcct7">
+			          		ORDER BY gl_acct_category
+			          		<isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_control_acct
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_1
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_2
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_3
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_4
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_5
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_6
+				            <isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>,
+				            gl_sub_acct_7
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="glAcctName">
+			          		ORDER BY gl_acct_name
+			          	</isEqual>
+			          	<isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	</isNotNull>
+		              	)a,
+			               (SELECT count(*) count_ 
+			                  FROM TABLE(giacs351_pkg.get_gl_acct_lov(#findText#))) b) 
+		WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+    <procedure id="valAddDtlRecGiacs351" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giacs351_pkg.val_addglacctno_rec(#repCd#, #glAcctCategory#, #glAcctControlAcct#, #glSubAcct1#, #glSubAcct2#, #glSubAcct3#, #glSubAcct4#, #glSubAcct5#, #glSubAcct6#, #glSubAcct7#);
+ 		END;
+ 	</procedure>
+ 	
+    <delete id="delEomRepDtl" parameterClass="giacEomRepDtl">
+		BEGIN
+ 			giacs351_pkg.del_rec(#repCd#, #glAcctId#);
+ 		END;
+ 	</delete>
+ 	
+    <procedure id="setEomRepDtl" parameterClass="giacEomRepDtl">
+	    DECLARE
+	    	v_rec giac_eom_rep_dtl%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.rep_cd := #repCd#;
+ 			v_rec.gl_acct_id := #glAcctId#;
+ 			v_rec.remarks := #remarks#;
+ 			v_rec.user_id := #userId#;
+ 			
+ 			giacs351_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+</sqlMap>

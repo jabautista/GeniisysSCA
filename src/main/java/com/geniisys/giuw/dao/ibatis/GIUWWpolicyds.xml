@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GIUWWpolicyds">
+	
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIUWWpolicydsClass" type="com.geniisys.giuw.entity.GIUWWpolicyds"/>
+	
+	<resultMap class="GIUWWpolicydsClass" id="GIUWWpolicydsResultMap">
+		<result column="dist_no" 			property="distNo"/>
+		<result column="dist_seq_no" 		property="distSeqNo"/>
+		<result column="dist_flag" 			property="distFlag"/>
+		<result column="tsi_amt" 			property="tsiAmt"/>
+		<result column="prem_amt" 			property="premAmt"/>
+		<result column="item_grp" 			property="itemGrp"/>
+		<result column="ann_tsi_amt" 		property="annTsiAmt"/>
+		<result column="arc_ext_data" 		property="arcExtData"/>
+		<result column="currency_cd" 		property="currencyCd"/>
+		<result column="currency_desc" 		property="currencyDesc"/>
+		<result column="nbt_line_cd" 		property="nbtLineCd"/>
+		<result column="{distNo=dist_no , distSeqNo=dist_seq_no}" property="giuwWpolicydsDtl" select="getGIUWWpolicydsDtl"/>
+	</resultMap>
+	
+	<select id="getGIUWWpolicyds" resultMap="GIUWWpolicydsResultMap">
+		SELECT * FROM TABLE(GIUW_WPOLICYDS_PKG.get_giuw_wpolicyds(#distNo#, #parId#, #takeupSeqNo#))
+	</select>
+	
+	<insert id="setGIUWWpolicyds" parameterClass="GIUWWpolicydsClass">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GIUW_WPOLICYDS_PKG.set_giuw_wpolicyds(
+				#distNo#,         #distSeqNo#,
+                #distFlag#,       #tsiAmt#,
+                #premAmt#,        #itemGrp#,
+                #annTsiAmt#,      #arcExtData#);
+		END;	
+	</insert>
+	
+	<select id="getGIUWWpolicyds2" resultMap="GIUWWpolicydsResultMap">
+		SELECT * FROM TABLE(GIUW_WPOLICYDS_PKG.get_giuw_wpolicyds2(#distNo#, #policyId#, #takeupSeqNo#))
+	</select>
+	
+	<select id="getGIUWWpolicyds3" resultMap="GIUWWpolicydsResultMap">
+		SELECT * FROM TABLE(GIUW_WPOLICYDS_PKG.get_giuw_wpolicyds3(#distNo#, #policyId#))
+	</select>
+
+	<select id="isExistGIUWWpolicyds" parameterClass="java.lang.Integer" resultClass="java.lang.String">
+		SELECT (GIUW_WPOLICYDS_PKG.get_giuw_wpolicyds_exist(#distNo#)) FROM DUAL
+	</select>
+	
+	<procedure id="transferWpolicyds" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GIUW_WPOLICYDS_PKG.transfer_wpolicyds(#distNo#);
+		END;	
+	</procedure>
+	
+</sqlMap>

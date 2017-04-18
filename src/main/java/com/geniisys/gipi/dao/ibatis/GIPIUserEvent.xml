@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIUserEvent">
+	
+	<typeAlias alias="GIPIUserEventClass" type="com.geniisys.gipi.entity.GIPIUserEvent"/>
+	
+	<resultMap class="GIPIUserEventClass" id="GIPIUserEventResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="eventCd" 			column="EVENT_CD"/>
+		<result property="eventType"		column="EVENT_TYPE"/>
+		<result property="eventDesc" 		column="EVENT_DESC"/>
+		<result property="receiverTag" 		column="RECEIVER_TAG"/>
+		<result property="multipleAssignSw" column="MULTIPLE_ASSIGN_SW"/>
+		<result property="tranCount" 		column="TRAN_CNT"/>
+		<result property="newTranCount" 	column="NEW_TRAN_CNT"/>
+		<result property="tranCountDisplay" column="TRAN_CNT_DISPLAY"/>
+	</resultMap>
+
+	<resultMap class="GIPIUserEventClass" id="GIPIUserEventDetailResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="eventCd" 			column="EVENT_CD"/>
+		<result property="tranDtl" 			column="TRAN_DTL"/>
+		<result property="eventUserMod" 	column="EVENT_USER_MOD"/>
+		<result property="eventColCd" 		column="EVENT_COL_CD"/>
+		<result property="tranId" 			column="TRAN_ID"/>
+		<result property="colValue" 		column="COL_VALUE"/>
+		<result property="switchValue" 		column="SWITCH"/>
+		<result property="sender" 			column="SENDER"/>
+		<result property="dateReceived" 	column="DATE_RECEIVED"/>
+		<result property="remarks" 			column="REMARKS" />
+		<result property="eventModCd" 		column="EVENT_MOD_CD" />
+		<result property="recipient" 		column="RECIPIENT" />
+		<result property="status" 			column="STATUS" />
+		<result property="dateDue" 			column="DATE_DUE" />
+		<result property="gueAttachList" 	column="{tranId=TRAN_ID}" select="getGUEAttachListing"/>
+	</resultMap>	
+	
+	<resultMap id="TranListResultMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+  		<result column="COL_VALUE" 			property="colValue"			jdbcType="VARCHAR" />
+	  	<result column="TRAN_DTL"			property="tranDtl"			jdbcType="VARCHAR" />
+  	</resultMap>
+	
+	<parameterMap class="java.util.HashMap" id="saveCreatedEventParamMap">
+		<parameter property="appUser" 	javaType="java.lang.String" 	jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="createTag" javaType="java.lang.String" 	jdbcType="VARCHAR" mode="IN"/>		
+		<parameter property="eventCd" 	javaType="java.lang.Integer" 	jdbcType="NUMBER" mode="IN"/>
+		<parameter property="eventType" javaType="java.lang.Integer" 	jdbcType="NUMBER" mode="IN"/>
+		<parameter property="userId" 	javaType="java.lang.String" 	jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="remarks" 	javaType="java.lang.String" 	jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="status" 	javaType="java.lang.String" 	jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="dateDue" 	javaType="java.lang.String" 	jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="colValue" 	javaType="java.lang.String" 	jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="tranDtl" 	javaType="java.lang.String" 	jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="messageType" javaType="java.lang.String" 	jdbcType="VARCHAR" mode="OUT"/>
+		<parameter property="message" 	javaType="java.lang.String" 	jdbcType="VARCHAR" mode="OUT"/>
+	</parameterMap>
+
+	<parameterMap class="java.util.HashMap" id="transferEventParamMap">
+		<parameter property="appUser" 	javaType="java.lang.String" 	jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="tranId" 	javaType="java.lang.Integer" 	jdbcType="NUMBER" mode="IN"/>
+		<parameter property="eventModCd" javaType="java.lang.Integer" 	jdbcType="NUMBER" mode="IN"/>
+		<parameter property="eventColCd" javaType="java.lang.Integer" 	jdbcType="NUMBER" mode="IN"/>
+		<parameter property="eventUserMod" javaType="java.lang.Integer" 	jdbcType="NUMBER" mode="IN"/>
+		<parameter property="userId" 	javaType="java.lang.String" 	jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="remarks" 	javaType="java.lang.String" 	jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="status" 	javaType="java.lang.String" 	jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="dateDue" 	javaType="java.lang.String" 	jdbcType="VARCHAR" mode="IN"/>
+<!-- 		<parameter property="colValue" 	javaType="java.lang.String" 	jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="tranDtl" 	javaType="java.lang.String" 	jdbcType="VARCHAR" mode="IN"/> -->
+		<parameter property="eventCd" 			javaType="java.lang.Integer" 	jdbcType="NUMERIC" mode="IN"/>
+		<parameter property="eventType" 		javaType="java.lang.Integer" 	jdbcType="NUMERIC" mode="IN"/>
+		<parameter property="multipleAssignSw" 	javaType="java.lang.String" 	jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="receiverTag" 		javaType="java.lang.String" 	jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="messageType" 		javaType="java.lang.String" 	jdbcType="VARCHAR" mode="OUT"/>
+		<parameter property="message" 			javaType="java.lang.String" 	jdbcType="VARCHAR" mode="OUT"/>
+	</parameterMap>	
+	
+	<parameterMap class="map" id="setWorkflowGICLS010Map">
+		<parameter property="userId"	    jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN" />
+		<parameter property="claimId"		jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="clmStatCd"		jdbcType="INTEGER"	javaType="java.lang.String"		mode="IN" />
+	</parameterMap>
+	
+	<select id="getGIPIUserEventTableGrid" resultMap="GIPIUserEventResultMap" parameterClass="map" remapResults="true">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIPI_USER_EVENTS_PKG.get_gipi_user_events_listing(#userId#, #filter.eventDesc#))
+		                  <isEqual property="sortColumn" compareValue="eventDesc">
+			              		ORDER BY event_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="tranCountDisplay">
+			              		ORDER BY tran_cnt
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIPI_USER_EVENTS_PKG.get_gipi_user_events_listing(#userId#, #filter.eventDesc#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getEventsByDateSent" resultMap="GIPIUserEventResultMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIPI_USER_EVENTS_PKG.get_sent_events_by_date_sent(#userId#, #date#, #eventDesc#))
+		                  <isEqual property="sortColumn" compareValue="eventDesc">
+			              		ORDER BY event_desc
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIPI_USER_EVENTS_PKG.get_sent_events_by_date_sent(#userId#, #date#, #eventDesc#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getEventsByDateRange" resultMap="GIPIUserEventResultMap" parameterClass="map" remapResults="true">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIPI_USER_EVENTS_PKG.get_sent_events_by_date_range(#userId#, #dateFrom#, #dateTo#, #eventDesc#))
+		                  <isEqual property="sortColumn" compareValue="eventDesc">
+			              		ORDER BY event_desc
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIPI_USER_EVENTS_PKG.get_sent_events_by_date_range(#userId#, #dateFrom#, #dateTo#, #eventDesc#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>	
+	
+	<select id="getGIPIUserEventDetailListing" resultMap="GIPIUserEventDetailResultMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_,
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIPI_USER_EVENTS_PKG.get_event_detail_listing(#eventCd#, #userId#))
+		                 WHERE UPPER(recipient) LIKE UPPER(NVL(#recipient#, '%'))                         
+                           AND UPPER(sender) LIKE UPPER(NVL(#sender#, '%'))                           
+                           AND UPPER(NVL(remarks, '%')) LIKE UPPER(NVL(#remarks#, '%'))                           
+                           AND tran_id = NVL(#tranId#, tran_id)
+                           AND UPPER(NVL(status_desc, '%')) LIKE UPPER(NVL(#status#, '%'))                           
+		                   AND UPPER(NVL(tran_dtl, '%')) LIKE UPPER(NVL(#transaction#, '%'))
+		                   AND TRUNC(date_received) = NVL(TO_DATE(#dateReceived#, 'MM-DD-YYYY'), TRUNC(date_received))                           
+                           AND NVL(TRUNC(date_due), SYSDATE) = NVL(TO_DATE(#dateRue#, 'MM-DD-YYYY'), NVL(TRUNC(date_due), SYSDATE))
+		                  <isEqual property="sortColumn" compareValue="recipient">
+			              		ORDER BY recipient 
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="tranDtl">
+			              		ORDER BY tran_dtl 
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="sender">
+			              		ORDER BY sender 
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="dateReceived">
+			              		ORDER BY TO_DATE(date_received) 
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="remarks">
+			              		ORDER BY remarks 
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="tranId">
+			              		ORDER BY tran_id 
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="status">
+			              		ORDER BY status 
+			              </isEqual> 
+			          	  <isEqual property="sortColumn" compareValue="dueDate">
+			              		ORDER BY TO_DATE(date_due) 
+			              </isEqual>
+			              <isNotNull property="sortColumn"> 
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a,       
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIPI_USER_EVENTS_PKG.get_event_detail_listing(#eventCd#, #userId#))
+		                 WHERE UPPER(recipient) LIKE UPPER(NVL(#recipient#, '%'))                         
+                           AND UPPER(sender) LIKE UPPER(NVL(#sender#, '%'))                           
+                           AND UPPER(NVL(remarks, '%')) LIKE UPPER(NVL(#remarks#, '%'))                           
+                           AND tran_id = NVL(#tranId#, tran_id)
+                           AND UPPER(NVL(status_desc, '%')) LIKE UPPER(NVL(#status#, '%'))                           
+		                   AND UPPER(NVL(tran_dtl, '%')) LIKE UPPER(NVL(#transaction#, '%'))
+		                   AND TRUNC(date_received) = NVL(TO_DATE(#dateReceived#, 'MM-DD-YYYY'), TRUNC(date_received))                           
+                           AND NVL(TRUNC(date_due), SYSDATE) = NVL(TO_DATE(#dateRue#, 'MM-DD-YYYY'), NVL(TRUNC(date_due), SYSDATE))
+		                 ) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#		 
+	</select>
+	
+	<procedure id="saveCreatedEvent" parameterMap="saveCreatedEventParamMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			wf.save_created_event(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<procedure id="transferEvent" parameterMap="transferEventParamMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			wf.transfer_event(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>	
+	
+	<procedure id="delGIPIUserEvent" parameterClass="java.util.HashMap">
+		BEGIN
+			wf.del_gipi_user_event(#eventUserMod#, #eventColCd#, #tranId#);
+		END;
+	</procedure>
+	
+	<procedure id="delUserEvent" parameterClass="GIPIUserEventClass">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			wf.del_event(#eventUserMod#, #eventColCd#, #tranId#, #userId#);
+		END;
+	</procedure>
+	
+	<procedure id="updateGIPIUserEventStatus" parameterClass="GIPIUserEventClass">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			wf.update_event_status(#eventUserMod#, #eventColCd#, #tranId#, #status#);
+		END;
+	</procedure>
+	
+	<procedure id="setWorkflowGICLS010" parameterMap="setWorkflowGICLS010Map">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			gipi_user_events_pkg.set_workflow_gicls010(?, ?);
+		END;
+	</procedure>
+
+	<select id="getWorkflowTranList" resultMap="TranListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIPI_USER_EVENTS_PKG.get_tran_list(#eventCd#))              
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a,
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIPI_USER_EVENTS_PKG.get_tran_list(#eventCd#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>	
+	
+	<procedure id="deleteWorkflowRec" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			DELETE_WORKFLOW_REC(#eventDesc#, #moduleId#, #userId#, #colValue#);
+		END;
+	</procedure>
+</sqlMap>

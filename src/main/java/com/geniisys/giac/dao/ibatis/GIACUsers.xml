@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="GIACUsers">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+
+	<typeAlias alias="GIACUsers" type="com.geniisys.giac.entity.GIACUsers"/>
+
+	<resultMap class="GIACUsers" id="giacs313RecListMap" extends="BaseEntity.TableGridResultMap">
+		<result column="giac_user_id" 		property="giacUserId" />
+		<result column="user_name" 			property="userName" />
+		<result column="designation" 		property="designation" />
+		<result column="active_dt" 			property="activeDt" />
+		<result column="inactive_dt" 		property="inactiveDt" />
+		<result column="active_tag" 		property="activeTag" />
+		<result column="remarks" 			property="remarks" />
+		<result column="user_id" 			property="userId" />
+		<result column="last_update" 		property="lastUpdate" />
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="getGiacs313GiisUsersLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="giac_user_id" 		property="giacUserId" />
+		<result column="user_name" 			property="userName" />
+	</resultMap>
+	
+	<select id="getGiacs313GiisUsersLOV" resultMap="getGiacs313GiisUsersLOVMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		          FROM (SELECT * 
+		  		   		 	FROM TABLE (giacs313_pkg.get_giis_users)
+						 <isNotNull property="findText">
+							WHERE (UPPER(giac_user_id) LIKE UPPER(#findText#)
+							OR UPPER(user_name) LIKE UPPER(#findText#))
+						 </isNotNull>
+						 <isNull property="findText">
+							WHERE (UPPER(giac_user_id) LIKE  UPPER(#findText2#)
+							OR UPPER(user_name) LIKE UPPER(#findText2#))
+						 </isNull>
+                         <isEqual property="sortColumn" compareValue="giacUserId">
+                                ORDER BY giac_user_id
+                         </isEqual>
+                          <isEqual property="sortColumn" compareValue="userName">
+                                ORDER BY user_name
+                         </isEqual>
+		  				 <isNotNull property="sortColumn">
+                                 <isEqual property="ascDescFlg" compareValue="ASC">
+                                     ASC
+                                 </isEqual> 
+                                 <isEqual property="ascDescFlg" compareValue="DESC">
+                                     DESC
+                                 </isEqual>
+                         </isNotNull> 
+		  		   		) a,
+		          	   (SELECT count(*) count_ 
+		  		   		    FROM TABLE (giacs313_pkg.get_giis_users)
+	  		   		    <isNotNull property="findText">
+							WHERE (UPPER(giac_user_id) LIKE UPPER(#findText#)
+							OR UPPER(user_name) LIKE UPPER(#findText#))
+						 </isNotNull>
+						 <isNull property="findText">
+							WHERE (UPPER(giac_user_id) LIKE UPPER(#findText2#)
+							OR UPPER(user_name) LIKE UPPER(#findText2#))
+						 </isNull>
+		  		   		) b
+               )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiacs313RecList" resultMap="giacs313RecListMap">
+		SELECT * 
+			FROM (SELECT rownum rownum_,
+						 b.count_,
+						 a.*
+					FROM (SELECT * 
+							FROM TABLE (giacs313_pkg.get_rec_list (#giacUserId#,#userName#,#designation#,#activeDt#,#inactiveDt#,#activeTag#))
+							<isEqual property="sortColumn" compareValue="giacUserId">
+								ORDER BY giac_user_id
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="userName">
+								ORDER BY user_name
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="designation">
+								ORDER BY designation
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="activeDt">
+								ORDER BY TO_DATE(active_dt,'MM-DD-YYYY')
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="inactiveDt">
+								ORDER BY TO_DATE(inactive_dt,'MM-DD-YYYY')
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="activeTag">
+								ORDER BY active_tag
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>) a, 
+							(SELECT count(*) count_
+							   FROM TABLE (giacs313_pkg.get_rec_list (#giacUserId#,#userName#,#designation#,#activeDt#,#inactiveDt#,#activeTag#))
+							 ) b)
+		WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="setAccountingUser" parameterClass="GIACUsers">
+	    DECLARE
+	    	v_rec giac_users%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.user_id := #giacUserId#;
+ 			v_rec.user_name := #userName#;
+ 			v_rec.designation := #designation#;
+ 			v_rec.active_dt := TO_DATE(#activeDt#,'MM-DD-YYYY');
+ 			v_rec.inactive_dt := TO_DATE(#inactiveDt#,'MM-DD-YYYY');
+ 			v_rec.active_tag := #activeTag#;
+ 			v_rec.remarks := #remarks#;
+ 			v_rec.tran_user_id := #userId#;
+ 			
+ 			giacs313_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteAccountingUser" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giacs313_pkg.val_del_rec(#recId#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddAccountingUser" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giacs313_pkg.val_add_rec(#recId#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delAccountingUser" parameterClass="java.lang.String">
+		BEGIN
+ 			giacs313_pkg.del_rec(#recId#);
+ 		END;
+ 	</delete>
+</sqlMap>

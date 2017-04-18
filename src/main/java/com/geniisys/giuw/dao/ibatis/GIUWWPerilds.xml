@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIUWWPerilds">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIUWWPerilds" type="com.geniisys.giuw.entity.GIUWWPerilds" />
+	
+	<resultMap class="GIUWWPerilds" id="GIUWWPerildsResultMap">
+		<result property="distNo"		column="DIST_NO" />
+		<result property="distSeqNo"	column="DIST_SEQ_NO" />
+		<result property="perilCd"		column="PERIL_CD" />
+		<result property="perilName"	column="PERIL_NAME" />
+		<result property="lineCd"		column="LINE_CD" />
+		<result property="tsiAmt"		column="TSI_AMT" />
+		<result property="premAmt"		column="PREM_AMT" />
+		<result property="annTsiAmt"	column="ANN_TSI_AMT" />
+		<result property="distFlag"		column="DIST_FLAG" />
+		<result property="arcExtData"	column="ARC_EXT_DATA" />
+		<result property="currencyDesc"	column="CURRENCY_DESC" />
+		<result property="giuwWPerildsDtl" column="{distNo=DIST_NO, distSeqNo=DIST_SEQ_NO, lineCd=LINE_CD, perilCd=PERIL_CD}" select="getGIUWWPerildsDtl" />
+	</resultMap>
+	
+	<resultMap class="GIUWWPerilds" id="GIUWWPerilds2ResultMap"> 
+		<result property="distNo"		column="DIST_NO" />
+		<result property="distSeqNo"	column="DIST_SEQ_NO" />
+		<result property="perilType"	column="PERIL_TYPE"/>
+		<result property="perilCd"		column="PERIL_CD" />
+		<result property="bascPerlCd"	column="BASC_PERL_CD" />
+		<result property="perilName"	column="PERIL_NAME" />
+		<result property="tsiAmt"		column="TSI_AMT" />
+		<result property="premAmt"		column="PREM_AMT" />
+		<result property="annTsiAmt"	column="ANN_TSI_AMT" />
+		<result property="itemGrp"		column="ITEM_GRP" />
+		<result property="currencyCd"	column="CURRENCY_CD" />
+		<result property="currencyRt"	column="CURRENCY_RT" />
+		<result property="currencyShrtName"	column="CURRENCY_SHRTNAME" />
+		<result property="packLineCd"	    column="PACK_LINE_CD" />
+		<result property="packSublineCd"	column="PACK_SUBLINE_CD" />
+		<result property="origDistSeqNo"	column="ORIG_DIST_SEQ_NO" />
+		<result property="origPerilCd"		column="ORIG_PERIL_CD" />
+		<result property="lineCd"		    column="LINE_CD" />
+		<result property="maxDistSeqNo"		column="MAX_DIST_SEQ_NO" />
+		<result property="rowNum"			column="ROWNUM_" />
+		<result property="rowCount"		    column="COUNT_" />
+		<result property="cntPerDistGrp"    column="cnt_per_dist_grp" />   <!--  jhing 12.11.2014 added field -->		
+	</resultMap>
+	
+	<select id="getGIUWWPerilds" resultMap="GIUWWPerildsResultMap">
+		SELECT * FROM TABLE(GIUW_WPERILDS_PKG.GET_GIUW_WPERILDS(#distNo#))
+	</select>
+	
+	<insert id="setGIUWWPerilds" parameterClass="GIUWWPerilds">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GIUW_WPERILDS_PKG.set_giuw_wperilds(
+				#distNo#,         #distSeqNo#,
+				#perilCd#,		  #lineCd#,
+                #tsiAmt#,		  #premAmt#,
+                #annTsiAmt#,      #distFlag#,
+                #arcExtData#);
+		END;	
+	</insert>
+	
+	<select id="getGiuwWperildsForDistFinal" resultMap="GIUWWPerilds2ResultMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIUW_WPERILDS_PKG.get_giuw_wperilds2(#distNo#,#policyId#))) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIUW_WPERILDS_PKG.get_giuw_wperilds2(#distNo#,#policyId#))) b)
+		  WHERE rownum_ BETWEEN #from# AND #to#    
+	</select>
+	
+	<delete id="delGIUWWPerilds" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GIUW_WPERILDS_PKG.del_giuw_wperilds3(#distNo#, #distSeqNo#); 
+		END;
+	</delete>
+	
+	<!--  added by jhing 12.05.2014 -->
+	<delete id="delGIUWWPerilds2" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GIUW_WPERILDS_PKG.del_giuw_wperilds4(#distNo#, #distSeqNo#, #perilCd#); 
+		END;
+	</delete>	
+	
+ 	<select id="getGIUWWPerilds3" resultMap="GIUWWPerildsResultMap">
+		SELECT * FROM TABLE(GIUW_WPERILDS_PKG.get_giuw_wperilds3(#distNo#))
+	</select>
+	
+	<select id="isExistGiuwWPerildsGIUWS012" resultClass="java.lang.String" parameterClass="java.lang.Integer">
+		SELECT giuw_wperilds_pkg.get_giuw_wperilds_exist3(#distNo#) FROM dual
+	</select>
+	
+	<procedure id="transferWperilds" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GIUW_WPERILDS_PKG.transfer_wperilds(#distNo#);
+		END;	
+	</procedure>
+	
+</sqlMap>

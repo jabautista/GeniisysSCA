@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIQuoteItemMC">
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIPIQuoteItemMCClass" type="com.geniisys.quote.entity.GIPIQuoteItemMC" />
+	
+	<resultMap id="GIPIQuoteMCItemResultMap" class="com.geniisys.quote.entity.GIPIQuoteItemMC">
+		<result column="quote_id" 				property="quoteId" />
+	 	<result column="item_no" 				property="itemNo" />
+	 	<result column="assignee" 				property="assignee"		/>
+	 	<result column="acquired_from" 			property="acquiredFrom" />
+	 	<result column="origin" 					property="origin"			/>
+	 	<result column="destination" 			property="destination"		/>
+	 	<result column="plate_no" 				property="plateNo" />
+	 	<result column="model_year" 			property="modelYear" 	/>            
+	 	<result column="mv_file_no" 			property="mvFileNo"		/>
+	 	<result column="no_of_pass" 			property="noOfPass"		/>     
+	 	<result column="basic_color_cd" 		property="basicColorCd"		/> 
+	 	<result column="color" 					property="color"		/>
+	 	<result column="towing" 				property="towing"		/>
+	 	<result column="repair_lim" 			property="repairLim"	/>
+	 	<result column="coc_type" 				property="cocType"		/>
+	 	<result column="coc_serial_no" 			property="cocSerialNo"	/>
+		<result column="coc_yy" 					property="cocYy"		/>
+	 	<result column="ctv_tag" 				property="ctvTag"		/>
+	 	<result column="type_of_body_cd" 		property="typeOfBodyCd" />
+	 	<result column="car_company_cd" 		property="carCompanyCd" />
+	 	<result column="make" 					property="make"			/>
+	 	<result column="series_cd" 				property="seriesCd"			/>
+	 	<result column="mot_type" 				property="motType"		/>
+	 	<result column="unladen_wt" 			property="unladenWt"	/>
+		<result column="serial_no" 				property="serialNo" />
+		<result column="subline_type_cd" 		property="sublineTypeCd" />
+		<result column="motor_no" 				property="motorNo" />
+	 	<result column="est_value" 				property="estValue"		/>
+		<result column="tariff_zone" 			property="tariffZone"	/>  
+	 	<result column="coc_issue_date" 		property="cocIssueDate" />
+	 	<result column="make_cd" 				property="makeCd"			/>
+	 	<result column="color_cd" 				property="colorCd"			/>
+	 	<result column="coc_atcn" 				property="cocAtcn"			/>
+	  	<result column="coc_seq_no" 			property="cocSeqNo"		/>    
+	 	<result column="subline_cd" 			property="sublineCd"		/>   
+	 	<result column="dsp_basic_color" 			property="dspBasicColor"		/>      
+	 	<result column="dsp_deductibles" 					property="dspDeductibles"			/>
+	 	<result column="dsp_repair_lim" 				property="dspRepairLim"			/>
+	 	<result column="dsp_type_of_body_cd" 			property="dspTypeOfBodyCd"		/>
+	 	<result column="dsp_car_company_cd" 		property="dspCarCompanyCd"		/>
+	 	<result column="dsp_engine_series" 			property="dspEngineSeries"		/>
+	 	<result column="dsp_mot_type" 			property="dspMotType"		/>
+	 	<result column="dsp_subline_type_cd" 			property="dspSublineTypeCd"		/>
+	</resultMap>
+	
+	<select id="getGIPIQuoteMCItemDetails"		resultMap="GIPIQuoteMCItemResultMap">
+		SELECT 
+			quote_id,            item_no,                ESCAPE_VALUE(assignee) assignee,         
+		    ESCAPE_VALUE(acquired_from) acquired_from,   ESCAPE_VALUE(origin) origin,           ESCAPE_VALUE(destination) destination,   
+		    ESCAPE_VALUE(plate_no) plate_no,             ESCAPE_VALUE(model_year) model_year,   ESCAPE_VALUE(mv_file_no) mv_file_no,          
+		    ESCAPE_VALUE(basic_color_cd) basic_color_cd, ESCAPE_VALUE(color) color,             no_of_pass,             
+		    towing,              repair_lim,             ESCAPE_VALUE(coc_type) coc_type,       coc_serial_no,       
+		    coc_yy,              ctv_tag,  				 type_of_body_cd,                       car_company_cd,      
+		    ESCAPE_VALUE(make) make,  series_cd,         mot_type,                              ESCAPE_VALUE(unladen_wt) unladen_wt,         
+		    ESCAPE_VALUE(serial_no) serial_no,           ESCAPE_VALUE(subline_type_cd) subline_type_cd,     
+		    ESCAPE_VALUE(motor_no) motor_no,             est_value,                             ESCAPE_VALUE(tariff_zone) tariff_zone,        
+		    coc_issue_date,        make_cd,              color_cd,                              ESCAPE_VALUE(coc_atcn) coc_atcn,          
+		    coc_seq_no,                                  ESCAPE_VALUE(subline_cd) subline_cd,   ESCAPE_VALUE(dsp_basic_color) dsp_basic_color,   
+		    dsp_deductibles,       dsp_repair_lim,        ESCAPE_VALUE(dsp_type_of_body_cd) dsp_type_of_body_cd, 
+		    ESCAPE_VALUE(dsp_car_company_cd) dsp_car_company_cd, ESCAPE_VALUE(dsp_engine_series) dsp_engine_series, 
+		    ESCAPE_VALUE(dsp_mot_type) dsp_mot_type,     ESCAPE_VALUE(dsp_subline_type_cd) dsp_subline_type_cd  
+		FROM TABLE(gipi_quote_item_dtls.get_gipi_quote_mc2(#quoteId#, #itemNo#))
+	</select>
+	
+	<insert id="saveGIPIQuoteMCItem" parameterClass="GIPIQuoteItemMCClass">
+		DECLARE
+			quoteItemMC GIPI_QUOTE_ITEM_MC%ROWTYPE;
+		BEGIN
+			quoteItemMC.quote_id			:= #quoteId#;
+		 	quoteItemMC.item_no           	:= #itemNo#;
+		 	quoteItemMC.plate_no            := #plateNo#;
+		 	quoteItemMC.motor_no			:= #motorNo#;
+			quoteItemMC.serial_no			:= #serialNo#;             
+		 	quoteItemMC.subline_type_cd	  	:= #sublineTypeCd#;
+		 	quoteItemMC.mot_type			:= #motType#;
+			quoteItemMC.car_company_cd		:= #carCompanyCd#;
+		 	quoteItemMC.coc_yy				:= #cocYy#;
+		 	quoteItemMC.coc_seq_no			:= #cocSeqNo#;         
+		 	quoteItemMC.coc_serial_no		:= #cocSerialNo#;
+		 	quoteItemMC.coc_type			:= #cocType#;
+		 	quoteItemMC.repair_lim			:= #repairLim#;
+		 	quoteItemMC.color				:= #color#;
+		 	quoteItemMC.model_year			:= #modelYear#;        
+		 	quoteItemMC.make				:= #make#;
+		 	quoteItemMC.est_value			:= #estValue#;
+		 	quoteItemMC.towing				:= #towing#;
+		 	quoteItemMC.assignee			:= #assignee#;
+		 	quoteItemMC.no_of_pass			:= #noOfPass#;           
+		 	quoteItemMC.tariff_zone		  	:= #tariffZone#;
+		 	quoteItemMC.coc_issue_date		:= #cocIssueDate#;
+		 	quoteItemMC.mv_file_no			:= #mvFileNo#;
+		 	quoteItemMC.acquired_from		:= #acquiredFrom#;
+		 	quoteItemMC.ctv_tag			  	:= #ctvTag#;                
+		 	quoteItemMC.type_of_body_cd	  	:= #typeOfBodyCd#;
+		 	quoteItemMC.unladen_wt			:= #unladenWt#;
+		 	quoteItemMC.make_cd			 	:= #makeCd#;
+		 	quoteItemMC.series_cd			:= #seriesCd#;
+		 	quoteItemMC.basic_color_cd		:= #basicColorCd#;         
+		 	quoteItemMC.color_cd			:= #colorCd#;
+		 	quoteItemMC.origin				:= #origin#;
+		 	quoteItemMC.destination		  	:= #destination#;
+		 	quoteItemMC.coc_atcn			:= #cocAtcn#;
+		 	quoteItemMC.user_id			 	:= #userId#;           
+		 	quoteItemMC.last_update		  	:= #lastUpdate#;
+		 	quoteItemMC.subline_cd			:= #sublineCd#;
+		 	
+		 	giis_users_pkg.app_user := #appUser#;
+		 	Gipi_Quote_Item_Dtls.Set_Gipi_Quote_MC(quoteItemMC);
+		END;
+	</insert>
+	
+</sqlMap>

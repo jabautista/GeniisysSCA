@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISUserGrpTran">
+	<typeAlias alias="GIISUserGrpTran" type="com.geniisys.common.entity.GIISUserGrpTran" />
+	<typeAlias alias="giisTransaction" type="com.geniisys.common.entity.GIISTransaction" />
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<resultMap id="GIISUserGrpTranMap" class="GIISUserGrpTran">
+		<result column="TRAN_CD"		property="tranCd" />
+		<result column="TRAN_DESC"		property="tranDesc" />
+		<result column="USER_ID"		property="userId" />
+		<result column="LAST_UPDATE"	property="lastUpdate" />
+		<result column="ACCESS_TAG"		property="accessTag" />
+		<result column="REMARKS"		property="remarks" />
+	</resultMap>
+	
+	<resultMap id="giiss041UserGrpTransMap" class="GIISUserGrpTran" extends="GIISUserGrpTranMap">
+		<result column="USER_GRP"		property="userGrp" />
+		<result column="INC_ALL_TAG"    property="incAllTag" />
+		<result column="ROWNUM_" 		property="rowNum" />
+		<result column="COUNT_" 		property="rowCount" />
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="giss041TranLOV" extends="BaseEntity.TableGridResultMap">
+		<result column="tran_cd"     	property="tranCd"/>
+		<result column="tran_desc"     	property="tranDesc"/>
+	</resultMap>
+	
+	<select id="getGiisUserGrpTranList" resultMap="GIISUserGrpTranMap">
+		select tran_cd,
+			   user_id,
+			   last_update,
+			   remarks,
+			   tran_desc,
+			   access_tag 
+		  from table(GIIS_USER_GRP_TRAN_PKG.get_giis_user_grp_tran_list(#userGrp#)) 
+	  order by tran_desc
+	</select>
+	
+	<insert id="setGiisUserGrpTran" parameterClass="GIISUserGrpTran">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GIIS_USER_GRP_TRAN_PKG.set_giis_user_grp_tran(#userGrp#, #tranCd#, #remarks#, #accessTag#, #userId#);
+		END;
+	</insert>
+	
+	<delete id="deleteGiisUserGrpTran" parameterClass="java.lang.Integer">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			GIIS_USER_GRP_TRAN_PKG.del_giis_user_grp_tran(#userGrp#);
+		END;
+	</delete>
+	
+	<resultMap id="giisUserGrpTranResultMap" class="giisTransaction" extends="BaseEntity.TableGridResultMap">
+		<result column="TRAN_CD"		property="tranCd" />
+		<result column="TRAN_DESC"		property="tranDesc" />
+	</resultMap>	
+	
+	<select id="getUserGrpTrans"  resultMap="giisUserGrpTranResultMap">
+		SELECT *
+		   FROM (SELECT rownum rownum_, 
+		                b.count_, 
+		                a.* 
+		           FROM (SELECT * 
+		                   FROM TABLE (GIISS040_PKG.get_user_grp_trans(#userGrp#, #tranCd#, #tranDesc#))
+		                  <isEqual property="sortColumn" compareValue="tranCd">
+			              		ORDER BY tran_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="tranDesc">
+			              		ORDER BY tran_desc
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               	  (SELECT count(*) count_ 
+		                     FROM TABLE (GIISS040_PKG.get_user_grp_trans(#userGrp#, #tranCd#, #tranDesc#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiiss041UserGrpTrans" resultMap="giiss041UserGrpTransMap">
+		 SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss041_pkg.get_user_grp_tran_list(#userGrp#, #tranCd#, #tranDesc#))
+		  	      	  <isNotNull property="filter">
+							WHERE 1 = 1
+							<isNotEmpty prepend="AND"  property="incAllTag">
+								UPPER(inc_all_tag) LIKE UPPER(#incAllTag#)
+							</isNotEmpty>
+					  </isNotNull>
+	                  <isEqual property="sortColumn" compareValue="tranCd">
+		              		ORDER BY tran_cd
+		              </isEqual>
+		              <isEqual property="sortColumn" compareValue="tranDesc">
+		              		ORDER BY tran_desc
+		              </isEqual>
+		              <isEqual property="sortColumn" compareValue="incAllTag">
+		              		ORDER BY inc_all_tag
+		              </isEqual>
+		          	  <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              </isNotNull>
+	                  ) a, 
+	               (SELECT count(*) count_ 
+	                  FROM TABLE(giiss041_pkg.get_user_grp_tran_list(#userGrp#, #tranCd#, #tranDesc#))
+	                  <isNotNull property="filter">
+							WHERE 1 = 1
+							<isNotEmpty prepend="AND"  property="incAllTag">
+								UPPER(inc_all_tag) LIKE UPPER(#incAllTag#)
+							</isNotEmpty>
+					  </isNotNull>
+	                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiss041TranLOV" resultMap="giss041TranLOV">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giiss041_pkg.get_tran_lov(#findText#))
+						 WHERE tran_cd NOT IN (SELECT b.tran_cd
+						 						 FROM giis_user_grp_tran b
+												WHERE b.user_grp = #userGrp#
+                  							   <isNotEmpty property="notInDeleted">
+											  	  AND b.tran_cd NOT IN $notInDeleted$
+											   </isNotEmpty>)
+					      <isNotNull property="notIn">
+					  		AND tran_cd NOT IN $notIn$
+					  	  </isNotNull>
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="tranCd">
+								ORDER BY tran_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="tranDesc">
+								ORDER BY tran_desc
+							</isEqual>							
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(giiss041_pkg.get_tran_lov(#findText#))
+						  WHERE tran_cd NOT IN (SELECT b.tran_cd
+						 						 FROM giis_user_grp_tran b
+												WHERE b.user_grp = #userGrp#
+                  							   <isNotEmpty property="notInDeleted">
+											  	  AND b.tran_cd NOT IN $notInDeleted$
+											   </isNotEmpty>)
+						  <isNotNull property="notIn">
+					  		AND tran_cd NOT IN $notIn$
+					  	  </isNotNull>) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<delete id="delUserGrpTran" parameterClass="GIISUserGrpTran">
+		BEGIN
+ 			giiss041_pkg.del_user_grp_tran(#userGrp#, #tranCd#);
+ 		END;
+ 	</delete>
+ 	
+ 	<procedure id="valAddUserGrpTran" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss041_pkg.val_add_user_grp_tran(#userGrp#, #tranCd#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="setUserGrpTran" parameterClass="GIISUserGrpTran">
+	    DECLARE
+	    	v_rec giis_user_grp_tran%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.user_grp := #userGrp#;
+			v_rec.tran_cd := #tranCd#;
+			v_rec.user_id := #userId#;
+ 			
+ 			giiss041_pkg.add_user_grp_tran(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="giiss041IncAllModules" parameterClass="GIISUserGrpTran">
+ 		BEGIN
+ 			giis_users_pkg.app_user := #userId#;
+ 			giiss041_pkg.insert_all_modules(#userGrp#, #tranCd#, #incAllModules#);
+ 		END;
+ 	</procedure>
+ 	
+</sqlMap>

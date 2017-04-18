@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIACR121_SUMMARY" language="groovy" pageWidth="910" pageHeight="612" columnWidth="910" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="1.5000000000000024"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="FORMAT" isDefault="true" hAlign="Left" isBlankWhenNull="true" fontName="Arial" fontSize="7"/>
+	<style name="NUMBER_FORMAT" isDefault="false" hAlign="Right" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true" fontName="Arial" fontSize="7"/>
+	<style name="TITLE" isDefault="false" hAlign="Center" fontName="Arial" fontSize="7"/>
+	<parameter name="P_CUT_OFF" class="java.lang.String">
+		<defaultValueExpression><![CDATA["06/30/2003"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="P_DATE_FROM" class="java.lang.String">
+		<defaultValueExpression><![CDATA["06/01/2000"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="P_DATE_TO" class="java.lang.String">
+		<defaultValueExpression><![CDATA["06/30/2000"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="P_LINE_CD" class="java.lang.String"/>
+	<parameter name="P_RI_CD" class="java.lang.String"/>
+	<parameter name="P_USER" class="java.lang.String">
+		<defaultValueExpression><![CDATA["CPI"]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT
+ri_name, sum(net_premium)
+FROM table(giacr121c_pkg.populate_giacr121c(
+$P{P_DATE_FROM},
+$P{P_DATE_TO},
+$P{P_CUT_OFF},
+$P{P_LINE_CD},
+$P{P_RI_CD},
+$P{P_USER}
+))
+group by ri_name
+order by ri_name]]>
+	</queryString>
+	<field name="RI_NAME" class="java.lang.String"/>
+	<field name="SUM(NET_PREMIUM)" class="java.math.BigDecimal"/>
+	<variable name="V_GT_AMOUNT_DUE" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUM(NET_PREMIUM)}]]></variableExpression>
+	</variable>
+	<group name="GRP_RI_NAME">
+		<groupExpression><![CDATA[$F{RI_NAME}]]></groupExpression>
+		<groupHeader>
+			<band height="11">
+				<textField isStretchWithOverflow="true">
+					<reportElement isPrintRepeatedValues="false" x="261" y="0" width="280" height="11"/>
+					<textElement/>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{RI_NAME}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true">
+					<reportElement style="NUMBER_FORMAT" x="552" y="0" width="100" height="11"/>
+					<textElement/>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{SUM(NET_PREMIUM)}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<columnHeader>
+		<band height="22">
+			<staticText>
+				<reportElement style="FORMAT" x="261" y="0" width="280" height="11"/>
+				<textElement/>
+				<text><![CDATA[RI Name]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="NUMBER_FORMAT" x="552" y="0" width="100" height="11"/>
+				<textElement/>
+				<text><![CDATA[Net Amount Due]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="NUMBER_FORMAT" x="552" y="11" width="100" height="11"/>
+				<textElement/>
+				<text><![CDATA[--------------------------------------------------------]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="FORMAT" x="261" y="11" width="280" height="11"/>
+				<textElement/>
+				<text><![CDATA[-----------------------------------------------------------------------------------------------------------------------------------------]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<summary>
+		<band height="28" splitType="Stretch">
+			<textField>
+				<reportElement style="NUMBER_FORMAT" x="552" y="5" width="100" height="11"/>
+				<textElement/>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_GT_AMOUNT_DUE}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="554" y="1" width="98" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.75" lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="554" y="17" width="98" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.75" lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="554" y="19" width="98" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.75" lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement style="NUMBER_FORMAT" x="441" y="5" width="100" height="11"/>
+				<textElement/>
+				<text><![CDATA[GRAND TOTAL :]]></text>
+			</staticText>
+		</band>
+	</summary>
+</jasperReport>

@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap>
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIPIDeductiblesClass" type="com.geniisys.gipi.entity.GIPIDeductibles"/>
+	
+	<resultMap class="GIPIDeductiblesClass" id="deductiblesMap">
+		<result property="aggregateSw" 			column="aggregate_sw"/>
+		<result property="ceilingSw" 			column="ceiling_sw"/>
+		<result property="deductibleRt" 		column="deductible_rt"/>
+		<result property="deductibleAmt" 		column="deductible_amt"/>
+		<result property="deductibleText" 		column="deductible_text"/>
+		<result property="dedDeductibleCd" 		column="ded_deductible_cd"/>
+		<result property="deductibleTitle" 		column="deductible_title"/>
+		<result property="totalDeductibleAmt" 	column="total_deductible_amt"/>
+		<result property="rowNum"				column="rownum_"/>
+		<result property="rowCount"				column="count_"/>
+	</resultMap>
+	
+	<resultMap class="GIPIDeductiblesClass" id="itemDeductiblesMap">
+		<result property="policyId" 			column="policy_id"/>
+		<result property="itemNo" 				column="item_no"/>
+		<result property="ceilingSw" 			column="ceiling_sw"/>
+		<result property="dedLineCd" 			column="ded_line_cd"/>
+		<result property="aggregateSw" 			column="aggregate_sw"/>
+		<result property="deductibleRt" 		column="deductible_rt"/>
+		<result property="deductibleText" 		column="deductible_text"/>
+		<result property="dedSublineCd" 		column="ded_subline_cd"/>
+		<result property="deductibleAmt" 		column="deductible_amt"/>
+		<result property="dedDeductibleCd" 		column="ded_deductible_cd"/>
+		<result property="deductibleTitle" 		column="deductible_name"/>
+		<result property="totalDeductibleAmt" 	column="total_deductible_amt"/>
+		<result property="itemTitle" 			column="item_title"/>
+		<result property="rowNum"				column="rownum_"/>
+		<result property="rowCount"				column="count_"/>
+	</resultMap>
+	
+	<select id="getDeductibles" resultMap="deductiblesMap" parameterClass="java.util.HashMap">
+		SELECT *       
+                FROM (SELECT rownum rownum_ ,b.count_,a.*     
+                        FROM (SELECT * FROM TABLE(GIPI_DEDUCTIBLES_PKG.get_deductibles(#policyId#))) a,
+	               		   (SELECT count(*) count_ FROM TABLE(GIPI_DEDUCTIBLES_PKG.get_deductibles(#policyId#))) b)
+	          WHERE rownum_ BETWEEN NVL(#from#,rownum_) AND NVL(#to#,rownum_)
+	</select>
+	<select id="getItemDeductibles" resultMap="itemDeductiblesMap" parameterClass="java.util.HashMap">
+		SELECT *       
+          FROM (SELECT rownum rownum_ ,b.count_,a.*     
+                  FROM (SELECT policy_id,
+                               item_no,
+                               ceiling_sw,
+                               ded_line_cd,
+                               aggregate_sw,
+                               deductible_rt,
+                               ESCAPE_VALUE(deductible_text) deductible_text,
+                               ded_subline_cd,
+                               deductible_amt,
+                               ded_deductible_cd,
+                               item_title,
+                               deductible_name,
+                               total_deductible_amt
+                          FROM TABLE(gipi_deductibles_pkg.get_item_deductibles(#policyId#,#itemNo#))) a,
+                                                          (SELECT count(*) count_ FROM TABLE(gipi_deductibles_pkg.get_item_deductibles(#policyId#,#itemNo#))) b)         
+                                             WHERE rownum_ BETWEEN NVL(#from#,rownum_) AND NVL(#to#,rownum_)
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="GIPIS100deductiblesMap">
+		<result property="aggregateSw" 			column="aggregate_sw"/>
+		<result property="ceilingSw" 			column="ceiling_sw"/>
+		<result property="deductibleRt" 		column="deductible_rt"/>
+		<result property="deductibleAmt" 		column="deductible_amt"/>
+		<result property="deductibleText" 		column="deductible_text"/>
+		<result property="dedDeductibleCd" 		column="ded_deductible_cd"/>
+		<result property="deductibleName" 		column="deductible_name"/>
+		<result property="totalDeductibleAmt" 	column="total_deductible_amt"/>
+		<result property="rowNum"				column="rownum_"/>
+		<result property="rowCount"				column="count_"/>
+	</resultMap>
+	
+	<select id="getGIPIS100Deductibles" resultMap="GIPIS100deductiblesMap" parameterClass="java.util.HashMap">
+		SELECT *       
+                FROM (SELECT rownum rownum_ ,b.count_,a.*     
+                        FROM (SELECT * FROM TABLE(GIPI_DEDUCTIBLES_PKG.get_gipis100_deductibles(#policyId#))
+                          <isEqual property="sortColumn" compareValue="dedDeductibleCd">
+			              		ORDER BY ded_deductible_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="deductibleName">
+			              		ORDER BY deductible_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="deductibleRt">
+			              		ORDER BY deductible_rt
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="deductibleAmt">
+			              		ORDER BY deductible_amt
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>) a,
+	               		   (SELECT count(*) count_ FROM TABLE(GIPI_DEDUCTIBLES_PKG.get_gipis100_deductibles(#policyId#))) b)
+	          WHERE rownum_ BETWEEN NVL(#from#,rownum_) AND NVL(#to#,rownum_)
+	</select>
+	
+</sqlMap>

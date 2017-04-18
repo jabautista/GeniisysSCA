@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIQuoteMortgagee">
+
+  	<cacheModel id="oneDayClient" type="MEMORY">
+    	<flushInterval hours="24"/>
+    	<property name="reference-type" value="WEAK"/>
+  	</cacheModel>
+  
+  	<typeAlias alias="Mortgagee" type="com.geniisys.gipi.entity.GIPIQuoteMortgagee" />
+  
+  	<resultMap class="com.geniisys.gipi.entity.GIPIQuoteMortgagee" id="GIPIQuoteMortgagee">
+	  	<result column="QUOTE_ID"				property="quoteId" />
+	  	<result column="ISS_CD"					property="issCd" />
+	  	<result column="ITEM_NO"				property="itemNo" />
+	  	<result column="MORTG_CD"				property="mortgCd" />
+	  	<result column="MORTG_NAME"				property="mortgName" />
+	  	<result column="AMOUNT"					property="amount" />
+	  	<result column="REMARKS"				property="remarks" />
+	  	<result column="LAST_UPDATE"			property="lastUpdate" />
+	  	<result column="USER_ID"				property="userId" />
+  	</resultMap>
+  
+  	<select id="getGIPIQuoteMortgagee" resultMap="GIPIQuoteMortgagee"> 
+  		SELECT DISTINCT * FROM TABLE(Gipi_Quote_Mort_Pkg.Get_Gipi_Quote_Mort(#quoteId#))
+  		ORDER BY mortg_name
+  	</select>
+  	
+  	<select id="getGIPIQuoteLevelMortgagee" resultMap="GIPIQuoteMortgagee"> 
+  		SELECT DISTINCT * FROM TABLE(Gipi_Quote_Mort_Pkg.get_gipi_quote_level_mort(#quoteId#))
+  		ORDER BY mortg_name
+  	</select>
+  	
+  	<procedure id="saveGIPIQuoteMortgagee" parameterClass="com.geniisys.gipi.entity.GIPIQuoteMortgagee">
+  		DECLARE
+  			m GIPI_QUOTE_MORTGAGEE%ROWTYPE;
+  		BEGIN
+  			m.quote_id 		:= #quoteId#;
+  			m.iss_cd 		:= #issCd#;
+  			m.item_no 		:= #itemNo#;
+  			m.mortg_cd 		:= #mortgCd#;
+  			m.amount		:= #amount#;
+  			m.remarks		:= #remarks#;
+  			m.last_update	:= SYSDATE;
+  			m.user_id		:= #userId#;
+  			m.cpi_rec_no	:= #cpiRecNo#;
+  			m.cpi_branch_cd	:= #cpiBranchCd#;
+  			Gipi_Quote_Mort_Pkg.Set_Gipi_Quote_Mort(m);
+  		END;
+  	</procedure>
+  	
+  	<procedure id="saveGIPIQuoteMortgagee2" parameterClass="java.util.HashMap">
+  		DECLARE
+  			m GIPI_QUOTE_MORTGAGEE%ROWTYPE;
+  		BEGIN
+  			m.quote_id 		:= #quoteId#;
+  			m.iss_cd 		:= #issCd#;
+  			m.item_no 		:= #itemNo#;
+  			m.mortg_cd 		:= #mortgCd#;
+  			m.amount		:= #amount#;
+  			m.remarks		:= #remarks#;
+  			m.last_update	:= SYSDATE;
+  			m.user_id		:= #userId#;
+  			m.cpi_rec_no	:= #cpiRecNo#;
+  			m.cpi_branch_cd	:= #cpiBranchCd#;
+  			Gipi_Quote_Mort_Pkg.Set_Gipi_Quote_Mort(m);
+  		END;
+  	</procedure>
+  	
+  	<procedure id="updateGIPIQuoteMortgagee" parameterClass="java.util.HashMap">
+  	DECLARE
+  			m GIPI_QUOTE_MORTGAGEE%ROWTYPE;
+  		BEGIN
+  			m.quote_id 		:= #quoteId#;
+  			m.iss_cd 		:= #issCd#;
+  			m.item_no 		:= #itemNo#;
+  			m.mortg_cd 		:= #mortgCd#;
+  			m.amount		:= #amount#;
+  			m.remarks		:= #remarks#;
+  			m.last_update	:= SYSDATE;
+  			m.user_id		:= #userId#;
+  			m.cpi_rec_no	:= #cpiRecNo#;
+  			m.cpi_branch_cd	:= #cpiBranchCd#;
+  			Gipi_Quote_Mort_Pkg.update_gipi_quote_mort(m, #oldMortgCd#);
+  		END;
+  	</procedure>
+  	
+  	<procedure id="deleteGIPIQuoteMortgagee" parameterClass="java.util.HashMap">
+  		BEGIN
+  			Gipi_Quote_Mort_Pkg.Del_Gipi_Quote_Mort(#quoteId#, #issCd#, #itemNo#, #mortgCd#);
+  		END;
+  	</procedure>
+  	
+<!--  add this to procedure later...	-->
+  	<delete id="deleteGIPIQuoteMortgagee2" parameterClass="java.util.HashMap">
+  		DELETE FROM gipi_quote_mortgagee
+  		      WHERE quote_id = #quoteId#
+  		      	AND iss_cd = #issCd#
+  		      	<isNotEmpty property="itemNo">
+  		        	AND item_No = #itemNo#
+  		        </isNotEmpty>
+  		        <isNotEmpty property="mortgCd">
+  		        	AND mortg_cd = #mortgCd#
+  		        </isNotEmpty>
+  	</delete>
+  	
+  	<procedure id="deleteAllGIPIQuoteMortgagee" parameterClass="java.util.HashMap">
+  		BEGIN
+  			Gipi_Quote_Mort_Pkg.Del_All_Gipi_Quote_Mort(#quoteId#, #itemNo#);
+  		END;
+  	</procedure>
+  	
+  	<select id="getPackQuotationsMortgagee" resultMap="GIPIQuoteMortgagee">
+  		SELECT * FROM TABLE(Gipi_Quote_Mort_Pkg.get_pack_quotations_mortgagee(#packQuoteId#))
+  	</select>
+   
+</sqlMap>

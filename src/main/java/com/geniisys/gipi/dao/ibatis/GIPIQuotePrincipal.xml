@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIQuotePrincipal">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<resultMap id="getPrincipalListingMap" class="com.geniisys.gipi.entity.GIPIQuotePrincipal">
+		<result property="quoteId" column="QUOTE_ID" />
+		<result property="principalCd" column="PRINCIPAL_CD" />
+		<result property="enggBasicInfonum" column="ENGG_BASIC_INFONUM" />
+		<result property="subconSw" column="SUBCON_SW" />
+		<result property="principalName" column="PRINCIPAL_NAME" />
+	</resultMap>
+	
+	<resultMap id="getGipiQuotePrincipalListingMap" class="com.geniisys.gipi.entity.GIPIQuotePrincipal">
+		<result property="quoteId" 			column="QUOTE_ID" />
+		<result property="principalCd" 		column="PRINCIPAL_CD" />
+		<result property="enggBasicInfonum" column="ENGG_BASIC_INFONUM" />
+		<result property="subconSw" 		column="SUBCON_SW" />
+		<result property="principalName" 	column="PRINCIPAL_NAME" />
+		<result property="principalType" 	column="PRINCIPAL_TYPE" />
+	</resultMap>
+	
+	<select id="getPrincipalContractorListing" parameterClass="java.util.HashMap" resultMap="getPrincipalListingMap">
+		SELECT * FROM TABLE(gipi_quote_principal_pkg.get_principal_listing(#quoteId#, #principalType#))
+	</select>
+	
+	<procedure id="saveGIPIQuotePrincipal" parameterClass="java.util.HashMap">
+		BEGIN
+			gipi_quote_principal_pkg.save_principal_dtls(#quoteId#, #principalCd#, #enggBasicInfonum#, #subconSw#, #origPrincipalCd#);
+		END;	
+	</procedure>
+	
+	<delete id="deleteGIPIQuotePrincipal" parameterClass="java.util.HashMap">
+		BEGIN
+			gipi_quote_principal_pkg.delete_principal(#quoteId#, #principalCd#);
+		END;
+	</delete>
+	
+	<select id="getGIPIQuotePrincipalList" resultMap="getGipiQuotePrincipalListingMap">
+		SELECT * FROM TABLE(GIPI_QUOTE_PRINCIPAL_PKG.get_gipi_quote_principal_list(#quoteId#))
+	</select>
+	
+	<procedure id="setGIPIQuotePrincipal" parameterClass="java.util.HashMap">
+		BEGIN
+			gipi_quote_principal_pkg.set_gipi_quote_principal(#quoteId#, #principalCd#, #enggBasicInfoNum#, #subconSw#);
+		END;
+	</procedure>
+
+</sqlMap>

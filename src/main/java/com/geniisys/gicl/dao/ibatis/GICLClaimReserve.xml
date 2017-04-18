@@ -1,0 +1,511 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="GICLClaimReserve">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+
+	<typeAlias alias="GICLClaimReserveClass" type="com.geniisys.gicl.entity.GICLClaimReserve"/>
+	<typeAlias alias="GICLClmResHistClass" type="com.geniisys.gicl.entity.GICLClmResHist"/>
+	
+	<parameterMap class="map" id="initClaimReserveResultType1">
+		<parameter property="claimId" 			jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="IN"/>
+		<parameter property="itemNo" 			jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="IN"/>
+		<parameter property="perilCd"			jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="IN"/>
+		<parameter property="groupedItemNo"		jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="IN"/>
+		<parameter property="lineCdAc"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="lineCdCa"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="claimNumber"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="policyNumber"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="lineCd"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="dspLossDate"		jdbcType="DATE"		javaType="java.util.Date"		mode="OUT"/>
+		<parameter property="lossDate"			jdbcType="DATE"		javaType="java.util.Date"		mode="OUT"/>
+		<parameter property="assuredName"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="lossCategory"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="sublineCd"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="polIssCd"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="issueYy"			jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="OUT"/>
+		<parameter property="polSeqNo"			jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="OUT"/>
+		<parameter property="renewNo"			jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="OUT"/>
+		<parameter property="issCd"				jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="polEffDate"		jdbcType="DATE"		javaType="java.util.Date"		mode="OUT"/>
+		<parameter property="expiryDate"		jdbcType="DATE"		javaType="java.util.Date"		mode="OUT"/>
+		<parameter property="clmFileDate"		jdbcType="DATE"		javaType="java.util.Date"		mode="OUT"/>
+		<parameter property="clmStatDesc"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="catastrophicCd"	jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="OUT"/>
+		<parameter property="claimYy"			jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="OUT"/>
+		<parameter property="exists"			jdbcType="VARCHAR"	javaType="java.lang.String"	mode="OUT"/>
+		<parameter property="showReserveHistory" jdbcType="VARCHAR" javaType="java.lang.String"	mode="OUT"/>
+		<parameter property="showPaymentHistory" jdbcType="VARCHAR" javaType="java.lang.String"	mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="getClaimReserveInitValues1" parameterMap="initClaimReserveResultType1">
+		{ CALL gicl_clm_reserve_pkg.init_claim_reserve1
+			(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) }
+	</procedure>
+
+	<parameterMap class="map" id="extractExpiryGICLS024ParamMap">
+		<parameter property="lineCd"		jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+		<parameter property="sublineCd" 	jdbcType="VARCHAR"	javaType="java.lang.String" mode="IN"/>
+		<parameter property="issCd"	 		jdbcType="VARCHAR"	javaType="java.lang.String" mode="IN"/>
+		<parameter property="issueYy" 		jdbcType="INTEGER"	javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="polSeqNo" 		jdbcType="INTEGER"	javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="renewNo"	 	jdbcType="INTEGER"	javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="lossDate"		jdbcType="DATE"		javaType="java.util.Date"	mode="IN"/>
+		<parameter property="nbtExpiryDate"	jdbcType="DATE"		javaType="java.util.Date"	mode="OUT"/>
+	</parameterMap>
+
+	<procedure id="extractExpiryGICLS02" parameterMap="extractExpiryGICLS024ParamMap">
+		{ CALL gicl_clm_reserve_pkg.extract_expiry(?, ?, ?, ?, ?, ?, ?, ?)}
+	</procedure>
+	
+	<parameterMap class="map" id="validateExistingDistGICLS024ParamMap">
+		<parameter property="lineCd"	jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+		<parameter property="sublineCd"	jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+		<parameter property="issCd"		jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+		<parameter property="issueYy"	jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="IN"/>
+		<parameter property="polSeqNo"	jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="IN"/>
+		<parameter property="renewNo"	jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="IN"/>
+		<parameter property="proceed"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="message"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="callModule"	jdbcType="VARCHAR"	javaType="java.lang.String"	mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="validateExistingDistGICLS024" parameterMap="validateExistingDistGICLS024ParamMap">
+		{ CALL gicl_clm_reserve_pkg.validate_existing_dist(?, ?, ?, ?, ?, ?, ?, ?, ?)}
+	</procedure>
+	
+	<resultMap class="GICLClaimReserveClass" id="GICLClaimReserveResultMap">
+		<result property="claimId" column="claim_id" jdbcType="NUMBER"/>
+		<result property="itemNo" column="item_no" jdbcType="NUMBER"/>
+		<result property="perilCd" column="peril_cd" jdbcType="NUMBER"/>
+		<result property="lossReserve" column="loss_reserve" jdbcType="NUMBER"/>
+		<result property="lossesPaid" column="losses_paid" jdbcType="NUMBER"/>
+		<result property="expenseReserve" column="expense_reserve" jdbcType="NUMBER"/>
+		<result property="expensesPaid" column="expenses_paid" jdbcType="NUMBER"/>
+		<result property="currencyCd" column="currency_cd" jdbcType="NUMBER"/>
+		<result property="convertRate" column="convert_rate" jdbcType="NUMBER"/>
+		<result property="netPdLoss" column="net_pd_loss" jdbcType="NUMBER"/>
+		<result property="netPdExp" column="net_pd_exp" jdbcType="NUMBER"/>
+		<result property="groupedItemNo" column="grouped_item_no" jdbcType="NUMBER"/>
+		<result property="redistSw" column="redist_sw" jdbcType="VARCHAR"/>
+	</resultMap>
+	
+	<select id="getGICLClaimReserveGICLS024" resultMap="GICLClaimReserveResultMap">
+		SELECT claim_id, item_no, peril_cd, loss_reserve, losses_paid, expense_reserve, expenses_paid, currency_cd,
+	       convert_rate, net_pd_loss, net_pd_exp, grouped_item_no, redist_sw 
+		  FROM gicl_clm_reserve
+		 WHERE claim_id = #claimId#
+		   AND item_no = #itemNo#
+		   <isNotEmpty prepend="AND"  property="perilCd">
+				peril_cd = #perilCd#
+			</isNotEmpty>
+	</select>
+
+	
+	<resultMap class="java.util.HashMap" id="recoverableDetailsMap">
+		<result column="claim_id" 			property="claimId"/>
+        <result column="item_no" 			property="itemNo"/>
+        <result column="peril_cd" 			property="perilCd"/>
+        <result column="loss_reserve" 		property="lossReserve"/>
+        <result column="expense_reserve"	property="expenseReserve"/>
+        <result column="dsp_item_desc" 		property="itemTitle"/>
+        <result column="dsp_peril_desc" 	property="perilSname"/>
+        <result column="nbt_paid_amt" 		property="nbtPaidAmt"/>
+        <result column="clm_loss_id" 		property="clmLossId"/>
+        <result column="hist_seq_no" 		property="histSeqNo"/>
+        <result column="chk_choose" 		property="chkChoose"/>
+        <result column="nbt_ann_tsi_amt" 	property="nbtAnnTsiAmt"/>
+        <result column="orig_nbt_paid_amt"  property="origNbtPaidAmt"/> <!-- added by apollo cruz 07.10.2015 UCPB SR 19584 -->
+        <result column="rownum_" 			property="rowNum"/>
+		<result column="count_" 			property="rowCount"/>
+	</resultMap>
+	
+	<select id="getRecoverableDetailsLOV" resultMap="recoverableDetailsMap">
+		SELECT * 
+		  FROM (SELECT rownum rownum_, 
+		        	   b.count_, 
+		               a.*
+		         FROM (SELECT * 
+		                 FROM TABLE (GICL_CLM_RESERVE_PKG.get_recoverable_details(#claimId#, #lineCd#, #recoveryId#))
+                        <isNotNull property="filter">
+						 WHERE 1=1
+               				<isNotEmpty prepend="AND"  property="itemNo">
+               					item_no LIKE #itemNo#
+               				</isNotEmpty>
+               				<isNotEmpty prepend="AND"  property="itemTitle">
+               					UPPER(dsp_item_desc) LIKE UPPER(#itemTitle#)
+               				</isNotEmpty>
+               				<isNotEmpty prepend="AND"  property="perilCd">
+               					peril_cd LIKE #perilCd#
+               				</isNotEmpty>
+               				<isNotEmpty prepend="AND"  property="perilSname">
+               					UPPER(dsp_peril_desc) LIKE UPPER(#perilSname#)
+               				</isNotEmpty>
+               				<isNotEmpty prepend="AND"  property="nbtAnnTsiAmt">
+               					nbt_ann_tsi_amt LIKE #nbtAnnTsiAmt#
+               				</isNotEmpty>
+               				<isNotEmpty prepend="AND"  property="nbtPaidAmt">
+               					nbt_paid_amt LIKE #nbtPaidAmt#
+               				</isNotEmpty>
+                    	</isNotNull>
+                        <isEqual property="sortColumn" compareValue="itemNo itemTitle">
+			            	ORDER BY item_no
+			            	<isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>, dsp_item_desc
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="perilCd perilSname">
+			            	ORDER BY peril_cd
+			            	<isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>, dsp_peril_desc
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="nbtAnnTsiAmt">
+			            	ORDER BY nbt_ann_tsi_amt
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="nbtPaidAmt">
+			            	ORDER BY nbt_paid_amt
+			          	</isEqual>
+			           	<isNotNull property="sortColumn">
+			              	<isEqual property="ascDescFlg" compareValue="ASC">
+			              		ASC
+			              	</isEqual>
+			              	<isEqual property="ascDescFlg" compareValue="DESC">
+			              		DESC
+			              	</isEqual>
+			            </isNotNull>
+                         ) a,
+                      (SELECT count(*) count_
+                         FROM TABLE(GICL_CLM_RESERVE_PKG.get_recoverable_details(#claimId#, #lineCd#, #recoveryId#))
+                         <isNotNull property="filter">
+						 WHERE 1=1
+               				<isNotEmpty prepend="AND"  property="itemNo">
+               					item_no LIKE #itemNo#
+               				</isNotEmpty>
+               				<isNotEmpty prepend="AND"  property="itemTitle">
+               					UPPER(dsp_item_desc) LIKE UPPER(#itemTitle#)
+               				</isNotEmpty>
+               				<isNotEmpty prepend="AND"  property="perilCd">
+               					peril_cd LIKE #perilCd#
+               				</isNotEmpty>
+               				<isNotEmpty prepend="AND"  property="perilSname">
+               					UPPER(dsp_peril_desc) LIKE UPPER(#perilSname#)
+               				</isNotEmpty> 
+               				<isNotEmpty prepend="AND"  property="nbtAnnTsiAmt">
+               					nbt_ann_tsi_amt LIKE #nbtAnnTsiAmt#
+               				</isNotEmpty>
+               				<isNotEmpty prepend="AND"  property="nbtPaidAmt">
+               					nbt_paid_amt LIKE #nbtPaidAmt#
+               				</isNotEmpty>
+                    	</isNotNull>
+                         ) b)
+         WHERE rownum_ BETWEEN #from# AND #to#     
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="availmentsMap">
+		<result column="claim_id" 			property="claimId"/>
+        <result column="loss_date" 			property="lossDate"/>
+        <result column="clm_stat_cd" 		property="clmStatCd"/>
+        <result column="clm_stat_desc"		property="clmStatDesc"/>
+        <result column="loss_reserve" 		property="lossReserve"/>
+        <result column="paid_amt" 			property="paidAmt"/>
+        <result column="no_of_units" 		property="noOfUnits"/>
+        <result column="peril_cd"		 	property="perilCd"/>
+        <result column="claim_no"	 		property="claimNo"/>
+        <result column="rownum_" 			property="rowNum"/>
+		<result column="count_" 			property="rowCount"/>
+	</resultMap>
+	<select id="getAvailmentsTableGrid" resultMap="availmentsMap">
+		SELECT * 
+		  FROM (SELECT rownum rownum_, 
+		        	   b.count_, 
+		               a.*
+		         FROM (SELECT * 
+		                 FROM TABLE (GICL_CLM_RESERVE_PKG.get_availments(#lineCd#, #sublineCd#, #polIssCd#, #issueYy#, #polSeqNo#, #renewNo#, #perilCd#, #noOfDays#))
+                         ) a,
+                      (SELECT count(*) count_
+                         FROM TABLE(GICL_CLM_RESERVE_PKG.get_availments(#lineCd#, #sublineCd#, #polIssCd#, #issueYy#, #polSeqNo#, #renewNo#, #perilCd#, #noOfDays#))
+                         ) b)
+         WHERE rownum_ BETWEEN #from# AND #to#
+         <isEqual property="sortColumn" compareValue="claimNo">
+			ORDER BY claim_no
+         </isEqual>  
+         <isEqual property="sortColumn" compareValue="lossDate">
+			ORDER BY loss_date
+         </isEqual>
+         <isEqual property="sortColumn" compareValue="clmStatDesc">
+			ORDER BY clm_stat_desc
+         </isEqual>
+         <isEqual property="sortColumn" compareValue="lossReserve">
+			ORDER BY loss_reserve
+         </isEqual>
+         <isEqual property="sortColumn" compareValue="paidAmt">
+			ORDER BY paid_amt
+         </isEqual>
+         <isEqual property="sortColumn" compareValue="noOfUnits">
+			ORDER BY no_of_units
+         </isEqual>
+         <isNotNull property="sortColumn">
+			<isEqual property="ascDescFlg" compareValue="ASC">
+				ASC
+			</isEqual>
+			<isEqual property="ascDescFlg" compareValue="DESC">
+				DESC
+			</isEqual>
+		</isNotNull>
+		<isNull property="sortColumn">
+			ORDER BY claim_no ASC
+		</isNull>
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="availmentTotalsMap">
+		<result column="sum_loss_reserve"	property="sumLossReserve"/>
+		<result column="sum_paid_amt"		property="sumPaidAmt"/>
+		<result column="sum_no_of_units"	property="sumNoOfUnits"/>
+	</resultMap>
+	<select id="getAvailmentTotals" resultMap="availmentTotalsMap">
+		SELECT SUM(loss_reserve) sum_loss_reserve,
+			   SUM(paid_amt) sum_paid_amt,
+			   SUM(no_of_units) sum_no_of_units
+		  FROM TABLE (GICL_CLM_RESERVE_PKG.get_availments(#lineCd#, #sublineCd#, #polIssCd#, #issueYy#, #polSeqNo#, #renewNo#, #perilCd#, #noOfDays#))
+	</select>
+	
+	<parameterMap class="java.util.HashMap" id="PreValidationParamMap">
+		<parameter property="claimId" 		javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="itemNo" 		javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="perilCd" 		javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="groupedItemNo" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="advLflag" 		javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT"/>
+		<parameter property="advEflag" 		javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT"/>
+		<parameter property="xolShareType" 	javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT"/>
+		<parameter property="currExists" 	javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT"/>
+		<parameter property="xolExists" 	javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT"/>
+		<parameter property="catCd" 		javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="getPreValidationParams" parameterMap="PreValidationParamMap">
+		BEGIN
+			get_pre_val_params(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<procedure id="gicls024UpdateStatus" parameterClass="java.util.HashMap">	
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			gicl_item_peril_pkg.gicls024_update_status(#claimId#, #itemNo#, #perilCd#, #groupedItemNo#, 
+			 <!-- comment out by Aliza 05.10.16 #closeFlag#, #closeFlag2#, #updateXol#, #distributionDate#, #lossReserve#, #expenseReserve#);-->
+			 #closeFlag#, #closeFlag2#, #updateXol#, #distDate#, #lossReserve#, #expenseReserve#);
+		END;
+	</procedure>
+	
+	<parameterMap class="java.util.HashMap" id="gicls024CheckUWDistMap">
+		<parameter property="lineCd" 		javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="sublineCd" 	javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="polIssCd" 		javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="issueYy" 		javaType="java.lang.Integer" jdbcType="INTEGER" mode="IN"/>
+		<parameter property="polSeqNo" 		javaType="java.lang.Integer" jdbcType="INTEGER" mode="IN"/>
+		<parameter property="renewNo" 		javaType="java.lang.Integer" jdbcType="INTEGER" mode="IN"/>
+		<parameter property="polEffDate" 	javaType="java.util.Date" jdbcType="DATE" mode="IN"/>
+		<parameter property="expiryDate" 	javaType="java.util.Date" jdbcType="DATE" mode="IN"/>
+		<parameter property="dspLossDate" 	javaType="java.util.Date" jdbcType="DATE" mode="IN"/>
+		<parameter property="perilCd" 		javaType="java.lang.Integer" jdbcType="INTEGER" mode="IN"/>
+		<parameter property="itemNo" 		javaType="java.lang.Integer" jdbcType="INTEGER" mode="IN"/>
+		<parameter property="message" 		javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="gicls024CheckUWDist" parameterMap="gicls024CheckUWDistMap">
+		{CALL gicl_clm_reserve_pkg.check_uw_dist_gicls024(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}
+	</procedure>
+	
+	<parameterMap class="java.util.HashMap" id="redistributeReserveMap">
+		<parameter property="userId" 		 javaType="java.lang.String"  	jdbcType="VARCHAR" 	mode="IN"/>
+		<parameter property="claimId"  		 javaType="java.lang.Integer" 	jdbcType="INTEGER" 	mode="IN"/>
+		<parameter property="itemNo" 		 javaType="java.lang.Integer" 	jdbcType="INTEGER" 	mode="IN"/>
+		<parameter property="perilCd" 		 javaType="java.lang.Integer" 	jdbcType="INTEGER" 	mode="IN"/>
+		<parameter property="groupedItemNo"  javaType="java.lang.Integer" 	jdbcType="INTEGER" 	mode="IN"/>
+		<parameter property="distDate" javaType="java.util.Date"    jdbcType="DATE" 	mode="IN"/> <!-- added by Aliza 05.10.16 -->
+		<parameter property="lossReserve"    javaType="java.math.BigDecimal" jdbcType="NUMERIC" mode="IN"/>
+		<parameter property="expenseReserve" javaType="java.math.BigDecimal" jdbcType="NUMERIC" mode="IN"/>
+		<parameter property="lineCd" 		 javaType="java.lang.String"  	jdbcType="VARCHAR" 	mode="IN"/>
+		<parameter property="histSeqNo"      javaType="java.lang.Integer"  	jdbcType="INTEGER" 	mode="IN"/>
+		<parameter property="clmResHistId"   javaType="java.lang.Integer"  	jdbcType="INTEGER" 	mode="IN"/>  <!-- added by Halley 09.20.13 -->
+		<parameter property="message" 		 javaType="java.lang.String"  	jdbcType="VARCHAR" 	mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="redistributeReserve" parameterMap="redistributeReserveMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			gicl_clm_reserve_pkg.redistribute_reserve(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<parameterMap class="java.util.HashMap" id="createNewReserveMap">
+		<parameter property="userId" 		 javaType="java.lang.String"  	jdbcType="VARCHAR" 	mode="IN"/>
+		<parameter property="claimId"  		 javaType="java.lang.Integer" 	jdbcType="INTEGER" 	mode="IN"/>
+		<parameter property="itemNo" 		 javaType="java.lang.Integer" 	jdbcType="INTEGER" 	mode="IN"/>
+		<parameter property="perilCd" 		 javaType="java.lang.Integer" 	jdbcType="INTEGER" 	mode="IN"/>
+		<parameter property="groupedItemNo"  javaType="java.lang.Integer" 	jdbcType="INTEGER" 	mode="IN"/>
+		<parameter property="distDate" javaType="java.util.Date"    jdbcType="DATE" 	mode="IN"/> <!-- added by Aliza 05.10.16 -->
+		<parameter property="lossReserve"    javaType="java.math.BigDecimal" jdbcType="NUMERIC" mode="IN"/>
+		<parameter property="expenseReserve" javaType="java.math.BigDecimal" jdbcType="NUMERIC" mode="IN"/>
+		<parameter property="histSeqNo"      javaType="java.lang.Integer"  	jdbcType="INTEGER" 	mode="OUT"/>
+		<parameter property="clmResHistId"   javaType="java.lang.Integer"  	jdbcType="INTEGER" 	mode="OUT"/> <!-- added by Halley 09.20.13 -->
+	</parameterMap>
+	
+	<procedure id="createNewReserve" parameterMap="createNewReserveMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			create_new_reserve (?, ?, ?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<procedure id="updateClaimDistTag" parameterClass="map">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			update_clm_dist_tag (#claimId#);
+		END;
+	</procedure>
+	
+	<parameterMap class="map" id="checkLossRsrvMap">
+		<parameter property="claimId"		 javaType="java.lang.Integer"	jdbcType="INTEGER" 			mode="IN"/>
+		<parameter property="perilCd"		 javaType="java.lang.Integer"	jdbcType="INTEGER" 			mode="IN"/>
+		<parameter property="itemNo"		 javaType="java.lang.Integer"	jdbcType="INTEGER" 			mode="IN"/>
+		<parameter property="groupedItemNo"	 javaType="java.lang.Integer"	jdbcType="INTEGER" 			mode="IN"/>
+		<parameter property="lineCd"		 javaType="java.lang.String"	jdbcType="VARCHAR" 			mode="IN"/>
+		<parameter property="issCd"		 	 javaType="java.lang.String"	jdbcType="VARCHAR" 			mode="IN"/>
+		<parameter property="lossReserve"    javaType="java.math.BigDecimal" jdbcType="NUMERIC" 		mode="IN"/>
+		<parameter property="expenseReserve" javaType="java.math.BigDecimal" jdbcType="NUMERIC" 		mode="IN"/>
+		<parameter property="convertRate"    javaType="java.math.BigDecimal" jdbcType="NUMERIC" 		mode="IN"/>
+		<parameter property="message" 		 javaType="java.lang.String"  	jdbcType="VARCHAR" 			mode="OUT"/>
+		<parameter property="approvedSw" 	 javaType="java.lang.String"  	jdbcType="VARCHAR" 			mode="OUT"/>
+		<parameter property="orCount" 	 	 javaType="java.lang.Integer"	jdbcType="INTEGER" 			mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="checkLossRsrv" parameterMap="checkLossRsrvMap">
+		{CALL check_loss_rsrv(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}
+	</procedure>
+	
+	<parameterMap class="map" id="gicls024OverrideMap">
+		<parameter property="user"		 	 javaType="java.lang.String"	 jdbcType="VARCHAR" 			mode="IN"/>
+		<parameter property="lossReserve"    javaType="java.math.BigDecimal" jdbcType="NUMERIC" 		mode="IN"/>
+		<parameter property="lineCd"		 javaType="java.lang.String"	 jdbcType="VARCHAR" 			mode="IN"/>
+		<parameter property="issCd"		 	 javaType="java.lang.String"	 jdbcType="VARCHAR" 			mode="IN"/>
+		<parameter property="message" 		 javaType="java.lang.String"  	 jdbcType="VARCHAR" 			mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="gicls024OverrideExpense" parameterMap="gicls024OverrideMap">
+		{CALL gicl_clm_reserve_pkg.checkOverrideGICLS024(?, ?, ?, ?, ?)}
+	</procedure>
+	
+	<procedure id="createOverrideRequestGICLS024" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			gicls024_create_override_req(#lineCd#, #issCd#, #claimId#, #userId#, #ovrRemarks#);
+		END;	
+	</procedure>
+	
+	<procedure id="gicls024PostFormsCommit" parameterClass="map">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			gicl_clm_reserve_pkg.gicls024_post_forms_commit(#claimId#);
+		END;
+	</procedure>
+	
+	<procedure id="saveClaimReserve" parameterClass="GICLClaimReserveClass">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+		
+			MERGE INTO gicl_clm_reserve
+	         USING DUAL ON (
+	                claim_id = #claimId#
+	            AND peril_cd = #perilCd#
+	            AND item_no  = #itemNo#
+	         )
+	         WHEN NOT MATCHED THEN
+	            INSERT (claim_id, item_no, peril_cd, loss_reserve,
+	                    losses_paid, expense_reserve, expenses_paid, currency_cd,
+	                    convert_rate, net_pd_loss, net_pd_exp, grouped_item_no, 
+	                   user_id, last_update)
+	            VALUES (#claimId#, #itemNo#, #perilCd#, #lossReserve#,
+	                    #lossesPaid#, #expenseReserve#, #expensesPaid#, 
+	                    gicl_clm_reserve_pkg.get_curr_cd(#claimId#, #itemNo#),
+	                    gicl_clm_reserve_pkg.get_curr_rt(#claimId#, #itemNo#),
+	                    #netPdLoss#, #netPdExp#, #groupedItemNo#,
+	                     NVL (giis_users_pkg.app_user, USER), SYSDATE)
+	         WHEN MATCHED THEN
+	            UPDATE
+	               SET  loss_reserve = #lossReserve#,
+	                    losses_paid = #lossesPaid#,
+	                    expense_reserve = #expenseReserve#,
+	                    expenses_paid = #expensesPaid#,
+	                    net_pd_loss = #netPdLoss#,
+	                    net_pd_exp = #netPdExp#,
+	                    user_id = NVL(giis_users_pkg.app_user, USER),
+	                    last_update = SYSDATE,
+	                    currency_cd = #currencyCd#,
+	                    convert_rate = #convertRate#;
+		END;
+	</procedure>
+	
+	<parameterMap class="java.util.HashMap" id="gicls024ChckLossRsrvMap">
+		<parameter property="claimId" 						javaType="java.lang.Integer" jdbcType="INTEGER" mode="IN"/>
+		<parameter property="itemNo" 						javaType="java.lang.Integer" jdbcType="INTEGER" mode="IN"/>
+		<parameter property="perilCd" 						javaType="java.lang.Integer" jdbcType="INTEGER" mode="IN"/>
+		<parameter property="groupedItemNo" 		javaType="java.lang.Integer" jdbcType="INTEGER" mode="IN"/>
+		<parameter property="lineCd" 						javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="issCd" 							javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="userId" 						javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="lossReserve" 	 			javaType="java.math.BigDecimal" jdbcType="NUMERIC" mode="IN"/>
+		<parameter property="expenseReserve" 		javaType="java.math.BigDecimal" jdbcType="NUMERIC" mode="IN"/>
+		<parameter property="converRate" 		 		javaType="java.math.BigDecimal" jdbcType="NUMERIC" mode="IN"/>
+		<parameter property="message" 					javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="gicls024ChckLossRsrv" parameterMap="gicls024ChckLossRsrvMap">
+		{CALL gicl_clm_reserve_pkg.gicls024_check_loss_rsrv(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}
+	</procedure>
+	
+	<select id="chckBkngDteExist" resultClass="java.lang.String">
+  		SELECT gicl_clm_reserve_pkg.gicls024_check_booking_date(#claimId#) FROM DUAL 
+  	</select>
+  	
+  	<select id="gicls024OverrideCount" resultClass="java.lang.String">
+  		SELECT gicl_clm_reserve_pkg.gicls024_get_override_cnt(#claimId#) FROM DUAL 
+  	</select>
+	
+	<update id="updateResAmtsGICLS024">
+		BEGIN
+				giis_users_pkg.app_user := #userId#;
+				UPDATE gicl_clm_reserve
+				   SET loss_reserve = nvl(#lossReserve#,loss_reserve),
+				   		   expense_reserve = nvl(#expenseReserve#, expense_reserve)
+				 WHERE claim_id = #claimId#
+	                  AND peril_cd = #perilCd#
+	                  AND item_no  = #itemNo#;
+		END;
+	</update>
+	
+	<select id="checkIfExistGiclClmReserve" resultClass="java.lang.String">
+		SELECT GICL_CLM_RESERVE_PKG.get_gicl_clm_reserve_exist(#claimId#) FROM dual
+	</select>
+	
+	<procedure id="createOverrideRequestBasicInfo" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			gicls010_create_override_req(#lineCd#, #issCd#, #userId#, #ovrRemarks#);
+		END;	
+	</procedure>
+	
+</sqlMap>

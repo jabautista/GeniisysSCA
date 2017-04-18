@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIErrorLog">
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIPIErrorLog" type="com.geniisys.gipi.entity.GIPIErrorLog"/>
+	
+	<resultMap id="GIPIErrorLogMap" class="GIPIErrorLog">
+		<result column="upload_no" 				property="uploadNo"/>
+		<result column="filename" 				property="filename"/>
+		<result column="grouped_item_title" 	property="groupedItemTitle"/>
+		<result column="sex" 					property="sex"/>
+		<result column="civil_status" 			property="civilStatus"/>
+		<result column="date_of_birth" 			property="dateOfBirth"/>
+		<result column="age" 					property="age"/>
+		<result column="salary" 				property="salary"/>
+		<result column="salary_grade" 			property="salaryGrade"/>
+		<result column="amount_coverage" 		property="amountCoverage"/>
+		<result column="remarks" 				property="remarks"/>
+		<result column="user_id" 				property="userId"/>
+		<result column="last_update" 			property="lastUpdate"/>
+		<result column="control_cd" 			property="controlCd"/>
+		<result column="control_type_cd" 		property="controlTypeCd"/>
+		<result column="grouped_item_no" 		property="groupedItemNo"/>
+	</resultMap>
+	
+	<resultMap class="GIPIErrorLog" id="GIPIErrorLogResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="UPLOAD_NO" 				property="uploadNo"/>
+		<result column="FILENAME" 				property="filename"/>
+		<result column="GROUPED_ITEM_TITLE" 	property="groupedItemTitle"/>
+		<result column="SEX" 					property="sex"/>
+		<result column="CIVIL_STATUS" 			property="civilStatus"/>
+		<result column="DATE_OF_BIRTH" 			property="dateOfBirth"/>
+		<result column="AGE" 					property="age"/>
+		<result column="SALARY" 				property="salary"/>
+		<result column="SALARY_GRADE" 			property="salaryGrade"/>
+		<result column="AMOUNT_COVERAGE" 		property="amountCoverage"/>
+		<result column="REMARKS" 				property="remarks"/>
+		<result column="USER_ID" 				property="userId"/>
+		<result column="LAST_UPDATE" 			property="lastUpdate"/>
+		<result column="CONTROL_CD" 			property="controlCd"/>
+		<result column="CONTROL_TYPE_CD" 		property="controlTypeCd"/>
+		<result column="GROUPED_ITEM_NO" 		property="groupedItemNo"/>
+	</resultMap>
+
+	<procedure id="getGIPIErrorLog" resultMap="GIPIErrorLogMap">
+		SELECT * FROM TABLE(GIPI_ERROR_LOG_PKG.get_gipi_error_log(#filename#))
+	</procedure>
+	
+	<delete id="delGIPIErrorLog">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			GIPI_ERROR_LOG_PKG.del_gipi_error_log;
+		END;
+	</delete>
+	
+	<select id="getGIPIErrorLogTG" resultMap="GIPIErrorLogResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(gipi_error_log_pkg.get_gipi_error_log(#filename#))
+						  <isNull property="sortColumn">
+							ORDER BY upload_no ASC
+						  </isNull>
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="uploadNo">
+								ORDER BY upload_no
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="filename">
+								ORDER BY filename
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="grouped_item_no">
+								ORDER BY grouped_item_no
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="groupedItemTitle">
+								ORDER BY grouped_item_title
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="sex">
+								ORDER BY sex
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="civilStatus">
+								ORDER BY civil_status
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="dateOfBirth">
+								ORDER BY date_of_birth
+							</isEqual>							
+							<isEqual property="sortColumn" compareValue="age">
+								ORDER BY age
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="salary">
+								ORDER BY salary
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="salaryGrade">
+								ORDER BY salary_grade
+							</isEqual>							
+							<isEqual property="sortColumn" compareValue="amountCoverage">
+								ORDER BY amount_coverage
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(gipi_error_log_pkg.get_gipi_error_log(#filename#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+
+</sqlMap>

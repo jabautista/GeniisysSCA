@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISFileSource">
+	<typeAlias alias="GIISFileSource" type="com.geniisys.giac.entity.GIACFileSource"/>
+	
+	<resultMap class="GIISFileSource" id="GIISFileSource" extends="BaseEntity.TableGridResultMap">
+		<result property="sourceCd" 		column="SOURCE_CD"/>
+		<result property="sourceName" 		column="SOURCE_NAME"/>
+		<result property="orTag" 			column="OR_TAG"/>
+		<result property="orTagDesc" 		column="OR_TAG_DESC"/>
+		<result property="atmTag" 			column="ATM_TAG"/>
+		<result property="address1" 		column="ADDRESS_1"/>
+		<result property="address2" 		column="ADDRESS_2"/>
+		<result property="address3" 		column="ADDRESS_3"/>
+		<result property="remarks" 			column="REMARKS"/>
+		<result property="utilityTag"		column="UTILITY_TAG"/>
+		<result property="tin" 				column="TIN"/>
+		<result property="originalSource" 	column="ORIGINAL_SOURCE"/>
+		<result property="addUpdate" 		column="ADD_UPDATE"/>
+		<result property="userId" 			column="USER_ID"/>
+		<result property="lastUpdate" 		column="LAST_UPDATE"/>
+		<result property="rowNum" 			column="rownum_"/>
+		<result property="rowCount" 		column="count_"/>
+	</resultMap>
+	
+	<select id="showFileSource" resultMap="GIISFileSource">
+		SELECT *
+		  FROM (SELECT a.*, b.count_, ROWNUM rownum_
+		          FROM (SELECT *
+		                  FROM TABLE (giacs600_pkg.get_file_source_records)
+ 							<isNotNull property="filter">
+								WHERE 1=1
+								<isNotEmpty prepend="AND"  property="sourceCd">
+									upper(source_cd) LIKE upper(#sourceCd#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="sourceName">
+									upper(source_name) LIKE upper(#sourceName#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="orTagDesc">
+									upper(or_tag_desc) LIKE upper(#orTagDesc#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="tin">
+									upper(tin) LIKE upper(#tin#)
+								</isNotEmpty>
+							</isNotNull>		                  
+		                  	<isEqual property="sortColumn" compareValue="atmTag">
+			              		ORDER BY atm_tag
+			              	</isEqual>
+	                        <isEqual property="sortColumn" compareValue="utilityTag">
+				                ORDER BY utility_tag
+				            </isEqual>
+				            <isEqual property="sortColumn" compareValue="sourceCd">
+				              	ORDER BY source_cd
+				            </isEqual>
+				            <isEqual property="sortColumn" compareValue="sourceName">
+				              	ORDER BY source_name
+				            </isEqual>
+				            <isEqual property="sortColumn" compareValue="orTagDesc">
+				              	ORDER BY or_tag_desc
+				            </isEqual>
+				            <isEqual property="sortColumn" compareValue="tin">
+				              	ORDER BY tin
+				            </isEqual>
+			              	<isNotNull property="sortColumn">
+				              	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	</isNotNull>
+		                  ) a,
+		               (SELECT COUNT (*) count_
+		                  FROM TABLE (giacs600_pkg.get_file_source_records)
+		                  	<isNotNull property="filter">
+								WHERE 1=1
+								<isNotEmpty prepend="AND"  property="sourceCd">
+									upper(source_cd) LIKE upper(#sourceCd#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="sourceName">
+									upper(source_name) LIKE upper(#sourceName#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="orTagDesc">
+									upper(or_tag_desc) LIKE upper(#orTagDesc#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="tin">
+									upper(tin) LIKE upper(#tin#)
+								</isNotEmpty>
+							</isNotNull>	
+		                  ) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<insert id="setFileSource" parameterClass="GIISFileSource">
+  		DECLARE
+  			v_file_source   giac_file_source%ROWTYPE;
+		BEGIN
+		  giis_users_pkg.app_user 	 := #appUser#;
+		  
+		  giacs600_pkg.set_file_source (#originalSource#, #addUpdate#, #sourceCd#, #sourceName#, #orTag#, #atmTag#, #address1#, #address2#, #address3#, #tin#, #remarks#, #utilityTag#, #appUser#);
+		END;
+  	</insert>
+  	
+  	<delete id="deleteFileSource" parameterClass="GIISFileSource">
+  		BEGIN
+  			giacs600_pkg.delete_file_source(#sourceCd#);
+  		END;
+  	</delete>
+  	
+  	<!-- Dren Niebres 10.03.2016 SR-4573 : GIACS606 - Start -->
+ 	<resultMap class="java.util.HashMap" id="giacs605SourceLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result property="sourceCd" 		column="source_cd" />
+		<result property="sourceName" 		column="source_name" />
+	</resultMap>	
+	
+	<select id="getGIACS605SourceLOV" resultMap="giacs605SourceLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giac_file_source_pkg.get_giacs605_source_lov(#search#))
+		                 <isNotNull property="findText">
+					         WHERE (UPPER(source_cd) LIKE (#findText#))
+				         </isNotNull>          
+			          	  <isNotNull property="sortColumn">
+			                  <isEqual property="sortColumn" compareValue="sourceCd">
+				              		ORDER BY source_cd
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="sourceName">
+				              		ORDER BY source_name
+				              </isEqual>
+				          	  <isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              </isNotNull>
+				          </isNotNull>    
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (giac_file_source_pkg.get_giacs605_source_lov(#search#))
+			              <isNotNull property="findText">
+					          WHERE (UPPER(source_cd) LIKE (#findText#))
+				          </isNotNull> 
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>	  
+	
+ 	<resultMap class="java.util.HashMap" id="giacs606SourceLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result property="sourceCd" 		column="source_cd" />
+		<result property="sourceName" 		column="source_name" />
+	</resultMap>	
+	
+	<select id="getGIACS606SourceLOV" resultMap="giacs606SourceLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giac_file_source_pkg.get_giacs606_source_lov(#search#))
+		                 <isNotNull property="findText">
+					         WHERE (UPPER(source_cd) LIKE (#findText#))
+				         </isNotNull>          
+			          	  <isNotNull property="sortColumn">
+			                  <isEqual property="sortColumn" compareValue="sourceCd">
+				              		ORDER BY source_cd
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="sourceName">
+				              		ORDER BY source_name
+				              </isEqual>
+				          	  <isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              </isNotNull>
+				          </isNotNull>    
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (giac_file_source_pkg.get_giacs606_source_lov(#search#))
+			              <isNotNull property="findText">
+					          WHERE (UPPER(source_cd) LIKE (#findText#))
+				          </isNotNull> 
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select> <!-- Dren Niebres 10.03.2016 SR-4573 : GIACS606 - End -->
+  	
+</sqlMap>

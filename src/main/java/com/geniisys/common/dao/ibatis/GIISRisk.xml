@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISRisk">
+
+ 	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<resultMap id="RiskLOVResultMap" class="com.geniisys.common.entity.GIISRisks" extends="BaseEntity.TableGridResultMap">
+		<result column="RISK_CD"			property="riskCd"/>
+		<result column="RISK_DESC"			property="riskDesc"/>
+	</resultMap>
+
+	<select id="getGIISRiskLOV" resultMap="RiskLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giis_risks_pkg.get_risk_listing(#blockId#, #findText#))
+		                  <isEqual property="sortColumn" compareValue="riskCd">
+			              		ORDER BY risk_cd
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="riskDesc">
+			              		ORDER BY risk_desc
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giis_risks_pkg.get_risk_listing(#blockId#, #findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGIISRiskLOV2" resultMap="RiskLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giis_risks_pkg.get_risk_listing(#blockId#, #findText#))
+						  <isNull property="findText">
+		                  	WHERE UPPER(risk_cd) LIKE UPPER(NVL(#searchString#, risk_cd))
+		                  	   OR UPPER(risk_desc) LIKE UPPER(NVL(#searchString#, risk_desc))
+		                  </isNull>
+		                  <isEqual property="sortColumn" compareValue="riskDesc">
+			              		ORDER BY risk_desc
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giis_risks_pkg.get_risk_listing(#blockId#, #findText#))
+						  <isNull property="findText">
+		                  	WHERE UPPER(risk_cd) LIKE UPPER(NVL(#searchString#, risk_cd))
+		                  	   OR UPPER(risk_desc) LIKE UPPER(NVL(#searchString#, risk_desc))
+		                  </isNull>
+		               	) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+</sqlMap>

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISClass">
+	
+	<typeAlias alias="giisClass" type="com.geniisys.common.entity.GIISClass"/>
+  	
+	<resultMap class="giisClass" id="giisClassListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="class_cd"     property="classCd"/>
+		<result column="class_desc"  property="classDesc"/>
+		<result column="user_id"     property="userId"/>
+		<result column="last_update" property="lastUpdate"/>
+		<result column="remarks"     property="remarks"/>
+	</resultMap>
+	
+	<select id="getGiiss063RecList" resultMap="giisClassListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss063_pkg.get_rec_list(#classCd#, #classDesc#))
+		                  <isEqual property="sortColumn" compareValue="classCd">
+			              		ORDER BY class_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="classDesc">
+			              		ORDER BY class_desc
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss063_pkg.get_rec_list(#classCd#, #classDesc#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setClass" parameterClass="giisClass">
+	    DECLARE
+	    	v_rec giis_class%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.class_cd := #classCd#;
+ 			v_rec.class_desc := #classDesc#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			giiss063_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteClass" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss063_pkg.val_del_rec(#recId#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddClass" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss063_pkg.val_add_rec(#recId#);
+ 		END;
+ 	</procedure> 	
+ 	
+ 	<procedure id="valAddClass2" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss063_pkg.val_add_rec2(#recDesc#);
+ 		END;
+ 	</procedure>
+ 	
+	<delete id="delClass" parameterClass="java.lang.String">
+		BEGIN
+ 			giiss063_pkg.del_rec(#classCd#);
+ 		END;
+ 	</delete>
+</sqlMap>

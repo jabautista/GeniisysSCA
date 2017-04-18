@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GICLClmStatHist">
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GICLClmStatHistClass" type="com.geniisys.gicl.entity.GICLClmStatHist"/>
+
+	<resultMap class="java.util.HashMap" id="getStatHistTableGridListingMap">
+		<result column="claim_id" 	property="claimId" />
+		<result column="clm_stat_cd" property="clmStatCd" />
+		<result column="clm_stat_desc" property="clmStatDesc" />
+		<result column="clm_stat_dt" property="clmStatDt" />
+		<result column="dsp_clm_stat_dt" property="dspClmStatDt" />
+		<result column="user_id"	property="userId" />
+		<result column="rownum_" 	property="rowNum" />
+		<result column="count_"		property="rowCount"/>
+	</resultMap>
+	
+	<select id="getStatHistTableGridListing" resultMap="getStatHistTableGridListingMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(gicl_clm_stat_hist_pkg.get_stat_hist(#claimId#))           
+				          	  <isEqual property="sortColumn" compareValue="clmStatCd">
+				              		ORDER BY clm_stat_cd
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="clmStatDesc">
+				              		ORDER BY clm_stat_desc
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="dspClmStatDt">
+				              		ORDER BY dsp_clm_stat_dt
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="userId">
+				              		ORDER BY user_id
+				              </isEqual>
+				              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			                  </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(gicl_clm_stat_hist_pkg.get_stat_hist(#claimId#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+</sqlMap>

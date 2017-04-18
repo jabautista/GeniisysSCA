@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIACCheckNo">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIACCheckNo" type="com.geniisys.giac.entity.GIACCheckNo"/>
+	
+	<resultMap class="java.util.HashMap" id="bankLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="bank_cd"     		property="bankCd"/>
+		<result column="bank_sname"     	property="bankSName"/>
+		<result column="bank_name"     		property="bankName"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="bankAcctLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="bank_acct_cd"     	property="bankAcctCd"/>
+		<result column="bank_acct_no"     	property="bankAcctNo"/>
+	</resultMap>
+	
+	<resultMap class="GIACCheckNo" id="checkNoListMap" extends="BaseEntity.TableGridResultMap">
+		<result column="fund_cd"     		property="fundCd"/>
+		<result column="branch_cd"     		property="branchCd"/>
+		<result column="bank_cd"     		property="bankCd"/>
+		<result column="bank_acct_cd"     	property="bankAcctCd"/>
+		<result column="chk_prefix"     	property="chkPrefix"/>
+		<result column="check_seq_no"     	property="checkSeqNo"/>
+		<result column="remarks"     		property="remarks"/>
+		<result column="user_id"     		property="userId"/>
+		<result column="last_update"     	property="lastUpdate"/>
+		<result column="in_use"     		property="inUse"/>
+		<result column="old_check_seq_no"   property="oldCheckSeqNo"/>
+	</resultMap>
+	
+	<procedure id="checkBranchForCheck" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			GIACS326_PKG.check_branch(#fundCd#, #branchCd#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<select id="getBankLOV" resultMap="bankLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(GIACS326_PKG.get_bank_lov(#fundCd#, #branchCd#, #findText#))
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="bankCd">
+								ORDER BY bank_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="bankSName">
+								ORDER BY bank_sname
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="bankName">
+								ORDER BY bank_name
+							</isEqual>			
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(GIACS326_PKG.get_bank_lov(#fundCd#, #branchCd#, #findText#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getBankAcctLOV" resultMap="bankAcctLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(GIACS326_PKG.get_bank_acct_lov(#bankCd#, #findText#))
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="bankAcctCd">
+								ORDER BY bank_acct_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="bankAcctNo">
+								ORDER BY bank_acct_no
+							</isEqual>	
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(GIACS326_PKG.get_bank_acct_lov(#bankCd#, #findText#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+ 	<select id="getGIACS326RecList" resultMap="checkNoListMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(GIACS326_PKG.get_check_no_list(#fundCd#, #branchCd#, #bankCd#, #bankAcctCd#, #chkPrefix#, #checkSeqNo#))
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="chkPrefix">
+								ORDER BY chk_prefix
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="checkSeqNo">
+								ORDER BY check_seq_no
+							</isEqual>	
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(GIACS326_PKG.get_check_no_list(#fundCd#, #branchCd#, #bankCd#, #bankAcctCd#, #chkPrefix#, #checkSeqNo#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="valAddGIACS326" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			GIACS326_PKG.val_add_rec(#fundCd#, #branchCd#, #bankCd#, #bankAcctCd#, #chkPrefix#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDelGIACS326" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			GIACS326_PKG.val_del_rec(#chkPrefix#, #bankCd#, #bankAcctCd#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="setGIACCheckNo" parameterClass="GIACCheckNo">
+	    DECLARE
+	    	v_rec GIAC_CHECK_NO%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.fund_cd := #fundCd#;
+ 			v_rec.branch_cd := #branchCd#;
+ 			v_rec.bank_cd := #bankCd#;
+ 			v_rec.bank_acct_cd := #bankAcctCd#;
+ 			v_rec.chk_prefix := #chkPrefix#;
+ 			v_rec.check_seq_no := #checkSeqNo#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.last_update := TO_DATE(#lastUpdate#, 'MM-DD-YYYY HH:MI:SS AM');
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			GIACS326_PKG.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<delete id="delGIACCheckNo" parameterClass="GIACCheckNo">
+		BEGIN
+ 			GIACS326_PKG.del_rec(#fundCd#, #branchCd#, #bankCd#, #bankAcctCd#, #chkPrefix#);
+ 		END;
+ 	</delete>
+ 	
+</sqlMap>

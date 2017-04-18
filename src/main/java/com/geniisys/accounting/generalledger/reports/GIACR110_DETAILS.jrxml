@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIACR110_DETAILS" language="groovy" pageWidth="950" pageHeight="572" columnWidth="950" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="a447393e-6231-4c73-97de-2f8a54bd3845">
+	<property name="ireport.zoom" value="2.565790591153533"/>
+	<property name="ireport.x" value="541"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="P_DATE1" class="java.lang.String"/>
+	<parameter name="P_DATE2" class="java.lang.String"/>
+	<parameter name="P_EXCLUDE_TAG" class="java.lang.String"/>
+	<parameter name="P_MODULE_ID" class="java.lang.String"/>
+	<parameter name="P_PAYEE" class="java.lang.String"/>
+	<parameter name="P_POST_TRAN_TOGGLE" class="java.lang.String"/>
+	<parameter name="P_USER_ID" class="java.lang.String"/>
+	<parameter name="P_PAYEE_CLASS_CD" class="java.lang.String"/>
+	<parameter name="P_TAX_CD" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT * FROM TABLE (giacr110_pkg.get_giacr110_records ($P{P_DATE1}, $P{P_DATE2}, $P{P_EXCLUDE_TAG}, $P{P_MODULE_ID}, $P{P_PAYEE}, $P{P_POST_TRAN_TOGGLE}, $P{P_TAX_CD}, $P{P_USER_ID})) WHERE payee_class_cd = $P{P_PAYEE_CLASS_CD} ORDER BY payee_cd]]>
+	</queryString>
+	<field name="COMPANY" class="java.lang.String"/>
+	<field name="ADDRESS" class="java.lang.String"/>
+	<field name="CF_INTM" class="java.lang.String"/>
+	<field name="CF_EMP" class="java.lang.String"/>
+	<field name="CF_DATE" class="java.lang.String"/>
+	<field name="PAYEE_CLASS_CD" class="java.lang.String"/>
+	<field name="CLASS_DESC" class="java.lang.String"/>
+	<field name="PAYEE_CD" class="java.math.BigDecimal"/>
+	<field name="PAYEE_NAME" class="java.lang.String"/>
+	<field name="INCOME_AMT" class="java.math.BigDecimal"/>
+	<field name="WHOLDING_TAX_AMT" class="java.math.BigDecimal"/>
+	<field name="BIR_TAX_CD" class="java.lang.String"/>
+	<field name="PERCENT_RATE" class="java.math.BigDecimal"/>
+	<field name="WHTAX_DESC" class="java.lang.String"/>
+	<field name="TIN" class="java.lang.String"/>
+	<variable name="V_WHTAX_DESC" class="java.math.BigDecimal" resetType="Group" resetGroup="PAYEE_CD" calculation="Count">
+		<variableExpression><![CDATA[$F{WHTAX_DESC}]]></variableExpression>
+	</variable>
+	<variable name="V_SUM_WTAX_PAYEE" class="java.math.BigDecimal" resetType="Group" resetGroup="PAYEE_CD" calculation="Sum">
+		<variableExpression><![CDATA[$F{WHOLDING_TAX_AMT}]]></variableExpression>
+	</variable>
+	<variable name="V_SUM_INCOME_PAYEE" class="java.math.BigDecimal" resetType="Group" resetGroup="PAYEE_CD" calculation="Sum">
+		<variableExpression><![CDATA[$F{INCOME_AMT}]]></variableExpression>
+	</variable>
+	<group name="PAYEE_CD">
+		<groupExpression><![CDATA[$F{PAYEE_CD}]]></groupExpression>
+		<groupFooter>
+			<band height="22">
+				<staticText>
+					<reportElement positionType="Float" x="323" y="11" width="57" height="11" isRemoveLineWhenBlank="true" uuid="24a87b63-0a87-4230-9432-8282559f2431">
+						<printWhenExpression><![CDATA[$V{V_WHTAX_DESC}>1]]></printWhenExpression>
+					</reportElement>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[Totals per Payee]]></text>
+				</staticText>
+				<staticText>
+					<reportElement positionType="Float" x="411" y="0" width="90" height="11" isRemoveLineWhenBlank="true" uuid="f38922dc-3285-4754-b986-1a7f9c8a45ff">
+						<printWhenExpression><![CDATA[$V{V_WHTAX_DESC}>1]]></printWhenExpression>
+					</reportElement>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[-------------------------------------------]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+					<reportElement positionType="Float" x="411" y="11" width="90" height="11" isRemoveLineWhenBlank="true" uuid="ef3b9546-06ee-4c41-80d8-71f3e4b7ae7b">
+						<printWhenExpression><![CDATA[$V{V_WHTAX_DESC}>1]]></printWhenExpression>
+					</reportElement>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{V_SUM_INCOME_PAYEE}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+					<reportElement positionType="Float" x="547" y="11" width="90" height="11" isRemoveLineWhenBlank="true" uuid="e329ecb3-2fd6-4812-98f4-9491b0b9c4b2">
+						<printWhenExpression><![CDATA[$V{V_WHTAX_DESC}>1]]></printWhenExpression>
+					</reportElement>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{V_SUM_WTAX_PAYEE}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement positionType="Float" x="547" y="0" width="90" height="11" isRemoveLineWhenBlank="true" uuid="9cb39213-d30d-4dad-bbf5-3c9d9403e48e">
+						<printWhenExpression><![CDATA[$V{V_WHTAX_DESC}>1]]></printWhenExpression>
+					</reportElement>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[-------------------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement positionType="Float" x="381" y="11" width="5" height="11" isRemoveLineWhenBlank="true" uuid="19f86aac-db1c-4e58-a3d1-382268792872">
+						<printWhenExpression><![CDATA[$V{V_WHTAX_DESC}>1]]></printWhenExpression>
+					</reportElement>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[:]]></text>
+				</staticText>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="11">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" isPrintRepeatedValues="false" x="0" y="0" width="40" height="11" uuid="8351b753-8e18-4db8-99ed-c07989284032"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PAYEE_CD}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" isPrintRepeatedValues="false" x="42" y="0" width="120" height="11" uuid="9a6d5b36-fa4a-4004-955a-2102a40afb9b"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PAYEE_NAME}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="189" y="0" width="116" height="11" uuid="e52dd308-b299-4bba-ba55-b50aac040d31"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{WHTAX_DESC} == null ? "" : $F{WHTAX_DESC})]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="308" y="0" width="100" height="11" uuid="c00b492d-3efb-4f7a-b6eb-776d508445ce"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{TIN}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="411" y="0" width="90" height="11" uuid="1d7e3379-3c73-4d80-a550-fe1b81638263"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{INCOME_AMT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="504" y="0" width="40" height="11" uuid="0b4fd1c7-5361-4ecc-9039-17197a08f8ab"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PERCENT_RATE}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="547" y="0" width="90" height="11" uuid="75443985-83ab-4246-8ec3-0d9c2929d2e7"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{WHOLDING_TAX_AMT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="165" y="0" width="24" height="11" uuid="f44a70fa-0fc6-4a5f-af20-0f19141a08af"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{BIR_TAX_CD} == null ? "" : $F{BIR_TAX_CD})]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

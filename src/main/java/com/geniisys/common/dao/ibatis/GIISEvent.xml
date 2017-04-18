@@ -1,0 +1,416 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISEvent">
+	
+	<typeAlias alias="GIISEventClass" type="com.geniisys.common.entity.GIISEvent"/>
+	<typeAlias alias="GIISEventsColumn" type="com.geniisys.common.entity.GIISEventsColumn"/>
+	<typeAlias alias="GIISEventsDisplay" type="com.geniisys.common.entity.GIISEventsDisplay"/>
+		
+	<resultMap class="GIISEventClass" id="GIISEventResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="eventCd" 			column="EVENT_CD"/>
+		<result property="eventDesc" 		column="EVENT_DESC"/>
+		<result property="eventType" 		column="EVENT_TYPE"/>
+	</resultMap>
+	
+ 	<resultMap class="GIISEventClass" id="GIISEventResultMap2" extends="BaseEntity.TableGridResultMap">
+		<result property="eventCd" 			column="EVENT_CD"/>		
+		<result property="eventDesc" 		column="EVENT_DESC"/>
+		<result property="eventType" 		column="EVENT_TYPE"/>
+		<result property="eventTypeDesc" 	column="EVENT_TYPE_DESC"/>
+		<result property="receiverTag" 		column="RECEIVER_TAG"/>
+		<result property="receiverTagDesc" 	column="RECEIVER_TAG_DESC"/>
+		<result property="multipleAssignSw" column="MULTIPLE_ASSIGN_SW"/>
+		<result property="remarks" 			column="remarks"/>
+	</resultMap>	
+	
+	<!-- added by steven 01.10.2013 -->
+	<resultMap class="java.util.HashMap" id="GIISEventResultMap3" extends="GIISEventResultMap2">
+		<result property="userId" 			column="user_id"/>		
+		<result property="lastUpdate" 		column="last_update"/>
+		<result property="eventModuleCond" 	column="event_module_cond"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="GIIS166AllTabColLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result property="tableName" 		column="table_name"/>		
+		<result property="columnName" 		column="column_name"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="getGIISEventColumnMap" extends="BaseEntity.TableGridResultMap">
+		<result property="eventCd" 			column="event_cd"/>		
+		<result property="eventColCd" 		column="event_col_cd"/>
+		<result property="tableName"	 	column="table_name"/>
+		<result property="columnName" 		column="column_name"/>
+		<result property="remarks" 			column="remarks"/>
+		<result property="userId" 			column="user_id"/>		
+		<result property="lastUpdate" 		column="last_update"/>
+		<result property="colModuleCond" 	column="col_module_cond"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="getGIISEventDisplayMap" extends="BaseEntity.TableGridResultMap">
+		<result property="dspColId" 		column="dsp_col_id"/>		
+		<result property="eventColCd" 		column="event_col_cd"/>
+		<result property="rvMeaning"		column="rv_meaning"/>
+	</resultMap>
+	
+	<select id="GIIS166AllTabColLOV" resultMap="GIIS166AllTabColLOVMap">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+			b.count_,
+			a.*
+			FROM (SELECT *
+				FROM TABLE(GIIS_EVENTS_PKG.get_all_tab_cols_list(#findText#))
+			<isNotNull property="sortColumn">
+				<isEqual property="sortColumn" compareValue="tableName">
+					ORDER BY table_name
+				</isEqual>
+				<isEqual property="sortColumn" compareValue="columnName">
+					ORDER BY column_name
+				</isEqual>
+				<isEqual property="ascDescFlg" compareValue="ASC">
+					ASC
+				</isEqual>
+				<isEqual property="ascDescFlg" compareValue="DESC">
+					DESC
+				</isEqual>
+			</isNotNull>
+			) a,
+			(SELECT count(*) count_
+				FROM TABLE(GIIS_EVENTS_PKG.get_all_tab_cols_list(#findText#))
+			) b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="GIIS166AllTabCol2LOV" resultMap="GIIS166AllTabColLOVMap">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+			b.count_,
+			a.*
+			FROM (SELECT *
+				FROM TABLE(GIIS_EVENTS_PKG.get_all_tab_cols_list2(#tableName#,#findText#))
+			<isNotNull property="sortColumn">
+				<isEqual property="sortColumn" compareValue="columnName">
+					ORDER BY column_name
+				</isEqual>
+				<isEqual property="ascDescFlg" compareValue="ASC">
+					ASC
+				</isEqual>
+				<isEqual property="ascDescFlg" compareValue="DESC">
+					DESC
+				</isEqual>
+			</isNotNull>
+			) a,
+			(SELECT count(*) count_
+				FROM TABLE(GIIS_EVENTS_PKG.get_all_tab_cols_list2(#tableName#,#findText#))
+			) b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGIISEventListing" resultMap="GIISEventResultMap3">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIIS_EVENTS_PKG.get_giis_events_listing2)
+		                  <isNotNull property="filter">
+								WHERE 1=1
+								<isNotEmpty prepend="AND"  property="eventCd">
+									event_cd = #eventCd#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="eventDesc">
+									event_desc = #eventDesc#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="eventType">
+									event_type = #eventType#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="receiverTag">
+									receiver_tag = #receiverTag#
+								</isNotEmpty>
+							</isNotNull>
+		                  <isEqual property="sortColumn" compareValue="eventCd">
+			              		ORDER BY event_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="eventDesc">
+			              		ORDER BY event_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="eventType">
+			              		ORDER BY event_type
+			              </isEqual>	
+			              <isEqual property="sortColumn" compareValue="receiverTag">
+			              		ORDER BY receiver_tag
+			              </isEqual>			              
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIIS_EVENTS_PKG.get_giis_events_listing2)
+		                  <isNotNull property="filter">
+								WHERE 1=1
+								<isNotEmpty prepend="AND"  property="eventCd">
+									event_cd = #eventCd#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="eventDesc">
+									event_desc = #eventDesc#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="eventType">
+									event_type = #eventType#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="receiverTag">
+									receiver_tag = #receiverTag#
+								</isNotEmpty>
+							</isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>	
+	
+	<procedure id="valDeleteGIISEvents" parameterClass="java.lang.String">
+ 		BEGIN
+ 			GIIS_EVENTS_PKG.val_del_giis_events(#eventCd#);
+ 		END;
+ 	</procedure>
+
+	<select id="getGIISEventColumn" resultMap="getGIISEventColumnMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIIS_EVENTS_PKG.get_giis_events_column(#eventCd#))
+		                  <isNotNull property="filter">
+								WHERE 1=1
+								<isNotEmpty prepend="AND"  property="tableName">
+									table_name = #tableName#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="columnName">
+									column_name = #columnName#
+								</isNotEmpty>
+						  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="tableName">
+			              		ORDER BY table_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="columnName">
+			              		ORDER BY column_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIIS_EVENTS_PKG.get_giis_events_column(#eventCd#))
+		                 <isNotNull property="filter">
+								WHERE 1=1
+								<isNotEmpty prepend="AND"  property="tableName">
+									table_name = #tableName#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="columnName">
+									column_name = #columnName#
+								</isNotEmpty>
+						  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>	
+	
+	<procedure id="setGIISEventsColumn" parameterClass="GIISEventsColumn">
+	    DECLARE
+	    	v_rec giis_events_column%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+
+			v_rec.event_cd := #eventCd#;
+ 			v_rec.event_col_cd := #eventColCd#;
+ 			v_rec.table_name := #tableName#;
+ 			v_rec.column_name := #columnName#;
+ 			v_rec.remarks := #remarks#;
+ 			GIIS_EVENTS_PKG.set_giis_events_column(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<delete id="delGIISEventsColumn" parameterClass="java.util.HashMap">
+		BEGIN
+ 			GIIS_EVENTS_PKG.del_giis_events_column(#eventColCd#);
+ 		END;
+ 	</delete>
+ 	
+ 	<procedure id="valDeleteGIISEventsColumn" parameterClass="java.lang.String">
+ 		BEGIN
+ 			GIIS_EVENTS_PKG.val_del_giis_events_column(#eventColCd#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddGIISEventsColumn" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			GIIS_EVENTS_PKG.val_add_giis_events_column(#tableName#,#columnName#);
+ 		END;
+ 	</procedure> 
+
+ 	<select id="getGIISEventDisplay" resultMap="getGIISEventDisplayMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIIS_EVENTS_PKG.get_giis_events_display(#eventColCd#))
+		                  <isNotNull property="filter">
+								WHERE 1=1
+								<isNotEmpty prepend="AND"  property="rvMeaning">
+									rv_meaning = #rvMeaning#
+								</isNotEmpty>
+						  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="rvMeaning">
+			              		ORDER BY rv_meaning
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIIS_EVENTS_PKG.get_giis_events_display(#eventColCd#))
+		                 <isNotNull property="filter">
+								WHERE 1=1
+								<isNotEmpty prepend="AND"  property="rvMeaning">
+									rv_meaning = #rvMeaning#
+								</isNotEmpty>
+						  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>	
+	
+	<procedure id="setGIISEventsDisplay" parameterClass="GIISEventsDisplay">
+	    DECLARE
+	    	v_rec giis_events_display%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+
+ 			v_rec.event_col_cd := #eventColCd#;
+ 			v_rec.dsp_col_id := #dspColId#;
+ 			GIIS_EVENTS_PKG.set_giis_events_display(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<delete id="delGIISEventsDisplay" parameterClass="java.util.HashMap">
+		BEGIN
+ 			GIIS_EVENTS_PKG.del_giis_events_display(#eventColCd#,#dspColId#);
+ 		END;
+ 	</delete>
+ 	
+ 	<procedure id="valAddGIISEventsDisplay" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			GIIS_EVENTS_PKG.val_add_giis_events_display(#eventColCd#,#dspColId#);
+ 		END;
+ 	</procedure> 
+	<!-- end; steven 01.10.2013 -->
+	
+	<select id="getGIISEventLOV" resultMap="GIISEventResultMap2">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIIS_EVENTS_PKG.get_giis_events_listing(#findText#))
+		                  <isEqual property="sortColumn" compareValue="eventCd">
+			              		ORDER BY event_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="eventDesc">
+			              		ORDER BY event_desc
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIIS_EVENTS_PKG.get_giis_events_listing(#findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGIISUserEventListing" resultMap="GIISEventResultMap2">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIIS_EVENTS_PKG.get_giis_events_listing2)
+		                  <isEqual property="sortColumn" compareValue="eventCd">
+			              		ORDER BY event_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="eventDesc">
+			              		ORDER BY event_desc
+			              </isEqual>		              
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIIS_EVENTS_PKG.get_giis_events_listing2)) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="setGIISEvent" parameterClass="GIISEventClass">
+		DECLARE
+		  v_event GIIS_EVENTS%ROWTYPE;
+		BEGIN
+		  giis_users_pkg.app_user := #appUser#;
+		  	
+		  v_event.event_cd := #eventCd#;
+		  v_event.event_desc := #eventDesc#;
+		  v_event.event_type := #eventType#;
+		  v_event.multiple_assign_sw := #multipleAssignSw#;
+		  v_event.receiver_tag := #receiverTag#;
+		  v_event.remarks := #remarks#;
+		  v_event.user_id := #userId#;
+		  
+		  giis_events_pkg.set_giis_event(v_event);
+		END;
+	</procedure>
+	
+	<procedure id="delGIISEvent" parameterClass="GIISEventClass">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			giis_events_pkg.del_giis_event(#eventCd#);
+		END;
+	</procedure>
+	
+	<parameterMap class="java.util.HashMap" id="CreateTransferEventParamMap">
+		<parameter property="appUser" 	jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"/>
+		<parameter property="moduleId" 	jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"/>
+		<parameter property="userId" 	jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"/>		
+		<parameter property="eventDesc" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"/>
+		<parameter property="colValue" 	jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"/>
+		<parameter property="info"	 	jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"/>
+		<parameter property="delimiter" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"/>
+		<parameter property="messages" 	jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="createTransferEvent" parameterMap="CreateTransferEventParamMap">
+		BEGIN
+			GIIS_USERS_PKG.app_user := ?;
+			giis_events_pkg.create_transfer_events(?, ?, ?, ?, ?, ?, ?);
+		END;		
+	</procedure>
+</sqlMap>

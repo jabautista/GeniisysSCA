@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIXXGroupedItems">
+	<typeAlias alias="GIXXGroupedItems" type="com.geniisys.gixx.entity.GIXXGroupedItems" />
+	
+	<resultMap id="getGIXXGroupedItemsMap" class="GIXXGroupedItems">
+		<result property="age" 					column="age"/>
+		<result property="sex" 					column="sex"/>
+		<result property="salary" 				column="salary"/>
+		<result property="itemNo" 				column="item_no"/>
+		<result property="remarks" 				column="remarks"/>
+		<result property="lineCd" 				column="line_cd"/>
+		<result property="toDate" 				column="to_date"/>
+		<result property="groupCd"	 			column="group_cd"/>
+		<result property="fromDate" 			column="from_date"/>
+		<result property="policyId" 			column="policy_id"/>
+		<result property="extractId" 			column="extract_id"/>
+		<result property="paytTerms" 			column="payt_terms"/>
+		<result property="sublineCd" 			column="subline_cd"/>
+		<result property="controlCd" 			column="control_cd"/>
+		<result property="packBenCd" 			column="pack_ben_cd"/>
+		<result property="positionCd" 			column="position_cd"/>
+		<result property="includeTag" 			column="include_tag"/>
+		<result property="deleteSw" 			column="delete_sw"/>
+		<result property="principalCd" 			column="principal_cd"/>
+		<result property="civilStatus" 			column="civil_status"/>
+		<result property="salaryGrade" 			column="salary_grade"/>
+        <result property="dateOfBirth" 			column="date_of_birth"/>
+     
+        <result property="groupedItemNo" 		column="grouped_item_no"/>
+        <result property="controlTypeCd" 		column="control_type_cd"/>
+        <result property="amountCoverage" 		column="amount_coverage"/>
+        <result property="groupedItemTitle" 	column="grouped_item_title"/>
+        <result property="controlTypeDesc" 		column="control_type_desc"/>
+        <result property="packageCd" 			column="package_cd"/>
+        <result property="paytTermsDesc" 		column="payt_terms_desc"/>
+        <result property="position" 			column="position"/>
+        <result property="groupDesc" 			column="group_desc"/>
+        <result property="meanCivilStatus"	 	column="mean_civil_status"/>
+        <result property="meanSex" 				column="mean_sex"/>
+        
+		<result property="rowNum"				column="rownum_"/>
+		<result property="rowCount"				column="count_"/>
+	</resultMap>
+	
+	<resultMap id="gixxCasualtyGroupedItemsMap" class="GIXXGroupedItems">
+		<result property="age" 					column="age"/>
+		<result property="sex" 					column="sex"/>
+		<result property="salary" 				column="salary"/>
+		<result property="itemNo" 				column="item_no"/>
+		<result property="remarks" 				column="remarks"/>
+		<result property="policyId" 			column="policy_id"/>
+		<result property="extractId" 			column="extract_id"/>
+		<result property="positionCd" 			column="position_cd"/>
+		<result property="includeTag" 			column="include_tag"/>
+		<result property="civilStatus" 			column="civil_status"/>
+		<result property="salaryGrade" 			column="salary_grade"/>
+        <result property="dateOfBirth" 			column="date_of_birth"/>
+		<result property="groupedItemNo" 		column="grouped_item_no"/>
+		<result property="amountCoverage" 		column="amount_coverage"/>
+        <result property="groupedItemTitle" 	column="grouped_item_title"/>
+        <result property="meanCivilStatus"	 	column="mean_civil_status"/>
+        <result property="meanSex" 				column="mean_sex"/>
+		<result property="sumAmt"				column="dsp_amt"/>
+		<result property="position" 			column="position"/>
+		
+		<result property="rowNum"				column="rownum_"/>
+		<result property="rowCount"				column="count_"/>
+	</resultMap>
+
+	<select id="getGIXXAccidentGroupedItems" resultMap="getGIXXGroupedItemsMap" parameterClass="java.util.HashMap">
+		SELECT *       
+          FROM (SELECT rownum rownum_ ,b.count_,a.*     
+                  FROM (SELECT * FROM TABLE(gixx_grouped_items_pkg.get_accident_grouped_item(#extractId#,#itemNo#))) a,
+	               	   (SELECT count(*) count_ FROM TABLE(gixx_grouped_items_pkg.get_accident_grouped_item(#extractId#,#itemNo#))) b)   
+	     WHERE rownum_ BETWEEN NVL(#from#,rownum_) AND NVL(#to#,rownum_)
+	</select>
+	
+	<select id="getGIXXCasualtyGroupedItems" resultMap="gixxCasualtyGroupedItemsMap" parameterClass="java.util.HashMap">
+		SELECT *       
+          FROM (SELECT rownum rownum_ ,b.count_,a.*     
+                  FROM (SELECT * FROM TABLE(gixx_grouped_items_pkg.get_casualty_grouped_item(#extractId#,#itemNo#))) a,
+	               	   (SELECT count(*) count_ FROM TABLE(gixx_grouped_items_pkg.get_casualty_grouped_item(#extractId#,#itemNo#))) b)   
+	     WHERE rownum_ BETWEEN NVL(#from#,rownum_) AND NVL(#to#,rownum_)
+	</select>
+</sqlMap>

@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISCaLocation">
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIISCaLocation" type="com.geniisys.common.entity.GIISCaLocation"/>
+	
+	<resultMap class="java.util.HashMap" id="GIISCaLocationTGMap">
+		<result column="LOCATION_CD" 	property="locationCd"/>
+		<result column="LOCATION_DESC" 	property="locationDesc"/>
+		<result column="rownum_" 		property="rowNum" />
+		<result column="count_"			property="rowCount"/>
+	</resultMap>
+	
+	<!-- fons 11/06/2013 -->
+	<resultMap class="java.util.HashMap" id="giisCaLocationListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="location_cd"     	property="locationCd"/>	
+		<result column="location_desc"     	property="locationDesc"/>	
+		<result column="loc_addr"     		property="locAddr"/>	
+		<result column="loc_addr1"     		property="locAddr1"/>	
+		<result column="loc_addr2"     		property="locAddr2"/>	
+		<result column="loc_addr3"     		property="locAddr3"/>	
+		<result column="treaty_limit"     	property="treatyLimit"/>	
+		<result column="ret_limit"     		property="retLimit"/>	
+		<result column="ret_beg_bal"     	property="retBegBal"/>	
+		<result column="treaty_beg_bal"    	property="treatyBegBal"/>	
+		<result column="fac_beg_bal"     	property="facBegBal"/>	
+		<result column="from_date"     		property="fromDate"/>	
+		<result column="to_date"     		property="toDate"/>	
+		<result column="remarks"     		property="remarks"/>	
+		<result column="user_id"     		property="userId"/>	
+		<result column="last_update"     	property="lastUpdate"/>		  
+	</resultMap>
+	
+	<select id="getGIISCaLocationTG" resultMap="GIISCaLocationTGMap">
+	SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIIS_CA_LOCATION_PKG.get_ca_location_list)             
+			          	  <isNotNull property="findText">
+		                  WHERE (UPPER(district_no) LIKE UPPER(#findText#) OR UPPER(district_desc) LIKE UPPER(#findText#))
+		             	  </isNotNull>
+			          	  <isNotNull property="sortColumn">
+			          	  	  <isEqual property="sortColumn" compareValue="locationCd">
+				              		ORDER BY location_cd
+				              </isEqual>
+			                  <isEqual property="sortColumn" compareValue="locationDesc">
+				              		ORDER BY location_desc
+				              </isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GIIS_CA_LOCATION_PKG.get_ca_location_list)        
+		                  <isNotNull property="findText">
+		                  WHERE (UPPER(location_code) LIKE UPPER(#findText#) OR UPPER(district_desc) LIKE UPPER(#findText#))
+		             	  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	 </select>
+		 
+	 <select id="getGiiss217RecList" resultMap="giisCaLocationListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss217_pkg.get_rec_list(#locationCd#, #locationDesc#, #locAddr#))
+		                  <isEqual property="sortColumn" compareValue="locationCd locationDesc">
+			              		ORDER BY location_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="locAddr">
+			              		ORDER BY loc_addr
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss217_pkg.get_rec_list(#locationCd#, #locationDesc#, #locAddr#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setCaLocation" parameterClass="GIISCaLocation">
+	    DECLARE
+	    	v_rec giis_ca_location%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.location_cd := TO_NUMBER(#locationCd#);
+ 			v_rec.location_desc := #locationDesc#;
+ 			v_rec.loc_addr1 := #locAddr1#;
+ 			v_rec.loc_addr2 := #locAddr2#;
+ 			v_rec.loc_addr3 := #locAddr3#;
+ 			v_rec.from_date := TO_DATE(#fromDate#,'MM-DD-YYYY');
+ 			v_rec.to_date :=  TO_DATE(#toDate#,'MM-DD-YYYY');
+ 			v_rec.treaty_limit := #treatyLimit#;
+ 			v_rec.ret_limit := #retLimit#;
+ 			v_rec.treaty_beg_bal := #treatyBegBal#;
+ 			v_rec.ret_beg_bal := #retBegBal#;
+ 			v_rec.fac_beg_bal := #facBegBal#;
+ 			v_rec.remarks := #remarks#;
+ 			v_rec.user_id := #userId#; 
+ 			 			
+ 			giiss217_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteCaLocation" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss217_pkg.val_del_rec(#recId#);
+ 		END;
+ 	</procedure>		
+ 	
+	<delete id="delCaLocation" parameterClass="java.lang.String">
+		BEGIN
+ 			giiss217_pkg.del_rec(#riType#);
+ 		END;
+ 	</delete>	
+</sqlMap>

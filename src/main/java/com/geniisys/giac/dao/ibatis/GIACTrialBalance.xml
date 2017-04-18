@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIACTrialBalance">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<select id="validateTransactionDate" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT giacs500_pkg.validate_transaction_date(TO_DATE(#transactionDate#,'MM-DD-RRRR')) FROM DUAL
+	</select>
+	
+	<select id="checkTranOpen" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT giacs500_pkg.check_tran_open(TO_DATE(#transactionDate#,'MM-DD-RRRR'), #includeMonths#, #includeYears#) FROM DUAL
+	</select>
+	
+	<select id="checkDate" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT giacs500_pkg.check_date(TO_DATE(#transactionDate#,'MM-DD-RRRR')) FROM DUAL
+	</select>
+	
+	<procedure id="delGiacMonthlyTotalsBackUp">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			giacs500_pkg.del_giac_monthly_totals_backup;
+		END;
+	</procedure>
+	
+	<procedure id="insGiacMonthlyTotalsBackUp" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			giacs500_pkg.ins_giac_monthly_totals_backup(TO_DATE(#transactionDate#, 'MM-DD-YYYY'));
+		END;
+	</procedure>
+	
+	<procedure id="updateAcctransAe" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			giacs500_pkg.update_acctransae(TO_DATE(#transactionDate#, 'MM-DD-YYYY'), #updateActionOpt#);
+		END;
+	</procedure>
+	
+	<select id="getNoOfRecords" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT giacs500_pkg.get_no_of_records(TO_DATE(#transactionDate#, 'MM-DD-YYYY')) FROM DUAL
+	</select>
+	
+	<procedure id="delGiacMonthlyTotals" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			giacs500_pkg.del_giac_monthly_totals(TO_DATE(#transactionDate#, 'MM-DD-YYYY'));
+		END;
+	</procedure>
+	
+	<procedure id="insGiacMonthlyTotals" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			giacs500_pkg.ins_giac_monthly_totals(TO_DATE(#transactionDate#, 'MM-DD-YYYY'), #userId#);
+		END;
+	</procedure>
+	
+</sqlMap>

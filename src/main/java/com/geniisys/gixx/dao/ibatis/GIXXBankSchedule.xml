@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap>
+	<typeAlias alias="GIXXBankSchedule" type="com.geniisys.gixx.entity.GIXXBankSchedule" />
+	
+	<resultMap id="getGIXXBankScheduleMap" class="GIXXBankSchedule" extends="BaseEntity.TableGridResultMap">
+		<result property="extractId" 		column="extract_id"/>
+		<result property="bankItemNo" 		column="bank_item_no"/>
+		<result property="bank" 			column="bank"/>
+		<result property="cashInVault" 		column="cash_in_vault"/>
+		<result property="cashInTransit" 	column="cash_in_transit"/>
+		<result property="bankLineCd" 		column="bank_line_cd"/>
+		<result property="bankSublineCd" 	column="bank_subline_cd"/>
+		<result property="bankIssCd" 		column="bank_iss_cd"/>
+		<result property="bankIssueYy" 		column="bank_issue_yy"/>
+		<result property="bankPolSeqNo" 	column="bank_pol_seq_no"/>
+		<result property="bankEndtSeqNo" 	column="bank_endt_seq_no"/>
+		<result property="bankRenewNo" 		column="bank_renew_no"/>
+		<result property="bankEffDate" 		column="bank_eff_date"/>
+		<result property="bankAddress" 		column="bank_address"/>
+	</resultMap>
+	
+	<select id="getGIXXBankScheduleList" resultMap="getGIXXBankScheduleMap" parameterClass="java.util.HashMap">
+		SELECT *       
+	  	  FROM (SELECT rownum rownum_ ,b.count_,a.*     
+	          	  FROM (SELECT * FROM TABLE(gixx_bank_schedule_pkg.get_bank_collection_list(#extractId#))) a,
+	               	   (SELECT count(*) count_ FROM TABLE(gixx_bank_schedule_pkg.get_bank_collection_list(#extractId#))) b)
+	     WHERE rownum_ BETWEEN NVL(#from#,rownum_) AND NVL(#to#,rownum_)
+	</select>
+</sqlMap>

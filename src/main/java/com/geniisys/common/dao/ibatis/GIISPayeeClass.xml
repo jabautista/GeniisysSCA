@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="GIISPayeeClass">
+
+	<typeAlias alias="GIISPayeeClassClass" type="com.geniisys.common.entity.GIISPayeeClass"/>
+
+	<resultMap id="GiisPayeeClassResultMap" class="GIISPayeeClassClass">
+		<result column="payee_class_cd" 	property="payeeClassCd"/>
+		<result column="class_desc" 		property="classDesc"/>
+	</resultMap>
+
+	<resultMap id="GiisPayeeClassGridResultMap" class="GIISPayeeClassClass" extends="GiisPayeeClassResultMap">
+		<result column="rownum_" 			property="rowNum" />
+		<result column="count_"				property="rowCount"/>
+	</resultMap>
+
+	<select id="getGiisPayeeClassLOV" resultMap="GiisPayeeClassGridResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giis_payee_class_pkg.get_payee_class_list)
+		                 <isNotNull property="findText">
+					         WHERE (UPPER(payee_class_cd) LIKE UPPER(#findText#) 
+					         	 OR UPPER(class_desc) LIKE UPPER(#findText#)
+					         	 )
+				         </isNotNull> 
+				         <isNotEmpty prepend="AND" property="payeeClassCdIn">
+							UPPER(payee_class_cd) IN $payeeClassCdIn$
+						 </isNotEmpty>  
+			          	  <isNotNull property="sortColumn">
+			                  <isEqual property="sortColumn" compareValue="payeeClassCd">
+				              		ORDER BY payee_class_cd
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="classDesc">
+				              		ORDER BY class_desc
+				              </isEqual>
+				          	  <isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              </isNotNull>
+				          </isNotNull>    
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (giis_payee_class_pkg.get_payee_class_list)
+			              <isNotNull property="findText">
+					         WHERE (UPPER(payee_class_cd) LIKE UPPER(#findText#) 
+					         	 OR UPPER(class_desc) LIKE UPPER(#findText#)
+					         	 )
+				         </isNotNull> 
+				         <isNotEmpty prepend="AND" property="payeeClassCdIn">
+							UPPER(payee_class_cd) IN $payeeClassCdIn$
+						 </isNotEmpty>  
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getPayeeClassSlTypeCd" 	resultClass="java.lang.String">
+		SELECT sl_type_cd FROM GIIS_PAYEE_CLASS
+		 WHERE payee_class_cd = #payeeClassCd#
+	</select>
+	
+	<resultMap id="getPayeeClassGiacs240LOVMap" class="GIISPayeeClassClass">
+		<result column="payee_class_cd" 	property="payeeClassCd"/>
+		<result column="class_desc" 		property="classDesc"/>
+		<result column="rownum_" 			property="rowNum" />
+		<result column="count_"				property="rowCount"/>
+	</resultMap>
+	
+	<select id="getPayeeClassGiacs240LOV" resultMap="getPayeeClassGiacs240LOVMap">
+  		SELECT * FROM TABLE (giis_payees_pkg.get_payee_class_giacs240_LOV(#findText#,
+      																	  #sortColumn#,
+      																	  #ascDescFlg#,
+      																	  #from#, 
+      																	  #to#,
+      																	  #searchString#))
+  		
+		 <!-- commented by MarkS 12.12.2016 SR5862 optimization -->
+		 <!-- SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giis_payees_pkg.get_payee_class)	              
+			              <isNotNull property="findText">
+							WHERE (UPPER(payee_class_cd) LIKE UPPER(#findText#) 
+								   	OR UPPER(class_desc) LIKE UPPER(#findText#))
+						  </isNotNull>
+						  <isNull property="findText">
+							WHERE (UPPER(payee_class_cd) LIKE UPPER(NVL(#searchString#, payee_class_cd))
+								  	OR UPPER(class_desc) LIKE UPPER(NVL(#searchString#, class_desc)))
+						  </isNull>
+		                  <isNotNull property="sortColumn">
+		                  	  <isEqual property="sortColumn" compareValue="payeeClassCd">
+				              		ORDER BY payee_class_cd
+				              </isEqual>
+			          	  	  <isEqual property="sortColumn" compareValue="classDesc">
+				              		ORDER BY class_desc
+				              </isEqual>
+		              		  <isEqual property="ascDescFlg" compareValue="ASC">
+		              			 ASC
+		              		  </isEqual>
+		              		  <isEqual property="ascDescFlg" compareValue="DESC">
+		              			 DESC
+		              		  </isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giis_payees_pkg.get_payee_class)
+		                  <isNotNull property="findText">
+							WHERE (UPPER(payee_class_cd) LIKE UPPER(#findText#) 
+								   	OR UPPER(class_desc) LIKE UPPER(#findText#))
+						  </isNotNull>
+						  <isNull property="findText">
+							WHERE (UPPER(payee_class_cd) LIKE UPPER(NVL(#searchString#, payee_class_cd))
+								  	OR UPPER(class_desc) LIKE UPPER(NVL(#searchString#, class_desc)))
+						  </isNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	 -->
+	</select>
+	
+<!--Gzelle 11.25.2013-->
+	<resultMap class="GIISPayeeClassClass" id="giisPayeeClassListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="payee_class_cd"     	property="payeeClassCd"/>
+		<result column="class_desc"  			property="classDesc"/>
+		<result column="eval_sw"  				property="evalSw"/>
+		<result column="loa_sw"  				property="loaSw"/>
+		<result column="payee_class_tag"  		property="payeeClassTag"/>
+		<result column="dsp_pc_tag_desc"  		property="dspPcTagDesc"/>
+		<result column="master_payee_class_cd"  property="masterPayeeClassCd"/>
+		<result column="sl_type_tag"  			property="slTypeTag"/>
+		<result column="sl_type_cd"  			property="slTypeCd"/>
+		<result column="clm_vat_cd"  			property="clmVatCd"/>
+		<result column="user_id"     			property="userId"/>
+		<result column="last_update" 			property="lastUpdate"/>
+		<result column="remarks"     			property="remarks"/>
+	</resultMap>
+	
+	<select id="getGicls140RecList" resultMap="giisPayeeClassListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(gicls140_pkg.get_rec_list(#payeeClassCd#, #classDesc#))
+		  	      		  <isNotNull property="filter">
+							WHERE 1=1
+								<isNotEmpty prepend="AND"  property="evalSw">
+									UPPER(eval_sw) LIKE UPPER(#evalSw#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="loaSw">
+									UPPER(loa_sw) LIKE UPPER(#loaSw#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="dspPcTagDesc">
+									UPPER(dsp_pc_tag_desc) LIKE UPPER(#dspPcTagDesc#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="masterPayeeClassCd">
+									UPPER(master_payee_class_cd) LIKE UPPER(#masterPayeeClassCd#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="slTypeTag">
+									UPPER(sl_type_tag) LIKE UPPER(#slTypeTag#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="slTypeCd">
+									UPPER(sl_type_cd) LIKE UPPER(#slTypeCd#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="clmVatCd">
+									clm_vat_cd = #clmVatCd#
+								</isNotEmpty>
+						  </isNotNull>
+		  	      		  <isEqual property="sortColumn" compareValue="evalSw">
+			              		ORDER BY eval_sw
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="loaSw">
+			              		ORDER BY loa_sw
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="payeeClassCd">
+			              		ORDER BY payee_class_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="classDesc">
+			              		ORDER BY class_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="dspPcTagDesc">
+			              		ORDER BY dsp_pc_tag_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="masterPayeeClassCd">
+			              		ORDER BY master_payee_class_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="slTypeTag">
+			              		ORDER BY sl_type_tag
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="slTypeCd">
+			              		ORDER BY sl_type_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="clmVatCd">
+			              		ORDER BY clm_vat_cd
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(gicls140_pkg.get_rec_list(#payeeClassCd#, #classDesc#))
+		                  <isNotNull property="filter">
+							WHERE 1=1
+								<isNotEmpty prepend="AND"  property="evalSw">
+									UPPER(eval_sw) LIKE UPPER(#evalSw#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="loaSw">
+									UPPER(loa_sw) LIKE UPPER(#loaSw#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="dspPcTagDesc">
+									UPPER(dsp_pc_tag_desc) LIKE UPPER(#dspPcTagDesc#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="masterPayeeClassCd">
+									UPPER(master_payee_class_cd) LIKE UPPER(#masterPayeeClassCd#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="slTypeTag">
+									UPPER(sl_type_tag) LIKE UPPER(#slTypeTag#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="slTypeCd">
+									UPPER(sl_type_cd) LIKE UPPER(#slTypeCd#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="clmVatCd">
+									clm_vat_cd = #clmVatCd#
+								</isNotEmpty>
+						  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setPayeeClass" parameterClass="GIISPayeeClassClass">
+	    DECLARE
+	    	v_rec giis_payee_class%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.eval_sw				:= #evalSw#;
+ 			v_rec.loa_sw				:= #loaSw#;
+ 			v_rec.payee_class_cd 		:= #payeeClassCd#;
+ 			v_rec.class_desc 			:= #classDesc#;
+ 			v_rec.payee_class_tag 		:= #payeeClassTag#;
+ 			v_rec.master_payee_class_cd := #masterPayeeClassCd#;
+ 			v_rec.sl_type_tag 			:= #slTypeTag#;
+ 			v_rec.sl_type_cd 			:= #slTypeCd#;
+ 			v_rec.clm_vat_cd 			:= #clmVatCd#;
+ 			v_rec.user_id 				:= #userId#;
+ 			v_rec.remarks 				:= #remarks#;
+ 			
+ 			gicls140_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeletePayeeClass" parameterClass="java.lang.String">
+ 		BEGIN
+ 			gicls140_pkg.val_del_rec(#recId#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddPayeeClass" parameterClass="java.lang.String">
+ 		BEGIN
+ 			gicls140_pkg.val_add_rec(#recId#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delPayeeClass" parameterClass="java.lang.String">
+		BEGIN
+ 			gicls140_pkg.del_rec(#payeeClassCd#);
+ 		END;
+ 	</delete>
+<!--END-->	
+</sqlMap>

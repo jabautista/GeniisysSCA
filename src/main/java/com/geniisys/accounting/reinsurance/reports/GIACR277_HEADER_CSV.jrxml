@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIACR277_HEADER" language="groovy" pageWidth="2000" pageHeight="11" columnWidth="2000" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="c3e05639-5631-41c8-b0d3-8cacf4425ab5">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="Crosstab Data Text" hAlign="Center"/>
+	<parameter name="P_ISS_PARAM" class="java.lang.String"/>
+	<parameter name="P_FROM" class="java.lang.String"/>
+	<parameter name="P_TO" class="java.lang.String"/>
+	<parameter name="P_LINE_CD" class="java.lang.String"/>
+	<parameter name="P_USER_ID" class="java.lang.String"/>
+	<parameter name="P_POLICY_ID" class="java.math.BigDecimal" isForPrompting="false"/>
+	<parameter name="P_PERIL_CD" class="java.math.BigDecimal" isForPrompting="false"/>
+	<parameter name="P_ACCT_TYPE" class="java.math.BigDecimal" isForPrompting="false"/>
+	<parameter name="P_ISS" class="java.lang.String" isForPrompting="false"/>
+	<queryString>
+		<![CDATA[select * from table(giacr277_pkg_csv.matrix( $P{P_ISS_PARAM},
+						      $P{P_FROM},
+							$P{P_TO},
+							$P{P_LINE_CD},
+							$P{P_USER_ID},
+							$P{P_POLICY_ID},
+							$P{P_PERIL_CD},
+							$P{P_ACCT_TYPE},$P{P_ISS}))
+
+order by line_cd,iss_cd,policy_id,peril_cd]]>
+	</queryString>
+	<field name="LINE_CD" class="java.lang.String"/>
+	<field name="ISS_CD" class="java.lang.String"/>
+	<field name="POLICY_ID" class="java.math.BigDecimal"/>
+	<field name="PERIL_CD" class="java.math.BigDecimal"/>
+	<field name="TREATY_PREM" class="java.math.BigDecimal"/>
+	<field name="TREATY_COMM" class="java.math.BigDecimal"/>
+	<field name="TRTY_ACCT_TYPE" class="java.math.BigDecimal"/>
+	<field name="TRTY_NAME" class="java.lang.String"/>
+	<field name="FACUL_PREM" class="java.math.BigDecimal"/>
+	<field name="FACUL_COMM" class="java.math.BigDecimal"/>
+	<field name="TRTY_ACCT_TYPE2" class="java.math.BigDecimal"/>
+	<field name="TOTAL_PREM" class="java.math.BigDecimal"/>
+	<summary>
+		<band height="11">
+			<crosstab ignoreWidth="false">
+				<reportElement x="0" y="0" width="2000" height="11" uuid="4cd227cb-29e4-49e8-81a0-ea2be2b732db"/>
+				<rowGroup name="LINE_CD" width="0">
+					<bucket class="java.lang.String">
+						<bucketExpression><![CDATA[$F{LINE_CD}]]></bucketExpression>
+					</bucket>
+					<crosstabRowHeader>
+						<cellContents mode="Opaque"/>
+					</crosstabRowHeader>
+					<crosstabTotalRowHeader>
+						<cellContents/>
+					</crosstabTotalRowHeader>
+				</rowGroup>
+				<columnGroup name="TRTY_NAME" height="11" totalPosition="End">
+					<bucket class="java.lang.String">
+						<bucketExpression><![CDATA[$F{TRTY_NAME}]]></bucketExpression>
+					</bucket>
+					<crosstabColumnHeader>
+						<cellContents mode="Transparent">
+							<textField isBlankWhenNull="false">
+								<reportElement style="Crosstab Data Text" x="0" y="0" width="150" height="11" isRemoveLineWhenBlank="true" uuid="f25fa2fc-9250-4605-8e71-0dc5019786f0"/>
+								<textElement>
+									<font fontName="Arial" size="7"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$V{TRTY_NAME} + " Premium Ceded"]]></textFieldExpression>
+							</textField>
+							<textField isBlankWhenNull="false">
+								<reportElement style="Crosstab Data Text" x="150" y="0" width="150" height="11" isRemoveLineWhenBlank="true" uuid="cf83b20c-3147-489f-b898-ff2c7fab6854"/>
+								<textElement>
+									<font fontName="Arial" size="7"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$V{TRTY_NAME} + " Comm. Income"]]></textFieldExpression>
+							</textField>
+						</cellContents>
+					</crosstabColumnHeader>
+					<crosstabTotalColumnHeader>
+						<cellContents/>
+					</crosstabTotalColumnHeader>
+				</columnGroup>
+				<measure name="TRTY_NAMEMeasure" class="java.lang.Integer" calculation="Count">
+					<measureExpression><![CDATA[$F{TRTY_NAME}]]></measureExpression>
+				</measure>
+				<crosstabCell width="300" height="0">
+					<cellContents/>
+				</crosstabCell>
+				<crosstabCell width="0" height="0" columnTotalGroup="TRTY_NAME">
+					<cellContents mode="Opaque"/>
+				</crosstabCell>
+			</crosstab>
+		</band>
+	</summary>
+</jasperReport>

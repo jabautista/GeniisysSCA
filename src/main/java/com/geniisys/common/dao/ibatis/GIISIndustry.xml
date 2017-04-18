@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISIndustry">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIISIndustry" type="com.geniisys.common.entity.GIISIndustry"/>
+	
+	<select id="getIndustryCd" parameterClass="Integer" resultClass="Integer">
+		SELECT giis_industry_pkg.get_industry_cd(#assdNo#) FROM DUAL
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="industryGroupLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="ind_grp_cd"			property="indGrpCd"/>
+		<result column="ind_grp_nm"			property="indGrpNm"/>
+	</resultMap>
+	
+	<select id="getIndustryGroupLOV" resultMap="industryGroupLOVResultMap" parameterClass="java.util.HashMap">
+		SELECT *
+  		  FROM (SELECT rownum rownum_,b.count_,a.*
+          		  FROM (SELECT * FROM TABLE(GIISS014_PKG.get_industry_group_lov)
+          		  <isNotNull property="findText">
+				  	WHERE 1=1
+		  			<isNotEmpty prepend="AND"  property="findText">
+		  				TO_CHAR(ind_grp_cd) LIKE #findText#
+		  				OR UPPER(ind_grp_nm) LIKE UPPER(#findText#)
+		  			</isNotEmpty>
+				  </isNotNull>
+          		  <isNotNull property="sortColumn">
+					<isEqual property="sortColumn" compareValue="indGrpCd">
+						ORDER BY ind_grp_cd
+					</isEqual>
+					<isEqual property="sortColumn" compareValue="indGrpNm">
+						ORDER BY ind_grp_nm
+					</isEqual>
+					<isEqual property="ascDescFlg" compareValue="ASC">
+						ASC
+					</isEqual>
+					<isEqual property="ascDescFlg" compareValue="DESC">
+						DESC
+					</isEqual>
+				  </isNotNull>) a,
+               (SELECT count(*) count_ FROM TABLE(GIISS014_PKG.get_industry_group_lov)
+             	<isNotNull property="findText">
+			  	WHERE 1=1
+	  			<isNotEmpty prepend="AND"  property="findText">
+	  				TO_CHAR(ind_grp_cd) LIKE #findText#
+		  				OR UPPER(ind_grp_nm) LIKE UPPER(#findText#)
+	  			</isNotEmpty>
+			  </isNotNull>
+               ) b)
+ 		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="giiss014IndustryListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="industry_cd"  property="industryCd"/>
+		<result column="industry_nm"  property="industryName"/>
+		<result column="ind_grp_cd"   property="industryGroupCd"/>
+		<result column="remarks"      property="remarks"/>
+		<result column="user_id"      property="userId"/>
+		<result column="last_update"  property="lastUpdate"/>
+	</resultMap>
+	
+	<select id="getGIISS014IndustryList" resultMap="giiss014IndustryListResultMap" parameterClass="java.util.HashMap">
+		SELECT *
+  		  FROM (SELECT rownum rownum_,b.count_,a.*
+          		  FROM (SELECT * FROM TABLE(GIISS014_PKG.get_giiss014_industry_list(#indGrpCd#))
+          		  <isNotNull property="filter">
+			      	WHERE 1=1
+           			<isNotEmpty prepend="AND" property="industryCd">
+           			  industry_cd = #industryCd#
+           			</isNotEmpty>
+           			<isNotEmpty prepend="AND" property="industryName">
+           			  UPPER(industry_nm) LIKE UPPER(#industryName#)
+           			</isNotEmpty>
+                  </isNotNull>
+          		  <isNotNull property="sortColumn">
+					<isEqual property="sortColumn" compareValue="industryCd">
+						ORDER BY industry_cd
+					</isEqual>
+					<isEqual property="sortColumn" compareValue="industryName">
+						ORDER BY industry_nm
+					</isEqual>
+					<isEqual property="ascDescFlg" compareValue="ASC">
+						ASC
+					</isEqual>
+					<isEqual property="ascDescFlg" compareValue="DESC">
+						DESC
+					</isEqual>
+				  </isNotNull>) a,
+               (SELECT count(*) count_ FROM TABLE(GIISS014_PKG.get_giiss014_industry_list(#indGrpCd#))
+               <isNotNull property="filter">
+			      	WHERE 1=1
+           			<isNotEmpty prepend="AND" property="industryCd">
+           			  industry_cd = #industryCd#
+           			</isNotEmpty>
+           			<isNotEmpty prepend="AND" property="industryName">
+           			  UPPER(industry_nm) LIKE UPPER(#industryName#)
+           			</isNotEmpty>
+                  </isNotNull>) b)
+ 		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="setIndustry" parameterClass="GIISIndustry">
+	    DECLARE
+	    	v_rec giis_industry%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.industry_cd := #industryCd#;
+ 			v_rec.industry_nm := #industryName#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			v_rec.ind_grp_cd := #industryGroupCd#;
+ 			
+ 			giiss014_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteIndustry" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss014_pkg.val_del_rec(#industryCd#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddIndustry" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss014_pkg.val_add_rec(#industryNm#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delIndustry" parameterClass="java.lang.String">
+		BEGIN
+ 			giiss014_pkg.del_rec(#industryCd#);
+ 		END;
+ 	</delete>
+ 	
+ 	<procedure id="valUpdateIndustry" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss014_pkg.val_updated_rec(#industryCd#, #industryNm#);
+ 		END;
+ 	</procedure>
+	
+</sqlMap>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIOrigInvTax">
+	<typeAlias alias="gipiOrigInvTax" type="com.geniisys.gipi.entity.GIPIOrigInvTax"/>
+	
+	<resultMap class="gipiOrigInvTax" id="gipiOrigInvTaxMap">
+	 	<result property="parId"   		column="PAR_ID"/>
+	 	<result property="itemGrp" 		column="ITEM_GRP"/>
+	 	<result property="taxDesc" 		column="TAX_DESC"/>
+	 	<result property="taxCd"   		column="TAX_CD" />
+	 	<result property="taxAmt"  		column="TAX_AMT"/>
+	 	<result property="shareTaxAmt"	column="SHARE_TAX_AMT"/>
+	 </resultMap>
+	 
+	 <resultMap class="java.util.HashMap" id="leadPolicyInvTaxesMap">
+	 	<result property="yourTaxCd"	column="your_tax_cd"/>
+	 	<result property="yourTaxDesc"	column="your_tax_desc"/>
+	 	<result property="yourTaxAmt"	column="your_tax_amt"/>
+	 	<result property="fullTaxCd"	column="full_tax_cd"/>
+	 	<result property="fullTaxDesc"	column="full_tax_desc"/>
+	 	<result property="fullTaxAmt"	column="full_tax_amt"/>
+	 	
+	 	<result property="rowNum" 		column="rownum_"/>
+		<result property="rowCount" 	column="count_"/>
+	 </resultMap>
+	 
+	 <select id="getOrigInvTax" resultMap="gipiOrigInvTaxMap" parameterClass="java.util.HashMap">
+	 	SELECT * FROM TABLE(GIPI_ORIG_INV_TAX_PKG.get_gipi_orig_inv_tax(#parId#, #lineCd#, #issCd#))
+	 </select>
+	 
+	 <select id="getLeadPolicyInvTaxes" resultMap="leadPolicyInvTaxesMap" parameterClass="java.util.HashMap">
+	 	SELECT *
+          FROM (SELECT rownum rownum_,b.count_,a.*
+                 FROM (SELECT * FROM TABLE(GIPI_ORIG_INV_TAX_PKG.get_inv_taxes(#policyId#,#itemGrp#))) a,
+                      (SELECT count(*) count_ FROM TABLE(GIPI_ORIG_INV_TAX_PKG.get_inv_taxes(#policyId#,#itemGrp#))) b)
+		WHERE rownum_ BETWEEN NVL(#from#,rownum_) AND NVL(#to#,rownum_)
+	 </select>
+</sqlMap>

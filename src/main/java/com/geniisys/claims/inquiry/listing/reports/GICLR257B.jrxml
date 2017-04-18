@@ -1,0 +1,590 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GICLR257B" language="groovy" pageWidth="990" pageHeight="792" columnWidth="950" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="ireport.zoom" value="1.8181818181818217"/>
+	<property name="ireport.x" value="256"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="P_PAYEE_NO" class="java.lang.String"/>
+	<parameter name="P_FROM_DATE" class="java.lang.String"/>
+	<parameter name="P_TO_DATE" class="java.lang.String"/>
+	<parameter name="P_AS_OF_DATE" class="java.lang.String"/>
+	<parameter name="P_USER_ID" class="java.lang.String"/>
+	<parameter name="P_SEARCH_TYPE" class="java.lang.String"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT aa.*, DECODE(SIGN(ROWNUM - (select bb.no_of_recs - aa.col_count from dual)), 1, 'Y', 'N') tag
+  FROM (SELECT   company_name, payee_no, payee_class_cd, payee_name, dummy,
+                 col1, col2, col3, col4, SUM (tot1), SUM (tot2), SUM (tot3),
+                 SUM (tot4), col_count, company_address, dsp_date
+            FROM TABLE (giclr257b_pkg.get_main ($P{P_PAYEE_NO},
+                                                  $P{P_FROM_DATE},
+                                                  $P{P_TO_DATE},
+                                                  $P{P_AS_OF_DATE},
+                                                  $P{P_USER_ID},
+                                                  $P{P_SEARCH_TYPE}
+                                                 )
+                       )
+        GROUP BY company_name,
+                 payee_no,
+                 payee_class_cd,
+                 payee_name,
+                 dummy,
+                 col1,
+                 col2,
+                 col3,
+                 col4,
+                 col_count, company_address, dsp_date
+        ORDER BY payee_no) aa,
+       (SELECT COUNT (*) no_of_recs
+          FROM (SELECT   company_name, payee_no, payee_class_cd, payee_name,
+                         dummy, col1, col2, col3, col4, SUM (tot1),
+                         SUM (tot2), SUM (tot3), SUM (tot4), col_count
+                    FROM TABLE (giclr257b_pkg.get_main ($P{P_PAYEE_NO},
+                                                          $P{P_FROM_DATE},
+                                                          $P{P_TO_DATE},
+                                                          $P{P_AS_OF_DATE},
+                                                          $P{P_USER_ID},
+                                                          $P{P_SEARCH_TYPE}
+                                                         )
+                               )
+                GROUP BY company_name,
+                         payee_no,
+                         payee_class_cd,
+                         payee_name,
+                         dummy,
+                         col1,
+                         col2,
+                         col3,
+                         col4,
+                         col_count
+                ORDER BY payee_no)) bb]]>
+	</queryString>
+	<field name="COMPANY_NAME" class="java.lang.String"/>
+	<field name="PAYEE_NO" class="java.lang.Integer"/>
+	<field name="PAYEE_CLASS_CD" class="java.lang.String"/>
+	<field name="PAYEE_NAME" class="java.lang.String"/>
+	<field name="DUMMY" class="java.lang.String"/>
+	<field name="COL1" class="java.lang.String"/>
+	<field name="COL2" class="java.lang.String"/>
+	<field name="COL3" class="java.lang.String"/>
+	<field name="COL4" class="java.lang.String"/>
+	<field name="SUM(TOT1)" class="java.math.BigDecimal"/>
+	<field name="SUM(TOT2)" class="java.math.BigDecimal"/>
+	<field name="SUM(TOT3)" class="java.math.BigDecimal"/>
+	<field name="SUM(TOT4)" class="java.math.BigDecimal"/>
+	<field name="COL_COUNT" class="java.math.BigDecimal"/>
+	<field name="COMPANY_ADDRESS" class="java.lang.String"/>
+	<field name="DSP_DATE" class="java.lang.String"/>
+	<field name="TAG" class="java.lang.String"/>
+	<group name="G_DUMMY" isStartNewPage="true" isReprintHeaderOnEachPage="true">
+		<groupExpression><![CDATA[$F{DUMMY}]]></groupExpression>
+		<groupHeader>
+			<band height="35">
+				<printWhenExpression><![CDATA[$F{PAYEE_NO} != null]]></printWhenExpression>
+				<staticText>
+					<reportElement x="610" y="20" width="60" height="11"/>
+					<textElement textAlignment="Center">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[Date Assigned]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="520" y="31" width="90" height="4"/>
+					<textElement>
+						<font fontName="Arial" size="3" isBold="true"/>
+					</textElement>
+					<text><![CDATA[--------------------------------------------------------------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="400" y="31" width="60" height="4"/>
+					<textElement textAlignment="Center">
+						<font fontName="Arial" size="3" isBold="true"/>
+					</textElement>
+					<text><![CDATA[-------------------------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="220" y="31" width="180" height="4"/>
+					<textElement>
+						<font fontName="Arial" size="3" isBold="true"/>
+					</textElement>
+					<text><![CDATA[--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="520" y="20" width="90" height="11"/>
+					<textElement>
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[Claim Status]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="460" y="20" width="60" height="11"/>
+					<textElement textAlignment="Center">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[File Date]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="400" y="20" width="60" height="11"/>
+					<textElement textAlignment="Center">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[Loss Date]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="220" y="20" width="180" height="11"/>
+					<textElement>
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[Assured]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="110" y="31" width="110" height="4"/>
+					<textElement>
+						<font fontName="Arial" size="3" isBold="true"/>
+					</textElement>
+					<text><![CDATA[----------------------------------------------------------------------------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="0" y="20" width="110" height="11"/>
+					<textElement>
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[Claim Number]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="110" y="20" width="110" height="11"/>
+					<textElement>
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[Policy Number]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement x="40" y="0" width="910" height="11" isPrintWhenDetailOverflows="true"/>
+					<textElement>
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{PAYEE_NO} + ' - ' + $F{PAYEE_NAME}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="0" y="0" width="40" height="11"/>
+					<textElement>
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[Adjuster :]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement x="670" y="20" width="70" height="11" isPrintWhenDetailOverflows="true"/>
+					<textElement textAlignment="Right">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{COL1}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement x="740" y="20" width="70" height="11" isPrintWhenDetailOverflows="true"/>
+					<textElement textAlignment="Right">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{COL2}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement x="810" y="20" width="70" height="11" isPrintWhenDetailOverflows="true"/>
+					<textElement textAlignment="Right">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{COL3}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement x="880" y="20" width="70" height="11" isPrintWhenDetailOverflows="true"/>
+					<textElement textAlignment="Right">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{COL4}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="460" y="31" width="60" height="4"/>
+					<textElement textAlignment="Center">
+						<font fontName="Arial" size="3" isBold="true"/>
+					</textElement>
+					<text><![CDATA[-------------------------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="610" y="31" width="60" height="4"/>
+					<textElement textAlignment="Center">
+						<font fontName="Arial" size="3" isBold="true"/>
+					</textElement>
+					<text><![CDATA[-------------------------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="740" y="31" width="70" height="4">
+						<printWhenExpression><![CDATA[$F{COL2} == null ? false : true]]></printWhenExpression>
+					</reportElement>
+					<textElement textAlignment="Right">
+						<font fontName="Arial" size="3" isBold="true"/>
+					</textElement>
+					<text><![CDATA[---------------------------------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="670" y="31" width="70" height="4">
+						<printWhenExpression><![CDATA[$F{COL1} == null ? false : true]]></printWhenExpression>
+					</reportElement>
+					<textElement textAlignment="Right">
+						<font fontName="Arial" size="3" isBold="true"/>
+					</textElement>
+					<text><![CDATA[---------------------------------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="810" y="31" width="70" height="4">
+						<printWhenExpression><![CDATA[$F{COL3} == null ? false : true]]></printWhenExpression>
+					</reportElement>
+					<textElement textAlignment="Right">
+						<font fontName="Arial" size="3" isBold="true"/>
+					</textElement>
+					<text><![CDATA[---------------------------------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="880" y="31" width="70" height="4">
+						<printWhenExpression><![CDATA[$F{COL4} == null ? false : true]]></printWhenExpression>
+					</reportElement>
+					<textElement textAlignment="Right">
+						<font fontName="Arial" size="3" isBold="true"/>
+					</textElement>
+					<text><![CDATA[---------------------------------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="0" y="31" width="110" height="4"/>
+					<textElement>
+						<font fontName="Arial" size="3" isBold="true"/>
+					</textElement>
+					<text><![CDATA[----------------------------------------------------------------------------------------------------]]></text>
+				</staticText>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="35">
+				<printWhenExpression><![CDATA[$F{PAYEE_NO} != null]]></printWhenExpression>
+				<subreport>
+					<reportElement x="670" y="0" width="280" height="16"/>
+					<subreportParameter name="P_DUMMY">
+						<subreportParameterExpression><![CDATA[$F{DUMMY}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="P_SEARCH_TYPE">
+						<subreportParameterExpression><![CDATA[$P{P_SEARCH_TYPE}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="P_PAYEE_CLASS_CD">
+						<subreportParameterExpression><![CDATA[$F{PAYEE_CLASS_CD}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="P_PAYEE_NO">
+						<subreportParameterExpression><![CDATA[$F{PAYEE_NO}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="P_FROM_DATE">
+						<subreportParameterExpression><![CDATA[$P{P_FROM_DATE}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="P_TO_DATE">
+						<subreportParameterExpression><![CDATA[$P{P_TO_DATE}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="P_USER_ID">
+						<subreportParameterExpression><![CDATA[$P{P_USER_ID}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="P_AS_OF_DATE">
+						<subreportParameterExpression><![CDATA[$P{P_AS_OF_DATE}]]></subreportParameterExpression>
+					</subreportParameter>
+					<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					<subreportExpression class="java.lang.String"><![CDATA[$P{SUBREPORT_DIR} + "GICLR257B_TOTALS.jasper"]]></subreportExpression>
+				</subreport>
+				<staticText>
+					<reportElement x="610" y="5" width="55" height="11">
+						<printWhenExpression><![CDATA[$F{COL1} != null]]></printWhenExpression>
+					</reportElement>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[Totals]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="665" y="5" width="5" height="11">
+						<printWhenExpression><![CDATA[$F{COL1} != null]]></printWhenExpression>
+					</reportElement>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[:]]></text>
+				</staticText>
+				<subreport>
+					<reportElement x="670" y="16" width="280" height="19">
+						<printWhenExpression><![CDATA[$F{TAG} == 'Y']]></printWhenExpression>
+					</reportElement>
+					<subreportParameter name="P_DUMMY">
+						<subreportParameterExpression><![CDATA[$F{DUMMY}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="P_SEARCH_TYPE">
+						<subreportParameterExpression><![CDATA[$P{P_SEARCH_TYPE}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="P_PAYEE_NO">
+						<subreportParameterExpression><![CDATA[$P{P_PAYEE_NO}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="P_FROM_DATE">
+						<subreportParameterExpression><![CDATA[$P{P_FROM_DATE}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="P_TO_DATE">
+						<subreportParameterExpression><![CDATA[$P{P_TO_DATE}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="P_USER_ID">
+						<subreportParameterExpression><![CDATA[$P{P_USER_ID}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="P_AS_OF_DATE">
+						<subreportParameterExpression><![CDATA[$P{P_AS_OF_DATE}]]></subreportParameterExpression>
+					</subreportParameter>
+					<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					<subreportExpression class="java.lang.String"><![CDATA[$P{SUBREPORT_DIR} + "GICLR257B_GRAND_TOTALS.jasper"]]></subreportExpression>
+				</subreport>
+				<staticText>
+					<reportElement x="610" y="20" width="55" height="11">
+						<printWhenExpression><![CDATA[$F{TAG} == 'Y']]></printWhenExpression>
+					</reportElement>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[Grand Totals]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="665" y="20" width="5" height="11">
+						<printWhenExpression><![CDATA[$F{TAG} == 'Y']]></printWhenExpression>
+					</reportElement>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[:]]></text>
+				</staticText>
+			</band>
+		</groupFooter>
+	</group>
+	<pageHeader>
+		<band height="72" splitType="Stretch">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="840" y="11" width="93" height="11" isPrintWhenDetailOverflows="true"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="840" y="0" width="110" height="11" isPrintWhenDetailOverflows="true"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[GICLR257B]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" evaluationTime="Report" isBlankWhenNull="true">
+				<reportElement x="933" y="11" width="17" height="11" isPrintWhenDetailOverflows="true"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="h:mm:ss a" isBlankWhenNull="true">
+				<reportElement x="40" y="11" width="70" height="11" isPrintWhenDetailOverflows="true"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.util.Date"><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="MM-dd-yyyy" isBlankWhenNull="true">
+				<reportElement x="40" y="0" width="70" height="11" isPrintWhenDetailOverflows="true"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.util.Date"><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="0" width="40" height="11" isPrintWhenDetailOverflows="true"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[RUNDATE :]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="11" width="40" height="11" isPrintWhenDetailOverflows="true"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[RUNTIME  :]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="33" width="950" height="11" isPrintWhenDetailOverflows="true"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[LIST OF PENDING CASES]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="110" y="0" width="730" height="11"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{COMPANY_NAME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="110" y="11" width="730" height="11"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{COMPANY_ADDRESS}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="44" width="950" height="11"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{DSP_DATE}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="35">
+			<printWhenExpression><![CDATA[$F{PAYEE_NO} == null]]></printWhenExpression>
+			<staticText>
+				<reportElement x="460" y="20" width="60" height="11"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[File Date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="520" y="20" width="90" height="11"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[Claim Status]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="110" y="20" width="110" height="11"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[Policy Number]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="0" width="40" height="11"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[Adjuster :]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="610" y="31" width="60" height="4"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="3" isBold="true"/>
+				</textElement>
+				<text><![CDATA[-------------------------------------------------]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="20" width="110" height="11"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[Claim Number]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="520" y="31" width="90" height="4"/>
+				<textElement>
+					<font fontName="Arial" size="3" isBold="true"/>
+				</textElement>
+				<text><![CDATA[--------------------------------------------------------------------------------------]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="31" width="110" height="4"/>
+				<textElement>
+					<font fontName="Arial" size="3" isBold="true"/>
+				</textElement>
+				<text><![CDATA[----------------------------------------------------------------------------------------------------]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="400" y="31" width="60" height="4"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="3" isBold="true"/>
+				</textElement>
+				<text><![CDATA[-------------------------------------------------]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="610" y="20" width="60" height="11"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[Date Assigned]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="220" y="20" width="180" height="11"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[Assured]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="220" y="31" width="180" height="4"/>
+				<textElement>
+					<font fontName="Arial" size="3" isBold="true"/>
+				</textElement>
+				<text><![CDATA[--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="110" y="31" width="110" height="4"/>
+				<textElement>
+					<font fontName="Arial" size="3" isBold="true"/>
+				</textElement>
+				<text><![CDATA[----------------------------------------------------------------------------------------------------]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="400" y="20" width="60" height="11"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[Loss Date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="460" y="31" width="60" height="4"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="3" isBold="true"/>
+				</textElement>
+				<text><![CDATA[-------------------------------------------------]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="17" splitType="Stretch">
+			<printWhenExpression><![CDATA[$F{PAYEE_NO} != null]]></printWhenExpression>
+			<subreport>
+				<reportElement x="0" y="4" width="950" height="11"/>
+				<subreportParameter name="SUBREPORT_DIR">
+					<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_DUMMY">
+					<subreportParameterExpression><![CDATA[$F{DUMMY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_SEARCH_TYPE">
+					<subreportParameterExpression><![CDATA[$P{P_SEARCH_TYPE}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_PAYEE_CLASS_CD">
+					<subreportParameterExpression><![CDATA[$F{PAYEE_CLASS_CD}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_PAYEE_NO">
+					<subreportParameterExpression><![CDATA[$F{PAYEE_NO}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_FROM_DATE">
+					<subreportParameterExpression><![CDATA[$P{P_FROM_DATE}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_TO_DATE">
+					<subreportParameterExpression><![CDATA[$P{P_TO_DATE}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_USER_ID">
+					<subreportParameterExpression><![CDATA[$P{P_USER_ID}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_AS_OF_DATE">
+					<subreportParameterExpression><![CDATA[$P{P_AS_OF_DATE}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression class="java.lang.String"><![CDATA[$P{SUBREPORT_DIR} + "GICLR257B_DETAILS.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</detail>
+</jasperReport>

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIWPrincipal">
+	
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIPIWPrincipal" type="com.geniisys.gipi.entity.GIPIWPrincipal"/>
+	
+	<resultMap id="getENWPrincipalMap" class="com.geniisys.gipi.entity.GIPIWPrincipal">
+		<result column="par_id" 					property="parId" />
+		<result column="principal_cd" 				property="principalCd" />
+		<result column="engg_basic_infonum" 		property="enBasicInfoNum" />
+		<result column="subcon_sw" 					property="subconSW" />
+		<result column="principal_name" 			property="principalName"/>
+		<result column="principal_type"				property="principalType"/>
+	</resultMap>
+	
+	<procedure id="getENWPrincipalList" resultMap="getENWPrincipalMap">
+		SELECT par_id, principal_cd, principal_name, engg_basic_infonum, subcon_sw, principal_type 
+		FROM TABLE(GIPI_WPRINCIPAL_PKG.get_wprincipal_list(#parId#))
+	</procedure>
+	
+	<procedure id="getENContractorList" resultMap="getENWPrincipalMap">
+		SELECT par_id, principal_cd, principal_name, engg_basic_infonum, subcon_sw, principal_type 
+		FROM TABLE(GIPI_WPRINCIPAL_PKG.get_contractor_list(#parId#))
+	</procedure>
+	
+	<procedure id="delENPrincipal" parameterClass="java.util.HashMap">
+		BEGIN
+			GIPI_WPRINCIPAL_PKG.del_gipi_en_wprincipal(#parId#, #principalCd#);
+		END;
+	</procedure>
+	
+	<procedure id="setENPrincipal" parameterClass="GIPIWPrincipal">
+		DECLARE
+			principal	GIPI_WPRINCIPAL%rowtype;
+		BEGIN
+			principal.par_id	:= #parId#;
+			principal.principal_cd := #principalCd#;
+			principal.engg_basic_infonum := #enBasicInfoNum#;
+			principal.subcon_sw		:= #subconSW#;
+			
+			GIPI_WPRINCIPAL_PKG.set_gipi_wprincipal(principal);
+		END;
+	</procedure>
+	<!-- added by robert SR 20307 10.27.15 -->
+	<resultMap class="java.util.HashMap" id="getEnPrincipalContractorTableGridMap" extends="BaseEntity.TableGridResultMap">
+		<result column="principal_cd" 			property="principalCd"/>
+		<result column="principal_name" 		property="principalName"/>	
+		<result column="subcon_sw" 				property="subconSw"/>	
+	</resultMap>
+	
+	<select id="getAddlInfoPrincipalListing" parameterClass="java.util.HashMap" resultMap="getEnPrincipalContractorTableGridMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+						  FROM TABLE(gipi_wprincipal_pkg.get_addl_info_principal_list(#policyId#,#extractId#,#principalType#,#summarySw#))
+		                  <isEqual property="sortColumn" compareValue="principalCd principalName">
+			              		ORDER BY principal_cd
+			              </isEqual>
+			               <isEqual property="sortColumn" compareValue="subconSw">
+			              		ORDER BY subcon_sw
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                   FROM TABLE(gipi_wprincipal_pkg.get_addl_info_principal_list(#policyId#,#extractId#,#principalType#,#summarySw#))					            
+						   ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	<!-- end robert SR 20307 10.27.15 -->
+</sqlMap>

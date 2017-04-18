@@ -1,0 +1,482 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISRequiredDoc">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+
+	<typeAlias alias="GIISRequiredDocClass" type="com.geniisys.giis.entity.GIISRequiredDoc" />
+
+	<resultMap class="GIISRequiredDocClass" id="GIISRequiredDocResultMap">
+		<result property="lineCd" 			column="LINE_CD" />
+		<result property="sublineCd" 		column="SUBLINE_CD" />
+		<result property="docCd" 			column="DOC_CD" />
+		<result property="docName" 			column="DOC_NAME" />
+		<result property="validFlag" 		column="VALID_FLAG" />
+		<result property="effectivityDate" 	column="EFFECTIVITY_DATE" />
+		<result property="remarks" 			column="REMARKS" />
+		<result property="cpiRecNo" 		column="CPI_REC_NO" />
+		<result property="cpiBranchCd" 		column="CPI_BRANCH_CD" />
+		<result property="userId" 			column="USER_ID" />
+		<result property="lastUpdate" 		column="LAST_UPDATE" />
+	</resultMap>
+
+	<resultMap class="GIISRequiredDocClass" id="GIISRequiredDocTableGridResultMap">
+		<result property="lineCd" 			column="LINE_CD" />
+		<result property="sublineCd" 		column="SUBLINE_CD" />
+		<result property="docCd" 			column="DOC_CD" />
+		<result property="docName" 			column="DOC_NAME" />
+		<result property="validFlag" 		column="VALID_FLAG" />
+		<result property="effectivityDate" 	column="EFFECTIVITY_DATE" />
+		<result property="remarks" 			column="REMARKS" />
+		<result property="cpiRecNo" 		column="CPI_REC_NO" />
+		<result property="cpiBranchCd" 		column="CPI_BRANCH_CD" />
+		<result property="userId" 			column="USER_ID" />
+		<result property="lastUpdate" 		column="LAST_UPDATE" />
+		<result property="rowNum" 			column="ROWNUM_" />
+		<result property="rowCount" 		column="COUNT_" />
+	</resultMap>
+	
+	<resultMap id="GIISLineListing" class="com.geniisys.common.entity.GIISLine" >
+	  	<result column="LINE_CD" 			property="lineCd" 			jdbcType="VARCHAR" />
+	  	<result column="LINE_NAME"			property="lineName"			jdbcType="VARCHAR" />
+	  	<result property="rowNum"			column="ROWNUM_"/>
+		<result property="rowCount"			column="COUNT_"/>
+  	</resultMap>
+	
+	<!--Select only records in GIIS_LINE where pack_pol_flag is equal to N-->
+	<!-- modified by Kris 05.23.2013: added parameters to function -->
+	<select id="getLineListingWithPackPolFlagN"	resultMap="GIISLineListing">  	
+  		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		          		  FROM TABLE(GIISS035_PKG.get_giis_line_list(#moduleId#, #appUser#))
+				         <isNotNull property="filter">
+				         	WHERE 1=1
+								<isNotEmpty prepend="AND"  property="lineCd">
+									UPPER(line_cd) LIKE UPPER(#lineCd#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="lineName">
+									UPPER(line_name) LIKE UPPER(#lineName#)
+								</isNotEmpty>
+						 </isNotNull>		              	   
+		          		  <isEqual property="sortColumn" compareValue="lineCd">
+			              		ORDER BY line_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="lineName">
+			              		ORDER BY line_name
+			              </isEqual> 
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIISS035_PKG.get_giis_line_list(#moduleId#, #appUser#))
+		          		  <isNotNull property="filter">
+				         WHERE 1=1
+								<isNotEmpty prepend="AND"  property="lineCd">
+									UPPER(line_cd) LIKE UPPER(#lineCd#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="lineName">
+									UPPER(line_name) LIKE UPPER(#lineName#)
+								</isNotEmpty>
+						  </isNotNull>	
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+  	
+  	<!--Select all required policy document based on the line code-->
+	<select id="getGiisRequiredDocList" resultMap="GIISRequiredDocTableGridResultMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+		      		   b.count_, a.*
+				  FROM (SELECT *
+						  FROM TABLE (GIISS035_PKG.get_giis_required_docs_list(#lineCd#))
+						 WHERE 1 = 1						  
+						 <isNotNull property="sublineCd">
+							AND UPPER(subline_cd) = UPPER(#sublineCd#)
+						</isNotNull>
+						<isNull property="sublineCd">
+							AND subline_cd IS NULL
+						</isNull>	 
+						  <isNotNull property="filter">
+								<isNotEmpty prepend="AND"  property="lineCd">
+									UPPER(line_cd) LIKE UPPER(#lineCd#)
+								</isNotEmpty>
+								<!-- <isNotEmpty prepend="AND"  property="sublineCd">
+									UPPER(subline_cd) LIKE UPPER(#sublineCd#)
+								</isNotEmpty> -->
+								<isNotEmpty prepend="AND"  property="docCd">
+									UPPER(doc_cd) LIKE UPPER(#docCd#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="docName">
+									UPPER(doc_name) LIKE UPPER(#docName#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="effectivityDate">
+									effectivity_date = TO_DATE(#effectivityDate#, 'mm-dd-yyyy')
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="remarks">
+									UPPER(remarks) LIKE UPPER(#remarks#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="validFlag">
+									UPPER(valid_flag) LIKE UPPER(#validFlag#)
+								</isNotEmpty>
+						 </isNotNull>	
+						  
+						  <isEqual property="sortColumn" compareValue="validFlag">
+			              		ORDER BY valid_flag
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="docCd">
+			              		ORDER BY doc_cd
+			              </isEqual>
+			               <isEqual property="sortColumn" compareValue="docName">
+			              		ORDER BY doc_name
+			              </isEqual>
+			               <isEqual property="sortColumn" compareValue="effectivityDate">
+			              		ORDER BY effectivity_date
+			              </isEqual>
+			               <isEqual property="sortColumn" compareValue="remarks">
+			              		ORDER BY remarks
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+						  ) a,
+			   (SELECT count(*) count_
+				  FROM TABLE (GIISS035_PKG.get_giis_required_docs_list(#lineCd#))
+				 WHERE 1 = 1
+				    <isNotNull property="sublineCd">
+						AND UPPER(subline_cd) = UPPER(#sublineCd#)
+					</isNotNull>
+					<isNull property="sublineCd">
+						AND subline_cd IS NULL
+					</isNull>	
+					
+					<isNotNull property="filter">
+							<isNotEmpty prepend="AND"  property="lineCd">
+								UPPER(line_cd) LIKE UPPER(#lineCd#)
+							</isNotEmpty>
+							<!-- <isNotEmpty prepend="AND"  property="sublineCd">
+								UPPER(subline_cd) LIKE UPPER(#sublineCd#)
+							</isNotEmpty> -->
+							<isNotEmpty prepend="AND"  property="docCd">
+								UPPER(doc_cd) LIKE UPPER(#docCd#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="docName">
+								UPPER(doc_name) LIKE UPPER(#docName#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="effectivityDate">
+								effectivity_date = TO_DATE(#effectivityDate#, 'mm-dd-yyyy')
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="remarks">
+								UPPER(remarks) LIKE UPPER(#remarks#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="validFlag">
+								UPPER(valid_flag) LIKE UPPER(#validFlag#)
+							</isNotEmpty>
+					 </isNotNull>	
+				  ) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<!--Validate line code and doc code if allowed to be deleted.
+		0 = valid for deletion
+		1 = with record in gipi_reqdocs
+		2 = with record in gipi_wreqdocs-->
+	<select id="validateDeleteRequiredDoc" parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+		SELECT giiss035_pkg.validate_delete_required_doc(#lineCd#, #docCd#) FROM DUAL
+	</select>
+
+	<!--Delete record from giis_required_docs table-->
+	<procedure id="delGIISRequiredDoc" parameterClass="GIISRequiredDocClass">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			GIISS035_PKG.del_giis_required_doc(#lineCd#, #sublineCd#, #docCd#);
+		END;
+	</procedure>
+	
+	<!--Insert and update record from giis_required_docs table-->
+	<procedure id="setGIISRequiredDoc" parameterClass="GIISRequiredDocClass">
+		DECLARE
+		  v_requiredDoc GIIS_REQUIRED_DOCS%ROWTYPE;
+		BEGIN
+		  giis_users_pkg.app_user := #appUser#;
+		  	
+		  v_requiredDoc.line_cd := #lineCd#;
+		  v_requiredDoc.subline_cd := #sublineCd#;
+		  v_requiredDoc.doc_cd := #docCd#;
+		  v_requiredDoc.doc_name := #docName#;
+		  v_requiredDoc.valid_flag := #validFlag#;
+		  v_requiredDoc.effectivity_date := TO_DATE(#effectivityDate#, 'MM-DD-RRRR');
+		  v_requiredDoc.remarks := #remarks#;
+		  v_requiredDoc.user_id := #appUser#;
+		  
+		  GIISS035_PKG.set_giis_required_doc(v_requiredDoc);
+		END;
+	</procedure>
+	
+	
+	<!-- added by Kris 05.23.2013: pre-delete validation for required doc -->
+	<procedure id="validateOnDeleteReqdDoc" parameterClass="java.util.HashMap" >
+		BEGIN
+			GIISS035_PKG.pre_delete_validation(#checkBoth#, #docCd#, #lineCd#);
+		END;
+	</procedure>
+	
+	<select id="getCurrentReqdDocList" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT '''' || doc_cd || ''''
+		  FROM TABLE (GIISS035_PKG.get_giis_required_docs_list(#lineCd#))
+		 WHERE UPPER(subline_cd) LIKE UPPER(#sublineCd#)
+	</select>
+	
+	<!-- added by john dolon 11.27.2013 -->
+	
+	<resultMap class="GIISRequiredDocClass" id="giisRequiredDocsResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="line_cd"    		property="lineCd"/>
+		<result column="subline_cd"  		property="sublineCd"/>
+		<result column="doc_cd"    			property="docCd"/>
+		<result column="doc_name"  			property="docName"/>
+		<result column="valid_flag"    		property="validFlag"/>
+		<result column="effectivity_date"  	property="effectivityDate"/>
+		<result column="user_id"     		property="userId"/>
+		<result column="last_update" 		property="lastUpdate"/>
+		<result column="remarks"     		property="remarks"/>
+	</resultMap>
+	
+	<select id="getGiiss035RecList" resultMap="giisRequiredDocsResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss035_pkg.get_rec_list(#lineCd#,#sublineCd#))
+		  	      <isNotNull property="filter">
+		  	      	WHERE 1 = 1 
+		  	      		<isNotEmpty prepend="AND" property="docCd">
+                        	UPPER(doc_cd) LIKE UPPER(#docCd#)
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="docName">
+                            UPPER(doc_name) LIKE UPPER(#docName#)
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="effectivityDate">
+                           effectivity_date = TO_DATE(#effectivityDate#, 'MM-DD-YYYY')
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="validFlag">
+                            valid_flag = UPPER(#validFlag#)
+                        </isNotEmpty>
+		  	      </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="docCd">
+			              		ORDER BY doc_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="docName">
+			              		ORDER BY doc_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="effectivityDate">
+			              		ORDER BY effectivity_date
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="validFlag">
+			              		ORDER BY valid_flag
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss035_pkg.get_rec_list(#lineCd#,#sublineCd#))
+		                   	<isNotNull property="filter">
+					  	      	WHERE 1 = 1 
+					  	      		<isNotEmpty prepend="AND" property="docCd">
+			                        	UPPER(doc_cd) LIKE UPPER(#docCd#)
+			                        </isNotEmpty>
+			                        <isNotEmpty prepend="AND" property="docName">
+			                            UPPER(doc_name) LIKE UPPER(#docName#)
+			                        </isNotEmpty>
+			                        <isNotEmpty prepend="AND" property="effectivityDate">
+			                            effectivity_date = TO_DATE(#effectivityDate#, 'MM-DD-YYYY')
+			                        </isNotEmpty>
+			                        <isNotEmpty prepend="AND" property="validFlag">
+			                            valid_flag = UPPER(#validFlag#)
+			                        </isNotEmpty>
+					  	      </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setRequiredDocs" parameterClass="GIISRequiredDocClass">
+	    DECLARE
+	    	v_rec giis_required_docs%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			v_rec.line_cd     		:= #lineCd#;    
+			v_rec.subline_cd  		:= #sublineCd#;    
+			v_rec.doc_cd      		:= #docCd#;    
+			v_rec.doc_name    		:= #docName#;    
+			v_rec.valid_flag  		:= #validFlag#;    
+			v_rec.effectivity_date	:= TO_DATE(#effectivityDate#,'MM-dd-yyyy');
+ 			v_rec.user_id 			:= #userId#;
+ 			v_rec.remarks 			:= #remarks#;
+ 			
+ 			giiss035_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<select id="valDeleteRequiredDocs" resultClass="java.lang.String">
+		SELECT giiss035_pkg.val_del_rec(#lineCd#,#sublineCd#,#docCd#)FROM dual							
+	</select>
+ 	
+ 	<procedure id="valAddRequiredDocs" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss035_pkg.val_add_rec(#lineCd#,#sublineCd#,#docCd#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delRequiredDocs" parameterClass="GIISRequiredDocClass">
+		BEGIN
+ 			giiss035_pkg.del_rec(#lineCd#,#sublineCd#,#docCd#);
+ 		END;
+ 	</delete>
+ 	
+ 	<resultMap class="java.util.HashMap" id="getGiiss035LineLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result property="lineCd" 			column="line_cd" />
+		<result property="lineName" 		column="line_name" />
+		<result property="rowNum" 			column="rownum_"/>
+		<result property="rowCount" 		column="count_"/>
+	</resultMap>
+	
+	<select id="getGiiss035LineLOV" resultMap="getGiiss035LineLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giiss035_pkg.get_giiss035_line_lov(#userId#))
+		                  WHERE 1=1
+		                 <isNotNull property="findText">
+					         AND (UPPER(line_cd) LIKE UPPER(#findText#)
+					         	 OR UPPER(line_name) LIKE UPPER(#findText#)
+					         	 )
+				         </isNotNull>       
+				         <isNotNull property="filterText">
+					         AND UPPER(line_cd) LIKE UPPER(#filterText#)
+				         </isNotNull>     
+			          	  <isNotNull property="sortColumn">
+			                  <isEqual property="sortColumn" compareValue="lineCd">
+				              		ORDER BY line_cd
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="lineName">
+				              		ORDER BY line_name
+				              </isEqual>
+				          	  <isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              </isNotNull>
+				          </isNotNull>    
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (giiss035_pkg.get_giiss035_line_lov(#userId#))
+			              <isNotNull property="findText">
+					          WHERE (UPPER(line_cd) LIKE UPPER(#findText#)
+					         	 OR UPPER(line_name) LIKE UPPER(#findText#)
+					         	 )
+				          </isNotNull> 
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="getGiiss035SublineLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result property="sublineCd" 		column="subline_cd" />
+		<result property="sublineName" 		column="subline_name" />
+		<result property="rowNum" 			column="rownum_"/>
+		<result property="rowCount" 		column="count_"/>
+	</resultMap>
+	
+	<select id="getGiiss035SublineLOV" resultMap="getGiiss035SublineLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giiss035_pkg.get_giiss035_subline_lov(#lineCd#, #search#))
+		                  WHERE 1 = 1
+		                 <isNotNull property="findText">
+					         AND (UPPER(subline_cd) LIKE UPPER(#findText#)
+					         	 OR UPPER(subline_name) LIKE UPPER(#findText#)
+					         	 )
+				         </isNotNull> 
+				         <!-- <isNotNull property="filterText">
+					         AND UPPER(subline_cd) LIKE UPPER(#filterText#)
+				         </isNotNull>   --> 
+			          	  <isNotNull property="sortColumn">
+			                  <isEqual property="sortColumn" compareValue="sublineCd">
+				              		ORDER BY subline_cd
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="sublineName">
+				              		ORDER BY subline_name
+				              </isEqual>
+				          	  <isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              </isNotNull>
+				          </isNotNull>    
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (giiss035_pkg.get_giiss035_subline_lov(#lineCd#, #search#))
+			              <isNotNull property="findText">
+					          WHERE (UPPER(subline_cd) LIKE UPPER(#findText#)
+					         	 OR UPPER(subline_name) LIKE UPPER(#findText#)
+					         	 )
+				          </isNotNull> 
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<parameterMap class="map" id="validateGiiss035LineMap">
+		<parameter property="lineCd" 	jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="INOUT"/>
+		<parameter property="lineName"  jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="OUT"/>
+		<parameter property="userId"  jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="IN"/>
+	</parameterMap>
+	
+	<procedure id="validateGiiss035Line" parameterMap="validateGiiss035LineMap">
+		BEGIN
+ 			giiss035_pkg.validate_line(?,?,?);
+ 		END;
+	</procedure>
+	
+	<parameterMap class="map" id="validateGiiss035SublineMap">
+		<parameter property="lineCd" 		jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="IN"/>
+		<parameter property="sublineCd" 	jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="INOUT"/>
+		<parameter property="sublineName"  	jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="validateGiiss035Subline" parameterMap="validateGiiss035SublineMap">
+		BEGIN
+ 			giiss035_pkg.validate_subline(?,?,?);
+ 		END;
+	</procedure>
+</sqlMap>	

@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIACBankDepSlips">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIACBankDepSlipsClass" type="com.geniisys.giac.entity.GIACBankDepSlips"/>
+	<typeAlias alias="GIACCashDepDtlClass" type="com.geniisys.giac.entity.GIACCashDepDtl"/>
+	
+	<resultMap class="java.util.HashMap" id="gbdsTableGridMap">
+		<result column="dep_id"					property="depId" />
+		<result column="dep_no"					property="depNo" />
+		<result column="gacc_tran_id"			property="gaccTranId" />
+		<result column="fund_cd"				property="fundCd" />
+		<result column="branch_cd"				property="branchCd" />
+		<result column="dcb_no"					property="dcbNo" />
+		<result column="dcb_year"				property="dcbYear" />
+		<result column="item_no"				property="itemNo" />
+		<result column="check_class"			property="checkClass" />
+		<result column="validation_dt"			property="validationDt" />
+		<result column="currency_short_name"	property="currencyShortName" />
+		<result column="amount"					property="amount" />
+		<result column="foreign_curr_amt"		property="foreignCurrAmt" />
+		<result column="currency_rt"			property="currencyRt" />
+		<result column="currency_cd"			property="currencyCd" />
+		<result column="rownum_" 				property="rowNum" />
+		<result column="count_"					property="rowCount"/>
+	</resultMap>
+		
+	<resultMap class="java.util.HashMap" id="gcddTableGridMap">
+		<result column="gacc_tran_id"			property="gaccTranId" />
+		<result column="fund_cd"				property="fundCd" />
+		<result column="branch_cd"				property="branchCd" />
+		<result column="dcb_year"				property="dcbYear" />
+		<result column="dcb_no"					property="dcbNo" />
+		<result column="item_no"				property="itemNo" />
+		<result column="currency_cd"			property="currencyCd" />
+		<result column="amount"					property="amount" />
+		<result column="currency_short_name"	property="currencyShortName" />
+		<result column="foreign_curr_amt"		property="foreignCurrAmt" />
+		<result column="currency_rt"			property="currencyRt" />
+		<result column="net_deposit"			property="netDeposit" />
+		<result column="short_over"				property="shortOver" />
+		<result column="remarks"				property="remarks" />
+		<result column="book_tag"				property="bookTag" />
+		<result column="remarks"				property="remarks" />
+		<result column="user_id"				property="userId" />
+		<result column="last_update"			property="lastUpdate" />
+		<result column="rownum_" 				property="rowNum" />
+		<result column="count_"					property="rowCount"/>
+	</resultMap>
+	
+		<resultMap class="java.util.HashMap" id="gbdsdTableGridMap">
+		<result column="dep_id"					property="depId" />
+		<result column="dep_no"					property="depNo" />
+		<result column="currency_cd"			property="currencyCd" />
+		<result column="bank_cd"				property="bankCd" />
+		<result column="or_pref"				property="orPref" />
+		<result column="check_no"				property="checkNo" />
+		<result column="dsp_check_no"			property="dspCheckNo" />
+		<result column="payor"					property="payor" />
+		<result column="or_no"					property="orNo" />
+		<result column="dsp_or_pref_suf"		property="dspOrPrefSuf" />
+		<result column="amount"					property="amount" />
+		<result column="currency_short_name"	property="currencyShortName" />
+		<result column="foreign_curr_amt"		property="foreignCurrAmt" />
+		<result column="currency_rt"			property="currencyRt" />
+		<result column="bounce_tag"				property="bounceTag" />
+		<result column="otc_tag"				property="otcTag" />
+		<result column="local_sur"				property="localSur" />
+		<result column="foreign_sur"			property="foreignSur" />
+		<result column="net_colln_amt"			property="netCollnAmt" />
+		<result column="error_tag"				property="errorTag" />
+		<result column="book_tag"				property="bookTag" />
+		<result column="deposited_amt"			property="depositedAmt" />
+		<result column="loc_error_amt"			property="locErrorAmt" />
+		<result column="rownum_" 				property="rowNum" />
+		<result column="count_"					property="rowCount"/>
+	</resultMap>
+	
+	<insert id="setGbds" parameterClass="GIACBankDepSlipsClass">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			giac_bank_dep_slips_pkg.set_giac_bank_dep_slips(
+				#depId#,	#depNo#, #gaccTranId#,		#itemNo#,
+				#fundCd#,	#branchCd#,			#dcbNo#,
+				#dcbYear#,	#checkClass#,		#validationDt#,
+				#amount#,	#foreignCurrAmt#,	#currencyRt#,
+				#currencyCd#);
+		END;
+	</insert>
+	
+	<insert id="setGccd" parameterClass="GIACCashDepDtlClass">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			giac_cash_dep_dtl_pkg.set_giac_cash_dep_dtl(#gaccTranId#, #fundCd#, #branchCd#, #dcbYear#, #dcbNo#,
+			                                            #itemNo#, #currencyCd#, #amount#, #foreignCurrAmt#, #currencyRt#,
+			                                            #netDeposit#, #shortOver#, #remarks#, #bookTag#, #userId#, SYSDATE);
+		END;
+	</insert>
+	
+	<delete id="delGbds" parameterClass="GIACBankDepSlipsClass">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			giac_bank_dep_slips_pkg.del_giac_bank_dep_slips(#depId#, #gaccTranId#, #itemNo#);
+		END;	
+	</delete>
+	
+	<delete id="delGccd" parameterClass="GIACCashDepDtlClass">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			giac_cash_dep_dtl_pkg.del_giac_cash_dep_dtl(#gaccTranId#, #itemNo#);
+		END;	
+	</delete>
+	
+	<select id="getGbdsTableGrid" resultMap="gbdsTableGridMap" parameterClass="java.util.HashMap">
+		SELECT *
+			  FROM (SELECT rownum rownum_, 
+			               b.count_, 
+			               a.* 
+			          FROM (SELECT * 
+			                  FROM TABLE (giac_bank_dep_slips_pkg.get_gbds_list(#gaccTranId#, #itemNo#))
+			                  <isEqual property="sortColumn" compareValue="depNo">
+			              		ORDER BY dep_no
+			              	  </isEqual>
+			              	  <isEqual property="sortColumn" compareValue="validationDt">
+			              		ORDER BY validation_dt
+			              	  </isEqual>
+			              	  <isEqual property="sortColumn" compareValue="currencyShortName">
+			              		ORDER BY currency_short_name
+			              	  </isEqual>
+			              	  <isEqual property="sortColumn" compareValue="amount">
+			              		ORDER BY amount
+			              	  </isEqual>
+			              	  <isEqual property="sortColumn" compareValue="foreignCurrAmt">
+			              		ORDER BY foreign_curr_amt
+			              	  </isEqual>
+			              	  <isEqual property="sortColumn" compareValue="currencyRt">
+			              		ORDER BY currency_rt
+			              	  </isEqual>
+			              	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	  </isNotNull>
+			              	  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (giac_bank_dep_slips_pkg.get_gbds_list(#gaccTranId#, #itemNo#))) b) 
+			 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+		
+	<select id="getGcddTableGrid" resultMap="gcddTableGridMap" parameterClass="java.util.HashMap">
+		SELECT *
+			  FROM (SELECT rownum rownum_, 
+			               b.count_, 
+			               a.* 
+			          FROM (SELECT * 
+			                  FROM TABLE (giac_cash_dep_dtl_pkg.get_gcdd_list(#gaccTranId#, #itemNo#))) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (giac_cash_dep_dtl_pkg.get_gcdd_list(#gaccTranId#, #itemNo#))) b) 
+			 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGbdsdTableGridByGaccTranId" resultMap="gbdsdTableGridMap" parameterClass="java.util.HashMap">
+		SELECT *
+			  FROM (SELECT rownum rownum_, 
+			               b.count_, 
+			               a.* 
+			          FROM (SELECT * 
+			                  FROM TABLE (giac_bank_dep_slip_dtl_pkg.get_gbdsd_list_by_tran_id(#gaccTranId#))) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (giac_bank_dep_slip_dtl_pkg.get_gbdsd_list_by_tran_id(#gaccTranId#))) b) 
+			 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGbdsdTableGrid" resultMap="gbdsdTableGridMap" parameterClass="java.util.HashMap">
+		SELECT *
+			  FROM (SELECT rownum rownum_, 
+			               b.count_, 
+			               a.* 
+			          FROM (SELECT * 
+			                  FROM TABLE (giac_bank_dep_slip_dtl_pkg.get_gbdsd_list(#depId#, #depNo#))) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (giac_bank_dep_slip_dtl_pkg.get_gbdsd_list(#depId#, #depNo#))) b) 
+			 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+</sqlMap>

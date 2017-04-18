@@ -1,0 +1,68 @@
+/* Formatted on 3/1/2016 11:28:04 AM (QP5 v5.227.12220.39754) */
+SET SERVEROUTPUT ON
+
+BEGIN
+   EXECUTE IMMEDIATE
+      'ALTER TABLE cpi.giac_deferred_ri_prem_ceded DROP CONSTRAINT gdefri_pk';
+
+   DBMS_OUTPUT.PUT_LINE ('dropped gdefri_pk constraint.');
+EXCEPTION
+   WHEN OTHERS
+   THEN
+      DBMS_OUTPUT.PUT_LINE (SQLERRM || '-' || SQLCODE);
+END;
+/
+BEGIN
+   EXECUTE IMMEDIATE 'DROP INDEX gdefri_pk';
+
+   DBMS_OUTPUT.PUT_LINE ('dropped gdefri_pk index.');
+EXCEPTION
+   WHEN OTHERS
+   THEN
+      DBMS_OUTPUT.PUT_LINE (SQLERRM || '-' || SQLCODE);
+END;
+/
+BEGIN
+   EXECUTE IMMEDIATE
+      'ALTER TABLE cpi.GIAC_DEFERRED_RI_PREM_CEDED ADD comp_sw  VARCHAR2(1)';
+
+   DBMS_OUTPUT.PUT_LINE (
+      'Successfully added comp_sw column to GIAC_DEFERRED_RI_PREM_CEDED table.');
+EXCEPTION
+   WHEN OTHERS
+   THEN
+      DBMS_OUTPUT.PUT_LINE (SQLERRM || '-' || SQLCODE);
+END;
+/
+BEGIN
+   UPDATE GIAC_DEFERRED_RI_PREM_CEDED
+      SET COMP_SW = 'N'
+    WHERE COMP_SW IS NULL;
+
+   COMMIT;
+END;
+/
+BEGIN
+   EXECUTE IMMEDIATE
+      'ALTER TABLE cpi.giac_deferred_ri_prem_ceded MODIFY(comp_sw DEFAULT ''N'')';
+
+   DBMS_OUTPUT.PUT_LINE ('Added default value for comp_sw.');
+EXCEPTION
+   WHEN OTHERS
+   THEN
+      DBMS_OUTPUT.PUT_LINE (SQLERRM || '-' || SQLCODE);
+END;
+/
+BEGIN
+   EXECUTE IMMEDIATE
+      'ALTER TABLE cpi.giac_deferred_ri_prem_ceded
+                         ADD CONSTRAINT gdefri_pk PRIMARY KEY (YEAR,MM,ISS_CD,LINE_CD, PROCEDURE_ID,SHARE_TYPE,ACCT_TRTY_TYPE,COMP_SW)';
+
+
+   DBMS_OUTPUT.PUT_LINE ('Successfully added gdefri_pk.');
+EXCEPTION
+   WHEN OTHERS
+   THEN
+      DBMS_OUTPUT.PUT_LINE (SQLERRM || '-' || SQLCODE);
+END;
+/

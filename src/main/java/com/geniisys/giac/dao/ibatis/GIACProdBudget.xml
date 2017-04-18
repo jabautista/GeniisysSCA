@@ -1,0 +1,360 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIACProdBudget">
+	
+	<typeAlias alias="GIACProdBudget" type="com.geniisys.giac.entity.GIACProdBudget"/>
+  	
+	<resultMap class="GIACProdBudget" id="GIACProdBudgetListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="year"     	 property="year"/>
+		<result column="month"  	 property="month"/>
+		<result column="iss_cd"  	 property="issCd"/>
+		<result column="iss_name"  	 property="dspIssName"/>
+		<result column="line_cd"  	 property="lineCd"/>
+		<result column="line_name"   property="dspLineName"/>
+		<result column="budget"      property="budget"/>
+		<result column="user_id"     property="userId"/>
+		<result column="last_update" property="lastUpdate"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="GIACProdBudgetYearListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="year"     	 property="year"/>
+		<result column="month"     	 property="month"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="yearRecListLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="year"     	 property="year"/>
+	</resultMap>	
+
+	<resultMap class="java.util.HashMap" id="monthRecListLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="month"     	 property="month"/>
+	</resultMap>	
+	
+	<resultMap class="java.util.HashMap" id="issRecListLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="iss_cd"    	  property="issCd"/>
+		<result column="iss_name"     property="issName"/>
+	</resultMap>
+
+	<resultMap class="java.util.HashMap" id="lineRecListLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="line_cd"       property="lineCd"/>
+		<result column="line_name"     property="lineName"/>
+	</resultMap>
+
+	<parameterMap class="java.util.HashMap" id="deleteGiacs360RecParametersMap">
+		<parameter property="year"		jdbcType="VARCHAR"	javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="month"		jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+		<parameter property="issCd"		jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+		<parameter property="lineCd"	jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+	</parameterMap>	
+
+	<parameterMap class="java.util.HashMap" id="addYearGiacs360RecParametersMap">
+		<parameter property="year"		jdbcType="VARCHAR"	javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="month"		jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+	</parameterMap>
+		
+	<select id="getGiacs360YearLOV" resultMap="yearRecListLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(giacs360_pkg.get_year_rec_list)		                 
+		                  	<isNull property="findText">
+				                WHERE year LIKE #search#	                    		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(year) LIKE UPPER(#findText#)			         		
+			             	</isNotNull>		             
+			              	<isEqual property="sortColumn" compareValue="year">
+			              		ORDER BY year
+			              	</isEqual>		              		                      
+			          	  	<isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	</isNotNull>
+		                  ) a, 
+		               (SELECT count (*) count_ 
+		                  FROM TABLE(giacs360_pkg.get_year_rec_list)		                 
+		                  	<isNull property="findText">
+				                 WHERE year LIKE #search#				                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(year) LIKE UPPER(#findText#)			  				         		
+			             	</isNotNull>		
+			             	) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiacs360MonthLOV" resultMap="monthRecListLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(giacs360_pkg.get_month_rec_list)		                 
+		                  	<isNull property="findText">
+				                WHERE UPPER(month) LIKE UPPER(#search#)	                    		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(month) LIKE UPPER(#findText#)			         		
+			             	</isNotNull>		             
+			              	<isEqual property="sortColumn" compareValue="month">
+			              		ORDER BY TO_DATE(month,'MONTH')
+			              	</isEqual>		              		                      
+			          	  	<isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	</isNotNull>
+		                  ) a, 
+		               (SELECT count (*) count_ 
+		                  FROM TABLE(giacs360_pkg.get_month_rec_list)		                 
+		                  	<isNull property="findText">
+				                 WHERE UPPER(month) LIKE UPPER(#search#)                 		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(month) LIKE UPPER(#findText#)		  				         		
+			             	</isNotNull>		
+			             	) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+
+	<select id="getGiacs360IssLOV" resultMap="issRecListLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(giacs360_pkg.get_iss_rec_list(#userId#))		                 
+		                  	<isNull property="findText">
+				                 WHERE UPPER(TO_CHAR(iss_cd)) LIKE UPPER(#search#)		                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(TO_CHAR(iss_cd)) LIKE UPPER(#findText#)	
+		                			OR UPPER(iss_name) LIKE UPPER(#findText#)				         		
+			             	</isNotNull>		             
+			              	<isEqual property="sortColumn" compareValue="issCd">
+			              		ORDER BY iss_cd
+			              	</isEqual>	
+			              	<isEqual property="sortColumn" compareValue="issName">
+			              		ORDER BY iss_name
+			              	</isEqual>			              		                      
+			          	  	<isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	</isNotNull>
+		                  ) a, 
+		               (SELECT count (*) count_ 
+		                  FROM TABLE(giacs360_pkg.get_iss_rec_list(#userId#))		                 
+		                  	<isNull property="findText">
+				                 WHERE UPPER(TO_CHAR(iss_cd)) LIKE UPPER(#search#)			                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(TO_CHAR(iss_cd)) LIKE UPPER(#findText#)	
+		                			OR UPPER(iss_name) LIKE UPPER(#findText#)				         		
+			             	</isNotNull>		
+			             	) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>	
+			
+	<select id="getGiacs360LineLOV" resultMap="lineRecListLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(giacs360_pkg.get_line_rec_list(#userId#,#issCd#))		                 
+		                  	<isNull property="findText">
+				                 WHERE UPPER(TO_CHAR(line_cd)) LIKE UPPER(#search#)			                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(TO_CHAR(line_cd)) LIKE UPPER(#findText#)	
+		                			OR UPPER(line_name) LIKE UPPER(#findText#)				         		
+			             	</isNotNull>		             
+			              	<isEqual property="sortColumn" compareValue="lineCd">
+			              		ORDER BY line_cd
+			              	</isEqual>	
+			              	<isEqual property="sortColumn" compareValue="lineName">
+			              		ORDER BY line_name
+			              	</isEqual>			              		                      
+			          	  	<isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	</isNotNull>
+		                  ) a, 
+		               (SELECT count (*) count_ 
+		                  FROM TABLE(giacs360_pkg.get_line_rec_list(#userId#,#issCd#))		                 
+		                  	<isNull property="findText">
+				                 WHERE UPPER(TO_CHAR(line_cd)) LIKE UPPER(#search#)			                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(TO_CHAR(line_cd)) LIKE UPPER(#findText#)	
+		                			OR UPPER(line_name) LIKE UPPER(#findText#)				         		
+			             	</isNotNull>		
+			             	) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>		
+	
+	<select id="getGiacs360YearMonthRecList" resultMap="GIACProdBudgetYearListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giacs360_pkg.get_year_month_rec_list(#userId#))
+		  	      		<isNotNull property="filter">
+							WHERE 1=1
+								<isNotEmpty prepend="AND"  property="year">
+									year = #year#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="month">
+									UPPER(month) LIKE UPPER(#month#)
+								</isNotEmpty>
+						  </isNotNull>		  	      
+		                  <isEqual property="sortColumn" compareValue="year">
+			              		ORDER BY year
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="month">
+			              		ORDER BY month
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giacs360_pkg.get_year_month_rec_list(#userId#))
+		  	      		<isNotNull property="filter">
+							WHERE 1=1
+								<isNotEmpty prepend="AND"  property="year">
+									year = #year#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="month">
+									UPPER(month) LIKE UPPER(#month#)
+								</isNotEmpty>
+						  </isNotNull>		  	      		                  
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+		
+	<select id="getGiacs360RecList" resultMap="GIACProdBudgetListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giacs360_pkg.get_rec_list(#year#, #month#, #userId#))
+		  	      		<isNotNull property="filter">
+							WHERE 1=1
+								<isNotEmpty prepend="AND"  property="issCd">
+									UPPER(iss_cd) LIKE UPPER(#issCd#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="dspIssName">
+									UPPER(iss_name) LIKE UPPER(#dspIssName#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="lineCd">
+									UPPER(line_cd) LIKE UPPER(#lineCd#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="dspLineName">
+									UPPER(line_name) LIKE UPPER(#dspLineName#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="budget">
+									budget = #budget#
+								</isNotEmpty>
+						  </isNotNull>		  	      
+		                  <isEqual property="sortColumn" compareValue="issCd dspIssName">
+			              		ORDER BY iss_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="lineCd dspLineName">
+			              		ORDER BY line_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="budget">
+			              		ORDER BY budget
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giacs360_pkg.get_rec_list(#year#, #month#, #userId#))
+		  	      		<isNotNull property="filter">
+							WHERE 1=1
+								<isNotEmpty prepend="AND"  property="issCd">
+									UPPER(iss_cd) LIKE UPPER(#issCd#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="dspIssName">
+									UPPER(iss_name) LIKE UPPER(#dspIssName#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="lineCd">
+									UPPER(line_cd) LIKE UPPER(#lineCd#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="dspLineName">
+									UPPER(line_name) LIKE UPPER(#dspLineName#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="budget">
+									budget = #budget#
+								</isNotEmpty>
+						  </isNotNull>		  	      		                  
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setBudget" parameterClass="GIACProdBudget">
+	    DECLARE
+	    	v_rec giac_prod_budget%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.year    := #year#;
+ 			v_rec.month   := #month#;
+ 			v_rec.iss_cd  := #issCd#;
+ 			v_rec.line_cd := #lineCd#;
+ 			v_rec.budget  := #budget#;
+ 			v_rec.user_id := #userId#;
+ 			
+ 			giacs360_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteBudget" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giacs360_pkg.val_del_rec(#recId#);
+ 		END;
+ 	</procedure>
+ 	
+ 	 <procedure id="valAddYearBudget" parameterMap="addYearGiacs360RecParametersMap">
+ 		BEGIN
+ 			giacs360_pkg.val_add_year_rec(?,?);
+ 		END;
+ 	</procedure> 	
+ 	
+ 	<procedure id="valAddBudget" parameterMap="deleteGiacs360RecParametersMap">
+ 		BEGIN
+ 			giacs360_pkg.val_add_rec(?,?,?,?);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delBudget" parameterMap="deleteGiacs360RecParametersMap">
+		BEGIN
+ 			giacs360_pkg.del_rec(?,?,?,?);
+ 		END;
+ 	</delete>
+</sqlMap>

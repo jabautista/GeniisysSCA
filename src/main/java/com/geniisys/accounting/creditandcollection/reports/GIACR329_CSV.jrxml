@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIACR329_CSV" language="groovy" pageWidth="3312" pageHeight="620" orientation="Landscape" columnWidth="3312" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" isIgnorePagination="true" uuid="2c14e821-086c-4b86-bdce-b2db506af09b">
+	<property name="ireport.zoom" value="1.7261356071965586"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="P_AS_OF_DATE" class="java.lang.String"/>
+	<parameter name="P_BRANCH_CD" class="java.lang.String"/>
+	<parameter name="P_INTM_TYPE" class="java.lang.String"/>
+	<parameter name="P_INTM_NO" class="java.lang.String"/>
+	<parameter name="P_USER_ID" class="java.lang.String"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT DISTINCT a.iss_cd, b.iss_name
+  FROM giac_aging_prem_rep_ext a,
+       giis_issource b
+ WHERE a.user_id LIKE $P{P_USER_ID}
+   AND a.as_of_date = NVL(TO_DATE($P{P_AS_OF_DATE}, 'mm-dd-yyyy'), a.as_of_date)
+   AND check_user_per_iss_cd_acctg2(NULL, a.iss_cd, 'GIACS329', $P{P_USER_ID}) = 1
+   AND a.iss_cd LIKE b.iss_cd
+ORDER BY ISS_CD]]>
+	</queryString>
+	<field name="ISS_CD" class="java.lang.String"/>
+	<field name="ISS_NAME" class="java.lang.String"/>
+	<variable name="V_DUMMY" class="java.lang.String" resetType="None"/>
+	<group name="BRANCH_GROUP">
+		<groupExpression><![CDATA[$F{ISS_CD}]]></groupExpression>
+	</group>
+	<detail>
+		<band height="11">
+			<subreport>
+				<reportElement positionType="Float" stretchType="RelativeToBandHeight" isPrintRepeatedValues="false" x="0" y="0" width="3292" height="11" isRemoveLineWhenBlank="true" uuid="b0191487-7244-4997-9cc3-bb4b3f1bbc3c">
+					<printWhenExpression><![CDATA[$V{REPORT_COUNT}==1]]></printWhenExpression>
+				</reportElement>
+				<subreportParameter name="P_INTM_TYPE">
+					<subreportParameterExpression><![CDATA[$P{P_INTM_TYPE}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_BRANCH_CD">
+					<subreportParameterExpression><![CDATA[$F{ISS_CD}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_INTM_NO">
+					<subreportParameterExpression><![CDATA[$P{P_INTM_NO}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_AS_OF_DATE">
+					<subreportParameterExpression><![CDATA[$P{P_AS_OF_DATE}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_USER_ID">
+					<subreportParameterExpression><![CDATA[$P{P_USER_ID}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<returnValue subreportVariable="V_DUMMY" toVariable="V_DUMMY"/>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "GIACR329_HEADER_CSV.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+		<band height="11">
+			<subreport>
+				<reportElement x="0" y="0" width="3292" height="11" uuid="ee71cc2f-2eb5-4541-8865-b14b7101c38c">
+					<printWhenExpression><![CDATA[$V{V_DUMMY}=="1"]]></printWhenExpression>
+				</reportElement>
+				<subreportParameter name="P_INTM_TYPE">
+					<subreportParameterExpression><![CDATA[$P{P_INTM_TYPE}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_BRANCH_CD">
+					<subreportParameterExpression><![CDATA[$F{ISS_CD}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_INTM_NO">
+					<subreportParameterExpression><![CDATA[$P{P_INTM_NO}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_USER_ID">
+					<subreportParameterExpression><![CDATA[$P{P_USER_ID}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_AS_OF_DATE">
+					<subreportParameterExpression><![CDATA[$P{P_AS_OF_DATE}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "GIACR329_MAIN_CSV.jasper"]]></subreportExpression>
+			</subreport>
+			<subreport>
+				<reportElement x="0" y="0" width="3292" height="11" uuid="86446ba6-c82c-492d-998c-268d7c2d331b">
+					<printWhenExpression><![CDATA[$V{V_DUMMY}!="1"]]></printWhenExpression>
+				</reportElement>
+				<subreportParameter name="P_INTM_TYPE">
+					<subreportParameterExpression><![CDATA[$P{P_INTM_TYPE}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_BRANCH_CD">
+					<subreportParameterExpression><![CDATA[$F{ISS_CD}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_INTM_NO">
+					<subreportParameterExpression><![CDATA[$P{P_INTM_NO}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_USER_ID">
+					<subreportParameterExpression><![CDATA[$P{P_USER_ID}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_AS_OF_DATE">
+					<subreportParameterExpression><![CDATA[$P{P_AS_OF_DATE}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "GIACR329_MAIN2_CSV.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</detail>
+</jasperReport>

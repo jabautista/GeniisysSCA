@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISTaxPeril">
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+
+	<typeAlias alias="GIISTaxPeril" type="com.geniisys.common.entity.GIISTaxPeril" />
+
+	<resultMap id="RequiredTaxPerilListing" class="com.geniisys.common.entity.GIISTaxPeril">
+		<result column="ISS_CD" 	property="issCd" 	jdbcType="VARCHAR2"/>
+		<result column="LINE_CD" 	property="lineCd" 	jdbcType="VARCHAR2"/>
+		<result column="TAX_CD" 	property="taxCd" 	jdbcType="NUMBER"/>
+		<result column="PERIL_CD" 	property="perilCd" 	jdbcType="NUMBER"/>
+	</resultMap>
+	
+	<resultMap id="taxPerilList" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result column="NOT_IN" 	property="notIn"/>
+		<result column="ISS_CD" 	property="issCd"/>
+		<result column="LINE_CD" 	property="lineCd"/>
+		<result column="TAX_CD" 	property="taxCd"/>
+		<result column="PERIL_CD" 	property="perilCd"/>
+		<result column="TAX_ID" 	property="taxId"/>
+		<result column="PERIL_SW" 	property="perilSw"/>
+		<result column="REMARKS" 	property="remarks"/>
+		<result column="PERIL_NAME" property="perilName"/>
+	</resultMap>
+	
+	<select id="getRequiredTaxPerilListing" parameterClass="java.util.HashMap" resultMap="RequiredTaxPerilListing">
+		SELECT iss_cd, line_cd, tax_cd, peril_cd
+		  FROM giis_tax_peril
+		 WHERE iss_cd 	= #issCd#
+		   AND line_cd 	= #lineCd#
+	</select>
+	
+	<select id="getTaxPerilList" parameterClass="java.util.HashMap" resultMap="taxPerilList">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(Giiss028_pkg.get_tax_peril_list(#issCd#, #lineCd#, #taxCd#, #taxId#))
+		  	      		<isNotNull property="filter">
+							WHERE 1=1
+							<isNotEmpty prepend="AND"  property="perilName">
+								upper(peril_name) LIKE upper(#perilName#)
+							</isNotEmpty>
+						</isNotNull>
+		                <isEqual property="sortColumn" compareValue="perilName">
+			            	ORDER BY peril_name
+		              	</isEqual>
+		          	  	<isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		             	</isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(Giiss028_pkg.get_tax_peril_list(#issCd#, #lineCd#, #taxCd#, #taxId#))
+		                 <isNotNull property="filter">
+							WHERE 1=1
+							<isNotEmpty prepend="AND"  property="perilName">
+								peril_name = #perilName#
+							</isNotEmpty>
+						</isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<resultMap class="java.util.HashMap" id="GIISS028TaxPerilLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="perilCd" 		column="peril_cd"/>
+		<result property="perilName" 	column="peril_name"/>
+		<result property="sublineCd" 	column="subline_cd"/>				
+	</resultMap>
+	
+	<select id="getGiiss028TaxPerilLOV" resultMap="GIISS028TaxPerilLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIISS028_PKG.get_peril_list(#issCd#, #lineCd#, #taxCd#, #taxId#))	         
+		                  	<isNull property="findText">
+				             	WHERE UPPER(peril_name) LIKE UPPER(#searchString#)				                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(peril_name) LIKE UPPER(#findText#)			  				         		
+		                		   OR UPPER(subline_cd) LIKE UPPER(#findText#)
+		                		   OR UPPER(peril_cd) LIKE UPPER(#findText#)
+			             	</isNotNull>		
+			             	<isNotNull property="notIn">
+								AND peril_cd NOT IN ($notIn$)
+							</isNotNull>              
+			              	<isEqual property="sortColumn" compareValue="perilCd">
+			              		ORDER BY peril_cd
+			              	</isEqual>	
+			              	<isEqual property="sortColumn" compareValue="perilName">
+			              		ORDER BY peril_name
+			              	</isEqual>	
+			              	<isEqual property="sortColumn" compareValue="sublineCd">
+			              		ORDER BY subline_cd
+			              	</isEqual>			              		                      
+			          	  	<isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	</isNotNull>
+		                  ) a, 
+		               (SELECT count (*) count_ 
+		                  FROM TABLE(GIISS028_PKG.get_peril_list(#issCd#, #lineCd#, #taxCd#, #taxId#))		
+		                  	<isNull property="findText">
+				                 WHERE UPPER(peril_name) LIKE UPPER(#searchString#)				                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(peril_name) LIKE UPPER(#findText#)			  				         		
+		                		   OR UPPER(subline_cd) LIKE UPPER(#findText#)
+		                		   OR UPPER(peril_cd) LIKE UPPER(#findText#)			  				         		
+			             	</isNotNull>	
+			             	<isNotNull property="notIn">
+								AND peril_cd NOT IN ($notIn$)
+							</isNotNull>   	
+			             	) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select> 
+	
+	<procedure id="setTaxPeril" parameterClass="com.geniisys.common.entity.GIISTaxPeril">
+	    DECLARE
+	    	v_rec giis_tax_peril%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.iss_cd := #issCd#;
+			v_rec.line_cd := #lineCd#;
+			v_rec.tax_cd := #taxCd#;
+			v_rec.tax_id := #taxId#;
+			v_rec.peril_cd := #perilCd#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			GIISS028_PKG.set_tax_peril_rec(v_rec);
+ 		END;
+ 	</procedure> 
+ 	
+ 	<delete id="delTaxPeril" parameterClass="com.geniisys.common.entity.GIISTaxPeril">
+		BEGIN
+ 			GIISS028_PKG.del_tax_peril_rec(#issCd#, #lineCd#, #taxCd#, #taxId#, #perilCd#);
+ 		END;
+ 	</delete> 
+</sqlMap>

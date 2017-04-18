@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="gipiOrigCommInvPeril">
+	<typeAlias alias="gipiOrigCommInvPeril" type="com.geniisys.gipi.entity.GIPIOrigCommInvPeril"/>
+	
+	<resultMap class="gipiOrigCommInvPeril" id="getGipiOrigCommInvPerilMap">
+		<result property="parId"				column="PAR_ID"/>
+		<result property="intrmdryNo"			column="INTRMDRY_INTM_NO"/>
+		<result property="itemGrp"				column="ITEM_GRP"/>
+		<result property="perilCd"				column="PERIL_CD"/>
+		<result property="perilName"			column="PERIL_NAME"/>
+		<result property="policyId"				column="POLICY_ID"/>
+		<result property="issCd"				column="ISS_CD"/>
+		<result property="premSeqNo"			column="PREM_SEQ_NO"/>
+		<result property="premiumAmt"			column="PREMIUM_AMT"/>
+		<result property="commissionAmt"		column="COMMISSION_AMT"/>
+		<result property="commissionRt"			column="COMMISSION_RT"/>
+		<result property="wholdingTax"			column="WHOLDING_TAX"/>
+		<result property="netCommission"		column="NET_COMMISSION"/>
+		<result property="sharePremiumAmt"		column="SHARE_PREMIUM_AMT"/>
+		<result property="shareCommissionAmt"	column="SHARE_COMMISSION_AMT"/>
+		<result property="shareCommissionRt"	column="SHARE_COMMISSION_RT"/>
+		<result property="shareWholdingTax"		column="SHARE_WHOLDING_TAX"/>
+		<result property="shareNetCommission"	column="SHARE_NET_COMMISSION"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="commInvPerilsMap">
+		<result property="parId"				column="par_id"/>
+		<result property="issCd"				column="iss_cd"/>
+		<result property="itemGrp"				column="item_grp"/>
+		<result property="perilCd"				column="peril_cd"/>
+		<result property="policyId"				column="policy_id"/>
+		<result property="premSeqNo"			column="prem_seq_no"/>
+		<result property="intrmdryIntmNo"		column="intrmdry_intm_no"/>
+
+		<result property="fullPerilName" 		column="full_peril_name"/>
+		<result property="fullPerilSname" 		column="full_peril_sname"/>
+		<result property="fullPremiumAmt" 		column="full_premium_amt"/>
+		<result property="fullWholdingTax" 		column="full_wholding_tax"/>
+		<result property="fullCommissionRt" 	column="full_commission_rt"/>
+		<result property="fullCommissionAmt" 	column="full_commission_amt"/>
+		<result property="fullNetCommission" 	column="full_net_commission"/>
+		
+		<result property="yourPerilName" 		column="your_peril_name"/>
+		<result property="yourPerilSname" 		column="your_peril_sname"/>
+		<result property="yourPremiumAmt" 		column="your_premium_amt"/>
+		<result property="yourWholdingTax" 		column="your_wholding_tax"/>
+		<result property="yourCommissionRt" 	column="your_commission_rt"/>
+		<result property="yourCommissionAmt" 	column="your_commission_amt"/>
+		<result property="yourNetCommission" 	column="your_net_commission"/>
+		
+		<result property="rowNum" 					column="rownum_"/>
+		<result property="rowCount" 				column="count_"/>
+	</resultMap>
+	
+	<select id="getGipiOrigCommInvPeril" resultMap="getGipiOrigCommInvPerilMap">
+		SELECT * FROM TABLE(GIPI_ORIG_COMM_INV_PERIL_PKG.get_gipi_orig_comm_inv_peril(#parId#, #lineCd#))
+	</select>
+	
+	<select id="getCommInvPerils" resultMap="commInvPerilsMap" parameterClass="java.util.HashMap">
+		SELECT *
+          FROM (SELECT rownum rownum_,b.count_,a.*
+                 FROM (SELECT * FROM TABLE(GIPI_ORIG_COMM_INV_PERIL_PKG.get_comm_inv_perils (#policyId#, #itemGrp#, #intrmdryIntmNo#))) a,
+                      (SELECT count(*) count_ FROM TABLE(GIPI_ORIG_COMM_INV_PERIL_PKG.get_comm_inv_perils (#policyId#, #itemGrp#, #intrmdryIntmNo#))) b)
+		WHERE rownum_ BETWEEN NVL(#from#,rownum_) AND NVL(#to#,rownum_)
+	</select>
+</sqlMap>

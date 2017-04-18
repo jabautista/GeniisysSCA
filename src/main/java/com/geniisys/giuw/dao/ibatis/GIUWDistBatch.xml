@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIUWDistBatch">
+	<typeAlias alias="GIUWDistBatch" type="com.geniisys.giuw.entity.GIUWDistBatch"/>
+	
+	<resultMap class="GIUWDistBatch" id="getGiuwDistBatchMap">
+		<result property="batchId"		column="BATCH_ID"/>
+		<result property="batchDate" 	column="BATCH_DATE"/>
+		<result property="batchFlag"	column="BATCH_FLAG"/>
+		<result property="batchQty"		column="BATCH_QTY"/>
+		<result property="cpiRecNo"		column="CPI_REC_NO"/>
+		<result property="cpiBranchCd"	column="CPI_BRANCH_CD"/>
+		<result property="arcExtData"	column="ARC_EXT_DATA"/>
+		<result property="lineCd"		column="LINE_CD"/>
+		<result property="giuwDistBatchDtlList"	column="{batchId=BATCH_ID, lineCd=LINE_CD}" select="getGiuwDistBatchDtl"/>
+	</resultMap>
+	
+	<select id="getGiuwDistBatch" resultMap="getGiuwDistBatchMap">
+		SELECT * FROM TABLE(GIUW_DIST_BATCH_PKG.get_giuw_dist_batch(#batchId#, #lineCd#))
+	</select>
+	
+	<procedure id="insertGiuwDistBatch" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GIUW_DIST_BATCH_PKG.insert_giuw_dist_batch(#newBatchId#, #batchFlag#, #batchQty#);
+		END;
+	</procedure>
+	
+	<procedure id="updateGiuwDistBatch" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GIUW_DIST_BATCH_PKG.set_giuw_dist_batch(#batchId#, #batchFlag#, #batchQty#);
+		END;
+	</procedure>
+	
+</sqlMap>

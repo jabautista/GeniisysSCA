@@ -1,0 +1,484 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="BatchPost">
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+
+	<resultMap id="parListForBatchPostingResultMap" class="java.util.HashMap"  extends="BaseEntity.TableGridResultMap">
+		<result property="parId" 			column="par_id"/>
+		<result property="parNo" 			column="par_no"/>
+		<result property="lineCd" 			column="line_cd"/>
+		<result property="sublineCd" 		column="subline_cd"/>
+		<result property="issCd" 			column="iss_cd"/>
+		<result property="assdNo" 			column="assd_no"/>
+		<result property="assdName"  		column="assd_name"/>
+		<result property="parType" 			column="par_type"/>
+		<result property="userId"			column="user_id"/>
+		<result property="postingSw" 		column="posting_sw"/>
+		<result property="parYear" 			column="par_yy"/>
+		<result property="parSeqNo" 		column="par_seq_no"/>
+		<result property="quoteSeqNo" 		column="quote_seq_no"/>
+		<result property="bankRefNo" 		column="bank_ref_no"/>
+	</resultMap>
+
+	<resultMap id="parListForByParamaterResultMap" class="java.util.HashMap">
+		<result property="parId" 			column="par_id"/>
+		<result property="postingSw" 		column="posting_sw"/>
+		<result property="issCd" 			column="iss_cd"/>
+	</resultMap>
+		
+	<resultMap id="errorLogForBatchPostingResultMap" class="java.util.HashMap"  extends="BaseEntity.TableGridResultMap">
+		<result property="parId" 			column="par_id"/>
+		<result property="parNo" 			column="par_no"/>		
+		<result property="remarks" 			column="remarks"/>
+		<result property="userId"			column="user_id"/>
+	</resultMap>
+
+	<resultMap id="postedLogForBatchPostingResultMap" class="java.util.HashMap"  extends="BaseEntity.TableGridResultMap">
+		<result property="parId" 			column="par_id"/>
+		<result property="parNo" 			column="par_no"/>
+		<result property="policyNo" 		column="policy_no"/>	
+		<result property="remarks" 			column="remarks"/>	
+ 		<result property="userId"			column="user_id"/>
+	</resultMap>		
+		
+	<select id="getParListForBatchPosting" resultMap="parListForBatchPostingResultMap">
+  		SELECT * 
+  		  FROM (SELECT a.*, b.count_, rownum rownum_
+  		     	  FROM (SELECT * 
+  		     	   		  FROM TABLE(gipis207_pkg.get_par_list_batch_posting(#lineCd#, #appUser#))   
+  		     	   		  <isNotNull property="filter">
+  		     	   		  		WHERE 1=1
+  		     	   		  		<isNotEmpty prepend="AND" property="parNo">
+  		     	   		  			UPPER(par_no) LIKE UPPER(#parNo#)
+  		     	   		  		</isNotEmpty>
+  		     	   		  		<isNotEmpty prepend="AND" property="assdName">
+  		     	   		  			UPPER(assd_name) LIKE UPPER(#assdName#)
+  		     	   		  		</isNotEmpty>
+  		     	   		  		<isNotEmpty prepend="AND" property="userId">
+  		     	   		  			UPPER(user_id) LIKE UPPER(#userId#)
+  		     	   		  		</isNotEmpty>
+  		     	   		  		<isNotEmpty prepend="AND" property="parType">
+  		     	   		  			UPPER(par_type) LIKE UPPER(#parType#)
+  		     	   		  		</isNotEmpty>
+  		     	   		  		<isNotEmpty prepend="AND" property="parYear">
+  		     	   		  			UPPER(par_yy) LIKE UPPER(#parYear#)
+  		     	   		  		</isNotEmpty>
+  		     	   		  		<isNotEmpty prepend="AND" property="parSeqNo">
+  		     	   		  			UPPER(par_seq_no) LIKE UPPER(#parSeqNo#)
+  		     	   		  		</isNotEmpty>
+  		     	   		  		<isNotEmpty prepend="AND" property="quoteSeqNo">
+  		     	   		  			UPPER(quote_seq_no) LIKE UPPER(#quoteSeqNo#)
+  		     	   		  		</isNotEmpty>
+  		     	   		  		<isNotEmpty prepend="AND" property="bankRefNo">
+  		     	   		  			UPPER(bank_ref_no) LIKE UPPER(#bankRefNo#)
+  		     	   		  		</isNotEmpty>
+  		     	   		  </isNotNull>
+  		     	   		   <isEqual property="sortColumn" compareValue="postingSw">
+  		     	   		  		ORDER BY posting_sw
+  		     	   		  </isEqual>
+  		     	   		  <isEqual property="sortColumn" compareValue="parNo">
+  		     	   		  		ORDER BY par_no
+  		     	   		  </isEqual>
+  		     	   		  <isEqual property="sortColumn" compareValue="assdName">
+  		     	   		  		ORDER BY assd_name
+  		     	   		  </isEqual>
+  		     	   		  <isEqual property="sortColumn" compareValue="userId">
+  		     	   		  		ORDER BY user_id
+  		     	   		  </isEqual>
+  		     	   		  <isEqual property="sortColumn" compareValue="parType">
+  		     	   		  		ORDER BY par_type
+  		     	   		  </isEqual>
+  		     	   		  <isNotNull property="sortColumn">
+	  		     	   		  	<isEqual property="ascDescFlg" compareValue="ASC">
+	  		     	   		  		ASC
+	  		     	   		  	</isEqual>
+	  		     	   		  	<isEqual property="ascDescFlg" compareValue="DESC">
+	  		     	   		  		DESC
+	  		     	   		  	</isEqual>
+  		     	   		  </isNotNull>
+  		     	   	    ) a,
+  		     	(SELECT count(*) count_
+  		     	   FROM TABLE(gipis207_pkg.get_par_list_batch_posting(#lineCd#, #appUser#))
+	  		     	   <isNotNull property="filter">
+	     	   		  		WHERE 1=1
+	     	   		  			<isNotEmpty prepend="AND" property="parNo">
+  		     	   		  			UPPER(par_no) LIKE UPPER(#parNo#)
+  		     	   		  		</isNotEmpty>
+  		     	   		  		<isNotEmpty prepend="AND" property="assdName">
+  		     	   		  			UPPER(assd_name) LIKE UPPER(#assdName#)
+  		     	   		  		</isNotEmpty>
+  		     	   		  		<isNotEmpty prepend="AND" property="userId">
+  		     	   		  			UPPER(user_id) LIKE UPPER(#userId#)
+  		     	   		  		</isNotEmpty>
+  		     	   		  		<isNotEmpty prepend="AND" property="parType">
+  		     	   		  			UPPER(par_type) LIKE UPPER(#parType#)
+  		     	   		  		</isNotEmpty>
+  		     	   		  		<isNotEmpty prepend="AND" property="parYear">
+  		     	   		  			UPPER(par_yy) LIKE UPPER(#parYear#)
+  		     	   		  		</isNotEmpty>
+  		     	   		  		<isNotEmpty prepend="AND" property="parSeqNo">
+  		     	   		  			UPPER(par_seq_no) LIKE UPPER(#parSeqNo#)
+  		     	   		  		</isNotEmpty>
+  		     	   		  		<isNotEmpty prepend="AND" property="quoteSeqNo">
+  		     	   		  			UPPER(quote_seq_no) LIKE UPPER(#quoteSeqNo#)
+  		     	   		  		</isNotEmpty>
+  		     	   		  		<isNotEmpty prepend="AND" property="bankRefNo">
+  		     	   		  			UPPER(bank_ref_no) LIKE UPPER(#bankRefNo#)
+  		     	   		  		</isNotEmpty>
+	     	   		  </isNotNull>
+  		     	   	   ) b)
+  		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+
+	<select id="getParListByParameter" resultMap="parListForByParamaterResultMap">
+  		(SELECT par_id, posting_sw, iss_cd
+  		     	   		  FROM TABLE(gipis207_pkg.get_par_list_batch_posting(#lineCd#, #appUser#))   
+  		     	   		  WHERE upper(line_cd) = upper(nvl(#paramLineCd#,line_cd))
+  		     	   		    AND upper(subline_cd) = upper(nvl(#paramSublineCd#,subline_cd))
+  		     	   		    AND upper(iss_cd) = upper(nvl(#paramIssCd#,iss_cd))
+<!--   		     	   		    AND upper(user_id) = upper(nvl(#paramUserId#,user_id)) -->
+  		     	   		    AND upper(par_type) = upper(nvl(#paramParType#,par_type)))
+  	</select>  	
+ 
+ 	<select id="getErrorLogForBatchPosting" resultMap="errorLogForBatchPostingResultMap">
+  		SELECT * 
+  		  FROM (SELECT a.*, b.count_, rownum rownum_
+  		     	  FROM (SELECT * 
+  		     	   		  FROM TABLE(gipis207_pkg.get_error_log(#user#))   <!-- added user parameter by kenneth L. 02.10.2014 -->
+  		     	   		  <isNotNull property="filter">
+  		     	   		  		WHERE 1=1
+  		     	   		  		<isNotEmpty prepend="AND" property="parNo">
+  		     	   		  			UPPER(par_no) LIKE UPPER(#parNo#)
+  		     	   		  		</isNotEmpty>
+  		     	   		  		<isNotEmpty prepend="AND" property="remarks">
+  		     	   		  			UPPER(remarks) LIKE UPPER(#remarks#)
+  		     	   		  		</isNotEmpty>
+  		     	   		  		<isNotEmpty prepend="AND" property="userId">
+  		     	   		  			UPPER(user_id) LIKE UPPER(#userId#)
+  		     	   		  		</isNotEmpty>
+  		     	   		  </isNotNull>
+  		     	   		  <isEqual property="sortColumn" compareValue="parNo">
+  		     	   		  		ORDER BY par_no
+  		     	   		  </isEqual>
+  		     	   		  <isEqual property="sortColumn" compareValue="remarks">
+  		     	   		  		ORDER BY remarks
+  		     	   		  </isEqual>
+  		     	   		  <isEqual property="sortColumn" compareValue="userId">
+  		     	   		  		ORDER BY user_id
+  		     	   		  </isEqual>
+  		     	   		  <isNotNull property="sortColumn">
+	  		     	   		  	<isEqual property="ascDescFlg" compareValue="ASC">
+	  		     	   		  		ASC
+	  		     	   		  	</isEqual>
+	  		     	   		  	<isEqual property="ascDescFlg" compareValue="DESC">
+	  		     	   		  		DESC
+	  		     	   		  	</isEqual>
+  		     	   		  </isNotNull>
+  		     	   	    ) a,
+  		     	(SELECT count(*) count_
+  		     	   FROM TABLE(gipis207_pkg.get_error_log(#user#))   <!-- added user parameter by kenneth L. 02.10.2014 -->
+	  		     	   <isNotNull property="filter">
+	     	   		  		WHERE 1=1
+	     	   		  			<isNotEmpty prepend="AND" property="parNo">
+  		     	   		  			UPPER(par_no) LIKE UPPER(#parNo#)
+  		     	   		  		</isNotEmpty>
+  		     	   		  		<isNotEmpty prepend="AND" property="remarks">
+  		     	   		  			UPPER(remarks) LIKE UPPER(#remarks#)
+  		     	   		  		</isNotEmpty>
+  		     	   		  		<isNotEmpty prepend="AND" property="userId">
+  		     	   		  			UPPER(user_id) LIKE UPPER(#userId#)
+  		     	   		  		</isNotEmpty>
+	     	   		  </isNotNull>
+  		     	   	   ) b)
+  		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select> 	
+  	
+  	<select id="getPostedLogForBatchPosting" resultMap="postedLogForBatchPostingResultMap">
+  		SELECT * 
+  		  FROM (SELECT a.*, b.count_, rownum rownum_
+  		     	  FROM (SELECT * 
+  		     	   		  FROM TABLE(gipis207_pkg.get_posted_log(#user#))   
+  		     	   		  <isNotNull property="filter">
+  		     	   		  		WHERE 1=1
+  		     	   		  		<isNotEmpty prepend="AND" property="parNo">
+  		     	   		  			UPPER(par_no) LIKE UPPER(#parNo#)
+  		     	   		  		</isNotEmpty>
+  		     	   		  		<isNotEmpty prepend="AND" property="policyNo">
+  		     	   		  			UPPER(policy_no) LIKE UPPER(#policyNo#)
+  		     	   		  		</isNotEmpty>
+  		     	   		  		<isNotEmpty prepend="AND" property="userId">
+  		     	   		  			UPPER(user_id) LIKE UPPER(#userId#)
+  		     	   		  		</isNotEmpty>
+  		     	   		  </isNotNull>
+  		     	   		  <isEqual property="sortColumn" compareValue="parNo">
+  		     	   		  		ORDER BY par_no
+  		     	   		  </isEqual>
+  		     	   		  <isEqual property="sortColumn" compareValue="policyNo">
+  		     	   		  		ORDER BY policy_no
+  		     	   		  </isEqual>
+  		     	   		  <isEqual property="sortColumn" compareValue="userId">
+  		     	   		  		ORDER BY user_id
+  		     	   		  </isEqual>
+  		     	   		  <isNotNull property="sortColumn">
+	  		     	   		  	<isEqual property="ascDescFlg" compareValue="ASC">
+	  		     	   		  		ASC
+	  		     	   		  	</isEqual>
+	  		     	   		  	<isEqual property="ascDescFlg" compareValue="DESC">
+	  		     	   		  		DESC
+	  		     	   		  	</isEqual>
+  		     	   		  </isNotNull>
+  		     	   	    ) a,
+  		     	(SELECT count(*) count_
+  		     	   FROM TABLE(gipis207_pkg.get_posted_log(#user#))  
+	  		     	   <isNotNull property="filter">
+	     	   		  		WHERE 1=1
+	     	   		  			<isNotEmpty prepend="AND" property="parNo">
+  		     	   		  			UPPER(par_no) LIKE UPPER(#parNo#)
+  		     	   		  		</isNotEmpty>
+  		     	   		  		<isNotEmpty prepend="AND" property="policyNo">
+  		     	   		  			UPPER(policy_no) LIKE UPPER(#policyNo#)
+  		     	   		  		</isNotEmpty>
+  		     	   		  		<isNotEmpty prepend="AND" property="userId">
+  		     	   		  			UPPER(user_id) LIKE UPPER(#userId#)
+  		     	   		  		</isNotEmpty>
+	     	   		  </isNotNull>
+  		     	   	   ) b)
+  		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select> 
+
+	<parameterMap class="java.util.HashMap" id="deleteErrorLogMap">
+		<parameter property="appUser"	jdbcType="VARCHAR"	javaType="java.lang.String" 	mode="IN"/>
+        <parameter property="userId"	jdbcType="VARCHAR" 	javaType="java.lang.String"		mode="IN"/>
+	</parameterMap>
+	
+  	<procedure id="deleteLog" parameterMap="deleteErrorLogMap">
+  		BEGIN
+  			giis_users_pkg.app_user := ?;
+  		  	GIPIS207_PKG.delete_log(?);
+  		END;
+  	</procedure>
+	
+  	<select id="checkIfBackEndt1" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT GIPIS207_PKG.check_endt(#parId#) FROM DUAL
+	</select>
+	
+	<parameterMap class="java.util.HashMap" id="checkCancelParBatchPostingMap">
+		<parameter property="parId"      jdbcType="VARCHAR" javaType="java.lang.Integer"  mode="IN" />
+        <parameter property="msgAlert"   jdbcType="VARCHAR" javaType="java.lang.String"   mode="OUT" />
+	</parameterMap>
+	
+	<procedure id="checkCancellationMsgBatchPosting" parameterMap="checkCancelParBatchPostingMap">
+		BEGIN
+			gipis207_pkg.check_cancel_par_posting(?, ?);
+		END;
+	</procedure>	
+	
+	<parameterMap class="java.util.HashMap" id="checkIfBackEndtBatchPostingMap">
+		<parameter property="parId"      jdbcType="VARCHAR" javaType="java.lang.Integer"  mode="IN" />
+        <parameter property="msgAlert"   jdbcType="VARCHAR" javaType="java.lang.String"   mode="OUT" />
+	</parameterMap>
+	
+	<procedure id="checkIfBackEndt" parameterMap="checkIfBackEndtBatchPostingMap">
+		BEGIN
+			gipis207_pkg.check_if_back_endt(?, ?);
+		END;
+	</procedure>	
+
+	<parameterMap class="java.util.HashMap" id="validateInstallmentBatchPostingMap">
+		<parameter property="parId"      jdbcType="VARCHAR" javaType="java.lang.Integer"  mode="IN" />
+        <parameter property="msgAlert"   jdbcType="VARCHAR" javaType="java.lang.String"   mode="OUT" />
+        <parameter property="moduleId"   jdbcType="VARCHAR" javaType="java.lang.String"   mode="IN" />
+	</parameterMap>
+	
+	<procedure id="validateInstallmentBatchPosting" parameterMap="validateInstallmentBatchPostingMap">
+		BEGIN
+			VALIDATE_INSTALLMENT(?, ?, ?);
+		END;
+	</procedure>
+			
+	<parameterMap class="map" id="whenPostBtnBatchPostingMap">
+		<parameter property="userId" 			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="parId"			    jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="lineCd"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="issCd" 			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="userId" 			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="msgAlert" 			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="changeStat" 		jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="msgType" 			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="credBranchConf" 	jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="bookingMsg" 		jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="moduleId" 			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+	</parameterMap>
+				
+	<procedure id="whenPostBtnBatchPosting" parameterMap="whenPostBtnBatchPostingMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+		 	when_post_btn_pressed(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+
+	<parameterMap class="map" id="postingProcessABatchPostingMap">
+		<parameter property="userId" 			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="parId"			    jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="msgAlert"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="moduleId" 			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+	</parameterMap>
+
+	<procedure id="postingProcessABatchPosting" parameterMap="postingProcessABatchPostingMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			Posting_Process_A(?, ?, ?);
+		END;	
+	</procedure>
+		
+	<parameterMap class="map" id="postPolParBatchPostingMap">
+		<parameter property="userId" 			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="parId"			    jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="lineCd"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="issCd" 			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="userId" 			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="changeStat" 		jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="INOUT"/>
+		<parameter property="policyId"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="packPolicyId"		jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="msgAlert"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="outUserId"			jdbcType="VARCHAR"	javaType="java.lang.String"	 mode="OUT"/>
+		<parameter property="premSeqNo"			jdbcType="VARCHAR"	javaType="java.lang.String"	 mode="OUT"/>
+		<parameter property="moduleId" 			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+	</parameterMap>
+	
+	<procedure id="postPolParBatchPosting" parameterMap="postPolParBatchPostingMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			post_pol_par(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+		END;	
+	</procedure>
+		
+	<parameterMap class="map" id="postingProcessBBatchPostingMap">
+		<parameter property="userId" 			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="parId"			    jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="userId" 			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="msgAlert"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="moduleId" 			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+	</parameterMap>
+	
+	<procedure id="postingProcessBBatchPosting" parameterMap="postingProcessBBatchPostingMap">
+	  	BEGIN
+			giis_users_pkg.app_user := ?;
+			Posting_Process_B(?, ?, ?, ?);
+		END;	
+	</procedure>	
+	
+	<parameterMap class="map" id="postingProcessCBatchPostingMap">
+		<parameter property="userId" 			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="parId"			    jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="lineCd"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="issCd" 			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="policyId"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="userId" 			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="distno"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="msgAlert"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="moduleId" 			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+	</parameterMap>
+	
+	<procedure id="postingProcessCBatchPosting" parameterMap="postingProcessCBatchPostingMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			posting_process_c(?, ?, ?, ?, ?, ?, ?, ?);
+		END;	
+	</procedure>	
+	
+	<parameterMap class="map" id="updateQuoteBatchPostingMap">
+		<parameter property="userId" 			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="parId"			    jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="userId" 			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+	</parameterMap>
+	
+	<procedure id="updateQuoteBatchPosting" parameterMap="updateQuoteBatchPostingMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			UPDATE_QUOTE(?, ?);
+		END;	
+	</procedure>
+	
+	<parameterMap class="map" id="deleteParBatchPostingMap">
+		<parameter property="userId" 			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="parId"			    jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="lineCd"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="issCd" 			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+	</parameterMap>
+	
+	<procedure id="deleteParBatchPosting" parameterMap="deleteParBatchPostingMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			delete_par(?, ?, ?);
+		END;	
+	</procedure>	
+	
+	<procedure id="postingProcessDBatchPosting" parameterMap="updateQuoteBatchPostingMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			posting_process_d(?, ?);
+		END;	
+	</procedure>
+	
+	<parameterMap class="map" id="postingProcessEBatchPostingMap">
+		<parameter property="userId" 			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="parId"			    jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="userId" 			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="msgAlert"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="workflowMsgr"		jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="moduleId" 			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+	</parameterMap>	
+	
+	<procedure id="postingProcessEBatchPosting" parameterMap="postingProcessEBatchPostingMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			posting_process_e(?, ?, ?, ?, ?);
+		END;	
+	</procedure>
+	
+	<parameterMap class="map" id="postingProcessFBatchPostingMap">
+		<parameter property="userId" 			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="parId"			    jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="backEndt"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+	</parameterMap>
+	
+	<procedure id="postingProcessFBatchPosting" parameterMap="postingProcessFBatchPostingMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			posting_process_f(?, ?);
+		END;
+	</procedure>	
+	
+	<parameterMap class="map" id="postPostedLogMap">
+		<parameter property="userId" 			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="parId"			    jdbcType="NUMBER" 	javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="userId"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="remarks"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+	</parameterMap>
+
+	<procedure id="postPostedLog" parameterMap="postPostedLogMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			gipis207_pkg.post_posted_log(?,?,?);
+		END;
+	</procedure>
+			
+	<parameterMap class="map" id="postErrorLogMap">
+		<parameter property="userId" 			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="parId"			    jdbcType="NUMBER" 	javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="remarks"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="moduleId"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+	</parameterMap>
+
+	<procedure id="postErrorLog" parameterMap="postErrorLogMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			gipis207_pkg.pre_post_error2(?,?,?);
+		END;
+	</procedure>				
+</sqlMap>	

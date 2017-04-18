@@ -1,0 +1,437 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISWarrCla">
+
+ 	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+
+	<resultMap id="GIISWarrClaLOVResultMap" class="com.geniisys.gipi.entity.GIPIQuoteWarrantyAndClause" extends="BaseEntity.TableGridResultMap">
+		<result column="LINE_CD" 			property="lineCd" />
+		<result column="MAIN_WC_CD" 		property="wcCd" />
+		<result column="PRINT_SW" 			property="printSw" />
+		<result column="WC_TITLE" 			property="wcTitle" />
+		<result column="WC_TEXT01" 			property="wcText1" />
+		<result column="WC_TEXT02" 			property="wcText2" />
+		<result column="WC_TEXT03" 			property="wcText3" />
+		<result column="WC_TEXT04" 			property="wcText4" />
+		<result column="WC_TEXT05" 			property="wcText5" />
+		<result column="WC_TEXT06" 			property="wcText6" />
+		<result column="WC_TEXT07" 			property="wcText7" />
+		<result column="WC_TEXT08" 			property="wcText8" />
+		<result column="WC_TEXT09" 			property="wcText9" />
+		<result column="WC_TEXT10" 			property="wcText10" />
+		<result column="WC_TEXT11" 			property="wcText11" />
+		<result column="WC_TEXT12" 			property="wcText12" />
+		<result column="WC_TEXT13" 			property="wcText13" />
+		<result column="WC_TEXT14" 			property="wcText14" />
+		<result column="WC_TEXT15" 			property="wcText15" />
+		<result column="WC_TEXT16" 			property="wcText16" />
+		<result column="WC_TEXT17" 			property="wcText17" />
+		<result column="TEXT_UPDATE_SW" 	property="changeTag" />
+		<result column="WC_SW" 				property="wcSw" />
+		<!-- <result column="REMARKS" 		property="wcRemarks" /> andrew 4.22.2014 - remarks from maintenance should not be retrieved for LOV -->
+	</resultMap>
+	
+	 <resultMap id="GIISLineListing" class="com.geniisys.giis.entity.GIISWarrCla" >
+	  	<result column="LINE_CD" 			property="lineCd" 			jdbcType="VARCHAR" />
+	  	<result column="LINE_NAME"			property="lineName"			jdbcType="VARCHAR" />
+	  	<result property="rowNum"			column="ROWNUM_"/>
+		<result property="rowCount"			column="COUNT_"/>
+  	</resultMap>
+	
+ 	<resultMap id="GIISWarrClaResultMap" class="com.geniisys.giis.entity.GIISWarrCla" extends="BaseEntity.TableGridResultMap" >
+ 		<result column="LINE_CD" 			property="lineCd" />
+		<result column="MAIN_WC_CD" 		property="mainWcCd" />
+		<result column="PRINT_SW" 			property="printSw" />
+		<result column="WC_TITLE" 			property="wcTitle" />
+		<result column="WC_TEXT01" 			property="wcText01" />
+		<result column="WC_TEXT02" 			property="wcText02" />
+		<result column="WC_TEXT03" 			property="wcText03" />
+		<result column="WC_TEXT04" 			property="wcText04" />
+		<result column="WC_TEXT05" 			property="wcText05" />
+		<result column="WC_TEXT06" 			property="wcText06" />
+		<result column="WC_TEXT07" 			property="wcText07" />
+		<result column="WC_TEXT08" 			property="wcText08" />
+		<result column="WC_TEXT09" 			property="wcText09" />
+		<result column="WC_TEXT10" 			property="wcText10" />
+		<result column="WC_TEXT11" 			property="wcText11" />
+		<result column="WC_TEXT12" 			property="wcText12" />
+		<result column="WC_TEXT13" 			property="wcText13" />
+		<result column="WC_TEXT14" 			property="wcText14" />
+		<result column="WC_TEXT15" 			property="wcText15" />
+		<result column="WC_TEXT16" 			property="wcText16" />
+		<result column="WC_TEXT17" 			property="wcText17" />
+		<result column="wc_sw_desc"			property="wcSwDesc" />
+		<result column="WC_SW" 				property="wcSw" />
+		<result column="remarks" 			property="remarks" />
+		<result column="user_id" 			property="userId" />
+		<result column="last_update" 		property="lastUpdate" />
+		<result column="active_tag" 		property="activeTag" />
+	</resultMap>
+
+	<select id="getGIISWarrClaLOV" resultMap="GIISWarrClaLOVResultMap">		
+	  	SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT line_cd, main_wc_cd, print_sw, wc_title,
+							   wc_text01, wc_text02, wc_text03,
+							   wc_text04, wc_text05, wc_text06,
+							   wc_text07, wc_text08, wc_text09,
+							   wc_text10, wc_text11, wc_text12,
+							   wc_text13, wc_text14, wc_text15,
+							   wc_text16, wc_text17,
+							   text_update_sw, wc_sw, remarks							   
+						  FROM TABLE(GIIS_WARRCLA_PKG.get_warrcla_list(#lineCd#, null))
+						  WHERE 1 = 1
+						  <isNotNull property="notIn" prepend="AND">
+		                  		(main_wc_cd NOT IN $notIn$)
+		                  </isNotNull>
+		                  AND (UPPER(wc_title) like UPPER(NVL(#findText#,wc_title))
+                           	 	OR UPPER(main_wc_cd) like UPPER(NVL(#findText#,main_wc_cd))
+                                	OR UPPER(wc_sw) like UPPER(NVL(#findText#,wc_sw)))
+		                  <isEqual property="sortColumn" compareValue="wcTitle">
+			              		ORDER BY wc_title
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="wcCd">
+			              		ORDER BY main_wc_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="wcSw">
+			              		ORDER BY wc_sw
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIIS_WARRCLA_PKG.get_warrcla_list(#lineCd#, null))
+		                    WHERE 1 = 1
+						  <isNotNull property="notIn" prepend="AND"> <!-- Added NOT IN by robert 09132013 -->
+		                  		(main_wc_cd NOT IN $notIn$)
+		                  </isNotNull>
+		                  AND (UPPER(wc_title) like UPPER(NVL(#findText#,wc_title))
+                           	 	OR UPPER(main_wc_cd) like UPPER(NVL(#findText#,main_wc_cd))
+                                	OR UPPER(wc_sw) like UPPER(NVL(#findText#,wc_sw)))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<!-- Added appuser reymon 05042013 -->
+	<select id="getGIISLine" resultMap="GIISLineListing" >  	
+  		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIISS034_PKG.get_giis_line_list(#appUser#))
+		          		 <isNotNull property="filter">
+				         	WHERE 1=1
+				         	<isNotEmpty prepend="AND" property="lineCd"> 
+				         		UPPER(line_cd) LIKE UPPER(#lineCd#)
+				         	</isNotEmpty>
+				         	<isNotEmpty prepend="AND" property="lineName"> 
+				         	  	UPPER(line_name) LIKE UPPER(#lineName#)
+				         	 </isNotEmpty>
+				         </isNotNull>
+		          		 <isEqual property="sortColumn" compareValue="lineCd">
+			              		ORDER BY line_cd
+			             </isEqual>
+			             <isEqual property="sortColumn" compareValue="lineName">
+			              		ORDER BY line_name
+			             </isEqual> 
+			          	 <isNotNull property="sortColumn">
+			             	<isEqual property="ascDescFlg" compareValue="ASC">
+			              		ASC
+			              	</isEqual>
+			              	<isEqual property="ascDescFlg" compareValue="DESC">
+			              		DESC
+			              	</isEqual>
+			             </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIISS034_PKG.get_giis_line_list(#appUser#))
+		                 <isNotNull property="filter">
+				         	WHERE 1=1
+				         	<isNotEmpty prepend="AND" property="lineCd"> 
+				         		UPPER(line_cd) LIKE UPPER(#lineCd#)
+				         	</isNotEmpty>
+				         	<isNotEmpty prepend="AND" property="lineName"> 
+				         	  	UPPER(line_name) LIKE UPPER(#lineName#)
+				         	 </isNotEmpty>
+				         </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+  	
+  	<select id="getGIISWarrCla" resultMap="GIISWarrClaResultMap">		
+	  	SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT line_cd, main_wc_cd, print_sw, wc_title, active_tag,
+							   wc_text01, wc_text02, wc_text03, wc_text04, 
+							   wc_text05, wc_text06, wc_text07, wc_text08, 
+							   wc_text09, wc_text10, wc_text11, wc_text12,
+							   wc_text13, wc_text14, wc_text15, wc_text16, 
+							   wc_text17, wc_sw, wc_sw_desc, remarks, user_id, last_update							   
+						  FROM TABLE(GIISS034_PKG.get_warrcla_list(#lineCd#))
+						  	<isNotNull property="filter">
+						  		WHERE 1 = 1
+						  		<isNotEmpty prepend="AND" property="mainWcCd">
+                           	 		UPPER(main_wc_cd) LIKE UPPER(#mainWcCd#)
+                           	 	</isNotEmpty>
+						  		<isNotEmpty prepend="AND" property="wcTitle">
+		                  			UPPER(wc_title) LIKE UPPER(#wcTitle#)
+		                  		</isNotEmpty>
+                                <isNotEmpty prepend="AND" property="wcSwDesc">
+                                	UPPER(DECODE(NVL(wc_sw,'W'),'W','Warranty','Clause')) LIKE UPPER(#wcSwDesc#)
+                                </isNotEmpty>
+                             </isNotNull>
+                          <isEqual property="sortColumn" compareValue="mainWcCd">
+			              		ORDER BY main_wc_cd
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="wcTitle">
+			              		ORDER BY wc_title
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="wcSwDesc">
+			              		ORDER BY wc_sw_desc
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIISS034_PKG.get_warrcla_list(#lineCd#))
+		                   <isNotNull property="filter">
+						  		WHERE 1 = 1
+						  		<isNotEmpty prepend="AND" property="mainWcCd">
+                           	 		UPPER(main_wc_cd) LIKE UPPER(#mainWcCd#)
+                           	 	</isNotEmpty>
+						  		<isNotEmpty prepend="AND" property="wcTitle">
+		                  			UPPER(wc_title) LIKE UPPER(#wcTitle#)
+		                  		</isNotEmpty>
+                                <isNotEmpty prepend="AND" property="wcSwDesc">
+                                	UPPER(DECODE(NVL(wc_sw,'W'),'W','Warranty','Clause')) LIKE UPPER(#wcSwDesc#)
+                                </isNotEmpty>
+                           </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<delete id="deleteWarrClaMaintenanceRow" parameterClass="com.geniisys.giis.entity.GIISWarrCla">
+  		BEGIN
+  			GIISS034_PKG.delete_giis_warr_cla_row(#lineCd#,#mainWcCd#);
+  		END;
+  	</delete>
+  	
+  	<procedure id="setWarrClaMaintenance" parameterClass="com.geniisys.giis.entity.GIISWarrCla">
+		DECLARE
+		  v_warr_cla GIIS_WARRCLA%ROWTYPE;
+		BEGIN
+		  giis_users_pkg.app_user := #appUser#;
+		  		 
+		  v_warr_cla.main_wc_cd := #mainWcCd#;
+		  v_warr_cla.line_cd    := #lineCd#;
+		  v_warr_cla.wc_title   := #wcTitle#;
+          v_warr_cla.wc_text01  := #wcText01#;
+          v_warr_cla.wc_text02  := #wcText02#;
+          v_warr_cla.wc_text03  := #wcText03#;
+          v_warr_cla.wc_text04  := #wcText04#;
+          v_warr_cla.wc_text05  := #wcText05#;
+          v_warr_cla.wc_text06  := #wcText06#;
+          v_warr_cla.wc_text07  := #wcText07#;
+          v_warr_cla.wc_text08  := #wcText08#;
+          v_warr_cla.wc_text09  := #wcText09#;
+          v_warr_cla.wc_text10  := #wcText10#;
+          v_warr_cla.wc_text11  := #wcText11#;
+          v_warr_cla.wc_text12  := #wcText12#;
+          v_warr_cla.wc_text13  := #wcText13#;
+          v_warr_cla.wc_text14  := #wcText14#;
+          v_warr_cla.wc_text15  := #wcText15#;
+          v_warr_cla.wc_text16  := #wcText16#;
+          v_warr_cla.wc_text17  := #wcText17#;
+          v_warr_cla.wc_sw      := #wcSw#;
+          v_warr_cla.print_sw   := #printSw#;
+          v_warr_cla.remarks    := #remarks#;
+          v_warr_cla.user_id    := #appUser#;
+          v_warr_cla.active_tag := #activeTag#;
+		  
+		  GIISS034_PKG.set_giis_warr_cla_group(v_warr_cla);
+		END;
+	</procedure>
+  	
+  	<select id="validateAddWarrCla" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT GIISS034_PKG.VALIDATE_ADD_WARR_CLA(#mainWcCd#,#lineCd#) FROM DUAL
+	</select>
+	
+	<select id="validateDeleteWarrCla" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT GIISS034_PKG.VALIDATE_DELETE_WARR_CLA(#lineCd#,#mainWcCd#) FROM DUAL
+	</select>
+	
+	<!-- temporarily commectd out by Kris 05.20.2013 -->
+	<!-- <select id="getGIISWarrClaLOV2" resultMap="GIISWarrClaLOVResultMap">		
+	  	SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT line_cd, main_wc_cd, print_sw, wc_title,
+							   wc_text01, wc_text02, wc_text03,
+							   wc_text04, wc_text05, wc_text06,
+							   wc_text07, wc_text08, wc_text09,
+							   wc_text10, wc_text11, wc_text12,
+							   wc_text13, wc_text14, wc_text15,
+							   wc_text16, wc_text17,
+							   text_update_sw, wc_sw							   
+						  FROM TABLE(GIPIS171_PKG.get_warrcla_list_lov(#lineCd#, #wcTitle#))
+						  <isNotNull property="findText">
+						  	WHERE 1 = 1
+						  	<isNotEmpty prepend="AND" property="findText">
+		                 		(UPPER(wc_title) like UPPER(NVL(#findText#,wc_title))
+                           	 	OR UPPER(main_wc_cd) like UPPER(NVL(#findText#,main_wc_cd))
+                                OR UPPER(wc_sw) like UPPER(NVL(#findText#,wc_sw)))
+                            </isNotEmpty>
+                          </isNotNull>
+						  WHERE 1 = 1
+						  <isNotNull property="notIn" prepend="AND">
+		                  		(main_wc_cd NOT IN $notIn$)
+		                  </isNotNull>
+		                 AND (UPPER(wc_title) like UPPER(NVL(#findText#,wc_title))
+                           	 	OR UPPER(main_wc_cd) like UPPER(NVL(#findText#,main_wc_cd))
+                                	OR UPPER(wc_sw) like UPPER(NVL(#findText#,wc_sw)))
+		                  <isEqual property="sortColumn" compareValue="wcTitle">
+			              		ORDER BY wc_title
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="wcCd">
+			              		ORDER BY main_wc_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="wcSw">
+			              		ORDER BY wc_sw
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIPIS171_PKG.get_warrcla_list_lov(#lineCd#, #wcTitle#))
+		                   <isNotNull property="findText">
+						  	WHERE 1 = 1
+						  	<isNotEmpty prepend="AND" property="findText">
+		                 		(UPPER(wc_title) like UPPER(NVL(#findText#,wc_title))
+                           	 	OR UPPER(main_wc_cd) like UPPER(NVL(#findText#,main_wc_cd))
+                                OR UPPER(wc_sw) like UPPER(NVL(#findText#,wc_sw)))
+                            </isNotEmpty>
+                          </isNotNull>
+		                   WHERE UPPER(wc_title) like UPPER(NVL(#findText#,wc_title))
+                           	 	OR UPPER(main_wc_cd) like UPPER(NVL(#findText#,main_wc_cd))
+                                	OR UPPER(wc_sw) like UPPER(NVL(#findText#,wc_sw))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select> -->
+	
+	<select id="validateWarrCla" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT GIPIS171_pkg.validate_warrcla(#wcTitle#) FROM DUAL
+	</select>
+	
+	<!-- modified by KRis 05.20.2013 -->
+	<select id="getGIISWarrClaLOV2" resultMap="GIISWarrClaLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT line_cd, main_wc_cd, print_sw, wc_title,
+							   wc_text01, wc_text02, wc_text03,
+							   wc_text04, wc_text05, wc_text06,
+							   wc_text07, wc_text08, wc_text09,
+							   wc_text10, wc_text11, wc_text12,
+							   wc_text13, wc_text14, wc_text15,
+							   wc_text16, wc_text17,
+							   text_update_sw, wc_sw, remarks							   
+						  FROM TABLE(GIPIS171_PKG.get_warrcla_list_lov(#lineCd#, #wcTitle#))
+						 WHERE 1 = 1
+						  <isNotNull property="notIn" prepend="AND">
+		                  		(main_wc_cd NOT IN $notIn$)
+		                  </isNotNull>
+		                  <isNotNull property="filterText" prepend="AND">
+		                  		(UPPER(wc_title) like UPPER(NVL(#filterText#,wc_title))
+                           	 	OR UPPER(main_wc_cd) like UPPER(NVL(#filterText#,main_wc_cd))
+                                	OR UPPER(wc_sw) like UPPER(NVL(#filterText#,wc_sw)))
+		                  </isNotNull>
+		                  <isNotNull property="findText" prepend="AND">
+		                       (UPPER(wc_title) like UPPER(NVL(#findText#,wc_title))
+                           	 	OR UPPER(main_wc_cd) like UPPER(NVL(#findText#,main_wc_cd))
+                                	OR UPPER(wc_sw) like UPPER(NVL(#findText#,wc_sw)))
+                          </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="wcTitle">
+			              		ORDER BY wc_title
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="wcCd">
+			              		ORDER BY main_wc_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="wcSw">
+			              		ORDER BY wc_sw
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIPIS171_PKG.get_warrcla_list_lov(#lineCd#, #wcTitle#))
+		                 WHERE 1 = 1
+						  <isNotNull property="notIn" prepend="AND">
+		                  		(main_wc_cd NOT IN $notIn$)
+		                  </isNotNull>
+		                  <isNotNull property="filterText" prepend="AND">
+		                  		(UPPER(wc_title) like UPPER(NVL(#filterText#,wc_title))
+                           	 	OR UPPER(main_wc_cd) like UPPER(NVL(#filterText#,main_wc_cd))
+                                	OR UPPER(wc_sw) like UPPER(NVL(#filterText#,wc_sw)))
+		                  </isNotNull>
+		                  <isNotNull property="findText" prepend="AND">
+		                       (UPPER(wc_title) like UPPER(NVL(#findText#,wc_title))
+                           	 	OR UPPER(main_wc_cd) like UPPER(NVL(#findText#,main_wc_cd))
+                                	OR UPPER(wc_sw) like UPPER(NVL(#findText#,wc_sw)))
+                          </isNotNull>
+		                  <!-- AND (UPPER(wc_title) like UPPER(NVL(#findText#,wc_title))
+                           	 	OR UPPER(main_wc_cd) like UPPER(NVL(#findText#,main_wc_cd))
+                                	OR UPPER(wc_sw) like UPPER(NVL(#findText#,wc_sw))) -->
+		                  <isEqual property="sortColumn" compareValue="wcTitle">
+			              		ORDER BY wc_title
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="wcCd">
+			              		ORDER BY main_wc_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="wcSw">
+			              		ORDER BY wc_sw
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>	
+	
+</sqlMap>

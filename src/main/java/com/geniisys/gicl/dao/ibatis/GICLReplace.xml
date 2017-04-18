@@ -1,0 +1,598 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GICLReplace">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GICLReplace" type="com.geniisys.gicl.entity.GICLReplace"/>
+	
+	<resultMap class="GICLReplace" id="giclReplaceClassMap">
+		<result property="evalId" column="eval_id"/>
+		<result property="payeeTypeCd" column="payee_type_cd"/>
+		<result property="payeeCd" column="payee_cd"/>
+		<result property="lossExpCd" column="loss_exp_cd"/>
+		<result property="partType" column="part_type"/>
+		<result property="partOrigAmt" column="part_orig_amt"/>
+		<result property="origPayeeTypeCd" column="orig_payee_type_cd"/>
+		<result property="origPayeeCd" column="orig_payee_cd"/>
+		<result property="partAmt" column="part_amt"/>
+		<result property="totalPartAmt" column="total_part_amt"/>
+		<result property="baseAmt" column="base_amt"/>
+		<result property="noOfUnits" column="no_of_units"/>
+		<result property="withVat" column="with_vat"/>
+		<result property="revisedSw" column="revised_sw"/>
+		<result property="paytPayeeTypeCd" column="payt_payee_type_cd"/>
+		<result property="paytPayeeCd" column="payt_payee_cd"/>
+		<result property="replaceId" column="replace_id"/>
+		<result property="replacedMasterId" column="replaced_master_id"/>
+		<result property="itemNo" column="item_no"/>
+		<result property="updateSw" column="update_sw"/>
+		<result property="userId" column="user_id"/>
+		<result property="lastUpdate" column="last_update"/>
+	</resultMap>
+	
+	<resultMap class="GICLReplace" id="mcEvalReplaceListMap" extends="giclReplaceClassMap">
+		<result column="dsp_part_desc" 	property="dspPartDesc" />
+		<result column="dsp_company_type" 	property="dspCompanyType" />
+		<result column="dsp_company" 	property="dspCompany" />
+		<result column="dsp_part_type_desc" property="dspPartTypeDesc"/>
+		<result column="rownum_" 	property="rowNum" />
+		<result column="count_"		property="rowCount"/>
+	</resultMap>
+	
+	<select id="getMcEvalReplaceListing" parameterClass="map" resultMap="mcEvalReplaceListMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (gicl_replace_pkg.get_mc_eval_replace_list(#evalId#))
+		                  <isEqual property="sortColumn" compareValue="itemNo">
+			              		ORDER BY item_no
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="partType">
+			              		ORDER BY part_type
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="dspPartDesc">
+			              		ORDER BY dsp_part_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="dspCompanyType">
+			              		ORDER BY dsp_company_type
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="dspCompany">
+			              		ORDER BY dsp_company
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="dspPartTypeDesc">
+			              		ORDER BY dsp_part_type_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="baseAmt">
+			              		ORDER BY base_amt
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="partAmt">
+			              		ORDER BY part_amt
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="noOfUnits">
+			              		ORDER BY no_of_units
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (gicl_replace_pkg.get_mc_eval_replace_list(#evalId#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="partsListMap">
+		<result property="lossExpDesc" column="loss_exp_desc"/>
+		<result property="lossExpCd" column="loss_exp_cd"/>
+		<result column="rownum_" 	property="rowNum" />
+		<result column="count_"		property="rowCount"/>
+	</resultMap>
+	 
+	<select id="getReplacePartsListLOV" parameterClass="map" resultMap="partsListMap">
+		 SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (gicl_replace_pkg.get_parts_list(#evalId#, #partType#,#findText#))
+		                  <isEqual property="sortColumn" compareValue="lossExpDesc">
+			              		ORDER BY loss_exp_desc
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (gicl_replace_pkg.get_parts_list(#evalId#, #partType#,#findText#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="companyListLOVMap">
+		<result property="dspCompany" column="dsp_company"/>
+		<result property="payeeNo" column="payee_no"/>
+		<result column="rownum_" 	property="rowNum" />
+		<result column="count_"		property="rowCount"/>
+	</resultMap>
+	
+	<select id="getCompanyListLOV" resultMap="companyListLOVMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (gicl_replace_pkg.get_company_list(#payeeTypeCd#, #claimId#,#findText#))
+		                  <isEqual property="sortColumn" compareValue="dspCompany">
+			              		ORDER BY dsp_Company
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (gicl_replace_pkg.get_company_list(#payeeTypeCd#, #claimId#,#findText#))
+			             
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getMortgageeListLOV" resultMap="companyListLOVMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (gicl_replace_pkg.get_rep_mortgagee_list(#claimId#, #itemNo#,#findText#))
+		                  <isEqual property="sortColumn" compareValue="dspCompany">
+			              		ORDER BY dsp_Company
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (gicl_replace_pkg.get_rep_mortgagee_list(#claimId#, #itemNo#,#findText#))
+			             
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	
+	
+	<parameterMap class="java.util.HashMap" id="validateMap">
+		<parameter property="evalMasterId" 		jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="evalId" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="lossExpCd"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="payeeTypeCd"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="payeeCd" 		jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="baseAmt" 			jdbcType="NUMERIC" 	javaType="java.math.BigDecimal"  mode="IN"/>
+		<parameter property="noOfUnits" 		jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="partType"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="oldLossExpCd"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="updateSw"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="masterReportType"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="depExist"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="validatePartType" parameterMap="validateMap">
+		BEGIN
+			gicl_replace_pkg.validate_part_type(?,?,?,?,?,?,?,?,?,?,?,?);
+		END;
+	</procedure>
+	<procedure id="validatePartDesc" parameterMap="validateMap">
+		BEGIN
+			gicl_replace_pkg.validate_part_desc(?,?,?,?,?,?,?,?,?,?,?,?);
+		END;
+	</procedure>
+	
+	<procedure id="validateCompanyType" parameterMap="validateMap">
+		BEGIN
+			gicl_replace_pkg.validate_company_type(?,?,?,?,?,?,?,?,?,?,?,?);
+		END;
+		<!-- SELECT gicl_replace_pkg.validate_company_type(#masterEvalId#,#evalId#,#lossExpCd#,#payeeTypeCd#,
+			#payeeCd#,#baseAmt#,#noOfUnits#,#partType#
+		) FROM DUAL -->
+	</procedure>
+	
+	<procedure id="validateCompanyDesc" parameterMap="validateMap">
+		BEGIN
+			gicl_replace_pkg.validate_company_desc(?,?,?,?,?,?,?,?,?,?,?,?);
+		END;
+	</procedure>
+	
+	<procedure id="validateBaseAmt" parameterMap="validateMap">
+		BEGIN
+			gicl_replace_pkg.validate_base_amt(?,?,?,?,?,?,?,?,?,?,?,?);
+		END;
+	</procedure>
+	
+	<procedure id="validateNoOfUnits" parameterMap="validateMap">
+		BEGIN
+			gicl_replace_pkg.validate_no_of_units(?,?,?,?,?,?,?,?,?,?,?,?);
+		END;
+	</procedure>
+	
+	<procedure id="validateWithVat" parameterMap="validateMap">
+		BEGIN
+			gicl_replace_pkg.validate_with_vat(?,?,?,?,?,?,?,?,?,?,?,?);
+		END;
+	</procedure>
+	
+	<resultMap class="java.util.HashMap" id="prevPartListLOVMap">
+		<result property="partType" column="part_type"/>
+		<result property="dspPartTypeDesc" column="dsp_part_type_desc"/>
+		<result property="dspCompanyType" column="dsp_company_type"/>
+		<result property="dspCompany" column="dsp_company"/>
+		<result property="partAmt" column="part_amt"/>
+		<result property="evalDate" column="eval_date"/>
+		<result property="payeeCd" column="payee_cd"/>
+		<result property="payeeTypeCd" column="payee_type_cd"/>
+		<result column="rownum_" 	property="rowNum" />
+		<result column="count_"		property="rowCount"/>
+	</resultMap>
+	
+	<select id="getPrevPartListLOV" resultMap="prevPartListLOVMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (gicl_replace_pkg.get_prev_part_list(#lossExpCd#, #partType#,#tpSw#,#claimId#,#itemNo#,#payeeClassCd#,#payeeNo#,#findText#))
+		                  <isEqual property="sortColumn" compareValue="dspPartTypeDesc">
+			              		ORDER BY dsp_part_type_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="dspCompanyType">
+			              		ORDER BY dsp_company_type
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="dspCompany">
+			              		ORDER BY dsp_Company
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="evalDate">
+			              		ORDER BY eval_date
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="partAmt">
+			              		ORDER BY part_amt
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (gicl_replace_pkg.get_prev_part_list(#lossExpCd#, #partType#,#tpSw#,#claimId#,#itemNo#,#payeeClassCd#,#payeeNo#,#findText#))
+			             
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="countPrevPartListLOV" resultClass="Integer" parameterClass="map">
+		SELECT count(*) FROM TABLE (gicl_replace_pkg.get_prev_part_list(#lossExpCd#, #partType#,#tpSw#,#claimId#,#itemNo#,#payeeClassCd#,#payeeNo#,#findText#))
+	</select>
+	
+	<parameterMap class="java.util.HashMap" id="checkPartIfExistMasterMap">
+		<parameter property="lossExpCd"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="partType"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="evalId" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="evalMasterId" 		jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="payeeCd" 		jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="payeeTypeCd"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="varS"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="resultMessage"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="replacedMasterId"			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="OUT"/>
+	</parameterMap>
+
+	<procedure id="checkPartIfExistMaster" parameterMap="checkPartIfExistMasterMap">
+		BEGIN
+			gicl_replace_pkg.check_part_if_exist_master(?,?,?,?,?,?,?,?,?);
+		END;
+	</procedure>	
+	
+	<resultMap class="java.util.HashMap" id="multiplePartsMap">
+		<result property="payeeTypeCd" column="payee_type_cd"/>
+		<result property="dspCompanyType" column="dsp_company_type"/>
+		<result property="dspCompany" column="dsp_company"/>
+		<result property="payeeCd" column="payee_cd"/>
+		<result property="replaceId" column="replace_id"/>
+		<result property="baseAmt" column="base_amt"/>
+		<result property="dspPartDesc" column="dsp_part_desc"/>
+		<result column="rownum_" 	property="rowNum" />
+		<result column="count_"		property="rowCount"/>
+	</resultMap>
+	
+	<select id="getMultiplePartsLOV" resultMap="multiplePartsMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (gicl_replace_pkg.get_multiple_parts_list(#lossExpCd#, #partType#,#evalId#,#evalMasterId#,#findText#))
+			              <isEqual property="sortColumn" compareValue="dspCompanyType">
+			              		ORDER BY dsp_company_type
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="dspCompany">
+			              		ORDER BY dsp_Company
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="evalDate">
+			              		ORDER BY eval_date
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="baseAmt">
+			              		ORDER BY base_amt
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (gicl_replace_pkg.get_multiple_parts_list(#lossExpCd#, #partType#,#evalId#,#evalMasterId#,#findText#))
+			             
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="copyMasterPartMap">
+		<result property="payeeTypeCd" column="payee_type_cd"/>
+		<result property="payeeCd" column="payee_cd"/>
+		<result property="dspCompanyType" column="dsp_company_type"/>
+		<result property="dspCompany" column="dsp_company"/>
+		<result property="baseAmt" column="base_amt"/>
+		<result property="noOfUnits" column="no_of_units"/>
+		<result property="partAmt" column="part_amt"/>
+		<result property="totalPartAmt" column="total_part_amt"/>
+	</resultMap>
+	
+	<select id="copyMasterPart" resultMap="copyMasterPartMap" parameterClass="map">
+		SELECT * FROM TABLE(gicl_replace_pkg.copy_master_part(#replacedMasterId#,#allDtlFlag#))
+	</select>
+	
+	<parameterMap class="java.util.HashMap" id="payeeDetailsMap">
+		<parameter property="claimId" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="payeeTypeCd"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="dspCompany"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="payeeCd" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="getPayeeDetailsMap" parameterMap="payeeDetailsMap">
+		BEGIN
+			gicl_replace_pkg.get_payee_details(?,?,?,?);
+		END;
+	</procedure>	
+	
+	<parameterMap class="java.util.HashMap" id="vatAndDedMap">
+		<parameter property="payeeCd" 		jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+    	<parameter property="payeeTypeCd"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+    	<parameter property="paytPayeeCd" 		jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+    	<parameter property="paytPayeeTypeCd"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+    	<parameter property="payeeCdOld" 		jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+    	<parameter property="payeeTypeCdOld"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+    	<parameter property="paytPayeeCdOld" 		jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+    	<parameter property="paytPayeeTypeCdOld"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+    	<parameter property="evalId" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+    	<parameter property="oldPayeeDed" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="OUT"/>
+    	<parameter property="newPayeeDed" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="OUT"/>
+    	<parameter property="oldPayeeDed2" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="OUT"/>
+    	<parameter property="newPayeeDed2" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="OUT"/>
+    	<parameter property="payeeDep" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="checkVatAndDeductibles" parameterMap="vatAndDedMap">
+		BEGIN
+			gicl_replace_pkg.check_vat_and_deductibles(?,?,?,?,?,?,?,?,?,?,?,?,?,?);
+		END;    
+	</procedure>
+	
+	<select id="getWithVatList"  resultClass="String">
+		SELECT * FROM TABLE(gicl_replace_pkg.get_with_vat_list(#evalMasterId#))
+	</select>
+	
+	<parameterMap class="java.util.HashMap" id="checkUpdateRepDtlMap">
+		<parameter property="evalMasterId" 		jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="evalId" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="oldLossExpCd"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="masterReportType"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="depExist"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="checkUpdateRepDtl" parameterMap="checkUpdateRepDtlMap">
+		BEGIN
+			gicl_replace_pkg.check_update_report_dtl(?,?,?,?,?);
+		END;   
+	</procedure>
+	
+	<select id="finalCheckVat" parameterClass="map" resultClass="String">
+		SELECT gicl_replace_pkg.final_check_vat(#payeeCd#,#payeeTypeCd#,#paytPayeeCd#,#paytPayeeTypeCd#,#evalId#) FROM DUAL
+	</select>
+	
+	<select id="finalCheckDed" parameterClass="map" resultClass="String">
+		SELECT gicl_replace_pkg.final_check_ded(#evalId#,#lossExpCd#) FROM DUAL
+	</select>
+	
+	<procedure id="updateOldEvalVat" parameterClass="map">
+		BEGIN
+			gicl_eval_vat_pkg.update_old_eval_vat(#payeeTypeCd#,#payeeCd#,#varPayeeTypeCd#,#varPayeeCd#,#evalId#);
+		END;  
+	</procedure>
+	
+	<procedure id="updateDeductibles" parameterClass="map">
+		BEGIN
+			gicl_eval_vat_pkg.update_old_eval_vat(#payeeTypeCd#,#payeeCd#,#varPayeeTypeCd#,#varPayeeCd#,#evalId#);
+		END;  
+	</procedure>
+	
+	<delete id="delEvalDepDtl" parameterClass="map">
+		DELETE gicl_eval_dep_dtl
+     	   WHERE eval_id = #evalId#
+     	     AND loss_exp_cd = #lossExpCd#
+	</delete>
+	
+	<delete id="delEvalDepDtl2" parameterClass="map">
+		 DELETE gicl_eval_dep_dtl
+		    WHERE payee_type_cd = #payeeTypeCd#
+		      AND payee_cd = #payeeCd#
+		      AND eval_id = #evalId#
+	</delete>
+	
+	<procedure id="saveReplaceDtls" parameterClass="map">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			gicl_replace_pkg.save_replace_dtls_gicls070(#evalId#,#payeeTypeCd#,#payeeCd#,#lossExpCd#,#partType#,#partOrigAmt#,
+				#origPayeeTypeCd#,#origPayeeCd#,#partAmt#,#totalPartAmt#,#baseAmt#,#noOfUnits#,#withVat#,#revisedSw#,#userId#,
+				#paytPayeeTypeCd#,#paytPayeeCd#,#replaceId#,#replacedMasterId#,#updateSw#,#newRecord#,#reportType#,#evalMasterId#
+			);
+		END; 
+	</procedure>
+	
+	<procedure id="updateItemNo" parameterClass="map">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			gicl_replace_pkg.update_item_no(#evalId#);
+		END; 
+	</procedure>
+	
+	<procedure id="deleteEvalVat" parameterClass="map">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			gicl_eval_vat_pkg.delete_eval_vat(#payeeTypeCd#,#payeeCd#,#evalId#);
+		END; 
+	</procedure>
+	
+	<procedure id="deleteEvalDeductible" parameterClass="map">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			gicl_eval_deductibles_pkg.del_eval_deductibles(#payeeTypeCd#,#payeeCd#);
+		END; 
+	</procedure>
+	
+	<procedure id="deleteReplaceDetail">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			gicl_replace_pkg.delete_replace_dtl(#replaceId#);
+		END;
+	</procedure>
+	
+	<resultMap class="java.util.HashMap" 	id="McEvalDeductibleCompanyListMap">
+		<result property="payeeCd" 			column="PAYEE_CD"/>
+		<result property="payeeTypeCd" 		column="PAYEE_TYPE_CD"/>
+		<result property="dspCompany" 		column="DSP_COMPANY"/>
+		<result property="rowNum"			column="ROWNUM_"/>
+		<result property="rowCount"			column="COUNT_"/>
+	</resultMap>
+	
+	<select id="getMcEvalDeductibleCompanyList" resultMap="McEvalDeductibleCompanyListMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GICL_REPLACE_PKG.get_company_list_2(#evalId#))
+		                  WHERE UPPER(dsp_company) LIKE UPPER(NVL(#findText#, dsp_company))
+		                  <isEqual property="sortColumn" compareValue="dspCompany">
+			              		ORDER BY dsp_company
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (GICL_REPLACE_PKG.get_company_list_2(#evalId#))
+			             	WHERE UPPER(dsp_company) LIKE UPPER(NVL(#findText#, dsp_company))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="replacePayeeListingMap">
+		<result property="evalId" 			column="eval_id"/>
+		<result property="paytPayeeTypeCd" 			column="payt_payee_type_cd"/>
+		<result property="paytPayeeCd" 		column="payt_payee_cd"/>
+		<result property="payeeTypeCd" column="payee_type_cd"/>
+		<result property="payeeCd" column="payee_cd"/>
+		<result property="dspPayeeTypeCd" column="dsp_payee_type_cd"/>
+		<result property="dspPayeeCd" column="dsp_payee_cd"/>
+		<result property="paytPartAmt" 		column="payt_part_amt"/>
+		<result property="paytImpTag" 		column="payt_imp_tag"/>
+		<result property="dspCompany" 		column="dsp_company"/>
+		<result property="rowNum"			column="ROWNUM_"/>
+		<result property="rowCount"			column="COUNT_"/>
+	</resultMap>
+		
+	<select id="getReplacePayeeListing" parameterClass="map" resultMap="replacePayeeListingMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (gicl_replace_pkg.get_replace_payee_listing(#evalId#))
+		                  <isEqual property="sortColumn" compareValue="companyName">
+			              		ORDER BY company_name
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="paytPartAmt">
+			              		ORDER BY payt_part_amt
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (gicl_replace_pkg.get_replace_payee_listing(#evalId#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<procedure id="changeReplacePayee" parameterClass="map">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			gicl_replace_pkg.change_replace_payee(#evalId#,#paytPayeeTypeCdMan#,#paytPayeeCdMan#,#payeeTypeCd#,#payeeCd#);
+		END;
+	</procedure>
+	
+	<procedure id="updateChangePayee" parameterClass="map">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			gicl_replace_pkg.update_change_payee(#evalId#,#paytPayeeTypeCdMan#,#paytPayeeCdMan#,#prevPaytPayeeTypeCd#,#prevPaytPayeeCd#);
+		END;
+	</procedure>
+	
+</sqlMap>

@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISSignatoryNames">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+
+	<typeAlias alias="GIISSignatoryNamesClass" type="com.geniisys.giis.entity.GIISSignatoryNames" />
+	
+	<resultMap class="GIISSignatoryNamesClass" id="giiss071ResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="signatory_id" 		property="signatoryId"/>
+		<result column="signatory"	 		property="signatory"/>
+		<result column="designation" 		property="designation"/>
+		<result column="res_cert_no" 		property="resCertNo"/>
+		<result column="res_cert_date" 		property="resCertDate"/>
+		<result column="res_cert_place"		property="resCertPlace"/>
+		<result column="status"		 		property="status"/>
+		<result column="status_mean" 		property="statusMean"/>
+		<result column="file_name" 			property="fileName"/>
+		<result column="remarks" 			property="remarks"/>
+		<result column="user_id" 			property="userId"/>
+		<result column="last_update" 		property="lastUpdate"/>
+	</resultMap>
+	
+	<select id="getGiiss071RecList" resultMap="giiss071ResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIISS071_PKG.GET_REC_LIST(#signatory#))
+                          <isNotNull property="filter">
+                             WHERE 1=1
+                             <isNotEmpty prepend="AND" property="designation">
+                             	UPPER(designation) LIKE UPPER(#designation#)
+                             </isNotEmpty>
+                             <isNotEmpty prepend="AND" property="resCertNo">
+                             	UPPER(res_cert_no) LIKE UPPER(#resCertNo#)
+                             </isNotEmpty>
+                             <isNotEmpty prepend="AND" property="resCertPlace">
+                             	UPPER(res_cert_place) LIKE UPPER(#resCertPlace#)
+                             </isNotEmpty>
+                             <isNotEmpty prepend="AND" property="signatoryId">
+                             	signatory_id = #signatoryId#
+                             </isNotEmpty>
+                             <isNotEmpty prepend="AND" property="resCertDate">
+                             	TO_DATE(res_cert_date, 'MM-DD-YYYY') = TO_DATE(#resCertDate#, 'MM-DD-YYYY')
+                             </isNotEmpty>
+                             <isNotEmpty prepend="AND" property="statusMean">
+                             	UPPER(status_mean) LIKE UPPER(#statusMean#)
+                             </isNotEmpty>
+                          </isNotNull>		                  	                      
+			          	  <isNotNull property="sortColumn">
+			          	  		<isEqual property="sortColumn" compareValue="signatoryId">
+									ORDER BY signatory_id
+								</isEqual>
+								<isEqual property="sortColumn" compareValue="signatory">
+									ORDER BY signatory
+								</isEqual>	
+								   <isEqual property="sortColumn" compareValue="designation">
+									ORDER BY designation
+								</isEqual>
+								<isEqual property="sortColumn" compareValue="resCertNo">
+									ORDER BY res_cert_no
+								</isEqual>	
+								<isEqual property="sortColumn" compareValue="resCertDate">
+									ORDER BY res_cert_date
+								</isEqual>
+								<isEqual property="sortColumn" compareValue="resCertPlace">
+									ORDER BY res_cert_place
+								</isEqual>	
+								<isEqual property="sortColumn" compareValue="statusMean">
+									ORDER BY status_mean
+								</isEqual>		
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GIISS071_PKG.GET_REC_LIST(#signatory#))
+                          <isNotNull property="filter">
+                             WHERE 1=1
+                             <isNotEmpty prepend="AND" property="designation">
+                             	UPPER(designation) LIKE UPPER(#designation#)
+                             </isNotEmpty>
+                             <isNotEmpty prepend="AND" property="resCertNo">
+                             	UPPER(res_cert_no) LIKE UPPER(#resCertNo#)
+                             </isNotEmpty>
+                             <isNotEmpty prepend="AND" property="resCertPlace">
+                             	UPPER(res_cert_place) LIKE UPPER(#resCertPlace#)
+                             </isNotEmpty>
+                             <isNotEmpty prepend="AND" property="signatoryId">
+                             	signatory_id = #signatoryId#
+                             </isNotEmpty>
+                             <isNotEmpty prepend="AND" property="resCertDate">
+                             	TO_DATE(res_cert_date, 'MM-DD-YYYY') = TO_DATE(#resCertDate#, 'MM-DD-YYYY')
+                             </isNotEmpty>
+                             <isNotEmpty prepend="AND" property="statusMean">
+                             	UPPER(status_mean) LIKE UPPER(#statusMean#)
+                             </isNotEmpty>
+                          </isNotNull>
+		                        ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getSignatoryNamesNoSeq" resultClass="java.lang.Integer">
+		SELECT SIGNATORY_NAMES_S.NEXTVAL FROM DUAL
+	</select>
+	
+	<procedure id="setSignatoryName" parameterClass="GIISSignatoryNamesClass">
+	    DECLARE
+	    	v_rec GIIS_SIGNATORY_NAMES%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.signatory_id 		:= #signatoryId#;
+ 			v_rec.signatory 		:= #signatory#;
+ 			v_rec.designation 		:= #designation#;
+ 			v_rec.status 			:= #status#;
+ 			v_rec.res_cert_no 		:= #resCertNo#;
+ 			v_rec.res_cert_place 	:= #resCertPlace#;
+ 			v_rec.res_cert_date 	:= TO_DATE(#resCertDate#, 'MM-DD-YYYY');
+ 			v_rec.user_id 			:= #userId#;
+ 			v_rec.remarks 			:= #remarks#;
+ 			
+ 			giiss071_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteSignatoryName" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss071_pkg.val_del_rec(#signatoryId#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddSignatoryName" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss071_pkg.val_add_rec(#signatoryId#, #signatory#, #resCertNo#);
+ 		END;
+ 	</procedure> 	
+ 	
+ 	<procedure id="valUpdateSignatoryName" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss071_pkg.val_update_rec(#signatoryId#, #signatory#, #resCertNo#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delSignatoryName" parameterClass="java.lang.Integer">
+		BEGIN
+ 			giiss071_pkg.del_rec(#signatoryId#);
+ 		END;
+ 	</delete>
+ 	
+ 	<procedure id="updateSignatoryNamesFilename" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			giiss071_pkg.set_signatory_file_name(#signatoryId#, #fileName#);
+		END;
+	</procedure>
+	
+	<select id="getFilenameGiiss071" parameterClass="java.lang.Integer" resultClass="java.lang.String">
+		SELECT file_name
+		  FROM GIIS_SIGNATORY_NAMES
+		 WHERE signatory_id = #signatoryId#
+	</select>
+</sqlMap>

@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIACCollnBatch">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<resultMap class="com.geniisys.giac.entity.GIACCollnBatch" id="giacCollnBranch">
+		<result column="DCB_NO" property="dcbNo"></result>
+  <!--  <result column="DCB_YEAR" property="dcbYear"></result>
+		<result column="FUND_CD" property="fundCd"></result>
+		<result column="BRANCH_CD" property="branchCd"></result>
+		<result column="TRAN_DATE" property="tranDate"></result>
+		<result column="DCB_FLAG" property="dcbFlag"></result>
+		<result column="REMARKS" property="remarks"></result>-->
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="dcbDateLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="tran_date"		property="tranDate" />
+		<result column="dcb_date"		property="dcbDate" />
+		<result column="dcb_year"		property="dcbYear" />
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="dcbNoLOVMap">
+		<result column="dcb_no"			property="dcbNo" />
+	</resultMap>
+	
+	<resultMap class="com.geniisys.giac.entity.GIACCollnBatch" id="giacCollnBranchMap">
+		<result column="DCB_NO" 		property="dcbNo"	/>
+  		<result column="DCB_YEAR" 		property="dcbYear"	/>
+		<result column="FUND_CD" 		property="fundCd"	/>
+		<result column="BRANCH_CD" 		property="branchCd"	/>
+		<result column="TRAN_DATE" 		property="tranDate"	/>
+		<result column="DCB_FLAG" 		property="dcbFlag"	/>
+		<result column="REMARKS" 		property="remarks"	/>
+		<result column="DCB_STATUS" 	property="dcbStatus"/>
+		<result column="USER_ID" 		property="userId"/>
+		<result column="ROWNUM_" 		property="rowNum" />			
+		<result column="COUNT_"			property="rowCount"/>
+	</resultMap>
+	
+	<procedure id="getDCBNo" resultMap="giacCollnBranch" parameterClass="java.util.HashMap">
+			SELECT dcb_no FROM TABLE(giac_colln_batch_pkg.get_dcb_no(#fundCd#, #branchCd#, #tranDate#))
+	</procedure>
+
+	<procedure id="getNewDCBNo" resultMap="giacCollnBranch" parameterClass="java.util.HashMap">
+			SELECT dcb_no FROM TABLE(giac_colln_batch_pkg.get_new_dcb_no(#fundCd#, #branchCd#, #tranDate#))
+	</procedure>
+
+	<procedure id="saveGiacCollnBatchDetails" parameterClass="com.geniisys.giac.entity.GIACCollnBatch">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			giac_colln_batch_pkg.set_dcb_details(
+				#dcbNo#, 
+				#dcbYear#,
+				#fundCd#,
+				#branchCd#,
+				#tranDate#,
+				#dcbFlag#,
+				#remarks#);
+		END;	
+	</procedure>
+	
+	<select id="getDCBDateLOVMap" resultMap="dcbDateLOVMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM TABLE(giac_colln_batch_pkg.get_dcb_date_lov(#gfunFundCd#, #gibrBranchCd#, #keyword#))
+	</select>
+	
+	<select id="getDCBNoLOV" resultMap="dcbNoLOVMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM TABLE(giac_colln_batch_pkg.get_dcb_no_lov(#gfunFundCd#, #gibrBranchCd#, #dcbDate#, #dcbYear#, #keyword#))
+	</select>
+	
+	<select id="generateDCBNo" resultClass="java.lang.Integer">
+  		SELECT MAX(dcb_no)+1 AS dcb_no FROM GIAC_COLLN_BATCH
+  	</select>
+	
+	<select id="getDCBNoForMaint" resultMap="giacCollnBranchMap" parameterClass="java.util.HashMap">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+						 b.count_,
+						 a.*
+				    FROM (SELECT *
+				    		FROM TABLE (GIAC_COLLN_BATCH_PKG.get_dcb_no_details(#fundCd#, #branchCd#, #dcbFlag#))
+				    			<!-- WHERE (NVL(dcb_year,'0')) LIKE (NVL(#dcbYear#, NVL(dcb_year,'0')))
+                              		AND (NVL(TO_CHAR(tran_date,'MM-DD-YYYY'),'*')) LIKE (NVL(#tranDate#, NVL(TO_CHAR(tran_date,'MM-DD-YYYY'),'*')))
+                              		AND (NVL(dcb_no,'0')) LIKE (NVL(#dcbNo#, NVL(dcb_no,'0'))) -->
+                          <isNotNull property="filter">
+				  	      	WHERE 1 = 1 
+				  	      		<isNotEmpty prepend="AND" property="dcbYear">
+		                        	dcb_year LIKE #dcbYear#
+		                        </isNotEmpty>
+		                        <isNotEmpty prepend="AND" property="tranDate">
+		                            TO_CHAR(tran_date,'MM-DD-YYYY') = TO_CHAR(TO_DATE(#tranDate#,'MM-DD-YYYY'), 'MM-DD-YYYY')
+		                        </isNotEmpty>
+		                        <isNotEmpty prepend="AND" property="dcbNo">
+		                            dcb_no LIKE #dcbNo#
+		                        </isNotEmpty>
+		                        <isNotEmpty prepend="AND" property="dcbStatus">
+		                            UPPER(dcb_status) LIKE UPPER(#dcbStatus#)
+		                        </isNotEmpty>
+		                        <isNotEmpty prepend="AND" property="remarks">
+		                            UPPER(remarks) LIKE UPPER(#remarks#)
+		                        </isNotEmpty>
+				  	      </isNotNull>
+                         <isEqual property="sortColumn" compareValue="dcbNo">
+				    	 	ORDER BY dcb_no
+				    	 </isEqual>
+				    	 <isEqual property="sortColumn" compareValue="dcbYear">
+				    	 	ORDER BY dcb_year
+				    	 </isEqual>
+				    	 <isEqual property="sortColumn" compareValue="tranDate">
+				    	 	ORDER BY tran_date
+				    	 </isEqual>
+				    	 <isEqual property="sortColumn" compareValue="remarks">
+				    	 	ORDER BY remarks
+				    	 </isEqual>
+				    	 <isEqual property="sortColumn" compareValue="dcbStatus">
+				    	 	ORDER BY dcb_status
+				    	 </isEqual>
+				    	 <isNotNull property="sortColumn">
+				    	 	<isEqual property="ascDescFlag" compareValue="ASC">ASC</isEqual>
+				    	 	<isEqual property="ascDescFlag" compareValue="DESC">DESC</isEqual>
+				    	 </isNotNull>
+				    	 <isNull property="sortColumn">
+				    	 	ORDER BY dcb_year DESC, tran_date DESC <!--added ORDER BY clause to sort records based on DCB year and Tran Date by MAC 01/11/2013.-->
+				    	 </isNull>
+				    	 ) a,
+				    	 (SELECT count(*) count_
+				    	 	FROM TABLE (GIAC_COLLN_BATCH_PKG.get_dcb_no_details(#fundCd#, #branchCd#, #dcbFlag#))
+				    	 		<!-- WHERE (NVL(dcb_year,'0')) LIKE (NVL(#dcbYear#, NVL(dcb_year,'0')))
+                              		AND (NVL(TO_CHAR(tran_date,'MM-DD-YYYY'),'*')) LIKE (NVL(#tranDate#, NVL(TO_CHAR(tran_date,'MM-DD-YYYY'),'*')))
+                              		AND (NVL(dcb_no,'0')) LIKE (NVL(#dcbNo#, NVL(dcb_no,'0'))) -->
+                          <isNotNull property="filter">
+				  	      	WHERE 1 = 1 
+				  	      		<isNotEmpty prepend="AND" property="dcbYear">
+		                        	dcb_year LIKE #dcbYear#
+		                        </isNotEmpty>
+		                        <isNotEmpty prepend="AND" property="tranDate">
+		                            TO_CHAR(tran_date,'MM-DD-YYYY') = TO_CHAR(TO_DATE(#tranDate#,'MM-DD-YYYY'), 'MM-DD-YYYY')
+		                        </isNotEmpty>
+		                        <isNotEmpty prepend="AND" property="dcbNo">
+		                            dcb_no LIKE #dcbNo#
+		                        </isNotEmpty>
+		                        <isNotEmpty prepend="AND" property="dcbStatus">
+		                            UPPER(dcb_status) LIKE UPPER(#dcbStatus#)
+		                        </isNotEmpty>
+		                        <isNotEmpty prepend="AND" property="remarks">
+		                            UPPER(remarks) LIKE UPPER(#remarks#)
+		                        </isNotEmpty>
+				  	      </isNotNull>
+                              		
+                              		) b)
+			WHERE rownum_ BETWEEN #from# AND #to#	    	 
+	</select>
+	<select id="getCloseTag" resultClass="String" parameterClass="java.util.HashMap">
+		  SELECT giac_colln_batch_pkg.get_closed_tag(#fundCd#,to_date(#tranDate#,'MM-dd-yyyy'),#branchCd#) FROM DUAL
+	</select>
+	<procedure id="saveGIACCollnBatch" parameterClass="com.geniisys.giac.entity.GIACCollnBatch">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GIAC_COLLN_BATCH_PKG.set_giac_colln_batch(
+				#dcbNo#, #dcbYear#, #fundCd#, #branchCd#, #tranDate#, #dcbFlag#, #remarks#, #userId#);
+		END;
+	</procedure>
+	
+	<procedure id="deleteGIACCollnBatch" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			GIAC_COLLN_BATCH_PKG.del_giac_colln_batch(#dcbNo#, #dcbYear#, #fundCd#, #branchCd#);
+		END;
+	</procedure>
+	
+	<procedure id="updateDCBForClosing" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GIAC_COLLN_BATCH_PKG.update_dcb_for_closing(#dcbFlag#, #tranClassNo#, #tranYear#, 
+				#fundCd#, #branchCd#, #userId#);
+		END;
+	</procedure>
+	
+	<!-- Added by J. Diago 10.07.2013 for GIACS035 DCB Date and DCB No LOV -->
+	<select id="getGiacs035DcbDateLOV" resultMap="dcbDateLOVMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giac_colln_batch_pkg.get_dcb_date_lov2(#gaccGfunFundCd#, #gaccGibrBranchCd#, #findText#))
+		                  <isEqual property="sortColumn" compareValue="dcbDate">
+			              		ORDER BY dcb_date
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giac_colln_batch_pkg.get_dcb_date_lov2(#gaccGfunFundCd#, #gaccGibrBranchCd#, #findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiacs035DcbNoLOV" resultMap="dcbNoLOVMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giac_colln_batch_pkg.get_dcb_no_lov2(#gaccGfunFundCd#, #gaccGibrBranchCd#, #dcbDate#, #dcbYear#, #findText#))
+		                  <isEqual property="sortColumn" compareValue="dcbNo">
+			              		ORDER BY dcb_no
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giac_colln_batch_pkg.get_dcb_no_lov2(#gaccGfunFundCd#, #gaccGibrBranchCd#, #dcbDate#, #dcbYear#, #findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+</sqlMap>

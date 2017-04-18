@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIWRequiredDocuments">
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+
+	<typeAlias alias="GIPIWRequiredDocumentsClass" type="com.geniisys.gipi.entity.GIPIWRequiredDocuments" />
+	
+	<resultMap class="GIPIWRequiredDocumentsClass" id="gipiWReqDocsMap">
+		<result 	column="DOC_CD" 		property="docCd"/>
+		<result 	column="PAR_ID" 		property="parId"/>
+		<result 	column="LINE_CD" 		property="lineCd"/>
+		<result 	column="DOC_SW" 		property="docSw"/>
+		<result 	column="DATE_SUBMITTED" property="dateSubmitted"/>
+		<result 	column="USER_ID" 		property="userId"/>
+		<result 	column="LAST_UPDATE" 	property="lastUpdate"/>
+		<result 	column="REMARKS" 		property="remarks"/>
+		<result 	column="DOC_NAME" 		property="docName"/>
+		<result 	column="DOC_NAME" 		property="docName"/>
+		<result 	column="DOC_NAME" 		property="docName"/>
+		<result property="rowNum" 		column="rownum_" />
+		<result property="rowCount"		column="count_" />
+		
+	</resultMap>
+	
+<!-- 	<select id="getWReqDocsList" resultMap="gipiWReqDocsMap">
+		SELECT * FROM TABLE(GIPI_WREQDOCS_PKG.get_wreqdocs_list(#parId#))
+	</select> -->
+	<select id="getWReqDocsList2" resultMap="gipiWReqDocsMap">
+		SELECT *
+              FROM (SELECT rownum rownum_, b.count_, a.*
+              FROM (SELECT *
+                  FROM TABLE
+                          (GIPI_WREQDOCS_PKG.get_wreqdocs_list(#parId#))
+                              <isNotNull property="filter">
+                                   WHERE 1=1
+                                <isNotEmpty prepend="AND"  property="docName">
+                                            DOC_NAME LIKE upper(#docName#)
+                                </isNotEmpty>
+                            </isNotNull>
+                            <isEqual property="sortColumn" compareValue="dateSubmitted">
+                                  ORDER BY DATE_SUBMITTED
+                            </isEqual>
+                            <isEqual property="sortColumn" compareValue="docName">
+                                  ORDER BY DOC_NAME
+                            </isEqual>
+                          <isNotNull property="sortColumn">
+                                  <isEqual property="ascDescFlg" compareValue="ASC">
+                                      ASC
+                                  </isEqual>
+                                  <isEqual property="ascDescFlg" compareValue="DESC">
+                                      DESC
+                                  </isEqual>
+                               </isNotNull>
+                               ) a,
+               (SELECT COUNT (*) count_
+                  FROM TABLE
+                          (GIPI_WREQDOCS_PKG.get_wreqdocs_list(#parId#))
+                          <isNotNull property="filter">
+                                    WHERE 1=1
+                                <isNotEmpty prepend="AND"  property="docName">
+                                            DOC_NAME LIKE upper(#docName#)
+                                </isNotEmpty>
+                            </isNotNull>  
+                            ) b)
+            WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	<procedure id="deleteWReqDoc" parameterClass="java.util.HashMap">
+		BEGIN
+			GIPI_WREQDOCS_PKG.delete_gipi_wreqdoc(#parId#, #docCd#);
+		END;
+	</procedure>
+	
+	<insert id="insertWReqDoc" parameterClass="GIPIWRequiredDocumentsClass">
+		BEGIN
+			GIPI_WREQDOCS_PKG.set_gipi_wreqdoc1(#docCd#
+  							,to_number(#parId#)
+							,#docSw#
+							,#lineCd#
+							,#dateSubmitted#
+							,#userId#
+							,#remarks#);
+		END;
+	</insert>
+
+</sqlMap>

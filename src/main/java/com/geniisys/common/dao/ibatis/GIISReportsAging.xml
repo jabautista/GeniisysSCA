@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISReportsAging">
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIISReportsAging" type="com.geniisys.common.entity.GIISReportsAging" />
+	
+ 	<resultMap id="giisReportsAgingListResultMap" class="GIISReportsAging" extends="BaseEntity.TableGridResultMap">
+		<result property="reportId"			column="REPORT_ID" />
+		<result property="branchCd"			column="BRANCH_CD" />
+		<result property="branchName"		column="BRANCH_NAME" />
+		<result property="columnNo"			column="COLUMN_NO" />
+		<result property="columnTitle"		column="COLUMN_TITLE" />
+		<result property="minDays"			column="MIN_DAYS" />
+		<result property="maxDays"			column="MAX_DAYS" />
+		<result property="userId"			column="USER_ID" />
+		<result property="lastUpdate"		column="LAST_UPDATE" />
+	</resultMap>
+	<select id="getGiiss090RecAgingList" resultMap="giisReportsAgingListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss090_pkg.get_rec_aging_list(#reportId#, #userId#))
+		  	      		  <isNotNull property="filter">
+		  	      		 WHERE 1 = 1
+		  	      		  	<isNotEmpty prepend="AND" property="reportId">
+	                        	UPPER(report_id) LIKE UPPER(#reportId#)
+	                        </isNotEmpty>
+	                        <isNotEmpty prepend="AND" property="branchCd">
+	                        	UPPER(branch_cd) LIKE UPPER(#branchCd#)
+	                        </isNotEmpty>
+	                        <isNotEmpty prepend="AND" property="columnNo">
+	                        	column_no = #columnNo#
+	                        </isNotEmpty>
+	                        <isNotEmpty prepend="AND" property="columnTitle">
+	                        	UPPER(column_title) LIKE UPPER(#columnTitle#)
+	                        </isNotEmpty>
+	                        <isNotEmpty prepend="AND" property="minDays">
+	                        	min_days = #minDays#
+	                        </isNotEmpty>
+	                        <isNotEmpty prepend="AND" property="maxDays">
+	                        	max_days = #maxDays#
+	                        </isNotEmpty>
+		  	      		  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="reportId">
+			              		ORDER BY report_id
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="branchCd">
+			              		ORDER BY branch_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="columnNo">
+			              		ORDER BY column_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="columnTitle">
+			              		ORDER BY column_title
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="minDays">
+			              		ORDER BY min_days
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="maxDays">
+			              		ORDER BY max_days
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss090_pkg.get_rec_aging_list(#reportId#, #userId#))
+		                  <isNotNull property="filter">
+		  	      		 WHERE 1 = 1
+		  	      		  	<isNotEmpty prepend="AND" property="reportId">
+	                        	UPPER(report_id) LIKE UPPER(#reportId#)
+	                        </isNotEmpty>
+	                        <isNotEmpty prepend="AND" property="branchCd">
+	                        	UPPER(branch_cd) LIKE UPPER(#branchCd#)
+	                        </isNotEmpty>
+	                        <isNotEmpty prepend="AND" property="columnNo">
+	                        	column_no = #columnNo#
+	                        </isNotEmpty>
+	                        <isNotEmpty prepend="AND" property="columnTitle">
+	                        	UPPER(column_title) LIKE UPPER(#columnTitle#)
+	                        </isNotEmpty>
+	                        <isNotEmpty prepend="AND" property="minDays">
+	                        	min_days = #minDays#
+	                        </isNotEmpty>
+	                        <isNotEmpty prepend="AND" property="maxDays">
+	                        	max_days = #maxDays#
+	                        </isNotEmpty>
+		  	      		  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<procedure id="setReportAging" parameterClass="GIISReportsAging">
+	    DECLARE
+	    	v_rec giis_report_aging%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.report_id 			:= #reportId#;
+ 			v_rec.branch_cd 			:= #branchCd#;
+ 			v_rec.column_no 			:= #columnNo#;
+ 			v_rec.column_title 			:= #columnTitle#;
+ 			v_rec.min_days 				:= #minDays#;
+ 			v_rec.max_days 				:= #maxDays#; 			
+ 			v_rec.user_id 				:= #userId#;
+ 			
+ 			giiss090_pkg.set_rec_aging(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteReportAging" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss090_pkg.val_del_rec_aging(#recId#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddReportAging" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss090_pkg.val_add_rec_aging(#reportId#, #branchCd#, #columnNo#);
+ 		END;
+ 	</procedure> 	
+ 	
+ 	<delete id="delReportAging" parameterClass="GIISReportsAging">
+ 		DECLARE
+	    	v_rec giis_report_aging%ROWTYPE;
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.report_id 			:= #reportId#;
+ 			v_rec.branch_cd 			:= #branchCd#;
+ 			v_rec.column_no 			:= #columnNo#;
+ 			v_rec.column_title 			:= #columnTitle#;
+ 			v_rec.min_days 				:= #minDays#;
+ 			v_rec.max_days 				:= #maxDays#; 			
+ 			v_rec.user_id 				:= #userId#;
+ 			
+ 			giiss090_pkg.del_rec_aging(v_rec);
+ 		END;
+ 	</delete>
+</sqlMap>

@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISUser">
+	
+	<typeAlias alias="giisUser" type="com.geniisys.common.entity.GIISUser"/>
+  	
+  	<parameterMap class="java.util.HashMap" id="giiss040NewFormParamMap">
+  		<parameter property="restrictGen2FileByuser" javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT"/>
+  	</parameterMap>
+  	
+  	<procedure id="giiss040WhenNewFormInstance" parameterMap="giiss040NewFormParamMap">
+  		BEGIN
+  			giiss040_pkg.when_new_form_instance(?);
+  		END;
+  	</procedure>
+  	
+	<resultMap class="giisUser" id="giisUserListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="user_id"     	property="maintainUserId"/>
+		<result column="user_name"  	property="username"/>
+		<result column="email_address"  property="emailAdd"/>
+		<result column="active_flag"  	property="activeFlag"/>
+		<result column="comm_update_tag"  property="commUpdateTag"/>
+		<result column="all_user_sw"  	property="allUserSw"/>
+		<result column="mgr_sw"  		property="mgrSw"/>
+		<result column="mktng_sw"  		property="mktngSw"/>
+		<result column="mis_sw"  		property="misSw"/>
+		<result column="workflow_tag"  	property="workflowTag"/>
+		<result column="temp_access_tag"  property="tempAccessTag"/>
+		<result column="allow_gen_file_sw"  property="allowGenFileSw"/>
+		<result column="user_grp"  		property="userGrp"/>
+		<result column="dsp_user_grp_desc"  property="userGrpDesc"/>
+		<result column="dsp_grp_iss_cd"  property="issCd"/>
+		<result column="last_user_id"     	property="lastUserId"/>
+		<result column="last_update" 	property="strLastUpdate2"/>
+		<result column="remarks"     	property="remarks"/>
+		<result column="password"	property="password" />
+	</resultMap>
+	
+	<select id="getGiiss040RecList" resultMap="giisUserListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss040_pkg.get_rec_list(#maintainUserId#, #username#, #activeFlag#, #commUpdateTag#, 
+		  	      													  #allUserSw#, #mgrSw#, #mktngSw#, #misSw#, #workflowTag#, 
+		  	      													  #tempAccessTag#, #allowGenFileSw#, #userGrp#, #userGrpDesc#, #issCd#))
+		                  <isEqual property="sortColumn" compareValue="maintainUserId">
+			              		ORDER BY user_id
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="username">
+			              		ORDER BY user_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="userGrp">
+			              		ORDER BY user_grp
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="userGrpDesc">
+			              		ORDER BY dsp_user_grp_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="issCd">
+			              		ORDER BY dsp_grp_iss_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="activeFlag">
+			              		ORDER BY active_flag
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="commUpdateTag">
+			              		ORDER BY comm_update_tag
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="allUserSw">
+			              		ORDER BY all_user_sw
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="mgrSw">
+			              		ORDER BY mgr_sw
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="mktngSw">
+			              		ORDER BY mktng_sw
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="misSw">
+			              		ORDER BY mis_sw
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="workflowTag">
+			              		ORDER BY workflow_tag
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="tempAccessTag">
+			              		ORDER BY temp_access_tag
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="allowGenFileSw">
+			              		ORDER BY allow_gen_file_sw
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss040_pkg.get_rec_list(#maintainUserId#, #username#, #activeFlag#, #commUpdateTag#, 
+		  	      													  #allUserSw#, #mgrSw#, #mktngSw#, #misSw#, #workflowTag#, 
+		  	      													  #tempAccessTag#, #allowGenFileSw#, #userGrp#, #userGrpDesc#, #issCd#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setUser" parameterClass="giisUser">
+	    DECLARE
+	    	v_rec giis_users%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #lastUserId#;
+ 			
+ 			v_rec.user_id := #maintainUserId#;
+ 			v_rec.user_name := #username#;
+ 			v_rec.user_grp := #userGrp#;
+ 			v_rec.active_flag := #activeFlag#;
+ 			v_rec.comm_update_tag := #commUpdateTag#;
+ 			v_rec.all_user_sw := #allUserSw#;
+ 			v_rec.mgr_sw := #mgrSw#;
+ 			v_rec.mktng_sw := #mktngSw#;
+ 			v_rec.mis_sw := #misSw#;
+ 			v_rec.workflow_tag := #workflowTag#;
+ 			v_rec.temp_access_tag := #tempAccessTag#;
+ 			v_rec.allow_gen_file_sw
+ 			 := #allowGenFileSw#; 	 	
+ 			v_rec.user_level := #userLevel#;		
+ 			v_rec.last_user_id := #lastUserId#;
+ 			v_rec.remarks := #remarks#;
+ 			v_rec.email_address := #encryptedEmailAdd#;
+ 			 			
+ 			giiss040_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteUser" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss040_pkg.val_del_rec(#recId#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddUser" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss040_pkg.val_add_rec(#recId#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delUser" parameterClass="java.lang.String">
+		BEGIN
+ 			giiss040_pkg.del_rec(#maintainUserId#);
+ 		END;
+ 	</delete>
+ 	
+ 	<parameterMap class="java.util.HashMap" id="setGiiss040UserModuleParamMap">
+ 		<parameter property="appUser" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+ 		<parameter property="tranCd" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+ 		<parameter property="umUserId" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+ 		<parameter property="moduleId" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+ 		<parameter property="incTag" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+ 		<parameter property="dspAccessTag" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+ 		<parameter property="remarks" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+ 		<parameter property="incAllTag" javaType="java.lang.String" jdbcType="VARCHAR" mode="INOUT"/>
+ 	</parameterMap>
+ 	
+ 	<!-- removed by j.diago 06.06.2014 placed in giisusermodules.xml where parameterMap is based on its class -->
+	<!-- <procedure id="setGiiss040UserModule" parameterMap="setGiiss040UserModuleParamMap"> 
+ 		BEGIN	     
+ 			giiss040_pkg.set_user_module(?, ?, ? , ?, ?, ?, ?, ?);
+ 		END;
+ 	</procedure> -->
+ 	
+ 	<parameterMap class="java.util.HashMap" id="checkAllUserModuleParamMap">
+ 		<parameter property="tranCd" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+ 		<parameter property="umUserId" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+ 		<parameter property="incAllTag" javaType="java.lang.String" jdbcType="VARCHAR" mode="INOUT"/>
+ 	</parameterMap>
+ 	
+	<procedure id="checkAllUserModule" parameterMap="checkAllUserModuleParamMap">
+ 		BEGIN	     
+ 			giiss040_pkg.check_all(?, ?, ?);
+ 		END;
+ 	</procedure>
+ 	
+	<procedure id="uncheckAllUserModule" parameterMap="checkAllUserModuleParamMap">
+ 		BEGIN	     
+ 			giiss040_pkg.uncheck_all(?, ?, ?);
+ 		END;
+ 	</procedure>	
+ 	
+	<procedure id="valDeleteRecTran1" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss040_pkg.val_del_tran_1(#issCd#);
+ 		END;
+ 	</procedure>	
+ 	
+	<procedure id="valDeleteRecTran1Line" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss040_pkg.val_del_tran_1_line(#issCd#, #lineCd#);
+ 		END;
+ 	</procedure>
+ 	
+	<resultMap id="GIISUserMap" class="com.geniisys.common.entity.GIISUser">
+	  	<result column="USER_ID" 			property="userId" 			jdbcType="VARCHAR" />
+	  	<result column="USER_GRP"			property="userGrp"			jdbcType="NUMBER" />
+	  	<result column="USER_NAME"			property="username"			jdbcType="VARCHAR" />
+	  	<result column="USER_LEVEL"			property="userLevel"		jdbcType="NUMBER" />
+	  	<result column="ACCTG_SW"			property="acctgSw"			jdbcType="VACHAR"/>
+	  	<result column="CLAIM_SW"			property="claimSw" 			jdbcType="VARCHAR" />
+	  	<result column="DIST_SW"			property="distSw"			jdbcType="VARCHAR" />
+	  	<result column="EXP_SW"				property="expSw"			jdbcType="VARCHAR" />
+	  	<result column="INQ_SW"				property="inqSw"			jdbcType="VARCHAR" />
+	  	<result column="MIS_SW"				property="misSw"			jdbcType="VARCHAR" />
+	  	<result column="POL_SW"				property="polSw"			jdbcType="VARCHAR" />
+	  	<result column="RMD_SW"				property="rmdSw"			jdbcType="VARCHAR" />
+	  	<result column="RI_SW"				property="riSw"				jdbcType="VARCHAR" /> 
+	  	<result column="COMM_UPDATE_TAG"	property="commUpdateTag" 	jdbcType="VARCHAR" />
+	  	<result column="MGR_SW"				property="mgrSw"			jdbcType="VARCHAR" />
+	  	<result column="MKTNG_SW"			property="mktngSw"			jdbcType="VARCHAR"/>
+	  	<result column="ALL_USER_SW"		property="allUserSw"   		jdbcType="VARCHAR" />
+	  	<result column="REMARKS"			property="remarks"			jdbcType="VARCHAR" />
+	  	<result column="LAST_USER_ID"		property="lastUserId"		jdbcType="VARCHAR" />
+	  	<result column="LAST_UPDATE"		property="lastUpdate"		jdbcType="VARCHAR" />
+	  	<result column="ACTIVE_FLAG"		property="activeFlag" 		jdbcType="VARCHAR"/>
+	  	<result column="CHANGE_PASS_SW"		property="changePasswordSw" jdbcType="VARCHAR" />
+	  	<result column="WORKFLOW_TAG"		property="workflowTag"		jdbcType="VARCHAR" />
+	  	<result column="EMAIL_ADDRESS"		property="emailAdd"			jdbcType="VARCHAR" />
+  	</resultMap>
+ 	
+ 	<select id="getUserDetails" resultMap="GIISUserMap">
+ 		SELECT * FROM TABLE(giis_users_pkg.get_user_details(#userId#))
+ 	</select>
+</sqlMap>

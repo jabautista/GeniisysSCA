@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIOrigCommInvoice">
+	<typeAlias alias="gipiOrigCommInvoice" type="com.geniisys.gipi.entity.GIPIOrigCommInvoice"/>
+	
+	<resultMap class="gipiOrigCommInvoice" id="getGipiOrigCommInvoiceMap">
+		<result property="parId"					column="PAR_ID"/>
+		<result property="itemGrp"					column="ITEM_GRP"/>
+		<result property="intermediaryNo"			column="INTRMDRY_INTM_NO"/>
+		<result property="intermediaryName"			column="INTM_NAME"/>
+		<result property="parentIntermediaryNo"		column="PARENT_INTM_NO"/>
+		<result property="parentIntermediaryName"	column="PARENT_INTM_NAME"/>
+		<result property="premiumAmt"				column="PREMIUM_AMT"/>
+		<result property="commissionAmt"			column="COMMISSION_AMT"/>
+		<result property="sharePercentage"			column="SHARE_PERCENTAGE"/>
+		<result property="wholdingTax"				column="WHOLDING_TAX"/>
+		<result property="netComm"					column="NET_COMM"/>
+		<result property="sharePremiumAmt"			column="SHARE_PREMIUM_AMT"/>
+		<result property="shareCommissionAmt"		column="SHARE_COMMISSION_AMT"/>
+		<result property="shareSharePercentage"		column="SHARE_SHARE_PERCENTAGE"/>
+		<result property="shareWholdingTax"			column="SHARE_WHOLDING_TAX"/>
+		<result property="shareNetComm"				column="SHARE_NET_COMM"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="leadPolicyInvCommissionsMap">
+		<result property="policyId"					column="policy_id"/>
+		<result property="itemGrp"					column="item_grp"/>
+		<result property="parId"					column="par_id"/>
+		<result property="issCd"					column="iss_cd"/>
+		<result property="premSeqNo"				column="prem_seq_no"/>
+		
+		<result property="fullIntmName"				column="full_intm_name"/>
+		<result property="fullPrntIntmName"			column="full_prnt_intm_name"/>
+		<result property="fullPrntIntmNo"			column="full_prnt_intm_no"/>
+		<result property="fullPremiumAmt"			column="full_premium_amt"/>
+		<result property="fullWholdingTax"			column="full_wholding_tax"/>
+		<result property="fullNetCommission"		column="full_net_commission"/>
+		<result property="fullCommissionAmt"		column="full_commission_amt"/>
+		<result property="fullIntmNo"				column="full_intm_no"/>
+		<result property="fullSharePercentage"		column="full_share_percentage"/>
+		
+		<result property="yourIntmName"				column="your_intm_name"/>
+		<result property="yourPrntIntmName"			column="your_prnt_intm_name"/>
+		<result property="yourPremiumAmt"			column="your_premium_amt"/>
+		<result property="yourWholdingTax"			column="your_wholding_tax"/>
+		<result property="yourPrntIntmNo"			column="your_prnt_intm_no"/>
+		<result property="yourCommissionAmt"		column="your_commission_amt"/>
+		<result property="yourSharePercentage"		column="your_share_percentage"/>
+		<result property="yourIntmNo"				column="your_intm_no"/>
+		<result property="yourNetPremium"			column="your_net_premium"/>
+		
+		<result property="rowNum" 					column="rownum_"/>
+		<result property="rowCount" 				column="count_"/>
+	</resultMap>
+	
+	<select id="getGipiOrigCommInvoice"	resultMap="getGipiOrigCommInvoiceMap">
+		SELECT * FROM TABLE(GIPI_ORIG_COMM_INVOICE_PKG.get_gipi_orig_comm_invoice(#parId#))
+	</select>
+	
+	<select id="getInvoiceCommissions" resultMap="leadPolicyInvCommissionsMap" parameterClass="java.util.HashMap">
+		SELECT *
+          FROM (SELECT rownum rownum_,b.count_,a.*
+                 FROM (SELECT * FROM TABLE(GIPI_ORIG_COMM_INVOICE_PKG.get_invoice_commissions (#policyId#, #itemGrp#))) a,
+                      (SELECT count(*) count_ FROM TABLE(GIPI_ORIG_COMM_INVOICE_PKG.get_invoice_commissions (#policyId#, #itemGrp#))) b)
+		WHERE rownum_ BETWEEN NVL(#from#,rownum_) AND NVL(#to#,rownum_)
+	</select>
+	
+</sqlMap>

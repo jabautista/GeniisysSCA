@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GIUWWpolicydsDtl">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+
+	<typeAlias alias="GIUWWpolicydsDtlClass" type="com.geniisys.giuw.entity.GIUWWpolicydsDtl"/>
+	
+	<resultMap class="GIUWWpolicydsDtlClass" id="GIUWWpolicydsDtlResultMap">
+		<result column="dist_no" 			property="distNo"/>
+		<result column="dist_seq_no" 		property="distSeqNo"/>
+		<result column="line_cd" 			property="lineCd"/>
+		<result column="share_cd" 			property="shareCd"/>
+		<result column="dist_spct" 			property="distSpct"/>
+		<result column="dist_tsi" 			property="distTsi"/>
+		<result column="dist_prem" 			property="distPrem"/>
+		<result column="ann_dist_spct" 		property="annDistSpct"/>
+		<result column="ann_dist_tsi" 		property="annDistTsi"/>
+		<result column="dist_grp" 			property="distGrp"/>
+		<result column="dist_spct1" 		property="distSpct1"/>
+		<result column="arc_ext_data" 		property="arcExtData"/>
+		<result column="dsp_trty_cd" 		property="dspTrtyCd"/>
+		<result column="dsp_trty_name" 		property="dspTrtyName"/>
+		<result column="dsp_trty_sw" 		property="dspTrtySw"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="GIUWWpolicydsDtlResultHashMap">
+		<result column="dist_no" 			property="distNo"/>
+		<result column="dist_seq_no" 		property="distSeqNo"/>
+		<result column="dist_tsi" 			property="distTsi"/>
+		<result column="line_cd" 			property="lineCd"/>
+		<result column="dist_prem" 			property="distPrem"/>
+		<result column="dist_spct" 			property="distSpct"/>
+		<result column="dist_spct1" 		property="distSpct1"/> <!-- added by christian -->
+		<result column="tsi_amt" 			property="tsiAmt"/>
+		<result column="prem_amt" 			property="premAmt"/>
+		<result column="user_id" 			property="userId"/>
+		<result column="tsi_amt" 			property="tsiAmt"/>
+		<result column="currency_cd" 		property="currencyCd"/>
+		<result column="currency_rt" 		property="currencyRt"/>
+	</resultMap>
+
+	<select id="getGIUWWpolicydsDtl" resultMap="GIUWWpolicydsDtlResultMap">
+		SELECT * FROM TABLE(GIUW_WPOLICYDS_DTL_PKG.get_giuw_wpolicyds_dtl(#distNo#, #distSeqNo#))
+	</select>
+
+	<insert id="setGIUWWpolicydsDtl" parameterClass="GIUWWpolicydsDtlClass">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;		
+			GIUW_WPOLICYDS_DTL_PKG.set_giuw_wpolicyds_dtl(<!-- added TO_NUMBER to some parameters: shan 05.28.2014 -->
+				#distNo#, 		#distSeqNo#, 	
+				#lineCd#, 		#shareCd#,
+        		TO_NUMBER(#distSpct#), 	#distTsi#,	
+        		#distPrem#, 	TO_NUMBER(#annDistSpct#),
+        		#annDistTsi#, 	#distGrp#,
+        		TO_NUMBER(#distSpct1#), 	#arcExtData#); 
+		END;
+	</insert>
+
+	<delete id="delGIUWWpolicydsDtl" parameterClass="GIUWWpolicydsDtlClass">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GIUW_WPOLICYDS_DTL_PKG.del_giuw_wpolicyds_dtl(
+				#distNo#, 		#distSeqNo#, 	
+				#lineCd#, 		#shareCd#);
+		END;
+	</delete>
+	
+	<procedure id="postWpolicydsDtlGiuws015" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GIUW_WPOLICYDS_DTL_PKG.post_wpolicyds_dtl_giuws015(#batchId#, #distNo#);
+		END;	
+	</procedure>
+
+</sqlMap>

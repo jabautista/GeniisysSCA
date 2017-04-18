@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIQuoteDeductiblesClass">
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+
+	<typeAlias alias="GIPIQuoteDeductiblesClass" type="com.geniisys.quote.entity.GIPIDeductibles"/>
+	
+	<resultMap id="deductiblesInfoTGMap" class="GIPIQuoteDeductiblesClass">
+		<result property="quoteId"			column="quote_id"/>
+		<result property="itemNo"			column="item_no"/>
+		<result property="perilCd"			column="peril_cd"/>
+		<result property="deductibleCd"		column="ded_deductible_cd"/>
+		<result property="deductibleText"	column="deductible_text"/>
+		<result property="deductibleTitle"	column="deductible_title"/>
+		<result property="deductibleAmt"	column="deductible_amt"/>
+		<result property="deductibleRt"		column="deductible_rt"/>
+		<result property="deductibleType"	column="ded_type"/> <!-- added by steven 1/3/2013 -->
+		<result property="rowNum"			column="rownum_"/>
+		<result property="rowCount"			column="count_"/>
+	</resultMap>
+	
+	<select id="getDeductibleInfoTG" resultMap="deductiblesInfoTGMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(gipi_quote_deduct_pkg.get_deductible_info_tg(#quoteId#,#itemNo#,#perilCd#,#lineCd#,#sublineCd#))
+		          <isNotNull property="filter">
+				   		  WHERE 1=1
+				   		  		<isNotEmpty prepend="AND" property="deductibleCd">
+				   		  			upper(ded_deductible_cd) LIKE upper(#deductibleCd#)
+				   		  		</isNotEmpty>
+				   		  		<isNotEmpty prepend="AND" property="deductibleTitle">
+				   		  			upper(deductible_title) LIKE upper(#deductibleTitle#)
+				   		  		</isNotEmpty>
+				   		  		<isNotEmpty prepend="AND" property="deductibleText">
+				   		  			upper(deductible_text) LIKE upper(#deductibleText#)
+				   		  		</isNotEmpty>
+				   		  		<isNotEmpty prepend="AND" property="deductibleAmt">
+				   		  			deductible_amt = #deductibleAmt#
+				   		  		</isNotEmpty>
+				   		  		<isNotEmpty prepend="AND" property="deductibleRt">
+				   		  			deductible_rt = #deductibleRt#
+				   		  		</isNotEmpty>
+				  </isNotNull>
+		          <isEqual property="sortColumn" compareValue="deductibleCd">
+		          		ORDER BY ded_deductible_cd
+		          </isEqual>
+		          <isEqual property="sortColumn" compareValue="deductibleTitle">
+		          		ORDER BY deductible_title
+		          </isEqual>
+		          <isEqual property="sortColumn" compareValue="deductibleText">
+		          		ORDER BY deductible_text
+		          </isEqual>
+		          <isEqual property="sortColumn" compareValue="deductibleRt">
+		          		ORDER BY deductible_rt
+		          </isEqual>
+		          <isEqual property="sortColumn" compareValue="deductibleAmt">
+		          		ORDER BY deductible_amt
+		          </isEqual>
+		          <isNotNull property="sortColumn">
+			          <isEqual property="ascDescFlg" compareValue="ASC">
+			         		ASC
+			         </isEqual>
+			         <isEqual property="ascDescFlg" compareValue="DESC">
+			         		DESC
+			         </isEqual>
+		          </isNotNull>
+		          ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (gipi_quote_deduct_pkg.get_deductible_info_tg(#quoteId#,#itemNo#,#perilCd#,#lineCd#,#sublineCd#))
+		                  <isNotNull property="filter">
+						   		  WHERE 1=1
+						   		  		<isNotEmpty prepend="AND" property="deductibleCd">
+						   		  			upper(ded_deductible_cd) LIKE upper(#deductibleCd#)
+						   		  		</isNotEmpty>
+						   		  		<isNotEmpty prepend="AND" property="deductibleTitle">
+						   		  			upper(deductible_title) LIKE upper(#deductibleTitle#)
+						   		  		</isNotEmpty>
+						   		  		<isNotEmpty prepend="AND" property="deductibleText">
+						   		  			upper(deductible_text) LIKE upper(#deductibleText#)
+						   		  		</isNotEmpty>
+						   		  		<isNotEmpty prepend="AND" property="deductibleAmt">
+						   		  			deductible_amt = #deductibleAmt#
+						   		  		</isNotEmpty>
+						   		  		<isNotEmpty prepend="AND" property="deductibleRt">
+						   		  			deductible_rt = #deductibleRt#
+						   		  		</isNotEmpty>
+						  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<insert id="setDeductibleInfoGIIMM002" parameterClass="GIPIQuoteDeductiblesClass">
+		BEGIN
+			giis_users_pkg.app_user := #userId#; <!--replaced by userid by christian 03/09/2013 -->
+			gipi_quote_deduct_pkg.set_deductible_info_giimm002(#quoteId#,#itemNo#,#perilCd#,#deductibleCd#,#deductibleAmt#,#deductibleRt#,#deductibleText#);
+		END;
+	</insert>
+	
+	<delete id="deleteDeductibleInfoGIIMM002" parameterClass="GIPIQuoteDeductiblesClass">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			gipi_quote_deduct_pkg.del_deductible_info_giimm002(#quoteId#,#itemNo#,#perilCd#,#deductibleCd#);
+		END;
+	</delete>
+	
+	<select id="checkDeductibleText" resultClass="java.lang.String">
+		SELECT check_deductible_text FROM DUAL
+	</select>
+
+</sqlMap>

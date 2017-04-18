@@ -1,0 +1,373 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIACUpdateCheckNumber">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<resultMap class="java.util.HashMap" id="giacs049CompanyLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="gibrGfunFundCd"	column="GIBR_GFUN_FUND_CD"/>
+		<result property="fundDesc"			column="FUND_DESC"/>
+	</resultMap>
+	
+	<select id="getGIACS049CompanyLOV" resultMap="giacs049CompanyLOVResultMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		  		  FROM (SELECT * FROM TABLE(GIACS049_PKG.GET_COMPANY_LOV(#keyword#))
+		  		  	  	 <isNotNull property="findText">
+		  		  	  	 	WHERE UPPER(gibr_gfun_fund_cd) LIKE UPPER(#findText#)
+		  		  	  	 	   OR UPPER(fund_desc) LIKE UPPER(#findText#)
+		  		  	  	 </isNotNull>
+		  		  	  	 <isEqual property="sortColumn" compareValue="gibrGfunFundCd">
+		  		  	  	 		ORDER BY gibr_gfun_fund_cd
+		  		  	  	 </isEqual>
+		  		  	  	 <isEqual property="sortColumn" compareValue="fundDesc">
+		  		  	  	 		ORDER BY fund_desc
+		  		  	  	 </isEqual>
+		  		  	  	 <isNotNull property="sortColumn">
+		  		  	  	 		<isEqual property="ascDescFlg" compareValue="ASC">
+		  		  	  	 			ASC
+		  		  	  	 		</isEqual>
+		  		  	  	 		<isEqual property="ascDescFlg" compareValue="DESC">
+		  		  	  	 			DESC
+		  		  	  	 		</isEqual>
+		  		  	  	 </isNotNull>
+		  		  	    ) a,
+		  		  	   (SELECT count(*) count_ FROM TABLE(GIACS049_PKG.GET_COMPANY_LOV(#keyword#))
+		  		  	  	 <isNotNull property="findText">
+		  		  	  	 	WHERE UPPER(gibr_gfun_fund_cd) LIKE UPPER(#findText#)
+		  		  	  	 	   OR UPPER(fund_desc) LIKE UPPER(#findText#)
+		  		  	  	 </isNotNull>
+		  		  	  	 <isEqual property="sortColumn" compareValue="gibrGfunFundCd">
+		  		  	  	 		ORDER BY gibr_gfun_fund_cd
+		  		  	  	 </isEqual>
+		  		  	  	 <isEqual property="sortColumn" compareValue="fundDesc">
+		  		  	  	 		ORDER BY fund_desc
+		  		  	  	 </isEqual>
+		  		  	    ) b
+		  	    )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+
+	<resultMap class="java.util.HashMap" id="giacs049BranchLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="gibrBranchCd"	column="GIBR_BRANCH_CD"/>
+		<result property="branchName"	column="BRANCH_NAME"/>
+	</resultMap>
+	
+	<select id="getGIACS049BranchLOV" resultMap="giacs049BranchLOVResultMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		  		  FROM (SELECT * FROM TABLE(GIACS049_PKG.GET_BRANCH_LOV(#keyword#,#userId#))
+		  		  		 <isNotNull property="findText">
+		  		  		 	WHERE UPPER(gibr_branch_cd) LIKE UPPER(#findText#)
+		  		  		 	   OR UPPER(branch_name) LIKE UPPER(#findText#)
+		  		  		 </isNotNull>
+		  		  		 <isEqual property="sortColumn" compareValue="gibrBranchCd">
+	  		  		 		ORDER BY gibr_branch_cd
+		  		  		 </isEqual>
+		  		  		 <isEqual property="sortColumn" compareValue="branchName">
+	  		  		 		ORDER BY branch_name
+		  		  		 </isEqual>
+		  		  		 <isNotNull property="sortColumn">
+		  		  		 		<isEqual property="ascDescFlg" compareValue="ASC">
+		  		  		 			ASC
+		  		  		 		</isEqual>
+		  		  		 		<isEqual property="ascDescFlg" compareValue="DESC">
+		  		  		 			DESC
+		  		  		 		</isEqual>
+		  		  		 </isNotNull>
+		  		  		) a,
+		  		  	   (SELECT count(*) count_ FROM TABLE(GIACS049_PKG.GET_BRANCH_LOV(#keyword#,#userId#))
+		  		  		 <isNotNull property="findText">
+		  		  		 	WHERE UPPER(gibr_branch_cd) LIKE UPPER(#findText#)
+		  		  		 	   OR UPPER(branch_name) LIKE UPPER(#findText#)
+		  		  		 </isNotNull>
+		  		  		 <isEqual property="sortColumn" compareValue="gibrBranchCd">
+	  		  		 		ORDER BY gibr_branch_cd
+		  		  		 </isEqual>
+		  		  		 <isEqual property="sortColumn" compareValue="branchName">
+	  		  		 		ORDER BY branch_name
+		  		  		 </isEqual>
+		  		  	    ) b
+		  		)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="giacs049DvListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="gaccTranId"		column="GACC_TRAN_ID"/>
+		<result property="gibrGfunFundCd"	column="GIBR_GFUN_FUND_CD"/>
+		<result property="gibrBranchCd"		column="GIBR_BRANCH_CD"/>
+		<result property="dvPref"			column="DV_PREF"/>
+		<result property="dvNo"				column="DV_NO"/>
+		<result property="checkDate"		column="CHECK_DATE"/>
+		<result property="documentCd"		column="DOCUMENT_CD"/>
+		<result property="branchCd"			column="BRANCH_CD"/>
+		<result property="lineCd"			column="LINE_CD"/>
+		<result property="docYear"			column="DOC_YEAR"/>
+		<result property="docMm"			column="DOC_MM"/>
+		<result property="docSeqNo"			column="DOC_SEQ_NO"/>
+		<result property="checkPrefSuf"		column="CHECK_PREF_SUF"/>
+		<result property="checkNo"			column="CHECK_NO"/>
+		<result property="chkNo"			column="CHK_NO"/>
+		<result property="payee"			column="PAYEE"/>
+		<result property="particulars"		column="PARTICULARS"/>
+		<result property="userId"			column="USER_ID"/>
+		<result property="lastUpdate"		column="LAST_UPDATE"/>
+		<result property="dspLastUpdate"	column="DSP_LAST_UPDATE"/>
+		<result property="itemNo"			column="ITEM_NO"/> <!-- added by jeffdojello 12.16.2013 -->
+	</resultMap>
+	
+	<select id="getGIACS049DvListing" resultMap="giacs049DvListResultMap" parameterClass="java.util.HashMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		  		  FROM (SELECT * FROM TABLE(GIACS049_PKG.GET_DV_LIST(#gibrGfunFundCd#, #gibrBranchCd#))
+		  		  			<isNotNull property="filter">
+		  		  				WHERE 1=1
+		  		  				<isNotEmpty prepend="AND" property="dvPref">
+		  		  					UPPER(dv_pref) LIKE UPPER(#dvPref#)
+		  		  				</isNotEmpty>
+		  		  				<isNotEmpty prepend="AND" property="dvNo">
+		  		  					dv_no = #dvNo#
+		  		  				</isNotEmpty>
+		  		  				<isNotEmpty prepend="AND" property="checkDate">
+		  		  					check_date = TO_DATE(#checkDate#, 'MM-DD-YYYY')
+		  		  				</isNotEmpty>
+		  		  				<isNotEmpty prepend="AND" property="documentCd">
+		  		  					UPPER(document_cd) LIKE UPPER(#documentCd#)
+		  		  				</isNotEmpty>
+		  		  				<isNotEmpty prepend="AND" property="branchCd">
+		  		  					UPPER(branch_cd) LIKE UPPER(#branchCd#)
+		  		  				</isNotEmpty>
+		  		  				<isNotEmpty prepend="AND" property="lineCd">
+		  		  					UPPER(line_cd) LIKE UPPER(#lineCd#)
+		  		  				</isNotEmpty>
+		  		  				<isNotEmpty prepend="AND" property="docYear">
+		  		  					doc_year = #docYear#
+		  		  				</isNotEmpty>
+		  		  				<isNotEmpty prepend="AND" property="docMm">
+		  		  					doc_mm = #docMm#
+		  		  				</isNotEmpty>
+		  		  				<isNotEmpty prepend="AND" property="docSeqNo">
+		  		  					doc_seq_no = #docSeqNo#
+		  		  				</isNotEmpty>
+		  		  				<isNotEmpty prepend="AND" property="checkPrefSuf">
+		  		  					UPPER(check_pref_suf) LIKE UPPER(#checkPrefSuf#)
+		  		  				</isNotEmpty>
+		  		  				<isNotEmpty prepend="AND" property="checkNo">
+		  		  					check_no = #checkNo#
+		  		  				</isNotEmpty>
+		  		  			</isNotNull>		  		  			 
+		  		  			<isNotNull property="sortColumn">			  		  						  		  			
+			  		  			<isEqual property="sortColumn" compareValue="dvPref dvNo">
+			  		  				ORDER BY dv_pref, dv_no
+			  		  			</isEqual>  
+			  		  			<isEqual property="sortColumn" compareValue="checkDate">
+			  		  				ORDER BY check_date
+			  		  			</isEqual> 
+			  		  			<isEqual property="sortColumn" compareValue="documentCd branchCd lineCd docYear docMm docSeqNo">
+			  		  				ORDER BY document_cd, branch_cd, line_cd, doc_year, doc_mm, doc_seq_no
+			  		  			</isEqual>
+			  		  			<isEqual property="sortColumn" compareValue="checkPrefSuf checkNo">
+			  		  				ORDER BY check_pref_suf, check_no
+			  		  			</isEqual>
+		  		  				<isEqual property="ascDescFlg" compareValue="ASC">
+		  		  					ASC
+		  		  				</isEqual>
+		  		  				<isEqual property="ascDescFlg" compareValue="DESC">
+		  		  					DESC
+		  		  				</isEqual>
+		  		  			</isNotNull>
+		  		  		) a,
+		  		  	   (SELECT count(*) count_ FROM TABLE(GIACS049_PKG.GET_DV_LIST(#gibrGfunFundCd#, #gibrBranchCd#))
+		  		  			<isNotNull property="filter">
+		  		  				WHERE 1=1
+		  		  				<isNotEmpty prepend="AND" property="dvPref">
+		  		  					UPPER(dv_pref) LIKE UPPER(#dvPref#)
+		  		  				</isNotEmpty>
+		  		  				<isNotEmpty prepend="AND" property="dvNo">
+		  		  					dv_no = #dvNo#
+		  		  				</isNotEmpty>
+		  		  				<isNotEmpty prepend="AND" property="checkDate">
+		  		  					check_date = TO_DATE(#checkDate#, 'MM-DD-YYYY')
+		  		  				</isNotEmpty>
+		  		  				<isNotEmpty prepend="AND" property="documentCd">
+		  		  					UPPER(document_cd) LIKE UPPER(#documentCd#)
+		  		  				</isNotEmpty>
+		  		  				<isNotEmpty prepend="AND" property="branchCd">
+		  		  					UPPER(branch_cd) LIKE UPPER(#branchCd#)
+		  		  				</isNotEmpty>
+		  		  				<isNotEmpty prepend="AND" property="lineCd">
+		  		  					UPPER(line_cd) LIKE UPPER(#lineCd#)
+		  		  				</isNotEmpty>
+		  		  				<isNotEmpty prepend="AND" property="docYear">
+		  		  					doc_year = #docYear#
+		  		  				</isNotEmpty>
+		  		  				<isNotEmpty prepend="AND" property="docMm">
+		  		  					doc_mm = #docMm#
+		  		  				</isNotEmpty>
+		  		  				<isNotEmpty prepend="AND" property="docSeqNo">
+		  		  					doc_seq_no = #docSeqNo#
+		  		  				</isNotEmpty>
+		  		  				<isNotEmpty prepend="AND" property="checkPrefSuf">
+		  		  					UPPER(check_pref_suf) LIKE UPPER(#checkPrefSuf#)
+		  		  				</isNotEmpty>
+		  		  				<isNotEmpty prepend="AND" property="checkNo">
+		  		  					check_no = #checkNo#
+		  		  				</isNotEmpty>
+		  		  			</isNotNull>
+		  		  	    ) b
+		  		)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<parameterMap class="java.util.HashMap" id="validateCheckPrefSufMap">
+		<parameter property="gibrGfunFundCd"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="gibrBranchCd"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="checkPrefSuf"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="INOUT"/>
+		<parameter property="checkNo"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="INOUT"/>
+		<parameter property="chkNo"				jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+	</parameterMap>
+	
+	<parameterMap class="java.util.HashMap" id="validateCheckPrefSufMap2">
+		<parameter property="gibrGfunFundCd"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="gibrBranchCd"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="checkPrefSuf"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="checkNo"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+	</parameterMap>
+	
+	<procedure id="validateGIACS049CheckPrefSuf" parameterMap="validateCheckPrefSufMap2">
+		BEGIN
+			GIACS049_PKG.validate_check_pref_suf(?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<procedure id="validateGIACS049CheckNo" parameterMap="validateCheckPrefSufMap">
+		BEGIN
+			GIACS049_PKG.validate_check_no(?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<parameterMap class="java.util.HashMap" id="updateGIACS049CheckNoMap">
+		<parameter property="appUser"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/><!-- added by shan 07.28.2014 -->
+		<parameter property="gibrGfunFundCd"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="gibrBranchCd"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="gaccTranId"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="checkPrefSuf"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="itemNo"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/><!-- added by jeffdojello 12.16.2013 -->
+		<parameter property="checkNo"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="chkNo"				jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="msg"				jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="updateGIACS049CheckNo" parameterMap="updateGIACS049CheckNoMap">
+		BEGIN
+			GIIS_USERS_PKG.app_user := ?; <!-- added by shan 07.28.2014 -->
+			GIACS049_PKG.update_check_no(?, ?, ?, ?, ?, ?, ?, ?); <!-- modified by jeffdojello 12.16.2013 -->
+		END;
+	</procedure>
+	
+	<resultMap class="java.util.HashMap" id="giacs049CheckNoHistoryResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="gaccTranId"		column="GACC_TRAN_ID"/>
+		<result property="dvPref"			column="DV_PREF"/>
+		<result property="dvNo"				column="DV_NO"/>
+		<result property="oldCheckPref"		column="OLD_CHECK_PREF"/>
+		<result property="oldCheckNo"		column="OLD_CHECK_NO"/>
+		<result property="newCheckPref"		column="NEW_CHECK_PREF"/>
+		<result property="newCheckNo"		column="NEW_CHECK_NO"/>
+		<result property="userId"			column="USER_ID"/>
+		<result property="lastUpdate"		column="LAST_UPDATE"/>
+		<result property="dspLastUpdate"	column="DSP_LAST_UPDATE"/>
+	</resultMap>
+	
+	<select id="getGIACS049CheckNoHistory" resultMap="giacs049CheckNoHistoryResultMap" parameterClass="java.util.HashMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		  		  FROM (SELECT * FROM TABLE(GIACS049_PKG.GET_CHECK_NO_HISTORY(#gaccTranId#))
+		  		  			<isNotNull property="filter">
+		  		  				WHERE 1=1
+		  		  				<isNotEmpty prepend="AND" property="dvPref">
+		  		  					UPPER(dv_pref) LIKE UPPER(#dvPref#)
+		  		  				</isNotEmpty>
+		  		  				<isNotEmpty prepend="AND" property="dvNo">
+		  		  					dv_no = #dvNo#
+		  		  				</isNotEmpty>
+		  		  				<isNotEmpty prepend="AND" property="oldCheckPref">
+		  		  					UPPER(old_check_pref) LIKE UPPER(#oldCheckPref#)
+		  		  				</isNotEmpty>
+		  		  				<isNotEmpty prepend="AND" property="oldCheckNo">
+		  		  					old_check_no = #oldCheckNo#
+		  		  				</isNotEmpty>
+		  		  				<isNotEmpty prepend="AND" property="newCheckPref">
+		  		  					UPPER(new_check_pref) LIKE UPPER(#newCheckPref#)
+		  		  				</isNotEmpty>
+		  		  				<isNotEmpty prepend="AND" property="newCheckNo">
+		  		  					new_check_no = #newCheckNo#
+		  		  				</isNotEmpty>
+		  		  				<isNotEmpty prepend="AND" property="userId">
+		  		  					UPPER(user_id) LIKE UPPER(#userId#)
+		  		  				</isNotEmpty>
+		  		  				<isNotEmpty prepend="AND" property="dspLastUpdate">
+		  		  					last_update LIKE TO_DATE(#dspLastUpdate#, 'MM-DD-RRRR HH:MI:SS AM') || '%'
+		  		  				</isNotEmpty>
+		  		  			</isNotNull>	 			
+	  		  				<isEqual property="sortColumn" compareValue="userId">
+	  		  					ORDER BY user_id
+	  		  				</isEqual>
+	  		  				<isEqual property="sortColumn" compareValue="dspLastUpdate">
+	  		  					ORDER BY dsp_last_update
+	  		  				</isEqual>
+	  		  				<!-- added by Halley 12.03.13 -->
+	  		  				<isEqual property="sortColumn" compareValue="dvPref dvNo">
+	  		  					ORDER BY dv_pref, dv_no
+	  		  				</isEqual>
+	  		  				<isEqual property="sortColumn" compareValue="oldCheckPref oldCheckNo">
+	  		  					ORDER BY old_check_pref, old_check_no
+	  		  				</isEqual>
+	  		  				<isEqual property="sortColumn" compareValue="newCheckPref newCheckNo">
+	  		  					ORDER BY new_check_pref, new_check_no
+	  		  				</isEqual>
+	  		  				<!-- end -->
+		  		  			<isNotNull property="sortColumn">
+		  		  				<isEqual property="ascDescFlg" compareValue="ASC">
+		  		  					ASC
+		  		  				</isEqual>
+		  		  				<isEqual property="ascDescFlg" compareValue="DESC">
+		  		  					DESC
+		  		  				</isEqual>
+		  		  			</isNotNull>
+		  		  		) a,
+		  		  		(SELECT count(*) count_ FROM TABLE(GIACS049_PKG.GET_CHECK_NO_HISTORY(#gaccTranId#))
+		  		  			<isNotNull property="filter">
+		  		  				WHERE 1=1
+		  		  				<isNotEmpty prepend="AND" property="dvPref">
+		  		  					UPPER(dv_pref) LIKE UPPER(#dvPref#)
+		  		  				</isNotEmpty>
+		  		  				<isNotEmpty prepend="AND" property="dvNo">
+		  		  					dv_no = #dvNo#
+		  		  				</isNotEmpty>
+		  		  				<isNotEmpty prepend="AND" property="oldCheckPref">
+		  		  					UPPER(old_check_pref) LIKE UPPER(#oldCheckPref#)
+		  		  				</isNotEmpty>
+		  		  				<isNotEmpty prepend="AND" property="oldCheckNo">
+		  		  					old_check_no = #oldCheckNo#
+		  		  				</isNotEmpty>
+		  		  				<isNotEmpty prepend="AND" property="newCheckPref">
+		  		  					UPPER(new_check_pref) LIKE UPPER(#newCheckPref#)
+		  		  				</isNotEmpty>
+		  		  				<isNotEmpty prepend="AND" property="newCheckNo">
+		  		  					new_check_no = #newCheckNo#
+		  		  				</isNotEmpty>
+		  		  				<isNotEmpty prepend="AND" property="userId">
+		  		  					UPPER(user_id) LIKE UPPER(#userId#)
+		  		  				</isNotEmpty>
+		  		  				<isNotEmpty prepend="AND" property="dspLastUpdate">
+		  		  					last_update LIKE TO_DATE(#dspLastUpdate#, 'MM-DD-RRRR HH:MI:SS AM') || '%'
+		  		  				</isNotEmpty>
+		  		  			</isNotNull>
+		  		  		) b
+		  )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+</sqlMap>

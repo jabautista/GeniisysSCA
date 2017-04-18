@@ -1,0 +1,758 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE  sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GICLItemPeril">
+	
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GICLItemPerilClass" type="com.geniisys.gicl.entity.GICLItemPeril"/>
+	
+	<resultMap class="GICLItemPerilClass" id="GICLItemPerilResultMap">
+		<result column="claim_id" property="claimId" />
+		<result column="item_no" property="itemNo" />
+		<result column="peril_cd" property="perilCd" />
+		<result column="user_id" property="userId" />
+		<result column="last_update" property="lastUpdate" />
+		<result column="ann_tsi_amt" property="annTsiAmt" />
+		<result column="cpi_rec_no" property="cpiRecNo" />
+		<result column="cpi_branch_cd" property="cpiBranchCd" />
+		<result column="motshop_tag" property="motshopTag" />
+		<result column="loss_cat_cd" property="lossCatCd" />
+		<result column="line_cd" property="lineCd" />
+		<result column="close_date" property="closeDate" />
+		<result column="close_flag" property="closeFlag" />
+		<result column="close_flag2" property="closeFlag2" />
+		<result column="close_date2" property="closeDate2" />
+		<result column="aggregate_sw" property="aggregateSw" />
+		<result column="grouped_item_no" property="groupedItemNo" />
+		<result column="allow_tsi_amt" property="allowTsiAmt" />
+		<result column="base_amt" property="baseAmt" />
+		<result column="no_of_days" property="noOfDays" />
+		<result column="allow_no_of_days" property="allowNoOfDays" />
+		<result column="hist_indicator" property="histIndicator" />
+		<result column="dsp_loss_cat_des" property="dspLossCatDes" />
+		<result column="dsp_peril_name" property="dspPerilName" />
+		<result column="nbt_close_flag" property="nbtCloseFlag" />
+		<result column="nbt_close_flag2" property="nbtCloseFlag2" />
+		<result column="tloss_fl" property="tlossFl" />
+		<result column="dsp_item_no" property="dspItemNo" />
+		<result column="dsp_item_title" property="dspItemTitle" />
+		<result column="dsp_peril_cd" property="dspPerilCd" />
+		<result column="dsp_curr_desc" property="dspCurrDesc" />
+		<result column="currency_cd" property="currencyCd" />
+		<result column="dsp_grp_itm_title" property="dspGroupedItemTitle" />
+		<result column="dsp_grp_itm_title" property="dspGroupedItemTitle" />
+		<result column="color" property="color" />
+		<result column="model_year" property="modelYear" />
+		<result column="serial_no" property="serialNo" />
+		<result column="motor_no" property="motorNo" />
+		<result column="plate_no" property="plateNo" />
+		<result column="mv_file_no" property="mvFileNo" />
+		<result column="drvr_name" property="drvrName" />
+		<result column="dsp_make" property="dspMake" />
+		<result column="dsp_subline_type" property="dspSublineType" />
+		<result property="reserveDtlExist" column="reserve_dtl_exist"/>
+		<result property="paymentDtlExist" column="payment_dtl_exist"/>
+		
+	</resultMap>
+	
+	<resultMap class="GICLItemPerilClass" id="GICLItemPerilGridResultMap" extends="GICLItemPerilResultMap">
+		<result column="rownum_" property="rowNum" />
+		<result column="count_" property="rowCount" />
+	</resultMap>
+	
+	<resultMap class="GICLItemPerilClass" id="GICLItemPerilW/ReserveResultMap" extends="GICLItemPerilGridResultMap">
+		<result column="{claimId=CLAIM_ID, itemNo=ITEM_NO, perilCd=PERIL_CD}" property="giclClaimReserve" select="getGICLClaimReserveGICLS024"/>
+		<result column="{claimId=CLAIM_ID, itemNo=ITEM_NO, perilCd=PERIL_CD}" property="giclClmResHist" select="getLatestClmResHist2"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="GICLItemPerilW/ReserveResultMap2" extends="GICLItemPerilW/ReserveResultMap"> <!-- added by steven 06.03.2013 -->
+		<result column="sdf_last_update"			property="sdfLastUpdate"/>
+	</resultMap>
+	
+	<resultMap class="GICLItemPerilClass" id="getGICLS024ItemPerilMap" extends="GICLItemPerilResultMap">
+		<result column="{claimId=CLAIM_ID, itemNo=ITEM_NO, perilCd=PERIL_CD}" property="giclClaimReserve" select="getGICLClaimReserveGICLS024"/>
+		<result column="{claimId=CLAIM_ID, itemNo=ITEM_NO, perilCd=PERIL_CD}" property="giclClmResHist" select="getLatestClmResHist2"/>
+	</resultMap>
+		
+	<select id="getGiclItemPerilGrid" resultMap="GICLItemPerilGridResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(gicl_item_peril_pkg.get_gicl_item_peril(#claimId#, #itemNo#, #lineCd#))
+		          		<isNotNull property="filter">
+					      WHERE 1=1
+					      	<isNotEmpty prepend="AND" property="perilCd">
+           					  peril_cd LIKE #perilCd#
+           			        </isNotEmpty>
+           			        <isNotEmpty prepend="AND" property="dspPerilName">
+           					  UPPER(dsp_peril_name) LIKE UPPER(#dspPerilName#)
+           			        </isNotEmpty>
+           			        <isNotEmpty prepend="AND" property="lossCatCd">
+           					  UPPER(loss_cat_cd) LIKE UPPER(#lossCatCd#)
+           			        </isNotEmpty>
+           			        <isNotEmpty prepend="AND" property="dspLossCatDes">
+           					  UPPER(dsp_loss_cat_desc) LIKE UPPER(#dspLossCatDes#)
+           			        </isNotEmpty>
+           			        <isNotEmpty prepend="AND" property="allowTsiAmt">
+           					  allow_tsi_amt LIKE #allowTsiAmt#
+           			        </isNotEmpty>
+           			        <isNotEmpty prepend="AND" property="annTsiAmt">
+           					  ann_tsi_amt LIKE #annTsiAmt#
+           			        </isNotEmpty>
+               		  	</isNotNull>
+		          		<isEqual property="sortColumn" compareValue="perilCd dspPerilName">
+			             ORDER BY peril_cd
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="lossCatCd dspLossCatDes">
+			            ORDER BY loss_cat_cd
+			            	<isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>, dsp_loss_cat_des
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="annTsiAmt">
+			            ORDER BY ann_tsi_amt
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="nbtCloseFlag">
+			            ORDER BY nbt_close_flag
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="nbtCloseFlag2">
+			            ORDER BY nbt_close_flag2
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="aggregateSw"><!--  added by robert 10.30.2013 -->
+			            ORDER BY aggregate_sw
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="allowTsiAmt"><!--  added by robert 10.30.2013 -->
+			            ORDER BY allow_tsi_amt
+			          	</isEqual>
+			           	<isNotNull property="sortColumn">
+			              	<isEqual property="ascDescFlg" compareValue="ASC">
+			              		ASC
+			              	</isEqual>
+			              	<isEqual property="ascDescFlg" compareValue="DESC">
+			              		DESC
+			              	</isEqual>
+			            </isNotNull>  
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(gicl_item_peril_pkg.get_gicl_item_peril(#claimId#, #itemNo#, #lineCd#))
+		                <isNotNull property="filter">
+					      WHERE 1=1
+					      	<isNotEmpty prepend="AND" property="perilCd">
+           					  peril_cd LIKE #perilCd#
+           			        </isNotEmpty>
+           			        <isNotEmpty prepend="AND" property="dspPerilName">
+           					  UPPER(dsp_peril_name) LIKE UPPER(#dspPerilName#)
+           			        </isNotEmpty>
+           			        <isNotEmpty prepend="AND" property="lossCatCd">
+           					  UPPER(loss_cat_cd) LIKE UPPER(#lossCatCd#)
+           			        </isNotEmpty>
+           			        <isNotEmpty prepend="AND" property="dspLossCatDes">
+           					  UPPER(dsp_loss_cat_desc) LIKE UPPER(#dspLossCatDes#)
+           			        </isNotEmpty>
+           			        <isNotEmpty prepend="AND" property="allowTsiAmt">
+           					  allow_tsi_amt LIKE #allowTsiAmt#
+           			        </isNotEmpty>
+           			        <isNotEmpty prepend="AND" property="annTsiAmt">
+           					  ann_tsi_amt LIKE #annTsiAmt#
+           			        </isNotEmpty>
+               		  	</isNotNull>) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getClmItemPerilList" resultMap="GICLItemPerilGridResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(gicl_item_peril_pkg.get_peril_list(#lineCd#, #sublineCd#, #polIssCd#, 
+																		  	   #issueYy#, #polSeqNo#, #renewNo#, 
+																		       #lossDate#, #polEffDate#, #expiryDate#,
+																		       #itemNo#, #perilCd#, #lossCatCd#, 
+																		       #lossCatDes#,#findText#))
+					 		WHERE 1=1
+					 	<isNotNull property="notIn">
+		                 AND peril_cd NOT IN ($notIn$)					               
+		           		</isNotNull>										          
+						<isEqual property="sortColumn" compareValue="perilCd dspPerilName">
+			             	ORDER BY peril_cd
+			             	<isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>, dsp_peril_name
+			          	</isEqual>  
+			          	<isEqual property="sortColumn" compareValue="aggregateSw">
+			            	ORDER BY aggregate_sw
+			          	</isEqual>  
+			          	<isEqual property="sortColumn" compareValue="noOfDays">
+			            	ORDER BY no_of_days
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="baseAmt">
+			            	ORDER BY base_amt
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="lossCatCd dspLossCatDes">
+			            	ORDER BY loss_cat_cd
+			            	<isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>, dsp_loss_cat_des
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="annTsiAmt">
+			            	ORDER BY ann_tsi_amt
+			          	</isEqual>
+			           	<isNotNull property="sortColumn">
+			              	<isEqual property="ascDescFlg" compareValue="ASC">
+			              		ASC
+			              	</isEqual>
+			              	<isEqual property="ascDescFlg" compareValue="DESC">
+			              		DESC
+			              	</isEqual>
+			            </isNotNull> 
+		                ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(gicl_item_peril_pkg.get_peril_list(#lineCd#, #sublineCd#, #polIssCd#, 
+																		#issueYy#, #polSeqNo#, #renewNo#, 
+																	    #lossDate#, #polEffDate#, #expiryDate#,
+																	    #itemNo#, #perilCd#, #lossCatCd#, 
+																	    #lossCatDes#,#findText#))
+						 WHERE 1=1
+						<isNotNull property="notIn">
+		                 AND peril_cd NOT IN ($notIn$)					               
+		           		</isNotNull>								    
+						) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getMcClmItemPerilList" resultMap="GICLItemPerilGridResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(gicl_item_peril_pkg.get_mc_peril_list(#claimId#,#lineCd#, #sublineCd#, #polIssCd#, 
+																		  	   #issueYy#, #polSeqNo#, #renewNo#, 
+																		       #lossDate#, #polEffDate#, #expiryDate#,
+																		       #itemNo#, #perilCd#, #lossCatCd#, 
+																		       #lossCatDes#,#findText#))
+					 		WHERE 1=1
+					 	<isNotNull property="notIn">
+		                 AND peril_cd NOT IN ($notIn$)					               
+		           		</isNotNull>										          
+						<isEqual property="sortColumn" compareValue="perilCd dspPerilName">
+			             	ORDER BY peril_cd
+			             	<isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>, dsp_peril_name
+			          	</isEqual>  
+			          	<isEqual property="sortColumn" compareValue="aggregateSw">
+			            	ORDER BY aggregate_sw
+			          	</isEqual>  
+			          	<isEqual property="sortColumn" compareValue="noOfDays">
+			            	ORDER BY no_of_days
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="baseAmt">
+			            	ORDER BY base_amt
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="lossCatCd dspLossCatDes">
+			            	ORDER BY loss_cat_cd
+			            	<isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>, dsp_loss_cat_des
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="annTsiAmt">
+			            	ORDER BY ann_tsi_amt
+			          	</isEqual>
+			           	<isNotNull property="sortColumn">
+			              	<isEqual property="ascDescFlg" compareValue="ASC">
+			              		ASC
+			              	</isEqual>
+			              	<isEqual property="ascDescFlg" compareValue="DESC">
+			              		DESC
+			              	</isEqual>
+			            </isNotNull> 
+		                ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(gicl_item_peril_pkg.get_mc_peril_list(#claimId#,#lineCd#, #sublineCd#, #polIssCd#, 
+																		#issueYy#, #polSeqNo#, #renewNo#, 
+																	    #lossDate#, #polEffDate#, #expiryDate#,
+																	    #itemNo#, #perilCd#, #lossCatCd#, 
+																	    #lossCatDes#,#findText#))
+							WHERE 1=1
+						<isNotNull property="notIn">
+		                 AND peril_cd NOT IN ($notIn$)					               
+		           		</isNotNull>										    
+						) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<delete id="delGiclItemPeril" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			gicl_item_peril_pkg.del_gicl_item_peril(#claimId#, #itemNo#);
+		END;
+	</delete>
+
+	<select id="getGiclItemPerilGrid2" resultMap="GICLItemPerilGridResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(gicl_item_peril_pkg.get_gicl_item_peril2(#claimId#,#lineCd#))
+		          		<isEqual property="sortColumn" compareValue="dspItemNo">
+			             ORDER BY dsp_item_no
+			          	</isEqual>   
+			          	<isEqual property="sortColumn" compareValue="dspItemTitle">
+			            ORDER BY dsp_item_title
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="dspPerilCd">
+			            ORDER BY dsp_peril_cd
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="dspPerilName">
+			            ORDER BY dsp_peril_name
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="dspCurrDesc">
+			            ORDER BY dsp_curr_desc
+			          	</isEqual>
+			           	<isNotNull property="sortColumn">
+			              	<isEqual property="ascDescFlg" compareValue="ASC">
+			              		ASC
+			              	</isEqual>
+			              	<isEqual property="ascDescFlg" compareValue="DESC">
+			              		DESC
+			              	</isEqual>
+			            </isNotNull>  
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(gicl_item_peril_pkg.get_gicl_item_peril2(#claimId#,#lineCd#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+
+	<delete id="delGiclItemPeril2" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			gicl_item_peril_pkg.del_gicl_item_peril(#claimId#, #itemNo#, #perilCd#);
+		END;
+	</delete>
+	
+	<!-- <insert id="setGiclItemPeril" parameterClass="GICLItemPerilClass"> -->
+	<insert id="setGiclItemPeril" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			gicl_item_peril_pkg.set_gicl_item_peril(
+                    #claimId#, #itemNo#, #perilCd#, 
+                    #userId#, #lastUpdate#, #annTsiAmt#, 
+                    #cpiRecNo#, #cpiBranchCd#, #motshopTag#, 
+                    #lossCatCd#, #lineCd#, #closeDate#, 
+                    #closeFlag#, #closeFlag2#, #closeDate2#, 
+                    #aggregateSw#, #groupedItemNo#, #allowTsiAmt#, 
+                    #baseAmt#, #noOfDays#, #allowNoOfDays#);
+		END;
+	</insert>
+
+	<select id="getGiclItemPerilGrid3" resultMap="GICLItemPerilGridResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(gicl_item_peril_pkg.get_gicl_item_peril3(#claimId#))
+		                <isNotNull property="filter">
+					      WHERE 1=1
+          			        <isNotEmpty prepend="AND" property="dspItemNo">
+          					  dsp_item_no LIKE #dspItemNo#
+          			        </isNotEmpty>
+          			        <isNotEmpty prepend="AND" property="dspItemTitle">
+          					  UPPER(dsp_item_title) LIKE UPPER(#dspItemTitle#)
+          			        </isNotEmpty>
+          			        <isNotEmpty prepend="AND" property="perilCd">
+          					  peril_cd LIKE #perilCd#
+          			        </isNotEmpty>
+          			        <isNotEmpty prepend="AND" property="dspPerilName">
+          					  UPPER(dsp_peril_name) LIKE UPPER(#dspPerilName#)
+          			        </isNotEmpty>
+          			        <isNotEmpty prepend="AND" property="dspCurrDesc">
+          					  UPPER(dsp_curr_desc) LIKE UPPER(#dspCurrDesc#)
+          			        </isNotEmpty>
+          			        <isNotEmpty prepend="AND" property="annTsiAmt">
+          					  ann_tsi_amt LIKE #annTsiAmt#
+          			        </isNotEmpty>
+               		  	</isNotNull>
+		          		<isEqual property="sortColumn" compareValue="dspItemNo">
+			            	ORDER BY dsp_item_no
+			          	</isEqual>   
+			          	<isEqual property="sortColumn" compareValue="dspItemTitle">
+			            	ORDER BY dsp_item_title
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="dspItemNo dspItemTitle">
+			            	ORDER BY dsp_item_no
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="dspPerilName">
+			            	ORDER BY dsp_peril_name
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="perilCd dspPerilName">
+			            	ORDER BY peril_cd
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="dspGroupedItemTitle">
+			            	ORDER BY dsp_grp_itm_title
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="annTsiAmt">
+			            	ORDER BY ann_tsi_amt
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="allowTsiAmt">
+			            	ORDER BY allow_tsi_amt
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="allowNoOfDays">
+			            	ORDER BY allow_no_of_days
+			          	</isEqual>
+			           	<isNotNull property="sortColumn">
+			              	<isEqual property="ascDescFlg" compareValue="ASC">
+			              		ASC
+			              	</isEqual>
+			              	<isEqual property="ascDescFlg" compareValue="DESC">
+			              		DESC
+			              	</isEqual>
+			            </isNotNull>  
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(gicl_item_peril_pkg.get_gicl_item_peril3(#claimId#))
+		                <isNotNull property="filter">
+					      WHERE 1=1
+          			        <isNotEmpty prepend="AND" property="dspItemNo">
+          					  dsp_item_no LIKE #dspItemNo#
+          			        </isNotEmpty>
+          			        <isNotEmpty prepend="AND" property="dspItemTitle">
+          					  UPPER(dsp_item_title) LIKE UPPER(#dspItemTitle#)
+          			        </isNotEmpty>
+          			        <isNotEmpty prepend="AND" property="perilCd">
+          					  peril_cd LIKE #perilCd#
+          			        </isNotEmpty>
+          			        <isNotEmpty prepend="AND" property="dspPerilName">
+          					  UPPER(dsp_peril_name) LIKE UPPER(#dspPerilName#)
+          			        </isNotEmpty>
+          			        <isNotEmpty prepend="AND" property="dspCurrDesc">
+          					  UPPER(dsp_curr_desc) LIKE UPPER(#dspCurrDesc#)
+          			        </isNotEmpty>
+          			        <isNotEmpty prepend="AND" property="annTsiAmt">
+          					  ann_tsi_amt LIKE #annTsiAmt#
+          			        </isNotEmpty>
+               		  	</isNotNull>) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiclItemPerilGrid4" resultMap="GICLItemPerilW/ReserveResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(gicl_item_peril_pkg.get_gicl_item_peril4(#claimId#))
+		                WHERE item_no = NVL(#itemNo#, item_no)
+  						  AND UPPER(NVL(dsp_item_title, '***')) LIKE UPPER (NVL(#dspItemTitle#, (NVL(dsp_item_title, '***'))))
+                          AND UPPER(NVL(dsp_peril_name, '***')) LIKE UPPER (NVL(#dspPerilName#, (NVL(dsp_peril_name, '***'))))
+                          AND UPPER(NVL(dsp_grp_itm_title, '***')) LIKE UPPER (NVL(#dspGroupedItemTitle#, (NVL(dsp_grp_itm_title, '***'))))
+                          AND (NVL(ann_tsi_amt, 0)) LIKE (NVL(#annTsiAmt#, NVL(ann_tsi_amt, 0)))
+                          AND (NVL(allow_tsi_amt, 0)) LIKE (NVL(#allowTsiAmt#, NVL(allow_tsi_amt, 0)))
+                          AND (NVL(allow_no_of_days, 0)) LIKE (NVL(#allowNoOfDays#, NVL(allow_no_of_days, 0)))
+		          		<isEqual property="sortColumn" compareValue="itemNo dspItemTitle">
+			            	ORDER BY item_no || dsp_item_title
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="perilCd dspPerilName">
+			            	ORDER BY peril_cd || dsp_peril_name
+			          	</isEqual>
+		          		<isEqual property="sortColumn" compareValue="dspItemNo">
+			            	ORDER BY dsp_item_no
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="dspItemTitle">
+			            	ORDER BY dsp_item_title
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="perilCd">
+			            	ORDER BY peril_cd
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="dspPerilName">
+			            	ORDER BY dsp_peril_name
+			          	</isEqual>  
+			          	<isEqual property="sortColumn" compareValue="annTsiAmt">
+			            	ORDER BY ann_tsi_amt
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="allowTsiAmt">
+			            	ORDER BY allow_tsi_amt
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="lossStat">
+			            	ORDER BY close_flag
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="expStat">
+			            	ORDER BY close_flag2
+			          	</isEqual>
+			           	<isNotNull property="sortColumn">
+			              	<isEqual property="ascDescFlg" compareValue="ASC">
+			              		ASC
+			              	</isEqual>
+			              	<isEqual property="ascDescFlg" compareValue="DESC">
+			              		DESC
+			              	</isEqual>
+			            </isNotNull>  
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(gicl_item_peril_pkg.get_gicl_item_peril4(#claimId#))
+		                WHERE item_no = NVL(#itemNo#, item_no)
+  						  AND UPPER(NVL(dsp_item_title, '***')) LIKE UPPER (NVL(#dspItemTitle#, (NVL(dsp_item_title, '***'))))
+                          AND UPPER(NVL(dsp_peril_name, '***')) LIKE UPPER (NVL(#dspPerilName#, (NVL(dsp_peril_name, '***'))))
+                          AND UPPER(NVL(dsp_grp_itm_title, '***')) LIKE UPPER (NVL(#dspGroupedItemTitle#, (NVL(dsp_grp_itm_title, '***'))))
+                          AND (NVL(ann_tsi_amt, 0)) LIKE (NVL(#annTsiAmt#, NVL(ann_tsi_amt, 0)))
+                          AND (NVL(allow_tsi_amt, 0)) LIKE (NVL(#allowTsiAmt#, NVL(allow_tsi_amt, 0)))
+                          AND (NVL(allow_no_of_days, 0)) LIKE (NVL(#allowNoOfDays#, NVL(allow_no_of_days, 0)))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiclItemPerilGrid5" resultMap="GICLItemPerilW/ReserveResultMap2">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(gicl_item_peril_pkg.get_gicl_item_peril5(#claimId#))
+		          		<isNotNull property="filter">
+							WHERE 1=1
+           			        	<isNotEmpty prepend="AND" property="itemNo">
+            					  	item_no LIKE #itemNo#
+            			        </isNotEmpty>
+            			        <isNotEmpty prepend="AND" property="dspItemTitle">
+            					  	UPPER(dsp_item_title) LIKE UPPER(#dspItemTitle#)
+            			        </isNotEmpty>
+            			        <isNotEmpty prepend="AND" property="perilCd">
+            					  	peril_cd LIKE #perilCd#
+            			        </isNotEmpty>
+            			        <isNotEmpty prepend="AND" property="dspPerilName">
+            					  	UPPER(dsp_peril_name) LIKE UPPER(#dspPerilName#)
+            			        </isNotEmpty>
+            			        <isNotEmpty prepend="AND" property="annTsiAmt">
+            					  	ann_tsi_amt LIKE #annTsiAmt#
+            			        </isNotEmpty>
+            			        <isNotEmpty prepend="AND" property="nbtCloseFlag">
+            					  	UPPER(nbt_close_flag) LIKE UPPER(#nbtCloseFlag#)
+            			        </isNotEmpty>
+            			        <isNotEmpty prepend="AND" property="nbtCloseFlag2">
+            					  	UPPER(nbt_close_flag2) LIKE UPPER(#nbtCloseFlag2#)
+            			        </isNotEmpty>
+				        </isNotNull>
+		          		<isEqual property="sortColumn" compareValue="itemNo dspItemTitle">
+			            	ORDER BY item_no || dsp_item_title
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="perilCd dspPerilName">
+			            	ORDER BY peril_cd || dsp_peril_name
+			          	</isEqual>
+		          		<isEqual property="sortColumn" compareValue="dspItemNo">
+			            	ORDER BY dsp_item_no
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="dspItemTitle">
+			            	ORDER BY dsp_item_title
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="perilCd">
+			            	ORDER BY peril_cd
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="dspPerilName">
+			            	ORDER BY dsp_peril_name
+			          	</isEqual>  
+			          	<isEqual property="sortColumn" compareValue="annTsiAmt">
+			            	ORDER BY ann_tsi_amt
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="nbtCloseFlag">
+			            	ORDER BY nbt_close_flag
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="nbtCloseFlag2">
+			            	ORDER BY nbt_close_flag2
+			          	</isEqual>
+			           	<isNotNull property="sortColumn">
+			              	<isEqual property="ascDescFlg" compareValue="ASC">
+			              		ASC
+			              	</isEqual>
+			              	<isEqual property="ascDescFlg" compareValue="DESC">
+			              		DESC
+			              	</isEqual>
+			            </isNotNull>  
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(gicl_item_peril_pkg.get_gicl_item_peril5(#claimId#))
+		                <isNotNull property="filter">
+							WHERE 1=1
+           			        	<isNotEmpty prepend="AND" property="itemNo">
+            					  	item_no LIKE #itemNo#
+            			        </isNotEmpty>
+            			        <isNotEmpty prepend="AND" property="dspItemTitle">
+            					  	UPPER(dsp_item_title) LIKE UPPER(#dspItemTitle#)
+            			        </isNotEmpty>
+            			        <isNotEmpty prepend="AND" property="perilCd">
+            					  	peril_cd LIKE #perilCd#
+            			        </isNotEmpty>
+            			        <isNotEmpty prepend="AND" property="dspPerilName">
+            					  	UPPER(dsp_peril_name) LIKE UPPER(#dspPerilName#)
+            			        </isNotEmpty>
+            			        <isNotEmpty prepend="AND" property="annTsiAmt">
+            					  	ann_tsi_amt LIKE #annTsiAmt#
+            			        </isNotEmpty>
+            			        <isNotEmpty prepend="AND" property="nbtCloseFlag">
+            					  	UPPER(nbt_close_flag) LIKE UPPER(#nbtCloseFlag#)
+            			        </isNotEmpty>
+            			        <isNotEmpty prepend="AND" property="nbtCloseFlag2">
+            					  	UPPER(nbt_close_flag2) LIKE UPPER(#nbtCloseFlag2#)
+            			        </isNotEmpty>
+				        </isNotNull>) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getPAClmItemPerilList" resultMap="GICLItemPerilGridResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(gicl_item_peril_pkg.get_peril_list_PA(#claimId#,#lineCd#, #sublineCd#, #polIssCd#, 
+																		  	   #issueYy#, #polSeqNo#, #renewNo#, 
+																		       #lossDate#, #polEffDate#, #expiryDate#,
+																		       #itemNo#, #perilCd#, #lossCatCd#, 
+																		       #lossCatDes#, #catPerilCd#, #groupedItemNo#, #findText#))
+					 	WHERE 1=1
+					 	<isNotNull property="notIn">
+		                 AND peril_cd NOT IN ($notIn$)					               
+		           		</isNotNull>		          											          
+						<isEqual property="sortColumn" compareValue="perilCd dspPerilName">
+			             	ORDER BY peril_cd
+			             	<isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>, dsp_peril_name
+			          	</isEqual>  
+			          	<isEqual property="sortColumn" compareValue="aggregateSw">
+			            	ORDER BY aggregate_sw
+			          	</isEqual>  
+			          	<isEqual property="sortColumn" compareValue="noOfDays">
+			            	ORDER BY no_of_days
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="baseAmt">
+			            	ORDER BY base_amt
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="lossCatCd dspLossCatDes">
+			            	ORDER BY loss_cat_cd
+			            	<isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>, dsp_loss_cat_des
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="annTsiAmt">
+			            	ORDER BY ann_tsi_amt
+			          	</isEqual>
+			           	<isNotNull property="sortColumn">
+			              	<isEqual property="ascDescFlg" compareValue="ASC">
+			              		ASC
+			              	</isEqual>
+			              	<isEqual property="ascDescFlg" compareValue="DESC">
+			              		DESC
+			              	</isEqual>
+			            </isNotNull> 
+		                ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(gicl_item_peril_pkg.get_peril_list_PA(#claimId#,#lineCd#, #sublineCd#, #polIssCd#, 
+																		  	   #issueYy#, #polSeqNo#, #renewNo#, 
+																		       #lossDate#, #polEffDate#, #expiryDate#,
+																		       #itemNo#, #perilCd#, #lossCatCd#, 
+																		       #lossCatDes#, #catPerilCd#, #groupedItemNo#,#findText#))
+							WHERE 1=1
+						<isNotNull property="notIn">
+		                 AND peril_cd NOT IN ($notIn$)					               
+		           		</isNotNull>											    
+						) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+
+	<parameterMap class="map" id="checkAggPerilMap">
+		<parameter property="userId"		javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="IN"/>
+		<parameter property="aggregateSw"	javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="IN"/>
+		<parameter property="lineCd"		javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="IN"/>
+		<parameter property="sublineCd"		javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="IN"/>
+		<parameter property="polIssCd"		javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="IN"/>
+		<parameter property="issueYy"		javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="IN"/>
+		<parameter property="polSeqNo"		javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="IN"/>
+		<parameter property="renewNo"		javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="IN"/>
+		<parameter property="polEffDate"	javaType="java.util.Date"		jdbcType="DATE" 			mode="IN"/>
+		<parameter property="expiryDate"	javaType="java.util.Date"		jdbcType="DATE" 			mode="IN"/>
+		<parameter property="lossDate"		javaType="java.util.Date"		jdbcType="DATE" 			mode="IN"/>
+		<parameter property="itemNo"		javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="IN"/>
+		<parameter property="grpItemNo"		javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="IN"/>
+		<parameter property="perilCd"		javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="IN"/>
+		<parameter property="noOfDays"		javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="IN"/>
+		<parameter property="annTsiAmt"		javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="IN"/>
+		<parameter property="aggPeril"		javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="OUT"/>
+		<parameter property="baseAmt"		javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="OUT"/>
+		<parameter property="allowTsiAmt"	javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="OUT"/>
+		<parameter property="allowNoOfDays"	javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="checkAggPeril" parameterMap="checkAggPerilMap">
+		BEGIN
+  			giis_users_pkg.app_user := ?;
+  			gicl_item_peril_pkg.check_agg_peril(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+  		END;
+	</procedure>
+	
+	<select id="getGiclItemPerilDfltPayee" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT NVL(GET_DFLT_PAYEE_TYPE(#claimId#, #itemNo#, #perilCd#), 'L') dflt_payee_type FROM dual
+	</select>
+	
+	<parameterMap class="map" id="checkPerilStatusGICLS024Map">
+		<parameter property="claimId"		javaType="java.lang.Integer"	jdbcType="INTEGER" 			mode="IN"/>
+		<parameter property="perilCd"		javaType="java.lang.Integer"	jdbcType="INTEGER" 			mode="IN"/>
+		<parameter property="itemNo"		javaType="java.lang.Integer"	jdbcType="INTEGER" 			mode="IN"/>
+		<parameter property="groupedItemNo"	javaType="java.lang.Integer"	jdbcType="INTEGER" 			mode="IN"/>
+		<parameter property="closeFlag"		javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="OUT"/>
+		<parameter property="closeFlag2"	javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="checkPerilStatusGICLS024" parameterMap="checkPerilStatusGICLS024Map">
+		{CALL gicl_item_peril_pkg.check_peril_status_gicls024(?, ?, ?, ?, ?, ?)}
+	</procedure>
+	
+	<select id="getGICLS024ItemPeril" resultMap="getGICLS024ItemPerilMap">
+  		SELECT * FROM TABLE(gicl_item_peril_pkg.get_gicl_item_peril4(#claimId#))
+  	</select>
+  	
+  	<select id="checkIfGroupGICLS024"  parameterClass="java.lang.Integer"  resultClass="java.lang.Integer">
+  		SELECT DISTINCT grouped_item_no
+           FROM gicl_item_peril
+          WHERE claim_id = #claimId#
+  	</select> 
+	
+		<!-- added by Carlo 01-06-2017 SR5900-->
+	<select id="checkSharePercentage" resultClass="java.lang.String" parameterClass="java.util.HashMap">
+		SELECT gicl_item_peril_pkg.check_share_percentage(#claimId#, #perilCd#, #itemNo#) FROM DUAL	                 
+	</select>
+	
+</sqlMap>

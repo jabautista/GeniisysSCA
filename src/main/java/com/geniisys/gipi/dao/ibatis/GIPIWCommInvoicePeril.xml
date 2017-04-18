@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIWCommInvoicePeril">
+	
+	<typeAlias alias="WCommInvoicePeril" type="com.geniisys.gipi.entity.GIPIWCommInvoicePeril" />
+	
+	<resultMap class="WCommInvoicePeril" id="WCommInvoicePerilResultMap">
+		<result property="perilCd" 					column="PERIL_CD"/>
+		<result property="perilName" 				column="PERIL_NAME"/>
+		<result property="itemGroup" 				column="ITEM_GRP"/>
+		<result property="takeupSeqNo" 				column="TAKEUP_SEQ_NO"/>
+		<result property="parId" 					column="PAR_ID"/>
+		<result property="intermediaryIntmNo" 		column="INTRMDRY_INTM_NO"/>
+		<result property="premiumAmount" 			column="PREMIUM_AMT"/>
+		<result property="commissionRate" 			column="COMMISSION_RT"/>
+		<result property="commissionAmount" 		column="COMMISSION_AMT"/>
+		<result property="withholdingTax" 			column="WHOLDING_TAX"/>
+		<result property="netCommission" 			column="NET_COMMISSION"/>		
+	</resultMap>
+	
+	<select id="getWCommInvoicePeril" resultMap="WCommInvoicePerilResultMap" parameterClass="java.util.HashMap">
+		SELECT * 
+		  FROM TABLE(GIPI_WCOMM_INV_PERILS_PKG.get_gipi_wcomm_inv_perils(#parId#, #itemGroup#, #intermediaryIntmNo#))
+	</select>
+	
+	<select id="getWCommInvoicePeril2" resultMap="WCommInvoicePerilResultMap" parameterClass="java.util.HashMap">
+		SELECT * 
+		  FROM TABLE(GIPI_WCOMM_INV_PERILS_PKG.get_gipi_wcomm_inv_perils2(#parId#))
+	</select>
+	
+	<select id="getWCommInvoicePeril3" resultMap="WCommInvoicePerilResultMap" parameterClass="java.util.HashMap">
+		SELECT * 
+		  FROM TABLE(GIPI_WCOMM_INV_PERILS_PKG.get_gipi_wcomm_inv_perils3(#parId#, #intermediaryIntmNo#, #intermediaryIntmNo#, #takeupSeqNo#))
+	</select>	
+	
+	<insert id="saveWCommInvoicePeril" parameterClass="com.geniisys.gipi.entity.GIPIWCommInvoicePeril">
+		BEGIN
+			GIPI_WCOMM_INV_PERILS_PKG.set_gipi_wcomm_inv_perils(
+				#perilCd#, #itemGroup#, #takeupSeqNo#, #parId#,
+				#intermediaryIntmNo#, #premiumAmount#, #commissionRate#, #commissionAmount#, #withholdingTax#);
+		END;
+	</insert>
+	
+	<delete id="deleteWCommInvoicePeril" parameterClass="com.geniisys.gipi.entity.GIPIWCommInvoicePeril">
+		BEGIN
+			GIPI_WCOMM_INV_PERILS_PKG.del_gipi_wcomm_inv_perils(#parId#, #itemGroup#, #intermediaryIntmNo#, #takeupSeqNo#, #perilCd#);
+		END;
+	</delete>
+	
+	<delete id="deleteGIPIWCommInvPerilsByParIdItemGrp" parameterClass="java.util.HashMap">
+		BEGIN
+			GIPI_WCOMM_INV_PERILS_PKG.DEL_GIPI_WCOMM_INV_PERILS2(#parId#, #itemGrp#);
+		END;
+	</delete>
+	
+	<delete id="deleteGIPIWCommInvPerilsByParId" parameterClass="Integer">
+		BEGIN
+			gipi_wcomm_inv_perils_pkg.del_gipi_wcomm_inv_perils1(#parId#);
+		END;
+	</delete>
+</sqlMap>

@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIACR227_GL_ACCT" language="groovy" pageWidth="990" pageHeight="842" columnWidth="990" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="2.1435888100000104"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="style1" isDefault="false" fontName="Arial" fontSize="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false"/>
+	<parameter name="P_ISS_CD" class="java.lang.String"/>
+	<parameter name="P_ACCT_ENT_MONTH" class="java.lang.Integer"/>
+	<parameter name="P_ACCT_ENT_YEAR" class="java.lang.Integer"/>
+	<parameter name="P_USER_ID" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT * FROM TABLE (GIACR227_PKG.GET_GL_ACCT_RECORD(
+$P{P_ISS_CD},
+$P{P_ACCT_ENT_MONTH},
+$P{P_ACCT_ENT_YEAR},
+$P{P_USER_ID}))
+ORDER BY GL_ACCT_NAME, SL_CD, GACC_TRAN_ID DESC]]>
+	</queryString>
+	<field name="GL_ACCT" class="java.lang.String"/>
+	<field name="GL_ACCT_NAME" class="java.lang.String"/>
+	<field name="DEBIT_AMT" class="java.math.BigDecimal"/>
+	<field name="CREDIT_AMT" class="java.math.BigDecimal"/>
+	<field name="SL_CD" class="java.math.BigDecimal"/>
+	<field name="GSLT_SL_TYPE_CD" class="java.lang.String"/>
+	<field name="GACC_TRAN_ID" class="java.math.BigDecimal"/>
+	<field name="V_FLAG" class="java.lang.String"/>
+	<variable name="V_SUM_DEBIT" class="java.math.BigDecimal" resetType="Group" resetGroup="GRP_GL_ACCT" calculation="Sum">
+		<variableExpression><![CDATA[$F{DEBIT_AMT}]]></variableExpression>
+	</variable>
+	<variable name="V_SUM_CREDIT" class="java.math.BigDecimal" resetType="Group" resetGroup="GRP_GL_ACCT" calculation="Sum">
+		<variableExpression><![CDATA[$F{CREDIT_AMT}]]></variableExpression>
+	</variable>
+	<variable name="V_GRAND_DEBIT" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{DEBIT_AMT}]]></variableExpression>
+	</variable>
+	<variable name="V_GRAND_CREDIT" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CREDIT_AMT}]]></variableExpression>
+	</variable>
+	<group name="GRP_GL_ACCT">
+		<groupExpression><![CDATA[$F{GL_ACCT}]]></groupExpression>
+		<groupFooter>
+			<band height="30">
+				<printWhenExpression><![CDATA[$F{V_FLAG} == "Y"]]></printWhenExpression>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+					<reportElement style="style1" x="305" y="9" width="77" height="11"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle"/>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_SUM_DEBIT}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+					<reportElement style="style1" x="383" y="9" width="77" height="11"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle"/>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_SUM_CREDIT}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement style="style1" x="305" y="0" width="77" height="9"/>
+					<textElement textAlignment="Right" verticalAlignment="Bottom"/>
+					<text><![CDATA[------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement style="style1" x="383" y="0" width="77" height="9"/>
+					<textElement textAlignment="Right" verticalAlignment="Bottom"/>
+					<text><![CDATA[------------------------------]]></text>
+				</staticText>
+			</band>
+		</groupFooter>
+	</group>
+	<title>
+		<band height="11">
+			<staticText>
+				<reportElement style="style1" x="0" y="0" width="990" height="11"/>
+				<textElement/>
+				<text><![CDATA[GENERATED ACCOUNTING ENTRIES FOR TREATY DISTRIBUTION]]></text>
+			</staticText>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="22">
+			<staticText>
+				<reportElement style="style1" x="0" y="0" width="85" height="11"/>
+				<textElement/>
+				<text><![CDATA[GL Acct Code]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="style1" x="305" y="11" width="77" height="9"/>
+				<textElement textAlignment="Right"/>
+				<text><![CDATA[------------------------------]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="style1" x="383" y="0" width="77" height="11"/>
+				<textElement textAlignment="Right"/>
+				<text><![CDATA[Credit Amount]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="style1" x="305" y="0" width="77" height="11"/>
+				<textElement textAlignment="Right"/>
+				<text><![CDATA[Debit Amount]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="style1" x="86" y="11" width="184" height="9"/>
+				<textElement/>
+				<text><![CDATA[---------------------------------------------------------------------------]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="style1" x="383" y="11" width="77" height="9"/>
+				<textElement textAlignment="Right"/>
+				<text><![CDATA[------------------------------]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="style1" x="86" y="0" width="184" height="11"/>
+				<textElement/>
+				<text><![CDATA[GL Acct Name]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="style1" x="0" y="11" width="85" height="9"/>
+				<textElement/>
+				<text><![CDATA[---------------------------------]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="style1" x="271" y="0" width="33" height="11"/>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[SL Code]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="style1" x="271" y="11" width="33" height="9"/>
+				<textElement/>
+				<text><![CDATA[---------------]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="12" splitType="Prevent">
+			<printWhenExpression><![CDATA[$F{V_FLAG} == "Y"]]></printWhenExpression>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement style="style1" x="383" y="0" width="77" height="11"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{CREDIT_AMT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="style1" isPrintRepeatedValues="false" x="86" y="0" width="184" height="11"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{GL_ACCT_NAME}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="style1" isPrintRepeatedValues="false" x="0" y="0" width="85" height="11"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{GL_ACCT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="style1" x="271" y="0" width="33" height="11"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{SL_CD}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement style="style1" x="305" y="0" width="77" height="11"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{DEBIT_AMT}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<summary>
+		<band height="34" splitType="Stretch">
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement style="style1" x="305" y="10" width="77" height="11"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_GRAND_DEBIT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement style="style1" x="383" y="10" width="77" height="11"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_GRAND_CREDIT}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="style1" x="245" y="10" width="57" height="11"/>
+				<textElement/>
+				<text><![CDATA[Grand Total]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="style1" x="383" y="1" width="77" height="9"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom"/>
+				<text><![CDATA[------------------------------]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="style1" x="305" y="1" width="77" height="9"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom"/>
+				<text><![CDATA[------------------------------]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="style1" x="383" y="21" width="77" height="11"/>
+				<textElement textAlignment="Right" verticalAlignment="Top">
+					<font size="7"/>
+				</textElement>
+				<text><![CDATA[==================]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="style1" x="305" y="21" width="77" height="11"/>
+				<textElement textAlignment="Right" verticalAlignment="Top">
+					<font size="7"/>
+				</textElement>
+				<text><![CDATA[==================]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="style1" x="302" y="10" width="2" height="11"/>
+				<textElement/>
+				<text><![CDATA[:]]></text>
+			</staticText>
+		</band>
+	</summary>
+</jasperReport>

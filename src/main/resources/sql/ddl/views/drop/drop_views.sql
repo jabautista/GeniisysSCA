@@ -1,0 +1,1 @@
+DROP VIEW cpi.deptree CASCADE CONSTRAINTS;

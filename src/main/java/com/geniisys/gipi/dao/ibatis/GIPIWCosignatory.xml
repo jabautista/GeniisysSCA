@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIWCosignatory">
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIPIWCosignatoryClass" type="com.geniisys.gipi.entity.GIPIWCosignatory" />
+
+	<resultMap class="GIPIWCosignatoryClass" id="gipiWCosignatoryMap">
+		<result column="PAR_ID" 		property="parId"/>
+		<result column="COSIGN_ID" 		property="cosignId"/>
+		<result column="ASSD_NO" 		property="assdNo"/>
+		<result column="INDEM_FLAG" 	property="indemFlag"/>
+		<result column="BONDS_FLAG"		property="bondsFlag"/>
+		<result column="BONDS_RI_FLAG" 	property="bondsRiFlag"/>
+		<result column="COSIGN_NAME" 	property="cosignName"/>
+		<result column="DESIGNATION" 	property="designation"/>
+	</resultMap>
+	
+	<select id="getGIPIWCosignatory" resultMap="gipiWCosignatoryMap">
+		SELECT * FROM TABLE(GIPI_WCOSIGNTRY_PKG.get_gipi_wcosigntry_list(#parId#, NULL))
+	</select>
+	
+	<procedure id="deleteGIPIWCosignatory" parameterClass="java.util.HashMap">
+		BEGIN
+			GIPI_WCOSIGNTRY_PKG.delete_gipi_wcosigntry(#parId#, #cosignId#);
+		END;
+	</procedure>
+	
+	<insert id="insertGIPIWCosignatory" parameterClass="java.util.HashMap">
+		BEGIN
+			GIPI_WCOSIGNTRY_PKG.set_gipi_wcosigntry(#parId#
+  							   ,#cosignId#
+							   ,#assdNo#
+							   ,#indemFlag#
+							   ,#bondsFlag#
+							   ,#bondsRiFlag#);
+		END;
+	</insert>
+
+</sqlMap>

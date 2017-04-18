@@ -1,0 +1,547 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GICLCasualtyDtl">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GICLCasualtyDtlClass" type="com.geniisys.gicl.entity.GICLCasualtyDtl"/>
+	
+	<resultMap class="GICLCasualtyDtlClass" id="GICLCasualtyDtlResultMap">
+		<result column="loss_date"				property="lossDate"/>
+		<result column="claim_id"				property="claimId"/>
+		<result column="item_no"				property="itemNo"/>
+		<result column="item_title"				property="itemTitle"/>
+		<result column="grouped_item_no"		property="groupedItemNo"/>
+		<result column="grouped_item_title"	 	property="groupedItemTitle"/>
+		<!-- <result column="position"				property="position"/>  -->
+		<result column="currency_cd"			property="currencyCd"/>
+		<result column="currency_rate"			property="currencyRate"/>
+		<result column="currency_desc"			property="currencyDesc"/>
+		<result column="section_or_hazard_info" property="sectionOrHazardInfo"/>
+		<result column="section_or_hazard_cd"	property="sectionOrHazardCd"/>
+		<result column="item_desc"				property="itemDesc"/>
+		<result column="item_desc2"				property="itemDesc2"/>
+		<result column="property_no"			property="propertyNo"/>
+		<result column="property_no_type"		property="propertyNoType"/>
+		<result column="location"				property="location"/>
+		<result column="conveyance_info"		property="conveyanceInfo"/>
+		<result column="interest_on_premises"	property="interestOnPremises"/>
+		<result column="amount_coverage"		property="amountCoverage"/>
+		<result column="limit_of_liability"		property="limitOfLiability"/>
+		<result column="capacity_cd"			property="capacityCd"/>
+		<result column="position"                property="position" />
+		<result column="gicl_item_peril_exist" 	property="giclItemPerilExist" 	nullValue="N"/>
+  		<result column="gicl_mortgagee_exist" 	property="giclMortgageeExist" 	nullValue="N"/>
+  		<result column="gicl_item_peril_msg" 	property="giclItemPerilMsg" 	nullValue="2"/> 
+	</resultMap>
+	
+	<resultMap class="GICLCasualtyDtlClass" id="personnelListResultMap">
+		<result column="item_no"				property="itemNo"/>
+		<result column="personnel_no" 			property="personnelNo"/>
+		<result column="name"					property="name"/>
+		<result column="include_tag"			property="includeTag"/>
+		<result column="user_id"				property="userId"/>
+		<result column="last_update"			property="lastUpdate"/>
+		<result column="claim_id"				property="claimId"/>
+		<result column="capacity_cd"			property="capacityCd"/>
+		<result column="amount_covered"			property="amountCovered"/>
+		<result column="position"				property="position"/>
+		<result column="remarks"			 	property="remarks"/>
+		<result column="rownum_" 				property="rowNum" />
+		<result column="count_"					property="rowCount"/>
+	</resultMap>
+	
+	<resultMap class="GICLCasualtyDtlClass" id="GICLCasualtyDtlGridResultMap" extends="GICLCasualtyDtlResultMap">
+		<result column="rownum_" 				property="rowNum" />
+		<result column="count_"					property="rowCount"/>
+	</resultMap>
+	
+	<resultMap class="GICLCasualtyDtlClass" id="groupLOV">
+		<result column="group_no"				property="groupNo"/>
+	</resultMap>
+	
+	<parameterMap class="map" id="validateClmItemNoCasualtyMap">
+		<parameter property="userId"		javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="IN"/>
+  		<parameter property="lineCd"		javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="IN"/>
+		<parameter property="sublineCd"		javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="IN"/>
+		<parameter property="polIssCd"		javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="IN"/>
+		<parameter property="issueYy"		javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="IN"/>
+		<parameter property="polSeqNo"		javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="IN"/>
+		<parameter property="renewNo"		javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="IN"/>
+		<parameter property="polEffDate"	javaType="java.util.Date"		jdbcType="DATE" 			mode="IN"/>
+		<parameter property="expiryDate"	javaType="java.util.Date"		jdbcType="DATE" 			mode="IN"/>
+		<parameter property="lossDate"		javaType="java.util.Date"		jdbcType="DATE" 			mode="IN"/>
+		<parameter property="inceptDate"	javaType="java.util.Date"		jdbcType="DATE" 			mode="IN"/>
+		<parameter property="itemNo"		javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="IN"/>
+		<parameter property="claimId"		javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="IN"/>
+		<parameter property="from"			javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="IN"/>
+		<parameter property="to"			javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="IN"/>
+		<parameter property="row"			javaType="java.sql.ResultSet" 	jdbcType="ORACLECURSOR" 	mode="OUT" 		resultMap="GICLCasualtyDtlResultMap"/>
+		<parameter property="itemExist"		javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="OUT"/>
+		<parameter property="overrideFl"	javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="OUT"/>
+		<parameter property="tlossFl"		javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="OUT"/>
+		<parameter property="itemExist2"	javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="OUT"/>
+  	</parameterMap>
+  	
+  	<parameterMap class="map" id="extractLatestGroupedMap">
+  		<parameter property="userId"		javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="IN"/>
+  		<parameter property="lineCd"		javaType="java.lang.String"		jdbcType="VARCHAR"			mode="IN"/>
+  		<parameter property="sublineCd"		javaType="java.lang.String"		jdbcType="VARCHAR"			mode="IN"/>
+  		<parameter property="polIssCd"		javaType="java.lang.String"		jdbcType="VARCHAR"			mode="IN"/>
+  		<parameter property="issueYy"		javaType="java.lang.Integer"	jdbcType="NUMBER"			mode="IN"/>
+  		<parameter property="polSeqNo"		javaType="java.lang.Integer"	jdbcType="NUMBER"			mode="IN"/>
+  		<parameter property="renewNo"		javaType="java.lang.Integer"	jdbcType="NUMBER"			mode="IN"/>
+  		<parameter property="expiryDate"	javaType="java.util.Date"		jdbcType="DATE"				mode="IN"/>
+  		<parameter property="lossDate"		javaType="java.util.Date"		jdbcType="DATE"				mode="IN"/>
+  		<parameter property="polEffDate"	javaType="java.util.Date"		jdbcType="DATE"				mode="IN"/>
+  		<parameter property="itemNo"		javaType="java.lang.Integer"	jdbcType="NUMBER"			mode="IN"/>
+		<parameter property="to"			javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="IN"/>
+		<parameter property="row"			javaType="java.sql.ResultSet" 	jdbcType="ORACLECURSOR" 	mode="OUT" 		resultMap="GICLCasualtyDtlResultMap"/>
+  	</parameterMap>
+  	
+  	<parameterMap class="map" id="validateGroupItemNoMap">
+  		<parameter property="userId"		javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="IN"/>
+  		<parameter property="lineCd"		javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="IN"/>
+		<parameter property="sublineCd"		javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="IN"/>
+		<parameter property="polIssCd"		javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="IN"/>
+		<parameter property="issueYy"		javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="IN"/>
+		<parameter property="polSeqNo"		javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="IN"/>
+		<parameter property="renewNo"		javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="IN"/>
+		<parameter property="polEffDate"	javaType="java.util.Date"		jdbcType="DATE" 			mode="IN"/>
+		<parameter property="expiryDate"	javaType="java.util.Date"		jdbcType="DATE" 			mode="IN"/>
+		<parameter property="lossDate"		javaType="java.util.Date"		jdbcType="DATE" 			mode="IN"/>
+		<parameter property="itemNo"		javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="IN"/>
+		<parameter property="groupItemNo"		javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="IN"/>
+		<parameter property="groupItemTitle"		javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="OUT"/>
+		<parameter property="amountCoverage" jdbcType="NUMERIC" 	javaType="java.math.BigDecimal"  mode="OUT"/>
+		<parameter property="exist"		javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="OUT"/>
+  	</parameterMap>
+  	
+  	<resultMap class="GICLCasualtyDtlClass" id="personnelLOVMap">
+  		<result column="personnel_no"			property="personnelNo"/>
+  		<result column="name"					property="name"/>
+  		<result column="capacity_cd"			property="capacityCd"/>
+  		<result column="amount_covered"			property="amountCovered"/>
+  		<result column="position"				property="position"/>
+  		<result column="rownum_" 				property="rowNum" />
+		<result column="count_"					property="rowCount"/>
+  	</resultMap>
+  	
+  	<procedure id="validateClmItemNoCasualty" parameterMap="validateClmItemNoCasualtyMap">
+  		BEGIN
+  			giis_users_pkg.app_user := ?;
+  			GICL_CASUALTY_DTL_PKG.validate_gicl_casualty_dtl(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+  		END;
+  	</procedure>
+  	
+  	<procedure id="extractLatestGrouped" parameterMap="extractLatestGroupedMap">
+  		BEGIN
+		  	giis_users_pkg.app_user := ?;
+		  	GICL_CASUALTY_DTL_PKG.extract_latest_grouped(?,?,?,?,?,?,?,?,?,?,?,?);
+		END;
+  	</procedure>
+  	
+  	<select id="getPersonnelList" resultMap="personnelListResultMap">
+  	    SELECT *
+          FROM (SELECT rownum rownum_, 
+                       b.count_, 
+                       a.* 
+                  FROM (SELECT * FROM TABLE(GICL_CASUALTY_PERSONNEL_PKG.get_personnel_list(#claimId#,#itemNo#))) a, 
+                       (SELECT count(*) count_ 
+                          FROM TABLE(GICL_CASUALTY_PERSONNEL_PKG.get_personnel_list(#claimId#,#itemNo#))) b) 
+         WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+  	
+	<select id="getGiclCasualtyDtlGrid" resultMap="GICLCasualtyDtlGridResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GICL_CASUALTY_DTL_PKG.get_gicl_casualty_dtl(#claimId#))) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GICL_CASUALTY_DTL_PKG.get_gicl_casualty_dtl(#claimId#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getClmCaItemLOV" parameterClass="java.util.HashMap" resultMap="GIPIItem.itemNoLOVResultMap">
+		SELECT * 
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT item_no, item_title 
+		                  FROM TABLE (GIPI_ITEM_PKG.get_item_no_list(#lineCd#, #sublineCd#, #polIssCd#, 
+																		  #issueYy#, #polSeqNo#, #renewNo#, 
+																		  #lossDate#, #polEffDate#, #expiryDate#)) 
+		                 WHERE item_no NOT IN (SELECT item.item_no
+		  										 FROM (SELECT rownum rownum_2,  
+		               										  a2.* 
+		         										 FROM (SELECT * FROM TABLE(GICL_CLAIMS_PKG.get_casualty_item_info(#claimId#))   
+		          												<isEqual property="itemSortColumn" compareValue="itemNo">
+			            											ORDER BY item_no
+			          											</isEqual>  
+			          											<isEqual property="itemSortColumn" compareValue="itemTitle">
+			            											ORDER BY item_title
+			          											</isEqual>  
+			          											<isEqual property="itemSortColumn" compareValue="itemDesc">
+			            											ORDER BY item_desc
+			          											</isEqual>
+			          											<isEqual property="itemSortColumn" compareValue="itemDesc2">
+			            											ORDER BY item_desc2
+			          											</isEqual>
+			          											<isEqual property="itemSortColumn" compareValue="dspCurrencyDesc">
+			            											ORDER BY dsp_currency_desc
+			          											</isEqual>
+			          											<isEqual property="itemSortColumn" compareValue="currencyRate">
+			            											ORDER BY currency_rate
+			          											</isEqual>       
+			           											<isNotNull property="itemSortColumn">
+			              											<isEqual property="itemAscDescFlg" compareValue="ASC">
+			              												ASC
+			              											</isEqual>
+			              											<isEqual property="itemAscDescFlg" compareValue="DESC">
+			              												DESC
+			              											</isEqual>
+			              										</isNotNull>
+		                  									) a2
+		                  							  ) item 
+		 									    WHERE rownum_2 NOT BETWEEN #itemFrom# AND #itemTo#) 
+		 			 <isNotNull property="notIn">
+		                   AND item_no NOT IN ($notIn$)					               
+		           	</isNotNull>					     
+		           	<isNotNull property="findText">
+		                  AND (item_no LIKE #findText# OR UPPER(item_title) LIKE UPPER(#findText#))
+		          	</isNotNull> 
+		          	 <isNull property="sortColumn"> <!-- added by steven to sort the record when the LOV is shown -->
+             	 		ORDER BY item_no
+	             	 </isNull>      
+		                  <isEqual property="sortColumn" compareValue="itemNo">
+			              		ORDER BY item_no
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="itemTitle">
+			              		ORDER BY item_title
+			              </isEqual>		
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIPI_ITEM_PKG.get_item_no_list(#lineCd#, #sublineCd#, #polIssCd#, 
+																		  #issueYy#, #polSeqNo#, #renewNo#, 
+																		  #lossDate#, #polEffDate#, #expiryDate#)) 
+		 				  WHERE item_no NOT IN (SELECT item.item_no
+		  										 FROM (SELECT rownum rownum_2,  
+		               										  a2.* 
+		         										 FROM (SELECT * FROM TABLE(GICL_CLAIMS_PKG.get_casualty_item_info(#claimId#))   
+		          												<isEqual property="itemSortColumn" compareValue="itemNo">
+			            											ORDER BY item_no
+			          											</isEqual>  
+			          											<isEqual property="itemSortColumn" compareValue="itemTitle">
+			            											ORDER BY item_title
+			          											</isEqual>  
+			          											<isEqual property="itemSortColumn" compareValue="itemDesc">
+			            											ORDER BY item_desc
+			          											</isEqual>
+			          											<isEqual property="itemSortColumn" compareValue="itemDesc2">
+			            											ORDER BY item_desc2
+			          											</isEqual>
+			          											<isEqual property="itemSortColumn" compareValue="dspCurrencyDesc">
+			            											ORDER BY dsp_currency_desc
+			          											</isEqual>
+			          											<isEqual property="itemSortColumn" compareValue="currencyRate">
+			            											ORDER BY currency_rate
+			          											</isEqual>       
+			           											<isNotNull property="itemSortColumn">
+			              											<isEqual property="itemAscDescFlg" compareValue="ASC">
+			              												ASC
+			              											</isEqual>
+			              											<isEqual property="itemAscDescFlg" compareValue="DESC">
+			              												DESC
+			              											</isEqual>
+			              										</isNotNull>
+		                  									) a2
+		                  							  ) item 
+		 									    WHERE rownum_2 NOT BETWEEN #itemFrom# AND #itemTo#) 
+		 			 <isNotNull property="notIn">
+		                   AND item_no NOT IN ($notIn$)					               
+		           	</isNotNull>
+		           	<isNotNull property="findText">
+		               AND (item_no LIKE #findText# OR UPPER(item_title) LIKE UPPER(#findText#))
+		          	</isNotNull> 
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#		
+	</select>	
+	
+	<insert id="setGiclCasualtyDtl" parameterClass="GICLCasualtyDtlClass">
+			BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GICL_CASUALTY_DTL_PKG.set_gicl_casualty_dtl(#amountCoverage#,#capacityCd#,
+                                            #claimId#,#conveyanceInfo#,
+                                            #cpiBranchCd#,#cpiRecNo#,
+                                            #currencyCd#,#lossDate#,
+                                            #currencyRate#,#groupedItemNo#,
+                                            #groupedItemTitle#,
+                                            #interestOnPremises#,
+                                            #itemNo#,#itemTitle#,#lastUpdate#,
+                                            #limitOfLiability#,#location#,
+                                            #locationCd#,#propertyNo#,
+                                            #propertyNoType#,#sectionLineCd#,
+                                            #sectionOrHazardCd#,#sectionOrHazardInfo#,
+                                            #sectionSublineCd#,#userId#);
+   		   END;
+	</insert>
+	
+	<insert id="setPersonnel" parameterClass="java.util.HashMap">
+			BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GICL_CASUALTY_PERSONNEL_PKG.insert_delete_personnel(#claimId#,#itemNo#,#personnelNo#,
+									#name#,#includeTag#,#userId#,#lastUpdate#,#capacityCd#,#amountCovered#);
+   		   END;
+	</insert>
+	
+	<delete id="deletePersonnel" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GICL_CASUALTY_PERSONNEL_PKG.delete_personnel(#claimId#, #itemNo#,#personnelNo#);
+		END;
+	</delete>
+	
+	<delete id="delGiclCasualtyDtl" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GICL_CASUALTY_DTL_PKG.del_gicl_casualty_dtl(#claimId#, #itemNo#);
+		END;
+	</delete>
+	<delete id="delGiclCasualtyPersonnel" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GICL_CASUALTY_PERSONNEL_PKG.del_gicl_casualty_personnel(#claimId#, #itemNo#);
+		END;
+	</delete>
+	
+	<select id="getClmPersonnelLOV" resultMap="personnelLOVMap" parameterClass="HashMap">
+	    SELECT *
+          FROM (SELECT rownum rownum_, 
+                       b.count_, 
+                       a.* 
+                  FROM (SELECT * FROM TABLE(GICL_CASUALTY_PERSONNEL_PKG.personnel_lov(#lineCd#,#sublineCd#,#polIssCd#,#issueYy#,#polSeqNo#,#renewNo#,#itemNo#,#claimId#,#personnelNo#,#lossDate#,#expiryDate#))
+			                 WHERE 1 = 1 <!-- added by steven 12/04/2012 -->
+			                 <isNotNull property="findText">
+				                  AND (PERSONNEL_NO LIKE #findText# OR UPPER(NAME) LIKE UPPER(#findText#))
+				          	  </isNotNull> 
+							  <isNotNull property="notIn">
+			                  	AND PERSONNEL_NO NOT IN $notIn$
+			                  </isNotNull>
+			                  <isEqual property="sortColumn" compareValue="name">
+				              	   ORDER BY  NAME
+				              </isEqual>
+							  <isEqual property="sortColumn" compareValue="personnelNo">
+				              	   ORDER BY  PERSONNEL_NO
+				              </isEqual>
+				              <isNotNull property="sortColumn">
+			              	  <isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              	  </isEqual>
+			              	  <isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              	  </isEqual>
+			              	  </isNotNull>
+                  ) a, 
+                       (SELECT count(*) count_ 
+                          FROM TABLE(GICL_CASUALTY_PERSONNEL_PKG.personnel_lov(#lineCd#,#sublineCd#,#polIssCd#,#issueYy#,#polSeqNo#,#renewNo#,#itemNo#,#claimId#,#personnelNo#,#lossDate#,#expiryDate#))
+                            WHERE 1 = 1  <!-- added by steven 12/04/2012 -->
+                              <isNotNull property="findText">
+				                  AND (PERSONNEL_NO LIKE #findText# OR UPPER(NAME) LIKE UPPER(#findText#))
+				          	  </isNotNull> 
+							  <isNotNull property="notIn">
+			                  	AND PERSONNEL_NO NOT IN $notIn$
+			                  </isNotNull>
+			                  <isEqual property="sortColumn" compareValue="name">
+				              	   ORDER BY  NAME
+				              </isEqual>
+							  <isEqual property="sortColumn" compareValue="personnelNo">
+				              	   ORDER BY  PERSONNEL_NO
+				              </isEqual>
+				              <isNotNull property="sortColumn">
+			              	  <isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              	  </isEqual>
+			              	  <isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              	  </isEqual>
+			              	  </isNotNull>
+                          ) b) 
+         WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGroupLOV" resultMap="groupLOV" parameterClass="java.util.HashMap">
+			SELECT *
+          FROM (SELECT rownum rownum_, 
+                       b.count_, 
+                       a.* 
+                  FROM (SELECT * FROM TABLE(GICL_CASUALTY_DTL_PKG.get_group_lov(#lineCd#,#sublineCd#,#polIssCd#,#issueYy#,#polSeqNo#,#renewNo#,to_date(#polEffDate#,'MM-DD-YYYY'),to_date(#lossDate#,'MM-DD-YYYY'),#itemNo#,to_date(#expiryDate#,'MM-DD-YYYY')))) a, 
+                       (SELECT count(*) count_ 
+                          FROM TABLE(GICL_CASUALTY_DTL_PKG.get_group_lov(#lineCd#,#sublineCd#,#polIssCd#,#issueYy#,#polSeqNo#,#renewNo#,to_date(#polEffDate#,'MM-DD-YYYY'),to_date(#lossDate#,'MM-DD-YYYY'),#itemNo#,to_date(#expiryDate#,'MM-DD-YYYY')))) b) 
+         WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getCasualtyGroupedItemTitle" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT grouped_item_title
+	      FROM gicl_casualty_dtl
+	     WHERE claim_id = #claimId#
+	       AND item_no  = #itemNo#
+	       AND grouped_item_no = #groupedItemNo#
+	</select>
+	
+	<procedure id="validateGroupItemNo" parameterMap="validateGroupItemNoMap">
+  		BEGIN
+		  	giis_users_pkg.app_user := ?;
+		  	GICL_CASUALTY_DTL_PKG.validate_Group_ItemNo(?,?,?,?,?,?,?,?,?,?,?,?,?,?);
+		END;
+  	</procedure>
+  	
+  	<parameterMap class="java.util.HashMap" id="validatePersonnelNoMap">
+  		<parameter property="userId"		javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="IN"/>
+  		<parameter property="lineCd"		javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="IN"/>
+		<parameter property="sublineCd"		javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="IN"/>
+		<parameter property="polIssCd"		javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="IN"/>
+		<parameter property="issueYy"		javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="IN"/>
+		<parameter property="polSeqNo"		javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="IN"/>
+		<parameter property="renewNo"		javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="IN"/>
+		<parameter property="polEffDate"	javaType="java.util.Date"		jdbcType="DATE" 			mode="IN"/>
+		<parameter property="expiryDate"	javaType="java.util.Date"		jdbcType="DATE" 			mode="IN"/>
+		<parameter property="lossDate"		javaType="java.util.Date"		jdbcType="DATE" 			mode="IN"/>
+		<parameter property="itemNo"		javaType="java.lang.Integer"	jdbcType="NUMBER"			mode="IN"/>
+		<parameter property="claimId"	javaType="java.lang.Integer"	jdbcType="NUMBER" 			mode="IN"/>
+		<parameter property="personnelNo"		javaType="java.lang.Integer"	jdbcType="NUMBER"			mode="IN"/>
+		<parameter property="name"		javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="OUT"/>
+		<parameter property="capacityCd"		javaType="java.lang.String"	jdbcType="VARCHAR"			mode="OUT"/>
+		<parameter property="amountCovered" jdbcType="NUMERIC" 	javaType="java.math.BigDecimal"  mode="OUT"/>
+		<parameter property="position"		javaType="java.lang.String"		jdbcType="VARCHAR" 			mode="OUT"/>
+  	</parameterMap>
+  	
+  	
+  	<procedure id="validatePersonnelNo" parameterMap="validatePersonnelNoMap">
+  		BEGIN
+		  	giis_users_pkg.app_user := ?;
+		  	GICL_CASUALTY_DTL_PKG.validate_personnel_no(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);
+		END;
+  	</procedure>
+  	
+  	<resultMap class="java.util.HashMap" id="GICLCasualtyDtlGicls260Map">
+		<result column="loss_date"				property="lossDate"/>
+		<result column="claim_id"				property="claimId"/>
+		<result column="item_no"				property="itemNo"/>
+		<result column="item_title"				property="itemTitle"/>
+		<result column="grouped_item_no"		property="groupedItemNo"/>
+		<result column="grouped_item_title"	 	property="groupedItemTitle"/>
+		<!-- <result column="position"				property="position"/>  -->
+		<result column="currency_cd"			property="currencyCd"/>
+		<result column="currency_rate"			property="currencyRate"/>
+		<result column="currency_desc"			property="currencyDesc"/>
+		<result column="section_or_hazard_info" property="sectionOrHazardInfo"/>
+		<result column="section_or_hazard_cd"	property="sectionOrHazardCd"/>
+		<result column="item_desc"				property="itemDesc"/>
+		<result column="item_desc2"				property="itemDesc2"/>
+		<result column="property_no"			property="propertyNo"/>
+		<result column="property_no_type"		property="propertyNoType"/>
+		<result column="location"				property="location"/>
+		<result column="conveyance_info"		property="conveyanceInfo"/>
+		<result column="interest_on_premises"	property="interestOnPremises"/>
+		<result column="amount_coverage"		property="amountCoverage"/>
+		<result column="limit_of_liability"		property="limitOfLiability"/>
+		<result column="capacity_cd"			property="capacityCd"/>
+		<result column="position"               property="position" />
+		<result column="gicl_item_peril_exist" 	property="giclItemPerilExist" 	nullValue="N"/>
+  		<result column="gicl_mortgagee_exist" 	property="giclMortgageeExist" 	nullValue="N"/>
+  		<result column="gicl_item_peril_msg" 	property="giclItemPerilMsg" 	nullValue="2"/>
+  		<result column="personnel_no"           property="personnelNo"/>
+  		<result column="name"                	property="name"/>
+  		<result column="pers_capacity_cd"       property="persCapacityCd"/>
+  		<result column="nbt_position"           property="nbtPosition"/>
+  		<result column="amount_covered"         property="amountCovered"/>
+  		<result column="detail"         		property="detail"/>
+  		<result column="dsp_currency_desc"      property="dspCurrencyDesc"/>
+		<result column="loss_date_char"			property="lossDateChar"/>
+  		<result column="rownum_" 				property="rowNum" />
+		<result column="count_"					property="rowCount"/>
+	</resultMap>
+  	
+  	<select id="getGiclCasualtyDtlGridGicls260" resultMap="GICLCasualtyDtlGicls260Map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GICL_CASUALTY_DTL_PKG.get_casualty_dtl_gicls260(#claimId#))
+		          			<isNotNull property="filter">
+						      WHERE 1=1
+						      	<isNotEmpty prepend="AND" property="itemNo">
+              					  item_no LIKE #itemNo#
+              			        </isNotEmpty>
+              			        <isNotEmpty prepend="AND" property="itemTitle">
+              					  UPPER(item_title) LIKE UPPER(#itemTitle#)
+              			        </isNotEmpty>
+              			        <isNotEmpty prepend="AND" property="dspCurrencyDesc">
+              					  UPPER(dsp_currency_desc) LIKE UPPER(#dspCurrencyDesc#)
+              			        </isNotEmpty>
+              			        <isNotEmpty prepend="AND" property="currencyRate">
+              					  currency_rate LIKE #currencyRate#
+              			        </isNotEmpty>
+                   		  	</isNotNull>
+		          			<isEqual property="sortColumn" compareValue="itemNo">
+			            		ORDER BY item_no
+			          		</isEqual>  
+			          		<isEqual property="sortColumn" compareValue="itemTitle">
+			            		ORDER BY item_title
+			          		</isEqual>  
+			          		<isEqual property="sortColumn" compareValue="itemDesc">
+			            		ORDER BY item_desc
+			          		</isEqual>
+			          		<isEqual property="sortColumn" compareValue="itemDesc2">
+			            		ORDER BY item_desc2
+			          		</isEqual>
+			          		<isEqual property="sortColumn" compareValue="itemDesc itemDesc2">
+			            		ORDER BY item_desc, item_desc2
+			          		</isEqual>
+			          		<isEqual property="sortColumn" compareValue="dspCurrencyDesc">
+			            		ORDER BY currency_desc <!-- commented out by shan 04.14.2014  dsp_currency_desc  --> 
+			          		</isEqual>
+			          		<isEqual property="sortColumn" compareValue="currencyRate">
+			            		ORDER BY currency_rate
+			          		</isEqual>       
+			           		<isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	</isNotNull>
+		          		) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GICL_CASUALTY_DTL_PKG.get_casualty_dtl_gicls260(#claimId#))
+		                  	<isNotNull property="filter">
+						      WHERE 1=1
+						      	<isNotEmpty prepend="AND" property="itemNo">
+              					  item_no LIKE #itemNo#
+              			        </isNotEmpty>
+              			        <isNotEmpty prepend="AND" property="itemTitle">
+              					  UPPER(item_title) LIKE UPPER(#itemTitle#)
+              			        </isNotEmpty>
+              			        <isNotEmpty prepend="AND" property="dspCurrencyDesc">
+              					  UPPER(dsp_currency_desc) LIKE UPPER(#dspCurrencyDesc#)
+              			        </isNotEmpty>
+              			        <isNotEmpty prepend="AND" property="currencyRate">
+              					  currency_rate LIKE #currencyRate#
+              			        </isNotEmpty>
+                   		  	</isNotNull>) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+</sqlMap>

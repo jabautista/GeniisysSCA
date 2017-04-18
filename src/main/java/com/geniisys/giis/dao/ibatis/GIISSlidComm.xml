@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISSlidComm">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIISSlidComm" type="com.geniisys.giis.entity.GIISSlidComm"/>
+	
+	<resultMap class="java.util.HashMap" id="lineCdLovMap" extends="BaseEntity.TableGridResultMap">
+		<result column="line_cd"     		property="lineCd"/>
+		<result column="line_name"     		property="lineName"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="sublineCdLovMap" extends="BaseEntity.TableGridResultMap">
+		<result column="subline_cd"     	property="sublineCd"/>
+		<result column="subline_name"     	property="sublineName"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="perilResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="line_cd"     		property="lineCd"/>
+		<result column="subline_cd"     	property="sublineCd"/>
+		<result column="peril_cd"     		property="perilCd"/>
+		<result column="peril_sname"     	property="perilSname"/>
+		<result column="peril_name"     	property="perilName"/>
+		<result column="default_rate"     	property="defaultRate"/>
+	</resultMap>
+	
+	<resultMap class="GIISSlidComm" id="slidCommResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="line_cd"     		property="lineCd"/>
+		<result column="subline_cd"     	property="sublineCd"/>
+		<result column="peril_cd"     		property="perilCd"/>
+		<result column="lo_prem_lim"     	property="loPremLim"/>
+		<result column="hi_prem_lim"     	property="hiPremLim"/>
+		<result column="slid_comm_rt"     	property="slidCommRt"/>
+		<result column="remarks"     		property="remarks"/>
+		<result column="user_id"     		property="userId"/>
+		<result column="last_update"     	property="lastUpdate"/>
+		<result column="old_lo_prem_lim"    property="oldLoPremLim"/>
+		<result column="old_hi_prem_lim"    property="oldHiPremLim"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="historyResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="line_cd"     		property="lineCd"/>
+		<result column="subline_cd"     	property="sublineCd"/>
+		<result column="peril_cd"     		property="perilCd"/>
+		<result column="old_lo_prem_lim"    property="oldLoPremLim"/>
+		<result column="lo_prem_lim"     	property="loPremLim"/>
+		<result column="old_hi_prem_lim"    property="oldHiPremLim"/>
+		<result column="hi_prem_lim"     	property="hiPremLim"/>
+		<result column="old_slid_comm_rt"   property="oldSlidCommRt"/>
+		<result column="slid_comm_rt"     	property="slidCommRt"/>
+		<result column="user_id"     		property="userId"/>
+		<result column="last_update"     	property="lastUpdate"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="commRateListMap">
+		<result column="lo_prem_lim"     	property="loPremLim"/>
+		<result column="hi_prem_lim"     	property="hiPremLim"/>
+	</resultMap>
+	
+	<select id="getGiiss220LineCdLOV" resultMap="lineCdLovMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giiss220_pkg.get_line_lov(#findText#, #userId#))
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="lineCd">
+								ORDER BY line_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="lineName">
+								ORDER BY line_name
+							</isEqual>							
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(giiss220_pkg.get_line_lov(#findText#, #userId#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiiss220SublineCdLOV" resultMap="sublineCdLovMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giiss220_pkg.get_subline_lov(#lineCd#, #findText#))
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="sublineCd">
+								ORDER BY subline_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="sublineName">
+								ORDER BY subline_name
+							</isEqual>							
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(giiss220_pkg.get_subline_lov(#lineCd#, #findText#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGIISS220PerilList" resultMap="perilResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giiss220_pkg.get_peril_listing(#lineCd#, #perilCd#, #perilSname#, #perilName#, #defaultRate#))
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="perilCd">
+								ORDER BY peril_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="perilSname">
+								ORDER BY peril_sname
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="perilName">
+								ORDER BY peril_name
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="defaultRate">
+								ORDER BY default_rate
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(giiss220_pkg.get_peril_listing(#lineCd#, #perilCd#, #perilSname#, #perilName#, #defaultRate#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGIISS220SlidingComm" resultMap="slidCommResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giiss220_pkg.get_slid_comm_listing(#lineCd#, #sublineCd#, #perilCd#, #loPremLim#, #hiPremLim#, #slidCommRt#))
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="loPremLim">
+								ORDER BY lo_prem_lim
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="hiPremLim">
+								ORDER BY hi_prem_lim
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="slidCommRt">
+								ORDER BY slid_comm_rt
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(giiss220_pkg.get_slid_comm_listing(#lineCd#, #sublineCd#, #perilCd#, #loPremLim#, #hiPremLim#, #slidCommRt#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGIISS220History" resultMap="historyResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giiss220_pkg.get_history_listing(#lineCd#, #sublineCd#, #perilCd#,
+						  				#oldLoPremLim#, #loPremLim#, #oldHiPremLim#, #hiPremLim#, #oldSlidCommRt#, #slidCommRt#))
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="lineCd">
+								ORDER BY line_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="sublineCd">
+								ORDER BY subline_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="perilCd">
+								ORDER BY peril_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="oldLoPremLim">
+								ORDER BY old_lo_prem_lim
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="loPremLim">
+								ORDER BY lo_prem_lim
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="oldHiPremLim">
+								ORDER BY old_hi_prem_lim
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="hiPremLim">
+								ORDER BY hi_prem_lim
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="oldSlidCommRt">
+								ORDER BY old_slid_comm_rt
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="slidCommRt">
+								ORDER BY slid_comm_rt
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(giiss220_pkg.get_history_listing(#lineCd#, #sublineCd#, #perilCd#,
+						  				#oldLoPremLim#, #loPremLim#, #oldHiPremLim#, #hiPremLim#, #oldSlidCommRt#, #slidCommRt#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="checkRateGIISS220" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss220_pkg.check_rate(#lineCd#, #sublineCd#, #perilCd#, #loPremLim#, #hiPremLim#, #oldLoPremLim#, #oldHiPremLim#);
+ 		END;
+ 	</procedure>
+	
+	<procedure id="setSlidComm" parameterClass="GIISSlidComm">
+	    DECLARE
+	    	v_rec giis_slid_comm%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+			v_rec.line_cd := #lineCd#;
+			v_rec.subline_cd := #sublineCd#;
+			v_rec.peril_cd := #perilCd#;
+			v_rec.hi_prem_lim := #hiPremLim#;
+			v_rec.lo_prem_lim := #loPremLim#;
+			v_rec.slid_comm_rt := #slidCommRt#;
+			v_rec.user_id := #userId#;
+			v_rec.remarks := #remarks#;
+			
+ 			giiss220_pkg.set_rec(v_rec, #oldLoPremLim#, #oldHiPremLim#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<delete id="delSlidComm" parameterClass="GIISSlidComm">
+		BEGIN
+ 			giiss220_pkg.del_rec(#lineCd#, #sublineCd#, #perilCd#, #loPremLim#, #hiPremLim#);
+ 		END;
+ 	</delete>
+ 	
+ 	<select id="getSlidCommRateList" resultMap="commRateListMap">
+ 		SELECT *
+ 		  FROM TABLE(giiss220_pkg.get_rate_list(#lineCd#, #sublineCd#, #perilCd#))
+ 	</select>
+	
+</sqlMap>

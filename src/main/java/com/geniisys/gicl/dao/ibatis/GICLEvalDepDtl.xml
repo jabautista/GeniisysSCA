@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GICLEvalDepDtl">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GICLEvalDepDtl" type="com.geniisys.gicl.entity.GICLEvalDepDtl"/>
+	
+	<resultMap class="GICLEvalDepDtl" id="GICLEvalDepDtlMap">
+		<result property="evalId" column="eval_id"/>
+		<result property="payeeTypeCd" column="payee_type_cd"/>
+		<result property="payeeCd" column="payee_cd"/>
+		<result property="dedAmt" column="ded_amt"/>
+		<result property="dedRt" column="ded_rt"/>
+		<result property="lossExpCd" column="loss_exp_cd"/>
+		<result property="itemNo" column="item_no"/>
+		<result property="remarks" column="remarks"/>
+		<result property="lastUpdate" column="last_update"/>
+		<result property="userId" column="user_id"/>
+	</resultMap>
+	
+	<resultMap class="GICLEvalDepDtl" id="gicls070evalDepMap" extends="GICLEvalDepDtlMap">
+		<result property="partType" column="part_type"/>
+		<result property="partDesc" column="part_desc"/>
+		<result property="itemNo" column="item_no"/>
+		<result property="remarks" column="remarks"/>
+		<result property="partAmt" column="part_amt"/>
+		<result column="rownum_" 	property="rowNum" />
+		<result column="count_"		property="rowCount"/>
+ 	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="depDetailPayeeMap">
+		<result property="payeeCd" column="payee_cd"/>
+		<result property="payeeTypeCd" column="payee_type_cd"/>
+		<result property="evalId" column="eval_id"/>
+		<result property="dspCompanyType" column="dsp_company_type"/>
+		<result property="dspCompany" column="dsp_company"/>
+		<result property="totalAmount" column="total_amount"/>
+	</resultMap>
+	
+	<select id="getEvalDepList" resultMap="gicls070evalDepMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (gicl_eval_dep_dtl_pkg.get_eval_dep_listing(#evalId#))
+		                  <isEqual property="sortColumn" compareValue="lossExpCd">
+			              		ORDER BY loss_exp_cd
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="partDesc">
+			              		ORDER BY part_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="dedRt">
+			              		ORDER BY ded_rt
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="partAmt">
+			              		ORDER BY part_amt
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="dedAmt">
+			              		ORDER BY ded_amt
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (gicl_eval_dep_dtl_pkg.get_eval_dep_listing(#evalId#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<select id="getDepPayeeDtls" resultMap="depDetailPayeeMap" parameterClass="Integer">
+		SELECT * FROM TABLE(gicl_eval_dep_dtl_pkg.get_dep_payee_dtls(#evalId#))	
+	</select>
+	
+	<select id="getInitialDepPayeeDtls" resultMap="depDetailPayeeMap" parameterClass="Integer">
+		SELECT * FROM TABLE(gicl_eval_dep_dtl_pkg.get_initial_dep_payee_dtls(#evalId#))	
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="depCompanyLOVMap">
+		<result property="dspCompany" column="dsp_company"/>
+		<result property="payeeCd" column="payee_cd"/>
+		<result column="rownum_" 	property="rowNum" />
+		<result column="count_"		property="rowCount"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="depCompanyTypeLOVMap">
+		<result property="dspCompanyType" column="dsp_company_type"/>
+		<result property="payeeTypeCd" column="payee_type_cd"/>
+		<result column="rownum_" 	property="rowNum" />
+		<result column="count_"		property="rowCount"/>
+	</resultMap>
+	
+	<select id="getDepCompanyLOV" resultMap="depCompanyLOVMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (gicl_eval_dep_dtl_pkg.get_dep_com_lov(#evalId#,#findText#))
+		                  <isEqual property="sortColumn" compareValue="dspCompany">
+			              		ORDER BY dsp_Company
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (gicl_eval_dep_dtl_pkg.get_dep_com_lov(#evalId#,#findText#))
+			             
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getDepCompanyTypeLOV" resultMap="depCompanyTypeLOVMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (gicl_eval_dep_dtl_pkg.get_dep_com_type_lov(#evalId#,#findText#))
+		                  <isEqual property="sortColumn" compareValue="dspCompany">
+			              		ORDER BY dsp_Company
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (gicl_eval_dep_dtl_pkg.get_dep_com_type_lov(#evalId#,#findText#))
+			             
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<parameterMap class="java.util.HashMap" id="checkDepVatMap">
+		<parameter property="evalId" 			jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="lossExpCd"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="payeeCdOld" 		jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="OUT"/>
+		<parameter property="payeeTypeCdOld"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="vatExist"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="checkDepVat" parameterMap="checkDepVatMap">
+		BEGIN
+			gicl_eval_dep_dtl_pkg.check_dep_vat(?,?,?,?,?);
+		END;
+	</procedure>
+	
+	<procedure id="deleteEvalDep" parameterClass="map">
+		BEGIN
+			gicl_eval_dep_dtl_pkg.delete_eval_dep(#evalId#, #lossExpCd#);
+		END;
+	</procedure>
+	
+	<procedure id="setEvalDep" parameterClass="map">
+		BEGIN
+			gicl_eval_dep_dtl_pkg.set_eval_dep(#evalId#, #dedAmt#,#dedRt#, #payeeTypeCd#,#payeeCd#, #itemNo#,#lossExpCd#);
+		END;
+	</procedure>
+	
+	<select id="applyDepreciation" parameterClass="map" resultClass="String">
+		SELECT gicl_eval_dep_dtl_pkg.apply_depreciation(#evalId#, #clmSublineCd#,#polSublineCd#, #claimId#,#itemNo#, #payeeNo#,#payeeClassCd#,
+			#tpSw#,#mainEvalVatExist#,#userId#
+		) from dual
+	</select>
+
+</sqlMap>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap>
+	<typeAlias alias="GIXXCoInsurer" type="com.geniisys.gixx.entity.GIXXCoInsurer" />
+	
+	<resultMap id="getGIXXCoInsurerMap" class="GIXXCoInsurer" extends="BaseEntity.TableGridResultMap">
+		<result column="EXTRACT_ID"			property="extractId" />
+		<result column="CO_RI_CD"			property="coRiCd" />
+		<result column="CO_RI_SHR_PCT"		property="coRiShrPct" />
+		<result column="CO_RI_PREM_AMT"		property="coRiPremAmt" />
+		<result column="CO_RI_TSI_AMT"		property="coRiTsiAmt" />
+		<result column="RI_SNAME"			property="riSname" />
+	</resultMap>
+	
+	<select id="getGIXXCoInsurerList" resultMap="getGIXXCoInsurerMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, b.count_, a.*
+		  		  FROM (SELECT * FROM TABLE(gixx_co_insurer_pkg.get_co_ins_list(#extractId#))) a,
+		  		  	   (SELECT count(*) count_ FROM TABLE(gixx_co_insurer_pkg.get_co_ins_list(#extractId#))) b)
+		 WHERE rownum_ BETWEEN NVL(#from#, rownum_) AND NVL(#to#, rownum_)
+	</select>
+</sqlMap>

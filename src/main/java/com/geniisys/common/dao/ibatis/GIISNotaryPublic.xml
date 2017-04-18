@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISNotaryPublic">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIISNotaryPublic" type="com.geniisys.common.entity.GIISNotaryPublic"/>
+	
+	<resultMap class="java.util.HashMap" id="giiss016NotaryPublicListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="np_no" property="npNo" />
+		<result column="np_name" property="npName" />
+		<result column="ptr_no" property="ptrNo" />
+		<result column="issue_date" property="issueDate" />
+		<result column="expiry_date" property="expiryDate" />
+		<result column="place_issue" property="placeIssue" />
+		<result column="user_id" property="userId" />
+		<result column="last_update" property="lastUpdate" />
+		<result column="remarks" property="remarks" />
+	</resultMap>
+	
+	<select id="getGIISS016NotaryPublicList" resultMap="giiss016NotaryPublicListResultMap" parameterClass="java.util.HashMap">
+		SELECT *
+  		  FROM (SELECT rownum rownum_,b.count_,a.*
+          		  FROM (SELECT * FROM TABLE(GIISS016_PKG.get_rec_list)
+          		  <isNotNull property="filter">
+			      	WHERE 1=1
+           			<isNotEmpty prepend="AND" property="npNo">
+						np_no = #npNo#
+					</isNotEmpty>
+					<isNotEmpty prepend="AND" property="npName">
+						UPPER(np_name) LIKE UPPER(#npName#)
+					</isNotEmpty>
+					<isNotEmpty prepend="AND" property="ptrNo">
+						UPPER(ptr_no) LIKE UPPER(#ptrNo#)
+					</isNotEmpty>
+					<isNotEmpty prepend="AND" property="issueDate">
+						TRUNC(issue_date) = TO_DATE(#issueDate#, 'mm-dd-yyyy')
+					</isNotEmpty>
+					<isNotEmpty prepend="AND" property="expiryDate">
+						TRUNC(expiry_date) = TO_DATE(#expiryDate#, 'mm-dd-yyyy')
+					</isNotEmpty>
+					<isNotEmpty prepend="AND" property="placeIssue">
+						UPPER(place_issue) LIKE UPPER(#placeIssue#)
+					</isNotEmpty>
+                  </isNotNull>
+          		  <isNotNull property="sortColumn">
+          		  	<isEqual property="sortColumn" compareValue="npNo">
+						ORDER BY np_no
+					</isEqual>
+					<isEqual property="sortColumn" compareValue="npName">
+						ORDER BY np_name
+					</isEqual>
+					<isEqual property="sortColumn" compareValue="ptrNo">
+						ORDER BY ptr_no
+					</isEqual>
+					<isEqual property="sortColumn" compareValue="issueDate">
+						ORDER BY issue_date
+					</isEqual>
+					<isEqual property="sortColumn" compareValue="expiryDate">
+						ORDER BY expiry_date
+					</isEqual>
+					<isEqual property="sortColumn" compareValue="placeIssue">
+						ORDER BY place_issue
+					</isEqual>
+					<isEqual property="ascDescFlg" compareValue="ASC">
+						ASC
+					</isEqual>
+					<isEqual property="ascDescFlg" compareValue="DESC">
+						DESC
+					</isEqual>
+				  </isNotNull>) a,
+               (SELECT count(*) count_ FROM TABLE(GIISS016_PKG.get_rec_list)
+               <isNotNull property="filter">
+			      	WHERE 1=1
+           			<isNotEmpty prepend="AND" property="npNo">
+						np_no = #npNo#
+					</isNotEmpty>
+					<isNotEmpty prepend="AND" property="npName">
+						UPPER(np_name) LIKE UPPER(#npName#)
+					</isNotEmpty>
+					<isNotEmpty prepend="AND" property="ptrNo">
+						UPPER(ptr_no) LIKE UPPER(#ptrNo#)
+					</isNotEmpty>
+					<isNotEmpty prepend="AND" property="issueDate">
+						TRUNC(issue_date) = TO_DATE(#issueDate#, 'mm-dd-yyyy')
+					</isNotEmpty>
+					<isNotEmpty prepend="AND" property="expiryDate">
+						TRUNC(expiry_date) = TO_DATE(#expiryDate#, 'mm-dd-yyyy')
+					</isNotEmpty>
+					<isNotEmpty prepend="AND" property="placeIssue">
+						UPPER(place_issue) LIKE UPPER(#placeIssue#)
+					</isNotEmpty>
+                  </isNotNull>) b)
+ 		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="setGiiss016" parameterClass="GIISNotaryPublic">
+	    DECLARE
+	    	v_rec giis_notary_public%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.np_no := #npNo#;
+			v_rec.np_name := #npName#;
+			v_rec.ptr_no := #ptrNo#;
+			v_rec.issue_date := #issueDate#;
+			v_rec.expiry_date := #expiryDate#;
+			v_rec.place_issue := #placeIssue#;
+			v_rec.remarks := #remarks#;
+			v_rec.user_id := #userId#;
+ 			
+ 			giiss016_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="giiss016ValDelRec" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss016_pkg.val_del_rec(#npNo#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="giiss016DelRec" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss016_pkg.del_rec(#npNo#);
+ 		END;
+ 	</procedure>
+	
+</sqlMap>

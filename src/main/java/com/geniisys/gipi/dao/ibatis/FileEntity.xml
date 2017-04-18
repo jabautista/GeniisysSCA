@@ -1,0 +1,404 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="FileEntity">
+	
+	<typeAlias alias="fileEntity" type="com.geniisys.gipi.entity.FileEntity" />
+	
+	<resultMap id="gipiWPicture" class="fileEntity">
+		<result column="PAR_ID" 		property="id" />
+		<result column="ITEM_NO" 		property="itemNo" />
+		<result column="FILE_NAME" 		property="fileName" />
+		<result column="FILE_TYPE" 		property="fileType" />
+		<result column="FILE_EXT" 		property="fileExt" />
+		<result column="REMARKS" 		property="remarks" />
+	</resultMap>
+	
+	<resultMap id="gipiPicture" class="fileEntity">
+		<result column="POLICY_ID" 		property="id" />
+		<result column="ITEM_NO" 		property="itemNo" />
+		<result column="FILE_NAME" 		property="fileName" />
+		<result column="FILE_TYPE" 		property="fileType" />
+		<result column="FILE_EXT" 		property="fileExt" />
+		<result column="REMARKS" 		property="remarks" />
+		<result column="POL_FILE_NAME" 	property="polFileName" />
+		<result column="ARC_EXT_DATA" 	property="arcExtData" />
+	</resultMap>
+	
+	<resultMap id="gixxPicture" class="fileEntity">
+		<result column="EXTRACT_ID" 	property="id" />
+		<result column="ITEM_NO" 		property="itemNo" />
+		<result column="FILE_NAME" 		property="fileName" />
+		<result column="FILE_TYPE" 		property="fileType" />
+		<result column="FILE_EXT" 		property="fileExt" />
+		<result column="REMARKS" 		property="remarks" />
+		<result column="POL_FILE_NAME" 	property="polFileName" />
+	</resultMap>
+	
+	<resultMap id="gipiInspPicture" class="fileEntity">
+		<result column="INSP_NO"		property="id" />
+		<result column="ITEM_NO"		property="itemNo" />
+		<result column="FILE_NAME" 		property="fileName" />
+		<result column="FILE_TYPE" 		property="fileType" />
+		<result column="FILE_EXT" 		property="fileExt" />
+		<result column="REMARKS" 		property="remarks" />
+	</resultMap>
+	
+	<resultMap id="giclPictures" class="fileEntity" >
+		<result column="CLAIM_ID" 		property="id" />
+		<result column="ITEM_NO" 		property="itemNo" />
+		<result column="FILE_NAME" 		property="fileName" />
+		<result column="FILE_EXT" 		property="fileExt" />
+		<result column="FILE_TYPE" 		property="fileType" />
+		<result column="REMARKS" 		property="remarks" />
+	</resultMap>
+	
+	<resultMap id="gipiQuotePicturesResultMap" class="FileEntity">
+		<result column="QUOTE_ID" 		property="id" />
+		<result column="ITEM_NO" 		property="itemNo" />
+		<result column="FILE_NAME" 		property="fileName" />
+		<result column="FILE_EXT" 		property="fileExt" />
+		<result column="FILE_TYPE" 		property="fileType" />
+		<result column="REMARKS" 		property="remarks" />
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="gipiQuotePicturesTGResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="QUOTE_ID" 		property="id" />
+		<result column="ITEM_NO" 		property="itemNo" />
+		<result column="FILE_NAME" 		property="fileName" />
+		<result column="FILE_EXT" 		property="fileExt" />
+		<result column="FILE_TYPE" 		property="fileType" />
+		<result column="REMARKS" 		property="remarks" />
+		<result column="REAL_FILE_NAME" property="realFileName" />
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="gipiInspPicturesTGResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="INSP_NO"		property="id" />
+		<result column="ITEM_NO"		property="itemNo" />
+		<result column="FILE_NAME" 		property="fileName" />
+		<result column="FILE_TYPE" 		property="fileType" />
+		<result column="FILE_EXT" 		property="fileExt" />
+		<result column="REMARKS" 		property="remarks" />
+		<result column="SKETCH_TAG"		property="sketchTag" />
+		<result column="REAL_FILE_NAME" property="realFileName" />
+	</resultMap>
+	
+	<select id="selectGIPIWPicture" resultMap="gipiWPicture">
+		SELECT * 
+		  FROM TABLE(GIPI_WPICTURES_PKG.get_gipi_wpicture(#parId#, #itemNo#)) 
+	</select>
+	
+	<select id="selectGIPIPicture" resultMap="gipiPicture">
+		SELECT * 
+		  FROM TABLE(GIPI_PICTURES_PKG.get_gipi_picture(#policyId#, #itemNo#)) 
+	</select>
+	
+	<select id="selectGIXXPicture" resultMap="gixxPicture">
+		SELECT * 
+		  FROM TABLE(GIXX_PICTURES_PKG.get_gixx_picture(#extractId#, #itemNo#)) 
+	</select>
+	
+	<select id="selectGIPIInspPicture" resultMap="gipiInspPicture">
+		SELECT *
+		  FROM TABLE(GIPI_INSP_PICTURES_PKG.get_gipi_insp_pictures(#inspNo#, #itemNo#))
+	</select>
+	
+	<select id="selectGICLPictures" resultMap="giclPictures">
+		SELECT *
+		  FROM TABLE(GICL_PICTURES_PKG.get_gicl_pictures(#claimId#, #itemNo#))
+	</select>
+	
+	<select id="selectGipiQuotePictures" resultMap="gipiQuotePicturesResultMap">
+		SELECT *
+		  FROM TABLE(gipi_quote_pictures_pkg.get_gipi_quote_picture3(#quoteId#, #itemNo#))
+	</select>
+	
+	<procedure id="saveGIPIWPicture" parameterClass="fileEntity">
+		DECLARE
+			wpicture GIPI_WPICTURES%ROWTYPE;
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			
+			wpicture.PAR_ID		:= #id#;
+			wpicture.ITEM_NO	:= #itemNo#;
+			wpicture.FILE_NAME	:= #fileName#;
+			wpicture.FILE_TYPE	:= #fileType#;
+			wpicture.FILE_EXT	:= #fileExt#;
+			wpicture.REMARKS	:= #remarks#;
+			wpicture.USER_ID	:= #userId#;
+			
+			GIPI_WPICTURES_PKG.set_gipi_wpicture(wpicture);
+		END;
+	</procedure>
+	
+	<procedure id="saveGIPIPicture" parameterClass="fileEntity">
+		DECLARE		
+			picture GIPI_PICTURES%ROWTYPE;
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			
+			picture.POLICY_ID	  := #id#;
+			picture.ITEM_NO		  := #itemNo#;
+			picture.FILE_NAME	  := #fileName#;
+			picture.FILE_TYPE	  := #fileType#;
+			picture.FILE_EXT	  := #fileExt#;
+			picture.REMARKS	   	  := #remarks#;
+			picture.POL_FILE_NAME := #polFileName#;
+			picture.ARC_EXT_DATA  := #arcExtData#;
+			picture.USER_ID		  := #userId#;
+			
+			GIPI_PICTURES_PKG.set_gipi_picture(picture);
+		END;
+	</procedure>
+	
+	<procedure id="saveGIXXPicture" parameterClass="fileEntity">
+		DECLARE
+			xpicture GIXX_PICTURES%ROWTYPE;
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			
+			xpicture.EXTRACT_ID		:= #id#;
+			xpicture.ITEM_NO		:= #itemNo#;
+			xpicture.FILE_NAME		:= #fileName#;
+			xpicture.FILE_TYPE		:= #fileType#;
+			xpicture.FILE_EXT		:= #fileExt#;
+			xpicture.REMARKS	   	:= #remarks#;
+			xpicture.POL_FILE_NAME 	:= #polFileName#;
+			xpicture.USER_ID		:= #userId#;
+			
+			GIXX_PICTURES_PKG.set_gixx_picture(xpicture);
+		END;
+	</procedure>
+	
+	<procedure id="saveGIPIInspPicture" parameterClass="fileEntity">
+		DECLARE
+			insppicture GIPI_INSP_PICTURES%ROWTYPE;
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			
+			insppicture.INSP_NO			:= #id#;
+			insppicture.ITEM_NO			:= #itemNo#;
+			insppicture.FILE_NAME		:= #fileName#;
+			insppicture.FILE_TYPE		:= #fileType#;
+			insppicture.FILE_EXT		:= #fileExt#;
+			insppicture.REMARKS	   		:= #remarks#;
+			insppicture.USER_ID			:= #userId#;
+			
+			GIPI_INSP_PICTURES_PKG.set_gipi_insp_pictures(insppicture);
+		END;
+	</procedure>
+	
+	<procedure id="saveGICLPictures" parameterClass="fileEntity">
+		DECLARE
+			gicl_pictures_type GICL_PICTURES%ROWTYPE;
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			
+			gicl_pictures_type.CLAIM_ID			:= #id#;
+			gicl_pictures_type.ITEM_NO			:= #itemNo#;
+			gicl_pictures_type.FILE_NAME		:= #fileName#;
+			gicl_pictures_type.FILE_TYPE		:= #fileType#;
+			gicl_pictures_type.FILE_EXT			:= #fileExt#;
+			gicl_pictures_type.REMARKS	   		:= #remarks#;
+			gicl_pictures_type.USER_ID			:= #userId#;
+			
+			GICL_PICTURES_PKG.set_gicl_pictures(gicl_pictures_type);
+		END;
+	</procedure>
+	
+	<procedure id="saveGipiQuotePictures" parameterClass="fileEntity">
+		DECLARE
+			quote_pic_type GIPI_QUOTE_PICTURES%ROWTYPE;
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			
+			quote_pic_type.QUOTE_ID		:= #id#;
+			quote_pic_type.ITEM_NO		:= #itemNo#;
+			quote_pic_type.FILE_NAME	:= #fileName#;
+			quote_pic_type.FILE_TYPE	:= #fileType#;
+			quote_pic_type.FILE_EXT		:= #fileExt#;
+			quote_pic_type.REMARKS		:= #remarks#;
+			quote_pic_type.USER_ID		:= #userId#;
+			quote_pic_type.LAST_UPDATE	:= SYSDATE;
+			
+			GIPI_QUOTE_PICTURES_PKG.set_gipi_quote_pic(quote_pic_type);
+		END;
+	</procedure>
+	
+	<procedure id="saveGipiInspPictures" parameterClass="fileEntity">
+		DECLARE
+			gipi_insp_pictures_type GIPI_INSP_PICTURES%ROWTYPE;
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			
+			gipi_insp_pictures_type.INSP_NO		:= #id#;
+			gipi_insp_pictures_type.ITEM_NO		:= #itemNo#;
+			gipi_insp_pictures_type.FILE_NAME	:= #fileName#;
+			gipi_insp_pictures_type.FILE_TYPE	:= #fileType#;
+			gipi_insp_pictures_type.FILE_EXT	:= #fileExt#;
+			gipi_insp_pictures_type.REMARKS		:= #remarks#;
+			gipi_insp_pictures_type.SKETCH_TAG	:= #sketchTag#;
+			gipi_insp_pictures_type.USER_ID		:= #userId#;
+			gipi_insp_pictures_type.LAST_UPDATE	:= SYSDATE;
+			
+			GIPI_INSP_PICTURES_PKG.set_gipi_insp_pictures(gipi_insp_pictures_type);
+		END;
+	</procedure>
+	
+	<procedure id="deleteGipiQuotePictures" parameterClass="fileEntity">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			GIPI_QUOTE_PICTURES_PKG.del_gipi_quote_pic(#id#, #itemNo#, #fileName#);
+		END;
+	</procedure>
+	
+	<procedure id="deleteGipiInspPictures2" parameterClass="fileEntity">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			GIPI_INSP_PICTURES_PKG.del_gipi_insp_pictures2(#id#, #itemNo#, #fileName#);
+		END;
+	</procedure>
+	
+	<procedure id="deleteGIPIWPicture" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			GIPI_WPICTURES_PKG.del_gipi_wpicture(#parId#, #itemNo#, #fileName#);
+		END;
+	</procedure>
+	
+	<procedure id="deleteGIPIWPictures" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			GIPI_WPICTURES_PKG.del_gipi_wpictures(#parId#, #itemNo#);
+		END;
+	</procedure>
+	
+	<procedure id="deleteGIPIPictures" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			GIPI_PICTURES_PKG.del_gipi_pictures(#policyId#, #itemNo#);
+		END;
+	</procedure>
+	
+	<procedure id="deleteGIXXPictures" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			GIXX_WPICTURES_PKG.del_gixx_pictures(#extractId#, #itemNo#);
+		END;
+	</procedure>
+	
+	<procedure id="deleteGIPIInspPictures" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			GIPI_INSP_PICTURES_PKG.del_gipi_insp_pictures(#inspNo#, #itemNo#);
+		END;
+	</procedure>
+	
+	<procedure id="deleteGICLPictures" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			GICL_PICTURES_PKG.del_gicl_pictures(#claimId#, #itemNo#);
+		END;
+	</procedure>
+	
+	<!-- SR-5494 JET OCT-04-2016 -->
+	<resultMap id="gipiWPicture2ResultMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result property="id"			column="PAR_ID" />
+		<result property="itemNo"		column="ITEM_NO" />
+		<result property="fileName"		column="FILE_NAME" />
+		<result property="fileType"		column="FILE_TYPE" />
+		<result property="fileExt"		column="FILE_EXT" />
+		<result property="remarks"		column="REMARKS" />
+		<result property="realFileName"	column="REAL_FILE_NAME" />
+	</resultMap>
+	
+	<select id="selectGIPIWPicture2" resultMap="gipiWPicture2ResultMap">
+		SELECT *
+		  FROM ( SELECT ROWNUM rownum_, COUNT(1) OVER() count_, a.*
+	  			   FROM ( SELECT * 
+		  				    FROM TABLE(GIPI_WPICTURES_PKG.get_gipi_wpicture(#parId#, #itemNo#))		  				
+	  			   ) a
+		  )
+		WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap id="gipiPicture2ResultMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result property="id"			column="POLICY_ID" />
+		<result property="itemNo"		column="ITEM_NO" />
+		<result property="fileName"		column="FILE_NAME" />
+		<result property="fileType"		column="FILE_TYPE" />
+		<result property="fileExt"		column="FILE_EXT" />
+		<result property="remarks"		column="REMARKS" />
+		<result property="realFileName"	column="REAL_FILE_NAME" />
+	</resultMap>
+	
+	<select id="selectGIPIPicture2" resultMap="gipiPicture2ResultMap">
+		SELECT *
+		  FROM ( SELECT ROWNUM rownum_, COUNT(1) OVER() count_, a.*
+	  			   FROM ( SELECT * 
+		  				    FROM TABLE(GIPI_PICTURES_PKG.get_gipi_picture(#policyId#, #itemNo#))  				
+	  			   ) a
+		  )
+		WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="deleteGIPIWPicture2" parameterClass="fileEntity">
+		BEGIN
+			GIPI_WPICTURES_PKG.del_gipi_wpicture(#id#, #itemNo#, #fileName#);
+		END;
+	</procedure>
+	
+	<procedure id="deleteGIPIPicture2" parameterClass="fileEntity">
+		BEGIN
+			GIPI_PICTURES_PKG.del_gipi_picture(#id#, #itemNo#, #fileName#);
+		END;
+	</procedure>
+	
+	<resultMap id="giclPicture2ResultMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result property="id"			column="CLAIM_ID" />
+		<result property="itemNo"		column="ITEM_NO" />
+		<result property="fileName"		column="FILE_NAME" />
+		<result property="fileType"		column="FILE_TYPE" />
+		<result property="fileExt"		column="FILE_EXT" />
+		<result property="remarks"		column="REMARKS" />
+		<result property="realFileName"	column="REAL_FILE_NAME" />
+	</resultMap>
+	
+	<select id="selectGICLPictures2" resultMap="giclPicture2ResultMap">
+		SELECT *
+		  FROM ( SELECT ROWNUM rownum_, COUNT(1) OVER() count_, a.*
+	  			   FROM ( SELECT * 
+		  				    FROM TABLE(GICL_PICTURES_PKG.get_gicl_pictures(#claimId#, #itemNo#))		  				
+	  			   ) a
+		  )
+		WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="selectGipiQuotePicturesTG" resultMap="gipiQuotePicturesTGResultMap">
+		SELECT *
+		  FROM ( SELECT ROWNUM rownum_, COUNT(1) OVER() count_, a.*
+	  			   FROM ( SELECT *
+		  					FROM TABLE(gipi_quote_pictures_pkg.get_gipi_quote_picture3(#quoteId#, #itemNo#))
+	  			   ) a
+		  )
+		WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="selectGipiInspPicturesTG" resultMap="gipiInspPicturesTGResultMap">
+		SELECT *
+		  FROM ( SELECT ROWNUM rownum_, COUNT(1) OVER() count_, a.*
+	  			   FROM ( SELECT *
+		  					FROM TABLE(gipi_insp_pictures_pkg.get_gipi_insp_pictures2(#inspNo#, #itemNo#))
+	  			   ) a
+		  )
+		WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="deleteGICLPicture2" parameterClass="fileEntity">
+		BEGIN
+			GICL_PICTURES_PKG.del_gicl_picture(#id#, #itemNo#, #fileName#);
+		END;
+	</procedure>
+	
+</sqlMap>

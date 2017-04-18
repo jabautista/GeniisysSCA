@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISMvPremType">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<resultMap class="java.util.HashMap" id="GIISMvPremTypeMap" extends="BaseEntity.TableGridResultMap">
+		<result property="mvTypeCd" 		column="MV_TYPE_CD"/>
+		<result property="mvPremTypeCd" 	column="MV_PREM_TYPE_CD"/>
+		<result property="mvPremTypeDesc" 	column="MV_PREM_TYPE_DESC"/>
+		<result property="remarks" 			column="REMARKS"/>
+	</resultMap>
+	
+	<select id="getMvPremTypeLOV" resultMap="GIISMvPremTypeMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(GIIS_MV_PREM_TYPE_PKG.get_giis_mv_prem_type_list(#mvTypeCd#, #findText#))
+						  <isNotNull property="sortColumn">			
+							<isEqual property="sortColumn" compareValue="mvPremTypeCd">
+								ORDER BY mv_prem_type_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="mvPremTypeDesc">
+								ORDER BY mv_prem_type_desc
+							</isEqual>							
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(GIIS_MV_PREM_TYPE_PKG.get_giis_mv_prem_type_list(#mvTypeCd#, #findText#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+</sqlMap>

@@ -1,0 +1,1 @@
+drop trigger CPI.GICL_CLAIMS_TBXXU

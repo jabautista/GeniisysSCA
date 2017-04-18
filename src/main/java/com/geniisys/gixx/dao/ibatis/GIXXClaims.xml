@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap>
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIXXClaims" type="com.geniisys.gixx.entity.GIXXClaims" />
+	
+	<resultMap id="getGIXXClaimsMap" class="GIXXClaims" >
+		<result column="EXTRACT_ID"			property="extractId" />
+		<result column="CLAIM_ID"			property="claimId" />
+		<result column="LINE_CD"			property="lineCd" />
+		<result column="SUBLINE_CD"			property="sublineCd" />
+		<result column="CLM_YY"				property="clmYy" />
+		<result column="CLM_SEQ_NO"			property="clmSeqNo" />
+		<result column="ISS_CD"				property="issCd" />
+		<!-- <result column="CLM_STAT_CD"		property="clmStatCd" /> -->
+		<result column="CLM_SETL_DATE"		property="claimSettlementDate" />
+		<result column="CLM_FILE_DATE"		property="claimFileDate" />
+		<result column="LOSS_DATE"			property="lossDate" />
+		<result column="LOSS_PD_AMT"		property="lossPdAmt" />
+		<result column="LOSS_RES_AMT"		property="lossResAmt" />
+		<result column="EXP_PD_AMT"			property="expPdAmt" />
+		<!-- <result column="RI_CD"				property="riCd" /> -->
+		<!-- <result column="USER_ID"			property="userId" /> -->
+		<!-- <result column="ENTRY_DATE"			property="entryDate" />
+		<result column="LOSS_LOC1"			property="lossLoc1" />
+		<result column="LOSS_LOC2"			property="lossLoc2" />
+		<result column="LOSS_LOC3"			property="lossLoc3" />
+		<result column="IN_HOU_ADJ"			property="inHouAdj" />
+		<result column="CLM_CONTROL"		property="clmControl" />
+		<result column="CLM_COOP"			property="clmCoop" />
+		<result column="ASSD_NO"			property="assdNo" />
+		<result column="POL_EFF_DATE"		property="polEffDate" />
+		<result column="RECOVERY_SW"		property="recoverySw" />
+		<result column="CSR_NO"				property="csrNo" />
+		<result column="LOSS_CAT_CD"		property="lossCatCd" />
+		<result column="INTM_NO"			property="intmNo" />
+		<result column="CLM_AMT"			property="clmAmt" />
+		<result column="LOSS_DTLS"			property="lossDtls" />
+		<result column="OBLIGEE_NO"			property="obligeeNo" />
+		<result column="EXP_RES_AMT"		property="expResAmt" />
+		<result column="ASSURED_NAME"		property="assuredName" /> -->
+		
+		<result column="CLAIM_NO"			property="claimNumber" />
+		<result column="CLAIM_AMT"			property="claimAmount" />
+		<result column="PAID_AMT"			property="paidAmount" />
+		<result property="rowNum"			column="rownum_"/>
+		<result property="rowCount"			column="count_"/>
+	</resultMap>
+	
+	<select id="getGIXXRelatedClaims" resultMap="getGIXXClaimsMap" parameterClass="java.util.HashMap">
+		SELECT *       
+          FROM (SELECT rownum rownum_ , b.count_, a.*     
+                  FROM (SELECT * FROM TABLE(gixx_claims_pkg.get_gixx_claims(#extractId#))) a,
+	               	   (SELECT count(*) count_ FROM TABLE(gixx_claims_pkg.get_gixx_claims(#extractId#))) b)         
+	     WHERE rownum_ BETWEEN NVL(#from#,rownum_) AND NVL(#to#,rownum_)
+	</select>
+	
+</sqlMap>

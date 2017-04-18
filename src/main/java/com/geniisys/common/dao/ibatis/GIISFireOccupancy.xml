@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISFireOccupancy">
+
+ 	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIISFireOccupancy" type="com.geniisys.fire.entity.GIISFireOccupancy"/>	
+	
+	<resultMap id="GIISFireOccupancyLOVResultMap" class="com.geniisys.fire.entity.GIISFireOccupancy" extends="BaseEntity.TableGridResultMap">
+		<result column="occupancy_cd" 	property="occupancyCd"/>
+		<result column="occupancy_desc" 	property="occupancyDesc"/>
+	</resultMap>
+	
+		<resultMap class="GIISFireOccupancy" id="giisFireOccupancyListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="occupancy_cd"   property="occupancyCd"/>	
+		<result column="occupancy_desc" property="occupancyDesc"/>
+		<result column="active_tag"   	property="activeTag"/>
+		<result column="remarks"     	property="remarks"/>
+		<result column="user_id"     	property="userId"/>
+		<result column="last_update"    property="lastUpdate"/>
+	</resultMap>
+	
+	<select id="getGIISFireOccupancyLOV" resultMap="GIISFireOccupancyLOVResultMap">		
+	  	SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giis_fire_occupancy_pkg.get_fire_occupancy_listing(#findText#))
+		                  <isEqual property="sortColumn" compareValue="occupancyDesc">
+			              		ORDER BY occupancy_desc
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giis_fire_occupancy_pkg.get_fire_occupancy_listing(#findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiiss097RecList" resultMap="giisFireOccupancyListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss097_pkg.get_rec_list(#occupancyCd#, #occupancyDesc#, #activeTag#))
+		                  <isEqual property="sortColumn" compareValue="occupancyCd">
+			              		ORDER BY occupancy_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="occupancyDesc">
+			              		ORDER BY occupancy_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="activeTag">
+			              		ORDER BY active_tag
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss097_pkg.get_rec_list(#occupancyCd#, #occupancyDesc#, #activeTag#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+		<select id="getGiiss097AllRec" resultMap="giisFireOccupancyListResultMap">
+		SELECT rownum rownum_,
+			   '1' count_,
+			   a.*
+					FROM (SELECT * 
+							FROM TABLE (giiss097_pkg.get_rec_list (#occupancyCd#, #occupancyDesc#, #activeTag#))) a
+	</select>
+	
+	<procedure id="setFireOccupancy" parameterClass="GIISFireOccupancy">
+	    DECLARE
+	    	v_rec giis_fire_occupancy%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.occupancy_cd := #occupancyCd#;
+ 			v_rec.occupancy_desc := #occupancyDesc#;
+ 			v_rec.active_tag := #activeTag#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			giiss097_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteFireOccupancy" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss097_pkg.val_del_rec(#recId#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddFireOccupancy" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss097_pkg.val_add_rec(#occupancyCd#,#occupancyDesc#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delFireOccupancy" parameterClass="java.lang.String">
+		BEGIN
+ 			giiss097_pkg.del_rec(#occupancyCd#);
+ 		END;
+ 	</delete>
+	
+</sqlMap>

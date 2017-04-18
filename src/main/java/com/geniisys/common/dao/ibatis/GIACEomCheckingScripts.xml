@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIACEomCheckingScripts">
+    
+    <typeAlias alias="giacEomCheckingScripts" type="com.geniisys.common.entity.GIACEomCheckingScripts"/>
+    
+    <resultMap class="giacEomCheckingScripts" id="giacEomCheckingScriptsResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="eom_script_no"     			property="eomScriptNo"/>
+		<result column="eom_script_title"     		property="eomScriptTitle"/>
+		<result column="eom_script_text_1"     		property="eomScriptText1"/>
+		<result column="eom_script_text_2"     		property="eomScriptText2"/>
+		<result column="eom_script_soln"     		property="eomScriptSoln"/>
+		<result column="user_id"     				property="userId"/>
+		<result column="last_update" 				property="lastUpdate"/>
+		<result column="remarks"     				property="remarks"/>
+	</resultMap>
+	
+    <select id="getGiacs352RecList" resultMap="giacEomCheckingScriptsResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giacs352_pkg.get_rec_list(#eomScriptNo#, #eomScriptTitle#, #eomScriptText1#, #eomScriptText2#, #eomScriptSoln#))
+		                  <isEqual property="sortColumn" compareValue="eomScriptNo">
+			              		ORDER BY eom_script_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="eomScriptTitle">
+			              		ORDER BY eom_script_title
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="eomScriptText1">
+			              		ORDER BY eom_script_text_1
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="eomScriptText2">
+			              		ORDER BY eom_script_text_2
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="eomScriptSoln">
+			              		ORDER BY eom_script_soln
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giacs352_pkg.get_rec_list(#eomScriptNo#, #eomScriptTitle#, #eomScriptText1#, #eomScriptText2#, #eomScriptSoln#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+    
+    <procedure id="setEomCheckingScript" parameterClass="giacEomCheckingScripts">
+	    DECLARE
+	    	v_rec giac_eom_checking_scripts%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.eom_script_no := #eomScriptNo#;
+ 			v_rec.eom_script_title := #eomScriptTitle#;
+ 			v_rec.eom_script_text_1 := #eomScriptText1#;
+ 			v_rec.eom_script_text_2 := #eomScriptText2#;
+ 			v_rec.eom_script_soln := #eomScriptSoln#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			giacs352_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+    
+    <delete id="delEomCheckingScript" parameterClass="giacEomCheckingScripts">
+		BEGIN
+ 			giacs352_pkg.del_rec(#eomScriptNo#);
+ 		END;
+ 	</delete>
+</sqlMap>

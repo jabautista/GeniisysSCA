@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GICLR034_RI_RECOVERY_SHARE" pageWidth="595" pageHeight="842" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="DejaVu Serif 7" isDefault="true" isBlankWhenNull="true" fontName="SansSerif" fontSize="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false"/>
+	<parameter name="P_CLAIM_ID" class="java.lang.Integer"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String">
+		<defaultValueExpression><![CDATA["C:\\GENIISYS_JASPER_REPORTS\\Geniisys\\src\\com\\geniisys\\claims\\reports\\"]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT *
+  FROM TABLE(giclr034_pkg.get_ri_recovery_share($P{P_CLAIM_ID}))
+ ORDER BY share_type]]>
+	</queryString>
+	<field name="SHARE_TYPE" class="java.lang.String"/>
+	<field name="SHARE_TYPE_DESC" class="java.lang.String"/>
+	<variable name="V_SHORT_NAME" class="java.lang.String"/>
+	<variable name="V_TOTAL_RECOVERY" class="java.math.BigDecimal"/>
+	<variable name="V_GRAND_TOTAL_RECOVERY" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$V{V_TOTAL_RECOVERY}]]></variableExpression>
+		<initialValueExpression><![CDATA[]]></initialValueExpression>
+	</variable>
+	<detail>
+		<band height="27" splitType="Stretch">
+			<textField isStretchWithOverflow="true">
+				<reportElement x="0" y="0" width="59" height="12"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{SHARE_TYPE_DESC}]]></textFieldExpression>
+			</textField>
+			<subreport isUsingCache="true" runToBottom="false">
+				<reportElement x="59" y="0" width="536" height="12"/>
+				<subreportParameter name="P_SHARE_TYPE">
+					<subreportParameterExpression><![CDATA[$F{SHARE_TYPE}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_CLAIM_ID">
+					<subreportParameterExpression><![CDATA[$P{P_CLAIM_ID}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<returnValue subreportVariable="V_SHORT_NAME" toVariable="V_SHORT_NAME"/>
+				<returnValue subreportVariable="V_TOTAL_RECOVERY" toVariable="V_TOTAL_RECOVERY"/>
+				<returnValue subreportVariable="V_TOTAL_RECOVERY" toVariable="V_GRAND_TOTAL_RECOVERY" calculation="Sum"/>
+				<subreportExpression class="java.lang.String"><![CDATA[$P{SUBREPORT_DIR} + "GICLR034_RI_RECOVERY.jasper"]]></subreportExpression>
+			</subreport>
+			<staticText>
+				<reportElement positionType="Float" x="0" y="14" width="204" height="12"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[TOTAL RECOVERIES PER TYPE]]></text>
+			</staticText>
+			<textField evaluationTime="Band" pattern="#,##0.00">
+				<reportElement positionType="Float" x="223" y="14" width="65" height="12"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_TOTAL_RECOVERY}]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Band">
+				<reportElement positionType="Float" x="204" y="14" width="19" height="12"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$V{V_SHORT_NAME}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<summary>
+		<band height="12">
+			<textField evaluationTime="Report" pattern="#,##0.00">
+				<reportElement x="223" y="0" width="65" height="12"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_GRAND_TOTAL_RECOVERY}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="204" y="0" width="19" height="12"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$V{V_SHORT_NAME}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement positionType="Float" x="0" y="0" width="204" height="12"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[RECOVERIES GRAND TOTAL]]></text>
+			</staticText>
+		</band>
+	</summary>
+</jasperReport>

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPICargo">
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIPICargo" type="com.geniisys.gipi.entity.GIPICargo"/>
+	
+	<resultMap class="GIPICargo" id="GIPICargoResultMap">
+		<result property="policyId" 			column="POLICY_ID"/>
+		<result property="itemNo"				column="ITEM_NO" />		
+		<result property="printTag"				column="PRINT_TAG" />
+		<result property="vesselCd"				column="VESSEL_CD" />
+		<result property="geogCd"				column="GEOG_CD" />
+		<result property="cargoClassCd"			column="CARGO_CLASS_CD" />
+		<result property="cargoClassDesc"		column="CARGO_CLASS_DESC" />
+		<result property="voyageNo"				column="VOYAGE_NO" />
+		<result property="blAwb"				column="BL_AWB" />
+		<result property="origin"				column="ORIGIN" />
+		<result property="destn"				column="DESTN" />
+		<result property="etd"					column="ETD" />
+		<result property="eta"					column="ETA" />
+		<result property="cargoType"			column="CARGO_TYPE" />
+		<result property="deductText"			column="DEDUCT_TEXT" />
+		<result property="packMethod"			column="PACK_METHOD" />
+		<result property="transhipOrigin"		column="TRANSHIP_ORIGIN" />
+		<result property="transhipDestination"	column="TRANSHIP_DESTINATION" />
+		<result property="lcNo"					column="LC_NO" />		
+		<result property="invoiceValue"			column="INVOICE_VALUE" />
+		<result property="invCurrCd"			column="INV_CURR_CD" />
+		<result property="invCurrRt"			column="INV_CURR_RT" />
+		<result property="markupRate"			column="MARKUP_RATE" />
+		<result property="recFlagWCargo"			column="REC_FLAG_WCARGO" />
+		<result property="cargoTypeDesc" 		column="cargo_type_desc"/> <!-- robert 9.18.2012 -->
+	</resultMap>
+	
+	<resultMap class="GIPICargo" id="cargoInfoMap">
+		<result property="policyId" 			column="policy_id"/>
+		<result property="itemNo" 				column="item_no"/>
+		<result property="blAwb"			 	column="bl_awb"/>
+		<result property="destn" 				column="destn"/>
+		<result property="etd" 					column="etd"/>
+		<result property="eta" 					column="eta"/>
+		<result property="lcNo" 				column="lc_no"/>
+		<result property="origin" 				column="origin"/>
+		<result property="geogCd" 				column="geog_cd"/>
+		<result property="vesselCd" 			column="vessel_cd"/>
+		<result property="voyageNo" 			column="voyage_no"/>
+		<result property="printTag" 			column="print_tag"/>
+		<result property="cargoType" 			column="cargo_type"/>
+		<result property="packMethod" 			column="pack_method"/>
+		<result property="invCurrRt" 			column="inv_curr_rt"/>
+		<result property="markupRate" 			column="markup_rate"/>
+		<result property="deductText" 			column="deduct_text"/>
+		<result property="invoiceValue" 		column="invoice_value"/>
+		<result property="cargoClassCd" 		column="cargo_class_cd"/>
+		<result property="transhipOrigin" 		column="tranship_origin"/>
+		<result property="transhipDestination" 	column="tranship_destination"/>
+      
+        <result property="cargoClassDesc" 		column="cargo_class_desc"/>
+        <result property="cargoTypeDesc" 		column="cargo_type_desc"/>
+        <result property="geogDesc" 			column="geog_desc"/>
+        <result property="shortName" 			column="short_name"/>
+        <result property="vesselName" 			column="vessel_name"/>
+        <result property="printDesc" 			column="print_desc"/>
+        <result property="multiCarrier" 		column="multi_carrier"/>
+        <result property="itemTitle"			column="item_title"/>
+ 	</resultMap>
+	
+	<select id="getGIPICargoForEndt" resultMap="GIPICargoResultMap">
+	<!-- andrew - 07152015 - SR 19806 -->
+		SELECT policy_id, 		item_no, 				rec_flag rec_flag_wcargo, 	print_tag,
+			   vessel_cd, 		geog_cd, 				cargo_class_cd, 			voyage_no,
+			   bl_awb, 			origin, 				destn, 						etd,
+			   eta, 			cargo_type, 			deduct_text, 				pack_method,
+			   tranship_origin, tranship_destination,   lc_no, 						invoice_value,
+			   inv_curr_cd, 	inv_curr_rt,		    markup_rate,				cargo_class_desc, 
+			   cargo_type_desc
+		  FROM TABLE(GIPI_CARGO_PKG.GET_GIPI_CARGOS1(#policyId#, #itemNo#))
+	</select>
+	
+	<select id="getCargoInfo" resultMap="cargoInfoMap" parameterClass="java.util.HashMap">
+		SELECT * FROM TABLE (gipi_cargo_pkg.get_cargo_info(#policyId#,#itemNo#))
+	</select>	
+	
+</sqlMap>

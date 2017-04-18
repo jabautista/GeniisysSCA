@@ -1,0 +1,537 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISDefaultDist">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIISDefaultDist" type="com.geniisys.giis.entity.GIISDefaultDist"/>
+	<typeAlias alias="GIISDefaultDistDtl" type="com.geniisys.giis.entity.GIISDefaultDistDtl"/>
+	<typeAlias alias="GIISDefaultDistPeril" type="com.geniisys.giis.entity.GIISDefaultDistPeril"/>
+	
+	<resultMap id="defaultDistListMap" class="GIISDefaultDist" extends="BaseEntity.TableGridResultMap">
+		<result column="DEFAULT_NO"				property="defaultNo" />
+		<result column="LINE_CD"    			property="lineCd" />
+		<result column="LINE_NAME"				property="dspLineName" />
+		<result column="DEFAULT_TYPE"			property="defaultType" />
+		<result column="DEFAULT_TYPE_DESC"		property="dspDefaultName" />
+		<result column="DIST_TYPE"				property="distType" />
+		<result column="DIST_TYPE_DESC"			property="dspDistName" />
+		<result column="SUBLINE_CD"				property="sublineCd" />
+		<result column="SUBLINE_NAME"			property="dspSublineName" />
+		<result column="ISS_CD"					property="issCd" />
+		<result column="ISS_NAME"				property="dspIssName" />
+		<result column="USER_ID"				property="userId" />
+		<result column="LAST_UPDATE"			property="lastUpdate" />
+	</resultMap>
+	
+	<resultMap id="defaultDistDtlListMap" class="GIISDefaultDistDtl" extends="BaseEntity.TableGridResultMap">
+		<result column="DEFAULT_NO"				property="defaultNo" />
+		<result column="LINE_CD"    			property="lineCd" />
+		<result column="SUBLINE_CD"				property="sublineCd" />
+		<result column="ISS_CD"					property="issCd" />
+		<result column="RANGE_FROM"				property="rangeFrom" />
+		<result column="RANGE_TO"				property="rangeTo" />
+	</resultMap>
+	
+	<resultMap id="defaultDistPerilMap" class="GIISDefaultDistPeril" extends="BaseEntity.TableGridResultMap">
+		<result column="DEFAULT_NO"				property="defaultNo" />
+		<result column="LINE_CD"    			property="lineCd" />
+		<result column="PERIL_CD"				property="perilCd" />
+		<result column="SHARE_CD"				property="shareCd" />
+		<result column="SEQUENCE"				property="sequence" />
+		<result column="SHARE_PCT"				property="sharePct" />
+		<result column="SHARE_AMT1"				property="shareAmt1" />
+		<result column="SHARE_AMT2"				property="shareAmt2" />
+		<result column="USER_ID"				property="userId" />
+		<result column="LAST_UPDATE"			property="lastUpdate" />
+		<result column="REMARKS"				property="remarks" />
+		<result column="TRTY_NAME"				property="trtyName" />
+	</resultMap>
+	
+	<resultMap id="perilListMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result column="PERIL_CD"				property="perilCd" />
+		<result column="PERIL_NAME"    			property="perilName" />
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="lineLov" extends="BaseEntity.TableGridResultMap">
+		<result column="line_cd"     			property="lineCd"/>
+		<result column="line_name"     			property="lineName"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="sublineLov" extends="BaseEntity.TableGridResultMap">
+		<result column="line_cd"     			property="lineCd"/>
+		<result column="subline_cd"     		property="sublineCd"/>
+		<result column="subline_name"    		property="sublineName"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="issourceLov" extends="BaseEntity.TableGridResultMap">
+		<result column="iss_cd"     			property="issCd"/>
+		<result column="iss_name"     			property="issName"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="distLov" extends="BaseEntity.TableGridResultMap">
+		<result column="type"     				property="type"/>
+		<result column="meaning"     			property="meaning"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="shareLov" extends="BaseEntity.TableGridResultMap">
+		<result column="line_cd"     			property="lineCd"/>
+		<result column="share_cd"     			property="shareCd"/>
+		<result column="trty_name"     			property="trtyName"/>
+	</resultMap>
+	
+	<parameterMap id="distPerilVariablesMap" class="map">
+		<parameter property="defaultNo"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="lineCd"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="perilCd"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="maxSequence"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="totalSharePct"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+	</parameterMap>
+	
+	<select id="getDefaultDistList" resultMap="defaultDistListMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+		               b.count_,
+		               a.*
+		  	      FROM (SELECT * FROM TABLE(giiss165_pkg.get_def_dist_listing(#userId#, #defaultNo#))
+		  	      		 WHERE 1 = 1
+		  	      		  <isNotNull property="dspLineName">
+					  		AND UPPER(line_name) LIKE UPPER(#dspLineName#)
+					  	  </isNotNull>
+					  	  <isNotNull property="dspSublineName">
+					  		AND UPPER(subline_name) LIKE UPPER(#dspSublineName#)
+					  	  </isNotNull>
+					  	  <isNotNull property="dspIssName">
+					  		AND UPPER(iss_name) LIKE UPPER(#dspIssName#)
+					  	  </isNotNull>
+					  	  <isNotNull property="dspDefaultName">
+					  		AND UPPER(default_type_desc) LIKE UPPER(#dspDefaultName#)
+					  	  </isNotNull>
+					  	  <isNotNull property="dspDistName">
+					  		AND UPPER(dist_type_desc) LIKE UPPER(#dspDistName#)
+					  	  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="defaultNo">
+			              		ORDER BY default_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="dspLineName">
+			              		ORDER BY line_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="dspSublineName">
+			              		ORDER BY subline_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="dspIssName">
+			              		ORDER BY iss_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="dspDefaultName">
+			              		ORDER BY default_type_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="dspDistName">
+			              		ORDER BY dist_type_desc
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_
+		                  FROM TABLE(giiss165_pkg.get_def_dist_listing(#userId#, #defaultNo#))
+		                 WHERE 1 = 1
+		  	      		  <isNotNull property="dspLineName">
+					  		AND UPPER(line_name) LIKE UPPER(#dspLineName#)
+					  	  </isNotNull>
+					  	  <isNotNull property="dspSublineName">
+					  		AND UPPER(subline_name) LIKE UPPER(#dspSublineName#)
+					  	  </isNotNull>
+					  	  <isNotNull property="dspIssName">
+					  		AND UPPER(iss_name) LIKE UPPER(#dspIssName#)
+					  	  </isNotNull>
+					  	  <isNotNull property="dspDefaultName">
+					  		AND UPPER(default_type_desc) LIKE UPPER(#dspDefaultName#)
+					  	  </isNotNull>
+					  	  <isNotNull property="dspDistName">
+					  		AND UPPER(dist_type_desc) LIKE UPPER(#dspDistName#)
+					  	  </isNotNull>
+		                  ) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getDefaultDistDtlList" resultMap="defaultDistDtlListMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+		               b.count_,
+		               a.*
+		  	      FROM (SELECT * FROM TABLE(giiss165_pkg.get_def_dist_dtl_listing(#defaultNo#, #rangeFrom#, #rangeTo#))
+		                  <isEqual property="sortColumn" compareValue="rangeFrom">
+			              		ORDER BY range_from
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="rangeTo">
+			              		ORDER BY range_to
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_
+		                  FROM TABLE(giiss165_pkg.get_def_dist_dtl_listing(#defaultNo#, #rangeFrom#, #rangeTo#))
+		                  ) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiiss165PerilList" resultMap="perilListMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+		               b.count_,
+		               a.*
+		  	      FROM (SELECT * FROM TABLE(giiss165_pkg.get_peril_listing(#lineCd#, #perilName#))
+		                  <isEqual property="sortColumn" compareValue="perilName">
+			              		ORDER BY peril_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_
+		                  FROM TABLE(giiss165_pkg.get_peril_listing(#lineCd#, #perilName#))
+		                  ) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getDefaultDistPerilList" resultMap="defaultDistPerilMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+		               b.count_,
+		               a.*
+		  	      FROM (SELECT * FROM TABLE(giiss165_pkg.get_def_dist_peril_listing(#defaultNo#, #lineCd#, #perilCd#,
+		  	      																	#sequence#, #sharePct#, #shareAmt1#))
+						  <isNotNull property="trtyName">
+					  	   WHERE UPPER(trty_name) LIKE UPPER(#trtyName#)
+					  	  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="sequence">
+			              		ORDER BY sequence
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="trtyName">
+			              		ORDER BY trty_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="sharePct">
+			              		ORDER BY share_pct
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="shareAmt1">
+			              		ORDER BY share_amt1
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a,
+		               (SELECT count(*) count_
+		                  FROM TABLE(giiss165_pkg.get_def_dist_peril_listing(#defaultNo#, #lineCd#, #perilCd#,
+		  	      															#sequence#, #sharePct#, #shareAmt1#))
+						  <isNotNull property="trtyName">
+					  	   WHERE UPPER(trty_name) LIKE UPPER(#trtyName#)
+					  	  </isNotNull>
+		                  ) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+		
+	<select id="getGiiss165LineLOV" resultMap="lineLov">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giiss165_pkg.get_line_lov(#issCd#, #userId#, #findText#))
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="lineCd">
+								ORDER BY line_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="lineName">
+								ORDER BY line_name
+							</isEqual>							
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(giiss165_pkg.get_line_lov(#issCd#, #userId#, #findText#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiiss165SublineLOV" resultMap="sublineLov">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giiss165_pkg.get_subline_lov(#lineCd#, #findText#))
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="sublineCd">
+								ORDER BY subline_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="sublineName">
+								ORDER BY subline_name
+							</isEqual>							
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(giiss165_pkg.get_subline_lov(#lineCd#, #findText#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiiss165IssourceLOV" resultMap="issourceLov">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giiss165_pkg.get_issource_lov(#lineCd#, #userId#, #findText#))
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="issCd">
+								ORDER BY iss_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="issName">
+								ORDER BY iss_name
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(giiss165_pkg.get_issource_lov(#lineCd#, #userId#, #findText#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiiss165DistLOV" resultMap="distLov">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giiss165_pkg.get_type_lov(#rvDomain#, #findText#))
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="type">
+								ORDER BY type
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="meaning">
+								ORDER BY meaning
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(giiss165_pkg.get_type_lov(#rvDomain#, #findText#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiiss165TrtyLOV" resultMap="shareLov">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giiss165_pkg.get_share_lov(#lineCd#, #findText#))
+						 WHERE share_cd NOT IN(SELECT b.share_cd
+								                 FROM giis_default_dist_peril b
+								                WHERE b.default_no = #defaultNo# 
+								                  AND b.line_cd = #lineCd#
+								                  AND b.peril_cd = #perilCd#
+								               <isNotEmpty property="notInDeleted">
+											  	  AND b.share_cd NOT IN $notInDeleted$
+											   </isNotEmpty>)
+						  <isNotNull property="notIn">
+					  		AND share_cd NOT IN $notIn$
+					  	  </isNotNull>
+						  <isNotNull property="sortColumn">
+						  	<isEqual property="sortColumn" compareValue="shareCd">
+								ORDER BY share_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="trtyName">
+								ORDER BY trty_name
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(giiss165_pkg.get_share_lov(#lineCd#, #findText#))
+						  WHERE share_cd NOT IN(SELECT b.share_cd
+ 								                  FROM giis_default_dist_peril b
+								                 WHERE b.default_no = #defaultNo# 
+								                   AND b.line_cd = #lineCd#
+								                   AND b.peril_cd = #perilCd#
+								               <isNotEmpty property="notInDeleted">
+											  	   AND b.share_cd NOT IN $notInDeleted$
+											   </isNotEmpty>)
+						  <isNotNull property="notIn">
+					  		AND share_cd NOT IN $notIn$
+					  	  </isNotNull>) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiiss165TrtyV2LOV" resultMap="shareLov">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giiss165_pkg.get_share_lov2(#lineCd#, #findText#))
+						 WHERE share_cd NOT IN(SELECT b.share_cd
+								                 FROM giis_default_dist_peril b
+								                WHERE b.default_no = #defaultNo# 
+								                  AND b.line_cd = #lineCd#
+								                  AND b.peril_cd = #perilCd#
+								               <isNotEmpty property="notInDeleted">
+											  	  AND b.share_cd NOT IN $notInDeleted$
+											   </isNotEmpty>)
+						  <isNotNull property="notIn">
+					  		AND share_cd NOT IN $notIn$
+					  	  </isNotNull>
+						  <isNotNull property="sortColumn">
+						  	<isEqual property="sortColumn" compareValue="shareCd">
+								ORDER BY share_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="trtyName">
+								ORDER BY trty_name
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(giiss165_pkg.get_share_lov2(#lineCd#, #findText#))
+						  WHERE share_cd NOT IN(SELECT b.share_cd
+								                 FROM giis_default_dist_peril b
+								                WHERE b.default_no = #defaultNo# 
+								                  AND b.line_cd = #lineCd#
+								                  AND b.peril_cd = #perilCd#
+								               <isNotEmpty property="notInDeleted">
+											  	  AND b.share_cd NOT IN $notInDeleted$
+											   </isNotEmpty>)
+						  <isNotNull property="notIn">
+					  		AND share_cd NOT IN $notIn$
+					  	  </isNotNull>) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="giss165ValAddRec" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss165_pkg.val_add_rec(#defaultNo#, #lineCd#, #sublineCd#, #issCd#);
+ 		END;
+ 	</procedure>
+	
+	<procedure id="giiss165ValDeleteRec" parameterClass="java.lang.Integer">
+ 		BEGIN
+ 			giiss165_pkg.val_del_rec(#defaultNo#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<delete id="delDefaultDist" parameterClass="GIISDefaultDist">
+		BEGIN
+ 			giiss165_pkg.delete_rec(#defaultNo#);
+ 		END;
+ 	</delete>
+ 	
+ 	<select id="getDefaultNoNextVal" resultClass="java.lang.Integer">
+ 		SELECT default_dist_default_no_s.NEXTVAL
+ 		  FROM DUAL
+ 	</select>
+ 	
+ 	<procedure id="setDefaultDist" parameterClass="GIISDefaultDist">
+	    DECLARE
+	    	v_rec giis_default_dist%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.default_no := #defaultNo#;
+ 			v_rec.line_cd := #lineCd#;
+ 			v_rec.default_type := #defaultType#;
+ 			v_rec.dist_type := #distType#;
+ 			v_rec.subline_cd := #sublineCd#;
+ 			v_rec.iss_cd := #issCd#;
+ 			v_rec.user_id := #userId#;
+ 			
+ 			giiss165_pkg.add_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="getDistPerilVariables" parameterMap="distPerilVariablesMap">
+ 		BEGIN
+ 			giiss165_pkg.get_dist_peril_variables(?, ?, ?, ?, ?);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="checkGiiss165DistRecords" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss165_pkg.check_dist_records(#defaultNo#, #lineCd#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<delete id="delDefaultDistPeril" parameterClass="GIISDefaultDistPeril">
+		BEGIN
+ 			giiss165_pkg.delete_peril(#defaultNo#, #lineCd#, #perilCd#, #shareCd#);
+ 		END;
+ 	</delete>
+ 	
+ 	<procedure id="setDefaultDistPeril" parameterClass="GIISDefaultDistPeril">
+	    DECLARE
+	    	v_rec giis_default_dist_peril%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.default_no := #defaultNo#;
+ 			v_rec.line_cd := #lineCd#;
+ 			v_rec.peril_cd := #perilCd#;
+ 			v_rec.share_cd := #shareCd#;
+ 			v_rec.sequence := #sequence#;
+ 			v_rec.share_pct := #sharePct#;
+ 			v_rec.share_amt1 := #shareAmt1#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			giiss165_pkg.add_peril(v_rec);
+ 		END;
+ 	</procedure>
+	
+</sqlMap>

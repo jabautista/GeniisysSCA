@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIRIEndttext">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIRIEndttext" type="com.geniisys.giri.entity.GIRIEndttext" />
+	
+	<parameterMap class="map" id="updateCreateEndtTextBinderMap">
+		<parameter property="userId"					jdbcType="VARCHAR"		javaType="java.lang.String"	mode="IN" />
+		<parameter property="policyId"					jdbcType="VARCHAR"		javaType="java.lang.String"	mode="IN" />
+		<parameter property="riCd"						jdbcType="VARCHAR"		javaType="java.lang.String"	mode="IN" />
+		<parameter property="dspEndtText"		jdbcType="VARCHAR"		javaType="java.lang.String"	mode="IN" />
+		<parameter property="fnlBinderId"			jdbcType="VARCHAR"		javaType="java.lang.String"	mode="IN" />
+		<parameter property="remarks"				jdbcType="VARCHAR"		javaType="java.lang.String"	mode="IN" />
+		<parameter property="lineCd"					jdbcType="VARCHAR"		javaType="java.lang.String"	mode="IN" />
+		<parameter property="userId"					jdbcType="VARCHAR"		javaType="java.lang.String"	mode="IN" />
+		<parameter property="effDate"					jdbcType="DATE"			javaType="java.util.Date"		mode="IN" />
+		<parameter property="expiryDate"			jdbcType="DATE"			javaType="java.util.Date"		mode="IN" />
+		<parameter property="dspBinderDate"	jdbcType="DATE"			javaType="java.util.Date"		mode="IN" />
+		<parameter property="issCd"						jdbcType="VARCHAR"		javaType="java.lang.String"	mode="IN" />
+		<parameter property="initialRiCd"				jdbcType="VARCHAR"		javaType="java.lang.String"	mode="IN" />
+		<parameter property="editRecord"			jdbcType="VARCHAR"		javaType="java.lang.String"	mode="IN" />
+	</parameterMap>
+	
+	<resultMap class="GIRIEndttext" id="getRiDtlsListMap" extends="BaseEntity.TableGridResultMap">
+		<result property="policyId"					column="POLICY_ID" />
+		<result property="riCd"							column="RI_CD" />
+		<result property="fnlBinderId"			column="FNL_BINDER_ID" />
+		<result property="remarks"					column="REMARKS" />
+		<result property="dspRiName"			column="DSP_RI_NAME" />
+		<result property="dspEndtText"			column="DSP_ENDT_TEXT" />
+		<result property="dspBinderDate"		column="DSP_BINDER_DATE" />
+		<result property="dspBinderNo"			column="DSP_BINDER_NO" />
+	</resultMap>
+	
+	<update id="updateCreateEndtTextBinder" parameterClass="GIRIEndttext">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			giri_endttext_pkg.update_create_endttext_binder(#policyId#, #riCd#, #dspEndtText#, 
+			#fnlBinderId#, #remarks#, #lineCd#, #appUser#, #effDate#, 
+			#expiryDate#, #dspBinderDate#, #issCd#);
+		END;
+	</update>
+	
+	<select id="getRiDtlsList" resultMap="getRiDtlsListMap" parameterClass="java.util.HashMap">		
+	    SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giri_endttext_pkg.get_reinsurance_details(#policyId#))
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giri_endttext_pkg.get_reinsurance_details(#policyId#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<delete id="deleteRiDtlsGIUTS024" parameterClass="java.util.HashMap">
+		BEGIN
+            DELETE FROM giri_endttext
+            WHERE ri_cd = #riCd#;
+            DELETE FROM giri_binder
+   			WHERE fnl_binder_id = #fnlBinderId#;
+        END;
+	</delete>
+	
+</sqlMap>	

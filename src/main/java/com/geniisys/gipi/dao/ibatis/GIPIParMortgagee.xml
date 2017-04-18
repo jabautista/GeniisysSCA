@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIParMortgagee">
+	
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="ParMortgagee" type="com.geniisys.gipi.entity.GIPIParMortgagee"/>
+	<typeAlias alias="PackMortgagee" type="com.geniisys.gipi.pack.entity.GIPIPackMortgagee"/>
+	
+	<resultMap class="com.geniisys.gipi.entity.GIPIParMortgagee" id="GIPIParMortgagee">
+		<result column="PAR_ID" 		property="parId" />
+		<result column="ISS_CD" 		property="issCd" />
+		<result column="ITEM_NO" 		property="itemNo" />
+		<result column="MORTG_CD" 		property="mortgCd" />
+		<result column="MORTG_NAME" 	property="mortgName" />
+		<result column="AMOUNT" 		property="amount" />
+		<result column="REMARKS" 		property="remarks" />
+		<result column="LAST_UPDATE" 	property="lastUpdate" />
+		<result column="USER_ID" 		property="userId" />
+		<result column="DELETE_SW"		property="deleteSw"/> <!-- kenneth SR 5483 05.26.2016 -->	
+	</resultMap>
+	
+	<resultMap class="PackMortgagee" 	id="GIPIPackMortgageeMap">
+		<result column="PAR_ID"			property="parId"/>
+		<result column="PAR_NO"			property="parNo"/>
+		<result column="{parId=PAR_ID}"	property="gipiParMortgagees" select="getGIPIWMortgageeItemZero"/>
+	</resultMap>
+	
+	<resultMap class="ParMortgagee" id="MortgageeByItemTableGridResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="PAR_ID" 		property="parId" />
+		<result column="ISS_CD" 		property="issCd" />
+		<result column="ITEM_NO" 		property="itemNo" />
+		<result column="MORTG_CD" 		property="mortgCd" />
+		<result column="MORTG_NAME" 	property="mortgName" />
+		<result column="AMOUNT" 		property="amount" />
+		<result column="REMARKS" 		property="remarks" />
+		<result column="LAST_UPDATE" 	property="lastUpdate" />
+		<result column="USER_ID" 		property="userId" />
+		<result column="DELETE_SW"		property="deleteSw"/> <!-- kenneth SR 5483 05.26.2016 -->	
+	</resultMap>
+	
+	
+	<select id="getGIPIParMortgagee" resultMap="GIPIParMortgagee">
+		SELECT * FROM TABLE(GIPI_WMORTGAGEE_PKG.get_gipi_wmortgagee(#parId#))
+	</select>
+	
+	<!--added delete_sw kenneth SR 5483 05.26.2016 -->	
+	<select id="getGIPIWMortgageeByItemNo" resultMap="GIPIParMortgagee" parameterClass="java.util.HashMap">
+		SELECT par_id,		iss_cd,				item_no,	delete_sw,
+			   mortg_cd,	mortg_name,			amount,
+			   <!-- ESCAPE_VALUE(remarks) removed by robert  01.17.2014 -->remarks, 	last_update,			   user_id
+		  FROM TABLE(GIPI_WMORTGAGEE_PKG.get_gipi_wmortgagee(#parId#, #itemNo#))
+	</select>
+	
+	<select id="getGIPIWMortgageeItemZero" resultMap="GIPIParMortgagee" parameterClass="java.util.HashMap">
+		SELECT * FROM TABLE(GIPI_WMORTGAGEE_PKG.get_gipi_wmortgagee(#parId#,0))
+	</select>
+	
+	<select id="getGIPIWMortgagee" resultMap="GIPIParMortgagee">
+		SELECT *
+		  FROM TABLE(GIPI_WMORTGAGEE_PKG.GET_ALL_GIPI_WMORTGAGEE(#parId#))
+	</select>
+	
+	<select id="getGIPIWMortgageeTableGrid" parameterClass="java.util.HashMap" resultMap="MortgageeByItemTableGridResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(gipi_wmortgagee_pkg.get_gipi_wmortgagee_tg(#parId#, #itemNo#, #mortgName#, #remarks#))
+						  <isNull property="sortColumn">
+							ORDER BY mortg_name ASC
+						  </isNull>
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="mortgCd">
+								ORDER BY mortg_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="mortgName">
+								ORDER BY mortg_name
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="amount">
+								ORDER BY amount
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="remarks">
+								ORDER BY remarks
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(gipi_wmortgagee_pkg.get_gipi_wmortgagee_tg(#parId#, #itemNo#, #mortgName#, #remarks#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="saveGIPIParMortgagee" parameterClass="com.geniisys.gipi.entity.GIPIParMortgagee">
+		DECLARE
+			mort GIPI_WMORTGAGEE%ROWTYPE;
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			
+			mort.par_id			:= #parId#;
+			mort.iss_cd			:= #issCd#;
+			mort.item_no		:= #itemNo#;
+			mort.mortg_cd		:= #mortgCd#;
+			mort.amount			:= #amount#;
+			mort.remarks		:= #remarks#;
+			mort.last_update	:= #lastUpdate#;
+			mort.user_id		:= #userId#;
+			
+			GIPI_WMORTGAGEE_PKG.set_gipi_wmortgagee(mort);
+			/*COMMIT;*/
+		END;
+	</procedure>
+	
+	<!--added delete_sw kenneth SR 5483 05.26.2016 -->	
+	<insert id="setGIPIParMortgagee" parameterClass="com.geniisys.gipi.entity.GIPIParMortgagee">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;			
+			GIPI_WMORTGAGEE_PKG.set_gipi_wmortgagee_1(#parId#, #issCd#, #itemNo#, #mortgCd#, #amount#, #remarks#, #lastUpdate#, #userId#, #deleteSw#);
+		END;
+	</insert>
+	
+	<procedure id="deleteGIPIParMortItem" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;			
+			GIPI_WMORTGAGEE_PKG.del_gipi_wmortgagee_item(#parId#, #itemNo#);
+			/*COMMIT;*/
+		END;
+	</procedure>
+	
+	<delete id="delGIPIParMortgagee" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			GIPI_WMORTGAGEE_PKG.del_gipi_wmortgagee_1(#parId#, #itemNo#, #mortgCd#);
+		END;
+	</delete>
+	
+	<procedure id="deleteGIPIParMort" parameterClass="java.lang.Integer">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			GIPI_WMORTGAGEE_PKG.del_gipi_wmortgagee(#parId#);
+			/*COMMIT;*/
+		END;
+	</procedure>
+	
+	<select id="getSubPoliciesMortgagees" resultMap="GIPIPackMortgageeMap" parameterClass="java.lang.Integer">
+		SELECT * FROM TABLE(GIPI_PARLIST_PKG.get_package_policy_list(#packParId#))
+	</select>
+	
+</sqlMap>

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISCoIntrmdryTypes">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIISCoIntrmdryTypes" type="com.geniisys.common.entity.GIISCoIntrmdryTypes"/>
+	
+	<resultMap class="java.util.HashMap" id="giisCoIntrmdryTypesListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="iss_cd"   		property="issCd"/>	
+		<result column="iss_name"   	property="issName"/>	
+		<result column="co_intm_type" 	property="coIntmType"/>
+		<result column="type_name"   	property="typeName"/>
+		<result column="remarks"     	property="remarks"/>
+		<result column="user_id"     	property="userId"/>
+		<result column="last_update"    property="lastUpdate"/>
+	</resultMap>	
+	
+	<select id="getGiiss075RecList" resultMap="giisCoIntrmdryTypesListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss075_pkg.get_rec_list(#issCd#, #issName#, #coIntmType#, #typeName#, #userId#))
+		                  <isEqual property="sortColumn" compareValue="issCd issName">
+			              		ORDER BY iss_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="coIntmType">
+			              		ORDER BY co_intm_type
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="typeName">
+			              		ORDER BY type_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss075_pkg.get_rec_list(#issCd#, #issName#, #coIntmType#, #typeName#, #userId#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setCoIntrmdryTypes" parameterClass="GIISCoIntrmdryTypes">
+	    DECLARE
+	    	v_rec giis_co_intrmdry_types%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.iss_cd := #issCd#;
+ 			v_rec.co_intm_type := #coIntmType#;
+ 			v_rec.type_name := #typeName#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			giiss075_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	 	 	
+ 	<procedure id="valDeleteCoIntrmdryTypes" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss075_pkg.val_del_rec(#issCd#,#coIntmType#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddCoIntrmdryTypes" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss075_pkg.val_add_rec(#issCd#,#coIntmType#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delCoIntrmdryTypes" parameterClass="GIISCoIntrmdryTypes">
+		DECLARE
+	    	v_rec giis_co_intrmdry_types%ROWTYPE;
+ 		BEGIN
+ 			v_rec.iss_cd := #issCd#;
+ 			v_rec.co_intm_type := #coIntmType#;
+ 			
+ 			giiss075_pkg.delete_rec(v_rec);
+ 		END;
+ 	</delete>
+</sqlMap>

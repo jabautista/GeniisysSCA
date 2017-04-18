@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GISMRecipientGroup">
+	
+	<typeAlias alias="gismRecipientGroup" type="com.geniisys.gism.entity.GISMRecipientGroup"/>
+
+	<resultMap id="recipientGroupLOVMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result column="GROUP_CD"				property="groupCd"/>
+		<result column="GROUP_NAME"				property="groupName"/>
+	</resultMap>
+	
+	<select id="getRecipientGroupLOV" parameterClass="java.util.HashMap" resultMap="recipientGroupLOVMap">
+		SELECT *
+          FROM (SELECT ROWNUM rownum_,
+            		   b.count_,
+            		   a.*
+                  FROM (SELECT *
+                          FROM TABLE(GISM_RECIPIENT_GROUP_PKG.get_gisms004_group_lov)
+						<isNotNull property="findText">
+                         WHERE TO_CHAR(group_cd) LIKE TO_CHAR(#findText#)
+                            OR UPPER(NVL(group_name, '*')) LIKE UPPER(#findText#)
+                        </isNotNull>
+                        <isNull property="findText">
+                         WHERE UPPER(group_name) LIKE UPPER(NVL(#searchString#, group_name))
+                        </isNull>
+                          	<isEqual property="sortColumn" compareValue="groupCd">
+								ORDER BY group_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="groupName">
+								ORDER BY group_name
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>) a,
+               (SELECT COUNT(*) count_
+                  FROM TABLE(GISM_RECIPIENT_GROUP_PKG.get_gisms004_group_lov)
+                <isNotNull property="findText">
+                 WHERE TO_CHAR(group_cd) LIKE TO_CHAR(#findText#)
+                    OR UPPER(NVL(group_name, '*')) LIKE UPPER(#findText#)
+                </isNotNull>
+                <isNull property="findText">
+                 WHERE UPPER(group_name) LIKE UPPER(NVL(#searchString#, group_name))
+                </isNull>
+				) b)
+          WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+
+	<resultMap class="gismRecipientGroup" id="gismRecipientGroupListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="group_cd"   	property="groupCd"/>
+		<result column="group_name" 	property="groupName"/>
+		<result column="table_name" 	property="tableName"/>
+		<result column="pk_column" 		property="pkColumn"/>
+		<result column="type_column" 	property="typeColumn"/>
+		<result column="type_value" 	property="typeValue"/>
+		<result column="key_word"     	property="keyWord"/>
+		<result column="bday_column" 	property="bdayColumn"/>
+		<result column="name_column" 	property="nameColumn"/>
+		<result column="cp_column" 		property="cpColumn"/>
+		<result column="globe_column" 	property="globeColumn"/>
+		<result column="smart_column" 	property="smartColumn"/>
+		<result column="sun_column" 	property="sunColumn"/>
+		<result column="user_id"      	property="userId"/>
+		<result column="last_update"  	property="lastUpdate"/>
+	</resultMap>
+
+	<resultMap class="java.util.HashMap" id="tableRecListLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="table_name"     property="tableName"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="columnRecListLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="column_name"     property="columnName"/>
+	</resultMap>
+		
+	<select id="getGisms003RecList" resultMap="gismRecipientGroupListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(gisms003_pkg.get_rec_list)
+		  	      		  <isNotNull property="filter">
+							WHERE 1=1
+								<isNotEmpty prepend="AND"  property="groupCd">
+									group_cd = #groupCd#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="groupName">
+									UPPER(group_name) LIKE UPPER(#groupName#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="tableName">
+									UPPER(table_name) LIKE UPPER(#tableName#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="pkColumn">
+									UPPER(pk_column) LIKE UPPER(#pkColumn#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="typeColumn">
+									UPPER(type_column) LIKE UPPER(#typeColumn#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="typeValue">
+									UPPER(type_value) LIKE UPPER(#typeValue#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="keyWord">
+									UPPER(key_word) LIKE UPPER(#keyWord#)
+								</isNotEmpty>
+						</isNotNull>		  	      
+		                  <isEqual property="sortColumn" compareValue="groupCd groupName">
+			              		ORDER BY group_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="tableName">
+			              		ORDER BY table_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="pkColumn">
+			              		ORDER BY pk_column
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="typeColumn">
+			              		ORDER BY type_column
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="typeValue">
+			              		ORDER BY type_value
+			              </isEqual>	
+			              <isEqual property="sortColumn" compareValue="keyWord">
+			              		ORDER BY key_word
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(gisms003_pkg.get_rec_list)
+		  	      		  <isNotNull property="filter">
+							WHERE 1=1
+								<isNotEmpty prepend="AND"  property="groupCd">
+									group_cd = #groupCd#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="groupName">
+									UPPER(group_name) LIKE UPPER(#groupName#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="tableName">
+									UPPER(table_name) LIKE UPPER(#tableName#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="pkColumn">
+									UPPER(pk_column) LIKE UPPER(#pkColumn#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="typeColumn">
+									UPPER(type_column) LIKE UPPER(#typeColumn#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="typeValue">
+									UPPER(type_value) LIKE UPPER(#typeValue#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="keyWord">
+									UPPER(key_word) LIKE UPPER(#keyWord#)
+								</isNotEmpty>
+						</isNotNull>		                  
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+
+	<select id="getGisms003TableRecList" resultMap="tableRecListLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(gisms003_pkg.get_table_rec_list)		                 
+		                  	<isNull property="findText">
+				                WHERE UPPER(table_name) LIKE UPPER(#search#)	                    		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(table_name) LIKE UPPER(#findText#)			         		
+			             	</isNotNull>		             
+			              	<isEqual property="sortColumn" compareValue="tableName">
+			              		ORDER BY table_name
+			              	</isEqual>		              		                      
+			          	  	<isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	</isNotNull>
+		                  ) a, 
+		               (SELECT count (*) count_ 
+		                  FROM TABLE(gisms003_pkg.get_table_rec_list)		                 
+		                  	<isNull property="findText">
+				                 WHERE UPPER(table_name) LIKE UPPER(#search#)	                    		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(table_name) LIKE UPPER(#findText#)			  				         		
+			             	</isNotNull>		
+			             	) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>	
+
+	<select id="getGisms003ColumnRecList" resultMap="columnRecListLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(gisms003_pkg.get_column_rec_list(#tableName#))		                 
+		                  	<isNull property="findText">
+				                WHERE UPPER(column_name) LIKE UPPER(#search#)	                    		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(column_name) LIKE UPPER(#findText#)			         		
+			             	</isNotNull>		             
+			              	<isEqual property="sortColumn" compareValue="columnName">
+			              		ORDER BY column_name
+			              	</isEqual>		              		                      
+			          	  	<isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	</isNotNull>
+		                  ) a, 
+		               (SELECT count (*) count_ 
+		                  FROM TABLE(gisms003_pkg.get_column_rec_list(#tableName#))		                 
+		                  	<isNull property="findText">
+				                 WHERE UPPER(column_name) LIKE UPPER(#search#)	                    		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(column_name) LIKE UPPER(#findText#)			  				         		
+			             	</isNotNull>		
+			             	) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+		
+	<procedure id="setRecipientGroup" parameterClass="gismRecipientGroup">
+	    DECLARE
+	    	v_rec gism_recipient_group%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.group_cd     := #groupCd#;
+ 			v_rec.group_name   := #groupName#;
+ 			v_rec.table_name   := #tableName#;
+ 			v_rec.pk_column   := #pkColumn#;
+ 			v_rec.type_column   := #typeColumn#;
+ 			v_rec.type_value   := #typeValue#;
+ 			v_rec.key_word     := #keyWord#;
+ 			v_rec.bday_column   := #bdayColumn#;
+ 			v_rec.name_column   := #nameColumn#;
+ 			v_rec.cp_column   := #cpColumn#;
+ 			v_rec.globe_column   := #globeColumn#;
+ 			v_rec.smart_column   := #smartColumn#;
+ 			v_rec.sun_column   := #sunColumn#;
+ 			v_rec.user_id 	   := #userId#;
+ 			
+ 			gisms003_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteRecipientGroup" parameterClass="java.lang.String">
+ 		BEGIN
+ 			gisms003_pkg.val_del_rec(#recId#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddRecipientGroup" parameterClass="java.lang.String">
+ 		BEGIN
+ 			gisms003_pkg.val_add_rec(#recId#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delRecipientGroup" parameterClass="java.lang.Integer">
+		BEGIN
+ 			gisms003_pkg.del_rec(#groupCd#);
+ 		END;
+ 	</delete>
+</sqlMap>

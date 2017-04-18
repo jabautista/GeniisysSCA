@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIACTaxes">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIISControlType" type="com.geniisys.giis.entity.GIISControlType"/>
+	
+	<resultMap class="GIISControlType" id="giiss108RecListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="control_type_cd"     	property="controlTypeCd"/>
+		<result column="control_type_desc"     	property="controlTypeDesc"/>
+		<result column="remarks"     			property="remarks"/>
+		<result column="user_id"     			property="userId"/>
+		<result column="last_update"    		property="lastUpdate"/>
+	</resultMap>
+	
+	<select id="getGiiss108RecList" resultMap="giiss108RecListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss108_pkg.get_rec_list(#controlTypeCd#, #controlTypeDesc#))
+		                  <isEqual property="sortColumn" compareValue="controlTypeCd">
+			              		ORDER BY control_type_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="controlTypeDesc">
+			              		ORDER BY control_type_desc
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss108_pkg.get_rec_list(#controlTypeCd#, #controlTypeDesc#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<select id="getGiiss108AllRecList" resultMap="giiss108RecListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss108_pkg.get_rec_list(#controlTypeCd#, #controlTypeDesc#))) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss108_pkg.get_rec_list(#controlTypeCd#, #controlTypeDesc#))) b)
+	</select>
+	
+	<procedure id="valAddControlType" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss108_pkg.val_add_rec(#oldValue#, #controlTypeDesc#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="setControlType" parameterClass="GIISControlType">
+	    DECLARE
+	    	v_rec giis_control_type%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.control_type_cd := #controlTypeCd#;
+ 			v_rec.control_type_desc := #controlTypeDesc#;
+ 			v_rec.remarks := #remarks#;
+ 			v_rec.user_id := #userId#;
+ 			
+ 			giiss108_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDelControlType" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss108_pkg.val_del_rec(#controlTypeCd#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<delete id="delControlType" parameterClass="java.lang.Integer">
+		BEGIN
+ 			giiss108_pkg.del_rec(#controlTypeCd#);
+ 		END;
+ 	</delete>
+ 	
+</sqlMap>

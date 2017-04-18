@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIPackPAR">
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIPIPackPARClass" type="com.geniisys.gipi.pack.entity.GIPIPackPARList"/>
+	
+	<resultMap id="GIPIPackPARList" class="GIPIPackPARClass">
+		<result column="PACK_PAR_ID"		property="packParId"/>
+		<result column="LINE_CD" 			property="lineCd"/>
+		<result column="LINE_NAME" 			property="lineName"/>
+		<result column="SUBLINE_CD" 		property="sublineCd"/>
+		<result column="ISS_CD" 			property="issCd"/>
+		<result column="ISSUE_YY" 			property="issueYy"/>
+		<result column="POL_SEQ_NO" 		property="polSeqNo"/>
+		<result column="RENEW_NO" 			property="renewNo"/>
+		<result column="PAR_YY" 			property="parYy"/>
+		<result column="PAR_SEQ_NO" 		property="parSeqNo"/>
+		<result column="QUOTE_SEQ_NO" 		property="quoteSeqNo"/>
+		<result column="ASSD_NO" 			property="assdNo"/>
+		<result column="ASSD_NAME" 			property="assdName"/>
+		<result column="PAR_STATUS"			property="parStatus"/>
+		<result	column="PAR_TYPE"			property="parType"/>
+		<result column="STATUS"				property="status"/>
+		<result column="PACK_PAR_NO" 		property="parNo"/>
+		<result column="REMARKS"			property="remarks"/>
+		<result column="UNDERWRITER" 		property="underwriter"/>
+		<result column="ASSIGN_SW" 			property="assignSw"/>
+		<result column="BANK_REF_NO" 		property="bankRefNo"/>
+		<result column="ROWNUM_" 			property="rowNum" />			
+		<result column="COUNT_"				property="rowCount"/>
+	</resultMap>
+	
+	<resultMap id="GIPIPackPARDetails" class="GIPIPackPARClass">
+		<result column="PACK_PAR_ID"		property="packParId"/>
+		<result column="LINE_CD" 			property="lineCd"/>
+		<result column="LINE_NAME" 			property="lineName"/>
+		<result column="ISS_CD" 			property="issCd"/>
+		<result column="PAR_YY" 			property="parYy"/>
+		<result column="PAR_SEQ_NO" 		property="parSeqNo"/>
+		<result column="QUOTE_SEQ_NO" 		property="quoteSeqNo"/>
+		<result column="ASSD_NO" 			property="assdNo"/>
+		<result column="ASSD_NAME" 			property="assdName"/>
+		<result column="PAR_STATUS"			property="parStatus"/>
+		<result column="UNDERWRITER" 		property="underwriter"/>
+		<result column="PAR_TYPE" 			property="parType"/>
+		<result column="PACK_PAR_NO" 		property="parNo"/>
+		<result column="assign_sw" 			property="assignSw"/>
+		<result column="remarks" 			property="remarks"/>
+	</resultMap>
+	
+	<resultMap id="GIPIPackPARListMap" class="GIPIPackPARClass">
+		<result column="PACK_PAR_ID"		property="packParId"/>
+		<result column="LINE_CD" 			property="lineCd"/>
+		<result column="ISS_CD" 			property="issCd"/>
+		<result column="PAR_YY" 			property="parYy"/>
+		<result column="PAR_SEQ_NO" 		property="parSeqNo"/>
+		<result column="QUOTE_SEQ_NO" 		property="quoteSeqNo"/>
+		<result column="ASSD_NO" 			property="assdNo"/>
+		<result column="ASSD_NAME" 			property="assdName"/>
+		<result column="PAR_STATUS"			property="parStatus"/>
+		<result column="DRV_PAR_SEQ_NO" 	property="parNo"/>
+		<result column="PAR_TYPE" 			property="parType"/>
+		<result column="ADDRESS1" 			property="address1"/>
+		<result column="ADDRESS2" 			property="address2"/>
+		<result column="ADDRESS3" 			property="address3"/>
+	</resultMap>
+	
+	<resultMap class="GIPIPackPARClass" id="newPackParId">
+		<result column="PACK_PAR_ID" 			property="packParId"/>
+	</resultMap>
+	
+	<parameterMap class="map" id="checkIfLineSublineExistMap">
+		<parameter property="packParId" 		 jdbcType="INT"		javaType="java.lang.Integer"	mode="IN"/>
+		<parameter property="lineCd" 		 jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="message" 		 jdbcType="VARCHAR"	javaType="java.lang.String"		mode="INOUT"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="checkRIMap">
+		<parameter property="packParId"	jdbcType="INTEGER" 	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="exist"		jdbcType="VARCHAR" 	javaType="java.lang.String"   mode="OUT"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="updatePackParStatus2Map">
+		<parameter property="userId" 			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="packParId"			jdbcType="INTEGER" 	javaType="java.lang.Integer" mode="IN"/>
+	</parameterMap>
+	
+	
+	<select id="getNewPackParId" resultMap="newPackParId">
+		SELECT GIPI_PACK_PARLIST_PAR_ID.NEXTVAL pack_par_id
+      	          FROM SYS.DUAL
+	</select>
+	
+	<select id="getPackParDetailsFromPackParId" resultMap="GIPIPackPARDetails">
+		SELECT * FROM TABLE(GIPI_PACK_PARLIST_PKG.get_gipi_pack_parlist(#packParId#))
+	</select>
+	
+	<select id="getGipiPackParList" resultMap="GIPIPackPARList" parameterClass="map">		
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIPI_PACK_PARLIST_PKG.get_gipi_pack_parlist_policy(#lineCd#, #filter.issCd#, #moduleId#, #userId#, #allUserSw#, #filter.parYy#, #filter.parSeqNo#, #filter.quoteSeqNo#, #filter.assdName#, #filter.underwriter#, #filter.status#, #filter.bankRefNo#, #riSwitch#))
+		                  <isEqual property="sortColumn" compareValue="parNo">
+			              		ORDER BY pack_par_no 
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="assdName">
+			              		ORDER BY assd_name 
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="underwriter">
+			              		ORDER BY underwriter 
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="status">
+			              		ORDER BY status 
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="remarks">
+			              		ORDER BY remarks 
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="bankRefNo">
+			              		ORDER BY bank_ref_no 
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+			              ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIPI_PACK_PARLIST_PKG.get_gipi_pack_parlist_policy(#lineCd#, #filter.issCd#, #moduleId#, #userId#, #allUserSw#, #filter.parYy#, #filter.parSeqNo#, #filter.quoteSeqNo#, #filter.assdName#, #filter.underwriter#, #filter.status#, #filter.bankRefNo#,#riSwitch#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getEndtGipiPackParList" resultMap="GIPIPackPARList" parameterClass="map">		
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIPI_PACK_PARLIST_PKG.get_gipi_pack_parlist_endt(#lineCd#, #filter.issCd#, #moduleId#, #userId#, #allUserSw#, #filter.parYy#, #filter.parSeqNo#, #filter.quoteSeqNo#, #filter.assdName#, #filter.underwriter#, #filter.status#, #filter.bankRefNo#,#riSwitch#))
+		                  <isEqual property="sortColumn" compareValue="parNo">
+			              		ORDER BY pack_par_no 
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="assdName">
+			              		ORDER BY assd_name 
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="underwriter">
+			              		ORDER BY underwriter 
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="status">
+			              		ORDER BY status 
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="remarks">
+			              		ORDER BY remarks 
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="bankRefNo">
+			              		ORDER BY bank_ref_no 
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+			              ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIPI_PACK_PARLIST_PKG.get_gipi_pack_parlist_endt(#lineCd#, #filter.issCd#, #moduleId#, #userId#, #allUserSw#, #filter.parYy#, #filter.parSeqNo#, #filter.quoteSeqNo#, #filter.assdName#, #filter.underwriter#, #filter.status#, #filter.bankRefNo#, #riSwitch#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<!--<select id="getGipiPackParList" resultMap="GIPIPackPARList" parameterClass="java.util.HashMap">		
+		SELECT * FROM TABLE(GIPI_PACK_PARLIST_PKG.get_gipi_pack_parlist(#lineCd#,'','GIPIS001A', #userId#, #keyword#))
+	</select>
+	
+	-->
+	<select id="getGipiEndtPackParList" resultMap="GIPIPackPARList" parameterClass="java.util.HashMap">
+		SELECT * FROM TABLE (GIPI_PACK_PARLIST_PKG.get_gipi_pack_endt_parlist(#lineCd#,'', 'GIPIS058A', #userId#, #keyword#))
+	</select>
+
+	<procedure id="saveGIPIPackPAR" parameterClass="GIPIPackPARClass">
+		DECLARE
+			pack_par GIPI_PACK_PARLIST%ROWTYPE;
+		BEGIN
+			giis_users_pkg.app_user := #underwriter#;
+			
+			pack_par.pack_par_id	:= #packParId#;
+  			pack_par.line_cd		:= #lineCd#;
+			pack_par.iss_cd			:= #issCd#;
+			pack_par.par_yy			:= #parYy#;
+			pack_par.quote_seq_no	:= #quoteSeqNo#;
+			pack_par.assd_no		:= #assdNo#;
+			pack_par.underwriter	:= #underwriter#;
+			pack_par.par_status		:= #parStatus#;
+			pack_par.par_type		:= #parType#;
+			pack_par.quote_id		:= #quoteId#;
+			pack_par.assign_sw		:= #assignSw#;
+			pack_par.remarks		:= #remarks#;
+			Gipi_Pack_Parlist_Pkg.save_pack_par(pack_par);
+		END;
+	</procedure>
+	
+	<procedure id="updatePackStatusFromQuote" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			Gipi_Pack_Parlist_Pkg.update_status_from_quote(#quoteId#, #parStatus#);
+		END;
+	</procedure>
+	
+	<select id="checkPackParQuote" resultClass="java.lang.String">
+		SELECT GIPI_PACK_PARLIST_PKG.check_par_quote(#packParId#) FROM DUAL
+	</select>
+	
+	<procedure id="checkIfLineSublineExist" parameterMap="checkIfLineSublineExistMap">
+		CALL(Gipi_Wpack_Line_Subline_Pkg.check_if_line_subline_exist(?,?,?))
+	</procedure>
+	
+	<insert id="createParListWPack" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			Gipi_Pack_Parlist_Pkg.create_parlist_wpack(#quoteId#, #lineCd#, #parId#, #issCd#, #assdNo#);
+		END;
+	</insert>
+	
+	<insert id="createItemInfo" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			Gipi_Pack_Parlist_Pkg.create_item_info(#quoteId#, #parId#);
+		END;
+	</insert>
+	
+	<insert id="createPerilWc" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			Gipi_Pack_Parlist_Pkg.create_peril_wc(#parId#);
+		END;
+	</insert>
+	
+	<insert id="createDistDed" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			Gipi_Pack_Parlist_Pkg.create_dist_ded(#parId#);
+		END;
+	</insert>
+	
+	<insert id="createWMortgagee" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			Gipi_Pack_Parlist_Pkg.create_wmortgagee(#quoteId#, #parId#);
+		END;
+	</insert>
+	
+	<insert id="createDiscounts" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			Gipi_Pack_Parlist_Pkg.create_discounts(#parId#);
+		END;
+	</insert>
+	
+	<procedure id="updatePackParStatus" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			Gipi_Pack_Parlist_Pkg.update_pack_par_status(#parId#, #parStatus#);
+		END;
+	</procedure>
+	
+	<procedure id="updatePackParStatus2" parameterMap="updatePackParStatus2Map">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			Gipi_Pack_Parlist_Pkg.update_pack_par_status(?);
+		END;
+	</procedure>
+	
+	<procedure id="deletePARIncludedInPackage" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			Gipi_Pack_Parlist_Pkg.delete_par(#packParId#, #userId#);
+		END;
+	</procedure>
+	
+	<procedure id="deletePackTables" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			Gipi_Pack_Parlist_Pkg.delete_pack_tables(#packParId#, #userId#);
+		END;
+	</procedure>
+	
+	<procedure id="cancelPackPar"	parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			Gipi_Pack_Parlist_Pkg.cancel_pack_par(#packParId#, #parStatus#, #userId#);
+		END;
+	</procedure>
+	
+	<procedure id="checkRIBeforeDeletion" parameterMap="checkRIMap">
+		{CALL CHECK_RI(?, ?)}
+	</procedure>
+	
+	<procedure id="updatePackParRemarks" parameterClass="GIPIPackPARClass">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+    		GIPI_PACK_PARLIST_PKG.update_pack_par_remarks(#packParId#, #remarks#);
+		END;
+	</procedure>
+	
+	<procedure id="updateGipiPackParListAssdNo"	 parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+    		GIPI_PACK_PARLIST_PKG.update_assd_no(#packParId#, #assdNo#);
+		END;
+	</procedure>
+	
+	<update id="updateParRemarksByPackParId"	 parameterClass="java.util.HashMap">
+   		UPDATE GIPI_PARLIST
+   			SET remarks = #remarks#
+   		WHERE pack_par_id = #packParId#	
+	</update>
+	
+	<select id="generatePackParIdGiuts008a" resultClass="java.lang.Integer">
+		SELECT gipi_pack_parlist_par_id.nextval FROM DUAL
+	</select>
+	
+	<select id="getPackParListGiuts008a" resultClass="java.util.HashMap">
+		SELECT * FROM TABLE(Gipi_Pack_Parlist_Pkg.get_pack_parlist_giuts008a(#packPolicyId#))
+	</select>
+	
+	<insert id="insertPackParListGiuts008a" parameterClass="java.util.HashMap">
+		BEGIN
+			gipi_pack_parlist_pkg.insert_pack_parlist_giuts008a(#packParId#,#lineCd#,#issCd#,#parYy#,#parType#,#assdNo#,
+																#underwriter#,#address1#,#address2#,#address3#);
+		END;
+	</insert>
+	
+	<select id="getPackSharePercentage" parameterClass="java.lang.Integer" resultClass="java.lang.String">
+		SELECT get_pack_share_percentage(#packParId#) FROM DUAL
+	</select>
+	
+	<select id="checkGipis095PackPeril" resultClass="java.lang.String">
+		SELECT gipi_pack_parlist_pkg.check_pack_peril (#itemNo#, #parId#) FROM DUAL
+	</select>
+</sqlMap>

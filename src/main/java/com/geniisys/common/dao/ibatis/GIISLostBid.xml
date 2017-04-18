@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISLostBid">
+
+  <cacheModel id="oneDayClient" type="MEMORY">
+    <flushInterval hours="24"/>
+    <property name="reference-type" value="WEAK"/>
+  </cacheModel>
+  
+  <typeAlias alias="GIISLostBid" type="com.geniisys.common.entity.GIISLostBid"/>
+  
+  <resultMap id="GIISLostBid" class="com.geniisys.common.entity.GIISLostBid" >
+  
+  	<result column="REASON_CD"			property="reasonCd"			jdbcType="NUMBER" />
+  	<result column="REASON_DESC"		property="reasonDesc"		jdbcType="VARCHAR" />
+  	<result column="REMARKS"			property="remarks"			jdbcType="VARCHAR" />
+ <!--  <result column="LAST_UPDATE"		property="lastUpdate"		jdbcType="DATE" /> --> 	
+ <!--  <result column="USER_ID"			property="userId"			jdbcType="VARCHAR" />  -->
+  	<result column="LINE_CD"			property="lineCd"			jdbcType="VARCHAR" /> 
+  	<result column="LINE_NAME"			property="lineName"			jdbcType="VARCHAR" />
+  
+  </resultMap>
+  
+   <resultMap id="GIISLostBidTableGrid" class="com.geniisys.common.entity.GIISLostBid" >
+	  	<result column="REASON_CD"			property="reasonCd"			jdbcType="NUMBER" />
+	  	<result column="REASON_DESC"		property="reasonDesc"		jdbcType="VARCHAR" />
+	  	<result column="REMARKS"			property="remarks"			jdbcType="VARCHAR" />
+ 	  	<result column="LAST_UPDATE"		property="lastUpdate"		jdbcType="VARCHAR" /> 	
+	  	<result column="USER_ID"			property="userId"			jdbcType="VARCHAR" />  
+	  	<result column="LINE_CD"			property="lineCd"			jdbcType="VARCHAR" /> 
+	  	<result column="LINE_NAME"			property="lineName"			jdbcType="VARCHAR" />
+	  	<result column="rownum_"			property="rowNum"/>
+		<result column="count_"				property="rowCount"/>
+		<result column="ACTIVE_TAG"		    property="activeTag"/>
+  </resultMap>
+
+  <select id="getLostBidReasonListByLineCd"	resultMap="GIISLostBid">
+  	SELECT REASON_CD, REASON_DESC FROM TABLE (GIIS_LOST_BID_PKG.get_lost_bid_reason_list(#lineCd#))
+  </select>
+  
+  <select id="generateReasonCd" resultClass="java.lang.Integer">
+  	SELECT LOST_BID_REASON_CD_S.nextVal as "REASON_CD" from dual
+  </select>
+  
+  <select id="generateReasonCd2" resultClass="java.lang.Integer">
+  	SELECT NVL(MAX(reason_cd),0)+1 AS reason_cd FROM GIIS_LOST_BID
+  </select>
+  
+  <select id="getLostBidReason"	resultMap="GIISLostBid">
+  	SELECT * FROM TABLE(GIIS_LOSS_BID_PKG.get_reasons_for_denial(#userId#))
+  </select>
+  
+   <select id="getLostBidReasonTableGrid"	resultMap="GIISLostBidTableGrid" parameterClass="java.util.HashMap">
+             SELECT *
+              FROM (SELECT rownum rownum_, 
+                           b.count_, 
+                           a.* 
+                      FROM (SELECT * 
+                              FROM TABLE (GIIS_LOSS_BID_PKG.get_reasons_for_denial(#userId#))                      
+                        	<isNotNull property="filter">
+								WHERE 1 = 1 
+								<isNotEmpty prepend="AND" property="reasonCd">
+										reason_cd = #reasonCd# 
+								</isNotEmpty>
+	 							<isNotEmpty prepend="AND" property="reasonDesc">
+										UPPER(reason_desc) LIKE UPPER(#reasonDesc#)
+								</isNotEmpty>	
+								<isNotEmpty prepend="AND" property="lineCd">
+										UPPER(line_cd) LIKE UPPER(#lineCd#)
+								</isNotEmpty>	
+								<isNotEmpty prepend="AND" property="lineName">
+										UPPER(line_name) LIKE UPPER(#lineName#)
+								</isNotEmpty>																																							
+							</isNotNull>	
+                              <isEqual property="sortColumn" compareValue="lineCd lineName">
+			              		ORDER BY line_cd
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="reasonCd">
+				              	ORDER BY reason_cd
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="reasonDesc">
+				              	ORDER BY reason_desc
+				              </isEqual>				         
+				              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	  </isNotNull>) a, 
+                           (SELECT count(*) count_ 
+                              FROM TABLE (GIIS_LOSS_BID_PKG.get_reasons_for_denial(#userId#)) 
+                              	<isNotNull property="filter">
+									WHERE 1 = 1 
+									<isNotEmpty prepend="AND" property="reasonCd">
+											reason_cd = #reasonCd# 
+									</isNotEmpty>
+		 							<isNotEmpty prepend="AND" property="reasonDesc">
+											UPPER(reason_desc) LIKE UPPER(#reasonDesc#)
+									</isNotEmpty>	
+									<isNotEmpty prepend="AND" property="lineCd">
+											UPPER(line_cd) LIKE UPPER(#lineCd#)
+									</isNotEmpty>	
+									<isNotEmpty prepend="AND" property="lineName">
+											UPPER(line_name) LIKE UPPER(#lineName#)
+									</isNotEmpty>																																								
+								</isNotNull>	
+							)  b )
+                     WHERE rownum_ BETWEEN #from# AND #to#
+  </select>
+  
+  <procedure id="setLostBidReason" parameterClass="GIISLostBid">
+  	DECLARE
+  		reason      GIIS_LOST_BID%rowtype;
+  	BEGIN
+  		giis_users_pkg.app_user := #userId#;
+  		  		
+  		reason.reason_cd	:=  #reasonCd#;
+  		reason.reason_desc  :=  #reasonDesc#;
+	    reason.remarks      :=  #remarks#;
+	    reason.line_cd      :=  #lineCd#;
+	    
+	    GIIS_LOSS_BID_PKG.SET_LOST_BID(reason);
+  	END;
+  </procedure>
+  
+  <procedure id="delLostBidReason" parameterClass="java.lang.Integer">
+  	BEGIN	
+  		giis_users_pkg.app_user := #userId#;
+  		GIIS_LOSS_BID_PKG.DEL_LOST_BID(#reasonCd#);
+  	END;
+  </procedure>
+  
+  <select id="valUpdateReason" resultClass="java.lang.String">
+	SELECT giis_loss_bid_pkg.val_update_rec(TO_NUMBER(#reasonCd#))FROM dual			
+  </select>
+  
+  <procedure id="setReason" parameterClass="GIISLostBid">
+	    DECLARE
+	    	v_rec giis_lost_bid%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.line_cd := #lineCd#; 		
+ 			v_rec.reason_cd := #reasonCd#;
+ 			v_rec.reason_desc := #reasonDesc#;		
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			v_rec.active_tag := #activeTag#;
+ 			
+ 			giis_loss_bid_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteReason">
+ 		BEGIN
+ 			giis_loss_bid_pkg.val_del_rec(#reasonCd#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddReason">
+ 		BEGIN
+ 			giis_loss_bid_pkg.val_add_rec(#reasonCd#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delReason" parameterClass="GIISLostBid">
+		BEGIN
+ 			giis_loss_bid_pkg.del_rec(#lineCd#,#reasonCd#);
+ 		END;
+ 	</delete>
+</sqlMap>

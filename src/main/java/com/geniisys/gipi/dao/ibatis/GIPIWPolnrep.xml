@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIWPolnrep">
+	
+	<typeAlias alias="WPolnrep" type="com.geniisys.gipi.entity.GIPIWPolnrep" />
+	
+	<resultMap class="WPolnrep" id="wpolnrepResultMap">
+		<result property="parId" 			column="PAR_ID" />
+		<result property="oldPolicyId" 		column="OLD_POLICY_ID" />
+		<result property="lineCd" 			column="LINE_CD" />
+		<result property="sublineCd" 		column="SUBLINE_CD" />
+		<result property="polSeqNo" 		column="POL_SEQ_NO" />
+		<result property="issCd" 			column="ISS_CD" />
+		<result property="issueYy" 			column="ISSUE_YY" />
+		<result property="renewNo" 			column="RENEW_NO" />
+		<result property="recFlag" 			column="REC_FLAG" />
+		<result property="renRepSw" 		column="REN_REP_SW" />
+		<result property="expiryDate"		column="EXPIRY_DATE" />
+	</resultMap>
+	
+	<parameterMap class="map" id="saveParamMap">
+		<parameter property="parId" 		jdbcType="int" 		javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="oldPolicyId" 	jdbcType="int" 		javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="polFlag"		jdbcType="VARCHAR" 	javaType="java.lang.String" mode="IN"/>
+		<parameter property="userId"		jdbcType="VARCHAR" 	javaType="java.lang.String" mode="IN"/>
+		<parameter property="message" 		jdbcType="VARCHAR" 	javaType="java.lang.String" mode="OUT"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="getPolicyIdParamMap">
+		<parameter property="parId" 		jdbcType="INT"  	javaType="java.lang.Integer" 	mode="IN" />
+		<parameter property="lineCd" 		jdbcType="VARCHAR" 	javaType="java.lang.String" 	mode="IN" />
+		<parameter property="sublineCd" 	jdbcType="VARCHAR" 	javaType="java.lang.String" 	mode="IN" />
+		<parameter property="issCd" 		jdbcType="VARCHAR" 	javaType="java.lang.String" 	mode="IN" />
+		<parameter property="issueYy" 		jdbcType="INT" 		javaType="java.lang.Integer" 	mode="IN" />
+		<parameter property="polSeqNo" 		jdbcType="INT" 		javaType="java.lang.Integer" 	mode="IN" />		
+		<parameter property="renewNo" 		jdbcType="INT" 		javaType="java.lang.Integer" 	mode="IN" />
+		<parameter property="polFlag" 		jdbcType="VARCHAR" 	javaType="java.lang.String" 	mode="IN" />
+		<parameter property="message" 		jdbcType="VARCHAR" 	javaType="java.lang.String" 	mode="OUT"/>
+		<parameter property="oldPolicyId" 	jdbcType="INTEGER" 	javaType="java.lang.Integer"	mode="OUT" />
+		<parameter property="renewExpiry" 	jdbcType="DATE"		javaType="java.util.Date"		mode="OUT" />
+	</parameterMap>
+	
+	<parameterMap class="map" id="isExistMapWPolnrep">
+	    <parameter property="parId"			    jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+	    <parameter property="exist"			    jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+	</parameterMap>
+	
+	<resultMap class="WPolnrep" id="oldPolicyIdMap">
+		<result property="oldPolicyId" 		column="OLD_POLICY_ID" />
+	</resultMap>
+		
+	<select id="getWPolnrep" resultMap="wpolnrepResultMap">
+		SELECT * 
+		  FROM TABLE(Gipi_Wpolnrep_Pkg.get_gipi_wpolnrep(#parId#))
+	</select>
+	
+	<procedure id="saveWPolnrep" parameterClass="java.util.HashMap" >
+		BEGIN	
+			GIIS_USERS_PKG.app_user := #userId#;
+			GIPI_WPOLNREP_PKG.SET_GIPI_WPOLNREP(#parId#, #oldPolicyId#, #polFlag#, #userId#);
+		END;
+	</procedure>
+
+	<procedure id="checkPolicyForRenewal" parameterMap="getPolicyIdParamMap">
+		{ CALL CHECK_POLICY_FOR_RENEWAL(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) }
+	</procedure>
+	
+	<procedure id="deleteWPolnreps">
+		BEGIN
+			Gipi_WPolnrep_Pkg.del_gipi_wpolnreps(#parId#);
+		END;
+	</procedure>
+	
+	<procedure id="deleteWPolnrep">
+		BEGIN
+			Gipi_WPolnrep_Pkg.del_gipi_wpolnrep(#parId#, #oldPolicyId#);
+		END;
+	</procedure>
+	
+	<procedure id="isExistWPolnrep" parameterMap="isExistMapWPolnrep">
+		{ CALL Gipi_WPolnrep_Pkg.get_gipi_wpolnrep_exist(?, ?) }
+	</procedure>
+	
+	<procedure id="setWpolnRepForPack" parameterClass="java.util.HashMap">
+		BEGIN
+			GIIS_USERS_PKG.app_user := #userId#;
+			Gipi_Wpolnrep_Pkg.set_wpolnrep_sublines(#packParId#, #oldPackPolicyId#);
+		END;
+	</procedure>
+	
+	<select id="getWPolnrep2" resultMap="wpolnrepResultMap">
+		SELECT * 
+		  FROM TABLE(Gipi_Wpolnrep_Pkg.get_gipi_wpolnrep2(#parId#))
+	</select>
+</sqlMap>

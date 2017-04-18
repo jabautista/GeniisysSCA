@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap>
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIPIOpenPolicyClass" type="com.geniisys.gipi.entity.GIPIOpenPolicy"/>
+	
+	<!-- <resultMap class="GIPIOpenPolicyClass" id="endtseq0OpenPolicyMap">
+		<result property="policyId" 	column="policy_id"/>
+		<result property="lineCd" 		column="line_cd"/>
+		<result property="opIssCd" 		column="op_iss_cd"/>
+		<result property="opIssueYy" 	column="op_issue_yy"/>
+		<result property="opPolSeqno" 	column="op_pol_seqno"/>
+		<result property="opSublineCd" 	column="op_subline_cd"/>
+		<result property="opRenewNo" 	column="op_renew_no"/>
+		<result property="decltnNo" 	column="decltn_no"/>
+		<result property="effDate" 		column="eff_date"/>
+		<result property="refOpenPolNo" column="ref_open_pol_no"/>
+		
+		<result property="rowNum"		column="rownum_"/>
+		<result property="rowCount"		column="count_"/>
+	</resultMap>
+	<select id="getEndtseq0OpenPolicy" resultMap="endtseq0OpenPolicyMap" parameterClass="java.lang.Integer">
+		SELECT *       
+                FROM (SELECT rownum rownum_ ,b.count_,a.*     
+                        FROM (SELECT * FROM TABLE(gipi_open_policy_pkg.get_endtseq0_open_policy(#policyEndSeq0#))) a,
+	               		   (SELECT count(*) count_ FROM TABLE(gipi_open_policy_pkg.get_endtseq0_open_policy(#policyEndSeq0#))) b)         
+	          WHERE rownum_ BETWEEN NVL(#from#,rownum_) AND NVL(#to#,rownum_)
+	</select> -->
+	
+	<resultMap class="GIPIOpenPolicyClass" id="endtseq0OpenPolicyMap">
+		<result property="policyId" 	column="policy_id"/>
+		<result property="lineCd" 		column="line_cd"/>
+		<result property="opIssCd" 		column="op_iss_cd"/>
+		<result property="opIssueYy" 	column="op_issue_yy"/>
+		<result property="opPolSeqno" 	column="op_pol_seqno"/>
+		<result property="opSublineCd" 	column="op_subline_cd"/>
+		<result property="opRenewNo" 	column="op_renew_no"/>
+		<result property="decltnNo" 	column="decltn_no"/>
+		<result property="effDate" 		column="eff_date"/>
+		<result property="refOpenPolNo" column="ref_open_pol_no"/>
+	</resultMap>
+	<select id="getEndtseq0OpenPolicy" resultMap="endtseq0OpenPolicyMap" parameterClass="java.lang.Integer">
+		SELECT * FROM TABLE(gipi_open_policy_pkg.get_endtseq0_open_policy(#policyEndSeq0#))
+	</select>
+	
+	<!-- for GIPIS199 -->
+	<resultMap class="java.util.HashMap" id="openPolicyListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="policyId" 		column="policy_id"/>
+		<result property="lineCd" 			column="line_cd"/>
+		<result property="opIssCd" 			column="op_iss_cd"/>
+		<result property="opIssueYy" 		column="op_issue_yy"/>
+		<result property="opPolSeqNo" 		column="op_pol_seq_no"/>
+		<result property="opSublineCd" 		column="op_subline_cd"/>
+		<result property="opRenewNo" 		column="op_renew_no"/>
+		<result property="policyNo" 		column="policy_no"/>
+		<result property="inceptDate" 		column="incept_date"/>
+		<result property="expiryDate" 		column="expiry_date"/>
+		<result property="assdNo" 			column="assd_no"/>
+		<result property="assdName" 		column="assd_name"/>
+		<result property="credBranch" 		column="cred_branch"/>
+		<result property="limitLiability" 	column="limit_liability"/>
+		<result property="tsiAmt" 			column="tsi_amt"/>
+		<result property="premAmt" 			column="prem_amt"/>		
+	</resultMap>
+	
+	<select id="getOpPolicyLOV" resultMap="openPolicyListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (gipi_open_policy_pkg.get_open_policy_lov(#lineCd#, #opSublineCd#, #opIssCd#, #opIssueYy#, #opPolSeqNo#, #opRenewNo#, #credBranch#, #userId#, #inceptDate1#, #expiryDate1#))
+		                 WHERE incept_date = NVL(#inceptDate#, incept_date)
+		                   AND expiry_date = NVL(#expiryDate#, expiry_date)
+		                <isNotNull property="filter">
+					  	 AND 1=1
+				  			<isNotEmpty prepend="AND" property="lineCd">
+				  				UPPER(line_cd) LIKE UPPER(#lineCd#)
+				  			</isNotEmpty>
+				  			<isNotEmpty prepend="AND" property="opSublineCd">
+				  				UPPER(op_subline_cd) LIKE UPPER(#opSublineCd#)
+				  			</isNotEmpty>
+				  			<isNotEmpty prepend="AND" property="opIssCd">
+				  				UPPER(op_iss_cd) LIKE UPPER(#opIssCd#)
+				  			</isNotEmpty>
+				  			<isNotEmpty prepend="AND" property="opIssueYy">
+				  				op_issue_yy = #opIssueYy#
+				  			</isNotEmpty>
+				  			<isNotEmpty prepend="AND" property="opPolSeqNo">
+				  				op_pol_seq_no = #opPolSeqNo#
+				  			</isNotEmpty>
+				  			<isNotEmpty prepend="AND" property="opRenewNo">
+				  				op_renew_no = #opRenewNo#
+				  			</isNotEmpty>
+			  			</isNotNull>
+		                  <isEqual property="sortColumn" compareValue="lineCd opSublineCd opIssCd opIssueYy opPolSeqNo opRenewNo">
+			              		ORDER BY policy_no
+			              </isEqual>			              
+			          	  <isNotNull property="sortColumn"> 
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (gipi_open_policy_pkg.get_open_policy_lov(#lineCd#, #opSublineCd#, #opIssCd#, #opIssueYy#, #opPolSeqNo#, #opRenewNo#, #credBranch#, #userId#, #inceptDate1#, #expiryDate1#))
+		                  WHERE incept_date = NVL(#inceptDate#, incept_date)
+		                   AND expiry_date = NVL(#expiryDate#, expiry_date)
+		                <isNotNull property="filter">
+					  	 AND 1=1
+				  			<isNotEmpty prepend="AND" property="lineCd">
+				  				UPPER(line_cd) LIKE UPPER(#lineCd#)
+				  			</isNotEmpty>
+				  			<isNotEmpty prepend="AND" property="opSublineCd">
+				  				UPPER(op_subline_cd) LIKE UPPER(#opSublineCd#)
+				  			</isNotEmpty>
+				  			<isNotEmpty prepend="AND" property="opIssCd">
+				  				UPPER(op_iss_cd) LIKE UPPER(#opIssCd#)
+				  			</isNotEmpty>
+				  			<isNotEmpty prepend="AND" property="opIssueYy">
+				  				op_issue_yy = #opIssueYy#
+				  			</isNotEmpty>
+				  			<isNotEmpty prepend="AND" property="opPolSeqNo">
+				  				op_pol_seq_no = #opPolSeqNo#
+				  			</isNotEmpty>
+				  			<isNotEmpty prepend="AND" property="opRenewNo">
+				  				op_renew_no = #opRenewNo#
+				  			</isNotEmpty>
+			  			</isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getOpPolicyList" resultMap="openPolicyListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (gipi_open_policy_pkg.get_open_policy_list(#lineCd#, #opSublineCd#, #opIssCd#, #opIssueYy#, #opPolSeqNo#, #opRenewNo#, #credBranch#, #userId#))
+		              <isNotNull property="filter">
+					  	 WHERE 1=1
+			  			<isNotEmpty prepend="AND" property="policyNo">
+			  				UPPER(policy_no) LIKE UPPER(#policyNo#)
+			  			</isNotEmpty>
+			  			<isNotEmpty prepend="AND" property="assdName">
+			  				UPPER(assd_name) LIKE UPPER(#assdName#)
+			  			</isNotEmpty>
+			  			<isNotEmpty prepend="AND" property="credBranch">
+			  				UPPER(cred_branch) LIKE UPPER(#credBranch#)
+			  			</isNotEmpty> <!-- added by gab 11.29.2016 SR 5855 -->
+			  			<isNotEmpty prepend="AND" property="inceptDate">
+			  				TO_DATE(incept_date, 'mm-dd-yyyy') = TO_DATE(#inceptDate#, 'mm-dd-yyyy')
+			  			</isNotEmpty>
+			  			<isNotEmpty prepend="AND" property="expiryDate">
+			  				TO_DATE(expiry_date, 'mm-dd-yyyy') = TO_DATE(#expiryDate#, 'mm-dd-yyyy')
+			  			</isNotEmpty>
+			  			<isNotEmpty prepend="AND" property="tsiAmt">
+			  				tsi_amt = #tsiAmt#
+			  			</isNotEmpty>
+			  			<isNotEmpty prepend="AND" property="premAmt">
+			  				prem_amt = #premAmt#
+			  			</isNotEmpty>
+					  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="policyNo">
+			              		ORDER BY policy_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="assdName">
+			              		ORDER BY assd_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="credBranch">
+			              		ORDER BY cred_branch
+			              </isEqual> <!-- added by gab 11.29.2016 SR 5855 -->
+			              <isEqual property="sortColumn" compareValue="inceptDate">
+			              		ORDER BY TO_DATE(incept_date, 'mm-dd-yyyy')
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="expiryDate">
+			              		ORDER BY TO_DATE(expiry_date, 'mm-dd-yyyy')
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="tsiAmt">
+			              		ORDER BY tsi_amt
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="premAmt">
+			              		ORDER BY prem_amt
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (gipi_open_policy_pkg.get_open_policy_list(#lineCd#, #opSublineCd#, #opIssCd#, #opIssueYy#, #opPolSeqNo#, #opRenewNo#, #credBranch#, #userId#))
+		                  <isNotNull property="filter">
+					  	 WHERE 1=1
+			  			<isNotEmpty prepend="AND" property="policyNo">
+			  				UPPER(policy_no) LIKE UPPER(#policyNo#)
+			  			</isNotEmpty>
+			  			<isNotEmpty prepend="AND" property="assdName">
+			  				UPPER(assd_name) LIKE UPPER(#assdName#)
+			  			</isNotEmpty>
+			  			<isNotEmpty prepend="AND" property="credBranch">
+			  				UPPER(cred_branch) LIKE UPPER(#credBranch#)
+			  			</isNotEmpty> <!-- added by gab 11.29.2016 SR 5855 -->
+			  			<isNotEmpty prepend="AND" property="inceptDate">
+			  				TO_DATE(incept_date, 'mm-dd-yyyy') = TO_DATE(#inceptDate#, 'mm-dd-yyyy')
+			  			</isNotEmpty>
+			  			<isNotEmpty prepend="AND" property="expiryDate">
+			  				TO_DATE(expiry_date, 'mm-dd-yyyy') = TO_DATE(#expiryDate#, 'mm-dd-yyyy')
+			  			</isNotEmpty>
+			  			<isNotEmpty prepend="AND" property="tsiAmt">
+			  				tsi_amt = #tsiAmt#
+			  			</isNotEmpty>
+			  			<isNotEmpty prepend="AND" property="premAmt">
+			  				prem_amt = #premAmt#
+			  			</isNotEmpty>
+					  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="openLiabFiMnResultMap">
+		<result property="policyId"			column="policy_id" />
+		<result property="geogCd"			column="geog_cd" />
+		<result property="geogDesc"			column="geog_desc" />
+		<result property="currencyCd"		column="currency_cd" />
+		<result property="currencyDesc"		column="currency_desc" />
+		<result property="limitLiability"	column="limit_liability" />
+		<result property="currencyRt"		column="currency_rt" />
+		<result property="voyLimit"			column="voy_limit" />
+		<result property="withInvoiceTag"			column="with_invoice_tag" />		
+	</resultMap>
+	
+	<select id="getOpenLiabFiMn" resultMap="openLiabFiMnResultMap" parameterClass="java.lang.String">
+		SELECT * FROM TABLE (gipi_open_policy_pkg.get_open_liab_fi_mn(#policyId#))
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="openCargoResultMap">
+		<result property="cargoClassCd"		column="cargo_class_cd" />
+		<result property="cargoClassDesc"	column="cargo_class_desc" />		
+	</resultMap>
+	
+	<select id="getOpenCargos" resultMap="openCargoResultMap" parameterClass="java.util.HashMap">
+		SELECT * FROM TABLE (gipi_open_policy_pkg.get_open_cargos(#policyId#, #geogCd#))
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="openPerilResultMap">
+		<result property="perilName"		column="peril_name" />
+		<result property="premRate"			column="prem_rate" />
+		<result property="remarks"			column="remarks" />
+		<result property="withInvoiceTag"	column="with_invoice_tag" />		
+	</resultMap>
+	
+	<select id="getOpenPerils" resultMap="openPerilResultMap" parameterClass="java.util.HashMap">
+		SELECT * FROM TABLE (gipi_open_policy_pkg.get_open_perils(#policyId#, #geogCd#))
+	</select>
+</sqlMap>

@@ -1,0 +1,604 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIWCommInvoice">
+	
+	<typeAlias alias="WCommInvoice" type="com.geniisys.gipi.entity.GIPIWCommInvoice" />
+	
+	<resultMap class="WCommInvoice" id="wcommInvoiceResultMap">
+		<result property="parId" 					column="PAR_ID"/>
+		<result property="itemGroup" 				column="ITEM_GRP"/>
+		<result property="takeupSeqNo" 				column="TAKEUP_SEQ_NO"/>
+		<result property="commissionAmount" 		column="COMMISSION_AMT"/>
+		<result property="intermediaryName" 		column="INTM_NAME"/>
+		<result property="intermediaryNo" 			column="INTRMDRY_INTM_NO"/>
+		<result property="netCommission" 			column="NET_COMMISSION"/>
+		<result property="parentIntermediaryNo" 	column="PARENT_INTM_NO"/>
+		<result property="parentIntermediaryName" 	column="PARENT_INTM_NAME"/>
+		<result property="premiumAmount" 			column="PREMIUM_AMT"/>
+		<result property="sharePercentage" 			column="SHARE_PERCENTAGE"/>
+		<result property="withholdingTax" 			column="WHOLDING_TAX"/>
+		<result property="parentIntmLicTag"         column="parent_intm_lic_tag"/>
+		<result property="parentIntmSpecialRate"    column="parent_intm_special_rate"/>
+		<result property="licTag" 					column="lic_tag"/> 		<!--added by christian 08.25.2012-->
+		<result property="specialRate" 				column="special_rate"/>	<!--added by christian 08.25.2012-->
+	</resultMap>
+	
+	<resultMap class="com.geniisys.gipi.entity.GIPIWInvoice" id="winvoiceResultMap">
+		<result property="parId" 			column="PAR_ID" />
+		<result property="itemGrp" 			column="ITEM_GRP" />
+		<result property="takeupSeqNo" 		column="TAKEUP_SEQ_NO" />
+		<result property="multiBookingMM" 	column="MULTI_BOOKING_MM" />
+		<result property="multiBookingYY" 	column="MULTI_BOOKING_YY" />
+		<result property="insured"		  	column="INSURED" />		
+	</resultMap>
+	
+	<resultMap class="com.geniisys.gipi.entity.GIPIWCommInvoicePeril" id="WCommInvoicePerilResultMap">
+		<result property="perilCd" 					column="PERIL_CD"/>
+		<result property="perilName" 				column="PERIL_NAME"/>
+		<result property="itemGroup" 				column="ITEM_GRP"/>
+		<result property="takeupSeqNo" 				column="TAKEUP_SEQ_NO"/>
+		<result property="parId" 					column="PAR_ID"/>
+		<result property="intermediaryIntmNo" 		column="INTRMDRY_INTM_NO"/>
+		<result property="premiumAmount" 			column="PREMIUM_AMT"/>
+		<result property="commissionRate" 			column="COMMISSION_RT"/>
+		<result property="commissionAmount" 		column="COMMISSION_AMT"/>
+		<result property="withholdingTax" 			column="WHOLDING_TAX"/>
+		<result property="netCommission" 			column="NET_COMMISSION"/>		
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="parlistResultMap">
+		<result property="parId"		column="PAR_ID"/>
+		<result property="lineCd"		column="LINE_CD"/>
+		<result property="issCd"		column="ISS_CD"/>
+		<result property="parYy"		column="PAR_YY"/>
+		<result property="parSeqNo"		column="PAR_SEQ_NO"/>
+		<result property="quoteSeqNo"	column="QUOTE_SEQ_NO"/>
+		<result property="dspPackParNo"	column="DSP_PACK_PAR_NO"/>
+		<result property="drvParSeqNo"	column="DRV_PAR_SEQ_NO"/>
+		<result property="polFlag"		column="POL_FLAG"/>
+		<result property="assdNo"		column="ASSD_NO"/>
+		<result property="dspAssdName"	column="DSP_ASSD_NAME"/>
+		<result property="parStatus"	column="PAR_STATUS"/>
+		<result property="nbEndtYy"		column="NB_ENDT_YY"/>
+		<result property="parType"		column="PAR_TYPE"/>
+		<result property="packParId"	column="PACK_PAR_ID"/>
+		<result property="sublineCd"	column="SUBLINE_CD"/>
+	</resultMap>
+	
+	<resultMap id="GIISBancTypeMap" class="com.geniisys.common.entity.GIISBancType">
+		<result column="BANC_TYPE_CD"		property="bancTypeCd"/>
+		<result column="BANC_TYPE_DESC"		property="bancTypeDesc"/>
+		<result column="RATE"				property="rate"/>
+		<result column="USER_ID"			property="userId"/>
+		<result column="LAST_UPDATE"		property="lastUpdate"/>
+	</resultMap>
+	
+	<resultMap id="GIISBancTypeDtlMap" class="com.geniisys.common.entity.GIISBancTypeDtl">
+		<result column="item_no"			property="itemNo"/>
+		<result column="intm_no"			property="intmNo"/>
+		<result column="intm_name"			property="intmName"/>
+		<result column="intm_type"			property="intmType"/>
+		<result column="fixed_tag"			property="fixedTag"/>
+		<result column="banc_type_cd"		property="bancTypeCd"/>
+		<result column="intm_type_desc"		property="intmTypeDesc"/>
+		<result column="share_percentage"	property="sharePercentage"/>
+		<result column="parent_intm_no"		property="parentIntmNo"/>
+		<result column="parent_intm_name"	property="parentIntmName"/>
+	</resultMap>
+	
+	<resultMap id="itemGrpListMap" class="java.util.HashMap">
+		<result column="item_grp"			property="itemGrp"/>
+	</resultMap>
+	
+	<resultMap id="gipiWinvperlListMap" class="java.util.HashMap">
+		<result column="PERIL_CD"			property="perilCd"/>
+		<result column="PREM_AMT"			property="premAmt"/>
+		<result column="PERIL_NAME"			property="perilName"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="packParlistResultMap">
+		<result property="packParId"			column="PACK_PAR_ID"/>
+		<result property="parId"				column="PAR_ID"/>
+		<result property="vValidateBanca"		column="V_VALIDATE_BANCA"/>
+		<result property="vPolFlag"				column="V_POL_FLAG"/>
+		<result property="intmNo"				column="INTM_NO"/>
+		<result property="intmName"				column="INTM_NAME"/>
+		<result property="parentIntmNo"			column="PARENT_INTM_NO"/>
+		<result property="parentIntmName"		column="PARENT_INTM_NAME"/>
+		<result property="lineCd"				column="LINE_CD"/>
+		<result property="sublineCd"			column="SUBLINE_CD"/>
+		<result property="assdNo"				column="ASSD_NO"/>
+		<result property="parType"				column="PAR_TYPE"/>
+		<result property="vLovTag"				column="V_LOV_TAG"/>
+		<result property="vWcominvIntmLov"		column="V_WCOMINV_INTM_NO_LOV"/>
+		<result property="vMsgAlert"			column="V_MSG_ALERT"/>
+	</resultMap>
+	
+	<resultMap id="packWitmperlListMap" class="java.util.HashMap">
+		<result column="ITEM_NO"			property="itemNo"/>
+		<result column="PACK_LINE_CD"		property="packLineCd"/>
+		<result column="PERIL_CD"			property="perilCd"/>
+		<result column="PREM_AMT"			property="premAmt"/>
+		<result column="PERIL_NAME"			property="perilName"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="wcommInvoiceListTableGridResultMap">
+		<result property="parId" 					column="PAR_ID"/>
+		<result property="itemGroup" 				column="ITEM_GRP"/>
+		<result property="takeupSeqNo" 				column="TAKEUP_SEQ_NO"/>
+		<result property="commissionAmount" 		column="COMMISSION_AMT"/>
+		<result property="intermediaryName" 		column="INTM_NAME"/>
+		<result property="intermediaryNo" 			column="INTRMDRY_INTM_NO"/>
+		<result property="netCommission" 			column="NET_COMMISSION"/>
+		<result property="parentIntermediaryNo" 	column="PARENT_INTM_NO"/>
+		<result property="parentIntermediaryName" 	column="PARENT_INTM_NAME"/>
+		<result property="premiumAmount" 			column="PREMIUM_AMT"/>
+		<result property="sharePercentage" 			column="SHARE_PERCENTAGE"/>
+		<result property="withholdingTax" 			column="WHOLDING_TAX"/>
+		<result property="intmNoNbt"				column="INTRMDRY_INTM_NO"/>
+		<result property="sharePercentageNbt"		column="SHARE_PERCENTAGE"/>
+		<result property="nbtIntmType"				column="PAR_ID"/> <!-- temp value -->
+		<result property="parentIntmLicTag"         column="parent_intm_lic_tag"/>
+		<result property="parentIntmSpecialRate"         column="parent_intm_special_rate"/>
+		<result property="specialRate"				column="special_rate" />
+		<result property="licTag"					column="lic_tag" />
+		<result property="rowNum" 					column="rownum_"/>
+		<result property="rowCount"					column="count_"/>
+	</resultMap>
+	
+	<parameterMap class="map" id="applyBtnMap">
+		<parameter property="parId" jdbcType="NUMBER" javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="itemGrp" jdbcType="NUMBER" javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="intermediaryNo" jdbcType="NUMBER" javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="intermediaryNoNbt" jdbcType="NUMBER" javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="takeupSeqNo" jdbcType="NUMBER" javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="sharePercentage" jdbcType="NUMBER" javaType="java.math.BigDecimal" mode="IN"/>
+		<parameter property="sharePercentageNbt" jdbcType="NUMBER" javaType="java.math.BigDecimal" mode="IN"/>
+		<parameter property="prevSharePercentage" jdbcType="NUMBER" javaType="java.math.BigDecimal" mode="IN"/>
+		<parameter property="lineCd" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"/>
+		<parameter property="issCd" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"/>
+		<parameter property="intmTypeNbt" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"/>
+		<parameter property="recordStatus" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"/>
+		<parameter property="perilCd" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"/>
+		<parameter property="commissionAmt" jdbcType="NUMBER" javaType="java.math.BigDecimal" mode="IN"/>
+		<parameter property="commissionAmtNbt" jdbcType="NUMBER" javaType="java.math.BigDecimal" mode="IN"/>
+		<parameter property="premiumAmt" jdbcType="VARCHAR" javaType="java.lang.String" mode="INOUT"/>
+		<parameter property="commissionRate" jdbcType="VARCHAR" javaType="java.lang.String" mode="INOUT"/>
+		<parameter property="wholdingTax" jdbcType="VARCHAR" javaType="java.lang.String" mode="INOUT"/>
+		<parameter property="applyBtnEnabled" jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT"/>
+		<parameter property="commissionRateEnabled" jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT"/>
+		<parameter property="commissionAmtEnabled" jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT"/>
+		<parameter property="varMessage" jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT"/>
+		<parameter property="varTaxAmt" jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT"/>
+		<parameter property="varSharePercentage" jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT"/>
+		<parameter property="varFunction" jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT"/>
+		<parameter property="varSwitchNo" jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT"/>
+		<parameter property="varSwitchName" jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT"/>
+	</parameterMap>
+	
+	<!-- 
+	<parameterMap class="map" id="wcommInvPerilMap">
+		<parameter property="parId" jdbcType="NUMBER" javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="itemGrp" jdbcType="VARCHAR" javaType="java.lang.String" mode="INOUT"/>
+		<parameter property="takeupSeqNo" jdbcType="NUMBER" javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="lineCd" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"/>
+		<parameter property="intmNo" jdbcType="NUMBER" javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="nbtIntmType" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"/>
+		<parameter property="nbtRetOrig" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"/>
+		<parameter property="perilCd" jdbcType="VARCHAR" javaType="java.lang.String" mode="INOUT"/>
+		<parameter property="sharePercentage" jdbcType="VARCHAR" javaType="java.lang.String" mode="INOUT"/>
+		<parameter property="prevSharePercentage" jdbcType="VARCHAR" javaType="java.lang.String" mode="INOUT"/>
+		<parameter property="premiumAmt" jdbcType="VARCHAR" javaType="java.lang.String" mode="INOUT"/>
+		<parameter property="commissionRate" jdbcType="VARCHAR" javaType="java.lang.String" mode="INOUT"/>
+		<parameter property="commissionAmt" jdbcType="VARCHAR" javaType="java.lang.String" mode="INOUT"/>
+		<parameter property="nbtCommissionAmt" jdbcType="VARCHAR" javaType="java.lang.String" mode="INOUT"/>
+		<parameter property="wholdingTax" jdbcType="VARCHAR" javaType="java.lang.String" mode="INOUT"/>
+		<parameter property="issCd" jdbcType="VARCHAR" javaType="java.lang.String" mode="INOUT"/>
+		<parameter property="varMessage" jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT"/>
+		<parameter property="varRate" jdbcType="VARCHAR" javaType="java.lang.String" mode="INOUT"/>
+	</parameterMap> -->
+	
+	<parameterMap class="map" id="wcommInvPerilMap">
+		<parameter property="parId"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="lineCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="itemGrp"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="varIssCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="message"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="populateWcommInvPerilsMap">
+		<parameter property="parId"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="itemGrp"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="takeupSeqNo"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="lineCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="gipiWinvperlList"	jdbcType="ORACLECURSOR"		javaType="java.sql.ResultSet" mode="OUT"	resultMap="gipiWinvperlListMap" />
+	</parameterMap>
+	
+	<parameterMap class="map" id="populatePackagePerilsMap">
+		<parameter property="parId"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="itemGrp"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="packWitmperlList"	jdbcType="ORACLECURSOR"		javaType="java.sql.ResultSet" mode="OUT"	resultMap="packWitmperlListMap" />
+	</parameterMap>
+	
+	<parameterMap class="map" id="validateIntmNoMap">
+		<parameter property="parId" 			jdbcType="NUMBER"  javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="intmNo" 			jdbcType="VARCHAR" javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="lineCd" 			jdbcType="VARCHAR" javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="lovTag" 			jdbcType="VARCHAR" javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="globalCancelTag" 	jdbcType="VARCHAR" javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="message" 			jdbcType="VARCHAR" javaType="java.lang.String" 	mode="OUT"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="getParTypeAndEndtTaxMap">
+		<parameter property="parId" jdbcType="NUMBER" javaType="java.lang.Integer" mode="IN"/>
+		<parameter property="parType" jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT"/>
+		<parameter property="endtTax" jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT"/>
+	</parameterMap>	
+	
+	<parameterMap class="map" id="wcommInvoiceNewFormInstanceParamMap">
+		<parameter property="userId"				jdbcType="VARCHAR"			javaType="java.lang.String"   mode="IN"/>
+		<parameter property="parId"					jdbcType="INTEGER"			javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="globalCancelTag"		jdbcType="VARCHAR"			javaType="java.lang.String"   mode="OUT"/>
+		<parameter property="isPack"				jdbcType="VARCHAR"			javaType="java.lang.String"   mode="IN"/>
+		<parameter property="isBancassuranceRec"	jdbcType="VARCHAR"			javaType="java.lang.String"   mode="OUT"/>
+		<parameter property="isCancellationType"	jdbcType="VARCHAR"			javaType="java.lang.String"   mode="OUT"/>
+		<parameter property="isBancaBtnEnabled"		jdbcType="VARCHAR"			javaType="java.lang.String"   mode="OUT"/>
+		<parameter property="isBancaCheckEnabled"	jdbcType="VARCHAR"			javaType="java.lang.String"   mode="OUT"/>
+		<parameter property="varBancRateSw"			jdbcType="VARCHAR"			javaType="java.lang.String"   mode="OUT"/>
+		<parameter property="varOverrideWhtax"		jdbcType="VARCHAR"			javaType="java.lang.String"   mode="OUT"/>
+		<parameter property="varVCommUpdateTag"		jdbcType="VARCHAR"			javaType="java.lang.String"   mode="OUT"/>
+		<parameter property="varVParamShowComm"		jdbcType="VARCHAR"			javaType="java.lang.String"   mode="OUT"/>
+		<parameter property="varEndtYy"				jdbcType="VARCHAR"			javaType="java.lang.String"   mode="OUT"/>
+		<parameter property="varParamReqDefIntm"	jdbcType="VARCHAR"			javaType="java.lang.String"   mode="OUT"/>
+		<parameter property="vOra2010Sw"			jdbcType="VARCHAR"			javaType="java.lang.String"   mode="OUT"/>
+		<parameter property="vValidateBanca"		jdbcType="VARCHAR"			javaType="java.lang.String"   mode="OUT"/>
+		<parameter property="vParType"				jdbcType="VARCHAR"			javaType="java.lang.String"   mode="OUT"/>
+		<parameter property="vEndtTax"				jdbcType="VARCHAR"			javaType="java.lang.String"   mode="OUT"/>
+		<parameter property="vPolFlag"				jdbcType="VARCHAR"			javaType="java.lang.String"   mode="OUT"/>
+		<parameter property="vGipiWpolnrepExist"	jdbcType="VARCHAR"			javaType="java.lang.String"   mode="OUT"/>
+		<parameter property="vLovTag"				jdbcType="VARCHAR"			javaType="java.lang.String"   mode="OUT"/>
+		<parameter property="vWcominvIntmLov"		jdbcType="VARCHAR"			javaType="java.lang.String"   mode="OUT"/>
+		<parameter property="vAllowApplySlComm"		jdbcType="VARCHAR"			javaType="java.lang.String"   mode="OUT"/>
+		<parameter property="parlist"				jdbcType="ORACLECURSOR"		javaType="java.sql.ResultSet" mode="OUT"		resultMap="parlistResultMap" />
+		<parameter property="wcommInvoices"			jdbcType="ORACLECURSOR"		javaType="java.sql.ResultSet" mode="OUT"		resultMap="wcommInvoiceResultMap" /> <!-- here -->
+		<parameter property="winvoice"				jdbcType="ORACLECURSOR"		javaType="java.sql.ResultSet" mode="OUT"		resultMap="winvoiceResultMap" />
+		<parameter property="wcommInvPerils"		jdbcType="ORACLECURSOR"		javaType="java.sql.ResultSet" mode="OUT"		resultMap="WCommInvoicePerilResultMap" />
+		<parameter property="giisBancType"			jdbcType="ORACLECURSOR"		javaType="java.sql.ResultSet" mode="OUT"		resultMap="GIISBancTypeMap" />
+		<parameter property="giisBancTypeDtlList"	jdbcType="ORACLECURSOR"		javaType="java.sql.ResultSet" mode="OUT"		resultMap="GIISBancTypeDtlMap" />
+		<parameter property="itemGrpList"			jdbcType="ORACLECURSOR"		javaType="java.sql.ResultSet" mode="OUT"		resultMap="itemGrpListMap" />
+		<parameter property="dfltIntmNo"			jdbcType="INTEGER"			javaType="java.lang.Integer"  mode="OUT" />
+		<parameter property="dfltIntmName"			jdbcType="VARCHAR"			javaType="java.lang.String"	  mode="OUT" />
+		<parameter property="dfltParentIntmNo"		jdbcType="INTEGER"			javaType="java.lang.Integer"  mode="OUT" />
+		<parameter property="dfltParentIntmName"	jdbcType="VARCHAR"			javaType="java.lang.String"   mode="OUT" />
+		<parameter property="msgAlert"				jdbcType="VARCHAR"			javaType="java.lang.String"   mode="OUT"/>
+		<parameter property="coinsurerSw"			jdbcType="VARCHAR"			javaType="java.lang.String"   mode="OUT"/>
+		<parameter property="maintainedDfltIntmNo"	jdbcType="INTEGER"			javaType="java.lang.Integer"  mode="OUT"/> <!-- benjo 09.07.2016 SR-5604 -->
+		<parameter property="reqDfltIntmPerAssd"    jdbcType="VARCHAR"			javaType="java.lang.String"   mode="OUT"/> <!-- benjo 09.07.2016 SR-5604 -->
+		<parameter property="allowUpdIntmPerAssd"	jdbcType="VARCHAR"			javaType="java.lang.String"   mode="OUT"/> <!-- benjo 09.07.2016 SR-5604 -->
+	</parameterMap>
+	
+	<parameterMap class="map" id="bancassuranceGetDefaultTaxRtMap">
+		<parameter property="parId"					jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="parType"				jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="wcomInvParId"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="intrmdryIntmNo"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="intrmdryIntmNoNbt"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="sharePercentage"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="sharePercentageNbt"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="takeupSeqNo"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="systemRecordStatus"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="itemGrp"				jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="varTaxAmt"				jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="globalCancelTag"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="vRgId"					jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="vOv"					jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="varOverrideWhtax"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="varVCommUpdateTag"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="varSwitchNo"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="varSwitchName"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="varVParamShowComm"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="perilWithholdingTax"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="perilCommissionAmount"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="vGoClearBlock"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="vRemoveClrdRwFrmGrp"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="vCheckCommPeril"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="vMsgAlert1"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="vUpdWcommInvPerils"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="vPopWcommInvPerils"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="vDelWcommInvPerils"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="vMsgAlert2"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="vShowView"				jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="vHideView"				jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="vSetItmProp1"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="vSetItmProp2"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="vGoItem"				jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="vComputeTotCom"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="vAddGroupRow"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="vPolicyId"				jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="bancassuranceProcessCommissionMap">
+		<parameter property="parId"					jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="wcomInvParId"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="intrmdryIntmNo"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="intrmdryIntmNoNbt"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="sharePercentage"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="sharePercentageNbt"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="itemGrp"				jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="takeupSeqNo"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="systemRecordStatus"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="varVCommUpdateTag"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+		<parameter property="varSwitchNo"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+		<parameter property="varSwitchName"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+		<parameter property="varVParamShowComm"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+		<parameter property="globalCancelTag"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="perilWithholdingTax"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+		<parameter property="perilCommissionAmount"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="varTaxAmt"				jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="vGoClearBlock"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+		<parameter property="vRemoveClrdRwFrmGrp"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+		<parameter property="vCheckCommPeril"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="vMsgAlert1"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="vUpdWcommInvPerils"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="vPopWcommInvPerils"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="vDelWcommInvPerils"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="vMsgAlert2"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="vShowView"				jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="vHideView"				jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="vSetItmProp1"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="vSetItmProp2"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="vGoItem"				jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="vComputeTotCom"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="validateGipis085IntmNoMap">
+		<parameter property="parId"					jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="intmNo"				jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="nbtIntmType"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="INOUT"/>
+		<parameter property="assdNo"				jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="lineCd"				jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="parType"				jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="drvParSeqNo"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN"/>
+		<parameter property="vLovTag"				jdbcType="VARCHAR"		javaType="java.lang.String"		mode="INOUT"/>
+		<parameter property="issName"				jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="msgAlert"				jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="getIntmdryRateMap">
+		<parameter property="parId"				jdbcType="VARCHAR"			javaType="java.lang.String"		mode="IN"/>
+		<parameter property="b240ParType"		jdbcType="VARCHAR"			javaType="java.lang.String"		mode="IN"/>
+		<parameter property="b240LineCd"		jdbcType="VARCHAR"			javaType="java.lang.String"		mode="IN"/>
+		<parameter property="b240IssCd"			jdbcType="VARCHAR"			javaType="java.lang.String"		mode="IN"/>
+		<parameter property="intmNo"			jdbcType="VARCHAR"			javaType="java.lang.String"		mode="IN"/>
+		<parameter property="nbtRetOrig"		jdbcType="VARCHAR"			javaType="java.lang.String"		mode="IN"/>
+		<parameter property="varPerilCd"		jdbcType="VARCHAR"			javaType="java.lang.String"		mode="IN"/>
+		<parameter property="nbtIntmType"		jdbcType="VARCHAR"			javaType="java.lang.String"		mode="IN"/>
+		<parameter property="globalCancelTag"	jdbcType="VARCHAR"			javaType="java.lang.String"		mode="IN"/>
+		<parameter property="varRate"			jdbcType="VARCHAR"			javaType="java.lang.String"		mode="OUT"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="getGipis085PackageIntmRateMap">
+		<parameter property="itemNo"			jdbcType="VARCHAR"			javaType="java.lang.String"		mode="IN"/>
+		<parameter property="lineCd"			jdbcType="VARCHAR"			javaType="java.lang.String"		mode="IN"/>
+		<parameter property="perilCd"			jdbcType="VARCHAR"			javaType="java.lang.String"		mode="IN"/>
+		<parameter property="intmNo"			jdbcType="VARCHAR"			javaType="java.lang.String"		mode="IN"/>
+		<parameter property="parId"				jdbcType="VARCHAR"			javaType="java.lang.String"		mode="IN"/>
+		<parameter property="itemGrp"			jdbcType="VARCHAR"			javaType="java.lang.String"		mode="IN"/>
+		<parameter property="issCd"				jdbcType="VARCHAR"			javaType="java.lang.String"		mode="IN"/>
+		<parameter property="varIssCd"			jdbcType="VARCHAR"			javaType="java.lang.String"		mode="IN"/>
+		<parameter property="varRate"			jdbcType="VARCHAR"			javaType="java.lang.String"		mode="OUT"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="endtBondWCommInvoiceNewFormInstanceMap">
+		<parameter property="parId"					jdbcType="INTEGER"			javaType="java.lang.Integer"  mode="IN" />
+		<parameter property="vWcominvIntmLov"		jdbcType="VARCHAR"			javaType="java.lang.String"   mode="OUT"/>
+		<parameter property="vLovTag"				jdbcType="VARCHAR"			javaType="java.lang.String"   mode="OUT"/>
+		<parameter property="vPolFlag"				jdbcType="VARCHAR"			javaType="java.lang.String"   mode="OUT"/>
+		<parameter property="dfltIntmNo"			jdbcType="INTEGER"			javaType="java.lang.Integer"  mode="OUT" />
+		<parameter property="dfltIntmName"			jdbcType="VARCHAR"			javaType="java.lang.String"	  mode="OUT" />
+		<parameter property="dfltParentIntmNo"		jdbcType="INTEGER"			javaType="java.lang.Integer"  mode="OUT" />
+		<parameter property="dfltParentIntmName"	jdbcType="VARCHAR"			javaType="java.lang.String"   mode="OUT" />
+		<parameter property="varParamReqDefIntm"	jdbcType="VARCHAR"			javaType="java.lang.String"   mode="OUT"/>
+		<parameter property="varOverrideWhtax"		jdbcType="VARCHAR"			javaType="java.lang.String"   mode="OUT"/>
+		<parameter property="vOra2010Sw"			jdbcType="VARCHAR"			javaType="java.lang.String"   mode="OUT"/>
+		<parameter property="vValidateBanca"		jdbcType="VARCHAR"			javaType="java.lang.String"   mode="OUT"/>
+		<parameter property="vAllowApplySlComm"		jdbcType="VARCHAR"			javaType="java.lang.String"   mode="OUT"/>
+		<parameter property="parlist"				jdbcType="ORACLECURSOR"		javaType="java.sql.ResultSet" mode="OUT"		resultMap="parlistResultMap" />
+		<parameter property="winvoice"				jdbcType="ORACLECURSOR"		javaType="java.sql.ResultSet" mode="OUT"		resultMap="winvoiceResultMap" />
+		<parameter property="wcommInvPerils"		jdbcType="ORACLECURSOR"		javaType="java.sql.ResultSet" mode="OUT"		resultMap="WCommInvoicePerilResultMap" />
+		<parameter property="giisBancType"			jdbcType="ORACLECURSOR"		javaType="java.sql.ResultSet" mode="OUT"		resultMap="GIISBancTypeMap" />
+		<parameter property="giisBancTypeDtlList"	jdbcType="ORACLECURSOR"		javaType="java.sql.ResultSet" mode="OUT"		resultMap="GIISBancTypeDtlMap" />
+		<parameter property="varBancRateSw"			jdbcType="VARCHAR"			javaType="java.lang.String"   mode="OUT"/>
+		<parameter property="vGipiWpolnrepExist"	jdbcType="VARCHAR"			javaType="java.lang.String"   mode="OUT"/>
+		<parameter property="wComInvIntmNo"			jdbcType="INTEGER"			javaType="java.lang.Integer"  mode="OUT"/>
+		<parameter property="maintainedDfltIntmNo"	jdbcType="INTEGER"			javaType="java.lang.Integer"  mode="OUT"/> <!-- benjo 09.07.2016 SR-5604 -->
+		<parameter property="reqDfltIntmPerAssd"    jdbcType="VARCHAR"			javaType="java.lang.String"   mode="OUT"/> <!-- benjo 09.07.2016 SR-5604 -->
+		<parameter property="allowUpdIntmPerAssd"	jdbcType="VARCHAR"			javaType="java.lang.String"   mode="OUT"/> <!-- benjo 09.07.2016 SR-5604 -->
+	</parameterMap>
+	
+	<select id="getWCommInvoice" resultMap="wcommInvoiceResultMap" parameterClass="java.util.HashMap">
+		SELECT * 
+		  FROM TABLE(GIPI_WCOMM_INVOICES_PKG.get_gipi_wcomm_invoices(#parId#, #itemGroup#))
+	</select>
+	
+	<select id="getWCommInvoice2" resultMap="wcommInvoiceResultMap" parameterClass="java.util.HashMap">
+		SELECT * 
+		  FROM TABLE(GIPI_WCOMM_INVOICES_PKG.get_gipi_wcomm_invoices2(#parId#))
+	</select>
+	
+	<insert id="setWCommInvoice" parameterClass="com.geniisys.gipi.entity.GIPIWCommInvoice">
+		BEGIN
+			GIPI_WCOMM_INVOICES_PKG.set_gipi_wcomm_invoices(
+			#intermediaryNo#, #sharePercentage#, #takeupSeqNo#, #itemGroup#, 
+			#parId#, #premiumAmount#, #commissionAmount#, #withholdingTax#,
+			#parentIntermediaryNo#);
+		END;
+	</insert>
+	
+	<procedure id="deleteWCommInvoice" parameterClass="java.util.HashMap">
+		BEGIN
+			GIPI_WCOMM_INVOICES_PKG.del_gipi_wcomm_invoices(#parId#, #itemGroup#);
+		END;
+	</procedure>
+	
+	<delete id="deleteWCommInvoice2" parameterClass="com.geniisys.gipi.entity.GIPIWCommInvoice">
+		BEGIN
+			GIPI_WCOMM_INVOICES_PKG.del_gipi_wcomm_invoices_2(#parId#, #itemGroup#, #takeupSeqNo#, #intermediaryNo#);
+		END;
+	</delete>
+	
+	<procedure id="deleteGipiWcommInvDtl" parameterClass="java.util.HashMap">
+		BEGIN
+			GIPI_WCOMM_INV_DTL_PKG.del_gipi_wcomm_invoices(#parId#, #itemGroup#, #intrmdryIntmNo#);
+		END;
+	</procedure>
+	
+	<select id="checkPerilCommRate" resultClass="java.lang.String" parameterClass="java.util.HashMap">
+		SELECT check_peril_comm_rate(#intrmdryIntmNo#, #parId#, #itemGrp#, #takeupSeqNo#, #lineCd#, #issCd#, #nbtIntmType#)
+		  FROM dual
+	</select>
+	
+	<!-- 
+		emman 03.16.10
+		giacp.v - Returns Accounting Parameters
+		
+		NOTE: replace when necessary DAO and Services for the following
+			  statements are made, or if necessary. 
+	 -->
+	<select id="getAccountingParameter" resultClass="java.lang.String" parameterClass="java.lang.String">
+		SELECT giacp.v(#paramName#) FROM dual
+	</select>
+	
+	<!-- 
+		emman 03.16.10
+		The whole procedure for the apply button
+	 -->
+	 <procedure id="applyBtn" parameterMap="applyBtnMap">				
+		CALL GIPI_WCOMM_INVOICES_PKG.APPLY_BTN_WHEN_BUTTON_PRESSED
+		 (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)		
+	 </procedure>
+	 
+	 <!-- old
+	 <procedure id="populateWcommInvPerils" parameterMap="wcommInvPerilMap">				
+		CALL GIPI_WCOMM_INVOICES_PKG.POPULATE_WCOMM_INV_PERILS
+		 (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	 </procedure>
+	  -->
+	  
+	 <procedure id="populateWcommInvPerils" parameterMap="wcommInvPerilMap">				
+		CALL GIPI_WCOMM_INVOICES_PKG.POPULATE_WCOMM_INV_PERILS(?, ?, ?, ?, ?)
+	 </procedure>
+	 
+	 <procedure id="validateIntmNo" parameterMap="validateIntmNoMap">				
+		CALL GIPI_WCOMM_INVOICES_PKG.INTM_NO_WHEN_VALIDATE_ITEM
+		 (?, ?, ?, ?, ?, ?)
+	 </procedure>
+	 
+	 <procedure id="getParTypeAndEndtTax" parameterMap="getParTypeAndEndtTaxMap">
+	 	CALL GIPI_WCOMM_INVOICES_PKG.GET_PAR_TYPE_AND_ENDTTAX
+		 (?, ?, ?)
+	 </procedure>
+	 
+	 <procedure id="wcommInvoiceNewFormInstance" parameterMap="wcommInvoiceNewFormInstanceParamMap">
+	 	BEGIN
+	 		giis_users_pkg.app_user := ?;
+	 		GIPI_WCOMM_INVOICES_PKG.gipis085_new_form_instance(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+	 	END;
+	 </procedure>
+	 
+	 <!-- move these procedure calls if a DAO for BANCASSURANCE is necessary -->
+	 <procedure id="bancassuranceGetDefaultTaxRt" parameterMap="bancassuranceGetDefaultTaxRtMap">
+	 	{CALL BANCASSURANCE.get_default_tax_rt(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}
+	 </procedure>
+	 
+	 <procedure id="bancassuranceProcessCommission" parameterMap="bancassuranceProcessCommissionMap">
+	 	{CALL BANCASSURANCE.process_commission(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}
+	 </procedure>
+	 
+	 <procedure id="validateGipis085IntmNo" parameterMap="validateGipis085IntmNoMap">
+	 	{CALL GIPI_WCOMM_INVOICES_PKG.validate_gipis085_intm_no(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}
+	 </procedure>
+	 
+	 <procedure id="populateWcommInvPerils2" parameterMap="populateWcommInvPerilsMap">
+	 	{CALL GIPI_WCOMM_INVOICES_PKG.populate_wcomm_inv_perils2(?, ?, ?, ?, ?)}
+	 </procedure>
+	 
+	 <procedure id="getIntmdryRate" parameterMap="getIntmdryRateMap">
+	 	{CALL GIPI_WCOMM_INVOICES_PKG.get_intmdry_rate(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}
+	 </procedure>
+	 
+	 <select id="getAdjustIntmdryRate" resultClass="java.math.BigDecimal" parameterClass="java.util.HashMap">
+	 	SELECT GIPI_WCOMM_INVOICES_PKG.GET_ADJUST_INTRMDRY_RATE(#intrmdryIntmNo#, #parId#, #perilCd#) FROM dual
+	 </select>
+	 
+	 <procedure id="populatePackagePerils" parameterMap="populatePackagePerilsMap">
+	 	{CALL GIPI_WCOMM_INVOICES_PKG.populate_package_perils2(?, ?, ?)}
+	 </procedure>
+	 
+	 <procedure id="getGipis085PackageIntmRate" parameterMap="getGipis085PackageIntmRateMap">
+	 	{CALL GIPI_WCOMM_INVOICES_PKG.get_package_intm_rate(?, ?, ?, ?, ?, ?, ?, ?, ?)}
+	 </procedure>
+	 
+	 <procedure id="gipis085PopulateGipiWcommInvDtl" parameterClass="com.geniisys.gipi.entity.GIPIWCommInvoice">
+	 	{CALL GIPI_WCOMM_INVOICES_PKG.populate_gipi_wcomm_inv_dtl(#parId#, #itemGroup#, #takeupSeqNo#, #intermediaryNo#)}
+	 </procedure>
+	 
+	 <delete id="gipis085DeleteGipiWcommInvDtl" parameterClass="com.geniisys.gipi.entity.GIPIWCommInvoice">
+	 	BEGIN
+	 		GIPI_WCOMM_INV_DTL_PKG.del_gipi_wcomm_inv_dtl(#parId#, #itemGroup#, #intermediaryNo#);
+	 	END;
+	 </delete>
+	 
+	 <select id="getPackParlistParams" resultMap="packParlistResultMap" parameterClass="java.lang.Integer">
+		SELECT * 
+		  FROM TABLE(GIPI_WCOMM_INVOICES_PKG.get_pack_initial_vars(#packParId#))
+	</select>
+	
+	<procedure id="endtBondWCommInvoiceNewFormInstance" parameterMap="endtBondWCommInvoiceNewFormInstanceMap">
+		{CALL GIPI_WCOMM_INVOICES_PKG.gipis160_new_form_instance(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}
+	</procedure>
+	
+	<parameterMap class="map" id="applySlidingCommissionMap">
+		<parameter property="slidingComm" 		jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT"/>
+		<parameter property="rate" 				jdbcType="VARCHAR" javaType="java.lang.String" 	mode="OUT"/>
+		<parameter property="lineCd" 			jdbcType="VARCHAR" javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="sublineCd" 		jdbcType="VARCHAR" javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="parId" 			jdbcType="VARCHAR" javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="perilCd" 			jdbcType="VARCHAR" javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="itemGrp" 			jdbcType="VARCHAR" javaType="java.lang.String" 	mode="IN"/> <!-- Apollo Cruz 10.24.2014 -->
+	</parameterMap>
+	
+	<!-- Modified by Apollo Cruz 10.24.2014 - considered item group. used avg instead of distinct. -->
+	<procedure id="applySlidingCommission" parameterMap="applySlidingCommissionMap">
+		<!-- {CALL Apply_Sliding_Commission(?, ?, ?, ?, ?, ?)} -->
+		CALL gipi_wcomm_invoices_pkg.apply_sliding_commission(?, ?, ?, ?, ?, ?, ?)
+	</procedure>
+	
+	<select id="getWCommInvoiceListTableGrid" resultMap="wcommInvoiceListTableGridResultMap" parameterClass="java.util.HashMap">
+		SELECT *
+			  FROM (SELECT rownum rownum_, 
+			               b.count_, 
+			               a.* 
+			          FROM (SELECT * 
+	                     	  FROM TABLE(GIPI_WCOMM_INVOICES_PKG.get_gipi_wcomm_invoices2(#parId#))) a, 
+			               (SELECT count(*) count_
+			                  FROM TABLE(GIPI_WCOMM_INVOICES_PKG.get_gipi_wcomm_invoices2(#parId#))) b) 
+			 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<delete id="deleteGIPIWCommInvoicesByParId" parameterClass="Integer">
+		BEGIN
+			gipi_wcomm_invoices_pkg.del_gipi_wcomm_invoices_1(#parId#);
+		END;
+	</delete>
+	
+	<procedure id="recomputeGIPIS085Amounts" parameterClass="java.lang.String">
+	   CALL gipi_wcomm_invoices_pkg.recompute_gipis085_amounts(#parId#)
+	</procedure>
+	
+	<procedure id="delCommInvoiceRelatedRecs" parameterClass="java.lang.Integer">
+	   CALL gipi_wcomm_invoices_pkg.del_comm_invoice_related_recs(#parId#)
+	</procedure>
+</sqlMap>

@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIPIR949C_MATRIX_TOTAL" language="groovy" pageWidth="950" pageHeight="752" columnWidth="950" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="Crosstab Data Text" isDefault="false" hAlign="Center"/>
+	<parameter name="P_FROM_DATE" class="java.lang.String"/>
+	<parameter name="P_TO_DATE" class="java.lang.String"/>
+	<parameter name="P_TOTAL_RISK_COUNT" class="java.math.BigDecimal"/>
+	<parameter name="P_TOTAL_SUM_INSURED" class="java.math.BigDecimal"/>
+	<parameter name="P_TOTAL_PREM_AMT" class="java.math.BigDecimal"/>
+	<queryString>
+		<![CDATA[SELECT BLOCK_RISK, SUM(RISK_COUNT), 
+       SUM(SUM_INSURED), SUM(PREM_AMOUNT)
+  FROM TABLE(GIPIR949C_PKG.POPULATE_REPORT(
+	$P{P_FROM_DATE}, $P{P_TO_DATE}))
+ GROUP BY block_risk
+ UNION
+SELECT 'Grand Total', $P{P_TOTAL_RISK_COUNT}, $P{P_TOTAL_SUM_INSURED}, $P{P_TOTAL_PREM_AMT} FROM DUAL]]>
+	</queryString>
+	<field name="BLOCK_RISK" class="java.lang.String"/>
+	<field name="SUM(RISK_COUNT)" class="java.math.BigDecimal"/>
+	<field name="SUM(SUM_INSURED)" class="java.math.BigDecimal"/>
+	<field name="SUM(PREM_AMOUNT)" class="java.math.BigDecimal"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<summary>
+		<band height="42" splitType="Stretch">
+			<crosstab>
+				<reportElement x="0" y="0" width="950" height="42"/>
+				<rowGroup name="1" width="0">
+					<bucket>
+						<bucketExpression class="java.lang.String"><![CDATA[1]]></bucketExpression>
+					</bucket>
+					<crosstabRowHeader>
+						<cellContents backcolor="#F0F8FF" mode="Opaque"/>
+					</crosstabRowHeader>
+					<crosstabTotalRowHeader>
+						<cellContents/>
+					</crosstabTotalRowHeader>
+				</rowGroup>
+				<columnGroup name="BLOCK_RISK" height="0">
+					<bucket>
+						<bucketExpression class="java.lang.String"><![CDATA[$F{BLOCK_RISK}]]></bucketExpression>
+					</bucket>
+					<crosstabColumnHeader>
+						<cellContents backcolor="#F0F8FF" mode="Opaque"/>
+					</crosstabColumnHeader>
+					<crosstabTotalColumnHeader>
+						<cellContents/>
+					</crosstabTotalColumnHeader>
+				</columnGroup>
+				<measure name="RISK_COUNTMeasure" class="java.math.BigDecimal">
+					<measureExpression><![CDATA[$F{SUM(RISK_COUNT)}]]></measureExpression>
+				</measure>
+				<measure name="SUM_INSUREDMeasure" class="java.lang.Object">
+					<measureExpression><![CDATA[$F{SUM(SUM_INSURED)}]]></measureExpression>
+				</measure>
+				<measure name="PREM_AMTMeasure" class="java.lang.Object">
+					<measureExpression><![CDATA[$F{SUM(PREM_AMOUNT)}]]></measureExpression>
+				</measure>
+				<crosstabCell width="225" height="30">
+					<cellContents>
+						<textField isBlankWhenNull="true">
+							<reportElement style="Crosstab Data Text" x="0" y="9" width="40" height="11">
+								<printWhenExpression><![CDATA[$V{BLOCK_RISK} != null]]></printWhenExpression>
+							</reportElement>
+							<textElement textAlignment="Right">
+								<font fontName="Arial" size="7"/>
+							</textElement>
+							<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{RISK_COUNTMeasure}]]></textFieldExpression>
+						</textField>
+						<textField pattern="#,##0.00;#,##0.00-" isBlankWhenNull="true">
+							<reportElement style="Crosstab Data Text" x="41" y="9" width="90" height="11">
+								<printWhenExpression><![CDATA[$V{BLOCK_RISK} != null]]></printWhenExpression>
+							</reportElement>
+							<textElement textAlignment="Right">
+								<font fontName="Arial" size="7"/>
+							</textElement>
+							<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{SUM_INSUREDMeasure}]]></textFieldExpression>
+						</textField>
+						<textField pattern="#,##0.00;#,##0.00-" isBlankWhenNull="true">
+							<reportElement style="Crosstab Data Text" x="132" y="9" width="90" height="11">
+								<printWhenExpression><![CDATA[$V{BLOCK_RISK} != null]]></printWhenExpression>
+							</reportElement>
+							<textElement textAlignment="Right">
+								<font fontName="Arial" size="7"/>
+							</textElement>
+							<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{PREM_AMTMeasure}]]></textFieldExpression>
+						</textField>
+						<staticText>
+							<reportElement style="Crosstab Data Text" x="0" y="20" width="40" height="9">
+								<printWhenExpression><![CDATA[$V{BLOCK_RISK} != null]]></printWhenExpression>
+							</reportElement>
+							<textElement>
+								<font fontName="Arial" size="7"/>
+							</textElement>
+							<text><![CDATA[=================]]></text>
+						</staticText>
+						<staticText>
+							<reportElement style="Crosstab Data Text" x="0" y="0" width="40" height="9">
+								<printWhenExpression><![CDATA[$V{BLOCK_RISK} != null]]></printWhenExpression>
+							</reportElement>
+							<textElement>
+								<font fontName="Arial" size="7"/>
+							</textElement>
+							<text><![CDATA[----------------------------------------------]]></text>
+						</staticText>
+						<staticText>
+							<reportElement style="Crosstab Data Text" x="41" y="0" width="90" height="9">
+								<printWhenExpression><![CDATA[$V{BLOCK_RISK} != null]]></printWhenExpression>
+							</reportElement>
+							<textElement>
+								<font fontName="Arial" size="7"/>
+							</textElement>
+							<text><![CDATA[----------------------------------------------]]></text>
+						</staticText>
+						<staticText>
+							<reportElement style="Crosstab Data Text" x="132" y="0" width="90" height="9">
+								<printWhenExpression><![CDATA[$V{BLOCK_RISK} != null]]></printWhenExpression>
+							</reportElement>
+							<textElement>
+								<font fontName="Arial" size="7"/>
+							</textElement>
+							<text><![CDATA[-----------------------------------------]]></text>
+						</staticText>
+						<staticText>
+							<reportElement style="Crosstab Data Text" x="41" y="20" width="90" height="9">
+								<printWhenExpression><![CDATA[$V{BLOCK_RISK} != null]]></printWhenExpression>
+							</reportElement>
+							<textElement>
+								<font fontName="Arial" size="7"/>
+							</textElement>
+							<text><![CDATA[==============================================]]></text>
+						</staticText>
+						<staticText>
+							<reportElement style="Crosstab Data Text" x="132" y="20" width="90" height="9">
+								<printWhenExpression><![CDATA[$V{BLOCK_RISK} != null]]></printWhenExpression>
+							</reportElement>
+							<textElement>
+								<font fontName="Arial" size="7"/>
+							</textElement>
+							<text><![CDATA[==============================================]]></text>
+						</staticText>
+					</cellContents>
+				</crosstabCell>
+			</crosstab>
+		</band>
+	</summary>
+</jasperReport>

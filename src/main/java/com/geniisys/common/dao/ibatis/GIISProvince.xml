@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISProvince">
+
+ 	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+		
+	<resultMap id="GIISProvinceLOVResultMap" class="com.geniisys.common.entity.GIISProvince" extends="BaseEntity.TableGridResultMap">
+		<result column="region_cd" 	property="regionCd"/>
+		<result column="province_cd" 	property="provinceCd"/>
+		<result column="province_desc" 	property="provinceDesc"/>
+	</resultMap>
+	
+	<resultMap id="provDtlMap" class="java.util.HashMap">
+  		<result column="province_cd" 		property="provinceCd" />			
+	  	<result column="province_desc"		property="provinceDesc"	/>	
+  		<result column="rownum_" 			property="rowNum" />
+		<result column="count_"				property="rowCount"/>
+  	</resultMap>
+  	
+  	<resultMap id="GIISProvinceListing" class="com.geniisys.common.entity.GIISBlock" extends="BaseEntity.TableGridResultMap">
+  		<result column="province_cd"		property="provinceCd"/>
+  		<result column="province"			property="province"/>  
+  	</resultMap>
+	
+	<select id="getGIISProvinceLOV" resultMap="GIISProvinceLOVResultMap">		
+	  	SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giis_province_pkg.get_province_listing(#regionCd#, #findText#))
+		                  <isEqual property="sortColumn" compareValue="provinceDesc">
+			              		ORDER BY province_desc
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giis_province_pkg.get_province_listing(#regionCd#, #findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getProvinceDtlLOV" resultMap="provDtlMap">
+  		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(giis_province_pkg.get_province_list)
+		          		 <isNotNull property="findText">
+		                 WHERE (UPPER(province_cd) LIKE UPPER(#findText#) OR UPPER(province_desc) LIKE UPPER(#findText#))
+		             	 </isNotNull>   
+		          		  <isEqual property="sortColumn" compareValue="provinceCd">
+			              		ORDER BY province_cd
+			              </isEqual>
+		          		  <isEqual property="sortColumn" compareValue="provinceDesc">
+			              		ORDER BY province_desc
+			              </isEqual>           
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giis_province_pkg.get_province_list)
+		                 <isNotNull property="findText">
+		                 WHERE (UPPER(province_cd) LIKE UPPER(#findText#) OR UPPER(province_desc) LIKE UPPER(#findText#))
+		             	 </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+  	
+  	<!-- for GIPIS155 : shan 09.30.2013 -->
+  	<select id="getGIISProvinceLOV2" resultMap="provDtlMap">
+  		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT DISTINCT province_cd, province_desc
+		           		  FROM giis_province
+		          		 <isNotNull property="findText">
+		                 	WHERE UPPER(province_cd) LIKE UPPER(NVL(#findText#, province_cd)) 
+		                 	  OR UPPER(province_desc) LIKE UPPER(NVL(#findText#, province_desc))
+		             	 </isNotNull>  
+		             	 <isNull property="findText">
+		                 	WHERE UPPER(province_cd) LIKE UPPER(NVL(#searchString#, province_cd)) 
+		                 	  OR UPPER(province_desc) LIKE UPPER(NVL(#searchString#, province_desc))
+		             	 </isNull>   
+		          		  <isEqual property="sortColumn" compareValue="provinceCd">
+			              		ORDER BY province_cd
+			              </isEqual>
+		          		  <isEqual property="sortColumn" compareValue="provinceDesc">
+			              		ORDER BY province_desc
+			              </isEqual>           
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(DISTINCT province_cd) count_
+		           		  FROM giis_province
+		                <isNotNull property="findText">
+		                 	WHERE UPPER(province_cd) LIKE UPPER(NVL(#findText#, province_cd)) 
+		                 	  OR UPPER(province_desc) LIKE UPPER(NVL(#findText#, province_desc))
+		             	 </isNotNull>  
+		             	 <isNull property="findText">
+		                 	WHERE UPPER(province_cd) LIKE UPPER(NVL(#searchString#, province_cd)) 
+		                 	  OR UPPER(province_desc) LIKE UPPER(NVL(#searchString#, province_desc))
+		             	 </isNull>   
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+  	
+  	<resultMap class="java.util.HashMap" id="GICLS056ProvinceResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="province_cd" property="provinceCd" />
+		<result column="province_desc" property="provinceDesc" />
+	</resultMap>
+	
+	<select id="getGicls056ProvinceLov" resultMap="GICLS056ProvinceResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(gicls056_pkg.get_province_lov)
+		  	     	<isNotEmpty property="findText">
+		  	      		WHERE UPPER(province_cd) LIKE UPPER(#findText#)
+		  	      		OR UPPER(province_desc) LIKE UPPER(#findText#)
+		  	      	</isNotEmpty>
+		  	      	<isNotEmpty property="filterText">
+		  	      		WHERE UPPER(province_cd) LIKE UPPER(#filterText#)
+		  	      		OR UPPER(province_desc) LIKE UPPER(#filterText#)
+		  	      	</isNotEmpty>
+					<isEqual property="sortColumn" compareValue="provinceCd">
+						ORDER BY province_cd
+					</isEqual>
+					<isEqual property="sortColumn" compareValue="provinceDesc">
+						ORDER BY province_desc
+					</isEqual>
+					<isNotNull property="sortColumn">
+						<isEqual property="ascDescFlg" compareValue="ASC">
+							ASC
+						</isEqual>
+						<isEqual property="ascDescFlg" compareValue="DESC">
+							DESC
+						</isEqual>
+					</isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(gicls056_pkg.get_province_lov)
+                  	<isNotEmpty property="findText">
+		  	      		WHERE UPPER(province_cd) LIKE UPPER(#findText#)
+		  	      		OR UPPER(province_desc) LIKE UPPER(#findText#)
+		  	      	</isNotEmpty>
+		  	      	<isNotEmpty property="filterText">
+		  	      		WHERE UPPER(province_cd) LIKE UPPER(#filterText#)
+		  	      		OR UPPER(province_desc) LIKE UPPER(#filterText#)
+		  	      	</isNotEmpty>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<select id="getGiiss007ProvinceLOV" resultMap="GIISProvinceListing">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIISS007_PKG.get_province_lov)		                 
+		                  	<isNull property="findText">
+				                 WHERE UPPER(province_cd) LIKE UPPER(#searchString#)
+				                 OR UPPER(province) LIKE UPPER(#searchString#)					                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(province_cd) LIKE UPPER(#findText#)
+				                 OR UPPER(province) LIKE UPPER(#findText#)				  				         		
+			             	</isNotNull>		             
+			              	<isEqual property="sortColumn" compareValue="provinceCd">
+			              		ORDER BY province_cd
+			              	</isEqual>	
+			              	<isEqual property="sortColumn" compareValue="province">
+			              		ORDER BY province
+			              	</isEqual>			              		                      
+			          	  	<isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	</isNotNull>
+		                  ) a, 
+		               (SELECT count (*) count_ 
+		                  FROM TABLE(GIISS007_PKG.get_province_lov)		                 
+		                  	<isNull property="findText">
+				                 WHERE UPPER(province_cd) LIKE UPPER(#searchString#)
+				                 OR UPPER(province) LIKE UPPER(#searchString#)					                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(province_cd) LIKE UPPER(#findText#)
+				                 OR UPPER(province) LIKE UPPER(#findText#)				  				         		
+			             	</isNotNull>		
+			             	) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+</sqlMap>

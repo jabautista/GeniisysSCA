@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIPIR909a_CONVERTED_QUOTES" pageWidth="880" pageHeight="595" columnWidth="840" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="ireport.zoom" value="0.9313819845887328"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="fields" isDefault="true" mode="Transparent" forecolor="#000000" fontName="Arial" fontSize="10" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false"/>
+	<parameter name="P_FROM_DATE" class="java.util.Date">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="P_TO_DATE" class="java.util.Date">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="P_INTM_NO" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="P_LINE" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String">
+		<defaultValueExpression><![CDATA["C:\\GENIISYS_WEB\\Geniisys\\src\\com\\geniisys\\marketing\\statistical\\reports\\"]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT DISTINCT LINE_NAME, LINE_CD, print_header
+FROM TABLE (gipi_quote_pkg.get_converted_quote($P{P_FROM_DATE}, $P{P_TO_DATE}, $P{P_INTM_NO}, $P{P_LINE}))
+ORDER BY LINE_NAME]]>
+	</queryString>
+	<field name="LINE_NAME" class="java.lang.String"/>
+	<field name="LINE_CD" class="java.lang.String"/>
+	<field name="PRINT_HEADER" class="java.lang.String"/>
+	<variable name="V_GRAND_NETPREM" class="java.math.BigDecimal" calculation="Sum"/>
+	<variable name="V_GRAND_TOTPREM" class="java.math.BigDecimal" calculation="Sum"/>
+	<group name="LINE_GRP" isStartNewPage="true" isReprintHeaderOnEachPage="true">
+		<groupExpression><![CDATA[$F{LINE_NAME}]]></groupExpression>
+		<groupHeader>
+			<band height="21">
+				<textField>
+					<reportElement style="fields" x="2" y="0" width="296" height="20" isPrintWhenDetailOverflows="true"/>
+					<textElement>
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{LINE_NAME}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band height="75">
+			<printWhenExpression><![CDATA[!$F{PRINT_HEADER}.isEmpty()]]></printWhenExpression>
+			<staticText>
+				<reportElement style="fields" mode="Opaque" x="0" y="0" width="840" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Summary Report of Converted Quotations]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="fields" mode="Opaque" x="0" y="40" width="54" height="20"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Runtime :]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="fields" mode="Opaque" x="0" y="20" width="54" height="20"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Rundate :]]></text>
+			</staticText>
+			<textField pattern="hh:mm:ss a">
+				<reportElement style="fields" mode="Opaque" x="54" y="40" width="100" height="20"/>
+				<textElement/>
+				<textFieldExpression class="java.util.Date"><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField pattern="MM-dd-yyyy">
+				<reportElement style="fields" mode="Opaque" x="54" y="20" width="100" height="20"/>
+				<textElement/>
+				<textFieldExpression class="java.util.Date"><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="fields" mode="Opaque" x="737" y="20" width="103" height="20"/>
+				<textElement textAlignment="Right">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[GIPIR909A]]></text>
+			</staticText>
+			<textField evaluationTime="Report">
+				<reportElement style="fields" mode="Opaque" x="800" y="40" width="40" height="20"/>
+				<textElement textAlignment="Left">
+					<font isBold="false"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="fields" mode="Opaque" x="720" y="40" width="80" height="20"/>
+				<textElement textAlignment="Right">
+					<font isBold="false"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="298" y="20" width="245" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Top"/>
+				<textFieldExpression class="java.lang.String"><![CDATA[new SimpleDateFormat("MMMMM d, yyyy").format($P{P_FROM_DATE})+" - "+new SimpleDateFormat("MMMMM d, yyyy").format($P{P_TO_DATE})]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="53" splitType="Stretch">
+			<printWhenExpression><![CDATA[$F{PRINT_HEADER}.equals( "Y" )]]></printWhenExpression>
+			<subreport>
+				<reportElement positionType="Float" x="2" y="29" width="838" height="21"/>
+				<subreportParameter name="P_LINE">
+					<subreportParameterExpression><![CDATA[$F{LINE_CD}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_FROM_DATE">
+					<subreportParameterExpression><![CDATA[$P{P_FROM_DATE}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_TO_DATE">
+					<subreportParameterExpression><![CDATA[$P{P_TO_DATE}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_INTM_NO">
+					<subreportParameterExpression><![CDATA[$P{P_INTM_NO}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<returnValue subreportVariable="V_LINE_NETPREM" toVariable="V_GRAND_NETPREM" calculation="Sum"/>
+				<returnValue subreportVariable="V_LINE_TOTPREM" toVariable="V_GRAND_TOTPREM" calculation="Sum"/>
+				<subreportExpression class="java.lang.String"><![CDATA[$P{SUBREPORT_DIR} + "GIPIR909a_CONVERTED_QUOTES_DTL.jasper"]]></subreportExpression>
+			</subreport>
+			<staticText>
+				<reportElement style="fields" x="107" y="1" width="100" height="20" isPrintWhenDetailOverflows="true"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Assured]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="fields" x="212" y="1" width="100" height="20" isPrintWhenDetailOverflows="true"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Policy No.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="fields" x="317" y="1" width="100" height="20" isPrintWhenDetailOverflows="true"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Effectivity]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="fields" x="422" y="1" width="100" height="20" isPrintWhenDetailOverflows="true"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Intermediary]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="fields" x="527" y="1" width="100" height="20" isPrintWhenDetailOverflows="true"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Remarks]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="fields" x="632" y="1" width="100" height="20" isPrintWhenDetailOverflows="true"/>
+				<textElement textAlignment="Right">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Net Premium]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="fields" x="737" y="1" width="100" height="20" isPrintWhenDetailOverflows="true"/>
+				<textElement textAlignment="Right">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total Premium]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="fields" x="2" y="1" width="100" height="20" isPrintWhenDetailOverflows="true"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Quotation]]></text>
+			</staticText>
+			<line>
+				<reportElement x="2" y="21" width="100" height="1" isPrintWhenDetailOverflows="true"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="107" y="21" width="100" height="1" isPrintWhenDetailOverflows="true"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="212" y="21" width="100" height="1" isPrintWhenDetailOverflows="true"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="317" y="21" width="100" height="1" isPrintWhenDetailOverflows="true"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="422" y="21" width="100" height="1" isPrintWhenDetailOverflows="true"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="527" y="21" width="100" height="1" isPrintWhenDetailOverflows="true"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="632" y="21" width="100" height="1" isPrintWhenDetailOverflows="true"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="737" y="21" width="100" height="1" isPrintWhenDetailOverflows="true"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+		</band>
+	</detail>
+	<summary>
+		<band height="26">
+			<printWhenExpression><![CDATA[$F{PRINT_HEADER}.equals( "Y" )]]></printWhenExpression>
+			<textField pattern="#,##0.00;(#,##0.00)">
+				<reportElement style="fields" x="632" y="0" width="100" height="18"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_GRAND_NETPREM}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(#,##0.00)">
+				<reportElement style="fields" x="737" y="0" width="100" height="18"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_GRAND_TOTPREM}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="632" y="22" width="100" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="737" y="22" width="100" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement style="fields" x="527" y="0" width="100" height="18"/>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[Grand Totals:]]></text>
+			</staticText>
+			<line>
+				<reportElement x="632" y="24" width="100" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="737" y="24" width="100" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+		</band>
+	</summary>
+</jasperReport>

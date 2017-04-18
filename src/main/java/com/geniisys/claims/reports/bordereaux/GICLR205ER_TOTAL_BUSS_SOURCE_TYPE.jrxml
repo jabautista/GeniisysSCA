@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GILCR205L_TOTAL_BUSS_SOURCE_TYPE" language="groovy" pageWidth="990" pageHeight="802" columnWidth="990" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="4.0"/>
+	<property name="ireport.x" value="626"/>
+	<property name="ireport.y" value="0"/>
+	<style name="Crosstab Data Text" isDefault="false" hAlign="Center"/>
+	<parameter name="P_SESSION_ID" class="java.lang.String"/>
+	<parameter name="P_CLAIM_ID" class="java.lang.Integer"/>
+	<parameter name="P_PAGE_BREAK" class="java.lang.String"/>
+	<parameter name="P_BUSS_SOURCE" class="java.lang.String"/>
+	<parameter name="P_LINE_CD" class="java.lang.String"/>
+	<parameter name="P_ISS_CD" class="java.lang.String"/>
+	<parameter name="P_SUBLINE_CD" class="java.lang.String"/>
+	<parameter name="P_LOSS_YEAR" class="java.lang.Integer"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="P_BUSS_SOURCE_TYPE" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT * FROM TABLE(giclr205er_pkg.get_total_per_buss_source_type($P{P_SESSION_ID},$P{P_CLAIM_ID},$P{P_BUSS_SOURCE_TYPE}))]]>
+	</queryString>
+	<field name="BUSS_SOURCE_TYPE" class="java.lang.String"/>
+	<field name="BUSS_SOURCE" class="java.lang.String"/>
+	<field name="ISS_CD" class="java.lang.String"/>
+	<field name="LINE_CD" class="java.lang.String"/>
+	<field name="SUBLINE_CD" class="java.lang.String"/>
+	<field name="OUTSTANDING_LOSS" class="java.math.BigDecimal"/>
+	<field name="TREATY_NAME" class="java.lang.String"/>
+	<field name="OUTSTANDING_LOSS_TRTY" class="java.math.BigDecimal"/>
+	<variable name="CS_OUT_LOSS_SUB" class="java.math.BigDecimal" resetType="Group" resetGroup="GRP_SUBLINE" calculation="Sum">
+		<variableExpression><![CDATA[$F{OUTSTANDING_LOSS}]]></variableExpression>
+	</variable>
+	<variable name="CS_OUT_LOSS_LINE" class="java.math.BigDecimal" resetType="Group" resetGroup="GRP_LINE" calculation="Sum">
+		<variableExpression><![CDATA[$V{CS_OUT_LOSS_SUB}]]></variableExpression>
+	</variable>
+	<variable name="CS_OUT_LOSS_ISS" class="java.math.BigDecimal" resetType="Group" resetGroup="GRP_ISS" calculation="Sum">
+		<variableExpression><![CDATA[$V{CS_OUT_LOSS_LINE}]]></variableExpression>
+	</variable>
+	<variable name="CS_OUT_LOSS_ISS_TYPE" class="java.math.BigDecimal" resetType="Group" resetGroup="GRP_BUSS_SOURCE" calculation="Sum">
+		<variableExpression><![CDATA[$V{CS_OUT_LOSS_SUB}]]></variableExpression>
+	</variable>
+	<variable name="CS_OUT_LOSS_BUSS" class="java.math.BigDecimal" resetType="Group" resetGroup="GRP_BUSS_SOURCE_TYPE" calculation="Sum">
+		<variableExpression><![CDATA[$F{OUTSTANDING_LOSS}]]></variableExpression>
+	</variable>
+	<group name="GRP_BUSS_SOURCE_TYPE">
+		<groupExpression><![CDATA[$P{P_BUSS_SOURCE_TYPE}]]></groupExpression>
+	</group>
+	<group name="GRP_BUSS_SOURCE">
+		<groupExpression><![CDATA[$F{BUSS_SOURCE}]]></groupExpression>
+	</group>
+	<group name="GRP_ISS">
+		<groupExpression><![CDATA[$F{ISS_CD}]]></groupExpression>
+	</group>
+	<group name="GRP_LINE">
+		<groupExpression><![CDATA[$F{LINE_CD}]]></groupExpression>
+	</group>
+	<group name="GRP_SUBLINE">
+		<groupExpression><![CDATA[$F{SUBLINE_CD}]]></groupExpression>
+	</group>
+	<summary>
+		<band height="17">
+			<frame>
+				<reportElement x="0" y="0" width="183" height="17"/>
+				<staticText>
+					<reportElement x="0" y="7" width="112" height="9"/>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Arial" size="7" isBold="false"/>
+					</textElement>
+					<text><![CDATA[Total per Business Source Type]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="112" y="7" width="8" height="9"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="Arial" size="7" isBold="false"/>
+					</textElement>
+					<text><![CDATA[:]]></text>
+				</staticText>
+				<line>
+					<reportElement x="127" y="4" width="55" height="1"/>
+					<graphicElement>
+						<pen lineStyle="Dotted"/>
+					</graphicElement>
+				</line>
+				<textField pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement x="126" y="7" width="54" height="9"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{CS_OUT_LOSS_BUSS}]]></textFieldExpression>
+				</textField>
+			</frame>
+			<crosstab>
+				<reportElement x="183" y="0" width="990" height="17"/>
+				<rowGroup name="TREATY_NAME" width="123" totalPosition="End">
+					<bucket>
+						<bucketExpression class="java.lang.String"><![CDATA[$F{TREATY_NAME}]]></bucketExpression>
+					</bucket>
+					<crosstabRowHeader>
+						<cellContents backcolor="#FFFFFF" mode="Opaque">
+							<box>
+								<pen lineWidth="0.5" lineStyle="Solid" lineColor="#FFFFFF"/>
+							</box>
+							<textField isBlankWhenNull="true">
+								<reportElement x="7" y="0" width="109" height="9"/>
+								<textElement textAlignment="Left" verticalAlignment="Middle">
+									<font fontName="Arial" size="7"/>
+								</textElement>
+								<textFieldExpression class="java.lang.String"><![CDATA[$V{TREATY_NAME}]]></textFieldExpression>
+							</textField>
+						</cellContents>
+					</crosstabRowHeader>
+					<crosstabTotalRowHeader>
+						<cellContents backcolor="#FFBFBF" mode="Opaque">
+							<box>
+								<pen lineWidth="0.5" lineStyle="Solid" lineColor="#FFFFFF"/>
+							</box>
+						</cellContents>
+					</crosstabTotalRowHeader>
+				</rowGroup>
+				<columnGroup name="LINE_CD" height="8" totalPosition="End">
+					<bucket>
+						<bucketExpression class="java.lang.String"><![CDATA[$F{LINE_CD}]]></bucketExpression>
+					</bucket>
+					<crosstabColumnHeader>
+						<cellContents backcolor="#FFFFFF" mode="Opaque">
+							<box>
+								<pen lineWidth="0.5" lineStyle="Solid" lineColor="#FFFFFF"/>
+							</box>
+						</cellContents>
+					</crosstabColumnHeader>
+					<crosstabTotalColumnHeader>
+						<cellContents backcolor="#FFBFBF" mode="Opaque">
+							<box>
+								<pen lineWidth="0.5" lineStyle="Solid" lineColor="#FFFFFF"/>
+							</box>
+						</cellContents>
+					</crosstabTotalColumnHeader>
+				</columnGroup>
+				<measure name="OUTSTANDING_LOSSMeasure" class="java.math.BigDecimal">
+					<measureExpression><![CDATA[$F{OUTSTANDING_LOSS_TRTY}]]></measureExpression>
+				</measure>
+				<crosstabCell width="50" height="9">
+					<cellContents>
+						<box>
+							<pen lineWidth="0.5" lineStyle="Solid" lineColor="#FFFFFF"/>
+						</box>
+						<textField pattern="#,##0.00" isBlankWhenNull="true">
+							<reportElement x="0" y="0" width="50" height="9"/>
+							<textElement textAlignment="Right" verticalAlignment="Middle">
+								<font fontName="Arial" size="7"/>
+							</textElement>
+							<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{OUTSTANDING_LOSSMeasure}]]></textFieldExpression>
+						</textField>
+					</cellContents>
+				</crosstabCell>
+				<crosstabCell width="0" height="9" columnTotalGroup="LINE_CD">
+					<cellContents backcolor="#FFBFBF" mode="Opaque">
+						<box>
+							<pen lineWidth="0.5" lineStyle="Solid" lineColor="#FFFFFF"/>
+						</box>
+					</cellContents>
+				</crosstabCell>
+				<crosstabCell height="0" rowTotalGroup="TREATY_NAME">
+					<cellContents backcolor="#FFBFBF" mode="Opaque">
+						<box>
+							<pen lineWidth="0.5" lineStyle="Solid" lineColor="#FFFFFF"/>
+						</box>
+					</cellContents>
+				</crosstabCell>
+				<crosstabCell width="0" height="0" rowTotalGroup="TREATY_NAME" columnTotalGroup="LINE_CD">
+					<cellContents backcolor="#FFBFBF" mode="Opaque">
+						<box>
+							<pen lineWidth="0.5" lineStyle="Solid" lineColor="#FFFFFF"/>
+						</box>
+					</cellContents>
+				</crosstabCell>
+			</crosstab>
+		</band>
+	</summary>
+</jasperReport>

@@ -1,0 +1,443 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISTaxCharges">
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="giisTaxCharges" type="com.geniisys.common.entity.GIISTaxCharges"/>
+	
+	<resultMap id="TaxChargesLOVResultMap" 	class="com.geniisys.common.entity.GIISTaxCharges" extends="BaseEntity.TableGridResultMap">
+	  	<result column="TAX_CD"				property="taxCd"/>
+	  	<result column="TAX_DESC"			property="taxDesc"/>
+	  	<result column="LINE_CD"			property="lineCd"/>
+	  	<result column="ISS_CD"				property="issCd"/>
+	  	<result column="TAX_ID"				property="taxId"/>
+	  	<result column="RATE"				property="rate"	/>
+	  	<result column="PRIMARY_SW"			property="primarySw"/>
+	  	<result column="PERIL_SW"  			property="perilSw"/>
+	  	<result column="ALLOCATION_TAG"     property="allocationTag"/>
+	  	<result column="NO_RATE_TAG"        property="noRateTag"/>
+	  	<result column="PERIL_CD" 			property="perilCd"/>
+	</resultMap>
+	
+	<resultMap id="TaxChargesLOVResultMap2" 	class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+	  	<result column="TAX_CD"				property="taxCd"/>
+	  	<result column="TAX_DESC"			property="taxDesc"/>
+	  	<result column="LINE_CD"			property="lineCd"/>
+	  	<result column="ISS_CD"				property="issCd"/>
+	  	<result column="TAX_ID"				property="taxId"/>
+	  	<result column="RATE"				property="rate"	/>
+	  	<result column="PRIMARY_SW"			property="primarySw"/>
+	  	<result column="PERIL_SW"  			property="perilSw"/>
+	  	<result column="ALLOCATION_TAG"     property="allocationTag"/>
+	  	<result column="NO_RATE_TAG"        property="noRateTag"/>
+	  	<result column="PERIL_CD" 			property="perilCd"/>
+	  	<result column="TAX_AMT"			property="taxAmt"/>
+	</resultMap>
+	
+	<resultMap id="taxChargeMaintenance" 	class="com.geniisys.common.entity.GIISTaxCharges" extends="BaseEntity.TableGridResultMap">
+	  	<result column="TAX_CD"				property="taxCd"/>
+	  	<result column="TAX_DESC"			property="taxDesc"/>
+	  	<result column="LINE_CD"			property="lineCd"/>
+	  	<result column="ISS_CD"				property="issCd"/>
+	  	<result column="TAX_ID"				property="taxId"/>
+	  	<result column="RATE"				property="rate"	/>
+	  	<result column="PRIMARY_SW"			property="primarySw"/>
+	  	<result column="PERIL_SW"  			property="perilSw"/>
+	  	<result column="ALLOCATION_TAG"     property="allocationTag"/>
+	  	<result column="NO_RATE_TAG"        property="noRateTag"/>
+	  	<result column="TAX_TYPE"			property="taxType"/>
+	  	<result column="FUNCTION_NAME"		property="functionName"/>
+	  	<result column="TAX_AMOUNT"			property="taxAmount"/>
+	  	<result column="SEQUENCE"			property="sequence"/>
+	  	<result column="EFF_START_DATE"		property="effStartDate"/>
+	  	<result column="EFF_END_DATE"		property="effEndDate"/>
+	  	<result column="DR_GL_CD"			property="drGlCd"/>
+	  	<result column="CR_GL_CD"  			property="crGlCd"/>
+	  	<result column="DR_SUB1"     		property="drSub1"/>
+	  	<result column="CR_SUB1"        	property="crSub1"/>
+	  	<result column="INCLUDE_TAG"		property="includeTag"/>
+	  	<result column="INCEPT_SW"			property="inceptSw"/>
+	  	<result column="EXPIRED_SW"			property="expiredSw"/>
+	  	<result column="POL_ENDT_SW"		property="polEndtSw"/>
+	  	<result column="TAKEUP_ALLOC_TAG"	property="takeupAllocTag"/>
+	  	<result column="REMARKS"  			property="remarks"/>
+	  	<result column="ISSUE_DATE_TAG"     property="issueDateTag"/>
+	  	<result column="COC_CHARGE"         property="cocCharge"/>	
+	  	<result column="MAX_SEQUENCE"       property="maxSequence"/>
+	  	<result column="MAX_TAX_ID"         property="maxTaxId"/>	
+	  	<result column="USER_ID"      		property="userId"/>
+	  	<result column="LAST_UPDATE"        property="strLastUpdate"/>
+	  	<result column="V_EXISTS"         	property="strExists"/>		
+	  	<result column="REFUND_SW"         	property="refundSw"/>	<!-- added by robert GENQA SR 48244 08.10.15 -->
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="Giiss028TaxLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="taxCd" 	column="tax_cd"/>
+		<result property="taxName" 	column="tax_name"/>			
+		<result property="taxType" 	column="tax_type"/>
+	</resultMap>
+	
+	<select id="getGIISTaxChargesLOV" resultMap="TaxChargesLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIIS_TAX_CHARGES_PKG.GET_QUOTE_TAX_CHARGES_LIST(#lineCd#, #issCd#, #quoteId#, #findText#))
+		                  <isNotNull property="notIn">
+		                   WHERE tax_cd NOT IN $notIn$
+		                  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="taxDesc">
+			              		ORDER BY tax_desc
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIIS_TAX_CHARGES_PKG.GET_QUOTE_TAX_CHARGES_LIST(#lineCd#, #issCd#, #quoteId#, #findText#))
+		                  <isNotNull property="notIn">
+		                    WHERE tax_cd NOT IN $notIn$
+		                  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getTaxListLOV" resultMap="TaxChargesLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIIS_TAX_CHARGES_PKG.GET_TAX_LIST2(#lineCd#, #issCd#, #policyId#))
+		                  <isNotNull property="notIn">
+  		 				  		WHERE tax_cd NOT IN $notIn$
+  		 				  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="taxCd">
+			              		ORDER BY tax_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="taxDesc">
+			              		ORDER BY tax_desc
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIIS_TAX_CHARGES_PKG.GET_TAX_LIST2(#lineCd#, #issCd#, #policyId#))
+		                  <isNotNull property="notIn">
+		                    WHERE tax_cd NOT IN $notIn$
+		                  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getTaxChargesLOV" resultMap="TaxChargesLOVResultMap2">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIIS_TAX_CHARGES_PKG.get_tax_charges_lov(#lineCd#, #issCd#, #quoteId#, #premAmt#, #rate#, #findText#)) <!-- remove by steven 12/06/2012 the ff: #taxCdList#, #taxCdCount#, -->
+		                  <isNotNull property="notIn">
+		                   	WHERE tax_cd NOT IN $notIn$ <!-- added by steven 12/06/2012 -->
+		                  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="taxDesc">
+			              		ORDER BY tax_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="rate">
+			              		ORDER BY rate
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIIS_TAX_CHARGES_PKG.get_tax_charges_lov(#lineCd#, #issCd#, #quoteId#, #premAmt#, #rate#, #findText#)) <!-- remove by steven 12/06/2012 the ff: #taxCdList#, #taxCdCount#, -->
+		                  <isNotNull property="notIn">
+		                   	WHERE tax_cd NOT IN $notIn$ <!-- added by steven 12/06/2012 -->
+		                  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiiss028RecList" resultMap="taxChargeMaintenance">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(Giiss028_pkg.get_tax_charges_list(#issCd#, #lineCd#))
+		  	      		<isNotNull property="filter">
+							WHERE 1=1
+							<isNotEmpty prepend="AND"  property="taxCd">
+								tax_cd = #taxCd#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="taxDesc">
+								upper(tax_desc) LIKE upper(#taxDesc#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="sequence">
+								sequence = #sequence#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="effStartDate">
+								eff_start_date LIKE #effStartDate#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="effEndDate">
+								eff_end_date LIKE #effEndDate#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="noRateTag">
+								UPPER(no_rate_tag) LIKE UPPER(#noRateTag#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="includeTag">
+								UPPER(include_tag) LIKE UPPER(#includeTag#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="primarySw">
+								UPPER(primary_sw) LIKE UPPER(#primarySw#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="expiredSw">
+								UPPER(expired_sw) LIKE UPPER(#expiredSw#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="perilSw">
+								UPPER(peril_sw) LIKE UPPER(#perilSw#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="issueDateTag">
+								UPPER(issue_date_tag) LIKE UPPER(#issueDateTag#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="cocCharge">
+								UPPER(coc_charge) LIKE UPPER(#cocCharge#)
+							</isNotEmpty>
+						</isNotNull>
+		                <isEqual property="sortColumn" compareValue="taxCd">
+			            	ORDER BY tax_cd
+		              	</isEqual>
+		              	<isEqual property="sortColumn" compareValue="taxDesc">
+		              		ORDER BY tax_desc
+		              	</isEqual>
+		              	<isEqual property="sortColumn" compareValue="sequence">
+			            	ORDER BY sequence
+		              	</isEqual>
+		              	<isEqual property="sortColumn" compareValue="effStartDate">
+		              		ORDER BY TO_DATE(eff_start_date,'MM-DD-YYYY')
+		              	</isEqual>
+		              	<isEqual property="sortColumn" compareValue="effEndDate">
+		              		ORDER BY TO_DATE(eff_end_date,'MM-DD-YYYY')
+		              	</isEqual>
+		              	<isEqual property="sortColumn" compareValue="noRateTag">
+			            	ORDER BY no_rate_tag
+		              	</isEqual>
+		              	<isEqual property="sortColumn" compareValue="includeTag">
+			            	ORDER BY include_tag
+		              	</isEqual>
+		              	<isEqual property="sortColumn" compareValue="primarySw">
+			            	ORDER BY primary_sw
+		              	</isEqual>
+		              	<isEqual property="sortColumn" compareValue="expiredSw">
+			            	ORDER BY expired_sw
+		              	</isEqual>
+		              	<isEqual property="sortColumn" compareValue="perilSw">
+			            	ORDER BY peril_sw
+		              	</isEqual>
+		              	<isEqual property="sortColumn" compareValue="issueDateTag">
+			            	ORDER BY issue_date_tag
+		              	</isEqual>
+		              	<isEqual property="sortColumn" compareValue="cocCharge">
+			            	ORDER BY coc_charge
+		              	</isEqual>
+		          	  	<isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		             	</isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(Giiss028_pkg.get_tax_charges_list(#issCd#, #lineCd#))
+		                 <isNotNull property="filter">
+							WHERE 1=1
+							<isNotEmpty prepend="AND"  property="taxCd">
+								tax_cd = #taxCd#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="taxDesc">
+								upper(tax_desc) LIKE upper(#taxDesc#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="sequence">
+								sequence = #sequence#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="effStartDate">
+								eff_start_date LIKE #effStartDate#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="effEndDate">
+								eff_end_date LIKE #effEndDate#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="noRateTag">
+								UPPER(no_rate_tag) LIKE UPPER(#noRateTag#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="includeTag">
+								UPPER(include_tag) LIKE UPPER(#includeTag#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="primarySw">
+								UPPER(primary_sw) LIKE UPPER(#primarySw#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="expiredSw">
+								UPPER(expired_sw) LIKE UPPER(#expiredSw#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="perilSw">
+								UPPER(peril_sw) LIKE UPPER(#perilSw#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="issueDateTag">
+								UPPER(issue_date_tag) LIKE UPPER(#issueDateTag#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="cocCharge">
+								UPPER(coc_charge) LIKE UPPER(#cocCharge#)
+							</isNotEmpty>
+						</isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setTaxCharges" parameterClass="giisTaxCharges">
+	    DECLARE
+	    	v_rec giis_tax_charges%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.iss_cd := #issCd#;
+			v_rec.line_cd := #lineCd#;
+			v_rec.tax_cd := #taxCd#;
+			v_rec.tax_desc := #taxDesc#;
+			v_rec.function_name := #functionName#;
+			v_rec.sequence := #sequence#;
+			v_rec.rate := #rate#;
+			v_rec.tax_amount := #taxAmount#;
+			v_rec.eff_start_date := TO_DATE(#effStartDate#, 'MM-DD-YYYY');
+			v_rec.eff_end_date := TO_DATE(#effEndDate#, 'MM-DD-YYYY');
+			v_rec.dr_gl_cd := #drGlCd#;
+			v_rec.cr_gl_cd := #crGlCd#;
+			v_rec.dr_sub1 := #drSub1#;
+			v_rec.cr_sub1 := #crSub1#;
+			v_rec.tax_type := #taxType#;
+			v_rec.no_rate_tag := #noRateTag#;
+			v_rec.include_tag := #includeTag#;
+			v_rec.incept_sw := #inceptSw#;
+			v_rec.primary_sw := #primarySw#;
+			v_rec.expired_sw := #expiredSw#;
+			v_rec.peril_sw := #perilSw#;
+			v_rec.pol_endt_sw := #polEndtSw#;
+			v_rec.takeup_alloc_tag := #takeupAllocTag#;
+			v_rec.tax_id := #taxId#;
+			v_rec.allocation_tag := #allocationTag#;
+			v_rec.remarks := #remarks#;
+			v_rec.user_id := #userId#;
+			v_rec.issue_date_tag := #issueDateTag#;
+			v_rec.coc_charge := #cocCharge#;
+			v_rec.incept_sw := 'N';
+ 			v_rec.refund_sw := #refundSw#; <!-- added by robert GENQA 4844 08.10.15 -->
+ 			GIISS028_PKG.set_rec(v_rec);
+ 		END;
+ 	</procedure> 
+ 	
+ 	<procedure id="valDeleteTaxCharges" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			GIISS028_PKG.val_del_rec(#issCd#, #lineCd#, #taxCd#, #taxId#);
+ 		END;
+ 	</procedure>	
+ 	
+	<delete id="delTaxCharges" parameterClass="giisTaxCharges">
+		BEGIN
+ 			GIISS028_PKG.del_rec(#issCd#, #lineCd#, #taxCd#, #taxId#);
+ 		END;
+ 	</delete> 
+ 	
+ 	<select id="getGiiss028TaxLOV" resultMap="Giiss028TaxLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIISS028_PKG.get_tax_list(#fundCd#))		                 
+		                  	<isNull property="findText">
+				             	WHERE UPPER(tax_cd) LIKE UPPER(#searchString#)				                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(tax_cd) LIKE UPPER(#findText#)			  				         		
+			             	</isNotNull>		             
+			              	<isEqual property="sortColumn" compareValue="taxCd">
+			              		ORDER BY tax_cd
+			              	</isEqual>	
+			              	<isEqual property="sortColumn" compareValue="taxName">
+			              		ORDER BY tax_name
+			              	</isEqual>
+			              	<isEqual property="sortColumn" compareValue="taxType">
+			              		ORDER BY tax_type
+			              	</isEqual>					              		                      
+			          	  	<isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	</isNotNull>
+		                  ) a, 
+		               (SELECT count (*) count_ 
+		                  FROM TABLE(GIISS028_PKG.get_tax_list(#fundCd#))                 
+		                  	<isNull property="findText">
+				                 WHERE UPPER(tax_cd) LIKE UPPER(#searchString#)				                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(tax_cd) LIKE UPPER(#findText#)			  				         		
+			             	</isNotNull>		
+			             	) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="checkIfHasRecord" resultClass="java.lang.String" parameterClass="java.util.HashMap">
+		SELECT giiss028_pkg.val_add_tax (#issCd#, #lineCd#, #taxCd#)
+  		  FROM DUAL
+	</select>
+	
+	<select id="valDateOnAdd" resultClass="java.lang.String" parameterClass="java.util.HashMap">
+		SELECT giiss028_pkg.val_date_on_add (#issCd#, #lineCd#, #taxCd#, #effStartDate#, #effEndDate#, #taxId#, #tran#)
+  		  FROM DUAL
+	</select>
+	
+	<procedure id="valSeqOnAdd" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss028_pkg.val_seq_on_add(#issCd#, #lineCd#, #sequence#);
+ 		END;
+ 	</procedure>	
+ 	
+ 	<!-- Gzelle 10272014 -->
+	<resultMap class="java.util.HashMap" id="taxChargeResultMap">
+		<result property="taxId" 		column="tax_id"/>	
+		<result property="taxCd" 		column="tax_cd"/>
+		<result property="taxDesc" 		column="tax_desc"/>
+		<result property="taxType" 		column="tax_type"/>
+		<result property="noRateTag" 	column="no_rate_tag"/>	
+	</resultMap> 	
+	
+	<select id="getGiisTaxCharges" resultMap="taxChargeResultMap" parameterClass="java.util.HashMap">
+		SELECT * FROM TABLE(giis_tax_charges_pkg.get_giis_tax_charges(#lineCd#,#issCd#))
+	</select>
+</sqlMap>

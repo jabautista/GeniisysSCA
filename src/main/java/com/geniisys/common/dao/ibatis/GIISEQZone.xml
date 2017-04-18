@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISEQZone">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIISEQZone" type="com.geniisys.common.entity.GIISEQZone"/>
+	
+	<resultMap id="GIISEQZoneLOVResultMap" class="com.geniisys.common.entity.GIISEQZone" extends="BaseEntity.TableGridResultMap" >
+		<result property="eqZone" column="EQ_ZONE" />
+		<result property="eqDesc" column="EQ_DESC" />
+	</resultMap>
+	
+	<!-- fons 11/18/2013 -->
+	<resultMap class="java.util.HashMap" id="giisEQZoneListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="eq_zone"     	property="eqZone"/>	
+		<result column="eq_desc"   		property="eqDesc"/>
+		<result column="zone_grp"   	property="zoneGrp"/>
+		<result column="remarks"     	property="remarks"/>
+		<result column="user_id"     	property="userId"/>
+		<result column="last_update"    property="lastUpdate"/>
+	</resultMap>
+	
+	<select id="getEQZoneLOV" resultMap="GIISEQZoneLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+		  		  	   b.count_,
+		  		  	   a.*
+		  		  FROM (SELECT *
+		  		  		  FROM TABLE(giis_eqzone_pkg.get_eqzone_listing(#findText#))
+		  		  		  <isEqual property="sortColumn" compareValue="eqDesc">
+		  		  		  	ORDER eq_desc
+		  		  		  </isEqual>
+		  		  		  <isNotNull property="sortColumn">
+		  		  		  	<isEqual property="ascDescFlag" compareValue="ASC">
+		  		  		  		ASC
+		  		  		  	</isEqual>
+		  		  		  	<isEqual property="ascDescFlag" compareValue="DESC">
+		  		  		  		DESC
+		  		  		  	</isEqual>
+		  		  		  </isNotNull>
+		  		  		  ) a,
+		  		  	   (SELECT count(*) count_
+		  		  	      FROM TABLE(giis_eqzone_pkg.get_eqzone_listing(#findText#))) b)
+		  		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getEQZoneLOV2" resultMap="GIISEQZoneLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+		  		  	   b.count_,
+		  		  	   a.*
+		  		  FROM (SELECT *
+		  		  		  FROM TABLE(giis_eqzone_pkg.get_eqzone_listing(#findText#))
+		  		  		  <isNull property="findText">
+		                  	WHERE UPPER(eq_zone) LIKE UPPER(NVL(#searchString#, eq_zone))
+		                  	   OR UPPER(eq_desc) LIKE UPPER(NVL(#searchString#, eq_desc))
+		                  </isNull>
+		  		  		  <isEqual property="sortColumn" compareValue="eqDesc">
+		  		  		  	ORDER eq_desc
+		  		  		  </isEqual>
+		  		  		  <isNotNull property="sortColumn">
+		  		  		  	<isEqual property="ascDescFlag" compareValue="ASC">
+		  		  		  		ASC
+		  		  		  	</isEqual>
+		  		  		  	<isEqual property="ascDescFlag" compareValue="DESC">
+		  		  		  		DESC
+		  		  		  	</isEqual>
+		  		  		  </isNotNull>
+		  		  		  ) a,
+		  		  	   (SELECT count(*) count_
+		  		  	      FROM TABLE(giis_eqzone_pkg.get_eqzone_listing(#findText#))
+		  		  	      <isNull property="findText">
+		                  	WHERE UPPER(eq_zone) LIKE UPPER(NVL(#searchString#, eq_zone))
+		                  	   OR UPPER(eq_desc) LIKE UPPER(NVL(#searchString#, eq_desc))
+		                  </isNull>
+		                ) b)
+		  		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiiss011RecList" resultMap="giisEQZoneListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss011_pkg.get_rec_list(#eqZone#, #eqDesc#, #zoneGrp#))		            
+		                  <isEqual property="sortColumn" compareValue="eqZone">
+			              		ORDER BY eq_zone
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="eqDesc">
+			              		ORDER BY eq_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="zoneGrp">
+			              		ORDER BY zone_grp
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss011_pkg.get_rec_list(#eqZone#, #eqDesc#, #zoneGrp#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+				
+	<procedure id="setEQZone" parameterClass="GIISEQZone">
+	    DECLARE
+	    	v_rec giis_eqzone%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.eq_zone := #eqZone#;
+ 			v_rec.eq_desc := #eqDesc#;
+ 			v_rec.zone_grp := #zoneGrp#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			giiss011_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteEQZone" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss011_pkg.val_del_rec(#recId#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddEQZone" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss011_pkg.val_add_rec(#eqZone#,#eqDesc#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delEQZone" parameterClass="java.lang.String">
+		BEGIN
+ 			giiss011_pkg.del_rec(#eqZone#);
+ 		END;
+ 	</delete>
+ 	
+ 	<select id="getGiiss007EqZoneLOV" resultMap="GIISEQZoneLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIISS007_PKG.get_eq_zone_lov)		                 
+		                  	<isNull property="findText">
+				                 WHERE UPPER(eq_zone) LIKE UPPER(#searchString#)
+				                 OR UPPER(eq_desc) LIKE UPPER(#searchString#)					                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(eq_zone) LIKE UPPER(#findText#)
+				                 OR UPPER(eq_desc) LIKE UPPER(#findText#)				  				         		
+			             	</isNotNull>		             
+			              	<isEqual property="sortColumn" compareValue="eqZone">
+			              		ORDER BY eq_zone
+			              	</isEqual>	
+			              	<isEqual property="sortColumn" compareValue="eqDesc">
+			              		ORDER BY eq_desc
+			              	</isEqual>			              		                      
+			          	  	<isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	</isNotNull>
+		                  ) a, 
+		               (SELECT count (*) count_ 
+		                  FROM TABLE(GIISS007_PKG.get_eq_zone_lov)		                 
+		                  	<isNull property="findText">
+				                 WHERE UPPER(eq_zone) LIKE UPPER(#searchString#)
+				                 OR UPPER(eq_desc) LIKE UPPER(#searchString#)					                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(eq_zone) LIKE UPPER(#findText#)
+				                 OR UPPER(eq_desc) LIKE UPPER(#findText#)				  				         		
+			             	</isNotNull>		
+			             	) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiiss011AllRec" resultMap="giisEQZoneListResultMap">
+		SELECT rownum rownum_,
+			   '1' count_,
+			   a.*
+					FROM (SELECT * 
+							FROM TABLE (giiss011_pkg.get_rec_list(#eqZone#, #eqDesc#, #zoneGrp#))) a
+	</select>
+</sqlMap>

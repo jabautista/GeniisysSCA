@@ -1,0 +1,33 @@
+CREATE OR REPLACE PACKAGE CPI.EXTRACT_OS_PD_PER_CAT IS
+
+/*********************EXTRACT BASIC INFORMATION*************************************/
+
+  PROCEDURE EXTRACT_ALL(P_SESSION_ID      IN GICL_OS_PD_CLM_EXTR.SESSION_ID%TYPE,
+     P_CATASTROPHIC_CD IN GICL_CLAIMS.CATASTROPHIC_CD%TYPE,
+     P_LINE_CD         IN GICL_CLAIMS.LINE_CD%TYPE,
+     P_ISS_CD          IN GICL_CLAIMS.ISS_CD%TYPE,
+     P_LOSS_CAT_CD     IN GICL_CLAIMS.LOSS_CAT_CD%TYPE,
+            P_LOCATION        IN GICL_OS_PD_CLM_EXTR.LOSS_LOC%TYPE,
+     P_OS_DATE_OPT     IN NUMBER,
+     P_PD_DATE_OPT     IN NUMBER,
+     P_AS_OF_DATE      IN DATE);
+
+/****************************EXTRACT DISTRIBUTION***********************************/
+
+  PROCEDURE EXTRACT_DISTRIBUTION(P_SESSION_ID IN GICL_OS_PD_CLM_EXTR.SESSION_ID%TYPE,
+       P_DATE       IN DATE);
+
+/****************************GENERATE RECORD ID************************************/
+
+  PROCEDURE RESET_RECORD_ID;
+  PROCEDURE DELETE_DATA;
+    V_OS_PD_REC_ID       GICL_OS_PD_CLM_EXTR.OS_PD_REC_ID%TYPE;
+    V_OS_PD_DS_REC_ID    GICL_OS_PD_CLM_DS_EXTR.OS_PD_DS_REC_ID%TYPE;
+    V_OS_PD_RIDS_REC_ID  GICL_OS_PD_CLM_RIDS_EXTR.OS_PD_RIDS_REC_ID%TYPE;
+
+/**********************************************************************************/
+
+END;
+/
+
+

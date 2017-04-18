@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISUserGrpDtl">
+
+	<typeAlias alias="GIISUserGrpDtl" type="com.geniisys.common.entity.GIISUserGrpDtl"/>
+
+  	<cacheModel id="oneDayClient" type="MEMORY">
+    	<flushInterval hours="24"/>
+    	<property name="reference-type" value="WEAK"/>
+  	</cacheModel>
+  
+  	<resultMap id="GIISUserGrpDtlMap" class="GIISUserGrpDtl">
+  		<result column="ISS_CD"				property="issCd" />
+	  	<result column="ISS_NAME"			property="issName" />
+	  	<result column="USER_GRP"			property="userGrp" />
+	  	<result column="TRAN_CD"			property="tranCd" />
+	  	<result column="USER_ID"			property="userId" />
+	  	<result column="LAST_UPDATE"		property="lastUpdate" />
+	  	<result column="REMARKS"			property="remarks" />
+  	</resultMap>
+  	
+  	<resultMap id="giiss041UserGrpDtlsMap" class="GIISUserGrpDtl"  extends="BaseEntity.TableGridResultMap">
+  		<result column="ISS_CD"				property="issCd" />
+	  	<result column="ISS_NAME"			property="issName" />
+	  	<result column="USER_GRP"			property="userGrp" />
+	  	<result column="TRAN_CD"			property="tranCd" />
+  	</resultMap>
+  	
+  	<resultMap class="java.util.HashMap" id="giss041IssueLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="iss_cd"     		property="issCd"/>
+		<result column="iss_name"     		property="issName"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="allIssCodesMap">
+		<result column="iss_cd"     		property="issCd"/>
+		<result column="iss_name"     		property="issName"/>
+	</resultMap>
+  
+  	<select id="getGiisUserGrpDtlGrpList"	resultMap="GIISUserGrpDtlMap" parameterClass="java.lang.String">  
+    	select * from table(GIIS_USER_GRP_DTL_PKG.get_giis_user_grp_dtl_grp_list(#userGrp#))
+  	</select>
+  	
+  	<insert id="setGiisUserGrpDtl" parameterClass="GIISUserGrpDtl">
+  		BEGIN
+  			giis_users_pkg.app_user := #userId#;
+  			GIIS_USER_GRP_DTL_PKG.set_giis_user_grp_dtl(#userGrp#, #tranCd#, #issCd#, #remarks#, #userId#);
+  		END;
+  	</insert>
+  
+  	<delete id="deleteGiisUserGrpDtl" parameterClass="java.lang.Integer">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			GIIS_USER_GRP_DTL_PKG.del_giis_user_grp_dtl(#userGrp#);
+		END;
+  	</delete>
+
+	<resultMap id="giisUserGrpDtlResultMap" class="giisUserGrpDtl" extends="BaseEntity.TableGridResultMap">
+		<result column="iss_cd"		property="issCd" />
+		<result column="iss_name"	property="issName" />
+	</resultMap>	
+	
+	<select id="getUserGrpDtl"  resultMap="giisUserGrpDtlResultMap">
+		SELECT *
+		   FROM (SELECT rownum rownum_, 
+		                b.count_, 
+		                a.* 
+		           FROM (SELECT * 
+		                   FROM TABLE (GIISS040_PKG.get_user_grp_dtl(#userGrp#, #tranCd#, #issCd#, #issName#))
+		                  <isEqual property="sortColumn" compareValue="issCd">
+			              		ORDER BY iss_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="issName">
+			              		ORDER BY iss_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               	  (SELECT count(*) count_ 
+		                     FROM TABLE (GIISS040_PKG.get_user_grp_dtl(#userGrp#, #tranCd#, #issCd#, #issName#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiiss041UserGrpDtls" resultMap="giiss041UserGrpDtlsMap">
+		 SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss041_pkg.get_user_grp_dtl_list(#userGrp#, #tranCd#, #issCd#, #issName#))
+	                  <isEqual property="sortColumn" compareValue="issCd">
+		              		ORDER BY iss_cd
+		              </isEqual>
+		              <isEqual property="sortColumn" compareValue="issName">
+		              		ORDER BY iss_name
+		              </isEqual>
+		          	  <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              </isNotNull>
+	                  ) a, 
+	               (SELECT count(*) count_ 
+	                  FROM TABLE(giiss041_pkg.get_user_grp_dtl_list(#userGrp#, #tranCd#, #issCd#, #issName#))
+	                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiss041IssueLOV" resultMap="giss041IssueLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giiss041_pkg.get_issue_lov(#grpIssCd#, #findText#))
+						 WHERE iss_cd NOT IN (SELECT b.iss_cd
+                                       			FROM giis_user_grp_dtl b
+                                      		   WHERE b.user_grp = #userGrp#
+                                        		 AND b.tran_cd = #tranCd#
+                                        	  <isNotEmpty property="notInDeleted">
+											  	 AND b.iss_cd NOT IN $notInDeleted$
+											  </isNotEmpty>)
+						  <isNotNull property="notIn">
+					  		AND iss_cd NOT IN $notIn$
+					  	  </isNotNull>
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="issCd">
+								ORDER BY iss_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="issName">
+								ORDER BY iss_name
+							</isEqual>							
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(giiss041_pkg.get_issue_lov(#grpIssCd#, #findText#))
+						  WHERE iss_cd NOT IN (SELECT b.iss_cd
+                                       			 FROM giis_user_grp_dtl b
+                                      		    WHERE b.user_grp = #userGrp#
+                                        		  AND b.tran_cd = #tranCd#
+                                        	  <isNotEmpty property="notInDeleted">
+											  	  AND b.iss_cd NOT IN $notInDeleted$
+											  </isNotEmpty>)
+						  <isNotNull property="notIn">
+					  		AND iss_cd NOT IN $notIn$
+					  	  </isNotNull>
+						   ) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="valDelUserGrpDtl" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss041_pkg.val_del_user_grp_dtl(#userGrp#, #tranCd#, #issCd#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddUserGrpDtl" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss041_pkg.val_set_user_grp_dtl(#userGrp#, #tranCd#, #issCd#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<delete id="delUserGrpDtl" parameterClass="GIISUserGrpDtl">
+		BEGIN
+ 			giiss041_pkg.del_user_grp_dtl(#userGrp#, #tranCd#, #issCd#);
+ 		END;
+ 	</delete>
+ 	
+ 	<procedure id="setUserGrpDtl" parameterClass="GIISUserGrpDtl">
+	    DECLARE
+	    	v_rec giis_user_grp_dtl%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.user_grp := #userGrp#;
+ 			v_rec.iss_cd := #issCd#;
+ 			v_rec.user_id := #userId#;
+			v_rec.tran_cd := #tranCd#;
+			
+ 			giiss041_pkg.set_user_grp_dtl(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<select id="getAllIssCodesGiiss041" resultMap="allIssCodesMap">
+ 		SELECT *
+  		  FROM TABLE(giiss041_pkg.get_issue_lov(#grpIssCd#, null))
+ 	     WHERE iss_cd NOT IN (SELECT iss_cd
+                                FROM giis_user_grp_dtl
+                       		   WHERE user_grp = #userGrp#
+                         		 AND tran_cd = #tranCd#
+                         		 <isNotEmpty property="notInDeleted">
+                         		 AND iss_cd NOT IN $notInDeleted$
+                         		 </isNotEmpty>)
+		<isNotEmpty property="notIn">
+   		   AND iss_cd NOT IN $notIn$
+		</isNotEmpty>
+ 	</select>
+ 	
+</sqlMap>

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIWMcAcc">
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIPIWMcAcc" type="com.geniisys.gipi.entity.GIPIWMcAcc"/>
+	
+	<resultMap class="GIPIWMcAcc" id="GIPIWMcAccMap">
+		<result column="PAR_ID" 		property="parId" />
+		<result column="ITEM_NO" 		property="itemNo" />
+		<result column="ACCESSORY_CD" 	property="accessoryCd" />
+		<result column="ACC_AMT" 		property="accAmt" />
+		<result column="DELETE_SW" 		property="deleteSw" />
+		<result column="ACCESSORY_DESC" property="accessoryDesc" />
+		<result column="USER_ID"		property="userId" />
+	</resultMap>
+	
+	<resultMap class="GIPIWMcAcc" id="GIPIWMcAccMapByItemTableGridResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="PAR_ID" 		property="parId" />
+		<result column="ITEM_NO" 		property="itemNo" />
+		<result column="ACCESSORY_CD" 	property="accessoryCd" />
+		<result column="ACC_AMT" 		property="accAmt" />
+		<result column="DELETE_SW" 		property="deleteSw" />
+		<result column="ACCESSORY_DESC" property="accessoryDesc" />
+		<result column="USER_ID"		property="userId" />
+	</resultMap>
+	
+	<procedure id="getGIPIWMcAcc" resultMap="GIPIWMcAccMap">
+		select * from table(Gipi_WMcAcc_Pkg.get_Gipi_WMcAcc(#parId#,#itemNo#))
+	</procedure>
+	
+	<procedure id="getGIPIWMcAccByParId" resultMap="GIPIWMcAccMap">
+		SELECT * FROM TABLE(GIPI_WMCACC_PKG.get_gipi_wmcacc_1(#parId#))
+	</procedure>
+	
+	<insert id="setGipiWMcAcc" parameterClass="com.geniisys.gipi.entity.GIPIWMcAcc">
+		DECLARE
+			accessory Gipi_WMcAcc%ROWTYPE; 
+		BEGIN
+			accessory.par_id 		:= #parId#;
+			accessory.item_no 		:= #itemNo#;
+			accessory.accessory_cd 	:= #accessoryCd#;
+			accessory.acc_amt 		:= #accAmt#;
+			accessory.user_id		:= #userId#;
+			
+			Gipi_WMcAcc_Pkg.set_Gipi_WMcAcc(accessory);
+			COMMIT;
+		END;
+	</insert>
+	
+	<insert id="setGipiWMcAccByParams" parameterClass="com.geniisys.gipi.entity.GIPIWMcAcc">
+		BEGIN
+			GIPI_WMCACC_PKG.set_gipi_wmcacc_1(#parId#, #itemNo#, #accessoryCd#, #accAmt#, #userId#, #deleteSw#);
+		END;
+	</insert>
+	
+	<procedure id="deleteGipiWMcAcc" parameterClass="com.geniisys.gipi.entity.GIPIWMcAcc">
+		BEGIN
+			Gipi_WMcAcc_Pkg.delete_all_GipiWMcAcc(#parId#,#itemNo#);
+			COMMIT;
+		END;
+	</procedure>
+	
+	<delete id="delGipiWMcAcc" parameterClass="java.util.HashMap">
+		BEGIN
+			GIPI_WMCACC_PKG.del_gipi_wmcacc(#parId#, #itemNo#);
+		END;
+	</delete>
+	
+	<delete id="delGipiWMcAccWithAccCd" parameterClass="java.util.HashMap">
+		BEGIN
+			GIPI_WMCACC_PKG.del_gipi_wmcacc_1(#parId#, #itemNo#, #accessoryCd#);
+		END;		
+	</delete>
+	
+	<select id="getAccessoryForPackPolicyItems" resultMap="GIPIWMcAccMap">
+		SELECT * FROM TABLE(gipi_wmcacc_pkg.get_gipi_wmcacc_pack_pol(#parId#, #itemNo#))
+	</select>
+	
+	<select id="getGIPIWMcAccTableGrid" parameterClass="java.util.HashMap" resultMap="GIPIWMcAccMapByItemTableGridResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(gipi_wmcacc_pkg.get_gipi_wmcacc_tg(#parId#, #itemNo#, #accessoryDesc#))
+						  <isNull property="sortColumn">
+							ORDER BY accessory_desc ASC
+						  </isNull>
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="accessoryCd">
+								ORDER BY accessory_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="accessoryDesc">
+								ORDER BY accessory_desc
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="accAmt"> <!-- added by robert 09232013 -->
+								ORDER BY ACC_AMT
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(gipi_wmcacc_pkg.get_gipi_wmcacc_tg(#parId#, #itemNo#, #accessoryDesc#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+</sqlMap>

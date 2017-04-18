@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISVestype">
+	
+	<typeAlias alias="giisVestype" type="com.geniisys.common.entity.GIISVestype"/>
+  	
+	<resultMap class="giisVestype" id="giisVestypeListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="vestype_cd"     property="vestypeCd"/>
+		<result column="vestype_desc"  	property="vestypeDesc"/>
+		<result column="user_id"     	property="userId"/>
+		<result column="last_update" 	property="lastUpdate"/>
+		<result column="remarks"     	property="remarks"/>
+	</resultMap>
+	
+	<select id="getGiiss077RecList" resultMap="giisVestypeListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss077_pkg.get_rec_list(#vestypeCd#, #vestypeDesc#))
+		                  <isEqual property="sortColumn" compareValue="vestypeCd">
+			              		ORDER BY vestype_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="vestypeDesc">
+			              		ORDER BY vestype_desc
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss077_pkg.get_rec_list(#vestypeCd#, #vestypeDesc#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setVesselType" parameterClass="giisVestype">
+	    DECLARE
+	    	v_rec giis_vestype%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.vestype_cd := #vestypeCd#;
+ 			v_rec.vestype_desc := #vestypeDesc#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			giiss077_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteVesselType" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss077_pkg.val_del_rec(#recId#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddVesselType" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss077_pkg.val_add_rec(#recId#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delVesselType" parameterClass="java.lang.String">
+		BEGIN
+ 			giiss077_pkg.del_rec(#vestypeCd#);
+ 		END;
+ 	</delete>
+</sqlMap>

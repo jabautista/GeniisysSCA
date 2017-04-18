@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GICLCatDtl">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GICLCatDtlClass" type="com.geniisys.gicl.entity.GICLCatDtl"/>
+
+	<resultMap class="GICLCatDtlClass" id="GICLCatDtlResultMap">
+		<result column="catastrophic_cd" 		property="catCd" />
+		<result column="catastrophic_desc" 		property="catDesc" />
+		<result column="line_cd" 				property="lineCd" />
+		<result column="loss_cat_cd" 			property="lossCatCd" />
+		<result column="start_date" 			property="startDate" />
+		<result column="end_date" 				property="endDate" />
+		<result column="location" 				property="location" />
+		<result column="block_no" 				property="blockNo" />
+		<result column="district_no" 			property="districtNo" />
+		<result column="city_cd" 				property="cityCd" />
+		<result column="province_cd" 			property="provinceCd" />
+		<result column="remarks" 				property="remarks" />
+	</resultMap>
+	
+	<resultMap id="GICLCatDtlResultMapGrid" class="GICLCatDtlClass" extends="GICLCatDtlResultMap">
+  		<result column="rownum_" 			property="rowNum" />
+		<result column="count_"				property="rowCount"/>
+  	</resultMap>
+
+  	<select id="getGiclCatDtlLOV" resultMap="GICLCatDtlResultMapGrid">
+  		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(gicl_cat_dtl_pkg.get_cat_dtls)  
+		          		 <isNotNull property="findText">
+		                 WHERE (UPPER(catastrophic_cd) LIKE UPPER(#findText#) OR UPPER(catastrophic_desc) LIKE UPPER(#findText#))
+		             	 </isNotNull>            
+			          	  <isNotNull property="sortColumn">
+			          	  		<isEqual property="sortColumn" compareValue="catCd">
+				              		ORDER BY catastrophic_cd
+				              	</isEqual>
+			                  	<isEqual property="sortColumn" compareValue="catDesc">
+				              		ORDER BY catastrophic_desc
+				              	</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(gicl_cat_dtl_pkg.get_cat_dtls)
+		                 <isNotNull property="findText">
+		                 WHERE (UPPER(catastrophic_cd) LIKE UPPER(#findText#) OR UPPER(catastrophic_desc) LIKE UPPER(#findText#))
+		             	 </isNotNull>  
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+  	
+  	<select id="getCatDtlByCatastrophicCd" resultMap="GICLCatDtlResultMap" parameterClass="java.util.HashMap">
+  		SELECT * FROM TABLE(GICL_CAT_DTL_PKG.get_cat_dtl_by_cat_cd(#catastrophicCd#, #lineCd#))
+  	</select>
+  	
+  	<select id="getGiclCatDtlLOV2" resultMap="GICLCatDtlResultMapGrid">		
+		SELECT *
+  		  FROM (SELECT ROWNUM rownum_, 
+	               	   b.count_, 
+	              	   a.* 
+	          	  FROM (SELECT * 
+	          	  		  FROM TABLE(GICL_CAT_DTL_PKG.get_cat_dtls)
+	          			 WHERE 1=1
+			          	 <isNotNull property="searchString">	          	 
+			          	 	<isNull prepend="AND" property="findText">
+								( UPPER(catastrophic_cd) LIKE UPPER(#searchString#)
+									OR UPPER (catastrophic_desc) LIKE UPPER(#searchString#) ) 
+							</isNull>
+							<isNotNull prepend="AND" property="findText">
+								( UPPER(catastrophic_cd) LIKE UPPER(#findText#)
+									OR UPPER (catastrophic_desc) LIKE UPPER(#findText#) ) 
+							</isNotNull>
+						 </isNotNull>
+						 <isNull property="searchString">
+						 	<isNotNull prepend="AND" property="findText">
+								( UPPER(catastrophic_cd) LIKE UPPER(#findText#)
+									OR UPPER (catastrophic_desc) LIKE UPPER(#findText#) ) 
+							</isNotNull>
+						 </isNull>
+			             <isEqual property="sortColumn" compareValue="catCd">
+		              		ORDER BY catastrophic_cd
+			             </isEqual>
+			             <isEqual property="sortColumn" compareValue="catDesc">
+		              		ORDER BY catastrophic_desc
+			             </isEqual>
+			             <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	 </isNotNull>) a,
+		               (SELECT count(*) count_
+			          	  FROM TABLE(GICL_CAT_DTL_PKG.get_cat_dtls)
+			          	 WHERE 1=1
+			            	 <isNotNull property="searchString">	          	 
+			          	 	<isNull prepend="AND" property="findText">
+								( UPPER(catastrophic_cd) LIKE UPPER(#searchString#)
+									OR UPPER (catastrophic_desc) LIKE UPPER(#searchString#) ) 
+							</isNull>
+							<isNotNull prepend="AND" property="findText">
+								( UPPER(catastrophic_cd) LIKE UPPER(#findText#)
+									OR UPPER (catastrophic_desc) LIKE UPPER(#findText#) ) 
+							</isNotNull>
+						 </isNotNull>
+						 <isNull property="searchString">
+						 	<isNotNull prepend="AND" property="findText">
+								( UPPER(catastrophic_cd) LIKE UPPER(#findText#)
+									OR UPPER (catastrophic_desc) LIKE UPPER(#findText#) ) 
+							</isNotNull>
+						 </isNull>)b
+				 ) 
+		 WHERE rownum_ BETWEEN #from# AND #to# 	
+ 	</select>	
+  	
+</sqlMap>	

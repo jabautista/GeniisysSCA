@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<!-- created by cherrie 12.21.2012 (Claim history)-->
+
+<sqlMap namespace = "GICLClaimsHist"> 
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<resultMap class="java.util.HashMap" id="itemResDetailsMap" extends="BaseEntity.TableGridResultMap">
+		<result property="claimId" column="claim_id" />
+		<result property="groupedItemNo" column="grouped_item_no" />
+		<result property="itemNo" column="item_no" />
+		<result property="itemTitle" column="item_title" />
+		<result property="perilCd" column="peril_cd" />
+		<result property="perilName" column="peril_name" />
+		<result property="lossReserve" column="loss_reserve" />
+		<result property="expenseReserve" column="expense_reserve" />	
+		<result column="ROWNUM_" 			property="rowNum" />			
+		<result column="COUNT_"				property="rowCount"/>	
+	</resultMap>
+
+	<resultMap class="java.util.HashMap" id="itemHistDetailsMap" extends="BaseEntity.TableGridResultMap">
+		<result property="claimId" column="claim_id" />
+		<result property="groupedItemNo" column="grouped_item_no" />
+		<result property="itemNo" column="item_no" />
+		<result property="perilCd" column="peril_cd" />		
+		<result property="histSeqNo" column="hist_seq_no" />
+		<result property="itemStatCd" column="item_stat_cd" />
+		<result property="distSw" column="dist_sw" />
+		<result property="paidAmt" column="paid_amt" />		
+		<result property="netAmt" column="net_amt" />	
+		<result property="adviseAmt" column="advise_amt" />			
+		<result property="payeeType" column="payee_type" />		
+		<result property="payeeClassCd" column="payee_class_cd" />	
+		<result property="payeeCd" column="payee_cd" />
+		<result property="payeeName" column="payee_name" />		
+		<result column="ROWNUM_" 			property="rowNum" />			
+		<result column="COUNT_"				property="rowCount"/>
+	</resultMap>	
+
+	<select id="getClaimItemResDtls" resultMap="itemResDetailsMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GICL_CLAIMS_HIST_PKG.GET_CLAIM_ITEM_RESERVE(#claimId#))
+          		  <isNotNull property="filter">
+				  	WHERE 1=1
+		  			<isNotEmpty prepend="AND" property="itemNo">
+		  				item_no = #itemNo#
+		  			</isNotEmpty>
+		  			<isNotEmpty prepend="AND" property="itemTitle">
+		  				UPPER(item_title) LIKE UPPER(#itemTitle#)
+		  			</isNotEmpty>
+		  			<isNotEmpty prepend="AND" property="perilCd">
+		  				peril_cd = #perilCd#
+		  			</isNotEmpty>
+		  			<isNotEmpty prepend="AND" property="perilName">
+		  				UPPER(peril_name) LIKE UPPER(#perilName#)
+		  			</isNotEmpty>
+		  			<isNotEmpty prepend="AND" property="lossReserve">
+		  				loss_reserve = #lossReserve#
+		  			</isNotEmpty>
+		  			<isNotEmpty prepend="AND" property="expenseReserve">
+		  				expense_reserve = #expenseReserve#
+		  			</isNotEmpty>
+				  </isNotNull>
+          		  <isEqual property="sortColumn" compareValue="itemNo itemTitle">
+			            	ORDER BY item_no || item_title
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="perilCd perilName">
+			            	ORDER BY peril_cd || peril_name
+			          	</isEqual>
+		          		<isEqual property="sortColumn" compareValue="itemNo">
+			            	ORDER BY item_no
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="itemTitle">
+			            	ORDER BY item_title
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="perilCd">
+			            	ORDER BY peril_cd
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="perilName">
+			            	ORDER BY peril_name
+			          	</isEqual>  
+			          	<isEqual property="sortColumn" compareValue="lossReserve">
+			            	ORDER BY loss_reserve
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="expenseReserve">
+			            	ORDER BY expense_reserve
+			          	</isEqual>
+			           	<isNotNull property="sortColumn">
+			              	<isEqual property="ascDescFlg" compareValue="ASC">
+			              		ASC
+			              	</isEqual>
+			              	<isEqual property="ascDescFlg" compareValue="DESC">
+			              		DESC
+			              	</isEqual>
+			            </isNotNull>) a,
+			            (SELECT count(*) count_ 
+		                  FROM TABLE(GICL_CLAIMS_HIST_PKG.GET_CLAIM_ITEM_RESERVE(#claimId#))
+               		   <isNotNull property="filter">
+						  	WHERE 1=1
+				  			<isNotEmpty prepend="AND" property="itemNo">
+				  				item_no = #itemNo#
+				  			</isNotEmpty>
+				  			<isNotEmpty prepend="AND" property="itemTitle">
+				  				UPPER(item_title) LIKE UPPER(#itemTitle#)
+				  			</isNotEmpty>
+				  			<isNotEmpty prepend="AND" property="perilCd">
+				  				peril_cd = #perilCd#
+				  			</isNotEmpty>
+				  			<isNotEmpty prepend="AND" property="perilName">
+				  				UPPER(peril_name) LIKE UPPER(#perilName#)
+				  			</isNotEmpty>
+				  			<isNotEmpty prepend="AND" property="lossReserve">
+				  				loss_reserve = #lossReserve#
+				  			</isNotEmpty>
+				  			<isNotEmpty prepend="AND" property="expenseReserve">
+				  				expense_reserve = #expenseReserve#
+				  			</isNotEmpty>
+						  </isNotNull>) b)
+          WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+
+	<select id="getClmItemHistDtls" resultMap="itemHistDetailsMap" parameterClass="java.util.HashMap">
+		SELECT *       
+  		  FROM (SELECT rownum rownum_ ,b.count_,a.*     
+          		  FROM (SELECT * FROM TABLE(GICL_CLAIMS_HIST_PKG.GET_CLAIM_LOSS_EXP_HIST(#claimId#, #itemNo#, #perilCd#, #groupedItemNo#))
+          		  		<isNotNull property="filter">
+						  	WHERE 1=1
+				  			<isNotEmpty prepend="AND" property="histSeqNo">
+				  				hist_seq_no = #histSeqNo#
+				  			</isNotEmpty>
+				  			<isNotEmpty prepend="AND" property="itemStatCd">
+				  				UPPER(item_stat_cd) LIKE UPPER(#itemStatCd#)
+				  			</isNotEmpty>
+				  			<isNotEmpty prepend="AND" property="distSw">
+				  				UPPER(dist_sw) LIKE UPPER(#distSw#)
+				  			</isNotEmpty>
+				  			<isNotEmpty prepend="AND" property="paidAmt">
+				  				paid_amt = #paidAmt#
+				  			</isNotEmpty>
+				  			<isNotEmpty prepend="AND" property="adviseAmt">
+				  				advise_amt = #adviseAmt#
+				  			</isNotEmpty>
+				  			<isNotEmpty prepend="AND" property="netAmt">
+				  				net_amt = #netAmt#
+				  			</isNotEmpty>
+				  			<isNotEmpty prepend="AND" property="payeeType">
+				  				UPPER(payee_type) LIKE UPPER(#payeeType#)
+				  			</isNotEmpty>
+				  			<isNotEmpty prepend="AND" property="payeeClassCd">
+				  				payee_class_cd = #payeeClassCd#
+				  			</isNotEmpty>
+				  			<isNotEmpty prepend="AND" property="payeeCd">
+				  				payee_cd = #payeeCd#
+				  			</isNotEmpty>
+				  			<isNotEmpty prepend="AND" property="payeeName">
+				  				UPPER(payee_name) LIKE UPPER(#payeeName#)
+				  			</isNotEmpty>
+				  		</isNotNull>        
+				  		
+				  		  		  
+          		  		<isEqual property="sortColumn" compareValue="histSeqNo">
+			            	ORDER BY hist_seq_no
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="itemStatCd">
+			            	ORDER BY item_stat_cd
+			          	</isEqual>
+		          		<isEqual property="sortColumn" compareValue="distSw">
+			            	ORDER BY dist_sw
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="paidAmt">
+			            	ORDER BY paid_amt
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="adviseAmt">
+			            	ORDER BY advise_amt
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="netAmt">
+			            	ORDER BY net_amt
+			          	</isEqual>  
+			          	<isEqual property="sortColumn" compareValue="payeeType">
+			            	ORDER BY payee_type
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="payeeClassCd">
+			            	ORDER BY payee_class_cd
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="payeeCd">
+			            	ORDER BY payee_cd
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="payeeName">
+			            	ORDER BY payee_name
+			          	</isEqual>			          	
+			           	<isNotNull property="sortColumn">
+			              	<isEqual property="ascDescFlg" compareValue="ASC">
+			              		ASC
+			              	</isEqual>
+			              	<isEqual property="ascDescFlg" compareValue="DESC">
+			              		DESC
+			              	</isEqual>
+			            </isNotNull>) a,
+               		   (SELECT count(*) count_ FROM TABLE(GICL_CLAIMS_HIST_PKG.GET_CLAIM_LOSS_EXP_HIST(#claimId#, #itemNo#, #perilCd#,#groupedItemNo#))
+               		   <isNotNull property="filter">
+						  	WHERE 1=1
+				  			<isNotEmpty prepend="AND" property="histSeqNo">
+				  				hist_seq_no = #histSeqNo#
+				  			</isNotEmpty>
+				  			<isNotEmpty prepend="AND" property="itemStatCd">
+				  				UPPER(item_stat_cd) LIKE UPPER(#itemStatCd#)
+				  			</isNotEmpty>
+				  			<isNotEmpty prepend="AND" property="distSw">
+				  				UPPER(dist_sw) LIKE UPPER(#distSw#)
+				  			</isNotEmpty>
+				  			<isNotEmpty prepend="AND" property="paidAmt">
+				  				paid_amt = #paidAmt#
+				  			</isNotEmpty>
+				  			<isNotEmpty prepend="AND" property="adviseAmt">
+				  				advise_amt = #adviseAmt#
+				  			</isNotEmpty>
+				  			<isNotEmpty prepend="AND" property="netAmt">
+				  				net_amt = #netAmt#
+				  			</isNotEmpty>
+				  			<isNotEmpty prepend="AND" property="payeeType">
+				  				UPPER(payee_type) LIKE UPPER(#payeeType#)
+				  			</isNotEmpty>
+				  			<isNotEmpty prepend="AND" property="payeeClassCd">
+				  				payee_class_cd = #payeeClassCd#
+				  			</isNotEmpty>
+				  			<isNotEmpty prepend="AND" property="payeeCd">
+				  				payee_cd = #payeeCd#
+				  			</isNotEmpty>
+				  			<isNotEmpty prepend="AND" property="payeeName">
+				  				UPPER(payee_name) LIKE UPPER(#payeeName#)
+				  			</isNotEmpty>
+				  		</isNotNull>)b)
+          WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+</sqlMap>

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GICLExpPayees">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GICLExpPayeesClass" type="com.geniisys.gicl.entity.GICLExpPayees"/>
+	
+	<resultMap class="GICLExpPayeesClass" 	id="GICLExpPayeesResultMap">
+		<result property="claimId"				column="CLAIM_ID"/> 
+		<result property="payeeClassCd"			column="PAYEE_CLASS_CD"/>
+		<result property="payeeClassDesc"		column="PAYEE_CLASS_DESC"/>
+		<result property="adjCompanyCd"			column="ADJ_COMPANY_CD"/>
+		<result property="adjCompanyName"		column="ADJ_COMPANY_NAME"/>
+		<result property="privAdjCd"			column="PRIV_ADJ_CD"/>
+		<result property="adjName"				column="ADJ_NAME"/>
+		<result property="mailAddr1"			column="MAIL_ADDR1"/>
+		<result property="mailAddr2"			column="MAIL_ADDR2"/>
+		<result property="mailAddr3"			column="MAIL_ADDR3"/>
+		<result property="phoneNo"				column="PHONE_NO"/>
+		<result property="assignDate"			column="ASSIGN_DATE"/>
+		<result property="userId"				column="USER_ID"/>
+		<result property="lastUpdate"			column="LAST_UPDATE"/>
+		<result property="clmPaid"				column="CLM_PAID"/>
+		<result property="remarks"				column="REMARKS"/>
+	</resultMap>
+	
+	<resultMap id="GICLExpPayeesGridResultMap" class="GICLExpPayeesClass" extends="GICLExpPayeesResultMap">
+  		<result property="rowNum"				column="ROWNUM_"/>
+		<result property="rowCount"				column="COUNT_"/>
+  	</resultMap>
+	
+	
+	<select id="getGICLExpPayeesList" resultMap="GICLExpPayeesGridResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, a.*
+		          FROM (SELECT * 
+		                  FROM TABLE (GICL_EXP_PAYEES_PKG.get_gicl_exp_payees(#claimId#))
+			              <isEqual property="sortColumn" compareValue="payeeClassCd payeeClassDesc">
+			            		ORDER BY payee_class_cd
+			            		<isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              	</isNotNull>
+				              	,payee_class_desc
+			          		</isEqual>
+			          		<isEqual property="sortColumn" compareValue="adjCompanyCd adjCompanyName">
+			            		ORDER BY adj_company_cd
+			            		<isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              	</isNotNull>
+				              	,adj_company_name
+			          		</isEqual>
+		                  <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	  </isNotNull>) a, 
+		               (SELECT count(*) count_
+		                  FROM TABLE (GICL_EXP_PAYEES_PKG.get_gicl_exp_payees(#claimId#))			                  	
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#			
+	</select>
+	
+	<select id="checkGiclExpPayeesExist" resultClass="java.lang.String">
+		SELECT GICL_EXP_PAYEES_PKG.check_exist_exp_payees(#claimId#) FROM dual
+	</select>
+	
+</sqlMap>	

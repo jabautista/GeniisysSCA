@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIRIWFrperil">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+
+	<resultMap class="java.util.HashMap" id="getGIRIWFrperilResultMap">
+		<result property="lineCd" 		column="line_cd" />
+		<result property="frpsYy" 		column="frps_yy" />
+		<result property="frpsSeqNo" 	column="frps_seq_no" />
+		<result property="riSeqNo" 		column="ri_seq_no" />
+		<result property="perilCd" 		column="peril_cd" />
+		<result property="riCd" 		column="ri_cd" />
+		<result property="riShrPct" 	column="ri_shr_pct" />
+		<result property="riTsiAmt" 	column="ri_tsi_amt" />
+		<result property="riPremAmt" 	column="ri_prem_amt" />
+		<result property="annRiSAmt" 	column="ann_ri_s_amt" />
+		<result property="annRiPct" 	column="ann_ri_pct" />
+		<result property="riCommRt" 	column="ri_comm_rt" />
+		<result property="riCommAmt" 	column="ri_comm_amt" />
+		<result property="riPremVat" 	column="ri_prem_vat" />
+		<result property="riCommVat" 	column="ri_comm_vat" />
+		<result property="premTax" 		column="prem_tax" />
+		<result property="riCommAmt2" 	column="ri_comm_amt2" />
+		<result property="perilSname" 	column="peril_sname" />
+		<result property="perilName" 	column="peril_name" />
+		<result property="distPrem"     column="dist_prem" />
+		<result property="distTsi"		column="dist_tsi" />
+		<result property="inputVatRate" column="input_vat_rate" />
+		<result property="premAmt"		column="prem_amt" />
+		<result property="tsiAmt" column="tsi_amt" />
+		<result property="rowNum"			column="ROWNUM_"/>
+		<result property="rowCount"			column="COUNT_"/>
+	</resultMap>
+	
+	<parameterMap class="java.util.HashMap" id="wfrperilSumParamMap">
+		<parameter property="lineCd" 			jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+		<parameter property="frpsYy" 			jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+		<parameter property="frpsSeqNo" 		jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+		<parameter property="riSeqNo" 			jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+		<parameter property="riCd" 				jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+		<parameter property="sumRiCommAmt" 		jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" />
+		<parameter property="sumRiPremAmt" 		jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" />
+		<parameter property="sumRiPremVat" 		jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" />
+		<parameter property="sumRiTsiAmt" 		jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" />
+	</parameterMap>
+	
+	<parameterMap class="java.util.HashMap" id="setGIRIWPerilParamMap">
+		<parameter property="userId" 			jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+		<parameter property="lineCd" 			jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+		<parameter property="frpsYy" 			jdbcType="INTEGER" javaType="java.lang.Integer" mode="IN" />
+		<parameter property="frpsSeqNo" 		jdbcType="INTEGER" javaType="java.lang.Integer" mode="IN" />
+		<parameter property="riSeqNo" 			jdbcType="INTEGER" javaType="java.lang.Integer" mode="IN" />
+		<parameter property="riCd" 				jdbcType="INTEGER" javaType="java.lang.Integer" mode="IN" />
+		<parameter property="perilCd"			jdbcType="INTEGER" javaType="java.lang.Integer" mode="IN" />
+		<parameter property="riShrPct"			jdbcType="INTEGER" javaType="java.math.BigDecimal" mode="IN" />
+		<parameter property="riTsiAmt"			jdbcType="INTEGER" javaType="java.math.BigDecimal" mode="IN" />
+		<parameter property="riPremAmt"			jdbcType="INTEGER" javaType="java.math.BigDecimal" mode="IN" />
+		<parameter property="annRiSAmt"			jdbcType="INTEGER" javaType="java.math.BigDecimal" mode="IN" />
+		<parameter property="annRiPct"			jdbcType="INTEGER" javaType="java.math.BigDecimal" mode="IN" />
+		<parameter property="riCommRt"			jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+		<parameter property="riCommAmt"			jdbcType="INTEGER" javaType="java.math.BigDecimal" mode="IN" />
+		<parameter property="riPremVat"			jdbcType="INTEGER" javaType="java.math.BigDecimal" mode="IN" />
+		<parameter property="riCommVat"			jdbcType="INTEGER" javaType="java.math.BigDecimal" mode="IN" />
+		<parameter property="premTax"			jdbcType="INTEGER" javaType="java.math.BigDecimal" mode="IN" />
+		<parameter property="riCommAmt2"		jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+	</parameterMap>
+	
+	<select id="getGIRIWFrperil" resultMap="getGIRIWFrperilResultMap" parameterClass="java.util.HashMap">
+		<!-- SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIRI_WFRPERIL_PKG.get_giri_wfrperil(
+		                  	#lineCd#, #frpsYy#, #frpsSeqNo#, #riSeqNo#, #riCd#, #distNo#, #distSeqNo#))) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIRI_WFRPERIL_PKG.get_giri_wfrperil(
+		                  	#lineCd#, #frpsYy#, #frpsSeqNo#, #riSeqNo#, #riCd#, #distNo#, #distSeqNo#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#  -->
+		<!--  SELECT * FROM TABLE (GIRI_WFRPERIL_PKG.get_giri_wfrperil(
+		      #lineCd#, #frpsYy#, #frpsSeqNo#, #riSeqNo#, #riCd#, #distNo#, #distSeqNo#)) -->	
+		      
+		      SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIRI_WFRPERIL_PKG.get_giri_wfrperil(
+		      #lineCd#, #frpsYy#, #frpsSeqNo#, #riSeqNo#, #riCd#, #distNo#, #distSeqNo#))	
+		                  <isEqual property="sortColumn" compareValue="perilName">
+						  		ORDER BY peril_name
+						  </isEqual>
+						  <isEqual property="sortColumn" compareValue="riShrPct">
+						  		ORDER BY ri_shr_pct
+						  </isEqual>
+						  <isEqual property="sortColumn" compareValue="riTsiAmt">
+						  		ORDER BY ri_tsi_amt
+						  </isEqual>
+						  <isEqual property="sortColumn" compareValue="riPremAmt">
+						  		ORDER BY ri_prem_amt
+						  </isEqual>
+						  <isEqual property="sortColumn" compareValue="riCommRt">
+						  		ORDER BY ri_comm_rt
+						  </isEqual>
+						  <isEqual property="sortColumn" compareValue="riPremVat">
+						  		ORDER BY ri_prem_vat
+						  </isEqual>
+						  <isEqual property="sortColumn" compareValue="premTax">
+						  		ORDER BY prem_tax
+						  </isEqual>
+						  <isNotNull property="sortColumn">
+						    	<isEqual property="ascDescFlg" compareValue="ASC">
+						        	ASC
+						        </isEqual>
+						        <isEqual property="ascDescFlg" compareValue="DESC">
+						        	DESC
+						        </isEqual>
+						  </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIRI_WFRPERIL_PKG.get_giri_wfrperil(
+		      #lineCd#, #frpsYy#, #frpsSeqNo#, #riSeqNo#, #riCd#, #distNo#, #distSeqNo#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#  
+	</select>
+
+	<!-- Vincent 201604-12 SR-4797 -->
+	<select id="getGIRIWFrperilNewCommAll" resultMap="getGIRIWFrperilResultMap" parameterClass="java.util.HashMap">
+		SELECT '1'rownum_, 
+		       '1' count_, 
+		       a.* 
+		  FROM TABLE (GIRI_WFRPERIL_PKG.get_giri_wfrperil(#lineCd#, #frpsYy#, #frpsSeqNo#, #riSeqNo#, #riCd#, #distNo#, #distSeqNo#)) a	
+	</select>
+		
+	<procedure id="setGIRIFrperil" parameterMap="setGIRIWPerilParamMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			GIRI_WFRPERIL_PKG.set_giri_wfrperil(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+		END;	
+	</procedure>
+	
+	<delete id="delGiriWFrperil2">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GIRI_WFRPERIL_PKG.del_giri_wfrperil_2(#lineCd#, #frpsYy#, #frpsSeqNo#, #origRiCd#);
+		END;
+	</delete>
+	
+	<procedure id="getWFrperilSums" parameterMap="wfrperilSumParamMap">
+		BEGIN
+			GIRI_WFRPERIL_PKG.get_sum_frperil_amounts(?, ?, ?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<select id="validateBinderPrinting" parameterClass="map" resultClass="String">
+		SELECT GIRI_WFRPERIL_PKG.validate_binder_giris002(
+				#lineCd#, #frpsYy#, #frpsSeqNo#, #distNo#, #distSeqNo#) 
+		  FROM DUAL
+	</select>
+	
+	<select id="validateFrpsPosting" parameterClass="map" resultClass="String">
+		SELECT validate_post_frps(
+				#lineCd#, #frpsYy#, #frpsSeqNo#, #distNo#, #distSeqNo#) 
+		  FROM DUAL
+	</select>
+	
+</sqlMap>

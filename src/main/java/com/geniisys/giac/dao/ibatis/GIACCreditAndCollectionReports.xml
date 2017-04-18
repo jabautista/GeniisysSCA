@@ -1,0 +1,1255 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIACCreditAndCollectionReports">
+
+	<!-- added by Kris 04.30.2013 for GIACS180 -->
+	<resultMap id="getSOAParamsMap" class="com.geniisys.giac.entity.GIACSoaRepExtParam">
+		<result property="userId"				column="user_id" />
+		<!-- <result property="paramDate"			column="param_date" /> -->
+		
+		<!-- added by gab 10.14.2016 SR 4016 -->
+		<result property="dspAsOfDate"				column="dsp_date_as_of" />
+		<result property="dspCutOffDate"			column="dsp_cut_off" />
+		<result property="dspBookDateFr"			column="dsp_book_date_fr" />
+		<result property="dspBookDateTo"			column="dsp_book_date_to" />
+		<result property="dspIncepDateFr"			column="dsp_incep_date_fr" />
+		<result property="dspIncepDateTo"			column="dsp_incep_date_to" />
+		<result property="dspIssueDateFr"			column="dsp_issue_date_fr" />
+		<result property="dspIssueDateTo"			column="dsp_issue_date_to" />
+		<!-- end gab -->
+		
+		<result property="reportDate"			column="rep_date" />
+		<result property="fromDate1"			column="from_date1" />
+		<result property="toDate1"				column="to_date1" />
+		<result property="fromDate1"			column="from_date1" />
+		<result property="toDate1"				column="to_date1" />
+		<result property="dateTag"				column="date_tag" />
+		<result property="asOfDate"				column="date_as_of" />
+		<result property="branchCd"				column="branch_cd" />
+		<result property="intmNo"				column="intm_no" />
+		<result property="intmType"				column="intm_type" />
+		<result property="assdNo"				column="assd_no" />
+		<result property="incSpecialPol"		column="special_pol" />
+		<result property="extractAgingDays"		column="extract_days" />
+		<result property="branchParam"			column="branch_param" />
+		<result property="bookTag"				column="book_tag" />
+		<result property="incepTag"				column="incep_tag" />
+		<result property="issueTag"				column="issue_tag" />
+		<result property="bookDateFr"			column="book_date_fr" />
+		<result property="bookDateTo"			column="book_date_to" />
+		<result property="incepDateFr"			column="incep_date_fr" />
+		<result property="incepDateTo"			column="incep_date_to" />
+		<result property="issueDateFr"			column="issue_date_fr" />
+		<result property="issueDateTo"			column="issue_date_to" />
+		<result property="cutOffDate"			column="cut_off" />
+		
+		<result property="message"				column="message" />
+		
+		<result property="branchName"			column="branch_name" />
+		<result property="intmName"				column="intm_name" />
+		<result property="assdName"				column="assd_name" />
+		<result property="intmTypeDesc"			column="intm_type_desc" />		
+		
+		<result property="paytDate"			column="payt_date" />
+		
+		<!-- <result property="strBookDateFr"			column="str_book_date_fr" />
+		<result property="strBookDateTo"			column="str_book_date_to" />
+		<result property="strIncepDateFr"			column="str_incep_date_fr" />
+		<result property="strIncepDateTo"			column="str_incep_date_to" />
+		<result property="strIssueDateFr"			column="str_issue_date_fr" />
+		<result property="strIssueDateTo"			column="str_issue_date_to" />
+		<result property="strCutOffDate"			column="str_cut_off" />
+		<result property="strAsOfDate"				column="str_date_as_of" /> -->
+	</resultMap>
+	<select id="getDefaultSOAParams" parameterClass="java.lang.String" resultMap="getSOAParamsMap">
+		SELECT *
+		  FROM TABLE(GIACS180_PKG.get_default_dates(#userId#))
+	</select>
+	
+	<select id="getExtractDate" parameterClass="java.util.HashMap" resultMap="getSOAParamsMap">
+		SELECT *
+		  FROM TABLE(GIACS180_PKG.get_extract_date(#userId#, #reportDate#))
+	</select>
+	
+	<select id="setDefaultDates" parameterClass="java.util.HashMap" resultMap="getSOAParamsMap">
+		SELECT *
+		  FROM TABLE(GIACS180_PKG.set_default_dates1(#userId#, #reportDate#))
+	</select>
+	
+	<parameterMap id="extractSOARepMap" class="java.util.HashMap">
+		<parameter property="appUser"				jdbcType="VARCHAR" 	javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="incSpecialPol"			jdbcType="VARCHAR" 	javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="branchCd"				jdbcType="VARCHAR" 	javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="intmNo"				jdbcType="NUMERIC" 	javaType="java.lang.Integer" 	mode="IN"/>
+		<parameter property="intmType"				jdbcType="VARCHAR" 	javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="assdNo"				jdbcType="NUMERIC" 	javaType="java.lang.Integer" 	mode="IN"/>
+		<parameter property="reportDate"			jdbcType="VARCHAR" 	javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="bookTag"				jdbcType="VARCHAR" 	javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="bookDateFr"			jdbcType="DATE" 	javaType="java.util.Date"	 	mode="IN"/>
+		<parameter property="bookDateTo"			jdbcType="DATE" 	javaType="java.util.Date"	 	mode="IN"/>
+		
+		<parameter property="incepTag"				jdbcType="VARCHAR" 	javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="incepDateFr"			jdbcType="DATE" 	javaType="java.util.Date"	 	mode="IN"/>
+		<parameter property="incepDateTo"			jdbcType="DATE" 	javaType="java.util.Date"	 	mode="IN"/>
+		
+		<parameter property="issueTag"				jdbcType="VARCHAR" 	javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="issueDateFr"			jdbcType="DATE" 	javaType="java.util.Date"	 	mode="IN"/>
+		<parameter property="issueDateTo"			jdbcType="DATE" 	javaType="java.util.Date"	 	mode="IN"/>
+		
+		<parameter property="asOfDate"				jdbcType="DATE" 	javaType="java.util.Date"	 	mode="IN"/>
+		<parameter property="cutOffDate"			jdbcType="DATE" 	javaType="java.util.Date"	 	mode="IN"/>
+		
+		<parameter property="includePDC"			jdbcType="VARCHAR" 	javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="rowCounter"			jdbcType="NUMERIC" 	javaType="java.lang.Integer" 	mode="OUT"/>
+		
+		<parameter property="extractAgingDays"		jdbcType="NUMERIC" 	javaType="java.lang.Integer" 	mode="IN"/>
+		<parameter property="branchParam"			jdbcType="VARCHAR" 	javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="message"				jdbcType="VARCHAR" 	javaType="java.lang.String" 	mode="OUT"/>
+		<parameter property="userId"				jdbcType="VARCHAR" 	javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="paytDate"				jdbcType="VARCHAR" 	javaType="java.lang.String" 	mode="IN"/>
+	</parameterMap>
+	<procedure id="extractSOARepDtls" parameterMap="extractSOARepMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			GIACS180_PKG.extract_soa_rep_dtls(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<parameterMap id="breakdownTaxesParamMap" class="java.util.HashMap">
+		<parameter property="userId"				jdbcType="VARCHAR" 	javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="cutOffDate"			jdbcType="DATE" 	javaType="java.util.Date"	 	mode="IN"/>
+		<parameter property="paytDate"				jdbcType="VARCHAR" 	javaType="java.lang.String"	 	mode="IN"/>
+		<parameter property="message"				jdbcType="VARCHAR" 	javaType="java.lang.String" 	mode="OUT"/>
+	</parameterMap>
+	<procedure id="breakdownTaxes" parameterMap="breakdownTaxesParamMap">
+		<!-- BEGIN
+			GIACS180_PKG.break_taxes(?, ?, ?);
+		END; -->
+		{ CALL GIACS180_PKG.break_taxes(?, ?, ?, ?) }
+	</procedure>
+	
+	<select id="getSOARemarks" resultClass="java.lang.String">
+		SELECT GIACS180_PKG.get_remarks
+  		  FROM dual
+	</select>
+	
+	<resultMap id="getGSOADtlsMap" class="com.geniisys.giac.entity.GIACSoaRepExt" extends="BaseEntity.TableGridResultMap">
+		<result property="intmNo"			column="INTM_NO" />
+		<result property="intmName"			column="INTM_NAME" />
+		<result property="assdNo"			column="ASSD_NO" />
+		<result property="assdName"			column="ASSD_NAME" />
+		<result property="policyNo"			column="POLICY_NO" />
+		<result property="billNo"			column="BILL_NO" />
+		<result property="issCd"			column="ISS_CD" />
+		<result property="premSeqNo"		column="PREM_SEQ_NO" />
+		<result property="instNo"			column="INST_NO" />
+		<result property="agingId"			column="AGING_ID" />
+		<result property="columnTitle"		column="COLUMN_TITLE" />
+		<result property="balanceAmtDue"	column="BALANCE_AMT_DUE" />
+		<result property="totalAmtDue"		column="TOTAL_AMT_DUE" />
+		
+		<!-- used by filterByAging -->
+		<result property="fundCd"			column="FUND_CD" />
+		<result property="branchCd"			column="BRANCH_CD" />
+		<result property="agingBalAmtDue"	column="AGING_BAL_AMT_DUE" />
+		<result property="agingPremBalDue"	column="AGING_PREM_BAL_DUE" />
+		<result property="agingTaxBalDue"	column="AGING_TAX_BAL_DUE" />
+		<result property="ageLevel"			column="AGE_LEVEL" />
+		
+		<!-- used by Reprint Collection Letter -->
+		<result property="collLetNo"		column="COLL_LET_NO" />
+		<result property="collSeqNo"		column="COLL_SEQ_NO" />
+		<result property="collYear"			column="COLL_YEAR" />
+		<result property="userId"			column="USER_ID" />
+		<result property="lastUpdate"		column="LAST_UPDATE" />
+		<result property="lastUpdate2"		column="LAST_UPDATE2" />
+	</resultMap>
+	
+	<parameterMap class="java.util.HashMap" id="extractAging"> <!-- added by kenneth for print premium deposit 06.25.2013 -->
+		<parameter property="userId"		jdbcType="VARCHAR"	javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="fromDate"		jdbcType="DATE"		javaType="java.util.Date"		mode="IN" />
+		<parameter property="toDate"		jdbcType="DATE"		javaType="java.util.Date"		mode="IN" />
+		<parameter property="effDate"		jdbcType="VARCHAR"	javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="dueDate"	    jdbcType="VARCHAR"	javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="branchCd"	    jdbcType="VARCHAR"	javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="message"		jdbcType="VARCHAR"	javaType="java.lang.String"	    mode="OUT"/>
+	</parameterMap>
+	
+	<!-- gets all records for selectAll -->
+	<select id="getIntmGSOADtlsAll" resultMap="getGSOADtlsMap" >
+		SELECT a.* , 
+			   '0' rownum_ ,
+		       '0' count_,
+		       '0' total_amt_due
+          FROM TABLE(GIACS180_PKG.get_intm_gsoa_dtl(#intmNo#, #userId#)) a
+          <isNotNull property="filter">
+			  WHERE 1 = 1
+			  		<isNotEmpty prepend="AND" property="columnTitle">
+				UPPER(column_title) LIKE UPPER(#columnTitle#)
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="policyNo">
+				UPPER(policy_no) LIKE UPPER(#policyNo#)
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="billNo">
+				UPPER(bill_no) LIKE UPPER(#billNo#)
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="balanceAmtDue">
+				balance_amt_due = #balanceAmtDue#
+			</isNotEmpty>
+  		  </isNotNull>
+	</select>
+	
+	<select id="getIntmGSOADtls" resultMap="getGSOADtlsMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, b.count_, a.*, c.total_amt_due
+		          FROM (SELECT * 
+		                  FROM TABLE(GIACS180_PKG.get_intm_gsoa_dtl(#intmNo#, #userId#))
+		                  <isNotNull property="filter">
+		                 WHERE 1 = 1
+		                 		<isNotEmpty prepend="AND" property="columnTitle">
+			  		         		UPPER(column_title) LIKE UPPER(#columnTitle#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="policyNo">
+			  		         		UPPER(policy_no) LIKE UPPER(#policyNo#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="billNo">
+			  		         		UPPER(bill_no) LIKE UPPER(#billNo#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="balanceAmtDue">
+			  		         		balance_amt_due = #balanceAmtDue#
+			  		         	</isNotEmpty>
+		                  </isNotNull>
+		                  <isNotNull property="sortColumn">
+		                  		<isEqual property="sortColumn" compareValue="columnTitle">
+									ORDER BY column_title
+								</isEqual>
+								<isEqual property="sortColumn" compareValue="policyNo">
+									ORDER BY policy_no
+								</isEqual>
+								<isEqual property="sortColumn" compareValue="billNo">
+									ORDER BY bill_no
+								</isEqual>
+								<isEqual property="sortColumn" compareValue="balanceAmtDue">
+									ORDER BY balance_amt_due
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+		                  </isNotNull>) a,
+		          	   (SELECT count(*) count_
+		          	      FROM TABLE(GIACS180_PKG.get_intm_gsoa_dtl(#intmNo#, #userId#))
+		          	      <isNotNull property="filter">
+		                 WHERE 1 = 1
+		                 		<isNotEmpty prepend="AND" property="columnTitle">
+			  		         		UPPER(column_title) LIKE UPPER(#columnTitle#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="policyNo">
+			  		         		UPPER(policy_no) LIKE UPPER(#policyNo#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="billNo">
+			  		         		UPPER(bill_no) LIKE UPPER(#billNo#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="balanceAmtDue">
+			  		         		balance_amt_due = #balanceAmtDue#
+			  		         	</isNotEmpty>
+		                  </isNotNull>) b,
+		                  (SELECT SUM(balance_amt_due) total_amt_due
+		          	      FROM TABLE(GIACS180_PKG.get_intm_gsoa_dtl(#intmNo#, #userId#))
+		          	      <isNotNull property="filter">
+		                 WHERE 1 = 1
+		                 		<isNotEmpty prepend="AND" property="columnTitle">
+			  		         		UPPER(column_title) LIKE UPPER(#columnTitle#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="policyNo">
+			  		         		UPPER(policy_no) LIKE UPPER(#policyNo#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="billNo">
+			  		         		UPPER(bill_no) LIKE UPPER(#billNo#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="balanceAmtDue">
+			  		         		balance_amt_due = #balanceAmtDue#
+			  		         	</isNotEmpty>
+		                  </isNotNull>) c)
+		 WHERE rownum_ BETWEEN NVL(#from#, rownum_) AND NVL(#to#, rownum_)
+	</select>
+	
+	<!-- gets all records for selectAll -->
+	<select id="getAssdGSOADtlsAll" resultMap="getGSOADtlsMap" >
+		SELECT a.* , 
+			   '0' rownum_ ,
+		       '0' count_,
+		       '0' total_amt_due
+          FROM TABLE(GIACS180_PKG.get_assd_gsoa_dtl(#assdNo#, #userId#)) a
+          <isNotNull property="filter">
+			  WHERE 1 = 1
+			  		<isNotEmpty prepend="AND" property="columnTitle">
+				UPPER(column_title) LIKE UPPER(#columnTitle#)
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="policyNo">
+				UPPER(policy_no) LIKE UPPER(#policyNo#)
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="billNo">
+				UPPER(bill_no) LIKE UPPER(#billNo#)
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="balanceAmtDue">
+				balance_amt_due = #balanceAmtDue#
+			</isNotEmpty>
+  		  </isNotNull>
+	</select>
+	
+	<select id="getAssdGSOADtls" resultMap="getGSOADtlsMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, b.count_, a.*, c.total_amt_due
+		          FROM (SELECT *
+		                  FROM TABLE(GIACS180_PKG.get_assd_gsoa_dtl(#assdNo#, #userId#))
+		                  <isNotNull property="filter">
+		                 WHERE 1 = 1
+		                 		<isNotEmpty prepend="AND" property="columnTitle">
+			  		         		UPPER(column_title) LIKE UPPER(#columnTitle#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="policyNo">
+			  		         		UPPER(policy_no) LIKE UPPER(#policyNo#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="billNo">
+			  		         		UPPER(bill_no) LIKE UPPER(#billNo#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="balanceAmtDue">
+			  		         		balance_amt_due = #balanceAmtDue#
+			  		         	</isNotEmpty>
+		                  </isNotNull>
+		                  <isNotNull property="sortColumn">
+		                  		<isEqual property="sortColumn" compareValue="columnTitle">
+									ORDER BY column_title
+								</isEqual>
+								<isEqual property="sortColumn" compareValue="policyNo">
+									ORDER BY policy_no
+								</isEqual>
+								<isEqual property="sortColumn" compareValue="billNo">
+									ORDER BY bill_no
+								</isEqual>
+								<isEqual property="sortColumn" compareValue="balanceAmtDue">
+									ORDER BY balance_amt_due
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+			                  </isNotNull>) a,
+		          	   (SELECT count(*) count_
+		          	      FROM TABLE(GIACS180_PKG.get_assd_gsoa_dtl(#assdNo#, #userId#))
+		          	      <isNotNull property="filter">
+		                 WHERE 1 = 1
+		                 		<isNotEmpty prepend="AND" property="columnTitle">
+			  		         		UPPER(column_title) LIKE UPPER(#columnTitle#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="policyNo">
+			  		         		UPPER(policy_no) LIKE UPPER(#policyNo#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="billNo">
+			  		         		UPPER(bill_no) LIKE UPPER(#billNo#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="balanceAmtDue">
+			  		         		balance_amt_due = #balanceAmtDue#
+			  		         	</isNotEmpty>
+		                  </isNotNull>) b,
+	                   (SELECT SUM(balance_amt_due) total_amt_due
+		          	      FROM TABLE(GIACS180_PKG.get_assd_gsoa_dtl(#assdNo#, #userId#))
+		          	      <isNotNull property="filter">
+		                 WHERE 1 = 1
+		                 		<isNotEmpty prepend="AND" property="columnTitle">
+			  		         		UPPER(column_title) LIKE UPPER(#columnTitle#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="policyNo">
+			  		         		UPPER(policy_no) LIKE UPPER(#policyNo#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="billNo">
+			  		         		UPPER(bill_no) LIKE UPPER(#billNo#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="balanceAmtDue">
+			  		         		balance_amt_due = #balanceAmtDue#
+			  		         	</isNotEmpty>
+		                  </isNotNull>) c)
+		 WHERE rownum_ BETWEEN NVL(#from#, rownum_) AND NVL(#to#, rownum_)
+	</select>
+	
+	<!-- gets all records for selectAll -->
+	<select id="getAgingIntmLOVAll" resultMap="getGSOADtlsMap" >
+		SELECT a.* , 
+			   '0' rownum_ ,
+		       '0' count_,
+		       '0' total_amt_due
+          FROM TABLE(GIACS180_PKG.get_aging_intm_list(#userId#)) a
+          <isNotNull property="filter">
+             WHERE 1 = 1
+             	<isNotEmpty prepend="AND" property="intmNo">
+	         		intm_no = #intmNo#
+	         	</isNotEmpty>
+	         	<isNotEmpty prepend="AND" property="intmName">
+	         		UPPER(intm_name) LIKE UPPER(#intmName#)
+	         	</isNotEmpty>
+	         	<isNotEmpty prepend="AND" property="balanceAmtDue">
+	         		balance_amt_due = #balanceAmtDue#
+	         	</isNotEmpty>
+		  </isNotNull>
+	</select>
+	<select id="getAgingIntmLOV" parameterClass="java.util.HashMap" resultMap="getGSOADtlsMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, b.count_, a.*, c.total_amt_due
+		          FROM (SELECT *
+		          		  FROM TABLE(GIACS180_PKG.get_aging_intm_list(#userId#))
+		          		  <isNotNull property="filter">
+		                 WHERE 1 = 1
+		                 		<isNotEmpty prepend="AND" property="intmNo">
+			  		         		intm_no = #intmNo#
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="intmName">
+			  		         		UPPER(intm_name) LIKE UPPER(#intmName#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="balanceAmtDue">
+			  		         		balance_amt_due = #balanceAmtDue#
+			  		         	</isNotEmpty>
+			  		      </isNotNull>
+			  		      <isNotNull property="sortColumn">
+		                  		<isEqual property="sortColumn" compareValue="intmNo">
+									ORDER BY intm_no
+								</isEqual>
+								<isEqual property="sortColumn" compareValue="intmName">
+									ORDER BY intm_name
+								</isEqual>
+								<isEqual property="sortColumn" compareValue="balanceAmtDue">
+									ORDER BY balance_amt_due
+								</isEqual>		
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>						
+			                  </isNotNull>) a,
+				       (SELECT count(*) count_
+				          FROM TABLE(GIACS180_PKG.get_aging_intm_list(#userId#))
+				          <isNotNull property="filter">
+		                 WHERE 1 = 1
+		                 		<isNotEmpty prepend="AND" property="intmNo">
+			  		         		intm_no = #intmNo#
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="intmName">
+			  		         		UPPER(intm_name) LIKE UPPER(#intmName#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="balanceAmtDue">
+			  		         		balance_amt_due = #balanceAmtDue#
+			  		         	</isNotEmpty>
+			  		      </isNotNull>) b,
+			  		      (SELECT SUM(balance_amt_due) total_amt_due
+		          	     	 FROM TABLE(GIACS180_PKG.get_aging_intm_list(#userId#))
+			          	     <isNotNull property="filter">
+		                    WHERE 1 = 1
+		                 		<isNotEmpty prepend="AND" property="intmNo">
+			  		         		intm_no = #intmNo#
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="intmName">
+			  		         		UPPER(intm_name) LIKE UPPER(#intmName#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="balanceAmtDue">
+			  		         		balance_amt_due = #balanceAmtDue#
+			  		         	</isNotEmpty>
+			  		      </isNotNull>) c)
+		 WHERE rownum_ BETWEEN NVL(#from#, rownum_) AND NVL(#to#, rownum_)
+	</select>
+	
+	<!-- gets all records for selectAll -->
+	<select id="getFilterByAgingIntmAll" resultMap="getGSOADtlsMap" >
+		SELECT a.* , 
+			   '0' rownum_ ,
+		       '0' count_,
+		       '0' total_amt_due
+          FROM TABLE(GIACS180_PKG.get_aging_totals_intm(#intmNo#, #userId#)) a
+          <isNotNull property="filter">
+              WHERE 1 = 1
+             		<isNotEmpty prepend="AND" property="fundCd">
+	         		UPPER(fund_cd) LIKE UPPER(#fundCd#)
+	         	</isNotEmpty>
+	         	<isNotEmpty prepend="AND" property="branchCd">
+	         		UPPER(branch_cd) LIKE UPPER(#branchCd#)
+	         	</isNotEmpty>
+	         	<isNotEmpty prepend="AND" property="ageLevel">
+	         		UPPER(age_level) LIKE UPPER(#ageLevel#)
+	         	</isNotEmpty>
+	         	<isNotEmpty prepend="AND" property="agingBalAmtDue">
+	         		aging_bal_amt_due = #agingBalAmtDue#
+	         	</isNotEmpty>
+  		  </isNotNull>
+	</select>
+	
+	<select id="getFilterByAgingIntm" parameterClass="java.util.HashMap" resultMap="getGSOADtlsMap">
+		SELECT *
+		   FROM (SELECT rownum rownum_, b.count_, a.*, c.total_amt_due
+		           FROM (SELECT *
+		           		   FROM TABLE(GIACS180_PKG.get_aging_totals_intm(#intmAssdNo#, #userId#))
+				           <isNotNull property="filter">
+		                  WHERE 1 = 1
+		                 		<isNotEmpty prepend="AND" property="fundCd">
+			  		         		UPPER(fund_cd) LIKE UPPER(#fundCd#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="branchCd">
+			  		         		UPPER(branch_cd) LIKE UPPER(#branchCd#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="ageLevel">
+			  		         		UPPER(age_level) LIKE UPPER(#ageLevel#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="agingBalAmtDue">
+			  		         		aging_bal_amt_due = #agingBalAmtDue#
+			  		         	</isNotEmpty>
+			  		       </isNotNull>
+				           <isNotNull property="sortColumn">
+		                  		<isEqual property="sortColumn" compareValue="fundCd">
+									ORDER BY fund_cd
+								</isEqual>
+								<isEqual property="sortColumn" compareValue="branchCd">
+									ORDER BY branch_cd
+								</isEqual>
+								<isEqual property="sortColumn" compareValue="ageLevel">
+									ORDER BY age_level
+								</isEqual>	
+								<isEqual property="sortColumn" compareValue="agingBalAmtDue">
+									ORDER BY aging_bal_amt_due
+								</isEqual>		
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>						
+		                  </isNotNull>)a,
+				        (SELECT count(*) count_
+				           FROM TABLE(GIACS180_PKG.get_aging_totals_intm(#intmAssdNo#, #userId#))
+				           <isNotNull property="filter">
+		                  WHERE 1 = 1
+		                 		<isNotEmpty prepend="AND" property="fundCd">
+			  		         		UPPER(fund_cd) LIKE UPPER(#fundCd#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="branchCd">
+			  		         		UPPER(branch_cd) LIKE UPPER(#branchCd#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="ageLevel">
+			  		         		UPPER(age_level) LIKE UPPER(#ageLevel#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="agingBalAmtDue">
+			  		         		aging_bal_amt_due = #agingBalAmtDue#
+			  		         	</isNotEmpty>
+			  		       </isNotNull> )b,
+		  		       (SELECT SUM(aging_bal_amt_due) total_amt_due
+		  		          FROM TABLE(GIACS180_PKG.get_aging_totals_intm(#intmAssdNo#, #userId#))
+				         <isNotNull property="filter">
+		                 WHERE 1 = 1
+		                 		<isNotEmpty prepend="AND" property="fundCd">
+			  		         		UPPER(fund_cd) LIKE UPPER(#fundCd#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="branchCd">
+			  		         		UPPER(branch_cd) LIKE UPPER(#branchCd#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="ageLevel">
+			  		         		UPPER(age_level) LIKE UPPER(#ageLevel#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="agingBalAmtDue">
+			  		         		aging_bal_amt_due = #agingBalAmtDue#
+			  		         	</isNotEmpty>
+			  		       </isNotNull>) c)
+		  WHERE rownum_ BETWEEN NVL(#from#, rownum_) AND NVL(#to#, rownum_)
+	</select>
+	
+	<!-- List All > Aging -->
+	<!-- gets all records for selectAll -->
+	<select id="getListAllAgingSelectAll" resultMap="getGSOADtlsMap" >
+		SELECT a.* , 
+			   '0' rownum_ ,
+		       '0' count_,
+		       '0' total_amt_due
+          FROM TABLE(GIACS180_PKG.get_list_all_aging(#userId#, #viewType#, #index#, #intmNo#, #intmName#, #assdNo#, #assdName#, #balanceAmtDue#)) a
+          <isNotNull property="filter">
+              WHERE 1 = 1
+             		<isNotEmpty prepend="AND" property="fundCd">
+	         		UPPER(fund_cd) LIKE UPPER(#fundCd#)
+	         	</isNotEmpty>
+	         	<isNotEmpty prepend="AND" property="branchCd">
+	         		UPPER(branch_cd) LIKE UPPER(#branchCd#)
+	         	</isNotEmpty>
+	         	<isNotEmpty prepend="AND" property="ageLevel">
+	         		UPPER(age_level) LIKE UPPER(#ageLevel#)
+	         	</isNotEmpty>
+	         	<isNotEmpty prepend="AND" property="agingBalAmtDue">
+	         		aging_bal_amt_due = #agingBalAmtDue#
+	         	</isNotEmpty>
+		  </isNotNull>
+	</select>	
+	<select id="getListAllAging" parameterClass="java.util.HashMap" resultMap="getGSOADtlsMap">
+		SELECT *
+		   FROM (SELECT rownum rownum_, b.count_, a.*, c.total_amt_due
+		           FROM (SELECT *
+		           		   FROM TABLE(GIACS180_PKG.get_list_all_aging(#userId#, #viewType#, #index#, #intmNo#, #intmName#, #assdNo#, #assdName#, #balanceAmtDue#))
+				           <isNotNull property="filter">
+		                  WHERE 1 = 1
+		                 		<isNotEmpty prepend="AND" property="fundCd">
+			  		         		UPPER(fund_cd) LIKE UPPER(#fundCd#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="branchCd">
+			  		         		UPPER(branch_cd) LIKE UPPER(#branchCd#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="ageLevel">
+			  		         		UPPER(age_level) LIKE UPPER(#ageLevel#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="agingBalAmtDue">
+			  		         		aging_bal_amt_due = #agingBalAmtDue#
+			  		         	</isNotEmpty>
+			  		       </isNotNull>
+				           <isNotNull property="sortColumn">
+		                  		<isEqual property="sortColumn" compareValue="fundCd">
+									ORDER BY fund_cd
+								</isEqual>
+								<isEqual property="sortColumn" compareValue="branchCd">
+									ORDER BY branch_cd
+								</isEqual>
+								<isEqual property="sortColumn" compareValue="ageLevel">
+									ORDER BY age_level
+								</isEqual>	
+								<isEqual property="sortColumn" compareValue="agingBalAmtDue">
+									ORDER BY aging_bal_amt_due
+								</isEqual>		
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>						
+		                  </isNotNull>)a,
+				        (SELECT count(*) count_
+				           FROM TABLE(GIACS180_PKG.get_list_all_aging(#userId#, #viewType#, #index#, #intmNo#, #intmName#, #assdNo#, #assdName#, #balanceAmtDue#))
+				           <isNotNull property="filter">
+		                  WHERE 1 = 1
+		                 		<isNotEmpty prepend="AND" property="fundCd">
+			  		         		UPPER(fund_cd) LIKE UPPER(#fundCd#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="branchCd">
+			  		         		UPPER(branch_cd) LIKE UPPER(#branchCd#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="ageLevel">
+			  		         		UPPER(age_level) LIKE UPPER(#ageLevel#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="agingBalAmtDue">
+			  		         		aging_bal_amt_due = #agingBalAmtDue#
+			  		         	</isNotEmpty>
+			  		       </isNotNull> )b,
+		  		       (SELECT SUM(aging_bal_amt_due) total_amt_due
+		  		          FROM TABLE(GIACS180_PKG.get_list_all_aging(#userId#, #viewType#, #index#, #intmNo#, #intmName#, #assdNo#, #assdName#, #balanceAmtDue#))
+				         <isNotNull property="filter">
+		                 WHERE 1 = 1
+		                 		<isNotEmpty prepend="AND" property="fundCd">
+			  		         		UPPER(fund_cd) LIKE UPPER(#fundCd#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="branchCd">
+			  		         		UPPER(branch_cd) LIKE UPPER(#branchCd#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="ageLevel">
+			  		         		UPPER(age_level) LIKE UPPER(#ageLevel#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="agingBalAmtDue">
+			  		         		aging_bal_amt_due = #agingBalAmtDue#
+			  		         	</isNotEmpty>
+			  		       </isNotNull>) c)
+		  WHERE rownum_ BETWEEN NVL(#from#, rownum_) AND NVL(#to#, rownum_)
+	</select>
+	
+	
+	
+	
+	
+	
+	<!-- gets all records for selectAll -->
+	<select id="getAgingAssdLOVAll" resultMap="getGSOADtlsMap" >
+		SELECT a.* , 
+			   '0' rownum_ ,
+		       '0' count_,
+		       '0' total_amt_due
+          FROM TABLE(GIACS180_PKG.get_aging_assd_list(#userId#)) a
+          <isNotNull property="filter">
+             WHERE 1 = 1
+             		<isNotEmpty prepend="AND" property="assdNo">
+	         		assd_no = #assdNo#
+	         	</isNotEmpty>
+	         	<isNotEmpty prepend="AND" property="assdName">
+	         		UPPER(assd_name) LIKE UPPER(#assdName#)
+	         	</isNotEmpty>
+	         	<isNotEmpty prepend="AND" property="balanceAmtDue">
+	         		balance_amt_due = #balanceAmtDue#
+	         	</isNotEmpty>
+		  </isNotNull>
+	</select>
+	<select id="getAgingAssdLOV" parameterClass="java.util.HashMap" resultMap="getGSOADtlsMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, b.count_, a.*, c.total_amt_due
+		          FROM (SELECT *
+		          		  FROM TABLE(GIACS180_PKG.get_aging_assd_list(#userId#))
+		          		  <isNotNull property="filter">
+		                 WHERE 1 = 1
+		                 		<isNotEmpty prepend="AND" property="assdNo">
+			  		         		assd_no = #assdNo#
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="assdName">
+			  		         		UPPER(assd_name) LIKE UPPER(#assdName#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="balanceAmtDue">
+			  		         		balance_amt_due = #balanceAmtDue#
+			  		         	</isNotEmpty>
+			  		      </isNotNull>
+			  		      <isNotNull property="sortColumn">
+		                  		<isEqual property="sortColumn" compareValue="assdNo">
+									ORDER BY assd_no
+								</isEqual>
+								<isEqual property="sortColumn" compareValue="assdName">
+									ORDER BY assd_name
+								</isEqual>
+								<isEqual property="sortColumn" compareValue="balanceAmtDue">
+									ORDER BY balance_amt_due
+								</isEqual>		
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>						
+			                  </isNotNull>) a,
+				       (SELECT count(*) count_
+				          FROM TABLE(GIACS180_PKG.get_aging_assd_list(#userId#))
+				          <isNotNull property="filter">
+		                 WHERE 1 = 1
+		                 		<isNotEmpty prepend="AND" property="assdNo">
+			  		         		assd_no = #assdNo#
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="assdName">
+			  		         		UPPER(assd_name) LIKE UPPER(#assdName#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="balanceAmtDue">
+			  		         		balance_amt_due = #balanceAmtDue#
+			  		         	</isNotEmpty>
+			  		      </isNotNull>) b,
+			  		      (SELECT SUM(balance_amt_due) total_amt_due
+		          	     	 FROM TABLE(GIACS180_PKG.get_aging_assd_list(#userId#))
+			          	     <isNotNull property="filter">
+		                    WHERE 1 = 1
+		                 		<isNotEmpty prepend="AND" property="assdNo">
+			  		         		assd_no = #assdNo#
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="assdName">
+			  		         		UPPER(assd_name) LIKE UPPER(#assdName#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="balanceAmtDue">
+			  		         		balance_amt_due = #balanceAmtDue#
+			  		         	</isNotEmpty>
+			  		      </isNotNull>) c)
+		 WHERE rownum_ BETWEEN NVL(#from#, rownum_) AND NVL(#to#, rownum_)
+	</select>
+	
+	
+	<!-- gets all records for selectAll -->
+	<select id="getFilterByAgingAssdAll" resultMap="getGSOADtlsMap" >
+		SELECT a.* , 
+			   '0' rownum_ ,
+		       '0' count_,
+		       '0' total_amt_due
+          FROM TABLE(GIACS180_PKG.get_aging_totals_assd(#assdNo#, #userId#)) a
+          <isNotNull property="filter">
+              WHERE 1 = 1
+             		<isNotEmpty prepend="AND" property="fundCd">
+	         		UPPER(fund_cd) LIKE UPPER(#fundCd#)
+	         	</isNotEmpty>
+	         	<isNotEmpty prepend="AND" property="branchCd">
+	         		UPPER(branch_cd) LIKE UPPER(#branchCd#)
+	         	</isNotEmpty>
+	         	<isNotEmpty prepend="AND" property="ageLevel">
+	         		UPPER(age_level) LIKE UPPER(#ageLevel#)
+	         	</isNotEmpty>
+	         	<isNotEmpty prepend="AND" property="agingBalAmtDue">
+	         		aging_bal_amt_due = #agingBalAmtDue#
+	         	</isNotEmpty>
+		  </isNotNull>
+	</select>
+	<select id="getFilterByAgingAssd" parameterClass="java.util.HashMap" resultMap="getGSOADtlsMap">
+		SELECT *
+		   FROM (SELECT rownum rownum_, b.count_, a.*, c.total_amt_due
+		           FROM (SELECT *
+		                   FROM TABLE(GIACS180_PKG.get_aging_totals_assd(#intmAssdNo#, #userId#))
+				           <isNotNull property="filter">
+		                  WHERE 1 = 1
+		                 		<isNotEmpty prepend="AND" property="fundCd">
+			  		         		UPPER(fund_cd) LIKE UPPER(#fundCd#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="branchCd">
+			  		         		UPPER(branch_cd) LIKE UPPER(#branchCd#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="ageLevel">
+			  		         		UPPER(age_level) LIKE UPPER(#ageLevel#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="agingBalAmtDue">
+			  		         		aging_bal_amt_due = #agingBalAmtDue#
+			  		         	</isNotEmpty>
+			  		       </isNotNull>
+				           <isNotNull property="sortColumn">
+		                  		<isEqual property="sortColumn" compareValue="fundCd">
+									ORDER BY fund_cd
+								</isEqual>
+								<isEqual property="sortColumn" compareValue="branchCd">
+									ORDER BY branch_cd
+								</isEqual>
+								<isEqual property="sortColumn" compareValue="ageLevel">
+									ORDER BY age_level
+								</isEqual>	
+								<isEqual property="sortColumn" compareValue="agingBalAmtDue">
+									ORDER BY aging_bal_amt_due
+								</isEqual>			
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>						
+		                  </isNotNull>)a,
+				        (SELECT count(*) count_
+				           FROM TABLE(GIACS180_PKG.get_aging_totals_assd(#intmAssdNo#, #userId#)) 
+				           <isNotNull property="filter">
+		                  WHERE 1 = 1
+		                 		<isNotEmpty prepend="AND" property="fundCd">
+			  		         		UPPER(fund_cd) LIKE UPPER(#fundCd#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="branchCd">
+			  		         		UPPER(branch_cd) LIKE UPPER(#branchCd#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="ageLevel">
+			  		         		UPPER(age_level) LIKE UPPER(#ageLevel#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="agingBalAmtDue">
+			  		         		aging_bal_amt_due = #agingBalAmtDue#
+			  		         	</isNotEmpty>
+			  		       </isNotNull>)b,
+			  		    (SELECT SUM(aging_bal_amt_due) total_amt_due
+				           FROM TABLE(GIACS180_PKG.get_aging_totals_assd(#intmAssdNo#, #userId#)) 
+				           <isNotNull property="filter">
+		                  WHERE 1 = 1
+		                 		<isNotEmpty prepend="AND" property="fundCd">
+			  		         		UPPER(fund_cd) LIKE UPPER(#fundCd#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="branchCd">
+			  		         		UPPER(branch_cd) LIKE UPPER(#branchCd#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="ageLevel">
+			  		         		UPPER(age_level) LIKE UPPER(#ageLevel#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="agingBalAmtDue">
+			  		         		aging_bal_amt_due = #agingBalAmtDue#
+			  		         	</isNotEmpty>
+			  		       </isNotNull>) c)
+		  WHERE rownum_ BETWEEN NVL(#from#, rownum_) AND NVL(#to#, rownum_)
+	</select>
+	
+	<parameterMap id="saveCollectionLetterParamsMap" class="java.util.HashMap">
+		<parameter property="issCd"					jdbcType="VARCHAR" 	javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="premSeqNo"				jdbcType="NUMERIC" 	javaType="java.lang.Integer" 	mode="IN"/>
+		<parameter property="instNo"				jdbcType="NUMERIC" 	javaType="java.lang.Integer" 	mode="IN"/>
+		<parameter property="balanceAmtDue"			jdbcType="NUMERIC" 	javaType="java.math.BigDecimal" mode="IN"/>
+		<parameter property="collLetNo"				jdbcType="NUMERIC" 	javaType="java.lang.Integer" 	mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="saveCollectionLetterParams" parameterMap="saveCollectionLetterParamsMap">
+		BEGIN
+			GIACS180_PKG.populate_parameters(?, ?, ?, ?, ?);
+		END;		
+	</procedure>
+	
+	<select id="processIntmOrAssd" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT GIACS180_PKG.process_intm_assd(#viewType#)
+  		  FROM dual
+	</select>
+	<select id="processIntmOrAssd2" parameterClass="java.util.HashMap" resultClass="java.lang.String"> <!-- resultMap="getGSOADtlsMap" -->
+		<!-- SELECT a.* , 
+			   '0' rownum_ ,
+		       '0' count_,
+		       '0' total_amt_due 
+		  FROM TABLE(GIACS180_PKG.process_intm_assd2(#viewType#, #assdNo#, #intmNo#, #agingId#, #userId#, #assdNoList#, #intmNoList#, #agingIdList#, #fromButton#)) a -->
+		  SELECT GIACS180_PKG.process_intm_assd2(#viewType#, #assdNo#, #intmNo#, #agingId#, #userId#, #assdNoList#, #intmNoList#, #agingIdList#, #fromButton#)
+		    FROM dual
+	</select>
+	
+	<!-- begin: For Reprint Collection Letter -->
+	<!-- gets all records for selectAll -->
+	<select id="getCollnLetterListAll" resultMap="getGSOADtlsMap" >
+		SELECT a.* , 
+			   '0' rownum_ ,
+		       '0' count_,
+		       '0' total_amt_due
+          FROM TABLE(GIACS180_PKG.get_colln_letter(#userId#)) a
+          <isNotNull property="filter">
+             WHERE 1 = 1
+             		<isNotEmpty prepend="AND" property="collSeqNo">
+	         		coll_seq_no = #collSeqNo#
+	         	</isNotEmpty>
+	         	<isNotEmpty prepend="AND" property="collLetNo">
+	         		coll_let_no = #collLetNo#
+	         	</isNotEmpty>
+	         	<isNotEmpty prepend="AND" property="collYear">
+	         		coll_year = #collYear#
+	         	</isNotEmpty>
+	         	<isNotEmpty prepend="AND" property="billNo">
+	         		UPPER(bill_no) LIKE UPPER(#billNo#)
+	         	</isNotEmpty>
+	         	<isNotEmpty prepend="AND" property="balanceAmtDue">
+	         		balance_amt_due = #balanceAmtDue#
+	         	</isNotEmpty>
+	         	<isNotEmpty prepend="AND" property="userId">
+	         		UPPER(user_id) LIKE UPPER(#userId#)
+	         	</isNotEmpty>
+	         	<isNotEmpty prepend="AND" property="lastUpdate2">
+	         		TRUNC(last_update) = TO_DATE(#lastUpdate2#, 'mm-dd-yyyy')
+	         	</isNotEmpty>
+		  </isNotNull>
+	</select>
+	<select id="getCollnLetterList" parameterClass="java.util.HashMap" resultMap="getGSOADtlsMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, b.count_, a.*, c.total_amt_due
+		          FROM (SELECT *
+		          		  FROM TABLE(GIACS180_PKG.get_colln_letter(#userId#))
+		          		  <isNotNull property="filter">
+		                 WHERE 1 = 1
+		                 		<isNotEmpty prepend="AND" property="collSeqNo">
+			  		         		coll_seq_no = #collSeqNo#
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="collLetNo">
+			  		         		coll_let_no = #collLetNo#
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="collYear">
+			  		         		coll_year = #collYear#
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="billNo">
+			  		         		UPPER(bill_no) LIKE UPPER(#billNo#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="balanceAmtDue">
+			  		         		balance_amt_due = #balanceAmtDue#
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="userId">
+			  		         		UPPER(user_id) LIKE UPPER(#userId#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="lastUpdate2">
+			  		         		TRUNC(last_update) = TO_DATE(#lastUpdate2#, 'mm-dd-yyyy')
+			  		         	</isNotEmpty>
+			  		      </isNotNull>
+			  		      <isNotNull property="sortColumn">
+		                  		<isEqual property="sortColumn" compareValue="collSeqNo">
+									ORDER BY coll_seq_no
+								</isEqual>
+								<isEqual property="sortColumn" compareValue="collLetNo">
+									ORDER BY coll_let_no
+								</isEqual>
+								<isEqual property="sortColumn" compareValue="collYear">
+									ORDER BY coll_year
+								</isEqual>
+								<isEqual property="sortColumn" compareValue="billNo">
+									ORDER BY bill_no
+								</isEqual>
+								<isEqual property="sortColumn" compareValue="balanceAmtDue">
+									ORDER BY balance_amt_due
+								</isEqual>
+								<isEqual property="sortColumn" compareValue="userId">
+									ORDER BY user_id
+								</isEqual>
+								<isEqual property="sortColumn" compareValue="lastUpdate2">
+									ORDER BY last_update
+								</isEqual>										
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>						
+			                  </isNotNull>) a,
+				       (SELECT count(*) count_
+				          FROM TABLE(GIACS180_PKG.get_colln_letter(#userId#))
+				          <isNotNull property="filter">
+		                 WHERE 1 = 1
+		                 		<isNotEmpty prepend="AND" property="collSeqNo">
+			  		         		coll_seq_no = #collSeqNo#
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="collLetNo">
+			  		         		coll_let_no = #collLetNo#
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="collYear">
+			  		         		coll_year = #collYear#
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="billNo">
+			  		         		UPPER(bill_no) LIKE UPPER(#billNo#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="balanceAmtDue">
+			  		         		balance_amt_due = #balanceAmtDue#
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="userId">
+			  		         		UPPER(user_id) LIKE UPPER(#userId#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="lastUpdate2">
+			  		         		TRUNC(last_update) = TO_DATE(#lastUpdate2#, 'mm-dd-yyyy')
+			  		         	</isNotEmpty>
+			  		      </isNotNull>) b,
+			  		      (SELECT SUM(balance_amt_due) total_amt_due
+		          	     	 FROM TABLE(GIACS180_PKG.get_colln_letter(#userId#))
+			          	     <isNotNull property="filter">
+		                    WHERE 1 = 1
+		                 		<isNotEmpty prepend="AND" property="collSeqNo">
+			  		         		coll_seq_no = #collSeqNo#
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="collLetNo">
+			  		         		coll_let_no = #collLetNo#
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="collYear">
+			  		         		coll_year = #collYear#
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="billNo">
+			  		         		UPPER(bill_no) LIKE UPPER(#billNo#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="balanceAmtDue">
+			  		         		balance_amt_due = #balanceAmtDue#
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="userId">
+			  		         		UPPER(user_id) LIKE UPPER(#userId#)
+			  		         	</isNotEmpty>
+			  		         	<isNotEmpty prepend="AND" property="lastUpdate2">
+			  		         		TRUNC(last_update) = TO_DATE(#lastUpdate2#, 'mm-dd-yyyy')
+			  		         	</isNotEmpty>
+			  		      </isNotNull>) c)
+		 WHERE rownum_ BETWEEN NVL(#from#, rownum_) AND NVL(#to#, rownum_)
+	</select>
+	
+	<select id="fetchReprintCollnLetParams" resultMap="getGSOADtlsMap">
+		SELECT a.* , 
+			   '0' rownum_ ,
+		       '0' count_,
+		       '0' total_amt_due
+          FROM TABLE(GIACS180_PKG.fetch_parameters(#issCd#, #premSeqNo#, #instNo#, #userId#)) a
+	</select>
+	<!-- end: For Reprint Collection Letter -->
+	
+	<select id="checkUserData" parameterClass="java.lang.String" resultClass="java.lang.String">
+		SELECT GIACS180_PKG.check_user_data(#userId#)
+  		  FROM dual
+	</select>
+	
+	
+	<!-- added by kenneth L. for aging of collections 07.02.2013 -->
+	<procedure id="inserToAgingExt" parameterMap="extractAging">
+  		BEGIN
+  			giacs328_pkg.insert_to_aging_ext(?,?,?,?,?,?,?);
+  		END;
+  	</procedure>  
+  	
+	<procedure id="extractAgingOfCollections" parameterClass="java.lang.String">
+  		BEGIN
+  			giacs328_pkg.extract_aging_of_collections(#userId#);
+  		END;
+  	</procedure>  
+	<!-- end -->
+	
+	<!-- For GIACS329 by Joms 07.04.2013 -->
+	<parameterMap class="map" id="extractGIACS329">
+		<parameter property="asOfDate"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="branchCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="userId"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="intmType"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="intmNo"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="exist"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+	</parameterMap>
+	
+	<procedure id="extractGIACS329" parameterMap="extractGIACS329">
+		CALL GIACS329_PKG.extract_giacs329(TO_DATE(?,'MM-DD-YYYY'),?,?,?,?,?)
+	</procedure>
+
+	<select id="giacs329ValidateDateParams" resultClass="String">
+		SELECT GIACS329_PKG.validate_date_params(#asOfDate#, #userId#) FROM DUAL
+	</select>
+	<!-- For GIACS329 by Joms 07.04.2013 -->
+	
+	<!-- For GIACS480 by Joms 07.04.2013 -->
+	<parameterMap class="map" id="extractGIACS480">
+		<parameter property="asOfDate"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="issCd"		    jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="companyCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="employeeCd"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="userId"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="exist"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+	</parameterMap>
+	
+	<procedure id="extractGIACS480" parameterMap="extractGIACS480">
+		CALL GIACS480_PKG.extract_giacs480(TO_DATE(?,'MM-DD-YYYY'),?,?,?,?,?)
+	</procedure>
+	
+	<select id="giacs480ValidateDateParams" resultClass="String">
+		SELECT GIACS480_PKG.validate_date_params(#asOfDate#, #userId#) FROM DUAL
+	</select>
+	<!-- For GIACS480 by Joms 07.04.2013 -->
+
+	<procedure id="checkExistingReport" parameterClass="java.lang.String">
+		BEGIN
+			GIACS180_PKG.check_existing_report(#reportId#);
+		END;
+	</procedure>
+	
+	<resultMap class="java.util.HashMap" id="branchCdLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="branch_cd"		property="branchCd" />
+		<result column="branch_name"	property="branchName" />
+	</resultMap>
+	
+	<select id="showGiacs329BranchLov" resultMap="branchCdLOVMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+					   b.count_, 
+					   a.* 
+				  FROM (SELECT * 
+						  FROM TABLE (giacs329_pkg.get_branch_lov(#userId#, #findText#))
+						  <isEqual property="sortColumn" compareValue="branchCd">
+								ORDER BY branch_cd
+						  </isEqual>
+						  <isEqual property="sortColumn" compareValue="branchName">
+								ORDER BY branch_name
+						  </isEqual>
+						  <isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+						  </isNotNull>
+						  ) a, 
+					   (SELECT count(*) count_ 
+						  FROM TABLE (giacs329_pkg.get_branch_lov(#userId#, #findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="intmTypeLovMap" extends="BaseEntity.TableGridResultMap">
+		<result column="intm_type"		property="intmType" />
+		<result column="intm_desc"	    property="intmDesc" />
+	</resultMap>
+	
+	<select id="showGiacs329IntmTypeLov" resultMap="intmTypeLovMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+					   b.count_, 
+					   a.* 
+				  FROM (SELECT * 
+						  FROM TABLE (giacs329_pkg.get_intmtype_lov(#userId#, #findText#))
+						  <isEqual property="sortColumn" compareValue="intmType">
+								ORDER BY intm_type
+						  </isEqual>
+						  <isEqual property="sortColumn" compareValue="intmDesc">
+								ORDER BY intm_desc
+						  </isEqual>
+						  <isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+						  </isNotNull>
+						  ) a, 
+					   (SELECT count(*) count_ 
+						  FROM TABLE (giacs329_pkg.get_intmtype_lov(#userId#, #findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="intmLovMap" extends="BaseEntity.TableGridResultMap">
+		<result column="intm_no"		property="intmNo" />
+		<result column="intm_name"	    property="intmName" />
+	</resultMap>
+	
+	<select id="showGiacs329IntmLov" resultMap="intmLovMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+					   b.count_, 
+					   a.* 
+				  FROM (SELECT * 
+						  FROM TABLE (giacs329_pkg.get_intm_lov(#intmType#, #findText#))
+						  <isEqual property="sortColumn" compareValue="intmNo">
+								ORDER BY intm_no
+						  </isEqual>
+						  <isEqual property="sortColumn" compareValue="intmName">
+								ORDER BY intm_name
+						  </isEqual>
+						  <isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+						  </isNotNull>
+						  ) a, 
+					   (SELECT count(*) count_ 
+						  FROM TABLE (giacs329_pkg.get_intm_lov(#intmType#, #findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="whenNewFormInstanceGIACS329ResultMap">
+		<result column="v_as_of_date" 	    property="vAsOfDate"/>
+	</resultMap>
+	
+	<select id="whenNewFormInstanceGIACS329" resultMap="whenNewFormInstanceGIACS329ResultMap">
+		SELECT * FROM TABLE(giacs329_pkg.when_new_form_instance(#userId#))		
+	</select>
+	
+	<!-- added by kenneth L. for aging of collections 03.17.2014 -->
+	<parameterMap class="java.util.HashMap" id="lastExtractParamMap">
+		<parameter property="userId"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="fromDate"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+		<parameter property="toDate"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+		<parameter property="extractBy"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+		<parameter property="issCd"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+		<parameter property="issName"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+	</parameterMap>
+	
+	<procedure id="getLastExtractParam" parameterMap="lastExtractParamMap">
+  		BEGIN
+  			giacs328_pkg.get_last_extract_param(?,?,?,?,?,?);
+  		END;
+  	</procedure>  
+	
+	<resultMap class="java.util.HashMap" id="whenNewFormInstanceGIACS480ResultMap">
+		<result column="v_as_of_date" 	    property="vAsOfDate"/>
+	</resultMap>
+	
+	<select id="whenNewFormInstanceGIACS480" resultMap="whenNewFormInstanceGIACS480ResultMap">
+		SELECT * FROM TABLE(giacs480_pkg.when_new_form_instance(#userId#))		
+	</select>
+	
+	<!-- shan 12.10.2014 -->
+	<select id="checkUserChildRecords" resultClass="java.lang.String" parameterClass="java.util.HashMap">
+		SELECT GIACS180_PKG.CHECK_USER_CHILD_RECORDS(#pdcExt#, #userId#)
+  		  FROM DUAL
+	</select> 
+	<!-- end 12.10.2014 -->
+	
+	<select id="addToCollection" resultClass="java.lang.Integer" parameterClass="java.util.HashMap">
+		SELECT GIACS180_PKG.add_to_collection(#isNewItem#, #index#, #str#)
+		  FROM DUAL
+	</select>
+	
+	<select id="getCollElement" resultClass="java.lang.String" parameterClass="java.lang.Integer">
+		SELECT GIACS180_PKG.get_coll_element(#index#)
+		  FROM DUAL
+	</select>
+	
+	<procedure id="deleteCollElement" parameterClass="java.lang.Integer">
+		CALL GIACS180_PKG.delete_coll_element(#index#)
+	</procedure>
+</sqlMap>

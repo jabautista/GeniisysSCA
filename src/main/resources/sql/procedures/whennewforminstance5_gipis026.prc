@@ -1,0 +1,43 @@
+DROP PROCEDURE CPI.WHENNEWFORMINSTANCE5_GIPIS026;
+
+CREATE OR REPLACE PROCEDURE CPI.Whennewforminstance5_Gipis026(
+	   	  		  			 P_LINE_CD         IN  GIPI_PACK_WPOLBAS.LINE_CD%TYPE
+							,P_ISS_CD  		   IN  GIPI_PACK_WPOLBAS.ISS_CD%TYPE
+							,PG_PACK_PAR_ID    IN  GIPI_PACK_WPOLBAS.PACK_PAR_ID%TYPE
+							,PG_CG$B240_PAR_ID IN  GIPI_WPOLBAS.PAR_ID%TYPE
+							,PP_NO_TAX_SW      OUT VARCHAR2 ) IS
+SLINE_CD     GIPI_WPOLBAS.SUBLINE_cD%TYPE;
+BEGIN
+ IF PG_PACK_PAR_ID IS NOT NULL THEN
+  FOR V IN (SELECT NVL(NO_TAX_SW,'N')NO_TAX_SW 
+	            FROM GIPI_PACK_WPOLBAS A, GIIS_SUBLINE B 
+	           WHERE P_LINE_CD = A.LINE_CD
+                 AND P_LINE_CD = B.LINE_CD
+                 AND A.SUBLINE_CD = B.SUBLINE_CD
+                 AND P_ISS_CD = A.ISS_CD
+                 AND A.PACK_PAR_ID = PG_PACK_PAR_ID) LOOP
+	    IF V.NO_TAX_SW='Y'  THEN  
+         PP_NO_TAX_SW:='Y';
+	    ELSE 
+	  	 PP_NO_TAX_SW:='N';
+      END IF;    
+  END LOOP;
+ ELSE	
+  FOR V IN (SELECT NVL(NO_TAX_SW,'N')NO_TAX_SW 
+	            FROM GIPI_WPOLBAS A, GIIS_SUBLINE B 
+	           WHERE P_LINE_CD = A.LINE_CD
+                 AND P_LINE_CD = B.LINE_CD
+                 AND A.SUBLINE_CD = B.SUBLINE_CD
+                 AND P_ISS_CD = A.ISS_CD
+                 AND A.PAR_ID = PG_CG$B240_PAR_ID) LOOP
+	    IF V.NO_TAX_SW='Y'  THEN  
+         PP_NO_TAX_SW:='Y';
+	    ELSE 
+	  	 PP_NO_TAX_SW:='N';
+      END IF;    
+ END LOOP;            
+ END IF;
+END;
+/
+
+

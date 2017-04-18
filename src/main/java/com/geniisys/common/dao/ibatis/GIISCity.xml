@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISCity">
+
+ 	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+		
+	<resultMap id="CityByProvinceLOV" class="com.geniisys.common.entity.GIISCity" extends="BaseEntity.TableGridResultMap">
+		<result column="city" 			property="city"/>
+		<result column="city_cd" 		property="cityCd"/>
+		<result column="province_cd" 	property="provinceCd"/>
+		<result column="province_desc" 	property="provinceDesc" />
+		<result column="region_cd"		property="regionCd" />
+	</resultMap>
+	
+	<resultMap id="cityDtlMap" class="java.util.HashMap">
+  		<result column="city" 			property="city"/>
+		<result column="city_cd" 		property="cityCd"/>
+		<result column="province_cd" 	property="provinceCd"/>
+		<result column="province" 		property="provinceDesc" />	
+  		<result column="rownum_" 		property="rowNum" />
+		<result column="count_"			property="rowCount"/>
+  	</resultMap>
+  	
+  	<resultMap id="GIISCityListing" class="com.geniisys.common.entity.GIISCity" extends="BaseEntity.TableGridResultMap">
+  		<result column="city_cd"		property="cityCd"/>
+  		<result column="city"			property="city"/>  
+  	</resultMap>
+	
+	<select id="getGIISCityLOV" resultMap="CityByProvinceLOV">		
+	  	SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (Giis_City_Pkg.get_city_listing(#regionCd#, #provinceCd#, #findText#))
+		                  <isEqual property="sortColumn" compareValue="city">
+			              		ORDER BY city
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="provinceDesc">
+			              		ORDER BY province_desc
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_
+		                  FROM TABLE (giis_city_pkg.get_city_listing(#regionCd#, #provinceCd#, #findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getCityDtlLOV" resultMap="cityDtlMap">
+  		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(giis_city_pkg.get_city_listing_gicls010(#provinceCd#))              
+			          	  <isNotNull property="findText">
+		                  WHERE (UPPER(city_cd) LIKE UPPER(#findText#) OR UPPER(city) LIKE UPPER(#findText#))
+		             	  </isNotNull>
+			          	  <isNotNull property="sortColumn">
+				          	  <isEqual property="sortColumn" compareValue="cityCd">
+				              		ORDER BY city_cd
+				              </isEqual>
+			                  <isEqual property="sortColumn" compareValue="city">
+				              		ORDER BY city
+				              </isEqual>	
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giis_city_pkg.get_city_listing_gicls010(#provinceCd#))
+		                  <isNotNull property="findText">
+		                  WHERE (UPPER(city_cd) LIKE UPPER(#findText#) OR UPPER(city) LIKE UPPER(#findText#))
+		             	  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+  	
+  	
+  	<resultMap id="locationLOVResultMap" class="java.util.HashMap">
+  		<result column="location_cd" 		property="locationCd"/>
+		<result column="location_desc" 		property="locationDesc"/>
+  		<result column="rownum_" 			property="rowNum" />
+		<result column="count_"				property="rowCount"/>
+  	</resultMap>
+	
+	<select id="getLocationLOV" resultMap="locationLOVResultMap">		
+	  	SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE(GIIS_CITY_PKG.get_location_lov(nvl(#findText#, #searchString#)))
+		                  <isEqual property="sortColumn" compareValue="locationCd">
+			              		ORDER BY location_cd
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="locationDesc">
+			              		ORDER BY location_desc
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_
+		                  FROM TABLE(GIIS_CITY_PKG.get_location_lov(nvl(#findText#, #searchString#)))
+		             	  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	
+	<select id="getGipis155CityLOV" resultMap="cityDtlMap">
+  		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(giis_city_pkg.get_city_listing_gipis155(#provinceCd#))              
+			          	  <isNotNull property="findText">
+		                  WHERE UPPER(city_cd) LIKE UPPER(NVL(#findText#, city_cd)) 
+		                     OR UPPER(city) LIKE UPPER(NVL(#findText#, city))
+		             	  </isNotNull>
+		             	  <isNull property="findText">
+		                  	 WHERE UPPER(city_cd) LIKE UPPER(NVL(#searchString#, city_cd)) 
+		                        OR UPPER(city) LIKE UPPER(NVL(#searchString#, city))
+		             	  </isNull>
+			          	  <isNotNull property="sortColumn">
+				          	  <isEqual property="sortColumn" compareValue="cityCd">
+				              		ORDER BY city_cd
+				              </isEqual>
+			                  <isEqual property="sortColumn" compareValue="city">
+				              		ORDER BY city
+				              </isEqual>	
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giis_city_pkg.get_city_listing_gipis155(#provinceCd#))
+		                  <isNotNull property="findText">
+		                  	 WHERE UPPER(city_cd) LIKE UPPER(NVL(#findText#, city_cd)) 
+		                        OR UPPER(city) LIKE UPPER(NVL(#findText#, city))
+		             	  </isNotNull>
+		             	  <isNull property="findText">
+		                  	 WHERE UPPER(city_cd) LIKE UPPER(NVL(#searchString#, city_cd)) 
+		                        OR UPPER(city) LIKE UPPER(NVL(#searchString#, city))
+		             	  </isNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+  	
+  	<resultMap class="java.util.HashMap" id="GICLS056CityResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="city_cd" property="cityCd" />
+		<result column="city" property="city" />
+	</resultMap>
+	
+	<select id="getGicls056CityLov" resultMap="GICLS056CityResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(gicls056_pkg.get_city_lov(#provinceCd#))
+			  	      	<isNotEmpty property="findText">
+			  	      		WHERE UPPER(city_cd) LIKE UPPER(#findText#)
+			  	      		OR UPPER(city) LIKE UPPER(#findText#)
+			  	      	</isNotEmpty>
+			  	      	<isNotEmpty property="filterText">
+			  	      		WHERE UPPER(city_cd) LIKE UPPER(#filterText#)
+			  	      		OR UPPER(city) LIKE UPPER(#filterText#)
+			  	      	</isNotEmpty>
+		                  <isEqual property="sortColumn" compareValue="cityCd">
+			              		ORDER BY city_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="city">
+			              		ORDER BY city
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(gicls056_pkg.get_city_lov(#provinceCd#))
+		                  <isNotEmpty property="findText">
+			  	      		WHERE UPPER(city_cd) LIKE UPPER(#findText#)
+			  	      		OR UPPER(city) LIKE UPPER(#findText#)
+			  	      	</isNotEmpty>
+			  	      	<isNotEmpty property="filterText">
+			  	      		WHERE UPPER(city_cd) LIKE UPPER(#filterText#)
+			  	      		OR UPPER(city) LIKE UPPER(#filterText#)
+			  	      	</isNotEmpty>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<select id="getGiiss007CityLOV" resultMap="GIISCityListing">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIISS007_PKG.get_city_lov(#provinceCd#))		                 
+		                  	<isNull property="findText">
+				                 WHERE UPPER(city_cd) LIKE UPPER(#searchString#)
+				                 OR UPPER(city) LIKE UPPER(#searchString#)					                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(city_cd) LIKE UPPER(#findText#)
+				                 OR UPPER(city) LIKE UPPER(#findText#)				  				         		
+			             	</isNotNull>		             
+			              	<isEqual property="sortColumn" compareValue="cityCd">
+			              		ORDER BY city_cd
+			              	</isEqual>	
+			              	<isEqual property="sortColumn" compareValue="city">
+			              		ORDER BY city
+			              	</isEqual>			              		                      
+			          	  	<isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	</isNotNull>
+		                  ) a, 
+		               (SELECT count (*) count_ 
+		                  FROM TABLE(GIISS007_PKG.get_city_lov(#provinceCd#))		                 
+		                  	<isNull property="findText">
+				                 WHERE UPPER(city_cd) LIKE UPPER(#searchString#)
+				                 OR UPPER(city) LIKE UPPER(#searchString#)					                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(city_cd) LIKE UPPER(#findText#)
+				                 OR UPPER(city) LIKE UPPER(#findText#)				  				         		
+			             	</isNotNull>		
+			             	) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+</sqlMap>

@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GICLRecoveryPayor">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+
+	<typeAlias alias="GICLRecoveryPayorClass" type="com.geniisys.gicl.entity.GICLRecoveryPayor"/>	
+
+	<resultMap id="GICLRecoveryPayorResultMap" class="GICLRecoveryPayorClass">
+		<result column="payor_class_cd" 	property="payorClassCd"/>
+		<result column="claim_id" 			property="claimId"/>
+		<result column="payor_cd" 			property="payorCd"/> 
+		<result column="recovery_id" 		property="recoveryId"/>
+		<result column="recovered_amt" 		property="recoveredAmt"/>
+		<result column="cpi_rec_no" 		property="cpiRecNo"/>
+        <result column="cpi_branch_cd" 		property="cpiBranchCd"/> 
+        <result column="user_id" 			property="userId"/>
+        <result column="last_update" 		property="lastUpdate"/>
+        <result column="class_desc" 		property="classDesc"/>
+        <result column="payor_name" 		property="payorName"/>
+	</resultMap>
+	
+	<resultMap class="GICLRecoveryPayorClass" id="GICLRecoveryPayorResultMapGrid" extends="GICLRecoveryPayorResultMap">
+		<result column="rownum_" 			property="rowNum"/>
+		<result column="count_" 			property="rowCount"/>
+	</resultMap>
+	
+	<select id="getGiclRecoveryPayorGrid" resultMap="GICLRecoveryPayorResultMapGrid">
+		SELECT * 
+		  FROM (SELECT rownum rownum_, 
+		        	   b.count_, 
+		               a.*  
+		         FROM (SELECT * 
+                         FROM TABLE(gicl_recovery_payor_pkg.get_gicl_recovery_payor(#claimId#, #recoveryId#))
+                        <isNotNull property="filter">
+						 WHERE 1=1
+               				<isNotEmpty prepend="AND"  property="payorClassCd">
+               					payor_class_cd LIKE #payorClassCd#
+               				</isNotEmpty>
+               				<isNotEmpty prepend="AND"  property="classDesc">
+               					UPPER(class_desc) LIKE UPPER(#classDesc#)
+               				</isNotEmpty>
+               				<isNotEmpty prepend="AND"  property="payorCd">
+               					payor_cd LIKE #payorCd#
+               				</isNotEmpty>
+               				<isNotEmpty prepend="AND"  property="payorName">
+               					UPPER(payor_name) LIKE UPPER(#payorName#)
+               				</isNotEmpty>
+               				<isNotEmpty prepend="AND"  property="recoveredAmt">
+               					recovered_amt LIKE #recoveredAmt#
+               				</isNotEmpty>
+                    	</isNotNull>
+                        <isEqual property="sortColumn" compareValue="payorClassCd classDesc">
+			            	ORDER BY payor_class_cd
+			            	<isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>, class_desc
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="payorCd payorName">
+			            	ORDER BY payor_cd
+			            	<isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>, payor_name
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="recoveredAmt">
+			            	ORDER BY recovered_amt
+			          	</isEqual>
+			           	<isNotNull property="sortColumn">
+			              	<isEqual property="ascDescFlg" compareValue="ASC">
+			              		ASC
+			              	</isEqual>
+			              	<isEqual property="ascDescFlg" compareValue="DESC">
+			              		DESC
+			              	</isEqual>
+			            </isNotNull> 
+                         ) a,
+                      (SELECT count(*) count_
+                         FROM TABLE(gicl_recovery_payor_pkg.get_gicl_recovery_payor(#claimId#, #recoveryId#))
+                         <isNotNull property="filter">
+						 WHERE 1=1
+               				<isNotEmpty prepend="AND"  property="payorClassCd">
+               					payor_class_cd LIKE #payorClassCd#
+               				</isNotEmpty>
+               				<isNotEmpty prepend="AND"  property="classDesc">
+               					UPPER(class_desc) LIKE UPPER(#classDesc#)
+               				</isNotEmpty>
+               				<isNotEmpty prepend="AND"  property="payorCd">
+               					payor_cd LIKE #payorCd#
+               				</isNotEmpty>
+               				<isNotEmpty prepend="AND"  property="payorName">
+               					UPPER(payor_name) LIKE UPPER(#payorName#)
+               				</isNotEmpty>
+               				<isNotEmpty prepend="AND"  property="recoveredAmt">
+               					recovered_amt LIKE #recoveredAmt#
+               				</isNotEmpty>
+                    	 </isNotNull>
+                         ) b)
+         WHERE rownum_ BETWEEN #from# AND #to#                    					 			 		
+	</select> 
+
+	<delete id="delGiclRecoveryPayor" parameterClass="GICLRecoveryPayorClass">
+		BEGIN
+			giis_users_pkg.app_user := #userId#; 
+			gicl_recovery_payor_pkg.del_gicl_recovery_payor(#recoveryId#, #claimId#, #payorClassCd#, #payorCd#);
+		END;	
+	</delete>
+
+	<insert id="setGiclRecoveryPayor" parameterClass="GICLRecoveryPayorClass">
+		BEGIN
+			giis_users_pkg.app_user := #userId#; 
+			gicl_recovery_payor_pkg.set_gicl_recovery_payor(
+				#recoveryId#, #claimId#, #payorClassCd#, #payorCd#,
+				#recoveredAmt#, #cpiRecNo#, #cpiBranchCd#, #userId#, #lastUpdate#
+				);
+		END;
+	</insert>
+
+</sqlMap>

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIACR190B_GPOLICYNO_GPREMSEQNO" language="groovy" pageWidth="555" pageHeight="802" columnWidth="555" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="2.1435888100000016"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="P_INTM_NO" class="java.lang.Integer"/>
+	<parameter name="P_AGING_ID" class="java.lang.Integer"/>
+	<parameter name="P_USER_ID" class="java.lang.String"/>
+	<parameter name="P_INCEPT_DATE" class="java.lang.String"/>
+	<parameter name="P_EXPIRY_DATE" class="java.lang.String"/>
+	<parameter name="P_POLICY_NO" class="java.lang.String"/>
+	<parameter name="P_AGING_LIST" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[select *
+  FROM table(giacr190b_pkg.populate_giacr190b1($P{P_INTM_NO}, $P{P_AGING_ID}, $P{P_USER_ID}, $P{P_AGING_LIST}))
+ WHERE to_date(INCEPT_DATE,'mm-dd-yyyy') = to_date($P{P_INCEPT_DATE},'mm-dd-yyyy')
+   AND to_date(EXPIRY_DATE,'mm-dd-yyyy') = to_date($P{P_EXPIRY_DATE},'mm-dd-yyyy')
+   AND policy_no = $P{P_POLICY_NO}]]>
+	</queryString>
+	<field name="INCEPT_DATE" class="java.lang.String"/>
+	<field name="EXPIRY_DATE" class="java.lang.String"/>
+	<field name="POLICY_NO" class="java.lang.String"/>
+	<field name="V_DATE" class="java.sql.Timestamp"/>
+	<field name="V_INVOICE" class="java.lang.String"/>
+	<field name="V_PROPERTY1" class="java.lang.String"/>
+	<field name="V_SIGNATORY1" class="java.lang.String"/>
+	<field name="V_DESIGNATION1" class="java.lang.String"/>
+	<field name="V_INTM_NO1" class="java.math.BigDecimal"/>
+	<field name="V_USER1" class="java.lang.String"/>
+	<field name="V_INTM_NAME1" class="java.lang.String"/>
+	<field name="V_INTM_ADDRESS1" class="java.lang.String"/>
+	<field name="V_INTM_ADDRESS2" class="java.lang.String"/>
+	<field name="V_INTM_ADDRESS3" class="java.lang.String"/>
+	<field name="V_INTERMEDIARY_NAME" class="java.lang.String"/>
+	<field name="V_INTERMEDIARY_NO" class="java.math.BigDecimal"/>
+	<field name="V_POLICY" class="java.lang.String"/>
+	<field name="V_POLICY_NO" class="java.lang.String"/>
+	<field name="V_ENDT_NO" class="java.lang.String"/>
+	<field name="V_ISS_CD" class="java.lang.String"/>
+	<field name="V_PREM_SEQ_NO" class="java.math.BigDecimal"/>
+	<field name="V_PREM_BAL_DUE" class="java.math.BigDecimal"/>
+	<field name="V_TAX_BAL_DUE" class="java.math.BigDecimal"/>
+	<field name="V_BALANCE_AMT_DUE" class="java.math.BigDecimal"/>
+	<field name="V_INST_NO" class="java.math.BigDecimal"/>
+	<variable name="VAR_BAL_AMT_DUE" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{V_BALANCE_AMT_DUE}]]></variableExpression>
+		<initialValueExpression><![CDATA[]]></initialValueExpression>
+	</variable>
+	<detail>
+		<band height="11" splitType="Stretch">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="46" y="0" width="100" height="11"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{V_INVOICE}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="160" y="0" width="100" height="11"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{V_BALANCE_AMT_DUE}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<summary>
+		<band height="24">
+			<textField evaluationTime="Band" pattern="#,##0.00;(#,##0.00)">
+				<reportElement x="160" y="11" width="100" height="11"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{VAR_BAL_AMT_DUE}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="160" y="5" width="100" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+		</band>
+	</summary>
+</jasperReport>

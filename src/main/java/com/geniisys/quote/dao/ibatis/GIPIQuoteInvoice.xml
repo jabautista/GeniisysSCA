@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIQuoteInvoice">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIPIQuoteInvoice" type="com.geniisys.quote.entity.GIPIQuoteInvoice"/>
+	
+	<resultMap id="gipiQuoteInvoiceDtlsMap" class="GIPIQuoteInvoice">
+		<result property="quoteId"			column="quote_id"/>
+		<result property="issCd"			column="iss_cd"/>
+		<result property="quoteInvNo"		column="quote_inv_no"/>
+		<result property="currencyCd"		column="currency_cd"/>
+		<result property="currencyRt"		column="currency_rt"/>
+		<result property="premAmt"			column="prem_amt"/>
+		<result property="taxAmt"			column="tax_amt"/>
+		<result property="intmNo"			column="intm_no"/>
+		<result property="amountDue"		column="amount_due"/>
+		<result property="currencyDesc"		column="currency_desc"/>
+		<result property="intmName"			column="intm_name"/>
+	</resultMap>
+	
+	<parameterMap class="map" id="checkTaxTypeMap">
+		<parameter property="taxCd"			jdbcType="NUMBER"	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="taxId"			jdbcType="NUMBER"	javaType="java.lang.Integer"  mode="IN"/>
+		<parameter property="lineCd"		jdbcType="VARCHAR"	javaType="java.lang.String"   mode="IN"/>
+		<parameter property="issCd" 		jdbcType="VARCHAR"	javaType="java.lang.String"   mode="IN"/>
+		<parameter property="premAmt" 		jdbcType="VARCHAR"	javaType="java.lang.String"   mode="IN"/>
+		<parameter property="rate" 		    jdbcType="VARCHAR"	javaType="java.lang.String"   mode="IN"/>
+		<parameter property="taxAmt" 		jdbcType="VARCHAR"	javaType="java.lang.String"   mode="OUT"/>
+		<parameter property="message"		jdbcType="VARCHAR"	javaType="java.lang.String"   mode="OUT"/>
+	</parameterMap>
+	
+	<select id="getGipiQuoteInvoiceDtls" resultMap="gipiQuoteInvoiceDtlsMap" parameterClass="java.util.HashMap">
+  		SELECT * FROM TABLE(GIPI_QUOTE_INVOICE_PKG.get_giimm002_invoice_dtls(#quoteId#, #currencyCd#))
+  	</select>
+  	
+  	<update id="updateGIPIQuoteInvoiceIntm" parameterClass="java.util.HashMap">
+  		BEGIN
+  			GIPI_QUOTE_INVOICE_PKG.update_gipi_quote_invoice_intm(#quoteId#, #quoteInvNo#, #intmNo#);
+		END;
+  	</update>
+  	
+  	<procedure id="checkTaxType" parameterMap="checkTaxTypeMap">
+		CALL CHECK_TAX_AMOUNT(?, ?, ?, ?, ?, ?, ?, ?)
+	</procedure>
+  	
+</sqlMap>

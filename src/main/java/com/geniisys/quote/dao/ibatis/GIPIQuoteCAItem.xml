@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap>
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIPIQuoteCAItem" type="com.geniisys.quote.entity.GIPIQuoteCAItem" />
+	
+	<resultMap id="GIPIQuoteCAItemMap" class="GIPIQuoteCAItem">
+		<result column="QUOTE_ID" 									property="quoteId" />
+		<result column="ITEM_NO"										property="itemNo" />
+		<result column="SECTION_LINE_CD"						property="sectionLineCd" />
+		<result column="SECTION_SUBLINE_CD"				property="sectionSublineCd" />
+		<result column="SECTION_OR_HAZARD_CD" 		property="sectionOrHazardCd" />
+		<result column="CAPACITY_CD" 								property="capacityCd" />
+		<result column="PROPERTY_NO_TYPE" 				property="propertyNoType" />
+		<result column="PROPERTY_NO" 							property="propertyNo" />
+		<result column="LOCATION" 									property="location" />
+		<result column="CONVEYANCE_INFO" 					property="conveyanceInfo" />
+		<result column="INTEREST_ON_PREMISES" 			property="interestOnPremises" />
+		<result column="LIMIT_OF_LIABILITY" 					property="limitOfLiability" />
+		<result column="SECTION_OR_HAZARD_INFO" 	property="sectionOrHazardInfo" />
+		<result column="USER_ID" 										property="userId" />
+		<result column="LAST_UPDATE" 							property="lastUpdate" />
+		<result column="SECTION_OR_HAZARD_TITLE" 	property="dspSectionOrHazardTitle" />
+		<result column="POSITION" 										property="dspPosition" />
+	</resultMap>
+	
+	<select id="getGIPIQuoteCAItemDetails" resultMap="GIPIQuoteCAItemMap" parameterClass="java.util.HashMap">
+		SELECT 
+			quote_id,       item_no,      capacity_cd,              
+			ESCAPE_VALUE(location) location, 
+		    ESCAPE_VALUE(section_or_hazard_cd) section_or_hazard_cd, 
+		    ESCAPE_VALUE(section_or_hazard_title) section_or_hazard_title, 
+		    ESCAPE_VALUE(position) position, 
+		    ESCAPE_VALUE(limit_of_liability) limit_of_liability,       
+		    ESCAPE_VALUE(section_line_cd) section_line_cd,         
+		    ESCAPE_VALUE(section_subline_cd) section_subline_cd,       
+		    ESCAPE_VALUE(property_no_type) property_no_type,      
+		    ESCAPE_VALUE(property_no) property_no,             
+		    ESCAPE_VALUE(conveyance_info) conveyance_info,        
+		    ESCAPE_VALUE(interest_on_premises) interest_on_premises,     
+		    ESCAPE_VALUE(section_or_hazard_info) section_or_hazard_info,   
+		    ESCAPE_VALUE(user_id) user_id,              
+		    last_update
+		  FROM TABLE(Gipi_Quote_Item_Dtls.Get_Gipi_Quote_CA(#quoteId#, #itemNo#))
+		   WHERE ROWNUM = 1
+	</select>
+	
+	<procedure id="saveGIPIQuoteCAItem" parameterClass="GIPIQuoteCAItem">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			Gipi_Quote_Item_Dtls.Set_Gipi_Quote_CA(#quoteId#,
+	 			#itemNo#,
+				#location#,
+				#sectionOrHazardCd#,	 
+				#capacityCd#,
+				#limitOfLiability#,
+				#sectionLineCd#,
+				#sectionSublineCd#,
+				#propertyNoType#,
+				#propertyNo#,
+				#conveyanceInfo#,
+				#interestOnPremises#,
+				#sectionOrHazardInfo#);
+		END;
+	</procedure>
+	
+</sqlMap>

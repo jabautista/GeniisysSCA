@@ -1,0 +1,1949 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISISSource">
+
+  <cacheModel id="oneDayClient" type="MEMORY">
+    <flushInterval hours="24"/>
+    <property name="reference-type" value="WEAK"/>
+  </cacheModel>
+  
+  <resultMap id="GIISISSource" class="com.geniisys.common.entity.GIISISSource" >
+  
+  	<result column="ISS_CD"				property="issCd"			jdbcType="VARCHAR" />
+  	<result column="ACCT_ISS_CD"	 	property="acctIssCd"		jdbcType="NUMBER" />
+  	<result column="ISS_NAME"			property="issName"			jdbcType="VARCHAR" />
+  	<result column="GEN_INVC_SW"		property="genInvSw"			jdbcType="VARCHAR" />
+  	<result column="ISS_GRP"			property="issGrp"			jdbcType="NUMBER" />
+  	<result column="PRNT_ISS_CD"		property="prntIssCd"		jdbcType="VARCHAR" />
+  	<result column="ISS_LEVEL"			property="issLevel"			jdbcType="VARCHAR" />
+  	<result column="ADDRESS1"			property="address1"			jdbcType="VARCHAR" />
+  	<result column="ADDRESS2"			property="address2"			jdbcType="VARCHAR" />
+  	<result column="ADDRESS3"			property="address3"			jdbcType="VARCHAR" />
+  	<result column="USER_ID"			property="userId"			jdbcType="VARCHAR"/>
+  	<result column="LAST_UPDATE"		property="lastUpdate"		jdbcType="DATE" />
+  	<result column="REMARKS"			property="remarks"			jdbcType="VARCHAR" />
+  	<result column="CPI_REC_NO"			property="cpiRecNo"			jdbcType="NUMBER" />
+  	<result column="CPI_BRANCH_CD"		property="cpiBranchCd"		jdbcType="VARCHAR" />
+  	<result column="GOUC_OUC_ID"		property="goucOucId"		jdbcType="VARCHAR" />
+  	<result column="HO_TAG"				property="hoTag"			jdbcType="VARCHAR" />
+  	<result column="REGION_CD"			property="regionCd"			jdbcType="NUMBER" />
+  	<result column="CLAIM_BRANCH_CD"	property="claimBranchCd"	jdbcType="VARCHAR" />
+  	<result column="CLAIM_TAG"			property="claimTag"			jdbcType="VARCHAR" />
+  	<result column="CRED_BR_TAG"		property="credBrTag"		jdbcType="VARCHAR" />
+  	<result column="ONLINE_SW"			property="onlineSw"			jdbcType="VARCHAR" />
+  	  
+  </resultMap>
+  
+  <resultMap id="GIISISSourceListing" class="com.geniisys.common.entity.GIISISSource">
+  	<result column="ISS_CD"				property="issCd"			jdbcType="VARCHAR" />
+  	<result column="ISS_NAME"			property="issName"			jdbcType="VARCHAR" />  
+  </resultMap>
+  
+  <resultMap id="GIISISSourceListingMap" class="com.geniisys.common.entity.GIISISSource" >
+	  	<result column="ISS_CD"				property="issCd"/>
+	  	<result column="ISS_NAME"			property="issName"	/>  
+		<result property="rowNum"			column="ROWNUM_"/>
+		<result property="rowCount"			column="COUNT_"/>
+  </resultMap>
+  
+  	<!-- Mae 10.18.2012 -->
+    <resultMap id="GIISIssueSourceListMap" class="com.geniisys.common.entity.GIISISSource">
+  		 <result column="ISS_CD" 			property="issCd" 			jdbcType="VARCHAR" />
+  		 <result column="ISS_NAME" 			property="issName" 			jdbcType="VARCHAR" />
+  		 <result column="rownum_" 			property="rowNum" />
+		 <result column="count_"		    property="rowCount"/>
+  	</resultMap>
+  	<!-- Mae 10.18.2012 -->
+  
+  	<parameterMap class="map"  id="validatePolIssCdMap">
+		<parameter property="polLineCd" 	jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"/>
+		<parameter property="polIssCd" 	jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"/>
+		<parameter property="issRi" 			jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"/>
+		<parameter property="userId" 		jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"/>
+		<parameter property="moduleId" 	jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"/>
+		<parameter property="msg" 			jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="validateIssCdMap">
+		<parameter property="issCd"			jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="IN"/>
+		<parameter property="issName"		jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="OUT"/>
+		<parameter property="lineCd"		jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="IN"/>
+		<parameter property="moduleId"		jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="IN"/>
+		<parameter property="issRi"			jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="OUT"/>
+	</parameterMap>
+	
+	<resultMap id="GIUTS035AcctIssCdListingMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result column="ACCT_ISS_CD" 		property="acctIssCd"/>
+  		<result column="ISS_CD" 			property="issCd"/>
+  		<result column="ISS_NAME" 			property="issName"/>
+  	</resultMap>
+  	
+  	 <resultMap class="java.util.HashMap" id="GIPIS200IssueLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="issCd" 		column="iss_cd"/>
+		<result property="issName" 	column="iss_name"/>			
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="GIISS028IssueLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="issCd" 		column="iss_cd"/>
+		<result property="issName" 		column="iss_name"/>
+		<result property="fundCd" 		column="fund_cd"/>				
+	</resultMap>
+  
+  
+  <select id="getIssueSourceAllList"	resultMap="GIISISSourceListing">  
+    	<!-- select * from table (ISSUE_SOURCE_LIST_PKG.get_issue_source_all_list) ORDER BY ISS_NAME -->
+    	SELECT ISS_CD, ISS_NAME FROM TABLE(GIIS_ISSOURCE_PKG.get_issue_source_all_list)
+  </select>
+  
+  <select id="getDefaultIssCd"	resultClass="java.lang.String">
+  		SELECT giis_issource_pkg.get_iss_code(#riSwitch#, #userId#) FROM DUAL
+  </select>
+  
+  <select id="getIssCdNameLOV" resultMap="GIISISSourceListingMap" parameterClass="java.util.HashMap">
+		 SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giis_issource_pkg.get_iss_cd_name(#userId#, #lineCd#, #moduleId#))
+		                  WHERE 1=1
+		                  <isNotEmpty prepend="AND" property="findText"> 
+		                  UPPER(iss_cd) LIKE UPPER(#findText#)
+		                     OR UPPER(iss_name) LIKE UPPER(#findText#)
+		                  </isNotEmpty>
+		                  <isNotEmpty prepend="AND" property="searchString"> 
+		                  UPPER(iss_cd) LIKE UPPER(#searchString#)
+		                     OR UPPER(iss_name) LIKE UPPER(#searchString#)
+		                  </isNotEmpty>		                  
+		                  <isEqual property="sortColumn" compareValue="issCd">
+			              		ORDER BY iss_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="issName">
+			              		ORDER BY iss_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giis_issource_pkg.get_iss_cd_name(#userId#, #lineCd#, #moduleId#))
+		                  <isNotNull property="findText">
+			                  WHERE UPPER(iss_cd) LIKE UPPER(#findText#)
+			                  OR UPPER(iss_name) LIKE UPPER(#findText#)
+		                  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<!-- benjo 11.12.2015 UW-SPECS-2015-087 -->
+	<select id="getGiexs001CredBranchLOV" resultMap="GIISISSourceListingMap" parameterClass="java.util.HashMap">
+		 SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giis_issource_pkg.get_giexs001_cred_branch_lov(#userId#, #lineCd#, #moduleId#))
+		                  WHERE 1=1
+		                  <isNotEmpty prepend="AND" property="findText"> 
+		                  UPPER(iss_cd) LIKE UPPER(#findText#)
+		                     OR UPPER(iss_name) LIKE UPPER(#findText#)
+		                  </isNotEmpty>
+		                  <isNotEmpty prepend="AND" property="searchString"> 
+		                  UPPER(iss_cd) LIKE UPPER(#searchString#)
+		                     OR UPPER(iss_name) LIKE UPPER(#searchString#)
+		                  </isNotEmpty>		                  
+		                  <isEqual property="sortColumn" compareValue="issCd">
+			              		ORDER BY iss_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="issName">
+			              		ORDER BY iss_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giis_issource_pkg.get_giexs001_cred_branch_lov(#userId#, #lineCd#, #moduleId#))
+		                  <isNotNull property="findText">
+			                  WHERE UPPER(iss_cd) LIKE UPPER(#findText#)
+			                  OR UPPER(iss_name) LIKE UPPER(#findText#)
+		                  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="validatePolIssCd"  parameterMap="validatePolIssCdMap">
+		CALL giis_issource_pkg.validate_pol_iss_cd(?, ?, ?, ?, ?, ?)
+	</procedure>
+	
+	<select id="getPolbasicIssLOV" resultMap="GIISISSourceListingMap" parameterClass="java.util.HashMap">
+		 SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giis_issource_pkg.get_polbasic_iss_list(#lineCd#, #sublineCd#, #userId#))
+		                  <isNotNull property="findText">
+		                  	WHERE UPPER(iss_cd) LIKE UPPER(#findText#)
+		                  	   OR UPPER(iss_name) LIKE UPPER(#findText#)
+		                  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="issCd">
+			              		ORDER BY iss_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="issName">
+			              		ORDER BY iss_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giis_issource_pkg.get_polbasic_iss_list(#lineCd#, #sublineCd#, #userId#))
+		                  <isNotNull property="findText">
+		                  	WHERE UPPER(iss_cd) LIKE UPPER(#findText#)
+		                  	   OR UPPER(iss_name) LIKE UPPER(#findText#)
+		                  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+  
+  	<procedure id="validatePurgeIssCd" parameterMap="validateIssCdMap">
+		CALL GIIS_ISSOURCE_PKG.validate_purge_iss_cd(?, ?, ?, ?, ?)
+	</procedure>
+	
+	<select id="getPrintExpReportIssourceLOV"	resultMap="GIISISSourceListingMap" parameterClass="java.util.HashMap">  	
+  		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (select iss_cd, iss_name from table(giis_issource_pkg.get_exp_rep_issource_lov(#lineCd#,#moduleId#, #userId#))
+		          		  <isNotNull property="findText">
+		          		  		WHERE (UPPER(iss_cd) LIKE UPPER(#findText#)
+		          		  		       OR UPPER(iss_name) LIKE UPPER(#findText#)
+				         	          )
+		          		  </isNotNull>
+		          		  <isEqual property="sortColumn" compareValue="issCd">
+			              		ORDER BY iss_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="issName">
+			              		ORDER BY iss_name
+			              </isEqual> 
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giis_issource_pkg.get_exp_rep_issource_lov(#lineCd#,#moduleId#,#userId#))
+		                  <isNotNull property="findText">
+		          		  		WHERE (UPPER(iss_cd) LIKE UPPER(#findText#)
+		          		  		       OR UPPER(iss_name) LIKE UPPER(#findText#)
+				         	          )
+		          		  </isNotNull>
+		          		  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+
+	<select id="validateIssCdGiexs006" resultMap="GIISISSourceListing" parameterClass="java.util.HashMap">
+		SELECT * FROM TABLE(giis_issource_pkg.validate_iss_cd_giexs006(#issCd#,#lineCd#,#moduleId#))
+	</select>
+	
+	<select id="getGiriWinpolbasIssourceList" resultMap="GIISISSourceListingMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giis_issource_pkg.get_giri_winpolbas_issource(#findText#))
+		                  <isEqual property="sortColumn" compareValue="issCd">
+			              		ORDER BY iss_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="issName">
+			              		ORDER BY iss_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giis_issource_pkg.get_giri_winpolbas_issource(#findText#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getIssCdLOVGiuts007"	resultMap="GIISISSourceListingMap">  	
+  		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(giuts007_pkg.get_iss_cd_lov(#lineCd#,#issCd#,#moduleId#,#userId#)) 
+		          		 <isNotNull property="findText">
+				         WHERE (UPPER(iss_cd) LIKE UPPER(#findText#) 
+				         	 OR UPPER(iss_name) LIKE UPPER(#findText#)
+				         	 )
+				         </isNotNull>
+		          		  <isEqual property="sortColumn" compareValue="issCd">
+			              		ORDER BY iss_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="issName">
+			              		ORDER BY iss_name
+			              </isEqual> 
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giuts007_pkg.get_iss_cd_lov(#lineCd#,#issCd#,#moduleId#,#userId#))
+		                 <isNotNull property="findText">
+				         WHERE (UPPER(iss_cd) LIKE UPPER(#findText#) 
+				         	 OR UPPER(iss_name) LIKE UPPER(#findText#)
+				         	 )
+				         </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+  	
+  	<select id="gicls010ValidatePolIssCd" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT GIIS_ISSOURCE_PKG.validate_iss_cd(#userId#, #lineCd#, #moduleId#, #issCd#) FROM DUAL
+	</select> 
+	
+	<resultMap id="GIISISSourceListingTg" 	class="com.geniisys.common.entity.GIISISSource">
+		<result column="ISS_CD" 			property="issCd" 		jdbcType="VARCHAR" />
+		<result column="ISS_NAME" 			property="issName" 		jdbcType="VARCHAR" />
+		<result column="rownum_" 			property="rowNum" />
+		<result column="count_"				property="rowCount"/>
+	</resultMap>
+	
+	<select id="getAllIssSourceTG" resultMap="GIISISSourceListingTg" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIIS_ISSOURCE_PKG.get_issue_source_all_list)
+		                  <isNotNull property="findText">
+			              		where iss_cd like upper(#findText#) or iss_name like upper(#findText#)
+			              </isNotNull>
+			              <isNotNull property="sortColumn">
+			          	  	  <isEqual property="sortColumn" compareValue="issCd">
+				              		ORDER BY iss_cd
+				              </isEqual>
+			                  <isEqual property="sortColumn" compareValue="issName">
+				              		ORDER BY iss_name
+				              </isEqual>	
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (GIIS_ISSOURCE_PKG.get_issue_source_all_list)
+			                  <isNotNull property="findText">
+			              		where iss_cd like upper(#findText#) or iss_name like upper(#findText#)
+			            	  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<!-- Mae 10.18.2012 -->
+	<select id="getGiiss207IssueSourceLOV" resultMap="GIISIssueSourceListMap">
+	    SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIISS207_PKG.get_issue_sources(#userId#,#maintenanceUser#))
+						  <isNull property="findText">
+						   	 		WHERE iss_cd LIKE upper(NVL(#search#, iss_cd))
+						   	 			OR UPPER(iss_name) LIKE UPPER(NVL(#search#, iss_name))
+						  </isNull>
+			          	  <isNotNull property="findText">
+		                  	WHERE (UPPER(iss_cd) LIKE UPPER(#findText#) 
+		                  	 		 OR UPPER(iss_name) LIKE UPPER(#findText#))
+		             	  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="issCd">
+			              		ORDER BY iss_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="issName">
+			              		ORDER BY iss_name
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">	
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+			            ) a,
+		                (SELECT count(*) count_ 
+		                   FROM TABLE (GIISS207_PKG.get_issue_sources(#userId#,#maintenanceUser#))
+             			  <isNull property="findText">
+		                  	WHERE iss_cd LIKE upper(NVL(#search#, iss_cd))
+						   		OR UPPER(iss_name) LIKE UPPER(NVL(#search#, iss_name))
+						  </isNull>
+			          	  <isNotNull property="findText">
+		                  	WHERE (UPPER(iss_cd) LIKE UPPER(#findText#) 
+		                  	 	OR UPPER(iss_name) LIKE UPPER(#findText#))
+		             	  </isNotNull>	                   
+		                ) b )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+  	
+  	<select id="getIssueSourceListingLOV" resultMap="GIISIssueSourceListMap" parameterClass="java.util.HashMap">
+  	    SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIISS207_PKG.get_issue_sources(#userId#,#issCd#,#maintenanceUser#))
+		                  <isNotNull property="findText">
+		                  		WHERE 1=1
+		                  		<isNotEmpty prepend="AND" property="findText">
+		                  			UPPER(iss_cd) LIKE UPPER(#findText#)
+		                  		</isNotEmpty>
+		                  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="issCd">
+			              		ORDER BY iss_cd
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+			            ) a,
+		                (SELECT count(*) count_ 
+		                   FROM TABLE (GIISS207_PKG.get_issue_sources(#userId#,#issCd#,#maintenanceUser#))
+		                  <isNotNull property="findText">
+		                  		WHERE 1=1
+		                  		<isNotEmpty prepend="AND" property="findText">
+		                  			UPPER(iss_cd) LIKE UPPER(#findText#)
+		                  		</isNotEmpty>
+		                  </isNotNull>		                   
+		                ) b )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+  	<!-- Mae 10.18.2012 -->
+  	
+	
+	<select id="getIssSourceGicls201LOV" parameterClass="java.util.HashMap" resultMap="GIISISSourceListingTg">
+		SELECT * 
+		  FROM (SELECT rownum rownum_,
+		  			   b.count_,
+		  			   a.*
+		          FROM (SELECT * FROM TABLE(GIIS_ISSOURCE_PKG.get_iss_gicls201_LOV(#moduleId#))
+		          		 	<isNotNull property="findText">
+			              		where iss_cd like upper(#findText#) 
+			              		   or iss_name like upper(#findText#)
+			              	</isNotNull>
+			              	<isNull property="findText">
+			              		where iss_cd like upper(#searchString#) 
+			              	</isNull>
+			              	<isNotNull property="sortColumn">
+			          	  	  <isEqual property="sortColumn" compareValue="issCd">
+				              		ORDER BY iss_cd
+				              </isEqual>
+			                  <isEqual property="sortColumn" compareValue="issName">
+				              		ORDER BY iss_name
+				              </isEqual>	
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	</isNotNull>
+			              ) a,
+		               (SELECT count(*) count_ FROM TABLE(GIIS_ISSOURCE_PKG.get_iss_gicls201_LOV(#moduleId#))
+		               		<isNotNull property="findText">
+			              		where iss_cd like upper(#findText#) or iss_name like upper(#findText#)
+			              	</isNotNull>
+			              	<isNull property="findText">
+			              		where iss_cd like upper(#searchString#) 
+			              	</isNull>
+			           ) b
+		        )
+		 WHERE rownum_ BETWEEN #from# AND #to#		
+	</select>
+	
+	<parameterMap class="map" id="getIssNameGicls201Map">
+		<parameter property="moduleId"	jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+		<parameter property="issCd"		jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+		<parameter property="userId"	jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+		<parameter property="issName"	jdbcType="VARCHAR"	javaType="java.lang.String"	mode="OUT"/>
+		<parameter property="found"		jdbcType="VARCHAR"	javaType="java.lang.String"	mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="getIssNameGicls201" parameterMap="getIssNameGicls201Map" >
+		CALL GIIS_ISSOURCE_PKG.get_issue_name_gicls201(?, ?, ?, ?, ?)
+	</procedure>
+	
+	<!-- Kenneth L 04.24.2013 -->
+	<select id="getIssGIUTS022LOV" resultMap="GIISISSourceListingMap" parameterClass="java.util.HashMap">		 
+		SELECT *
+  		  FROM (SELECT ROWNUM rownum_, 
+	               	   b.count_, 
+	              	   a.* 
+	          	  FROM (SELECT * FROM TABLE(GIIS_ISSOURCE_PKG.GET_ISS_LOV_GIUTS022(#search#, #userId#))
+          	   	<isNotNull property="findText">
+					WHERE 1=1
+					<isNotEmpty prepend="AND"  property="findText">
+						(iss_cd LIKE upper(#findText#) OR
+						 iss_name LIKE upper(#findText#))
+					</isNotEmpty>
+				</isNotNull>
+	            <isEqual property="sortColumn" compareValue="issCd">
+              		ORDER BY iss_cd
+	            </isEqual>
+	            <isEqual property="sortColumn" compareValue="issName">
+              		ORDER BY iss_name
+	            </isEqual>
+	            <isNotNull property="sortColumn">
+              		<isEqual property="ascDescFlg" compareValue="ASC">
+              			ASC
+              		</isEqual>
+              		<isEqual property="ascDescFlg" compareValue="DESC">
+              			DESC
+              		</isEqual>
+              	</isNotNull>) a,
+              (SELECT count(*) count_
+	          	 FROM TABLE(GIIS_ISSOURCE_PKG.GET_ISS_LOV_GIUTS022(#search#, #userId#))
+	          	<isNotNull property="findText">
+					WHERE 1=1
+					<isNotEmpty prepend="AND"  property="findText">
+						(iss_cd LIKE upper(#findText#) OR
+						 iss_name LIKE upper(#findText#))
+					</isNotEmpty>
+				</isNotNull>)b) 
+	    	WHERE rownum_ BETWEEN #from# AND #to# 	
+ 	</select>
+ 	
+ 	<select id="getEndtIssGIUTS022LOV" resultMap="GIISISSourceListingMap" parameterClass="java.util.HashMap">		 
+		SELECT *
+  		  FROM (SELECT ROWNUM rownum_, 
+	               	   b.count_, 
+	              	   a.* 
+	          	  FROM (SELECT * FROM TABLE(GIIS_ISSOURCE_PKG.GET_ENDT_ISS_LOV_GIUTS022(#search#))
+          	   	<isNotNull property="findText">
+					WHERE 1=1
+					<isNotEmpty prepend="AND"  property="findText">
+						(iss_cd LIKE upper(#findText#) OR
+						 iss_name LIKE upper(#findText#))
+					</isNotEmpty>
+				</isNotNull>
+	            <isEqual property="sortColumn" compareValue="issCd">
+              		ORDER BY iss_cd
+	            </isEqual>
+	            <isEqual property="sortColumn" compareValue="issName">
+              		ORDER BY iss_name
+	            </isEqual>
+	            <isNotNull property="sortColumn">
+              		<isEqual property="ascDescFlg" compareValue="ASC">
+              			ASC
+              		</isEqual>
+              		<isEqual property="ascDescFlg" compareValue="DESC">
+              			DESC
+              		</isEqual>
+              	</isNotNull>) a,
+              (SELECT count(*) count_
+	          	 FROM TABLE(GIIS_ISSOURCE_PKG.GET_ENDT_ISS_LOV_GIUTS022(#search#))
+	          	<isNotNull property="findText">
+					WHERE 1=1
+					<isNotEmpty prepend="AND"  property="findText">
+						(iss_cd LIKE upper(#findText#) OR
+						 iss_name LIKE upper(#findText#))
+					</isNotEmpty>
+				</isNotNull>)b) 
+	    	WHERE rownum_ BETWEEN #from# AND #to# 	
+ 	</select>
+	
+	<resultMap class="java.util.HashMap" id="giacs045BranchCdLov2" extends="BaseEntity.TableGridResultMap">
+		<result column="branch_cd"		property="branchCd" />
+		<result column="branch_name"    property="branchName" />
+	</resultMap>
+	
+	<select id="getGIACS045BranchCdLov2" resultMap="giacs045BranchCdLov2">
+		SELECT *
+            FROM (SELECT ROWNUM rownum_, b.count_, a.*
+                  FROM (SELECT *
+                          FROM TABLE(GIACS045_PKG.get_branch_cd_lov2(#userId#))
+                            <isNull property="findText">
+			                	WHERE UPPER(branch_cd) LIKE UPPER(NVL(#searchString#, branch_cd))
+			                </isNull>
+			                <isNotNull property="findText">
+			                	WHERE UPPER(branch_cd) LIKE UPPER(NVL(#findText#, branch_cd))
+			                	OR UPPER(branch_name) LIKE UPPER(NVL(#findText#, branch_name))
+			                </isNotNull>
+                            <isEqual property="sortColumn" compareValue="branchCd">
+                                     ORDER BY branch_cd
+                            </isEqual>
+                            <isEqual property="sortColumn" compareValue="branchName">
+                                     ORDER BY branch_name
+                            </isEqual>
+                            <isNotNull property="sortColumn">
+                                 <isEqual property="ascDescFlg" compareValue="ASC">
+                                     ASC
+                                 </isEqual>
+                                 <isEqual property="ascDescFlg" compareValue="DESC">
+                                     DESC
+                                 </isEqual>
+                            </isNotNull>) a,
+               (SELECT COUNT (*) count_
+                  FROM TABLE
+                          (GIACS045_PKG.get_branch_cd_lov2(#userId#))
+                            <isNull property="findText">
+			                	WHERE UPPER(branch_cd) LIKE UPPER(NVL(#searchString#, branch_cd))
+			                </isNull>
+			                <isNotNull property="findText">
+			                	WHERE UPPER(branch_cd) LIKE UPPER(NVL(#findText#, branch_cd))
+			                	OR UPPER(branch_name) LIKE UPPER(NVL(#findText#, branch_name))
+			                </isNotNull>
+                          ) b)
+          WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGIACS180BranchCdLov" parameterClass="java.util.HashMap" resultMap="GIISISSourceListingTg">
+		SELECT *
+          FROM (SELECT rownum rownum_, b.count_, a.*
+                  FROM (SELECT *
+                          FROM TABLE(GIIS_ISSOURCE_PKG.get_giacs180_iss_lov(#userId#, #moduleId#))
+                       <isNotNull property="findText">
+		                  	WHERE (UPPER(iss_cd) LIKE UPPER(#findText#) 
+		                  			OR UPPER(iss_name) LIKE UPPER(#findText#)
+		                  			OR UPPER(iss_cd)||' - '||UPPER(iss_name) LIKE UPPER(#findText#))
+		               </isNotNull>
+		               <isNull property="findText">
+		               		<isNotNull property="filterText">
+			                  	WHERE (UPPER(iss_cd) LIKE UPPER(#filterText#) 
+			                  			OR UPPER(iss_name) LIKE UPPER(#filterText#)
+			                  			OR UPPER(iss_cd)||' - '||UPPER(iss_name) LIKE UPPER(#filterText#))
+			               </isNotNull>
+		               </isNull>
+                       <isNotNull property="sortColumn">
+                       		<isEqual property="sortColumn" compareValue="issCd">
+			              		ORDER BY iss_cd
+				            </isEqual>
+				            <isEqual property="sortColumn" compareValue="issName">
+			              		ORDER BY iss_name
+				            </isEqual>
+				            <isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+                       </isNotNull>) a,
+		               (SELECT count (*) count_
+		                  FROM TABLE(GIIS_ISSOURCE_PKG.get_giacs180_iss_lov(#userId#, #moduleId#))
+                       <isNotNull property="findText">
+		                  	WHERE (UPPER(iss_cd) LIKE UPPER(#findText#) 
+		                  			OR UPPER(iss_name) LIKE UPPER(#findText#)
+		                  			OR UPPER(iss_cd)||' - '||UPPER(iss_name) LIKE UPPER(#findText#))
+		               </isNotNull>
+		               <isNull property="findText">
+		               		<isNotNull property="filterText">
+			                  	WHERE (UPPER(iss_cd) LIKE UPPER(#filterText#) 
+			                  			OR UPPER(iss_name) LIKE UPPER(#filterText#)
+			                  			OR UPPER(iss_cd)||' - '||UPPER(iss_name) LIKE UPPER(#filterText#))
+			               </isNotNull>
+		               </isNull>) b)
+          WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<!-- added by kenneth L. for aging of collections 07.02.2013  modified 02.28.2014 removed iss_name query-->
+	<select id="getBranchGiacs328Lov" resultMap="GIISISSourceListingMap" parameterClass="java.util.HashMap">		
+		SELECT *
+  		  FROM (SELECT ROWNUM rownum_, 
+	               	   b.count_, 
+	              	   a.* 
+	          	  FROM (SELECT * FROM TABLE(GIACS328_PKG.GET_BRANCH_LOV(#userId#))
+          	   	 <isNull property="findText">
+					WHERE iss_cd LIKE upper(NVL(#search#, iss_cd))<!--  OR iss_name LIKE upper(NVL(#search#, iss_name)) -->
+					</isNull>
+					<isNotNull property="findText">
+					WHERE iss_cd LIKE upper(#findText#)<!--  OR iss_name LIKE upper(#findText#) -->
+					</isNotNull>
+					
+	            <isEqual property="sortColumn" compareValue="issCd">
+              		ORDER BY iss_cd
+	            </isEqual>
+	            <isEqual property="sortColumn" compareValue="issName">
+              		ORDER BY iss_name
+	            </isEqual>
+	            <isNotNull property="sortColumn">
+              		<isEqual property="ascDescFlg" compareValue="ASC">
+              			ASC
+              		</isEqual>
+              		<isEqual property="ascDescFlg" compareValue="DESC">
+              			DESC
+              		</isEqual>
+              	</isNotNull>) a,
+              (SELECT count(*) count_
+	          	 FROM TABLE(GIACS328_PKG.GET_BRANCH_LOV(#userId#))
+	           <isNull property="findText">
+					WHERE iss_cd LIKE upper(NVL(#search#, iss_cd)) <!-- OR iss_name LIKE upper(NVL(#search#, iss_name)) -->
+					</isNull>
+					<isNotNull property="findText">
+					WHERE iss_cd LIKE upper(#findText#)<!--  OR iss_name LIKE upper(#findText#) -->
+					</isNotNull>)b) 
+	    	WHERE rownum_ BETWEEN #from# AND #to# 	
+ 	</select>
+ 	
+ 	<select id="getBranchGiacs108LOV" resultMap="GIISISSourceListingMap" parameterClass="java.util.HashMap">		
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT iss_cd, iss_name FROM TABLE(giacs108_pkg.get_branch_cd_giacs108_lov(#moduleId#,#userId#))
+		          		  <isNotNull property="findText">
+				         		WHERE (UPPER(iss_cd) LIKE UPPER(#findText#) 
+				         	 	   OR UPPER(iss_name) LIKE UPPER(#findText#)
+				         	   )
+				          </isNotNull>
+		          		  <isEqual property="sortColumn" compareValue="issCd">
+			              		ORDER BY iss_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="issName">
+			              		ORDER BY iss_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giacs108_pkg.get_branch_cd_giacs108_lov(#moduleId#,#userId#))
+		                  <isNotNull property="findText">
+				         		WHERE (UPPER(iss_cd) LIKE UPPER(#findText#) 
+				         	 	   OR UPPER(iss_name) LIKE UPPER(#findText#)
+				         	   )
+				          </isNotNull>
+				          ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+ 	</select>
+
+ 	<!-- added by : Kenneth L. 07.16.2013 :for giacs286 -->
+	<select id="getGiacs286IssLov" resultMap="GIISISSourceListingMap" parameterClass="java.util.HashMap">		
+		SELECT *
+  		  FROM (SELECT ROWNUM rownum_, 
+	               	   b.count_, 
+	              	   a.* 
+	          	  FROM (SELECT * FROM TABLE(giis_issource_pkg.get_giacs286_iss_lov(#userId#))
+          	   	 <isNull property="findText">
+					WHERE iss_cd LIKE upper(NVL(#search#, iss_cd)) OR iss_name LIKE upper(NVL(#search#, iss_name))
+				 </isNull>
+				 <isNotNull property="findText">
+					WHERE iss_cd LIKE upper(#findText#) OR iss_name LIKE upper(#findText#)
+				 </isNotNull>
+					
+	            <isEqual property="sortColumn" compareValue="issCd">
+              		ORDER BY iss_cd
+	            </isEqual>
+	            <isEqual property="sortColumn" compareValue="issName">
+              		ORDER BY iss_name
+	            </isEqual>
+	            <isNotNull property="sortColumn">
+              		<isEqual property="ascDescFlg" compareValue="ASC">
+              			ASC
+              		</isEqual>
+              		<isEqual property="ascDescFlg" compareValue="DESC">
+              			DESC
+              		</isEqual>
+              	</isNotNull>) a,
+              (SELECT count(*) count_
+	          	 FROM TABLE(giis_issource_pkg.get_giacs286_iss_lov(#userId#))
+	            <isNull property="findText">
+			   		WHERE iss_cd LIKE upper(NVL(#search#, iss_cd)) OR iss_name LIKE upper(NVL(#search#, iss_name))
+				</isNull>
+				<isNotNull property="findText">
+					WHERE iss_cd LIKE upper(#findText#) OR iss_name LIKE upper(#findText#)
+				</isNotNull>)b) 
+	    	WHERE rownum_ BETWEEN #from# AND #to# 	
+ 	</select>	
+ 	
+	<!-- jomsdiago 07.19.2013 for GICLS220 -->
+	<select id="getGICLS220BranchLOV" resultMap="GIISISSourceListingMap" parameterClass="java.util.HashMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		          FROM (SELECT * FROM TABLE (GICLS220_PKG.get_gicls220_branch_lov(#moduleId#, #lineCd#, #userId#))
+		          		<isNotNull property="findText">
+		          			WHERE UPPER(iss_cd) LIKE UPPER(NVL(#findText# || '%', iss_cd))
+		          			   OR UPPER(iss_name) LIKE UPPER(NVL(#findText# || '%', iss_name))
+		          		</isNotNull>
+		          		<isNotNull property="sortColumn">
+		          			<isEqual property="sortColumn" compareValue="issCd">
+		          				ORDER BY iss_cd
+		          			</isEqual>
+		          			<isEqual property="sortColumn" compareValue="issName">
+		          				ORDER BY iss_name
+		          			</isEqual>
+		          			<isEqual property="ascDescFlg" compareValue="ASC">
+		          				ASC
+		          			</isEqual>
+		          			<isEqual property="ascDescFlg" compareValue="DESC">
+		          				DESC
+		          			</isEqual>
+		          		</isNotNull>
+		          		) a,
+		          		(SELECT count(*) count_ FROM TABLE (GICLS220_PKG.get_gicls220_branch_lov(#moduleId#, #lineCd#, #userId#))
+		          		 <isNotNull property="findText">
+		          			WHERE UPPER(iss_cd) LIKE UPPER(NVL(#findText# || '%', iss_cd))
+		          			   OR UPPER(iss_name) LIKE UPPER(NVL(#findText# || '%', iss_name))
+		          		 </isNotNull>
+		          		) b		  
+		  )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+
+<!-- Gzelle 07.31.2013 -->
+	<resultMap class="java.util.HashMap" id="outstLOABranchResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="iss_cd"				property="issCd" />
+		<result column="iss_name"			property="issName" />
+	</resultMap>
+	
+	<select id="getOutstLOABranchLOV" resultMap="outstLOABranchResultMap" parameterClass="java.util.HashMap">		 
+		SELECT *
+  		  FROM (SELECT ROWNUM rownum_, b.count_, a.*
+  		  		  FROM (SELECT * FROM TABLE(gicls219_pkg.get_outst_loa_branch_lov(#userId#))
+						<isNull property="findText">
+						 WHERE upper(iss_cd) LIKE upper(NVL(#search#, iss_cd))
+						   OR  upper(iss_name) LIKE upper(NVL(#search#, iss_name))
+						</isNull>
+						<isNotNull property="findText">
+						 WHERE upper(iss_cd) LIKE upper(#findText#)
+						    OR upper(iss_name) LIKE upper(#findText#)
+						</isNotNull>
+	            	<isEqual property="sortColumn" compareValue="issCd">
+              			ORDER BY iss_cd
+	            	</isEqual>
+	            	<isEqual property="sortColumn" compareValue="issName">
+              			ORDER BY iss_name
+	            	</isEqual>
+	            	<isNotNull property="sortColumn">
+              			<isEqual property="ascDescFlg" compareValue="ASC">
+              				ASC
+              			</isEqual>
+              			<isEqual property="ascDescFlg" compareValue="DESC">
+              				DESC
+              			</isEqual>
+              		</isNotNull>) a,
+              (SELECT count(*) count_
+	          	 FROM TABLE(gicls219_pkg.get_outst_loa_branch_lov(#userId#))
+				 <isNull property="findText">
+				WHERE upper(iss_cd) LIKE upper(NVL(#search#, iss_cd))
+					OR  upper(iss_name) LIKE upper(NVL(#search#, iss_name))
+				 </isNull>
+				 <isNotNull property="findText">
+				WHERE upper(iss_cd) LIKE upper(#findText#)
+				   OR upper(iss_name) LIKE upper(#findText#)
+				 </isNotNull>
+				)b) 
+	    	WHERE rownum_ BETWEEN #from# AND #to# 	
+ 	</select>
+ <!--End-->	
+
+<!-- Gzelle 08.05.2013 -->
+	<resultMap class="java.util.HashMap" id="reportedClaimsIssLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="iss_cd"				property="issCd" />
+		<result column="iss_name"			property="issName" />
+		<result column="pol_iss_cd"			property="polIssCd" />
+	</resultMap>
+	
+	<select id="getReportedClmBranchLOV" resultMap="reportedClaimsIssLOVResultMap" parameterClass="java.util.HashMap">		 
+		SELECT *
+  		  FROM (SELECT ROWNUM rownum_, b.count_, a.*
+  		  		  FROM (SELECT * FROM TABLE(gicls540_pkg.get_rep_clm_branch_lov(#lineCd#,#userId#))
+						<isNull property="findText">
+						 WHERE upper(iss_cd) LIKE upper(NVL(#search#, iss_cd))
+						</isNull>
+						<isNotNull property="findText">
+						 WHERE upper(iss_cd) LIKE upper(#findText#)
+						    OR upper(iss_name) LIKE upper(#findText#)
+						</isNotNull>
+	            	<isEqual property="sortColumn" compareValue="issCd">
+              			ORDER BY iss_cd
+	            	</isEqual>
+	            	<isEqual property="sortColumn" compareValue="issName">
+              			ORDER BY iss_name
+	            	</isEqual>
+	            	<isNotNull property="sortColumn">
+              			<isEqual property="ascDescFlg" compareValue="ASC">
+              				ASC
+              			</isEqual>
+              			<isEqual property="ascDescFlg" compareValue="DESC">
+              				DESC
+              			</isEqual>
+              		</isNotNull>) a,
+              (SELECT count(*) count_
+	          	 FROM TABLE(gicls540_pkg.get_rep_clm_branch_lov(#lineCd#,#userId#))
+				 <isNull property="findText">
+				WHERE upper(iss_cd) LIKE upper(NVL(#search#, iss_cd))
+				 </isNull>
+				 <isNotNull property="findText">
+				WHERE upper(iss_cd) LIKE upper(#findText#)
+				   OR upper(iss_name) LIKE upper(#findText#)
+				 </isNotNull>
+				)b) 
+	    	WHERE rownum_ BETWEEN #from# AND #to# 	
+ 	</select>
+
+	<select id="getReportedClmPolIssCdLOV" resultMap="reportedClaimsIssLOVResultMap" parameterClass="java.util.HashMap">		 
+		SELECT *
+  		  FROM (SELECT ROWNUM rownum_, b.count_, a.*
+  		  		  FROM (SELECT * FROM TABLE(gicls540_pkg.get_rep_clm_pol_iss_lov(#polSublineCd#,#polLineCd#,#userId#))
+						<isNull property="findText">
+						 WHERE upper(pol_iss_cd) LIKE upper(NVL(#search#, pol_iss_cd))
+						</isNull>
+						<isNotNull property="findText">
+						 WHERE upper(pol_iss_cd) LIKE upper(#findText#)
+						</isNotNull>
+	            	<isEqual property="sortColumn" compareValue="polIssCd">
+              			ORDER BY pol_iss_cd
+	            	</isEqual>
+	            	<isNotNull property="sortColumn">
+              			<isEqual property="ascDescFlg" compareValue="ASC">
+              				ASC
+              			</isEqual>
+              			<isEqual property="ascDescFlg" compareValue="DESC">
+              				DESC
+              			</isEqual>
+              		</isNotNull>) a,
+              (SELECT count(*) count_
+	          	 FROM TABLE(gicls540_pkg.get_rep_clm_pol_iss_lov(#polSublineCd#,#polLineCd#,#userId#))
+				 <isNull property="findText">
+				WHERE upper(pol_iss_cd) LIKE upper(NVL(#search#, pol_iss_cd))
+				 </isNull>
+				 <isNotNull property="findText">
+				WHERE upper(pol_iss_cd) LIKE upper(#findText#)
+				 </isNotNull>
+				)b) 
+	    	WHERE rownum_ BETWEEN #from# AND #to# 	
+ 	</select> 	
+ <!--End-->	
+
+<!-- Gzelle 08.27.2013 -->
+	<resultMap class="java.util.HashMap" id="batchPostingIssLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="iss_cd"				property="issCd" />
+		<result column="iss_name"			property="issName" />
+	</resultMap>
+	
+  	<select id="getIssCdForBatchPosting" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT gipis207_pkg.get_iss_cd_batch_posting(#userId#) FROM DUAL
+	</select>
+	
+	<select id="getIssForBatchPostingLOV" resultMap="batchPostingIssLOVResultMap" parameterClass="java.util.HashMap">		 
+		SELECT *
+  		  FROM (SELECT ROWNUM rownum_, b.count_, a.*
+  		  		  FROM (SELECT * FROM TABLE(gipis207_pkg.get_iss_list_batch_posting(#lineCd#,#userId#))
+						<isNull property="findText">
+						 WHERE upper(iss_cd) LIKE upper(NVL(#search#, iss_cd))
+						</isNull>
+						<isNotNull property="findText">
+						 WHERE upper(iss_cd) LIKE upper(#findText#)
+						    OR upper(iss_name) LIKE upper(#findText#)
+						</isNotNull>
+	            	<isEqual property="sortColumn" compareValue="issCd">
+              			ORDER BY iss_cd
+	            	</isEqual>
+	            	<isEqual property="sortColumn" compareValue="issName">
+              			ORDER BY iss_name
+	            	</isEqual>
+	            	<isNotNull property="sortColumn">
+              			<isEqual property="ascDescFlg" compareValue="ASC">
+              				ASC
+              			</isEqual>
+              			<isEqual property="ascDescFlg" compareValue="DESC">
+              				DESC
+              			</isEqual>
+              		</isNotNull>) a,
+              (SELECT count(*) count_
+	          	 FROM TABLE(gipis207_pkg.get_iss_list_batch_posting(#lineCd#,#userId#))
+				 <isNull property="findText">
+				WHERE upper(iss_cd) LIKE upper(NVL(#search#, iss_cd))
+				 </isNull>
+				 <isNotNull property="findText">
+				WHERE upper(iss_cd) LIKE upper(#findText#)
+				   OR upper(iss_name) LIKE upper(#findText#)
+				 </isNotNull>
+				)b) 
+	    	WHERE rownum_ BETWEEN #from# AND #to# 	
+ 	</select>
+<!--END--> 	
+
+	<!-- J. Diago 08.08.2013 For GIUTS031 Extract Expiring Covernote -->
+ 	<select id="showGiuts031IssCd" resultMap="GIISISSourceListingMap" parameterClass="java.util.HashMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		          FROM (SELECT * FROM TABLE (GIUTS031_PKG.GET_ISSUE_LOV(#lineCd#, #userId#, #findText#))
+		          		  <isEqual property="sortColumn" compareValue="issCd">
+								ORDER BY iss_cd
+						  </isEqual>
+						  <isEqual property="sortColumn" compareValue="issName">
+								ORDER BY iss_name
+						  </isEqual>
+						  <isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+						  </isNotNull>
+		          		) a,
+		          		(SELECT count(*) count_ FROM TABLE (GIUTS031_PKG.GET_ISSUE_LOV(#lineCd#, #userId#, #findText#))) b		  
+		  )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<!-- added by : Kenneth L. 08.23.2013 GIPIS170 -->
+	<select id="getGipis170IssLov" resultMap="GIISISSourceListingMap">		
+		SELECT *
+  		  FROM (SELECT ROWNUM rownum_, 
+	               	   b.count_, 
+	              	   a.* 
+	          	  FROM (SELECT * FROM TABLE(GIPIS170_PKG.GET_GIPIS170_ISS_LOV(#lineCd#, #moduleId#, #userId#))
+	          	 WHERE 1=1
+	          	 	<isNull prepend="AND" property="findText">
+						upper(iss_name) LIKE upper(#search# || '%')
+					</isNull>
+					<isNotNull prepend="AND" property="findText">
+						upper(iss_name) LIKE upper(#findText# || '%')
+					</isNotNull>
+		            <isEqual property="sortColumn" compareValue="issCd">
+	              		ORDER BY iss_cd
+		            </isEqual>
+		            <isEqual property="sortColumn" compareValue="issName">
+	              		ORDER BY iss_name
+		            </isEqual>
+		            <isNotNull property="sortColumn">
+	              		<isEqual property="ascDescFlg" compareValue="ASC">
+	              			ASC
+	              		</isEqual>
+	              		<isEqual property="ascDescFlg" compareValue="DESC">
+	              			DESC
+	              		</isEqual>
+	              	</isNotNull>) a,
+               (SELECT count(*) count_
+	          	  FROM TABLE(GIPIS170_PKG.GET_GIPIS170_ISS_LOV(#lineCd#, #moduleId#, #userId#))
+	          	 WHERE 1=1
+	            	<isNull prepend="AND" property="findText">
+						upper(iss_name) LIKE upper(#search# || '%')
+					</isNull>
+					<isNotNull prepend="AND" property="findText">
+						upper(iss_name) LIKE upper(#findText# || '%')
+					</isNotNull>)b) 
+		 WHERE rownum_ BETWEEN #from# AND #to# 	
+ 	</select>
+	
+	<select id="getBasicIsSourceLOV" resultMap="GIISISSourceListingMap" parameterClass="java.util.HashMap">		
+		SELECT *
+  		  FROM (SELECT ROWNUM rownum_, b.count_, a.* 
+  		  	      FROM (SELECT * FROM TABLE(GIIS_ISSOURCE_PKG.get_basic_issource_lov(#userId#, #moduleId#))
+          	  <isNull property="findText">
+			     WHERE UPPER(iss_cd) LIKE UPPER(NVL(#searchString#, iss_cd))
+			        OR UPPER(iss_name) LIKE UPPER(NVL(#searchString#, iss_name))
+			  </isNull>
+			  <isNotNull property="findText">
+			     WHERE UPPER(iss_cd) LIKE UPPER(NVL(#findText#, iss_cd))
+			       OR UPPER(iss_name) LIKE UPPER(NVL(#findText#, iss_name))
+			  </isNotNull>
+			  <isEqual property="sortColumn" compareValue="issCd">
+			     ORDER BY iss_cd
+			  </isEqual>
+			  <isEqual property="sortColumn" compareValue="issName">
+			 	 ORDER BY iss_name
+			  </isEqual>			                      
+			  <isNotNull property="sortColumn">
+			     <isEqual property="ascDescFlg" compareValue="ASC">
+			 	    ASC
+			     </isEqual>
+			 	 <isEqual property="ascDescFlg" compareValue="DESC">
+			 		DESC
+			 	 </isEqual>
+			  </isNotNull>) a,
+              (SELECT count(*) count_
+	          	 FROM TABLE(GIIS_ISSOURCE_PKG.get_basic_issource_lov(#userId#, #moduleId#))
+	            <isNull property="findText">
+			     WHERE UPPER(iss_cd) LIKE UPPER(NVL(#searchString#, iss_cd))
+			        OR UPPER(iss_name) LIKE UPPER(NVL(#searchString#, iss_name))
+			  </isNull>
+			  <isNotNull property="findText">
+			     WHERE UPPER(iss_cd) LIKE UPPER(NVL(#findText#, iss_cd))
+			       OR UPPER(iss_name) LIKE UPPER(NVL(#findText#, iss_name))
+			  </isNotNull>)b) 
+	    	WHERE rownum_ BETWEEN #from# AND #to# 	
+ 	</select>
+
+ 	
+	<resultMap class="java.util.HashMap" id="getGICLS038BranchCdMap" extends="BaseEntity.TableGridResultMap">
+        <result column="iss_cd"                         property="issCd" />
+        <result column="iss_name"                 	    property="issName" />
+        <result column="rownum_"                        property="rowNum"/>
+        <result column="count_"                         property="rowCount"/>
+    </resultMap>
+    
+	<select id="getGICLS038BranchCd" resultMap="getGICLS038BranchCdMap" parameterClass="java.util.HashMap">
+        SELECT * 
+          FROM (SELECT a.*, b.count_, rownum rownum_
+                  FROM (SELECT * FROM TABLE (GICLS038_PKG.GET_BRANCH_LOV(#lineCd#, #userId#, #findText#))
+                          <isEqual property="sortColumn" compareValue="issCd">
+                              ORDER BY iss_cd
+                          </isEqual>
+                          <isEqual property="sortColumn" compareValue="issName">
+                              ORDER BY iss_name
+                          </isEqual>
+                          <isNotNull property="sortColumn">
+                              <isEqual property="ascDescFlg" compareValue="ASC">
+                                  ASC
+                              </isEqual>
+                              <isEqual property="ascDescFlg" compareValue="DESC">
+                                  DESC
+                              </isEqual>
+                          </isNotNull>
+                          ) a,
+                          (SELECT count(*) count_ FROM TABLE (GICLS038_PKG.GET_BRANCH_LOV(#lineCd#, #userId#, #findText#))
+                          ) b          
+          )
+         WHERE rownum_ BETWEEN #from# AND #to#
+    </select>
+    
+    <select id="getGIUTS035AcctIssCdLOV" resultMap="GIUTS035AcctIssCdListingMap">
+		SELECT *
+          FROM (SELECT ROWNUM rownum_,
+            		   b.count_,
+            		   a.*
+                  FROM (SELECT *
+                          FROM TABLE(GIIS_ISSOURCE_PKG.get_acct_iss_cd_list)
+                        <isNotNull property="findText">
+                         WHERE TO_CHAR(acct_iss_cd) LIKE TO_CHAR(#findText#)
+                            OR UPPER(iss_cd) LIKE UPPER(#findText#)
+                            OR UPPER(iss_name) LIKE UPPER(#findText#)
+                        </isNotNull>
+                            <isEqual property="sortColumn" compareValue="issCd">
+								ORDER BY iss_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="issName">
+								ORDER BY iss_name
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="acctIssCd">
+								ORDER BY acct_iss_cd
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>) a,
+               (SELECT COUNT(*) count_
+                  FROM TABLE(GIIS_ISSOURCE_PKG.get_acct_iss_cd_list)
+                 <isNotNull property="findText">
+                 WHERE TO_CHAR(acct_iss_cd) LIKE TO_CHAR(#findText#)
+                    OR UPPER(iss_cd) LIKE UPPER(#findText#)
+                    OR UPPER(iss_name) LIKE UPPER(#findText#)
+                </isNotNull>
+                 ) b)
+          WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+    
+    <select id="getGicls200IssSourceLOV" resultMap="GIISISSourceListingTg" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GICLS200_PKG.get_gicls200_branch_list(#lineCd#, #appUser#, #moduleId#, nvl(#findText#, #filterText#)))
+		                  <isNotNull property="sortColumn">
+			          	  	  <isEqual property="sortColumn" compareValue="issCd">
+				              		ORDER BY iss_cd
+				              </isEqual>
+			                  <isEqual property="sortColumn" compareValue="issName">
+				              		ORDER BY iss_name
+				              </isEqual>	
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+			              (SELECT count(*) count_ 
+			                  FROM TABLE (GICLS200_PKG.get_gicls200_branch_list(#lineCd#, #appUser#, #moduleId#, nvl(#findText#, #filterText#)))
+			              ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+    <select id="getAllIssSourceLOV" resultMap="GIISISSourceListingTg" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIIS_ISSOURCE_PKG.get_issue_source_all_list)
+		                  <isNotNull property="findText">
+			              		WHERE iss_cd LIKE UPPER(#findText#) OR iss_name LIKE UPPER(#findText#)
+			              </isNotNull>
+			              <isNull property="findText">
+			              		WHERE iss_cd LIKE UPPER(#searchString#) OR iss_name LIKE UPPER(#searchString#)
+			              </isNull>
+			              <isNotNull property="sortColumn">
+			          	  	  <isEqual property="sortColumn" compareValue="issCd">
+				              		ORDER BY iss_cd
+				              </isEqual>
+			                  <isEqual property="sortColumn" compareValue="issName">
+				              		ORDER BY iss_name
+				              </isEqual>	
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (GIIS_ISSOURCE_PKG.get_issue_source_all_list)
+			                  <isNotNull property="findText">
+			              		WHERE iss_cd LIKE UPPER(#findText#) OR iss_name LIKE UPPER(#findText#)
+			              </isNotNull>
+			              <isNull property="findText">
+			              		WHERE iss_cd LIKE UPPER(#searchString#) OR iss_name LIKE UPPER(#searchString#)
+			              </isNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+    <!-- <resultMap id="gipis156AcctIssCdLovMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+	    <result column="iss_cd" 		property="issCd" />
+		<result column="iss_name"		property="issName" />
+		<result column="acct_iss_cd" 	property="acctIssCd" />
+	</resultMap>
+	
+	<select id="getGIPIS156AcctIssCdLov" resultMap="gipis156AcctIssCdLovMap">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+						 b.count_, 
+						 a.*
+					FROM (SELECT *
+							FROM TABLE (GIIS_ISSOURCE_PKG.get_acct_iss_cd_list)
+							<isNotNull property="findText">
+							   WHERE UPPER(iss_cd) LIKE UPPER(#findText#)
+							      OR UPPER(iss_name) LIKE UPPER(#findText#) 
+							      OR TO_CHAR(acct_iss_cd) LIKE #findText#
+							</isNotNull>
+							<isEqual property="sortColumn" compareValue="issCd">
+								ORDER BY iss_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="issName">
+								ORDER BY iss_name
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="acctIssCd">
+								ORDER BY acct_iss_cd
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>
+						) a,
+						(SELECT count(*) count_
+						   FROM TABLE (GIIS_ISSOURCE_PKG.get_acct_iss_cd_list)
+						   <isNotNull property="findText">
+							   WHERE UPPER(iss_cd) LIKE UPPER(#findText#)
+							      OR UPPER(iss_name) LIKE UPPER(#findText#) 
+							      OR TO_CHAR(acct_iss_cd) LIKE #findText#
+							</isNotNull>
+						   ) b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select> -->
+
+	<select id="getAllIssourceLOV" resultMap="GIISISSourceListingTg" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giis_issource_pkg.get_all_issource_lov(#issCd#))
+		                  <isNotNull property="findText">
+		              		WHERE ISS_CD LIKE UPPER(#findText#) 
+		              		   OR ISS_NAME LIKE upper(#findText#)
+			              </isNotNull>
+			              <isNotNull property="sortColumn">
+			          	  	  <isEqual property="sortColumn" compareValue="issCd">
+				              		ORDER BY ISS_CD
+				              </isEqual>
+			                  <isEqual property="sortColumn" compareValue="issName">
+				              		ORDER BY ISS_NAME
+				              </isEqual>	
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (giis_issource_pkg.get_all_issource_lov(#issCd#))
+			                  <isNotNull property="findText">
+			              		WHERE ISS_CD LIKE UPPER(#findText#) 
+			              		   OR ISS_NAME LIKE upper(#findText#)
+			            	  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>	
+	
+	<select id="getGIPIS200IssueLOV" resultMap="GIPIS200IssueLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIPIS200_PKG.get_issue_lov(#lineCd#,#userId#))		                 
+		                  	<isNull property="findText">
+				                 WHERE UPPER(iss_cd) LIKE UPPER(#issue#)
+				                 OR UPPER(iss_name) LIKE UPPER(#issue#)					                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(iss_cd) LIKE UPPER(#findText#)
+				                 OR UPPER(iss_name) LIKE UPPER(#findText#)				  				         		
+			             	</isNotNull>		             
+			              	<isEqual property="sortColumn" compareValue="issCd">
+			              		ORDER BY iss_cd
+			              	</isEqual>	
+			              	<isEqual property="sortColumn" compareValue="issName">
+			              		ORDER BY iss_name
+			              	</isEqual>			              		                      
+			          	  	<isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	</isNotNull>
+		                  ) a, 
+		               (SELECT count (*) count_ 
+		                  FROM TABLE(GIPIS200_PKG.get_issue_lov(#lineCd#,#userId#))		                 
+		                  	<isNull property="findText">
+				                 WHERE UPPER(iss_cd) LIKE UPPER(#issue#)
+				                 OR UPPER(iss_name) LIKE UPPER(#issue#)					                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(iss_cd) LIKE UPPER(#findText#)
+				                 OR UPPER(iss_name) LIKE UPPER(#findText#)				  				         		
+			             	</isNotNull>			
+			             	) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap id="gicls254IssLOVResultMap" class="java.util.HashMap"  extends="BaseEntity.TableGridResultMap">
+	  	<result column="iss_cd"	property="issCd"/>
+	  	<result column="iss_name"	property="issName"/>
+  	</resultMap>
+  	
+  	<select id="getGICLS254IssLOV" resultMap="gicls254IssLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIIS_ISSOURCE_PKG.get_gicls254_iss_lov(#lineCd#, #issCd#, #userId#))	
+		          			<isNotNull property="findText">
+		                		WHERE UPPER(iss_cd) LIKE UPPER(#findText#)
+				                 OR UPPER(iss_name) LIKE UPPER(#findText#)				  				         		
+			             	</isNotNull>	             
+			              	<isEqual property="sortColumn" compareValue="issCd">
+			              		ORDER BY iss_cd
+			              	</isEqual>	
+			              	<isEqual property="sortColumn" compareValue="issName">
+			              		ORDER BY iss_name
+			              	</isEqual>			              		                      
+			          	  	<isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	</isNotNull>
+		                  ) a, 
+		               (SELECT count (*) count_ 
+		                  FROM TABLE(GIIS_ISSOURCE_PKG.get_gicls254_iss_lov(#lineCd#, #issCd#, #userId#))				
+			             	<isNotNull property="findText">
+		                		WHERE UPPER(iss_cd) LIKE UPPER(#findText#)
+				                 OR UPPER(iss_name) LIKE UPPER(#findText#)				  				         		
+			             	</isNotNull>	) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+
+	<select id="getGIACS299BranchLOV" resultMap="GIISISSourceListingTg" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giis_issource_pkg.get_giacs299_branch_lov(#moduleId#,#userId#,#findText#))
+			              <isNotNull property="sortColumn">
+			          	  	  <isEqual property="sortColumn" compareValue="issCd">
+				              		ORDER BY ISS_CD
+				              </isEqual>
+			                  <isEqual property="sortColumn" compareValue="issName">
+				              		ORDER BY ISS_NAME
+				              </isEqual>	
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (giis_issource_pkg.get_giacs299_branch_lov(#moduleId#,#userId#,#findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>	
+	
+	<!-- GIISS004 : shan 11.05.2013 -->
+	<select id="getGiiss004CredBranchCdLOV" resultMap="GIISISSourceListingTg" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIIS_ISSOURCE_PKG.get_issue_source_all_list)
+		                  <isNotNull property="findText">
+			              		where iss_cd like upper(#findText#) or iss_name like upper(#findText#)
+			              </isNotNull>
+			              <isNull property="findText">
+			              		where iss_cd like upper(#searchString#) or iss_name like upper(#searchString#)
+			              </isNull>
+			              <isNotNull property="sortColumn">
+			          	  	  <isEqual property="sortColumn" compareValue="issCd">
+				              		ORDER BY iss_cd
+				              </isEqual>
+			                  <isEqual property="sortColumn" compareValue="issName">
+				              		ORDER BY iss_name
+				              </isEqual>	
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (GIIS_ISSOURCE_PKG.get_issue_source_all_list)
+			                  <isNotNull property="findText">
+			              		where iss_cd like upper(#findText#) or iss_name like upper(#findText#)
+			            	  </isNotNull>
+			            	  <isNull property="findText">
+			              		where iss_cd like upper(#searchString#) or iss_name like upper(#searchString#)
+			              </isNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="giiss004RegionLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="region_cd" 		property="regionCd"/>
+		<result column="region_desc" 	property="regionDesc"/>
+	</resultMap>
+	
+	<select id="getGiiss004RegionLOV" resultMap="giiss004RegionLOVMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIIS_REGION_PKG.get_region_list)
+		                  <isNotNull property="findText">
+			              		where region_cd like upper(#findText#) or region_desc like upper(#findText#)
+			              </isNotNull>
+			              <isNull property="findText">
+			              		where region_cd like upper(#searchString#) or region_desc like upper(#searchString#)
+			              </isNull>
+			              <isNotNull property="sortColumn">
+			          	  	  <isEqual property="sortColumn" compareValue="regionCd">
+				              		ORDER BY region_cd
+				              </isEqual>
+			                  <isEqual property="sortColumn" compareValue="regionDesc">
+				              		ORDER BY region_desc
+				              </isEqual>	
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (GIIS_REGION_PKG.get_region_list)
+			                  <isNotNull property="findText">
+				              		where region_cd like upper(#findText#) or region_desc like upper(#findText#)
+				              </isNotNull>
+				              <isNull property="findText">
+				              		where region_cd like upper(#searchString#) or region_desc like upper(#searchString#)
+				              </isNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="com.geniisys.common.entity.GIISISSource" id="giiss004ResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="iss_cd"     		property="issCd"/>
+		<result column="acct_iss_cd"  		property="acctIssCd"/>
+		<result column="iss_grp"     		property="issGrp"/>
+		<result column="iss_name"  			property="issName"/>
+		<result column="region_cd"			property="regionCd"/>
+		<result column="region_desc"		property="regionDesc"/>  
+		<result column="claim_branch_cd"	property="claimBranchCd"/>
+		<result column="city"				property="city"/>
+		<result column="address1"			property="address1"/>
+		<result column="address2"			property="address2"/>
+		<result column="address3"			property="address3"/>
+		<result column="branch_tin_cd"		property="branchTinCd"/>
+		<result column="branch_website"		property="branchWebsite"/>
+		<result column="tel_no"				property="telNo"/>
+		<result column="branch_fax_no"		property="branchFaxNo"/>
+		<result column="online_sw"			property="onlineSw"/>
+		<result column="cred_br_tag"		property="credBrTag"/>
+		<result column="claim_tag"			property="claimTag"/>
+		<result column="gen_invc_sw"		property="genInvSw"/>
+		<result column="ho_tag"				property="hoTag"/>
+		<result column="active_tag"			property="activeTag"/>
+		<result column="user_id"     		property="userId"/>
+		<result column="last_update" 		property="lastUpdate"/>
+		<result column="remarks"     		property="remarks"/>
+		<result column="acct_iss_cd"     	property="oldAcctIssCd"/>
+	</resultMap>
+	
+	<select id="getGiiss004RecList" resultMap="giiss004ResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss004_pkg.get_rec_list(#issCd#, #acctIssCd#, #issName#, #onlineSw#, #credBrTag#, 
+		  	      													 #claimTag#, #genInvSw#, #hoTag#, #activeTag#))
+		  	      		  <isNotNull property="filter">
+		  	      		  	WHERE 1=1
+		  	      		  		<isNotEmpty prepend="AND" property="claimBranchCd">
+		  	      		  			UPPER(claim_branch_cd) LIKE UPPER(#claimBranchCd#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="city">
+		  	      		  			UPPER(city) LIKE UPPER(#city#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="regionDesc">
+		  	      		  			UPPER(region_desc) LIKE UPPER(#regionDesc#)
+		  	      		  		</isNotEmpty>
+		  	      		  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="issCd">
+			              		ORDER BY iss_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="acctIssCd">
+			              		ORDER BY acct_iss_cd
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="issName">
+			              		ORDER BY iss_name
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="regionDesc">
+			              		ORDER BY region_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="claimBranchCd">
+			              		ORDER BY claim_branch_cd
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="city">
+			              		ORDER BY city
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="onlineSw">
+			              		ORDER BY online_sw
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="credBrTag">
+			              		ORDER BY cred_br_tag
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="claimTag">
+			              		ORDER BY claim_tag
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="genInvSw">
+			              		ORDER BY gen_invc_sw
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="hoTag">
+			              		ORDER BY ho_tag
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="activeTag">
+			              		ORDER BY active_tag
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss004_pkg.get_rec_list(#issCd#, #acctIssCd#, #issName#, #onlineSw#, #credBrTag#, 
+		  	      											   #claimTag#, #genInvSw#, #hoTag#, #activeTag#))
+		  	      		  <isNotNull property="filter">
+		  	      		  	WHERE 1=1
+		  	      		  		<isNotEmpty prepend="AND" property="claimBranchCd">
+		  	      		  			UPPER(claim_branch_cd) LIKE UPPER(#claimBranchCd#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="city">
+		  	      		  			UPPER(city) LIKE UPPER(#city#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="regionDesc">
+		  	      		  			UPPER(region_desc) LIKE UPPER(#regionDesc#)
+		  	      		  		</isNotEmpty>
+		  	      		  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setISSource" parameterClass="com.geniisys.common.entity.GIISISSource">
+	    DECLARE
+	    	v_rec GIIS_ISSOURCE%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.iss_cd           := #issCd#;
+            v_rec.acct_iss_cd      := #acctIssCd#;
+            v_rec.iss_grp          := #issGrp#;
+            v_rec.iss_name         := #issName#;
+            v_rec.region_cd        := #regionCd#;
+            v_rec.claim_branch_cd  := #claimBranchCd#;
+            v_rec.city             := #city#;
+            v_rec.address1         := #address1#;
+            v_rec.address2         := #address2#;
+            v_rec.address3         := #address3#;
+            v_rec.branch_tin_cd    := #branchTinCd#;
+            v_rec.branch_website   := #branchWebsite#;
+            v_rec.tel_no           := #telNo#;
+            v_rec.branch_fax_no    := #branchFaxNo#;
+            v_rec.online_sw        := #onlineSw#; 
+            v_rec.cred_br_tag      := #credBrTag#; 
+            v_rec.claim_tag        := #claimTag#; 
+            v_rec.gen_invc_sw      := #genInvSw#; 
+            v_rec.ho_tag           := #hoTag#; 
+            v_rec.active_tag       := #activeTag#;
+ 			v_rec.user_id 		   := #userId#;
+ 			v_rec.remarks 		   := #remarks#;
+ 			
+ 			giiss004_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteISSource" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss004_pkg.val_del_rec(#issCd#, #issGrp#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddISSource" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss004_pkg.val_add_rec(#issCd#, #acctIssCd#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delISSource" parameterClass="java.lang.String">
+		BEGIN
+ 			giiss004_pkg.del_rec(#issCd#);
+ 		END;
+ 	</delete>
+ 	
+ 	<resultMap class="java.util.HashMap" id="giiss004PlaceResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="iss_cd"     			property="issCd"/>
+		<result column="place_cd"  				property="placeCd"/>
+		<result column="place"     				property="place"/>
+		<result column="update_delete_allowed"	property="updateDeleteAllowed"/>
+	</resultMap>
+	
+	<select id="getGiiss004PlaceList" resultMap="giiss004PlaceResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss004_pkg.get_issource_place_list(#issCd#, #placeCd#, #place#))
+			              <isEqual property="sortColumn" compareValue="placeCd">
+			              		ORDER BY place_cd
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="place">
+			              		ORDER BY place
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss004_pkg.get_issource_place_list(#issCd#, #placeCd#, #place#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setISSourcePlace" parameterClass="com.geniisys.common.entity.GIISIssourcePlace">
+	    DECLARE
+	    	v_rec GIIS_ISSOURCE_PLACE%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.iss_cd            := #issCd#;
+            v_rec.place_cd      	:= #placeCd#;
+            v_rec.place          	:= #place#;
+ 			v_rec.user_id 		    := #userId#;
+ 			
+ 			giiss004_pkg.set_place_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteISSourcePlace" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss004_pkg.val_del_place_rec(#issCd#, #placeCd#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddISSourcePlace" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss004_pkg.val_add_place_rec(#issCd#, #placeCd#, #place#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delISSourcePlace" parameterClass="java.util.HashMap">
+		BEGIN
+ 			giiss004_pkg.del_place_rec(#issCd#, #placeCd#);
+ 		END;
+ 	</delete>
+<!-- end GIISS004 : shan 11.05.2013 -->	
+
+	<select id="getGiiss028IssLOV" resultMap="GIISS028IssueLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIISS028_PKG.get_iss_list(#userId#, #moduleId#, #lineCd#))		                 
+		                  	<isNull property="findText">
+				             	WHERE UPPER(iss_cd) LIKE UPPER(#searchString#)	
+				                 OR UPPER(iss_name) LIKE UPPER(#searchString#)				                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(iss_cd) LIKE UPPER(#findText#)	
+				                 OR UPPER(iss_name) LIKE UPPER(#findText#)			  				         		
+			             	</isNotNull>		             
+			              	<isEqual property="sortColumn" compareValue="issCd">
+			              		ORDER BY iss_cd
+			              	</isEqual>	
+			              	<isEqual property="sortColumn" compareValue="issName">
+			              		ORDER BY iss_name
+			              	</isEqual>			              		                      
+			          	  	<isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	</isNotNull>
+		                  ) a, 
+		               (SELECT count (*) count_ 
+		                  FROM TABLE(GIISS028_PKG.get_iss_list(#userId#, #moduleId#, #lineCd#))		                 
+		                  	<isNull property="findText">
+				             	WHERE UPPER(iss_cd) LIKE UPPER(#searchString#)	
+				                 OR UPPER(iss_name) LIKE UPPER(#searchString#)				                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(iss_cd) LIKE UPPER(#findText#)	
+				                 OR UPPER(iss_name) LIKE UPPER(#findText#)			  				         		
+			             	</isNotNull>			
+			             	) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select> 
+
+	<select id="showIssueSourceLOV" resultMap="GIISISSourceListingMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIISS075_PKG.show_issue_source_lov(#userId#))		                 
+		                  	<isNull property="findText">
+				                 WHERE UPPER(iss_cd) LIKE UPPER(#searchString#)
+				                 OR UPPER(iss_name) LIKE UPPER(#searchString#)					                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(iss_cd) LIKE UPPER(#findText#)
+				                 OR UPPER(iss_name) LIKE UPPER(#findText#)				  				         		
+			             	</isNotNull>		             
+			              	<isEqual property="sortColumn" compareValue="issCd">
+			              		ORDER BY iss_cd
+			              	</isEqual>	
+			              	<isEqual property="sortColumn" compareValue="issName">
+			              		ORDER BY iss_name
+			              	</isEqual>			              		                      
+			          	  	<isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	</isNotNull>
+		                  ) a, 
+		               (SELECT count (*) count_ 
+		                  FROM TABLE(GIISS075_PKG.show_issue_source_lov(#userId#))		                 
+		                  	<isNull property="findText">
+				                 WHERE UPPER(iss_cd) LIKE UPPER(#searchString#)
+				                 OR UPPER(iss_name) LIKE UPPER(#searchString#)					                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(iss_cd) LIKE UPPER(#findText#)
+				                 OR UPPER(iss_name) LIKE UPPER(#findText#)				  				         		
+			             	</isNotNull>		
+			             	) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+
+ 	<!-- added by : Kenneth L. 08.05.2013 :for giexs008 -->
+	<select id="getGiexs008IssLov" resultMap="GIISISSourceListingMap" parameterClass="java.util.HashMap">		
+		SELECT *
+  		  FROM (SELECT ROWNUM rownum_, 
+	               	   b.count_, 
+	              	   a.* 
+	          	  FROM (SELECT * FROM TABLE(giexs008_pkg.get_iss_lov(#userId#, #lineCd#))
+          	   	 <isNull property="findText">
+					WHERE iss_cd LIKE upper(NVL(#search#, iss_cd)) OR iss_name LIKE upper(NVL(#search#, iss_name))
+				 </isNull>
+				 <isNotNull property="findText">
+					WHERE iss_cd LIKE upper(#findText#) OR iss_name LIKE upper(#findText#)
+				 </isNotNull>
+					
+	            <isEqual property="sortColumn" compareValue="issCd">
+              		ORDER BY iss_cd
+	            </isEqual>
+	            <isEqual property="sortColumn" compareValue="issName">
+              		ORDER BY iss_name
+	            </isEqual>
+	            <isNotNull property="sortColumn">
+              		<isEqual property="ascDescFlg" compareValue="ASC">
+              			ASC
+              		</isEqual>
+              		<isEqual property="ascDescFlg" compareValue="DESC">
+              			DESC
+              		</isEqual>
+              	</isNotNull>) a,
+              (SELECT count(*) count_
+	          	 FROM TABLE(giexs008_pkg.get_iss_lov(#userId#, #lineCd#))
+	            <isNull property="findText">
+			   		WHERE iss_cd LIKE upper(NVL(#search#, iss_cd)) OR iss_name LIKE upper(NVL(#search#, iss_name))
+				</isNull>
+				<isNotNull property="findText">
+					WHERE iss_cd LIKE upper(#findText#) OR iss_name LIKE upper(#findText#)
+				</isNotNull>)b) 
+	    	WHERE rownum_ BETWEEN #from# AND #to# 	
+ 	</select>	
+ 	
+ 	<!-- GIISS076 : shan 04.25.2014 -->
+	<select id="getGiiss076IssCdLOV" resultMap="GIISISSourceListingTg" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIISS076_PKG.GET_ISS_LOV(#userId#))
+		                  <isNotNull property="findText">
+			              		where iss_cd like upper(#findText#) or iss_name like upper(#findText#)
+			              </isNotNull>
+			              <isNull property="findText">
+			              		where iss_cd like upper(#searchString#) or iss_name like upper(#searchString#)
+			              </isNull>
+			              <isNotNull property="sortColumn">
+			          	  	  <isEqual property="sortColumn" compareValue="issCd">
+				              		ORDER BY iss_cd
+				              </isEqual>
+			                  <isEqual property="sortColumn" compareValue="issName">
+				              		ORDER BY iss_name
+				              </isEqual>	
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (GIISS076_PKG.GET_ISS_LOV(#userId#))
+			                  <isNotNull property="findText">
+			              		where iss_cd like upper(#findText#) or iss_name like upper(#findText#)
+			            	  </isNotNull>
+			            	  <isNull property="findText">
+			              		where iss_cd like upper(#searchString#) or iss_name like upper(#searchString#)
+			              </isNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="allIssuePlacesMap">
+		<result column="iss_cd"     			property="issCd"/>
+		<result column="place_cd"  				property="placeCd"/>
+		<result column="place"     				property="place"/>
+		<result column="update_delete_allowed"	property="updateDeleteAllowed"/>
+	</resultMap>
+	
+	<select id="getAllIssuePlaces" resultMap="allIssuePlacesMap">
+		SELECT * FROM TABLE(giiss004_pkg.get_issource_place_list(#issCd#, NULL, NULL))
+	</select>
+	
+	<select id="getAcctIssCdList" resultClass="java.lang.String">
+ 		SELECT giiss004_pkg.get_acct_iss_cd_list()
+ 		  FROM DUAL
+ 	</select>
+ 	
+</sqlMap> 

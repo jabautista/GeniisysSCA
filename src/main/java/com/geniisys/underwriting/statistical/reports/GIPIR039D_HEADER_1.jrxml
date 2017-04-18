@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIPIR039D_HEADER_1" language="groovy" columnCount="7" printOrder="Horizontal" pageWidth="838" pageHeight="44" columnWidth="118" columnSpacing="2" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="4.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="style1" isDefault="false" fontName="Arial" fontSize="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false"/>
+	<style name="Crosstab Data Text" isDefault="false" hAlign="Center"/>
+	<parameter name="P_ZONE_TYPE" class="java.lang.Integer"/>
+	<parameter name="P_AS_OF_SW" class="java.lang.String"/>
+	<parameter name="P_USER_ID" class="java.lang.String"/>
+	<parameter name="P_FROM_DATE" class="java.lang.String"/>
+	<parameter name="P_TO_DATE" class="java.lang.String"/>
+	<parameter name="P_AS_OF" class="java.lang.String"/>
+	<parameter name="P_ROWNUM_2" class="java.math.BigDecimal"/>
+	<parameter name="P_ROWNUM_1" class="java.math.BigDecimal"/>
+	<queryString>
+		<![CDATA[SELECT *
+  FROM (SELECT ROWNUM row_num, a.*
+          FROM (SELECT *
+                  FROM TABLE (gipir039d_pkg.get_fi_item_grp2_v2 ($P{P_ZONE_TYPE},
+                                                                 $P{P_AS_OF_SW},
+                                                                 $P{P_USER_ID},
+                                                                 $P{P_FROM_DATE},
+                                                                 $P{P_TO_DATE},
+                                                                 $P{P_AS_OF}
+                                                                )
+                             )
+                UNION ALL
+                SELECT 'GROSS'
+                  FROM DUAL
+                UNION ALL
+                SELECT *
+                  FROM (SELECT description
+                          FROM TABLE
+                                  (gipir039d_pkg.get_description_record_v2
+                                                                ($P{P_ZONE_TYPE},
+                                                                 $P{P_AS_OF_SW},
+                                                                 $P{P_USER_ID},
+                                                                 $P{P_FROM_DATE},
+                                                                 $P{P_TO_DATE},
+                                                                 $P{P_AS_OF}
+                                                                )
+                                  ))) a)
+ WHERE row_num BETWEEN $P{P_ROWNUM_1} AND $P{P_ROWNUM_2}]]>
+	</queryString>
+	<field name="ROW_NUM" class="java.math.BigDecimal"/>
+	<field name="FI_ITEM_GRP" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="44" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="118" height="11"/>
+				<textElement textAlignment="Center">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{FI_ITEM_GRP}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="2" y="11" width="116" height="6"/>
+				<box>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed"/>
+				</box>
+				<textElement markup="none">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="22" width="59" height="11"/>
+				<textElement textAlignment="Right">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<text><![CDATA[EXPOSURE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="59" y="22" width="59" height="11"/>
+				<textElement textAlignment="Right">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<text><![CDATA[PREMIUM]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="2" y="33" width="116" height="6"/>
+				<box>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed"/>
+				</box>
+				<textElement markup="none">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+		</band>
+	</detail>
+</jasperReport>

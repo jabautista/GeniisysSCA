@@ -1,0 +1,571 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<!-- Modified by reymon 04252013 for PHILFIRE-QA: 12849 -->
+<sqlMap namespace="GIACDirectClaimPayment">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIACDirectClaimPaymentClass" 	type="com.geniisys.giac.entity.GIACDirectClaimPayment"/>
+	<typeAlias alias="GIISISSourceClass" 			type="com.geniisys.common.entity.GIISISSource"/>
+	<typeAlias alias="GICLAdviceClass" 				type="com.geniisys.gicl.entity.GICLAdvice"/>
+	<typeAlias alias="GICLClaimLossExpenseClass" 	type="com.geniisys.gicl.entity.GICLClaimLossExpense"/>
+	
+	<resultMap class="GIACDirectClaimPaymentClass" id="GIACDirectClaimPaymentResultMap">
+		<result property="adviceId"					column="advice_id"			/>
+		<result property="claimId"					column="claim_id" 			/>
+		<result property="claimLossId" 				column="clm_loss_id" 		/>
+		<result property="convertRate"				column="convert_rate" 		/>
+		<result property="cpiBranchCd"				column="cpi_branch_cd" 		/>
+		<result property="cpiRecNo"					column="cpi_rec_no" 		/>
+		<result property="currencyCode"				column="currency_cd" 		/>
+		<result property="disbursementAmount"		column="disbursement_amt" 	/>
+		<result property="foreignCurrencyAmount" 	column="foreign_curr_amt" 	/>
+		<result property="gaccTranId"				column="gacc_tran_id" 		/>
+		<result property="inputVatAmount"			column="input_vat_amt"		/>
+		<result property="netDisbursementAmount" 	column="net_disb_amt" 		/>
+		<result property="originalCurrencyCode" 	column="orig_curr_cd" 		/>
+		<result property="originalCurrencyRate" 	column="orig_curr_rate" 	/>
+		<result property="orPrintTag"				column="or_print_tag" 		/>
+		<result property="payeeCd"					column="payee_cd" 			/>
+		<result property="payeeClassCd" 			column="payee_class_cd"		/>
+		<result property="payeeType"				column="payee_type" 		/>
+		<result property="remarks"					column="remarks" 			/>
+		<result property="transactionType"			column="transaction_type" 	/>
+		<result property="withholdingTaxAmount"		column="wholding_tax_amt" 	/>
+	</resultMap>
+	
+	<resultMap class="GIACDirectClaimPaymentClass" id="GIACDirectClaimPaymentResultMap2">
+		<result property="adviceId"					column="advice_id" 			/>
+		<result property="claimId"					column="claim_id" 			/>
+		<result property="claimLossId" 				column="clm_loss_id" 		/>
+		<result property="convertRate"				column="convert_rate" 		/>
+		<result property="cpiBranchCd"				column="cpi_branch_cd" 		/>
+		<result property="cpiRecNo"					column="cpi_rec_no" 		/>
+		<result property="currencyCode"				column="currency_cd" 		/>
+		<result property="disbursementAmount" 		column="disbursement_amt" 	/>
+		<result property="foreignCurrencyAmount" 	column="foreign_curr_amt" 	/>
+		<result property="gaccTranId"				column="gacc_tran_id" 		/>
+		<result property="inputVatAmount"			column="input_vat_amt"		/>
+		<result property="netDisbursementAmount" 	column="net_disb_amt" 		/>
+		<result property="originalCurrencyCode" 	column="orig_curr_cd" 		/>
+		<result property="originalCurrencyRate" 	column="orig_curr_rate" 	/>
+		<result property="orPrintTag"				column="or_print_tag" 		/>
+		<result property="payeeCd"					column="payee_cd" 			/>
+		<result property="payeeClassCd" 			column="payee_class_cd"		/>
+		<result property="payeeType"				column="payee_type" 		/>
+		<result property="remarks"					column="remarks" 			/>
+		<result property="transactionType"			column="transaction_type" 	/>
+		<result property="withholdingTaxAmount"		column="wholding_tax_amt" 	/>
+		<result property="giclClaims"				column="{claimId=claim_id}" 	select="getGiclClaimById"/>
+		<result property="giclAdvice"				column="{adviceId=advice_id}" 	select="getAdviceByAdviceId"/>
+	</resultMap>
+	
+	<resultMap id="GICLClaimResultMap" class="com.geniisys.gicl.entity.GICLClaims" >
+		<result property="lineCode" 			column="line_cd"/>
+		<result property="sublineCd" 			column="subline_cd"/>
+		<result property="policyIssueCode" 		column="pol_iss_cd"/>
+		<result property="issueYy" 				column="issue_yy"/>
+		<result property="policySequenceNo" 	column="pol_seq_no"/>
+		<result property="renewNo" 				column="renew_no"/>
+		<result property="issueCode" 			column="iss_cd"/>
+		<result property="claimYy" 				column="clm_yy"/>
+		<result property="claimSequenceNo" 		column="clm_seq_no"/>
+		<result property="assuredName" 			column="assured_name"/>
+	</resultMap>
+	
+<!--	Advice Sequence Number	- rencela - 10/26/2010	-->
+	<resultMap id="GICLAdviceResultMap2" class="com.geniisys.gicl.entity.GICLAdvice">
+		<result property="adviceId"				column="advice_id" 		/>
+		<result property="claimId"				column="claim_id" 		/>
+		<result property="lineCode"				column="line_cd" 		/>
+		<result property="issueCode"			column="iss_cd" 		/>
+		<result property="adviceYear"			column="advice_year" 	/>
+		<result property="adviceSequenceNumber" column="advice_seq_no" 	/>
+		<result property="adviceNo"				column="advice_no" 		/>
+		<result property="convertRate"			column="convert_rate"	/>
+		<result property="currencyCode"			column="currency_cd" 	/>
+		<result property="currencyDescription"	column="currency_desc" 	/>
+	</resultMap>
+	
+	<parameterMap class="java.util.HashMap" id="GIACDirectClaimPaymentSubset1ParameterMap">
+		<parameter property="appUser" 		jdbcType="VARCHAR"	javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="vCheck" 		jdbcType="INTEGER" javaType="java.lang.Integer" 	mode="INOUT" />
+		<parameter property="transactionType"	jdbcType="INTEGER" javaType="java.lang.Integer" 	mode="IN" />
+		<parameter property="gaccTransId"		jdbcType="INTEGER" javaType="java.lang.Integer" 	mode="IN" />
+		<parameter property="claimId"			jdbcType="INTEGER" javaType="java.lang.Integer" 	mode="IN" />
+		<parameter property="claimLossId"		jdbcType="INTEGER" javaType="java.lang.Integer" 	mode="IN" />
+		<parameter property="adviceId"		 	jdbcType="INTEGER" javaType="java.lang.Integer" 	mode="IN" />
+		<parameter property="inputVatAmount"	jdbcType="NUMERIC" javaType="java.math.BigDecimal" 	mode="OUT" />
+		<parameter property="withholdingTaxAmount"	jdbcType="NUMERIC" javaType="java.math.BigDecimal" 	mode="OUT" />
+		<parameter property="netDisbursementAmount"	jdbcType="NUMERIC" javaType="java.math.BigDecimal" 	mode="OUT" />
+	</parameterMap>
+	
+	<parameterMap class="java.util.HashMap" id="GIACDcpPostFormsCommitParameterMap">
+		<parameter property="appUser" 		jdbcType="VARCHAR"	javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="gaccTranId"	jdbcType="INTEGER" 	javaType="java.lang.Integer" 	mode="IN"/>
+		<parameter property="transSource" 	jdbcType="VARCHAR"	javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="orFlag" 		jdbcType="VARCHAR"	javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="gaccFundCd" 	jdbcType="VARCHAR"	javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="gaccBranchCd"	jdbcType="VARCHAR"	javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="claimId"		jdbcType="INTEGER"	javaType="java.lang.Integer" 	mode="IN"/>
+		<parameter property="adviceId"		jdbcType="INTEGER"	javaType="java.lang.Integer" 	mode="IN"/>
+		<parameter property="payeeClassCd"	jdbcType="VARCHAR"	javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="payeeCd"		jdbcType="INTEGER"	javaType="java.lang.Integer" 	mode="IN"/>
+		<parameter property="convertRate"	jdbcType="NUMERIC"	javaType="java.math.BigDecimal" mode="IN"/>
+		<parameter property="issueCode"		jdbcType="VARCHAR"	javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="moduleName"	jdbcType="VARCHAR"	javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="generationType"	jdbcType="VARCHAR"	javaType="java.lang.String" mode="INOUT"/>
+		<parameter property="itemNo"		jdbcType="INTEGER"	javaType="java.lang.Integer" 	mode="INOUT"/>
+		<parameter property="moduleId"		jdbcType="INTEGER"	javaType="java.lang.Integer" 	mode="INOUT"/>
+	</parameterMap>	
+	
+	<resultMap id="GICLAdviceResultMap3" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result property="adviceId"				column="advice_id" 		/>
+		<result property="claimId"				column="claim_id" 		/>
+		<result property="lineCode"				column="line_cd" 		/>
+		<result property="issueCode"			column="iss_cd" 		/>
+		<result property="adviceYear"			column="advice_year" 	/>
+		<result property="adviceSequenceNumber" column="advice_seq_no" 	/>
+		<result property="adviceNo"				column="advice_no" 		/>
+		<result property="convertRate"			column="convert_rate"	/>
+		<result property="currencyCode"			column="currency_cd" 	/>
+		<result property="currencyDescription"	column="currency_desc" 	/>
+		<result property="claimNumber"			column="dsp_claim_no"	/>
+		<result property="policyNumber"			column="dsp_policy_no" 	/>
+		<result property="assuredName"			column="assured_name" 	/>
+	</resultMap>
+	
+	<resultMap id="payeeClassLOVResultMap" class="com.geniisys.gicl.entity.GICLClaimLossExpense" extends="BaseEntity.TableGridResultMap">
+		<result column="claim_loss_id" 		property="claimLossId"		/>
+		<result column="payee_type" 		property="payeeType"		/>
+		<result column="payee_type_desc" 	property="payeeTypeDescription"/>
+		<result column="payee_class_cd" 	property="payeeClassCode"	/>
+		<result column="payee_cd" 			property="payeeCode"		/>
+		<result column="payee" 				property="payee"			/>
+		<result column="peril_cd" 			property="perilCode"		/>
+		<result column="peril_sname" 		property="perilSname"		/>
+		<result column="net_amt" 			property="netAmount"		/>
+		<result column="paid_amt" 			property="paidAmount"		/>
+		<result column="advice_amt" 		property="adviceAmount"		/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="GIACDirectClaimPaytsResultMap">
+		<result property="gaccTranId" 				column="gacc_tran_id" />
+		<result property="transactionType" 			column="transaction_type" />
+		<result property="claimId" 					column="claim_id" />
+		<result property="claimLossId" 				column="clm_loss_id" />
+		<result property="adviceId" 				column="advice_id" />
+		<result property="payeeCd" 					column="payee_cd" />
+		<result property="payeeClassCd" 			column="payee_class_cd" />
+		<result property="payeeType" 				column="payee_type" />
+		<result property="disbursementAmount" 		column="disbursement_amt" />
+		<result property="currencyCode" 			column="currency_cd" />
+		<result property="convertRate" 				column="convert_rate" />
+		<result property="foreignCurrencyAmount" 	column="foreign_curr_amt" />
+		<result property="orPrintTag" 				column="or_print_tag" />
+		<result property="remarks" 					column="remarks" />
+		<result property="inputVatAmount" 			column="input_vat_amt" />
+		<result property="withholdingTaxAmount" 	column="wholding_tax_amt" />
+		<result property="netDisbursementAmount" 	column="net_disb_amt" />
+		<result property="originalCurrencyCode" 	column="orig_curr_cd" />
+		<result property="originalCurrencyRate" 	column="orig_curr_rate" />
+		
+		<result property="dspAdviceNo"				column="dsp_advice_no" />
+		<result property="currencyDesc"				column="currency_desc" />
+		<result property="dspIssCd"					column="dsp_iss_cd" />
+		<result property="dspLineCd"				column="dsp_line_cd" />
+		<result property="dspAdviceYear"			column="dsp_advice_year" />
+		<result property="dspAdviceSeqNo"			column="dsp_advice_seq_no" />
+		<result property="dspPayeeDesc"				column="dsp_payee_desc" />
+		<result property="dspPerilName"				column="dsp_peril_name" />
+		<result property="dspPayeeName"				column="dsp_payee_name" />
+		
+		<result property="dspLineCd2" 				column="dsp_line_cd2" />
+		<result property="dspSublineCd" 			column="dsp_subline_cd" />
+		<result property="dspIssCd3" 				column="dsp_iss_cd3" />
+		<result property="dspIssueYy" 				column="dsp_issue_yy" />
+		<result property="dspPolSeqNo" 				column="dsp_pol_seq_no" />
+		<result property="dspRenewNo" 				column="dsp_renew_no" />
+		<result property="dspIssCd2" 				column="dsp_iss_cd2" />
+		<result property="dspClmYy" 				column="dsp_clm_yy" />
+		<result property="dspClmSeqNo" 				column="dsp_clm_seq_no" />
+		<result property="dspAssuredName" 			column="dsp_assured_name" />
+		<result property="batchCsrId"				column="batch_csr_id"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="giclAdviceTGResultMap" extends="GIACDirectClaimPaytsResultMap">
+		<result property="rowNum" 					column="rownum_" />
+		<result property="rowCount" 				column="count_" />
+	</resultMap>
+	
+	<parameterMap class="java.util.HashMap" id="gdcpAmountsSumMap">
+		<parameter property="gaccTranId" 	jdbcType="INTEGER"  javaType="java.lang.Integer" 	mode="IN" />
+		<parameter property="sumDisbAmt"	jdbcType="NUMERIC"	javaType="java.math.BigDecimal" mode="OUT"/>
+		<parameter property="sumInputVat"	jdbcType="NUMERIC"	javaType="java.math.BigDecimal" mode="OUT"/>
+		<parameter property="sumWHolding"	jdbcType="NUMERIC"	javaType="java.math.BigDecimal" mode="OUT"/>
+		<parameter property="sumDspNetAmt"	jdbcType="NUMERIC"	javaType="java.math.BigDecimal" mode="OUT"/>
+	</parameterMap>
+	
+	<parameterMap class="java.util.HashMap" id="giacs017PostFormsCommitMap">
+		<parameter property="appUser" 		jdbcType="VARCHAR"	javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="gaccTranId" 	jdbcType="INTEGER"  javaType="java.lang.Integer" 	mode="IN" />
+		<parameter property="branchCd" 		jdbcType="VARCHAR"  javaType="java.lang.String" 		mode="IN" />
+		<parameter property="fundCd" 		jdbcType="VARCHAR"  javaType="java.lang.String"		mode="IN" />
+		<parameter property="tranSource" 	jdbcType="VARCHAR"  javaType="java.lang.String" 		mode="IN" />
+		<parameter property="orFlag" 		jdbcType="VARCHAR"  javaType="java.lang.String" 		mode="IN" />
+		<parameter property="moduleName" 	jdbcType="VARCHAR"  javaType="java.lang.String" 		mode="INOUT" />
+		<parameter property="userId" 		jdbcType="VARCHAR"  javaType="java.lang.String" 		mode="IN" />
+		<parameter property="varGenType" 	jdbcType="VARCHAR"  javaType="java.lang.String"		mode="INOUT" />
+		<parameter property="message" 		jdbcType="VARCHAR"  javaType="java.lang.String" 		mode="OUT" />
+	</parameterMap>
+	
+<!--************************ LOV - START 	****************************************************-->
+	<select id="getClaimDetails" parameterClass="java.lang.Integer" resultMap="GICLClaimResultMap">
+		SELECT 	b.line_cd line_cd, b.subline_cd, b.pol_iss_cd, b.issue_yy, b.pol_seq_no, b.renew_no, 
+				b.iss_cd, b.clm_yy, b.clm_seq_no, b.assured_name
+    	  FROM 	gicl_claims b
+   		 WHERE 	b.claim_id = #claimId#
+	</select>
+	
+	<procedure id="computeAdviceDefaultAmount" parameterMap="GIACDirectClaimPaymentSubset1ParameterMap" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			GIAC_DIRECT_CLAIM_PAYTS_PKG.compute_advice_default_amount(?,?,?,?,?,?,?,?,?);
+		END;
+	</procedure>
+	
+	<select id="getAdviceSequenceListing" resultMap="GICLAdviceResultMap2">
+		SELECT *
+		  FROM TABLE(GIAC_DIRECT_CLAIM_PAYTS_PKG.get_advice_sequence_listing(#moduleId#, #keyword#))
+	</select>
+	
+<!--************************ LOV - END 	****************************************************-->
+
+	<procedure id="saveDirectClaimPayment" resultMap="GIACDirectClaimPaymentResultMap">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			 GIAC_DIRECT_CLAIM_PAYTS_PKG.save_direct_claim_payt(
+			 	#adviceId#,			#claimId#,				#claimLossId#,			#convertRate#,			#cpiBranchCd#, 
+			 	#cpiRecNo#,	 		#currencyCode#, 		#disbursementAmount#, 	#foreignCurrencyAmount#,#gaccTranId#,
+			 	#inputVatAmount#,	#netDisbursementAmount#,#originalCurrencyCode#, #originalCurrencyRate#,	#orPrintTag#,
+			 	#payeeCd#,			#payeeClassCd#,			#payeeType#,			#remarks#,				#transactionType#, 
+			 	#userId#,			#withholdingTaxAmount#
+			 );
+		END;
+	</procedure>
+	
+	<procedure id="setDirectClaimPayments">
+		DECLARE
+			p_dcp giac_direct_claim_payts%ROWTYPE;
+		BEGIN
+			p_dcp.advice_id			:= #adviceId#;
+			p_dcp.claim_id			:= #claimId#;
+			p_dcp.clm_loss_id		:= #claimLossId#;
+			p_dcp.convert_rate		:= #convertRate#;
+			p_dcp.cpi_branch_cd		:= #cpiBranchCd#;
+			p_dcp.cpi_rec_no		:= #cpiRecNo#;
+			p_dcp.currency_cd		:= #currencyCode#;
+			p_dcp.disbursement_amt	:= #disbursementAmount#;
+			p_dcp.foreign_curr_amt	:= #foreignCurrencyAmount#;
+			p_dcp.gacc_tran_id		:= #gaccTranId#;
+			p_dcp.input_vat_amt		:= #inputVatAmount#;
+			p_dcp.net_disb_amt		:= #netDisbursementAmount#;
+			p_dcp.orig_curr_cd		:= #originalCurrencyCode#;
+			p_dcp.orig_curr_rate	:= #originalCurrencyRate#;
+			p_dcp.or_print_tag		:= #orPrintTag#;
+			p_dcp.payee_cd			:= #payeeCd#;
+			p_dcp.payee_class_cd	:= #payeeClassCd#;
+			p_dcp.payee_type		:= #payeeType#;
+			p_dcp.remarks			:= #remarks#;
+			p_dcp.transaction_type	:= #transactionType#;
+			p_dcp.user_id			:= #userId#;
+			p_dcp.wholding_tax_amt	:= #withholdingTaxAmount#;
+			GIAC_DIRECT_CLAIM_PAYTS_PKG.set_direct_claim_payt(p_dcp);
+		END;
+	</procedure>
+	
+	<procedure id="dcpPostFormsCommit" parameterMap="GIACDcpPostFormsCommitParameterMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			GIAC_DIRECT_CLAIM_PAYTS_PKG.dcp_post_forms_commit(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);
+		END;
+	</procedure>
+	
+	<select id="getDirectClaimPaymentByGaccTranId" resultMap="GIACDirectClaimPaymentResultMap2">
+		SELECT *
+		  FROM giac_direct_claim_payts
+		 WHERE gacc_tran_id = #gaccTranId#
+	</select>
+	
+	<!-- updated by john 3.12.2015 -->
+	<delete id="deleteDirectClaimPayment" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			DELETE FROM giac_direct_claim_payts
+				  WHERE advice_id = #adviceId#
+					AND gacc_tran_id = #gaccTranId#
+					AND claim_id = #claimId#;
+					<!-- AND clm_loss_id = #claimLossId#; -->
+		END;
+	</delete>
+	
+	<procedure id="gicls032InsertIntoGdcp">
+		BEGIN
+			gicls032_insert_into_gdcp(#claimId#, #adviceId#, #issCd#, #userId#, #tranId#, #payeeCd#, #payeeClassCd#);
+		END;
+	</procedure>
+	
+	<!-- updated by john 3.12.2015 -->
+	<select id="getAdvSeqNoLOV" resultMap="GICLAdviceResultMap3">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE (GIAC_DIRECT_CLAIM_PAYTS_PKG.get_advice_seq_listing(#moduleId#, #userId#, #vIssCd#, #tranType#, #lineCd#, #issCd#, #adviceYear#, null)) x        
+			          	 WHERE advice_no LIKE NVL(#findText#, '%')
+			          	<isNotNull property="notIn2">
+					  		AND NOT EXISTS (SELECT DISTINCT 'X'
+					                     FROM gicl_clm_loss_exp y
+					                    WHERE x.claim_id = y.claim_id
+					                      AND x.advice_id = y.advice_id
+					                      AND (#notIn2# IS NOT NULL
+	                                      AND (INSTR(#notIn2#, ','||x.advice_id||'-'||y.clm_loss_id||',') != 0)
+	                                       OR #notIn2# IS NULL))
+					  	</isNotNull>
+					  	<isNull property= "sortColumn">
+					  		ORDER BY 2 ASC
+					  	</isNull>
+			          	<isEqual property="sortColumn" compareValue="adviceNo">
+			          		ORDER BY 2
+			          	</isEqual>
+			          	<isNotNull property= "sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	</isNotNull>) a, 
+		               (SELECT count(*) count_ 
+		                  FROM (SELECT * FROM TABLE (GIAC_DIRECT_CLAIM_PAYTS_PKG.get_advice_seq_listing(#moduleId#, #userId#, #vIssCd#, #tranType#, #lineCd#, #issCd#, #adviceYear#, null)) x       
+						          	  WHERE advice_no LIKE NVL(#findText#, '%')
+						          	<isNotNull property="notIn2">
+								  		AND NOT EXISTS (SELECT DISTINCT 'X'
+								             FROM gicl_clm_loss_exp y
+						                    WHERE x.claim_id = y.claim_id
+						                      AND x.advice_id = y.advice_id
+						                      AND (#notIn2# IS NOT NULL
+		                                      AND (INSTR(#notIn2#, ','||x.advice_id||'-'||y.clm_loss_id||',') != 0)
+		                                       OR #notIn2# IS NULL))
+								  	</isNotNull>)) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getPayeeClassLOV" 		parameterClass="map"	resultMap="payeeClassLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE (GIAC_DIRECT_CLAIM_PAYTS_PKG.get_clm_loss_id(#lineCd#,#adviceId#,#claimId#,#tranType#))        
+			          	 WHERE (payee_type LIKE NVL(#findText#, '%')
+			          	    OR payee_class_cd LIKE NVL(#findText#, '%')
+			          	    OR payee_cd LIKE NVL(#findText#, '%')
+			          	    OR payee LIKE NVL(#findText#, '%')
+			          	    OR peril_sname LIKE NVL(#findText#, '%')
+			          	    OR net_amt LIKE NVL(#findText#, '%'))
+			          	<isNotNull property="notIn">
+			          		AND claim_loss_id NOT IN ($notIn$)
+			          	</isNotNull>
+			          	<isEqual property="sortColumn" compareValue="payee">
+			          		ORDER BY payee
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="payeeType">
+			          		ORDER BY payee_type
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="perilCode">
+			          		ORDER BY peril_cd
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="netAmount">
+			          		ORDER BY net_amt
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="payeeClassCode">
+			          		ORDER BY payee_class_cd
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="payeeCode">
+			          		ORDER BY payee_cd
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="perilSname">
+			          		ORDER BY peril_sname
+			          	</isEqual>
+			          	<isNotNull property= "sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	</isNotNull>) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GIAC_DIRECT_CLAIM_PAYTS_PKG.get_clm_loss_id(#lineCd#,#adviceId#,#claimId#,#tranType#))
+		                 WHERE (payee_type LIKE NVL(#findText#, '%')
+			          	    OR payee_class_cd LIKE NVL(#findText#, '%')
+			          	    OR payee_cd LIKE NVL(#findText#, '%')
+			          	    OR payee LIKE NVL(#findText#, '%')
+			          	    OR peril_sname LIKE NVL(#findText#, '%')
+			          	    OR net_amt LIKE NVL(#findText#, '%'))
+			          	    <isNotNull property="notIn">
+			          		AND claim_loss_id NOT IN ($notIn$)
+			          		</isNotNull>) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiacDirectClaimPaytsTableGrid" resultMap="giclAdviceTGResultMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIAC_DIRECT_CLAIM_PAYTS_PKG.get_direct_claim_payts_list(#gaccTranId#))   
+		          		<!-- added filter : shan 10.30.2013 -->
+		          		<isNotNull property="filter">
+		          			WHERE 1=1
+		          			<isNotEmpty prepend="AND" property="transactionType">
+		          				transaction_type = #transactionType#
+		          			</isNotEmpty>
+		          			<isNotEmpty prepend="AND" property="dspAdviceNo">
+		          				UPPER(dsp_advice_no) LIKE UPPER(#dspAdviceNo#)
+		          			</isNotEmpty>
+		          			<isNotEmpty prepend="AND" property="dspPayeeDesc">
+		          				UPPER(dsp_payee_desc) LIKE UPPER(#dspPayeeDesc#)
+		          			</isNotEmpty>
+		          			<isNotEmpty prepend="AND" property="dspPerilName">
+		          				UPPER(dsp_peril_name) LIKE UPPER(#dspPerilName#)
+		          			</isNotEmpty>		          			
+		          			<isNotEmpty prepend="AND" property="disbursementAmount">
+		          				disbursement_amt = #disbursementAmount#
+		          			</isNotEmpty>	          			
+		          			<isNotEmpty prepend="AND" property="inputVatAmount">
+		          				input_vat_amt = #inputVatAmount#
+		          			</isNotEmpty>	          			
+		          			<isNotEmpty prepend="AND" property="withholdingTaxAmount">
+		          				wholding_tax_amt = #withholdingTaxAmount#
+		          			</isNotEmpty>	          			
+		          			<isNotEmpty prepend="AND" property="netDisbursementAmount">
+		          				net_disb_amt = #netDisbursementAmount#
+		          			</isNotEmpty>
+		          		</isNotNull>     
+			          	<isEqual property="sortColumn" compareValue="transactionType">
+			          		ORDER BY transaction_type
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="dspAdviceNo">
+			          		ORDER BY dsp_advice_no
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="dspPayeeDesc">
+			          		ORDER BY dsp_payee_desc
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="dspPerilName">
+			          		ORDER BY dsp_peril_name
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="disbursementAmount">
+			          		ORDER BY disbursement_amt
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="inputVatAmount">
+			          		ORDER BY input_vat_amt
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="withholdingTaxAmount">
+			          		ORDER BY wholding_tax_amt
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="netDisbursementAmount">
+			          		ORDER BY net_disb_amt
+			          	</isEqual>
+			          	<isNotNull property= "sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	</isNotNull>) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GIAC_DIRECT_CLAIM_PAYTS_PKG.get_direct_claim_payts_list(#gaccTranId#)) 
+		                <!-- added filter : shan 10.30.2013 -->
+		          		<isNotNull property="filter">
+		          			WHERE 1=1
+		          			<isNotEmpty prepend="AND" property="transactionType">
+		          				transaction_type = #transactionType#
+		          			</isNotEmpty>
+		          			<isNotEmpty prepend="AND" property="dspAdviceNo">
+		          				UPPER(dsp_advice_no) LIKE UPPER(#dspAdviceNo#)
+		          			</isNotEmpty>
+		          			<isNotEmpty prepend="AND" property="dspPayeeDesc">
+		          				UPPER(dsp_payee_desc) LIKE UPPER(#dspPayeeDesc#)
+		          			</isNotEmpty>
+		          			<isNotEmpty prepend="AND" property="dspPerilName">
+		          				UPPER(dsp_peril_name) LIKE UPPER(#dspPerilName#)
+		          			</isNotEmpty>		          			
+		          			<isNotEmpty prepend="AND" property="disbursementAmount">
+		          				disbursement_amt = #disbursementAmount#
+		          			</isNotEmpty>	          			
+		          			<isNotEmpty prepend="AND" property="inputVatAmount">
+		          				input_vat_amt = #inputVatAmount#
+		          			</isNotEmpty>	          			
+		          			<isNotEmpty prepend="AND" property="withholdingTaxAmount">
+		          				wholding_tax_amt = #withholdingTaxAmount#
+		          			</isNotEmpty>	          			
+		          			<isNotEmpty prepend="AND" property="netDisbursementAmount">
+		          				net_disb_amt = #netDisbursementAmount#
+		          			</isNotEmpty>
+		          		</isNotNull>     
+		                ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="getGDCPAmountSum" parameterMap="gdcpAmountsSumMap">
+		{CALL giac_direct_claim_payts_pkg.get_gdcp_amount_sums(?, ?, ?, ?, ?)}
+	</procedure>
+	
+	<select id="getDCPFromAdvice" resultMap="GIACDirectClaimPaytsResultMap" parameterClass="map">
+		SELECT * FROM TABLE(GIAC_DIRECT_CLAIM_PAYTS_PKG.get_dcp_from_advice(#gaccTranId#, 
+		    #tranType#, #lineCd#, #issCd#, #adviceYear#, #adviceSeqNo#, 
+			#payeeCd#, #claimId#, #claimLossId#, #riIssCd#, #moduleId#, #userId#))
+	</select>
+	
+	<select id="getDCPFromBatch" resultMap="GIACDirectClaimPaytsResultMap" parameterClass="map">
+		SELECT * FROM TABLE(GIAC_DIRECT_CLAIM_PAYTS_PKG.get_dcp_from_batch(#gaccTranId#, 
+		    #tranType#, #batchCsrId#, #riIssCd#, #moduleId#, #userId#))
+	</select>
+	
+	<select id="getEnteredAdviceDetails" resultMap="GICLAdviceResultMap3">
+		SELECT a.*, 1 rownum_, 2 count_ FROM 
+			TABLE(GIAC_DIRECT_CLAIM_PAYTS_PKG.get_advice_seq_listing(#moduleId#, #userId#, #vIssCd#, #tranType#, #lineCd#, #issCd#, #adviceYear#, #adviceSeqNo#)) a
+	</select>
+	
+	<procedure id="giacs017PostFormsCommit" parameterMap="giacs017PostFormsCommitMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			GIAC_DIRECT_CLAIM_PAYTS_PKG.giacs017_post_forms_commit(?, ?, ?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<!-- added by john 3.12.2015 -->
+	<resultMap id="listOfPayeesMap" class="com.geniisys.gicl.entity.GICLClaimLossExpense">
+		<result column="claim_loss_id" 		property="claimLossId"		/>
+		<result column="payee_type" 		property="payeeType"		/>
+		<result column="payee_type_desc" 	property="payeeTypeDescription"/>
+		<result column="payee_class_cd" 	property="payeeClassCode"	/>
+		<result column="payee_cd" 			property="payeeCode"		/>
+		<result column="payee" 				property="payee"			/>
+		<result column="peril_cd" 			property="perilCode"		/>
+		<result column="peril_sname" 		property="perilSname"		/>
+		<result column="net_amt" 			property="netAmount"		/>
+		<result column="paid_amt" 			property="paidAmount"		/>
+		<result column="advice_amt" 		property="adviceAmount"		/>
+	</resultMap>
+	
+	<select id="getListOfPayees" resultMap="listOfPayeesMap" parameterClass="map">
+		SELECT * FROM TABLE (GIAC_DIRECT_CLAIM_PAYTS_PKG.get_clm_loss_id(#lineCd#,#adviceId#,#claimId#,#tranType#))
+	</select>
+</sqlMap>

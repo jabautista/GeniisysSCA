@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIACR190E_COLUMN_GRAND_TOTALS" language="groovy" pageWidth="1180" pageHeight="752" columnWidth="1180" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="Crosstab Data Text" isDefault="false" hAlign="Center"/>
+	<parameter name="P_BRANCH_CD" class="java.lang.String"/>
+	<parameter name="P_INTM_TYPE" class="java.lang.String"/>
+	<parameter name="P_INTM_NO" class="java.lang.String"/>
+	<parameter name="P_PARAM_DATE" class="java.lang.String"/>
+	<parameter name="P_BAL_AMT_DUE" class="java.math.BigDecimal"/>
+	<parameter name="P_USER" class="java.lang.String"/>
+	<parameter name="P_SUM_CF_TOTAL" class="java.math.BigDecimal"/>
+	<parameter name="P_SUM_AFTERDATE_COLLECTION" class="java.math.BigDecimal"/>
+	<parameter name="P_SUM_BALANCE_AMT_DUE" class="java.math.BigDecimal"/>
+	<queryString>
+		<![CDATA[SELECT col_no, sum(intmbal) sum_grand_intmbal
+  FROM TABLE(GIACR190E_PKG.GET_COLUMN_DETAILS(
+	$P{P_BRANCH_CD}, $P{P_INTM_TYPE},
+	TO_NUMBER($P{P_INTM_NO}),
+        TO_DATE($P{P_PARAM_DATE}, 'MM-DD-YYYY'),
+	$P{P_BAL_AMT_DUE}, $P{P_USER} ) )
+ GROUP BY col_no
+ UNION
+SELECT 10001, $P{P_SUM_CF_TOTAL}
+  FROM DUAL
+ UNION
+SELECT 10002, $P{P_SUM_AFTERDATE_COLLECTION}
+  FROM DUAL
+ UNION
+SELECT 10003, $P{P_SUM_BALANCE_AMT_DUE}
+  FROM DUAL
+ ORDER BY 1]]>
+	</queryString>
+	<field name="COL_NO" class="java.lang.Integer"/>
+	<field name="SUM_GRAND_INTMBAL" class="java.math.BigDecimal"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<summary>
+		<band height="22" splitType="Stretch">
+			<crosstab>
+				<reportElement x="0" y="0" width="1180" height="22"/>
+				<rowGroup name="1" width="76">
+					<bucket>
+						<bucketExpression class="java.lang.Integer"><![CDATA[1]]></bucketExpression>
+					</bucket>
+					<crosstabRowHeader>
+						<cellContents backcolor="#F0F8FF" mode="Transparent">
+							<staticText>
+								<reportElement style="Crosstab Data Text" x="0" y="2" width="70" height="11"/>
+								<textElement textAlignment="Right">
+									<font size="8"/>
+								</textElement>
+								<text><![CDATA[Grand Totals  :  ]]></text>
+							</staticText>
+						</cellContents>
+					</crosstabRowHeader>
+					<crosstabTotalRowHeader>
+						<cellContents/>
+					</crosstabTotalRowHeader>
+				</rowGroup>
+				<columnGroup name="COL_NO" height="0">
+					<bucket>
+						<bucketExpression class="java.lang.Integer"><![CDATA[$F{COL_NO}]]></bucketExpression>
+					</bucket>
+					<crosstabColumnHeader>
+						<cellContents backcolor="#F0F8FF" mode="Opaque"/>
+					</crosstabColumnHeader>
+					<crosstabTotalColumnHeader>
+						<cellContents/>
+					</crosstabTotalColumnHeader>
+				</columnGroup>
+				<measure name="SUM_GRAND_INTMBALMeasure" class="java.math.BigDecimal">
+					<measureExpression><![CDATA[$F{SUM_GRAND_INTMBAL}]]></measureExpression>
+				</measure>
+				<crosstabCell width="96" height="19">
+					<cellContents>
+						<textField pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+							<reportElement style="Crosstab Data Text" x="0" y="2" width="90" height="11"/>
+							<textElement textAlignment="Right">
+								<font size="8"/>
+							</textElement>
+							<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{SUM_GRAND_INTMBALMeasure}]]></textFieldExpression>
+						</textField>
+						<line>
+							<reportElement style="Crosstab Data Text" x="3" y="14" width="88" height="1"/>
+							<graphicElement>
+								<pen lineWidth="0.5" lineStyle="Dashed"/>
+							</graphicElement>
+						</line>
+						<line>
+							<reportElement style="Crosstab Data Text" x="3" y="15" width="88" height="1"/>
+							<graphicElement>
+								<pen lineWidth="0.5" lineStyle="Dashed"/>
+							</graphicElement>
+						</line>
+					</cellContents>
+				</crosstabCell>
+			</crosstab>
+		</band>
+	</summary>
+</jasperReport>

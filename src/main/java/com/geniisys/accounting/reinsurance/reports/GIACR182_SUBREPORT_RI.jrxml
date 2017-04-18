@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIACR182_SUBREPORT_RI" language="groovy" pageWidth="480" pageHeight="842" columnWidth="480" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="P_RI_CD" class="java.lang.String"/>
+	<parameter name="P_USER_ID" class="java.lang.String"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["C:\\JAD\\Conversion\\GIACS182 - Schedule of  Premiums Ceded to Facultative RI (as of)\\GIACR182\\"]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT *
+  FROM TABLE (giacr182_pkg.get_giacr182_sum_per_ri($P{P_RI_CD}, $P{P_USER_ID}))]]>
+	</queryString>
+	<field name="RI_CD" class="java.lang.String"/>
+	<field name="RI_NAME" class="java.lang.String"/>
+	<field name="NET_PREMIUM" class="java.math.BigDecimal"/>
+	<detail>
+		<band height="14" splitType="Stretch">
+			<textField isStretchWithOverflow="true">
+				<reportElement isPrintRepeatedValues="false" x="0" y="0" width="183" height="11" isPrintWhenDetailOverflows="true"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{RI_NAME}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement isPrintRepeatedValues="false" x="193" y="1" width="64" height="11"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{NET_PREMIUM}]]></textFieldExpression>
+			</textField>
+			<subreport>
+				<reportElement x="257" y="1" width="223" height="11"/>
+				<subreportParameter name="P_LINE_CD"/>
+				<subreportParameter name="P_RI_CD">
+					<subreportParameterExpression><![CDATA[$F{RI_CD}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_USER_ID">
+					<subreportParameterExpression><![CDATA[$P{P_USER_ID}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression class="java.lang.String"><![CDATA[$P{SUBREPORT_DIR} + "GIACR182_SUBREPORT_LINE.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</detail>
+</jasperReport>

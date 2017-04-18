@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISCargoType">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIISCargoType" type="com.geniisys.common.entity.GIISCargoType" />
+	
+	<resultMap class="GIISCargoType" id="GIISCargoTypeLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="cargoClassCd"		column="CARGO_CLASS_CD" />
+		<result property="cargoType"		column="CARGO_TYPE" />
+		<result property="cargoTypeDesc"	column="CARGO_TYPE_DESC" />
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="GIISCargoTypeResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="cargoClassCd" 		column="cargo_class_cd"/>
+		<result property="cargoType" 			column="cargo_type"/>		
+		<result property="cargoTypeDesc" 		column="cargo_type_desc"/>	
+		<result property="remarks" 				column="remarks"/>	
+		<result property="userId" 				column="user_id"/>	
+		<result property="lastUpdate" 			column="last_update"/>	
+		<result property="cpiRecNo" 			column="cpi_rec_no"/>	
+		<result property="cpiBranchCd" 			column="cpi_branch_cd"/>							
+	</resultMap> 
+	
+	<select id="getCargoTypeLOV" resultMap="GIISCargoTypeLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giis_cargo_type_pkg.get_cargo_type_list_tg(#cargoClassCd#, ''))
+						  <isNotEmpty property="findText">
+				  			WHERE UPPER(cargo_type_desc) LIKE UPPER(#findText#)
+						  	   OR TO_CHAR(cargo_type) LIKE UPPER(#findText#)
+						  </isNotEmpty>
+						  <isNull property="sortColumn">
+							ORDER BY cargo_type_desc ASC
+						  </isNull>
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="cargoType">
+								ORDER BY cargo_type
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="cargoTypeDesc">
+								ORDER BY cargo_type_desc
+							</isEqual>							
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(giis_cargo_type_pkg.get_cargo_type_list_tg(#cargoClassCd#, ''))
+						 <isNotEmpty property="findText">
+				  			WHERE UPPER(cargo_type_desc) LIKE UPPER(#findText#)
+						  	   OR TO_CHAR(cargo_type) LIKE UPPER(#findText#)
+						  </isNotEmpty>) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>	
+	
+	<select id="showCargoType" resultMap="GIISCargoTypeResultMap">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+						 b.count_, 
+						 a.*
+					FROM (SELECT *
+							FROM TABLE (GIISS008_PKG.show_cargo_type(#cargoClassCd#))		
+							<isNotNull property="filter">
+								WHERE 1 = 1 
+									<isNotEmpty prepend="AND" property="cargoType">
+										UPPER(cargo_type) LIKE UPPER(#cargoType#)
+									</isNotEmpty>
+	 								<isNotEmpty prepend="AND" property="cargoTypeDesc">
+										UPPER(cargo_type_desc) LIKE UPPER(#cargoTypeDesc#)
+									</isNotEmpty>																																							
+							</isNotNull>					
+							<isEqual property="sortColumn" compareValue="cargoType">
+								ORDER BY cargo_type
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="cargoTypeDesc">
+								ORDER BY cargo_type_desc
+							</isEqual>																		
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>
+						) a,
+						(SELECT count(*) count_
+						   FROM TABLE (GIISS008_PKG.show_cargo_type(#cargoClassCd#))						 		
+								<isNotNull property="filter">
+								WHERE 1 = 1 
+									<isNotEmpty prepend="AND" property="cargoType">
+										UPPER(cargo_type) LIKE UPPER(#cargoType#)
+									</isNotEmpty>
+	 								<isNotEmpty prepend="AND" property="cargoTypeDesc">
+										UPPER(cargo_type_desc) LIKE UPPER(#cargoTypeDesc#)
+									</isNotEmpty>																																							
+							</isNotNull>							  
+						   ) b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select>		
+	
+	<insert id="setCargoType" parameterClass="GIISCargoType">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;						
+			GIISS008_PKG.set_cargo_type(
+				#cargoClassCd#, #cargoType#,
+				#cargoTypeDesc#,#remarks#);
+		END;	
+	</insert>	
+	
+	<delete id="deleteInCargoType" parameterClass="GIISCargoType">
+		BEGIN
+			GIISS008_PKG.delete_in_cargo_type(#cargoClassCd#, #cargoType#);
+		END;
+	</delete>		
+	
+	<select id="validateCargoType" resultClass="java.lang.String">
+		SELECT GIISS008_PKG.validate_cargo_type(#cargoType#)FROM dual							
+	</select>
+	
+	<select id="chkDeleteGIISS008CargoType" resultClass="java.lang.String">
+		SELECT GIISS008_PKG.chk_delete_giiss008_cargo_type(#cargoType#)FROM dual							
+	</select>
+</sqlMap>

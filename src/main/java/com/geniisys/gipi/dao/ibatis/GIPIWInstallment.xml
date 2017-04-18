@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIWInstallment">
+
+	<typeAlias alias="WInstallment" type="com.geniisys.gipi.entity.GIPIWInstallment"/>
+	<resultMap class="WInstallment" id="winstallment">
+		<result property="parId" column="PAR_ID" />
+		<result property="itemGrp" column="ITEM_GRP" />
+		<result property="instNo" column="INST_NO" />
+		<result property="dueDate" column="DUE_DATE" />
+		<result property="takeupSeqNo" column="TAKEUP_SEQ_NO" />
+		<result property="sharePct" column="SHARE_PCT" />
+		<result property="premAmt" column="PREM_AMT" />
+		<result property="taxAmt" column="TAX_AMT" />
+		<result property="totalSharePct" column="TOTAL_SHARE_PCT" />
+		<result property="totalPremAmt" column="TOTAL_PREM_AMT" />
+		<result property="totalTaxAmt" column="TOTAL_TAX_AMT" />
+		<result property="totalAmountDue" column="TOTAL_AMOUNT_DUE" />
+	</resultMap>
+	
+	<resultMap class="WInstallment" id="winstallment2">
+		<result property="parId" column="PAR_ID" />
+		<result property="itemGrp" column="ITEM_GRP" />
+		<result property="instNo" column="INST_NO" />
+		<result property="dueDate" column="DUE_DATE" />
+		<result property="takeupSeqNo" column="TAKEUP_SEQ_NO" />
+		<result property="sharePct" column="SHARE_PCT" />
+		<result property="premAmt" column="PREM_AMT" />
+		<result property="taxAmt" column="TAX_AMT" />
+	</resultMap>
+	
+	<parameterMap class="map" id="doPayttermsComputationMap">
+		<parameter property="version" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+		<parameter property="dueDate" jdbcType="VARCHAR" javaType="java.lang.String"  mode="IN" />
+		<parameter property="parId" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+		<parameter property="lineCd" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN"/>
+		<parameter property="gipiWInstallmentCur"	jdbcType="ORACLECURSOR"	javaType="java.sql.ResultSet"	resultMap="winstallment2" mode="OUT" />
+		
+	<!-- <parameter property="dateSw" jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" />
+		<parameter property="dateSw1" jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" />
+		<parameter property="lastDueDateSc" jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" />
+		<parameter property="lastDueDate" jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" />		
+		<parameter property="msgAlert" jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" />-->
+	</parameterMap>
+
+	<select id="getWInstallment" resultMap="winstallment">
+		SELECT * FROM TABLE(Gipi_Winstallment_Pkg.get_gipi_winstallment(#parId#, #itemGrp#, #takeupSeqNo#))
+	</select>
+	
+	<procedure id="saveGIPIWInstallment" parameterClass="WInstallment">
+		DECLARE
+			winstallment  gipi_winstallment%rowtype;
+		BEGIN
+			
+			winstallment.PAR_ID 				:= #parId#;
+			winstallment.ITEM_GRP 				:= #itemGrp#;
+			winstallment.TAKEUP_SEQ_NO 			:= #takeupSeqNo#;
+			winstallment.INST_NO				:= #instNo#;
+			winstallment.DUE_DATE				:= to_date(#dueDate#, 'MM-DD-YYYY');
+			winstallment.SHARE_PCT				:= #sharePct#;
+			winstallment.PREM_AMT				:= #premAmt#;
+			winstallment.TAX_AMT				:= #taxAmt#;
+		
+			Gipi_Winstallment_Pkg.set_gipi_winstallment(winstallment);
+		END;
+	</procedure>
+	
+	<procedure id="deleteGIPIWinstallment" parameterClass="java.util.HashMap">
+		BEGIN
+			Gipi_Winstallment_Pkg.del_gipi_winstallment_1(#parId#);
+		END;
+	</procedure>
+	
+	<procedure id="deleteGIPIWinstallment2" parameterClass="java.lang.Integer">
+		BEGIN
+			Gipi_Winstallment_Pkg.del_gipi_winstallment_1(#parId#);
+		END;
+	</procedure>
+	
+	<procedure id="doPaytermComputation" parameterMap="doPayttermsComputationMap"> 
+		CALL do_payterm_computation(?, ?, ?, ?)
+	</procedure>
+	
+	<procedure id="doPaytermComputation2" parameterMap="doPayttermsComputationMap"> 
+		CALL payt_term_computation(?, ?, ?, ?, ?)
+	</procedure>
+	
+	<select id="getAllWInstallment" resultMap="winstallment">
+		SELECT * FROM TABLE(Gipi_Winstallment_Pkg.get_all_gipi_winstallment(#parId#))
+	</select>
+
+</sqlMap>

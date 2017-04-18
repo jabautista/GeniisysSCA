@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GICLRecHist">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GICLRecHistClass" type="com.geniisys.gicl.entity.GICLRecHist"/>
+
+	<resultMap class="GICLRecHistClass" id="GICLRecHistResultMap">
+		<result property="recoveryId" 		column="recovery_id"/>
+		<result property="recHistNo" 		column="rec_hist_no"/>
+		<result property="recStatCd" 		column="rec_stat_cd"/>
+		<result property="remarks" 			column="remarks"/>
+		<result property="cpiRecNo" 		column="cpi_rec_no"/>
+		<result property="cpiBranchCd" 		column="cpi_branch_cd"/>
+		<result property="userId" 			column="user_id"/>
+		<result property="lastUpdate"		column="last_update"/> 
+		<result property="dspRecStatDesc" 	column="dsp_rec_stat_desc"/>
+	</resultMap>
+
+	<resultMap class="GICLRecHistClass" id="GICLRecHistResultMapGrid" extends="GICLRecHistResultMap">
+		<result column="rownum_" 				property="rowNum"/>
+		<result column="count_" 				property="rowCount"/>
+	</resultMap>
+	
+	<select id="getGiclRecHistGrid" resultMap="GICLRecHistResultMapGrid">
+		SELECT * 
+		  FROM (SELECT rownum rownum_, 
+		        	   b.count_, 
+		               a.*  
+		         FROM (SELECT * 
+                         FROM TABLE(gicl_rec_hist_pkg.get_gicl_rec_hist(#recoveryId#))
+                        <isNotNull property="filter">
+						 WHERE 1=1
+               				<isNotEmpty prepend="AND"  property="recHistNo">
+               					rec_hist_no LIKE #recHistNo#
+               				</isNotEmpty>
+               				<isNotEmpty prepend="AND"  property="recStatCd">
+               					UPPER(rec_stat_cd) LIKE UPPER(#recStatCd#)
+               				</isNotEmpty>
+               				<isNotEmpty prepend="AND"  property="dspRecStatDesc">
+               					UPPER(dsp_rec_stat_desc) LIKE UPPER(#dspRecStatDesc#)
+               				</isNotEmpty>
+               				<isNotEmpty prepend="AND"  property="remarks">
+               					UPPER(remarks) LIKE UPPER(#remarks#)
+               				</isNotEmpty>
+               				<isNotEmpty prepend="AND"  property="userId">
+               					UPPER(user_id) LIKE UPPER(#userId#)
+               				</isNotEmpty>
+               				<isNotEmpty prepend="AND"  property="strLastUpdate">
+               					last_update LIKE TO_DATE(#strLastUpdate#, 'mm-dd-yyyy')
+               				</isNotEmpty>
+                    	</isNotNull>
+                        <isEqual property="sortColumn" compareValue="recHistNo">
+			            	ORDER BY rec_hist_no
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="recStatCd dspRecStatDesc">
+			            	ORDER BY rec_stat_cd
+			            	<isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>, dsp_rec_stat_desc
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="remarks">
+			            	ORDER BY remarks
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="userId">
+			            	ORDER BY user_id
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="strLastUpdate">
+			            	ORDER BY last_update
+			          	</isEqual>
+			           	<isNotNull property="sortColumn">
+			              	<isEqual property="ascDescFlg" compareValue="ASC">
+			              		ASC
+			              	</isEqual>
+			              	<isEqual property="ascDescFlg" compareValue="DESC">
+			              		DESC
+			              	</isEqual>
+			            </isNotNull> 
+                         ) a,
+                      (SELECT count(*) count_
+                         FROM TABLE(gicl_rec_hist_pkg.get_gicl_rec_hist(#recoveryId#))
+                         <isNotNull property="filter">
+						 WHERE 1=1
+               				<isNotEmpty prepend="AND"  property="recHistNo">
+               					rec_hist_no LIKE #recHistNo#
+               				</isNotEmpty>
+               				<isNotEmpty prepend="AND"  property="recStatCd">
+               					rec_stat_cd LIKE #recStatCd#
+               				</isNotEmpty>
+               				<isNotEmpty prepend="AND"  property="dspRecStatDesc">
+               					UPPER(dsp_rec_stat_desc) LIKE UPPER(#dspRecStatDesc#)
+               				</isNotEmpty>
+               				<isNotEmpty prepend="AND"  property="remarks">
+               					UPPER(remarks) LIKE UPPER(#remarks#)
+               				</isNotEmpty>
+               				<isNotEmpty prepend="AND"  property="userId">
+               					UPPER(user_id) LIKE UPPER(#userId#)
+               				</isNotEmpty>
+               				<isNotEmpty prepend="AND"  property="strLastUpdate">
+               					last_update LIKE TO_DATE(#strLastUpdate#, 'mm-dd-yyyy')
+               				</isNotEmpty>
+                    	 </isNotNull>
+                         ) b)
+         WHERE rownum_ BETWEEN #from# AND #to#                    					 			 		
+	</select>
+
+	<delete id="delGiclRecHist" parameterClass="GICLRecHistClass">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			gicl_rec_hist_pkg.del_gicl_rec_hist(#recoveryId#, #recHistNo#);
+		END;
+	</delete>
+	
+	<insert id="setGiclRecHist" parameterClass="GICLRecHistClass">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			gicl_rec_hist_pkg.set_gicl_rec_hst(
+				#recoveryId#, #recHistNo#, #recStatCd#, #remarks#,      
+				#cpiRecNo#, #cpiBranchCd#, #userId#, #lastUpdate#
+			);
+		END;
+	</insert>
+</sqlMap>

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIEXLineList">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+
+	<typeAlias alias="GIEXLineListClass" type="com.geniisys.giex.entity.GIEXLine"/>
+	
+   	<resultMap class="GIEXLineListClass" 		id="GIISLineResultMap">
+		<result property="lineCd"				column="LINE_CD"/>
+		<result property="lineName"				column="LINE_NAME"/>
+	</resultMap>
+	
+	<resultMap class="GIEXLineListClass" id="GIEXLineTableGridResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="lineCd"				column="LINE_CD"/>
+		<result property="lineName"				column="LINE_NAME"/>
+		<result property="rowNum" 				column="ROWNUM_" />
+		<result property="rowCount" 			column="COUNT_" />
+	</resultMap>
+
+	<select id="showPerilDepreciationMaintenance" resultMap="GIEXLineTableGridResultMap">
+		SELECT *
+			FROM (SELECT ROWNUM rownum_, b.count_, a.* FROM
+				(SELECT * FROM TABLE (GIISS208_PKG.get_giis_line_item(#userId#))
+					<isNotNull property="filter">
+						WHERE 1=1
+							<isNotEmpty prepend="AND"  property="lineCd">
+								upper(line_cd) LIKE upper(#lineCd#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="lineName">
+								upper(line_name) LIKE upper(#lineName#)
+							</isNotEmpty>
+					</isNotNull>
+					<isEqual property="sortColumn" compareValue="lineCd">
+						ORDER BY line_cd
+					</isEqual>
+					<isEqual property="sortColumn" compareValue="lineName">
+						ORDER BY line_name
+					</isEqual>
+					<isNotNull property="sortColumn">
+						<isEqual property="ascDescFlg" compareValue="ASC">
+							ASC
+						</isEqual>
+						<isEqual property="ascDescFlg" compareValue="DESC">
+							DESC
+						</isEqual>
+					</isNotNull>) a,
+				(SELECT count(*) count_ FROM TABLE (GIISS208_PKG.get_giis_line_item(#userId#))
+			        <isNotNull property="filter">
+			        	WHERE 1=1
+			        		<isNotEmpty prepend="AND"  property="lineCd">
+			        			upper(line_cd) LIKE upper(#lineCd#)
+			        		</isNotEmpty>
+			        		<isNotEmpty prepend="AND"  property="lineName">
+			        			upper(line_name) LIKE upper(#lineName#)
+			        		</isNotEmpty>
+			        </isNotNull>)b)
+		WHERE rownum_ BETWEEN #from# AND #to#		
+	</select>
+</sqlMap>

@@ -1,0 +1,468 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GIACSlLists">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIACSlListsClass" type="com.geniisys.giac.entity.GIACSlLists"/>
+	
+	<resultMap class="GIACSlListsClass" id="SlNameListingResultMap">
+		<result column="sl_cd" 				property="slCd"/>
+		<result column="sl_name" 			property="slName"/>
+		<result column="item_no" 			property="itemNo"/> 
+		<result column="sl_type_cd" 		property="slTypeCd"/>
+	</resultMap>
+	
+	<resultMap class="GIACSlListsClass" id="getSlListingByWhtaxIdLOVResultMap" extends="SlNameListingResultMap">
+		<result column="rownum_" property="rowNum"/>
+		<result column="count_" property="rowCount"/>
+	</resultMap>
+	
+	
+	<resultMap class="GIACSlListsClass" id="SlNameListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="sl_cd" 				property="slCd"/>
+		<result column="sl_name" 			property="slName"/>
+		<result column="sl_type_cd" 		property="slTypeCd"/>
+	</resultMap>
+
+	<select id="getSlNameInputVatListing" resultMap="SlNameListingResultMap" parameterClass="java.util.HashMap">
+		SELECT * FROM TABLE(giac_sl_lists_pkg.get_sl_list(#gsltSlTypeCd#, #slName#))
+	</select>
+	
+	<select id="getSlListingByWhtaxId" resultMap="SlNameListingResultMap" parameterClass="java.util.HashMap">
+		SELECT * FROM TABLE(giac_sl_lists_pkg.get_sl_list_by_whtax_id(#whtaxId#, #keyword#))
+	</select>
+	
+	<select id="getSlListingByWhtaxIdLOV" resultMap="getSlListingByWhtaxIdLOVResultMap" parameterClass="java.util.HashMap">
+		SELECT * 
+			FROM (SELECT rownum rownum_,
+						 b.count_,
+						 a.*
+					FROM (SELECT * 
+							FROM TABLE(giac_sl_lists_pkg.get_sl_list_by_whtax_id(#whtaxId#, #findText#))
+							<isEqual property="sortColumn" compareValue="slName">
+								ORDER BY sl_name
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="slCd">
+								ORDER BY sl_cd
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>) a, 
+							(SELECT count(*) count_
+								FROM TABLE(giac_sl_lists_pkg.get_sl_list_by_whtax_id(#whtaxId#, #findText#))) b)
+		WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGIACSlListsLOV" resultMap="SlNameListResultMap" parameterClass="map">
+		SELECT * 
+			FROM (SELECT rownum rownum_,
+						 b.count_,
+						 a.*
+					FROM (SELECT * 
+							FROM TABLE(GIAC_SL_LISTS_PKG.get_sl_list_GIACS030(#slTypeCd#, #findText#))
+							<isEqual property="sortColumn" compareValue="slCd">
+								ORDER BY sl_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="slName">
+								ORDER BY sl_name
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>) a, 
+							(SELECT count(*) count_
+								FROM TABLE(GIAC_SL_LISTS_PKG.get_sl_list_GIACS030(#slTypeCd#, #findText#))) B)
+		WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getSlListForTaxTypeW" resultMap="SlNameListResultMap" parameterClass="java.util.HashMap">
+		SELECT * 
+			FROM (SELECT rownum rownum_,
+						 b.count_,
+						 a.*
+					FROM (SELECT * 
+							FROM TABLE(GIAC_SL_LISTS_PKG.get_sl_list_for_tax_type_W(#taxCd#))
+							WHERE 1=1
+							<isNotNull property="findText" prepend="AND">
+				  		  	  sl_cd LIKE #findText#
+							  OR UPPER(sl_name) LIKE UPPER(#findText#)
+					  		</isNotNull>	
+							<isEqual property="sortColumn" compareValue="slCd">
+								ORDER BY sl_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="slName">
+								ORDER BY sl_name
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>) a, 
+							(SELECT count(*) count_
+							   FROM TABLE(GIAC_SL_LISTS_PKG.get_sl_list_for_tax_type_W(#taxCd#))
+							  WHERE 1=1
+							<isNotNull property="findText" prepend="AND">
+				  		  	  sl_cd LIKE #findText#
+							  OR UPPER(sl_name) LIKE UPPER(#findText#)
+					  		</isNotNull>)b)
+		WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getSlListForTaxTypeI" resultMap="SlNameListResultMap" parameterClass="java.util.HashMap">
+		SELECT * 
+			FROM (SELECT rownum rownum_,
+						 b.count_,
+						 a.*
+					FROM (SELECT * 
+							FROM TABLE(GIAC_SL_LISTS_PKG.get_sl_list_for_tax_type_I(#taxCd#,#findText#)) <!-- added by steven 11/20/2012 -->
+							<isEqual property="sortColumn" compareValue="slCd">
+								ORDER BY sl_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="slName">
+								ORDER BY sl_name
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>) a, 
+							(SELECT count(*) count_
+								FROM TABLE(GIAC_SL_LISTS_PKG.get_sl_list_for_tax_type_I(#taxCd#,#findText#))) b)
+		WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getSlListForTaxTypeO" resultMap="SlNameListResultMap" parameterClass="java.util.HashMap">
+		SELECT * 
+			FROM (SELECT rownum rownum_,
+						 b.count_,
+						 a.*
+					FROM (SELECT * 
+							FROM TABLE(GIAC_SL_LISTS_PKG.get_sl_list_for_tax_type_O(#taxCd#))
+							WHERE 1=1
+							<isNotNull property="findText" prepend="AND">
+				  		  	  sl_cd LIKE #findText#
+							  OR UPPER(sl_name) LIKE UPPER(#findText#)
+					  		</isNotNull>
+							<isEqual property="sortColumn" compareValue="slCd">
+								ORDER BY sl_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="slName">
+								ORDER BY sl_name
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>) a, 
+							(SELECT count(*) count_
+							   FROM TABLE(GIAC_SL_LISTS_PKG.get_sl_list_for_tax_type_O(#taxCd#))
+							  WHERE 1=1
+							<isNotNull property="findText" prepend="AND">
+				  		  	  sl_cd LIKE #findText#
+							  OR UPPER(sl_name) LIKE UPPER(#findText#)
+					  		</isNotNull>) b)
+		WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="GIACSlListsClass" id="getSlNameInputVatListsLOVResultMap" extends="SlNameListResultMap">
+		<result column="rownum_" property="rowNum"/>
+		<result column="count_" property="rowCount"/>
+	</resultMap>
+
+	<select id="getSlNameInputVatListsLOV" parameterClass="java.util.HashMap" resultMap="getSlNameInputVatListsLOVResultMap">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+				a.*,
+				b.count_
+					FROM (SELECT sl_cd, sl_type_cd, sl_name 
+						FROM giac_sl_lists 
+						WHERE sl_type_cd = #slTypeCd#
+						AND (sl_cd LIKE NVL(#findText#, sl_cd)
+							OR UPPER(sl_name) LIKE UPPER(NVL(#findText#, sl_name)))
+						<isEqual property="sortColumn" compareValue="slCd">
+							ORDER BY sl_cd
+						</isEqual>
+						<isEqual property="sortColumn" compareValue="slName">
+							ORDER BY sl_name
+						</isEqual>
+						<isNotNull property="sortColumn">
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>)a,
+						(SELECT count(*) count_
+							FROM giac_sl_lists 
+							WHERE sl_type_cd = #slTypeCd#
+							AND (sl_cd LIKE NVL(#findText#, sl_cd)
+								OR UPPER(sl_name) LIKE UPPER(NVL(#findText#, sl_name))))b)
+				WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getSlListUnidentifiedCollnsLOV" resultMap="SlNameListResultMap" parameterClass="map">
+		SELECT * 
+			FROM (SELECT rownum rownum_,
+						 b.count_,
+						 a.*
+					FROM (SELECT sl_cd, 
+							 	 sl_name,
+							 	 sl_type_cd
+			    			FROM giac_sl_lists
+			   		   	   WHERE fund_cd = #fundCd#
+			         	 	 AND sl_type_cd = #slTypeCd#
+							<isNotNull property="findText" prepend="AND">
+					  		  	  sl_cd LIKE #findText#
+								  OR UPPER(sl_name) LIKE UPPER(#findText#)
+					  		</isNotNull>	  
+							<isEqual property="sortColumn" compareValue="slName">
+								ORDER BY sl_name
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="slCd">
+								ORDER BY sl_cd
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>) a, 
+							(SELECT count(*) count_
+							   FROM giac_sl_lists
+			   		   	      WHERE fund_cd = #fundCd#
+			         	 	    AND sl_type_cd = #slTypeCd#)b)
+		WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+<!-- GIACS309 : shan 12.18.2013 -->
+	<select id="getSapIntegrationSwGiacs309" resultClass="java.lang.String">
+		SELECT giacp.v('SAP_INTEGRATION_SW') FROM DUAL
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="giacs309SlTypeLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="SL_TYPE_CD"		property="slTypeCd"/>
+		<result column="SL_TYPE_NAME"	property="slTypeName"/>
+		<result column="SL_TAG"			property="slTag"/>
+		<result column="SL_TAG_DESC"	property="slTagDesc"/>
+	</resultMap>
+	
+	<select id="getGiacs309SlTypeLOV" resultMap="giacs309SlTypeLOVMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIACS309_PKG.GET_SL_TYPE_LOV)
+		                  <isNotNull property="findText">
+			              		WHERE UPPER(sl_type_cd) like upper(#findText#) 
+			              		   OR UPPER(sl_type_name) like upper(#findText#)
+			              		   OR UPPER(sl_tag) like upper(#findText#)
+			              		   OR UPPER(sl_tag_desc) like upper(#findText#)
+			              </isNotNull>
+			              <isNull property="findText">
+			              		WHERE UPPER(sl_type_cd) like upper(#searchString#) 
+			              		   <!-- OR UPPER(sl_type_name) like upper(#searchString#)
+			              		   OR UPPER(sl_tag) like upper(#searchString#)
+			              		   OR UPPER(sl_tag_desc) like upper(#searchString#) -->
+			              </isNull>
+			              <isNotNull property="sortColumn">
+			          	  	  <isEqual property="sortColumn" compareValue="activeTag">
+				              		ORDER BY active_tag
+				              </isEqual>
+			          	  	  <isEqual property="sortColumn" compareValue="slTypeCd">
+				              		ORDER BY sl_type_cd
+				              </isEqual>
+			                  <isEqual property="sortColumn" compareValue="slTypeName">
+				              		ORDER BY sl_type_name
+				              </isEqual>	
+			                  <isEqual property="sortColumn" compareValue="slTag">
+				              		ORDER BY sl_tag
+				              </isEqual>	
+			                  <isEqual property="sortColumn" compareValue="slTagDesc">
+				              		ORDER BY sl_tag_desc
+				              </isEqual>	
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (GIACS309_PKG.GET_SL_TYPE_LOV)
+			                  <isNotNull property="findText">
+				              		WHERE UPPER(sl_type_cd) like upper(#findText#) 
+				              		   OR UPPER(sl_type_name) like upper(#findText#)
+				              		   OR UPPER(sl_tag) like upper(#findText#)
+				              		   OR UPPER(sl_tag_desc) like upper(#findText#)
+				              </isNotNull>
+				              <isNull property="findText">				              		
+				              		WHERE UPPER(sl_type_cd) like upper(#searchString#) 
+				              		   <!-- OR UPPER(sl_type_name) like upper(#searchString#)
+				              		   OR UPPER(sl_tag) like upper(#searchString#)
+				              		   OR UPPER(sl_tag_desc) like upper(#searchString#) -->
+				              </isNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="GIACSlListsClass" id="giacs309ResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="FUND_CD" 		property="fundCd"/>
+		<result column="SL_TYPE_CD"		property="slTypeCd"/>
+		<result column="SL_CD" 			property="slCd"/>
+		<result column="SL_NAME"		property="slName"/>
+		<result column="ACTIVE_TAG" 	property="activeTag"/>
+		<result column="SL_TAG"			property="slTag"/>
+		<result column="REMARKS" 		property="remarks"/>
+		<result column="USER_ID" 		property="userId"/>
+		<result column="LAST_UPDATE"	property="lastUpdate"/>
+	</resultMap>
+	
+	<select id="getGiacs309RecList" resultMap="giacs309ResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giacs309_pkg.get_rec_list(#slTypeCd#))
+		  	      		  <isNotNull property="filter">
+		  	      		  	WHERE 1=1
+		  	      		  		<isNotEmpty prepend="AND" property="fundCd">
+		  	      		  			UPPER(fund_cd) LIKE UPPER(#fundCd#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="slCd">
+		  	      		  			UPPER(sl_cd) LIKE UPPER(#slCd#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="slName">
+		  	      		  			UPPER(sl_name) LIKE UPPER(#slName#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="activeTag">
+		  	      		  			UPPER(NVL(active_tag, 'N')) LIKE UPPER(NVL(#activeTag#, NVL(active_tag, 'N')))
+		  	      		  		</isNotEmpty>
+		  	      		  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="fundCd">
+			              		ORDER BY fund_cd
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="slCd">
+			              		ORDER BY sl_cd
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="slName">
+			              		ORDER BY sl_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="activeTag">
+			              		ORDER BY active_tag
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giacs309_pkg.get_rec_list(#slTypeCd#))
+		  	      		  <isNotNull property="filter">
+		  	      		  	WHERE 1=1
+		  	      		  		<isNotEmpty prepend="AND" property="fundCd">
+		  	      		  			UPPER(fund_cd) LIKE UPPER(#fundCd#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="slCd">
+		  	      		  			UPPER(sl_cd) LIKE UPPER(#slCd#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="slName">
+		  	      		  			UPPER(sl_name) LIKE UPPER(#slName#)
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="activeTag">
+		  	      		  			UPPER(NVL(active_tag, 'N')) LIKE UPPER(NVL(#activeTag#, NVL(active_tag, 'N')))
+		  	      		  		</isNotEmpty>
+		  	      		  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setSlLists" parameterClass="GIACSlListsClass">
+		DECLARE
+	    	v_rec GIAC_SL_LISTS%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.fund_cd 		:= #fundCd#;
+ 			v_rec.sl_type_cd 	:= #slTypeCd#;
+ 			v_rec.sl_cd 		:= #slCd#;
+ 			v_rec.sl_name 		:= #slName#;
+ 			v_rec.active_tag	:= #activeTag#;
+ 			v_rec.user_id 		:= #userId#;
+ 			v_rec.remarks 		:= #remarks#;
+ 			
+ 			giacs309_pkg.set_rec(v_rec);
+ 		END;
+	</procedure>
+	
+	<procedure id="valAddSlLists" parameterClass="java.util.HashMap">
+		BEGIN
+ 			giacs309_pkg.val_add_rec(#fundCd#, #slTypeCd#, #slCd#);
+ 		END;
+	</procedure>
+	
+	<procedure id="delSlLists" parameterClass="GIACSlListsClass">
+		BEGIN
+ 			giacs309_pkg.del_rec(#fundCd#, #slTypeCd#, #slCd#);
+ 		END;
+	</procedure>
+	
+	<select id="getSLCodeLOV" parameterClass="java.util.HashMap" resultMap="SlNameListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(GIAC_SL_LISTS_PKG.get_sl_code_list(#glAcctId#, #findText#))
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="slCd">
+								ORDER BY sl_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="slName">
+								ORDER BY sl_name
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="slTypeCd">
+								ORDER BY sl_type_cd
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(GIAC_SL_LISTS_PKG.get_sl_code_list(#glAcctId#, #findText#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+<!-- end GIACS309 -->
+</sqlMap>

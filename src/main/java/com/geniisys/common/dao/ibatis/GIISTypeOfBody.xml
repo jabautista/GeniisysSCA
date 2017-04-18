@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISTypeOfBody">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="giisTypeOfBody" type="com.geniisys.common.entity.GIISTypeOfBody"/>
+	
+	<resultMap class="giisTypeOfBody" id="GIISTypeOfBodyLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="typeOfBody"		column="TYPE_OF_BODY" />
+		<result property="typeOfBodyCd"	column="TYPE_OF_BODY_CD" />
+	</resultMap>
+	
+	<select id="getBodyTypeLOV" resultMap="GIISTypeOfBodyLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giis_type_of_body_pkg.get_type_of_body_list)
+						  <isNotNull property="findText">
+		                  	WHERE UPPER(TYPE_OF_BODY) LIKE UPPER(#findText#)
+		                  </isNotNull>
+					   )a,
+					   (SELECT COUNT(*) count_
+						  FROM TABLE(giis_type_of_body_pkg.get_type_of_body_list)
+						  <isNotNull property="findText">
+		                  	WHERE UPPER(TYPE_OF_BODY) LIKE UPPER(#findText#)
+		                  </isNotNull>
+		                  ) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="giisTypeOfBody" id="giisBodyTypeResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="type_of_body_cd"    property="typeOfBodyCd"/>
+		<result column="type_of_body"  		property="typeOfBody"/>
+		<result column="user_id"     		property="userId"/>
+		<result column="last_update" 		property="lastUpdate"/>
+		<result column="remarks"     		property="remarks"/>
+	</resultMap>
+	
+	<select id="getGiiss117RecList" resultMap="giisBodyTypeResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss117_pkg.get_rec_list)
+		  	      <isNotNull property="filter">
+		  	      	WHERE 1 = 1 
+		  	      		<isNotEmpty prepend="AND" property="typeOfBodyCd">
+                        	type_of_body_cd = #typeOfBodyCd#
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="typeOfBody">
+                            UPPER(type_of_body) LIKE UPPER(#typeOfBody#)
+                        </isNotEmpty>
+		  	      </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="typeOfBodyCd">
+			              		ORDER BY type_of_body_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="typeOfBody">
+			              		ORDER BY type_of_body
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss117_pkg.get_rec_list)
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setBodyType" parameterClass="giisTypeOfBody">
+	    DECLARE
+	    	v_rec giis_type_of_body%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.type_of_body_cd := #typeOfBodyCd#;
+ 			v_rec.type_of_body := #typeOfBody#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			giiss117_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<select id="valDeleteBodyType" resultClass="java.lang.String">
+		SELECT giiss117_pkg.val_del_rec(#typeOfBodyCd#)FROM dual							
+	</select>
+ 	
+ 	<procedure id="valAddBodyType" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss117_pkg.val_add_rec(#recId#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delBodyType" parameterClass="java.lang.Integer">
+		BEGIN
+ 			giiss117_pkg.del_rec(#typeOfBodyCd#);
+ 		END;
+ 	</delete>
+	
+</sqlMap>

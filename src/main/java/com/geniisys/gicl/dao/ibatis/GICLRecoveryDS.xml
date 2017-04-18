@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GICLRecoveryDS">
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GICLClmRecoveryDistClass" type="com.geniisys.gicl.entity.GICLClmRecoveryDist"/>
+		
+	<resultMap class="java.util.HashMap" id="getRecoveryDSTableGridListingMap">
+		<result column="recovery_id" 			property="recoveryId" />
+		<result column="recovery_payt_id" 		property="recoveryPaytId" />
+		<result column="rec_dist_no" 			property="recDistNo" />
+		<result column="line_cd" 				property="lineCd" />
+		<result column="grp_seq_no" 			property="grpSeqNo" />
+		<result column="dist_year" 				property="distYear" />
+		<result column="share_type" 			property="shareType" />
+		<result column="acct_trty_type" 		property="acctTrtyType" />
+		<result column="share_pct" 				property="sharePct" />
+		<result column="shr_recovery_amt" 		property="shrRecoveryAmt" />
+		<result column="dsp_share_name" 		property="dspShareName" />
+		<result column="rownum_" 				property="rowNum" />
+		<result column="count_"					property="rowCount"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="getRecoveryRidsTableGridListingMap">
+		<result column="recovery_id" 			property="recoveryId" />
+		<result column="recovery_payt_id" 		property="recoveryPaytId" />
+		<result column="rec_dist_no" 			property="recDistNo" />
+		<result column="line_cd" 				property="lineCd" />
+		<result column="grp_seq_no" 			property="grpSeqNo" />
+		<result column="dist_year" 				property="distYear" />
+		<result column="share_type" 			property="shareType" />
+		<result column="acct_trty_type" 		property="acctTrtyType" />
+		<result column="ri_cd" 					property="riCd" />
+		<result column="share_ri_pct" 			property="shareRiPct" />
+		<result column="shr_ri_recovery_amt" 	property="shrRiRecoveryAmt" />
+		<result column="share_ri_pct_real" 		property="share_ri_pct_real" />
+		<result column="dsp_ri_name"			property="dspRiName" />
+		<result column="rownum_" 				property="rowNum" />
+		<result column="count_"					property="rowCount"/>
+	</resultMap>
+	
+	<select id="getGICLRecoveryDSTGListing" resultMap="getRecoveryDSTableGridListingMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GICL_RECOVERY_DS_PKG.get_gicl_recovery_ds(#recoveryId#, #recoveryPaytId#))           
+			          	  <isEqual property="sortColumn" compareValue="dspShareName">
+			              		ORDER BY dsp_share_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="sharePct">
+			              		ORDER BY share_pct
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="distYear">
+			              		ORDER BY dist_year
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="shrRecoveryAmt">
+			              		ORDER BY shr_recovery_amt
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GICL_RECOVERY_DS_PKG.get_gicl_recovery_ds(#recoveryId#, #recoveryPaytId#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGICLRecoveryRidsTGListing" resultMap="getRecoveryRidsTableGridListingMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GICL_RECOVERY_RIDS_PKG.get_recovery_rids(#recoveryId#, #recoveryPaytId#, #recDistNo#, #grpSeqNo#))   <!-- added parameters Halley 01.14.2014 -->     
+			          	  <isEqual property="sortColumn" compareValue="riCd">
+			              		ORDER BY ri_cd 
+			              </isEqual>
+			               <isEqual property="sortColumn" compareValue="dspRiName">
+			              		ORDER BY dsp_ri_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="sharePct">
+			              		ORDER BY share_ri_pct <!--lara 1/10/2014  -->
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="shrRiRecoveryAmt">
+			              		ORDER BY shr_ri_recovery_amt <!--lara 1/10/2014  -->
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GICL_RECOVERY_RIDS_PKG.get_recovery_rids(#recoveryId#, #recoveryPaytId#, #recDistNo#, #grpSeqNo#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>	
+	
+	<resultMap class="GICLClmRecoveryDistClass" id="GICLRecoveryDistResultMap" extends="BaseEntity.TableGridResultMap"> 
+		<result property="recoveryId"		column="recovery_id"/>
+		<result property="recoveryPaytId"	column="recovery_payt_id"/>
+		<result property="recDistNo"		column="rec_dist_no"/>
+		<result property="dspLineCd"		column="dsp_line_cd"/>
+		<result property="grpSeqNo"			column="grp_seq_no"/>
+		<result property="dspShareName"		column="dsp_share_name"/>
+		<result property="acctTrtyType"		column="acct_trty_type"/>
+		<result property="shareType"		column="share_type"/>
+		<result property="sharePct"			column="share_pct"/>
+		<result property="distYear" 		column="dist_year"/>
+		<result property="shrRecoveryAmt"	column="shr_recovery_amt"/>
+		<result property="negateTag"		column="negate_tag"/>
+		<result property="negateDate"		column="negate_date"/>
+	</resultMap>
+	
+	<select id="getClmRecoveryDistGrid" resultMap="GICLRecoveryDistResultMap" >
+		SELECT * 
+		  FROM (SELECT rownum rownum_, 
+		        	   b.count_, 
+		               a.*  
+		         FROM (SELECT * 
+                         FROM TABLE(gicl_recovery_ds_pkg.get_recovery_distribution(#recoveryId#, #recoveryPaytId#))
+                         <isEqual property="sortColumn" compareValue="dspShareName">
+			              		ORDER BY dsp_share_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="sharePct">
+			              		ORDER BY share_pct
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="distYear">
+			              		ORDER BY dist_year
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="shrRecoveryAmt">
+			              		ORDER BY shr_recovery_amt
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+                         ) a,
+                      (SELECT count(*) count_
+                         FROM TABLE(gicl_recovery_ds_pkg.get_recovery_distribution(#recoveryId#, #recoveryPaytId#))) b)
+         WHERE rownum_ BETWEEN #from# AND #to#                    					 			 		
+	</select>
+	
+	<parameterMap class="java.util.HashMap" id="gicls054RiSharesParamMap">
+		<parameter property="userId" 			javaType="java.lang.String"   jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="recoveryId" 		javaType="java.lang.String"   jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="recoveryPaytId" 		javaType="java.lang.String"   jdbcType="VARCHAR" mode="IN"/>
+	</parameterMap>
+	
+	<procedure id="updateGICLS054RiShares" parameterMap="gicls054RiSharesParamMap">
+		BEGIN
+			giis_users_pkg.app_user := ?; 
+			gicl_recovery_ds_pkg.update_gicls054_ri_shares(?, ?);
+		END;	
+	</procedure>
+	
+	<parameterMap class="java.util.HashMap" id="distributeRecoveryMap">
+		<parameter property="userId" 			javaType="java.lang.String"   jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="recoveryId" 		javaType="java.lang.String"   jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="recoveryPaytId" 	javaType="java.lang.String"   jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="dspLineCd" 		javaType="java.lang.String"   jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="dspSublineCd" 		javaType="java.lang.String"   jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="dspIssCd" 			javaType="java.lang.String"   jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="dspIssueYy"		javaType="java.lang.String"   jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="dspPolSeqNo"		javaType="java.lang.String"   jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="dspRenewNo"		javaType="java.lang.String"   jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="effDate"			javaType="java.lang.String"   jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="expiryDate"		javaType="java.lang.String"   jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="lossDate"   		javaType="java.lang.String"   jdbcType="VARCHAR" mode="IN"/>
+	</parameterMap>
+
+	<procedure id="distributeRecovery" parameterMap="distributeRecoveryMap">
+		BEGIN
+			giis_users_pkg.app_user := ?; 
+			gicl_recovery_ds_pkg.distribute_recovery(?, ?, ?, ?, ?, ?, ?, ?, TO_DATE(?, 'yyyy-mm-dd'), TO_DATE(?, 'yyyy-mm-dd'), TO_DATE(?, 'yyyy-mm-dd'));
+		END;	
+	</procedure>
+	
+	<!-- <procedure id="distributeRecovery" parameterMap="distributeRecoveryMap">
+		BEGIN
+			giis_users_pkg.app_user := ?; 
+			gicl_recovery_ds_pkg.distribute_recovery(?, ?, ?, ?, ?, ?, ?, ?, TO_DATE(?, 'MM-DD-YYYY'), TO_DATE(?, 'MM-DD-YYYY'), TO_DATE(?, 'MM-DD-YYYY'));
+		END;	
+	</procedure> -->
+	
+	<procedure id="negateDistRecovery">
+		BEGIN
+			giis_users_pkg.app_user := #userId#; 
+			gicl_recovery_ds_pkg.negate_dist_recovery(#recoveryId#, #recoveryPaytId#);
+		END;	
+	</procedure>
+	
+	<procedure id="updDistRecovery">
+		BEGIN
+			giis_users_pkg.app_user := #userId#; 
+			gicl_recovery_ds_pkg.upd_dist_recovery(#recoveryId#, #recoveryPaytId#, #recDistNo#, #grpSeqNo#, #sharePct#, #shrRecoveryAmt#);
+		END;	
+	</procedure>
+	
+	<delete id="delDistRecovery">
+		BEGIN
+			giis_users_pkg.app_user := #userId#; 
+			gicl_recovery_ds_pkg.del_dist_recovery(#recoveryId#, #recoveryPaytId#, #recDistNo#, #grpSeqNo#);
+		END;	
+	</delete>
+</sqlMap>

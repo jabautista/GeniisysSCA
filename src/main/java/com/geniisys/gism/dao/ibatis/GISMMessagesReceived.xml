@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GISMMessagesReceived">
+	
+	<resultMap id="gismMessagesReceivedMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result column="SENDER"					property="sender"/>
+		<result column="CELLPHONE_NO"			property="cellphoneNo"/>
+		<result column="DATE_RECEIVED"			property="dateReceived"/>
+		<result column="MESSAGE"				property="message"/>
+		<result column="RECIPIENT"				property="recipient"/>
+		<result column="RECIPIENT_GRP"			property="recipientGrp"/>
+		<result column="USER_ID"				property="userId"/>
+		<result column="LAST_UPDATE"			property="lastUpdate"/>
+		<result column="ERROR_SW"				property="errorSw"/>
+		<result column="KEYWORD"				property="keyword"/>
+		<result column="ERROR_MSG_ID"			property="errorMsgId"/>
+		<result column="UPLOAD_SW"				property="uploadSw"/>
+		<result column="DSP_DATE_RECEIVED"		property="dspDateReceived"/>
+		<result column="DSP_LAST_UPDATE"		property="dspLastUpdate"/>
+	</resultMap>
+	
+	<resultMap id="msgReceivedDtlMap" class="java.util.HashMap">
+		<result column="MSG_ID"					property="msgId"/>
+		<result column="MESSAGE"				property="message"/>
+		<result column="MESSAGE_STATUS"			property="messageStatus"/>
+		<result column="DSP_MESSAGE_STATUS"		property="dspMessageStatus"/>
+		<result column="DSP_SET_DATE"			property="dspSetDate"/>
+	</resultMap>
+	
+	<select id="getMessagesReceived" parameterClass="java.util.HashMap" resultMap="gismMessagesReceivedMap">
+		SELECT *
+          FROM (SELECT ROWNUM rownum_,
+            		   b.count_,
+            		   a.*
+                  FROM (SELECT *
+                          FROM TABLE(GISM_MESSAGES_RECEIVED_PKG.get_messages_received(#sender#, #cellphoneNo#,
+                          																#dspDateReceived#, #message#))
+                          	<isEqual property="sortColumn" compareValue="errorSw">
+								ORDER BY error_sw
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="sender">
+								ORDER BY sender
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="cellphoneNo">
+								ORDER BY cellphone_no
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="dspDateReceived">
+								ORDER BY date_received
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>) a,
+               (SELECT COUNT(*) count_
+                  FROM TABLE(GISM_MESSAGES_RECEIVED_PKG.get_messages_received(#sender#, #cellphoneNo#,
+                          														#dspDateReceived#, #message#))
+				) b)
+          WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getMsgReceivedDtl" parameterClass="java.lang.Integer" resultMap="msgReceivedDtlMap">
+		SELECT *
+		  FROM TABLE(GISM_MESSAGES_RECEIVED_PKG.get_message_detail(#messageId#))
+	</select>
+	
+	<procedure id="replyToMessage" parameterClass="java.util.HashMap">
+		BEGIN
+			GIIS_USERS_PKG.app_user := #userId#;
+			GISM_MESSAGES_RECEIVED_PKG.reply_to_message(#message#, #sender#, #cellphoneNo#, #dateReceived#);
+		END;
+	</procedure>
+
+	<resultMap id="smsErrorLogResultMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result column="date_received"	property="dateReceived"/>
+		<result column="cellphone_no"	property="cellphoneNo"/>
+		<result column="name"			property="name"/>
+		<result column="keyword"		property="keyword"/>
+		<result column="message"		property="message"/>
+		<result column="class_cd"		property="classCd"/>
+		<result column="intm_no"		property="intmNo"/>
+		<result column="assd_no"		property="assdNo"/>
+	</resultMap>
+	
+	<select id="getSMSErrorLog" parameterClass="java.util.HashMap" resultMap="smsErrorLogResultMap">
+		SELECT *
+          FROM (SELECT ROWNUM rownum_,
+            		   b.count_,
+            		   a.*
+                  FROM (SELECT *
+                          FROM TABLE(GISM_MESSAGES_RECEIVED_PKG.get_sms_error_log)
+                          <isNotNull property="filter">
+                          	WHERE 1=1
+                          	<isNotEmpty prepend="AND" property="dateReceived">
+								TRUNC(date_received) = TO_DATE(#dateReceived#, 'mm-dd-yyyy')
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="cellphoneNo">
+								cellphone_no LIKE #cellphoneNo#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="name">
+								UPPER(name) LIKE UPPER(#name#)
+							</isNotEmpty>
+                          </isNotNull>
+							<isEqual property="sortColumn" compareValue="dateReceived">
+								ORDER BY date_received
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="cellphoneNo">
+								ORDER BY cellphone_no
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="name">
+								ORDER BY name
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>) a,
+               (SELECT COUNT(*) count_
+                  FROM TABLE(GISM_MESSAGES_RECEIVED_PKG.get_sms_error_log)
+					<isNotNull property="filter">
+						WHERE 1=1
+						<isNotEmpty prepend="AND" property="dateReceived">
+							TRUNC(date_received) = TO_DATE(#dateReceived#, 'mm-dd-yyyy')
+						</isNotEmpty>
+						<isNotEmpty prepend="AND" property="cellphoneNo">
+							cellphone_no LIKE #cellphoneNo#
+						</isNotEmpty>
+						<isNotEmpty prepend="AND" property="name">
+							UPPER(name) LIKE UPPER(#name#)
+						</isNotEmpty>
+					</isNotNull>
+				) b)
+          WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap id="gisms008AssuredLOVResultMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result column="assd_no"	property="number"/>
+		<result column="assd_name"	property="name"/>
+	</resultMap>
+	
+	<select id="getGISMS008AssuredLOV" parameterClass="java.util.HashMap" resultMap="gisms008AssuredLOVResultMap">
+		SELECT *
+          FROM (SELECT ROWNUM rownum_,
+            		   b.count_,
+            		   a.*
+                  FROM (SELECT *
+                          FROM TABLE(GIIS_ASSURED_PKG.get_gisms008_assd_lov(#gmrName#))
+							<isNotNull property="findText">
+								WHERE 1=1
+								<isNotEmpty prepend="AND"  property="findText">
+									(TO_CHAR(assd_no) LIKE #findText#
+									 OR UPPER(assd_name) LIKE UPPER(#findText#))
+								</isNotEmpty>
+							</isNotNull>
+							<isEqual property="sortColumn" compareValue="number">
+								ORDER BY assd_no
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="name">
+								ORDER BY assd_name
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>) a,
+               (SELECT COUNT(*) count_
+                  FROM TABLE(GIIS_ASSURED_PKG.get_gisms008_assd_lov(#gmrName#))
+                  <isNotNull property="findText">
+						WHERE 1=1
+						<isNotEmpty prepend="AND"  property="findText">
+							(TO_CHAR(assd_no) LIKE #findText#
+							 OR UPPER(assd_name) LIKE UPPER(#findText#))
+						</isNotEmpty>
+					</isNotNull>
+				) b)
+          WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap id="gisms008IntmLOVResultMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result column="intm_no"	property="number"/>
+		<result column="intm_name"	property="name"/>
+	</resultMap>
+	
+	<select id="getGISMS008IntmLOV" parameterClass="java.util.HashMap" resultMap="gisms008IntmLOVResultMap">
+		SELECT *
+          FROM (SELECT ROWNUM rownum_,
+            		   b.count_,
+            		   a.*
+                  FROM (SELECT *
+                          FROM TABLE(GIIS_INTERMEDIARY_PKG.get_gisms008_intm_lov(#gmrName#))
+							<isNotNull property="findText">
+								WHERE 1=1
+								<isNotEmpty prepend="AND"  property="findText">
+									(TO_CHAR(intm_no) LIKE #findText#
+									 OR UPPER(intm_name) LIKE UPPER(#findText#))
+								</isNotEmpty>
+							</isNotNull>
+							<isEqual property="sortColumn" compareValue="number">
+								ORDER BY intm_no
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="name">
+								ORDER BY intm_name
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>) a,
+               (SELECT COUNT(*) count_
+                  FROM TABLE(GIIS_INTERMEDIARY_PKG.get_gisms008_intm_lov(#gmrName#))
+                  <isNotNull property="findText">
+						WHERE 1=1
+						<isNotEmpty prepend="AND"  property="findText">
+							(TO_CHAR(intm_no) LIKE #findText#
+							 OR UPPER(intm_name) LIKE UPPER(#findText#))
+						</isNotEmpty>
+					</isNotNull>
+				) b)
+          WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="gisms008Assign" parameterClass="java.util.HashMap">
+		BEGIN
+			GIIS_USERS_PKG.app_user := #userId#;
+			GISM_MESSAGES_RECEIVED_PKG.gisms008_assign(#number#, #cellphoneNo#, #keyword#, #message#, #classCd#);
+		END;
+	</procedure>
+	
+	<procedure id="gisms008Purge" parameterClass="java.util.HashMap">
+		BEGIN
+			GIIS_USERS_PKG.app_user := #userId#;
+			GISM_MESSAGES_RECEIVED_PKG.gisms008_purge(#cellphoneNo#, #keyword#, #message#);
+		END;
+	</procedure>
+
+</sqlMap>

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIACR137C_DETAIL" language="groovy" pageWidth="990" pageHeight="802" columnWidth="990" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="4.0"/>
+	<property name="ireport.x" value="571"/>
+	<property name="ireport.y" value="0"/>
+	<style name="Crosstab Data Text" isDefault="false" hAlign="Center"/>
+	<parameter name="P_QUARTER" class="java.lang.Integer"/>
+	<parameter name="P_CESSION_YEAR" class="java.lang.Integer"/>
+	<parameter name="P_LINE_CD" class="java.lang.String"/>
+	<parameter name="P_SHARE_CD" class="java.lang.Integer"/>
+	<parameter name="P_USER_ID" class="java.lang.String"/>
+	<parameter name="P_TREATY_YY" class="java.lang.Integer"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="P_CESSION_MM" class="java.lang.Integer"/>
+	<parameter name="P_TRTY_COM_RT" class="java.math.BigDecimal"/>
+	<parameter name="P_BRANCH_CD" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT * FROM TABLE(GIACR137C_pkg.get_report_detail($P{P_QUARTER}, $P{P_CESSION_YEAR}, $P{P_LINE_CD}, $P{P_USER_ID}))
+WHERE cession_mm = $P{P_CESSION_MM}
+AND branch_cd = $P{P_BRANCH_CD}
+AND share_cd = $P{P_SHARE_CD}]]>
+	</queryString>
+	<field name="CESSION_MM" class="java.math.BigDecimal"/>
+	<field name="BRANCH_CD" class="java.lang.String"/>
+	<field name="PRNT_RI_CD" class="java.math.BigDecimal"/>
+	<field name="RI_SNAME" class="java.lang.String"/>
+	<field name="TRTY_SHR_PCT" class="java.math.BigDecimal"/>
+	<field name="COMMMISSION" class="java.math.BigDecimal"/>
+	<field name="SHARE_CD" class="java.math.BigDecimal"/>
+	<field name="BRANCH_COUNT" class="java.math.BigDecimal"/>
+	<variable name="CS_SUM_TRTY_SHARE_PCT" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{TRTY_SHR_PCT}]]></variableExpression>
+	</variable>
+	<variable name="CS_COMM_MM" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{COMMMISSION}]]></variableExpression>
+	</variable>
+	<group name="BRANCH_GRP">
+		<groupExpression><![CDATA[$F{BRANCH_CD}]]></groupExpression>
+		<groupFooter>
+			<band height="24">
+				<staticText>
+					<reportElement x="125" y="11" width="74" height="11"/>
+					<textElement textAlignment="Right" verticalAlignment="Top">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[Total :  ]]></text>
+				</staticText>
+				<textField pattern="#,##0.00;(-#,##0.00)" isBlankWhenNull="true">
+					<reportElement x="285" y="11" width="73" height="11"/>
+					<textElement textAlignment="Right">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{CS_COMM_MM}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;(-#,##0.00)" isBlankWhenNull="true">
+					<reportElement x="205" y="11" width="73" height="11"/>
+					<textElement textAlignment="Right">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{CS_SUM_TRTY_SHARE_PCT}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="285" y="0" width="74" height="11"/>
+					<textElement textAlignment="Right">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[-----------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="205" y="0" width="74" height="11"/>
+					<textElement textAlignment="Right">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[-----------------------------------]]></text>
+				</staticText>
+			</band>
+		</groupFooter>
+	</group>
+	<detail>
+		<band height="11">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="0" y="0" width="199" height="11"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{RI_SNAME}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(-#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="205" y="0" width="73" height="11"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{TRTY_SHR_PCT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(-#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="285" y="0" width="73" height="11"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{COMMMISSION}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

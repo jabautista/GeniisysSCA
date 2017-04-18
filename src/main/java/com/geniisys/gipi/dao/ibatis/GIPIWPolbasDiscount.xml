@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIWPolbasDiscount">
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GipiWPolbasDiscountClass" type="com.geniisys.gipi.entity.GIPIWPolbasDiscount"/>
+	
+	<resultMap class="GipiWPolbasDiscountClass" id="selectGIPIWPolbasDiscountMap">
+		<result column="PAR_ID" 			property="parId"/>
+		<result column="LINE_CD" 			property="lineCd"/>
+		<result column="SUBLINE_CD" 		property="sublineCd"/>
+		<result column="DISC_RT" 			property="discountRt"/>
+		<result column="DISC_AMT" 			property="discountAmt"/>
+		<result column="NET_GROSS_TAG" 		property="netGrossTag"/>
+		<result column="ORIG_PREM_AMT" 		property="origPremAmt"/>
+		<result column="SEQUENCE" 			property="sequenceNo"/>
+		<result column="REMARKS" 			property="remarks"/>
+		<result column="NET_PREM_AMT" 		property="netPremAmt"/>
+		<result column="SURCHARGE_RT" 		property="surchargeRt"/>
+		<result column="SURCHARGE_AMT" 		property="surchargeAmt"/>
+	</resultMap>
+	
+	<parameterMap class="map" id="getOrigPremAmtMap">
+		<parameter property="parId"			    jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="origPremAmt"		jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="getOrigPremAmtMap2">
+		<parameter property="parId"			    jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="msgAlert"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="origPremAmt"		jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="netPremAmt"		jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="getNetPolPremMap">
+		<parameter property="parId"			    jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="discTotal"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+		<parameter property="surcTotal"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="deleteDiscountAtPolMap">
+		<parameter property="parId"			    jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="sequence"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="var"			    jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="addDiscountPolMap">
+		<parameter property="parId"			    jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="netGrossTag"	    jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="discRt"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="surcRt"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="lineCd"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="sublineCd"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="sequence"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="discAmt"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="surcAmt"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+	</parameterMap>
+	
+	<parameterMap class="map" id="postFormCommitMap">
+		<parameter property="parId"			    jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="lineCd"			jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+		<parameter property="issCd"				jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+	</parameterMap>
+	
+	
+	
+	<procedure id="deleteGIPIWPolbasDiscount" parameterClass="java.lang.Integer">
+		BEGIN
+			Gipi_Wpolbas_Discount_Pkg.del_gipi_wpolbas_discount(#parId#);
+		END;	
+	</procedure>
+	
+	<procedure id="selectGIPIWPolbasDiscount" resultMap="selectGIPIWPolbasDiscountMap" parameterClass="java.util.HashMap">
+		SELECT * FROM TABLE(Gipi_Wpolbas_Discount_Pkg.get_gipi_wpolbas_discount(#parId#))
+	</procedure>
+	
+	<insert id="setGipiWPolbasDiscount" parameterClass="GipiWPolbasDiscountClass">
+		DECLARE
+			disc Gipi_WPolbas_Discount%ROWTYPE; 
+		BEGIN
+			disc.par_id 		:= #parId#;
+			disc.line_cd 		:= #lineCd#;
+			disc.subline_cd 	:= #sublineCd#;
+			disc.disc_rt 		:= #discountRt#;
+			disc.disc_amt		:= #discountAmt#;
+			disc.net_gross_tag  := #netGrossTag#;
+			disc.orig_prem_amt	:= #origPremAmt#;
+			disc.sequence		:= #sequenceNo#;
+			disc.remarks		:= #remarks#;
+			disc.net_prem_amt	:= #netPremAmt#;
+			disc.surcharge_rt	:= #surchargeRt#;
+			disc.surcharge_amt	:= #surchargeAmt#;
+			
+			Gipi_Wpolbas_Discount_Pkg.set_gipi_wpolbas_discount(disc);
+		END;
+	</insert>
+	
+	<procedure id="getOrigPremAmt" parameterMap="getOrigPremAmtMap">
+		{ CALL get_orig_prem_amt_gipis143(?, ?) }
+	</procedure>
+	
+	<procedure id="getOrigPremAmt2" parameterMap="getOrigPremAmtMap2">
+		{ CALL get_orig_policy_prem_gipis143(?, ?, ?, ?) }
+	</procedure>
+	
+	<procedure id="getNetPolPrem" parameterMap="getNetPolPremMap">
+		{ CALL get_net_pol_prem_a_gipis143(?, ?, ?) }
+	</procedure>
+	
+	<procedure id="deleteDiscountAtPol" parameterMap="deleteDiscountAtPolMap">
+		{ CALL DELETE_DISCOUNT_AT_POL(?, ?, ?) }
+	</procedure>
+	
+	<procedure id="addDiscountPol" parameterMap="addDiscountPolMap">
+		{ CALL ADD_DISCOUNT_AT_POL(?, ?, ?, ?, ?, ?, ?, ?, ?) }
+	</procedure>
+	
+	<procedure id="postFormCommit" parameterMap="postFormCommitMap">
+		{ CALL Post_forms_commit_gipis143(?, ?, ?) }
+	</procedure>
+	
+	<procedure id="validateSurchargeAmtPolDisc" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT Gipi_Wpolbas_Discount_Pkg.validate_surcharge_amt(#parId#, #lineCd#) FROM dual
+	</procedure>
+	
+	<procedure id="validateDiscSurcAmtItemDisc" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT Gipi_Wpolbas_Discount_Pkg.validate_disc_surc_amt_item(#parId#, #lineCd#, #itemNo#) FROM dual
+	</procedure>
+	
+	<procedure id="validateDiscSurcAmtPerilDisc" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT Gipi_Wpolbas_Discount_Pkg.validate_disc_surc_amt_peril(#parId#, #lineCd#, #itemNo#, #perilCd#) FROM dual
+	</procedure>
+	
+</sqlMap>	

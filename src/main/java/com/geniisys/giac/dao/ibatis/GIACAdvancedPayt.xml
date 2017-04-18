@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIACAdvancedPayt">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+
+	<typeAlias alias="GIACAdvancedPaytClass" type="com.geniisys.giac.entity.GIACAdvancedPayt" />
+
+	<parameterMap class="map" id="deleteGIACAdvancedPaytMap">
+		<parameter property="appUser"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="gaccTranId"	jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="IN"/>
+		<parameter property="issCd"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="premSeqNo" 	jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="IN"/>
+		<parameter property="instNo" 		jdbcType="INTEGER" 	javaType="java.lang.Integer" 	mode="IN"/>
+	</parameterMap>
+	
+	<procedure id="setGIACAdvancedPayt" parameterClass="GIACAdvancedPaytClass">
+		{CALL giac_advanced_payt_pkg.set_giac_advanced_payt
+				(#gaccTranId#, 		#policyId#, 	#transactionType#,
+				 #issCd#, 	   		#premSeqNo#, 	#premiumAmt#,
+				 #taxAmt#,			#instNo#, 	    #acctEntDate#,
+				 #userId#, 			#lastUpdate#,   #bookingMth#, 
+				 #bookingYear#, 	#cancelDate#,   #revGaccTranId#, 
+				 #batchGaccTranId#, #assdNo#)}
+	</procedure>
+	
+	<procedure id="deleteGIACAdvancedPaytMapParam" parameterMap="deleteGIACAdvancedPaytMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			giac_advanced_payt_pkg.delete_giac_advanced_payt(?,?,?,?);
+		END;
+	</procedure>
+	
+	<procedure id="deleteGIACAdvancedPaytEntityParam" parameterClass="GIACAdvancedPaytClass">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			giac_advanced_payt_pkg.delete_giac_advanced_payt(#gaccTranId#, #issCd#, #premSeqNo#, #instNo#);
+		END;
+	</procedure>
+	
+</sqlMap>

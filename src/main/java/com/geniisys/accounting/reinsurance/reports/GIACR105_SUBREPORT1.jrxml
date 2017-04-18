@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIACR105_SUBREPORT1" language="groovy" pageWidth="134" pageHeight="842" columnWidth="134" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="3.797498335832415"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="P_RI_CD" class="java.lang.String"/>
+	<parameter name="P_LINE_CD" class="java.lang.String"/>
+	<parameter name="P_DATE_TYPE" class="java.lang.String"/>
+	<parameter name="P_DATE_FROM" class="java.util.Date"/>
+	<parameter name="P_DATE_TO" class="java.util.Date"/>
+	<parameter name="P_TRAN_ID" class="java.math.BigDecimal" isForPrompting="false"/>
+	<parameter name="P_POL_ID" class="java.math.BigDecimal" isForPrompting="false"/>
+	<parameter name="P_PREM_SEQ_NO" class="java.math.BigDecimal"/>
+	<queryString>
+		<![CDATA[SELECT *
+  FROM TABLE (giacr105_pkg.get_binder_dtl
+       ($P{P_RI_CD},
+        $P{P_LINE_CD},
+	$P{P_DATE_TYPE},
+	TO_DATE($P{P_DATE_FROM}),
+	TO_DATE($P{P_DATE_TO}),
+        $P{P_TRAN_ID},
+	$P{P_POL_ID},
+	$P{P_PREM_SEQ_NO}))]]>
+	</queryString>
+	<field name="REF_DATE" class="java.lang.String"/>
+	<field name="REF_NO" class="java.lang.String"/>
+	<field name="COLL_AMT" class="java.math.BigDecimal"/>
+	<field name="TRAN_CLASS" class="java.lang.String"/>
+	<field name="POL_FLAG" class="java.lang.String"/>
+	<variable name="V_LINE_COLL_AMT" class="java.math.BigDecimal">
+		<variableExpression><![CDATA[$F{COLL_AMT}]]></variableExpression>
+	</variable>
+	<variable name="V_TOTAL_COLL_AMT" class="java.math.BigDecimal">
+		<variableExpression><![CDATA[$F{COLL_AMT}]]></variableExpression>
+	</variable>
+	<detail>
+		<band height="22" splitType="Stretch">
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement x="2" y="0" width="55" height="11"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{REF_DATE}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="0" y="11" width="62" height="11"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{REF_NO}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="64" y="0" width="70" height="11">
+					<printWhenExpression><![CDATA[$F{POL_FLAG}!="5"]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{COLL_AMT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="64" y="0" width="68" height="11">
+					<printWhenExpression><![CDATA[$F{POL_FLAG} == "5"]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["(SPOILED)"]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="57" y="0" width="4" height="11">
+					<printWhenExpression><![CDATA[$F{REF_DATE} != null]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[/]]></text>
+			</staticText>
+		</band>
+	</detail>
+</jasperReport>

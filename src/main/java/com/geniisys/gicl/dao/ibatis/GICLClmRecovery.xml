@@ -1,0 +1,555 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GICLClmRecovery">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+
+	<typeAlias alias="GICLClmRecoveryClass" type="com.geniisys.gicl.entity.GICLClmRecovery"/>
+	
+	<resultMap class="GICLClmRecoveryClass" id="GICLClmRecoveryResultMap">
+	    <result column="recovery_id" 			property="recoveryId" />
+        <result column="claim_id" 				property="claimId" />
+        <result column="line_cd" 				property="lineCd" />
+        <result column="rec_year" 				property="recYear" />
+        <result column="rec_seq_no" 			property="recSeqNo" />
+        <result column="rec_type_cd" 			property="recTypeCd" />
+        <result column="recoverable_amt" 		property="recoverableAmt" />
+        <result column="recovered_amt" 			property="recoveredAmt" />
+        <result column="tp_item_desc" 			property="tpItemDesc" />
+        <result column="plate_no" 				property="plateNo" />
+        <result column="currency_cd" 			property="currencyCd" />
+        <result column="convert_rate" 			property="convertRate" />
+        <result column="lawyer_class_cd" 		property="lawyerClassCd" />
+        <result column="lawyer_cd" 				property="lawyerCd" />
+        <result column="cpi_rec_no" 			property="cpiRecNo" />
+        <result column="cpi_branch_cd" 			property="cpiBranchCd" />
+        <result column="user_id" 				property="userId" />
+        <result column="last_update" 			property="lastUpdate" />
+        <result column="cancel_tag" 			property="cancelTag" />
+        <result column="iss_cd" 				property="issCd" />
+        <result column="rec_file_date" 			property="recFileDate" />
+        <result column="demand_letter_date" 	property="demandLetterDate" />
+        <result column="demand_letter_date2" 	property="demandLetterDate2" />
+        <result column="demand_letter_date3" 	property="demandLetterDate3" />
+        <result column="tp_driver_name" 		property="tpDriverName" />
+        <result column="tp_drvr_add" 			property="tpDrvrAdd" />
+        <result column="tp_plate_no" 			property="tpPlateNo" />
+        <result column="case_no" 				property="caseNo" />
+        <result column="court" 					property="court" />
+        <result column="dsp_lawyer_name" 		property="dspLawyerName" />
+        <result column="dsp_rec_stat_desc" 		property="dspRecStatDesc" />
+        <result column="dsp_rec_type_desc" 		property="dspRecTypeDesc" />
+        <result column="dsp_currency_desc" 		property="dspCurrencyDesc" />
+        <result column="msg_alert" 				property="msgAlert" />
+        <result column="dsp_check_valid" 		property="dspCheckValid"/>
+        <result column="dsp_check_all" 			property="dspCheckAll"/>
+	</resultMap>
+	
+	<resultMap class="GICLClmRecoveryClass" id="GICLClmRecoveryResultMapGrid" extends="GICLClmRecoveryResultMap">
+		<result column="rownum_" 				property="rowNum"/>
+		<result column="count_" 				property="rowCount"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="gicls025VariablesMap">
+		 <result column="assd_class_cd" 		property="assdClassCd"/>
+		 <result column="assd_no"				property="assdNo"/>
+		 <result column="assd_name"				property="assdName"/>
+		 <result column="plate_no"				property="plateNo"/>
+	</resultMap>
+	
+	<select id="getGiclClmRecoveryGrid" resultMap="GICLClmRecoveryResultMapGrid">
+		SELECT * 
+		  FROM (SELECT rownum rownum_, 
+		        	   b.count_, 
+		               a.*  
+		         FROM (SELECT * 
+                         FROM TABLE(GICL_CLM_RECOVERY_PKG.get_gicl_clm_recovery(#claimId#, #recoveryId#))
+                         	<isEqual property="sortColumn" compareValue="lineCd issCd recYear recSeqNo">
+		            			ORDER BY line_cd 
+		            			<isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              	</isNotNull>
+				              	,iss_cd
+				              	<isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              	</isNotNull>
+				              	,rec_year	
+				              	<isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              	</isNotNull>
+				              	,rec_seq_no
+			          		</isEqual> 
+			          		<isEqual property="sortColumn" compareValue="lawyerCd dspLawyerName">
+			            		ORDER BY lawyer_cd
+			            		<isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              	</isNotNull>
+				              	,dsp_lawyer_name
+			          		</isEqual>  
+				          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+				              </isNotNull>	
+                         ) a,
+                      (SELECT count(*) count_
+                         FROM TABLE(GICL_CLM_RECOVERY_PKG.get_gicl_clm_recovery(#claimId#, #recoveryId#))) b)
+         WHERE rownum_ BETWEEN #from# AND #to#                    					 			 		
+	</select>
+	
+   	<select id="getGiclClmRecoveryGrid2" resultMap="GICLClmRecoveryResultMapGrid">
+		SELECT * 
+		  FROM (SELECT rownum rownum_, 
+		        	   b.count_, 
+		               a.*  
+		         FROM (SELECT * FROM TABLE (GICL_CLM_RECOVERY_PKG.get_gicl_clm_recovery(#claimId#))
+		        WHERE UPPER(NVL(dsp_currency_desc, '***')) LIKE UPPER(NVL(#dspCurrencyDesc#, NVL(dsp_currency_desc, '***')))
+				  AND UPPER(iss_cd) LIKE UPPER(NVL(#issCd#, iss_cd))
+				  AND UPPER(line_cd) LIKE UPPER(NVL(#lineCd#, line_cd))
+				  AND NVL(convert_rate, 1) = NVL(#convertRate#, NVL(convert_rate, 1))
+				  AND NVL(recoverable_amt, 0) = NVL(#recoverableAmt#, NVL(recoverable_amt, 0))
+				  AND NVL(recovered_amt, 0) = NVL(#recoveredAmt#, NVL(recovered_amt, 0))
+				  AND rec_seq_no = NVL(#recSeqNo#, rec_seq_no)
+				  AND UPPER(rec_type_cd) LIKE UPPER(NVL(#recTypeCd#, rec_type_cd))
+				  AND UPPER(dsp_rec_type_desc) LIKE UPPER(NVL(#dspRecTypeDesc#, dsp_rec_type_desc))
+				  AND rec_year = NVL(#recYear#, rec_year)
+				  AND UPPER(dsp_rec_stat_desc) LIKE UPPER(NVL(#dspRecStatDesc#, dsp_rec_stat_desc))
+		         				<isEqual property="sortColumn" compareValue="lineCd issCd recYear recSeqNo">
+		            			ORDER BY line_cd 
+		            			<isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              	</isNotNull>
+				              	,iss_cd
+				              	<isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              	</isNotNull>
+				              	,rec_year	
+				              	<isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              	</isNotNull>
+				              	,rec_seq_no
+			          		</isEqual> 
+			          		<isEqual property="sortColumn" compareValue="recTypeCd dspRecTypeDesc">
+			            		ORDER BY rec_type_cd
+			            		<isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              	</isNotNull>
+				              	,dsp_rec_type_desc
+			          		</isEqual>  
+			          		<isEqual property="sortColumn" compareValue="dspCurrencyDesc">
+			            		ORDER BY dsp_currency_desc
+			          		</isEqual> 
+			          		<isEqual property="sortColumn" compareValue="convertRate">
+			            		ORDER BY convert_rate
+			          		</isEqual> 
+			          		<isEqual property="sortColumn" compareValue="recoverableAmt">
+			            		ORDER BY recoverable_amt
+			          		</isEqual> 
+			          		<isEqual property="sortColumn" compareValue="recoveredAmt">
+			            		ORDER BY recovered_amt
+			          		</isEqual> 
+			          		<isEqual property="sortColumn" compareValue="dspRecStatDesc">
+			            		ORDER BY dsp_rec_stat_desc
+			          		</isEqual> 
+				          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+				              </isNotNull>
+ 						) a,
+                      (SELECT count(*) count_
+                         FROM TABLE(GICL_CLM_RECOVERY_PKG.get_gicl_clm_recovery(#claimId#))
+                        WHERE UPPER(NVL(dsp_currency_desc, '***')) LIKE UPPER(NVL(#dspCurrencyDesc#, NVL(dsp_currency_desc, '***')))
+						  AND UPPER(iss_cd) LIKE UPPER(NVL(#issCd#, iss_cd))
+						  AND UPPER(line_cd) LIKE UPPER(NVL(#lineCd#, line_cd))
+						  AND NVL(convert_rate, 1) = NVL(#convertRate#, NVL(convert_rate, 1))
+						  AND NVL(recoverable_amt, 0) = NVL(#recoverableAmt#, NVL(recoverable_amt, 0))
+						  AND NVL(recovered_amt, 0) = NVL(#recoveredAmt#, NVL(recovered_amt, 0))
+						  AND rec_seq_no = NVL(#recSeqNo#, rec_seq_no)
+						  AND UPPER(rec_type_cd) LIKE UPPER(NVL(#recTypeCd#, rec_type_cd))
+						  AND UPPER(dsp_rec_type_desc) LIKE UPPER(NVL(#dspRecTypeDesc#, dsp_rec_type_desc))
+						  AND rec_year = NVL(#recYear#, rec_year)
+						  AND UPPER(dsp_rec_stat_desc) LIKE UPPER(NVL(#dspRecStatDesc#, dsp_rec_stat_desc))
+                       ) b)
+         WHERE rownum_ BETWEEN #from# AND #to#                    					 			 		
+	</select>
+	
+	<parameterMap class="map" id="saveClmRecoverableMap">
+		<parameter property="userId" 		jdbcType="VARCHAR"		javaType="java.lang.String"  	mode="IN"/>
+		<parameter property="lineCd" 		jdbcType="VARCHAR"		javaType="java.lang.String"  	mode="IN"/>
+		<parameter property="issCd" 		jdbcType="VARCHAR"		javaType="java.lang.String"  	mode="IN"/>
+		<parameter property="recYear"		jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="OUT" />
+		<parameter property="recSeqNo"		jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="OUT" />
+		<parameter property="recoveryId" 	jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="OUT" />
+		<parameter property="recFileDate" 	jdbcType="TIMESTAMP"	javaType="java.util.Date" 		mode="OUT" />
+	</parameterMap>
+	
+	<procedure id="saveClmRecoverable" parameterMap="saveClmRecoverableMap">
+		BEGIN
+			giis_users_pkg.app_user :=?; 
+			GICL_CLM_RECOVERY_PKG.save_recoverable(?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<parameterMap class="map" id="saveClmRecoverable2Map">
+		<parameter property="userId" 		jdbcType="VARCHAR"		javaType="java.lang.String"  	mode="IN"/>
+		<parameter property="chkChoose" 	jdbcType="VARCHAR"		javaType="java.lang.String"  	mode="IN"/>
+		<parameter property="itemNo"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="perilCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="nbtPaidAmt" 	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="clmLossId" 	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="recoveryId" 	jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="claimId" 		jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="recAmt" 		jdbcType="NUMERIC"		javaType="java.math.BigDecimal"	mode="OUT" />
+	</parameterMap>
+	
+	<procedure id="saveClmRecoverable2" parameterMap="saveClmRecoverable2Map">
+		BEGIN
+			giis_users_pkg.app_user :=?; 
+			GICL_CLM_RECOVERY_PKG.save_recoverable2(?, ?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<insert id="setGiclClmRecovery" parameterClass="GICLClmRecoveryClass">
+		BEGIN
+			giis_users_pkg.app_user := #userId#; 
+			GICL_CLM_RECOVERY_PKG.set_gicl_clm_recovery(
+					#recoveryId#, #claimId#, #lineCd#,        
+                    #recYear#, #recSeqNo#, #recTypeCd#,          
+                    #recoverableAmt#, #recoveredAmt#, #tpItemDesc#,        
+                    #plateNo#, #currencyCd#, #convertRate#,         
+                    #lawyerClassCd#, #lawyerCd#, #cpiRecNo#,           
+                    #cpiBranchCd#, #userId#, #lastUpdate#,  
+                    #cancelTag#, #issCd#, #recFileDate#, 
+                    #demandLetterDate#, #demandLetterDate2#, #demandLetterDate3#,  
+                    #tpDriverName#, #tpDrvrAdd#, #tpPlateNo#,          
+                    #caseNo#, #court#
+					);
+		END;
+	</insert>
+	
+	<select id="genRecHistNo" resultClass="java.lang.String">
+		SELECT gicl_clm_recovery_pkg.gen_rec_hist_no(#recoveryId#) FROM dual
+	</select>
+	
+	<parameterMap class="map" id="checkRecoveredAmtPerRecoveryMap">
+		<parameter property="claimId" 		javaType="java.lang.String"  jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="recoveryId" 	javaType="java.lang.String"  jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="count1" 		javaType="java.lang.Integer" jdbcType="INTEGER" mode="OUT"/>
+		<parameter property="count2" 		javaType="java.lang.Integer" jdbcType="INTEGER" mode="OUT"/>
+		<parameter property="count3" 		javaType="java.lang.Integer" jdbcType="INTEGER" mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="checkRecoveredAmtPerRecovery" parameterMap="checkRecoveredAmtPerRecoveryMap">
+		BEGIN
+			gicl_clm_recovery_pkg.check_recovery_recovered_amt(?, ?, ?, ?, ?);
+		END;	
+	</procedure>
+	
+	<procedure id="writeOffRecovery">
+		BEGIN
+			giis_users_pkg.app_user := #userId#; 
+			gicl_clm_recovery_pkg.write_off_recovery(#claimId#, #recoveryId#, #button#);
+		END;	
+	</procedure>
+	
+	<procedure id="cancelRecovery">
+		BEGIN
+			giis_users_pkg.app_user := #userId#; 
+			gicl_clm_recovery_pkg.cancel_recovery(#claimId#, #recoveryId#, #button#);
+		END;	
+	</procedure>
+	
+	<procedure id="closeRecovery">
+		BEGIN
+			giis_users_pkg.app_user := #userId#; 
+			gicl_clm_recovery_pkg.close_recovery(#claimId#, #recoveryId#, #button#);
+		END;	
+	</procedure>
+	
+	<!-- <resultMap class="GICLClmRecoveryClass" id="GICLRecoveryDistInfoResultMap" extends="BaseEntity.TableGridResultMap" > belle 12.17.2012 
+		<result property="dspLineCd"			column="dsp_line_cd"/>
+		<result property="dspIssCd"				column="dsp_iss_cd"/>
+		<result property="dspRecYear"			column="dsp_rec_year"/>
+		<result property="dspRecSeqNo"			column="dsp_rec_seq_no"/>
+		<result property="dspRefNo"				column="dsp_ref_no"/>
+		<result property="recoveryId"			column="recovery_id"/>
+		<result property="claimId"				column="claim_id"/>
+		<result property="recoveryPaytId"		column="recovery_payt_id"/>
+		<result property="payorClassCd"			column="payor_class_cd"/>
+		<result property="payorCd"				column="payor_cd"/>
+		<result property="dspPayorName" 		column="dsp_payor_name"/>
+		<result property="recoveredAmt"		    column="recovered_amt"/>
+		<result property="acctTranId"			column="acct_tran_id"/>
+		<result property="tranDate"				column="tran_date"/>
+		<result property="cancelTag"			column="cancel_tag"/>
+		<result property="cancelDate"			column="cancel_date"/>
+		<result property="entryTag"				column="entry_tag"/>
+		<result property="distSw"				column="dist_sw"/>
+		<result property="acctTranId2"			column="acct_tran_id2"/>
+		<result property="tranDate2"			column="tran_date2"/>
+		<result property="statSw"				column="stat_sw"/>
+		<result property="recoveryAcctId"		column="recovery_acct_id"/>			
+	</resultMap> -->
+	
+	<!-- pol cruz. 10.17.2013 -->
+	<resultMap class="java.util.HashMap" id="GICLRecoveryDistInfoResultMap" extends="BaseEntity.TableGridResultMap" >
+		<result property="dspLineCd"			column="dsp_line_cd"/>
+		<result property="dspIssCd"				column="dsp_iss_cd"/>
+		<result property="dspRecYear"			column="dsp_rec_year"/>
+		<result property="dspRecSeqNo"			column="dsp_rec_seq_no"/>
+		<result property="dspRefNo"				column="dsp_ref_no"/>
+		<result property="recoveryId"			column="recovery_id"/>
+		<result property="claimId"				column="claim_id"/>
+		<result property="recoveryPaytId"		column="recovery_payt_id"/>
+		<result property="payorClassCd"			column="payor_class_cd"/>
+		<result property="payorCd"				column="payor_cd"/>
+		<result property="dspPayorName" 		column="dsp_payor_name"/>
+		<result property="recoveredAmt"		    column="recovered_amt"/>
+		<result property="acctTranId"			column="acct_tran_id"/>
+		<result property="tranDate"				column="tran_date"/>
+		<result property="cancelTag"			column="cancel_tag"/>
+		<result property="cancelDate"			column="cancel_date"/>
+		<result property="entryTag"				column="entry_tag"/>
+		<result property="distSw"				column="dist_sw"/>
+		<result property="acctTranId2"			column="acct_tran_id2"/>
+		<result property="tranDate2"			column="tran_date2"/>
+		<result property="statSw"				column="stat_sw"/>
+		<result property="recoveryAcctId"		column="recovery_acct_id"/>
+		<result property="polEffDate"			column="pol_eff_date"/>
+		<result property="expiryDate"			column="expiry_date"/>
+		<result property="lossDate"				column="loss_date"/>			
+	</resultMap>
+
+	<select id="getClmRecoveryDistInfoGrid" resultMap="GICLRecoveryDistInfoResultMap">
+		SELECT * 
+		  FROM (SELECT rownum rownum_, 
+		        	   b.count_, 
+		               a.*  
+		         FROM (SELECT * 
+                         FROM TABLE(GICL_CLM_RECOVERY_PKG.get_recovery_dist_info(#claimId#))
+                         <isEqual property="sortColumn" compareValue="dspLineCd dspIssCd dspRecYear dspRecSeqNo">
+			              		ORDER BY dsp_line_cd || dsp_iss_cd || dsp_rec_year || dsp_rec_seq_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="dspRefNo">
+			              		ORDER BY dsp_ref_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="payorClassCd payorCd dspPayorName">
+			              		ORDER BY payor_class_cd || payor_cd || dsp_payor_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="recoveredAmt">
+			              		ORDER BY recovered_amt
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+                         ) a,
+                      (SELECT count(*) count_
+                         FROM TABLE(GICL_CLM_RECOVERY_PKG.get_recovery_dist_info(#claimId#))) b)
+         WHERE rownum_ BETWEEN #from# AND #to#                    					 			 		
+	</select>
+	
+	<parameterMap class="java.util.HashMap" id="gicls032ValPrintParamMap">
+		<parameter property="report1" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="report2" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="report3" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="report4" javaType="java.lang.String" jdbcType="VARCHAR" mode="IN"/>
+	</parameterMap>
+	
+	<procedure id="valPrint" parameterMap="gicls032ValPrintParamMap">
+		BEGIN
+		  GICLS025_VAL_PRINT(?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<update id="updateDemandLetterDates" parameterClass="java.util.HashMap">
+		BEGIN
+		  GIIS_USERS_PKG.app_user := #userId#;
+		  GICL_CLM_RECOVERY_PKG.update_demand_letter_dates(#claimId#, #recoveryId#, #demandLetterDate#, #demandLetterDate2#, #demandLetterDate3#);
+		END;
+	</update>
+	
+	<select id="getGicls025Variables" resultMap="gicls025VariablesMap" parameterClass="java.lang.Integer">
+		SELECT * FROM TABLE(GICL_CLM_RECOVERY_PKG.get_gicls025_variables(#claimId#))
+	</select>
+	
+	<select id="getGICLS260ClmRecovery" resultMap="GICLClmRecoveryResultMapGrid">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GICL_CLM_RECOVERY_PKG.get_gicl_clm_recovery_2(#claimId#))  
+		                <isNotNull property="filter">
+							WHERE 1=1
+							<isNotEmpty prepend="AND" property="lineCd">
+							  UPPER(line_cd) LIKE UPPER(#lineCd#)
+						    </isNotEmpty>
+						    <isNotEmpty prepend="AND" property="recYear">
+							  rec_year LIKE #recYear#
+						    </isNotEmpty>
+						    <isNotEmpty prepend="AND" property="recSeqNo">
+							  rec_seq_no LIKE #recSeqNo#
+						    </isNotEmpty>
+						    <isNotEmpty prepend="AND" property="recTypeCd">
+							  UPPER(rec_type_cd) LIKE UPPER(#recTypeCd#)
+						    </isNotEmpty>
+						    <isNotEmpty prepend="AND" property="dspRecTypeDesc">
+							  UPPER(dsp_rec_type_desc) LIKE UPPER(#dspRecTypeDesc#)
+						    </isNotEmpty>
+						    <isNotEmpty prepend="AND" property="dspCurrencyDesc">
+							  UPPER(dsp_currency_desc) LIKE UPPER(#dspCurrencyDesc#)
+						    </isNotEmpty>
+						    <isNotEmpty prepend="AND" property="convertRate">
+							  convert_rate LIKE #convertRate#
+						    </isNotEmpty>
+						    <isNotEmpty prepend="AND" property="recoverableAmt">
+							  recoverable_amt LIKE #recoverableAmt#
+						    </isNotEmpty>
+						    <isNotEmpty prepend="AND" property="recoveredAmt">
+							  recovered_amt LIKE #recoveredAmt#
+						    </isNotEmpty>
+						</isNotNull>
+		                <isEqual property="sortColumn" compareValue="lineCd recYear recSeqNo">
+		            			ORDER BY line_cd 
+		            			<isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              	</isNotNull>
+				              	,rec_year	
+				              	<isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              	</isNotNull>
+				              	,rec_seq_no
+			          		</isEqual>
+			          		<isEqual property="sortColumn" compareValue="recTypeCd dspRecTypeDesc">
+			            		ORDER BY rec_type_cd
+			            		<isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              	</isNotNull>
+				              	,dsp_rec_type_desc
+			          		</isEqual>
+		                	<isEqual property="sortColumn" compareValue="dspCurrencyDesc">
+			            		ORDER BY dsp_currency_desc
+			          		</isEqual> 
+			          		<isEqual property="sortColumn" compareValue="convertRate">
+			            		ORDER BY convert_rate
+			          		</isEqual> 
+			          		<isEqual property="sortColumn" compareValue="recoverableAmt">
+			            		ORDER BY recoverable_amt
+			          		</isEqual> 
+			          		<isEqual property="sortColumn" compareValue="recoveredAmt">
+			            		ORDER BY recovered_amt
+			          		</isEqual> 
+				          	<isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+				            </isNotNull>
+		                ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GICL_CLM_RECOVERY_PKG.get_gicl_clm_recovery_2(#claimId#))
+		                  <isNotNull property="filter">
+							WHERE 1=1
+							<isNotEmpty prepend="AND" property="lineCd">
+							  UPPER(line_cd) LIKE UPPER(#lineCd#)
+						    </isNotEmpty>
+						    <isNotEmpty prepend="AND" property="recYear">
+							  rec_year LIKE #recYear#
+						    </isNotEmpty>
+						    <isNotEmpty prepend="AND" property="recSeqNo">
+							  rec_seq_no LIKE #recSeqNo#
+						    </isNotEmpty>
+						    <isNotEmpty prepend="AND" property="recTypeCd">
+							  UPPER(rec_type_cd) LIKE UPPER(#recTypeCd#)
+						    </isNotEmpty>
+						    <isNotEmpty prepend="AND" property="dspRecTypeDesc">
+							  UPPER(dsp_rec_type_desc) LIKE UPPER(#dspRecTypeDesc#)
+						    </isNotEmpty>
+						    <isNotEmpty prepend="AND" property="dspCurrencyDesc">
+							  UPPER(dsp_currency_desc) LIKE UPPER(#dspCurrencyDesc#)
+						    </isNotEmpty>
+						    <isNotEmpty prepend="AND" property="convertRate">
+							  convert_rate LIKE #convertRate#
+						    </isNotEmpty>
+						    <isNotEmpty prepend="AND" property="recoverableAmt">
+							  recoverable_amt LIKE #recoverableAmt#
+						    </isNotEmpty>
+						    <isNotEmpty prepend="AND" property="recoveredAmt">
+							  recovered_amt LIKE #recoveredAmt#
+						    </isNotEmpty>
+						  </isNotNull>) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+</sqlMap>

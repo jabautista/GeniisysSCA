@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIXXCasualtyPersonnel">
+
+	<typeAlias alias="GIXXCasualtyPersonnel" type="com.geniisys.gixx.entity.GIXXCasualtyPersonnel" />
+	
+	<resultMap id="getGIXXCasualtyPersonnelTGMap" class="GIXXCasualtyPersonnel">
+		<result column="EXTRACT_ID"			property="extractId" />
+		<result column="ITEM_NO"			property="itemNo" />
+		<result column="POLICY_ID"			property="policyId" />
+		<result column="PERSONNEL_NO"		property="personnelNo" />
+		<result column="NAME"				property="name" />
+		<result column="INCLUDE_TAG"		property="includeTag" />
+		<result column="CAPACITY_CD"		property="capacityCd" />
+		<result column="AMOUNT_COVERED"		property="amountCovered" />
+		<result column="REMARKS"			property="remarks" />
+		<result column="DELETE_SW"			property="deleteSw" />
+		
+		<result property="rowNum"				column="rownum_"/>
+		<result property="rowCount"				column="count_"/>
+	</resultMap>
+	
+	<select id="getGIXXCasualtyPersonnelTG" resultMap="getGIXXCasualtyPersonnelTGMap" parameterClass="java.util.HashMap">
+		SELECT *       
+          FROM (SELECT rownum rownum_ ,b.count_,a.*     
+                  FROM (SELECT * FROM TABLE(gixx_casualty_personnel_pkg.get_casualty_personnel_info(#extractId#,#itemNo#))) a,
+	               	   (SELECT count(*) count_ FROM TABLE(gixx_casualty_personnel_pkg.get_casualty_personnel_info(#extractId#,#itemNo#))) b)   
+	     WHERE rownum_ BETWEEN NVL(#from#,rownum_) AND NVL(#to#,rownum_)
+	</select>
+</sqlMap>

@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIACBankBookTran">
+    <typeAlias alias="giacBankBookTran" type="com.geniisys.common.entity.GIACBankBookTran"/>
+    
+    <resultMap class="giacBankBookTran" id="giacBankBookTranListResultMap" extends="BaseEntity.TableGridResultMap">
+    	<result column="bank_cd"        	property="bankCd"/>
+    	<result column="bank_name"        	property="bankName"/>
+    	<result column="bank_sname"        	property="bankSname"/>
+    	<result column="bank_tran_cd"       property="bankTranCd"/>
+    	<result column="bank_tran_desc"     property="bankTranDesc"/>
+    	<result column="book_tran_cd"       property="bookTranCd"/>
+    	<result column="book_tran_desc"     property="bookTranDesc"/>
+    	<result column="remarks"     		property="remarks"/>
+    	<result column="user_id"     		property="userId"/>
+		<result column="last_update" 		property="lastUpdate"/>
+    </resultMap>
+    
+    <select id="getGiacs324RecList" resultMap="giacBankBookTranListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giacs324_pkg.get_rec_list(#bankCd#, #bankTranCd#, #bankTranDesc#, #bookTranCd#, #bookTranDesc#))
+		                  <isEqual property="sortColumn" compareValue="bankTranCd bankTranDesc">
+			              		ORDER BY bank_tran_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="bookTranCd bookTranDesc">
+			              		ORDER BY book_tran_cd
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giacs324_pkg.get_rec_list(#bankCd#, #bankTranCd#, #bankTranDesc#, #bookTranCd#, #bookTranDesc#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+    <resultMap id="getGiacs324BankCdLovMap" class="java.util.HashMap"  extends="BaseEntity.TableGridResultMap">
+	  	<result column="bank_cd"		property="bankCd"/>
+	  	<result column="bank_sname"		property="bankSname"/>
+	  	<result column="bank_name"		property="bankName"/>
+  	</resultMap>
+  	
+    <select id="getGiacs324BankCd" resultMap="getGiacs324BankCdLovMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+					   b.count_, 
+					   a.* 
+				  FROM (SELECT * 
+						  FROM TABLE (giacs324_pkg.get_bankcd_lov(#userId#, #findText#))
+						  <isEqual property="sortColumn" compareValue="bankSname">
+								ORDER BY bank_sname
+						  </isEqual>
+						  <isEqual property="sortColumn" compareValue="bankName">
+								ORDER BY bank_name
+						  </isEqual>
+						  <isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+						  </isNotNull>
+						  ) a, 
+					   (SELECT count(*) count_ 
+						  FROM TABLE (giacs324_pkg.get_bankcd_lov(#userId#, #findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+    <resultMap id="getGiacs324BookTranCdLovMap" class="java.util.HashMap"  extends="BaseEntity.TableGridResultMap">
+	  	<result column="tran_code"				property="tranCode"/>
+	  	<result column="book_transaction"		property="bookTransaction"/>
+  	</resultMap>
+  	
+    <select id="getGiacs324BookTranCd" resultMap="getGiacs324BookTranCdLovMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+					   b.count_, 
+					   a.* 
+				  FROM (SELECT * 
+						  FROM TABLE (giacs324_pkg.get_booktrancd_lov(#userId#, #findText#))
+						  <isEqual property="sortColumn" compareValue="tranCode">
+								ORDER BY tran_code
+						  </isEqual>
+						  <isEqual property="sortColumn" compareValue="bookTransaction">
+								ORDER BY book_transaction
+						  </isEqual>
+						  <isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+						  </isNotNull>
+						  ) a, 
+					   (SELECT count(*) count_ 
+						  FROM TABLE (giacs324_pkg.get_booktrancd_lov(#userId#, #findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+    <procedure id="valAddBankBookTran" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giacs324_pkg.val_add_rec(#bankCd#, #bankTranCd#, #bookTranCd#);
+ 		END;
+ 	</procedure>
+ 	
+    <procedure id="setBankBookTran" parameterClass="giacBankBookTran">
+	    DECLARE
+	    	v_rec giac_bank_book_tran%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.bank_cd := #bankCd#;
+ 			v_rec.bank_tran_cd := #bankTranCd#;
+ 			v_rec.bank_tran_desc := #bankTranDesc#;
+ 			v_rec.book_tran_cd := #bookTranCd#;
+ 			v_rec.book_tran_desc := #bookTranDesc#;
+ 			v_rec.remarks := #remarks#;
+ 			v_rec.user_id := #userId#;
+ 			
+ 			
+ 			giacs324_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+    <delete id="delBankBookTran" parameterClass="giacBankBookTran">
+		BEGIN
+ 			giacs324_pkg.del_rec(#bankCd#, #bankTranCd#);
+ 		END;
+ 	</delete>
+ 	
+     <procedure id="valBookTranCd" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giacs324_pkg.val_booktrancd_rec(#bookTranCd#);
+ 		END;
+ 	</procedure>
+</sqlMap>

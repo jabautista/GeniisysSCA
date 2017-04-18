@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISBancBranch">
+  
+  <typeAlias alias="GIISBancBranch" type="com.geniisys.common.entity.GIISBancBranch"/>
+    
+  <resultMap class="java.util.HashMap" id="GIISBancBranchListResultMap" extends="BaseEntity.TableGridResultMap">
+    <result column="branch_cd"     	property="branchCd"/>
+    <result column="branch_desc"  	property="branchDesc"/>
+    <result column="area_cd"  		property="areaCd"/>
+    <result column="area_desc"  	property="areaDesc"/>
+    <result column="eff_date"     	property="effDate"/>
+    <result column="manager_cd"  	property="managerCd"/>
+    <result column="manager_name"  	property="managerName"/>
+    <result column="bank_acct_cd"  	property="bankAcctCd"/>
+    <result column="mgr_eff_date"  	property="mgrEffDate"/>
+    <result column="user_id"     	property="userId"/>
+    <result column="last_update"	property="lastUpdate"/>
+    <result column="remarks"     	property="remarks"/>
+    
+  </resultMap>
+  
+  <select id="getGiiss216RecList" resultMap="GIISBancBranchListResultMap">
+    SELECT *
+      FROM (SELECT rownum rownum_, 
+                   b.count_, 
+                   a.*  
+              FROM (SELECT * FROM TABLE(giiss216_pkg.get_branch)
+              	WHERE 1 = 1
+              		<isNotEmpty prepend="AND" property="branchCd">
+              			branch_cd = #branchCd#
+              		</isNotEmpty>
+              		<isNotEmpty prepend="AND" property="branchDesc">
+              			UPPER(branch_desc) LIKE UPPER(#branchDesc#)
+              		</isNotEmpty>
+              		<isNotEmpty prepend="AND" property="areaDesc">
+              			UPPER(area_desc) LIKE UPPER(#areaDesc#)
+              		</isNotEmpty>
+              		<isNotEmpty prepend="AND" property="effDate">
+              			TRUNC(eff_date) = TO_DATE(#effDate#, 'mm-dd-yyyy')
+              		</isNotEmpty>
+                      <isEqual property="sortColumn" compareValue="branchCd">
+                        ORDER BY branch_cd
+                    </isEqual>
+                    <isEqual property="sortColumn" compareValue="branchDesc">
+                        ORDER BY branch_desc
+                    </isEqual>
+                    <isEqual property="sortColumn" compareValue="areaDesc">
+                        ORDER BY area_desc
+                    </isEqual>
+                    <isEqual property="sortColumn" compareValue="effDate">
+                        ORDER BY eff_date
+                    </isEqual>
+                    <isNotNull property="sortColumn">
+                        <isEqual property="ascDescFlg" compareValue="ASC">
+                          ASC
+                        </isEqual>
+                        <isEqual property="ascDescFlg" compareValue="DESC">
+                          DESC
+                        </isEqual>
+                    </isNotNull>
+                      ) a, 
+                   (SELECT count(*) count_ 
+                      FROM TABLE(giiss216_pkg.get_branch)
+                      WHERE 1 = 1
+              		<isNotEmpty prepend="AND" property="branchCd">
+              			branch_cd = #branchCd#
+              		</isNotEmpty>
+              		<isNotEmpty prepend="AND" property="branchDesc">
+              			UPPER(branch_desc) LIKE UPPER(#branchDesc#)
+              		</isNotEmpty>
+              		<isNotEmpty prepend="AND" property="areaDesc">
+              			UPPER(area_desc) LIKE UPPER(#areaDesc#)
+              		</isNotEmpty>
+              		<isNotEmpty prepend="AND" property="effDate">
+              			TRUNC(eff_date) = TO_DATE(#effDate#, 'mm-dd-yyyy')
+              		</isNotEmpty>
+                      ) b) 
+     WHERE rownum_ BETWEEN #from# AND #to#  
+  </select>
+  
+  <resultMap class="java.util.HashMap" id="GIISS216ManagerLovResMap" extends="BaseEntity.TableGridResultMap">
+    <result column="manager_cd"     	property="managerCd"/>
+    <result column="manager_name"  	property="managerName"/>
+  </resultMap>
+  
+  <select id="getGiiss216ManagerLov" resultMap="GIISS216ManagerLovResMap">
+    SELECT *
+      FROM (SELECT rownum rownum_, 
+                   b.count_, 
+                   a.*  
+              FROM (SELECT * FROM TABLE(giiss216_pkg.get_manager_lov)
+              	WHERE 1=1
+              		<isNotEmpty prepend="AND" property="findText">
+              			   (TO_CHAR(manager_cd) LIKE NVL(#findText#, TO_CHAR(manager_cd))
+              			   OR UPPER(manager_name) LIKE UPPER(NVL(#findText#, manager_name)))
+              		</isNotEmpty>
+              		<isNotEmpty prepend="AND" property="filterText">
+              			(TO_CHAR(manager_cd) LIKE NVL(#filterText#, TO_CHAR(manager_cd))
+              			   OR UPPER(manager_name) LIKE UPPER(NVL(#filterText#, manager_name)))
+              		</isNotEmpty>
+                      <isEqual property="sortColumn" compareValue="managerCd">
+                        ORDER BY manager_cd
+                    </isEqual>
+                    <isEqual property="sortColumn" compareValue="managerName">
+                        ORDER BY manager_name
+                    </isEqual>
+                    <isNotNull property="sortColumn">
+                        <isEqual property="ascDescFlg" compareValue="ASC">
+                          ASC
+                        </isEqual>
+                        <isEqual property="ascDescFlg" compareValue="DESC">
+                          DESC
+                        </isEqual>
+                    </isNotNull>
+                      ) a, 
+                   (SELECT count(*) count_ 
+                      FROM TABLE(giiss216_pkg.get_manager_lov)
+                      WHERE 1 = 1
+                      <isNotEmpty prepend="AND" property="findText">
+              			   (TO_CHAR(manager_cd) LIKE NVL(#findText#, TO_CHAR(manager_cd))
+              			   OR UPPER(manager_name) LIKE UPPER(NVL(#findText#, manager_name)))
+              		</isNotEmpty>
+              		<isNotEmpty prepend="AND" property="filterText">
+              			(TO_CHAR(manager_cd) LIKE NVL(#filterText#, TO_CHAR(manager_cd))
+              			   OR UPPER(manager_name) LIKE UPPER(NVL(#filterText#, manager_name)))
+              		</isNotEmpty>
+                      ) b) 
+     WHERE rownum_ BETWEEN #from# AND #to#  
+  </select>
+  
+  <procedure id="saveGiiss216" parameterClass="GIISBancBranch">
+	DECLARE
+		v_rec giis_banc_branch%ROWTYPE;
+	BEGIN        
+		giis_users_pkg.app_user := #userId#;
+		   
+		v_rec.branch_cd := #branchCd#;
+		v_rec.branch_desc := #branchDesc#;
+		v_rec.area_cd := #areaCd#;
+		v_rec.eff_date := #effDate#;
+		v_rec.remarks := #remarks#;
+		v_rec.user_id := #userId#;
+		<!-- v_rec.last_update := #lastUpdate#; -->
+		v_rec.manager_cd := #managerCd#;
+		v_rec.bank_acct_cd := #bankAcctCd#;
+		v_rec.mgr_eff_date := #mgrEffDate#;
+		   
+		giiss216_pkg.save_record(v_rec);
+	END;
+  </procedure>
+  
+  <resultMap class="java.util.HashMap" id="giiss216HistoryResultMap" extends="BaseEntity.TableGridResultMap">
+    <result column="old_area_cd" property="oldAreaCd" />
+	<result column="new_area_cd" property="newAreaCd" />
+	<result column="old_eff_date" property="oldEffDate" />
+	<result column="new_eff_date" property="newEffDate" />
+	<result column="user_id" property="userId" />
+	<result column="last_update" property="lastUpdate" />
+	<result column="old_manager_cd" property="oldManagerCd" />
+	<result column="new_manager_cd" property="newManagerCd" />
+	<result column="old_bank_acct_cd" property="oldBankAcctCd" />
+	<result column="new_bank_acct_cd" property="newBankAcctCd" />
+	<result column="old_mgr_eff_date" property="oldMgrEffDate" />
+	<result column="new_mgr_eff_date" property="newMgrEffDate" />
+	<result column="branch_cd" property="branchCd" />
+  </resultMap>
+  
+  <select id="getGiiss216History" resultMap="giiss216HistoryResultMap">
+    SELECT *
+      FROM (SELECT rownum rownum_, 
+                   b.count_, 
+                   a.*  
+              FROM (SELECT * FROM TABLE(giiss216_pkg.get_history(#branchCd#))
+              		 WHERE 1 = 1
+              		  <isNotEmpty prepend="AND" property="oldAreaCd">
+							old_area_cd = #oldAreaCd#
+						</isNotEmpty>
+						<isNotEmpty prepend="AND" property="newAreaCd">
+							new_area_cd = #newAreaCd#
+						</isNotEmpty>
+						<isNotEmpty prepend="AND" property="oldEffDate">
+							old_eff_date = TO_DATE(#oldEffDate#, 'mm-dd-yyyy')
+						</isNotEmpty>
+						<isNotEmpty prepend="AND" property="newEffDate">
+							new_eff_date = TO_DATE(#newEffDate#, 'mm-dd-yyyy')
+						</isNotEmpty>
+						<isNotEmpty prepend="AND" property="userId">
+							UPPER(user_id) LIKE UPPER(#userId#)
+						</isNotEmpty>
+						<isNotEmpty prepend="AND" property="lastUpdate">
+							UPPER(last_update) LIKE UPPER(#lastUpdate#)
+						</isNotEmpty>
+						<isNotEmpty prepend="AND" property="oldManagerCd">
+							old_manager_cd = #oldManagerCd#
+						</isNotEmpty>
+						<isNotEmpty prepend="AND" property="newManagerCd">
+							new_manager_cd = #newManagerCd#
+						</isNotEmpty>
+						<isNotEmpty prepend="AND" property="oldBankAcctCd">
+							UPPER(old_bank_acct_cd) LIKE UPPER(#oldBankAcctCd#)
+						</isNotEmpty>
+						<isNotEmpty prepend="AND" property="newBankAcctCd">
+							UPPER(new_bank_acct_cd) LIKE UPPER(#newBankAcctCd#)
+						</isNotEmpty>
+						<isNotEmpty prepend="AND" property="oldMgrEffDate">
+							old_mgr_eff_date = TO_DATE(#oldMgrEffDate#, 'mm-dd-yyyy')
+						</isNotEmpty>
+						<isNotEmpty prepend="AND" property="newMgrEffDate">
+							new_mgr_eff_date = TO_DATE(#newMgrEffDate#, 'mm-dd-yyyy')
+						</isNotEmpty>
+                      <isEqual property="sortColumn" compareValue="oldAreaCd">
+						  ORDER BY old_area_cd
+						</isEqual>
+						<isEqual property="sortColumn" compareValue="newAreaCd">
+						  ORDER BY new_area_cd
+						</isEqual>
+						<isEqual property="sortColumn" compareValue="oldEffDate">
+						  ORDER BY old_eff_date
+						</isEqual>
+						<isEqual property="sortColumn" compareValue="newEffDate">
+						  ORDER BY new_eff_date
+						</isEqual>
+						<isEqual property="sortColumn" compareValue="userId">
+						  ORDER BY user_id
+						</isEqual>
+						<isEqual property="sortColumn" compareValue="lastUpdate">
+						  ORDER BY last_update
+						</isEqual>
+						<isEqual property="sortColumn" compareValue="oldManagerCd">
+						  ORDER BY old_manager_cd
+						</isEqual>
+						<isEqual property="sortColumn" compareValue="newManagerCd">
+						  ORDER BY new_manager_cd
+						</isEqual>
+						<isEqual property="sortColumn" compareValue="oldBankAcctCd">
+						  ORDER BY old_bank_acct_cd
+						</isEqual>
+						<isEqual property="sortColumn" compareValue="newBankAcctCd">
+						  ORDER BY new_bank_acct_cd
+						</isEqual>
+						<isEqual property="sortColumn" compareValue="oldMgrEffDate">
+						  ORDER BY old_mgr_eff_date
+						</isEqual>
+						<isEqual property="sortColumn" compareValue="newMgrEffDate">
+						  ORDER BY new_mgr_eff_date
+						</isEqual>
+                    <isNotNull property="sortColumn">
+                        <isEqual property="ascDescFlg" compareValue="ASC">
+                          ASC
+                        </isEqual>
+                        <isEqual property="ascDescFlg" compareValue="DESC">
+                          DESC
+                        </isEqual>
+                    </isNotNull>
+                      ) a, 
+                   (SELECT count(*) count_ 
+                      FROM TABLE(giiss216_pkg.get_history(#branchCd#))
+                      WHERE 1 = 1
+              		  <isNotEmpty prepend="AND" property="oldAreaCd">
+							old_area_cd = #oldAreaCd#
+						</isNotEmpty>
+						<isNotEmpty prepend="AND" property="newAreaCd">
+							new_area_cd = #newAreaCd#
+						</isNotEmpty>
+						<isNotEmpty prepend="AND" property="oldEffDate">
+							old_eff_date = TO_DATE(#oldEffDate#, 'mm-dd-yyyy')
+						</isNotEmpty>
+						<isNotEmpty prepend="AND" property="newEffDate">
+							new_eff_date = TO_DATE(#newEffDate#, 'mm-dd-yyyy')
+						</isNotEmpty>
+						<isNotEmpty prepend="AND" property="userId">
+							UPPER(user_id) LIKE UPPER(#userId#)
+						</isNotEmpty>
+						<isNotEmpty prepend="AND" property="lastUpdate">
+							UPPER(last_update) LIKE UPPER(#lastUpdate#)
+						</isNotEmpty>
+						<isNotEmpty prepend="AND" property="oldManagerCd">
+							old_manager_cd = #oldManagerCd#
+						</isNotEmpty>
+						<isNotEmpty prepend="AND" property="newManagerCd">
+							new_manager_cd = #newManagerCd#
+						</isNotEmpty>
+						<isNotEmpty prepend="AND" property="oldBankAcctCd">
+							UPPER(old_bank_acct_cd) LIKE UPPER(#oldBankAcctCd#)
+						</isNotEmpty>
+						<isNotEmpty prepend="AND" property="newBankAcctCd">
+							UPPER(new_bank_acct_cd) LIKE UPPER(#newBankAcctCd#)
+						</isNotEmpty>
+						<isNotEmpty prepend="AND" property="oldMgrEffDate">
+							old_mgr_eff_date = TO_DATE(#oldMgrEffDate#, 'mm-dd-yyyy')
+						</isNotEmpty>
+						<isNotEmpty prepend="AND" property="newMgrEffDate">
+							new_mgr_eff_date = TO_DATE(#newMgrEffDate#, 'mm-dd-yyyy')
+						</isNotEmpty>
+                      ) b) 
+     WHERE rownum_ BETWEEN #from# AND #to#  
+  </select>
+  
+  	<procedure id="valAddRecGiiss216" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss216_pkg.val_add_rec(#branchCd#, #branchDesc#, #areaCd#, #stat#);
+ 		END;
+ 	</procedure>
+  
+</sqlMap>

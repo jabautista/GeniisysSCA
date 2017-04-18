@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIWinvTax">
+
+	<typeAlias alias="WinvTax" type="com.geniisys.gipi.entity.GIPIWinvTax" />
+	<resultMap class="WinvTax" id="winvtax">
+		<result property="taxId" column="TAX_ID"/>
+		<result property="taxCd" column="TAX_CD" />
+		<result property="taxDesc" column="TAX_DESC"/>
+		<result property="taxAmt" column="TAX_AMT"/>
+		<result property="parId" column="PAR_ID"/>
+		<result property="lineCd" column="LINE_CD"/>
+		<result property="issCd" column="ISS_CD"/>
+		<result property="itemGrp" column="ITEM_GRP"/>
+		<result property="takeupSeqNo" column="TAKEUP_SEQ_NO"/>
+		<result property="rate" column="RATE"/>
+		<result property="perilSw" column="PERIL_SW"/>
+		<result property="taxAllocation" column="TAX_ALLOCATION"/>
+		<result property="fixedTaxAllocation" column="FIXED_TAX_ALLOCATION"/>
+		<result property="sumTaxAmt" column="SUM_TAX_AMT"/>
+		<result property="primarySw" column="PRIMARY_SW" />
+		<result property="noRateTag" column="NO_RATE_TAG" />
+	 </resultMap>
+	 
+	 <parameterMap class="map" id="isExistMapWinvTax">
+	    <parameter property="parId"			    jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="IN"/>
+	    <parameter property="exist"			    jdbcType="VARCHAR" 	javaType="java.lang.String"  mode="OUT"/>
+	</parameterMap>
+	 
+	 <select id="getWinvTax" resultMap="winvtax">
+		SELECT * FROM TABLE(Gipi_Winv_Tax_Pkg.get_gipi_winv_tax(#parId#, #itemGrp#))
+	</select>
+	
+	<select id="getWinvTax2" resultMap="winvtax">
+		SELECT * FROM TABLE(Gipi_Winv_Tax_Pkg.get_gipi_winv_tax2(#parId#, #itemGrp#, #takeupSeqNo#))
+		ORDER BY tax_cd
+	</select>
+	
+	<select id="getWinvTax3" resultMap="winvtax" parameterClass="java.lang.Integer">
+		SELECT * FROM TABLE(Gipi_Winv_Tax_Pkg.get_gipi_winv_tax3(#parId#))
+	</select>
+	
+	<select id="getWinvTax4" resultMap="winvtax" parameterClass="java.lang.Integer">
+		SELECT * FROM TABLE(Gipi_Winv_Tax_Pkg.get_inv_tax_for_insert(#parId#))
+	</select>
+	
+	<procedure id="saveGIPIWinvTax" parameterClass="WinvTax">
+		DECLARE
+			winvtax  gipi_winv_tax%rowtype;
+		BEGIN
+			winvtax.TAX_ID 					:= #taxId#;
+			winvtax.TAX_CD 					:= #taxCd#;
+			winvtax.TAX_AMT 				:= #taxAmt#;
+			winvtax.PAR_ID 					:= #parId#;
+			winvtax.LINE_CD 				:= #lineCd#;
+			winvtax.ISS_CD 					:= #issCd#;
+			winvtax.ITEM_GRP 				:= #itemGrp#;
+			winvtax.TAKEUP_SEQ_NO 			:= #takeupSeqNo#;
+<!-- 			winvtax.RATE 					:= #rate#;  commented out by Gzelle 10282014-->
+			winvtax.TAX_ALLOCATION 			:= #taxAllocation#;
+			winvtax.FIXED_TAX_ALLOCATION 	:= #fixedTaxAllocation#;
+					
+		
+			Gipi_Winv_Tax_Pkg.set_gipi_winv_tax(winvtax);
+
+		END;
+	</procedure>
+	
+	<procedure id="deleteAllGIPIWinvTax" parameterClass="java.lang.Integer">
+		BEGIN
+			Gipi_Winv_Tax_Pkg.del_all_gipi_winv_tax(#parId#);
+		END;
+	</procedure>
+	
+	<procedure id="deleteGIPIWinvTaxPerRecord" parameterClass="java.util.HashMap">
+		BEGIN
+			Gipi_Winv_Tax_Pkg.del_gipi_winv_tax(#parId#, #itemGrp#, #taxCd#, #lineCd#, #issCd#);
+		END;
+	</procedure>
+	
+	<procedure id="isExistWinvTax" parameterMap="isExistMapWinvTax">
+		{ CALL Gipi_Winv_Tax_Pkg.get_gipi_winv_tax_exist(?, ?) }
+	</procedure>
+	
+	<delete id="delSelGipiWinvTax" parameterClass="java.util.HashMap">
+		BEGIN
+			Gipi_Winv_Tax_Pkg.del_sel_gipi_winv_tax(#parId#, #itemGrp#, #taxCd#, #takeupSeqNo#); 
+		END;	
+	</delete>
+	
+</sqlMap>

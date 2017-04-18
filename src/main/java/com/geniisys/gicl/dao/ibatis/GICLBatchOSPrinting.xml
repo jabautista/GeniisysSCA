@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GICLBatchOSPrinting">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<resultMap class="java.util.HashMap" id="gicls207RecordMap" extends="BaseEntity.TableGridResultMap">
+		<result column="os_Tag"				property="osTag" />
+		<result column="loss_Tag"	    	property="lossTag" />
+		<result column="exp_Tag"			property="expTag" />
+		<result column="tran_date"			property="tranDate" />
+		<result column="gibr_branch_cd"	    property="branchCd" />
+		<result column="tran_id"			property="tranId" />
+		<result column="tran_class"	    	property="tranClass" />
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="gicls207LossExpMap">
+		<result column="tran_id"			property="tranId" />
+		<result column="extract_tran_id"	property="extractTranId" />
+		<result column="tag"	    		property="tag" />
+		<result column="msg"	    		property="msg" />
+	</resultMap>
+	
+	<select id="getGICLS207Record" resultMap="gicls207RecordMap">
+		SELECT * 
+		  FROM (SELECT '' os_Tag, '' loss_Tag, '' exp_Tag, a.*, b.count_, rownum rownum_
+		          FROM (SELECT * 
+		  		   		  FROM TABLE(gicls207_pkg.get_batch_os_records(#userId#))
+						  WHERE 1=1
+                    	<isNotEmpty prepend="AND"  property="tranDate">
+							TRUNC(TO_DATE(tran_date,'MM-DD-YYYY')) = TRUNC(TO_DATE(#tranDate#,'MM-DD-YYYY'))
+						</isNotEmpty>
+						<isNotEmpty prepend="AND"  property="branchCd">
+							UPPER(gibr_branch_cd) LIKE UPPER(#branchCd#)
+						</isNotEmpty>
+						<isNotEmpty prepend="AND"  property="tranId">
+							tran_id LIKE #tranId#
+						</isNotEmpty>
+						<isNotEmpty prepend="AND"  property="tranClass">
+							UPPER(tran_class) LIKE UPPER(#tranClass#)
+						</isNotEmpty>
+						<isEqual property="sortColumn" compareValue="tranDate">
+		              		ORDER BY tran_date
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="branchCd">
+		              		ORDER BY gibr_branch_cd
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="tranId">
+		              		ORDER BY tran_id
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="tranClass">
+		              		ORDER BY tran_class
+			            </isEqual>
+			            <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	</isNotNull>
+		  		   		) a,
+		          	   (SELECT count(*) count_ 
+		  		   		  FROM TABLE(gicls207_pkg.get_batch_os_records(#userId#))
+	  		   		     WHERE 1=1
+                    	<isNotEmpty prepend="AND"  property="tranDate">
+							TRUNC(TO_DATE(tran_date,'MM-DD-YYYY')) = TRUNC(TO_DATE(#tranDate#,'MM-DD-YYYY'))
+						</isNotEmpty>
+						<isNotEmpty prepend="AND"  property="branchCd">
+							UPPER(gibr_branch_cd) LIKE UPPER(#branchCd#)
+						</isNotEmpty>
+						<isNotEmpty prepend="AND"  property="tranId">
+							tran_id LIKE #tranId#
+						</isNotEmpty>
+						<isNotEmpty prepend="AND"  property="tranClass">
+							UPPER(tran_class) LIKE UPPER(#tranClass#)
+						</isNotEmpty>
+		  		   		) b
+               )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGICLS207AllRecord" resultMap="gicls207RecordMap">
+		SELECT '' os_Tag, '' loss_Tag, '' exp_Tag, a.*, '' count_, '' rownum_
+		          FROM TABLE(gicls207_pkg.get_batch_os_records(#userId#)) a
+	</select>
+	
+	<select id="getGICLS207LossExpRecord" resultMap="gicls207LossExpMap">
+		SELECT *
+		          FROM TABLE(gicls207_pkg.validate_loss_exp(#userId#,#tranId#))
+	</select>
+	
+	<procedure id="extractOSDetail">
+		{CALL gicls207_pkg.extract_os_detail(#tranId#)}
+	</procedure>
+</sqlMap>

@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIACR606_TRAN5" language="groovy" pageWidth="950" pageHeight="612" orientation="Landscape" whenNoDataType="BlankPage" columnWidth="950" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="1.3310000000000142"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="P_SOURCE_CD" class="java.lang.String"/>
+	<parameter name="P_TRAN_TYPE" class="java.lang.String"/>
+	<parameter name="P_FILE_NAME" class="java.lang.String"/>
+	<parameter name="P_PREM_CHECK_FLAG" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT *
+FROM TABLE (GIACR606_PKG.POPULATE_GIACR606_TRAN5
+($P{P_SOURCE_CD},
+ $P{P_TRAN_TYPE},
+ $P{P_FILE_NAME},
+ $P{P_PREM_CHECK_FLAG}))
+ORDER BY FILE_NAME, PREM_CHK_FLAG]]>
+	</queryString>
+	<field name="FILE_NAME" class="java.lang.String"/>
+	<field name="PREM_CHK_FLAG" class="java.lang.String"/>
+	<field name="PREM_MEANING" class="java.lang.String"/>
+	<field name="PAYOR" class="java.lang.String"/>
+	<field name="BANK_REF_NO" class="java.lang.String"/>
+	<field name="COLLECTION_AMT" class="java.math.BigDecimal"/>
+	<field name="CHK_REMARKS" class="java.lang.String"/>
+	<variable name="FILE_COLLECTION_AMT_TOTAL" class="java.math.BigDecimal" resetType="Group" resetGroup="FILE_NAME_GROUP" calculation="Sum">
+		<variableExpression><![CDATA[$F{COLLECTION_AMT}]]></variableExpression>
+	</variable>
+	<variable name="STATUS_COLLECTION_AMT_TOTAL" class="java.math.BigDecimal" resetType="Group" resetGroup="STATUS_GROUP" calculation="Sum">
+		<variableExpression><![CDATA[$F{COLLECTION_AMT}]]></variableExpression>
+	</variable>
+	<group name="FILE_NAME_GROUP">
+		<groupExpression><![CDATA[$F{FILE_NAME}]]></groupExpression>
+		<groupFooter>
+			<band height="39">
+				<staticText>
+					<reportElement x="385" y="0" width="83" height="13"/>
+					<textElement textAlignment="Right"/>
+					<text><![CDATA[-----------------------------------------------------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="385" y="26" width="83" height="13"/>
+					<textElement textAlignment="Right"/>
+					<text><![CDATA[======================]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="373" y="13" width="12" height="13"/>
+					<textElement/>
+					<text><![CDATA[:]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="299" y="13" width="69" height="13"/>
+					<textElement textAlignment="Right"/>
+					<text><![CDATA[Total per File]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement x="385" y="13" width="83" height="13"/>
+					<textElement textAlignment="Right"/>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{FILE_COLLECTION_AMT_TOTAL}]]></textFieldExpression>
+				</textField>
+			</band>
+			<band height="1">
+				<break>
+					<reportElement x="0" y="0" width="100" height="1"/>
+				</break>
+			</band>
+		</groupFooter>
+	</group>
+	<group name="STATUS_GROUP">
+		<groupExpression><![CDATA[$F{PREM_CHK_FLAG}]]></groupExpression>
+		<groupHeader>
+			<band height="35">
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement x="0" y="10" width="250" height="13"/>
+					<textElement>
+						<font isStrikeThrough="false"/>
+					</textElement>
+					<textFieldExpression class="java.lang.String"><![CDATA[($F{PREM_CHK_FLAG}==null?" ":$F{PREM_CHK_FLAG})+($F{PREM_MEANING}==null?" - ":" - "+$F{PREM_MEANING})]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="26">
+				<staticText>
+					<reportElement x="385" y="0" width="83" height="13"/>
+					<textElement textAlignment="Right"/>
+					<text><![CDATA[-----------------------------------------------------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="373" y="13" width="12" height="13"/>
+					<textElement verticalAlignment="Middle"/>
+					<text><![CDATA[:]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="271" y="13" width="97" height="13"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle"/>
+					<text><![CDATA[Total per Status]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement x="385" y="13" width="83" height="13"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle"/>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{STATUS_COLLECTION_AMT_TOTAL}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<columnHeader>
+		<band height="67">
+			<staticText>
+				<reportElement x="0" y="0" width="950" height="13"/>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[CONVERTED RECORDS PER STATUS]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="41" width="79" height="13"/>
+				<textElement/>
+				<text><![CDATA[Payor]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="54" width="250" height="13"/>
+				<textElement/>
+				<text><![CDATA[-------------------------------------------------------------------------------]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="255" y="41" width="125" height="13"/>
+				<textElement/>
+				<text><![CDATA[Bank Reference Number]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="255" y="54" width="125" height="13"/>
+				<textElement/>
+				<text><![CDATA[----------------------------------------------------------------------]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="385" y="41" width="83" height="13"/>
+				<textElement textAlignment="Right"/>
+				<text><![CDATA[Collection Amount]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="385" y="54" width="83" height="13"/>
+				<textElement textAlignment="Right"/>
+				<text><![CDATA[----------------------------------------------------------------------]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="475" y="41" width="111" height="13"/>
+				<textElement/>
+				<text><![CDATA[Check Remarks]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="475" y="54" width="475" height="13"/>
+				<textElement/>
+				<text><![CDATA[-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="0" y="13" width="950" height="13"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{FILE_NAME}]]></textFieldExpression>
+			</textField>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="13" splitType="Stretch">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="475" y="0" width="475" height="13"/>
+				<textElement/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{CHK_REMARKS}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="385" y="0" width="83" height="13"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{COLLECTION_AMT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="256" y="0" width="124" height="13"/>
+				<textElement/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{BANK_REF_NO}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="0" y="0" width="250" height="13"/>
+				<textElement/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{PAYOR}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

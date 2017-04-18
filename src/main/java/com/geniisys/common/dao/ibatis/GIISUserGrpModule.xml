@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISUserGrpModule">
+	<cacheModel id="oneDayClient" type="MEMORY">
+    	<flushInterval hours="24"/>
+    	<property name="reference-type" value="WEAK"/>
+  	</cacheModel>
+  	
+  	<typeAlias alias="GIISUserGrpModule" type="com.geniisys.common.entity.GIISUserGrpModule" />
+  	
+  	<resultMap id="GroupModulesMap" class="GIISUserGrpModule">
+  		<result column="USER_GRP" 		property="userGroup" />
+  		<result column="MODULE_ID" 		property="moduleId" />
+  		<result column="MODULE_DESC" 	property="moduleDesc" />
+  		<result column="USER_ID" 		property="userId" />
+  		<result column="LAST_UPDATE" 	property="lastUpdate" />
+  		<result column="REMARKS" 		property="remarks" />
+  		<result column="ACCESS_TAG" 	property="accessTag" />
+  		<result column="TRAN_CD" 		property="tranCd" />
+  		<result column="CREATE_USER"	property="createUser" />
+  		<result column="CREATE_DATE"	property="createDate" />
+  	</resultMap>
+  	
+  	<resultMap id="GiisUserGrpModules" class="GIISUserGrpModule">
+  		<result column="MODULE_ID" 		property="moduleId" />
+  	</resultMap>
+  	
+  	<resultMap id="ModuleUserGroups" class="GIISUserGrpModule">
+  		<result column="USER_GRP" 		property="userGroup" />
+  		<result column="USER_GRP_DESC"	property="moduleDesc" />
+  		<result column="REMARKS"		property="remarks" />
+  		<result column="USER_ID"		property="userId" />
+  		<result column="LAST_UPDATE"	property="lastUpdate" />
+  	</resultMap>
+  	
+  	<resultMap class="GIISUserGrpModule" id="userGrpModulesMap" extends="BaseEntity.TableGridResultMap">
+  		<result column="user_grp" 			property="userGrp" />
+  		<result column="tran_cd" 			property="tranCd" />
+		<result column="module_id" 			property="moduleId" />
+		<result column="module_desc" 		property="moduleDesc" />
+		<result column="user_id" 			property="userId" />
+		<result column="last_update" 		property="lastUpdate" />
+		<result column="remarks"	 		property="remarks" />
+		<result column="access_tag"	 		property="accessTag" />
+		<result column="access_tag_desc" 	property="accessTagDesc" />
+		<result column="inc_tag" 			property="incTag" />
+	</resultMap>
+  	
+  	<select id="getGiisGrpModulesList" resultMap="GroupModulesMap" parameterClass="java.lang.String">
+  		 select * from table(GIIS_USER_GRP_MODULES_PKG.get_giis_user_grp_modules_list(#userGrp#)) order by module_desc
+  	</select>
+  	
+  	<insert id="setGiisUserGrpModule" parameterClass="GIISUserGrpModule">
+  		BEGIN
+  			giis_users_pkg.app_user := #userId#;
+  			GIIS_USER_GRP_MODULES_PKG.set_giis_user_grp_modules(#userGrp#, #moduleId#, #remarks#, #accessTag#, #tranCd#, #userId#);
+  		END;
+  	</insert>
+  	
+  	<delete id="deleteGiisUserGrpModule" parameterClass="java.lang.Integer">
+  		BEGIN
+  			giis_users_pkg.app_user := #appUser#;
+  			GIIS_USER_GRP_MODULES_PKG.del_giis_user_grp_module(#userGrp#);
+  		END;
+  	</delete>
+  	
+  	<select id="getGiisUserGrpModules" parameterClass="java.lang.String" resultMap="GiisUserGrpModules">
+  		select * from table(Giis_User_Grp_Modules_Pkg.get_giis_user_grp_modules(#userGrp#))
+  	</select>
+  	
+  	<select id="getModuleUserGrps" resultMap="ModuleUserGroups">
+  		SELECT * FROM TABLE(GIIS_USER_GRP_MODULES_PKG.get_module_user_grps(#moduleId#)) ORDER BY USER_GRP_DESC
+  	</select>
+  	
+  	<select id="getUserGrpModules" resultMap="userGrpModulesMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss041_pkg.get_module_list(#userGrp#, #tranCd#, #moduleId#, #moduleDesc#))
+		  	      		  <isEqual property="sortColumn" compareValue="incTag">
+			              		ORDER BY inc_tag
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="moduleId">
+			              		ORDER BY module_id
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="moduleDesc">
+			              		ORDER BY module_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="accessTagDesc">
+			              		ORDER BY access_tag_desc
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss041_pkg.get_module_list(#userGrp#, #tranCd#, #moduleId#, #moduleDesc#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<delete id="deleteUserGrpModule" parameterClass="GIISUserGrpModule">
+		BEGIN
+ 			giiss041_pkg.del_user_grp_modules(#userGrp#, #moduleId#, #tranCd#);
+ 		END;
+ 	</delete>
+ 	
+ 	<procedure id="updateUserGrpModule" parameterClass="GIISUserGrpModule">
+	    DECLARE
+	    	v_rec giis_user_grp_modules%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.user_grp := #userGrp#;
+			v_rec.module_id := #moduleId#;
+			v_rec.tran_cd := #tranCd#;
+			v_rec.access_tag := #accessTag#;
+			v_rec.remarks := #remarks#;
+			v_rec.user_id := #userId#;
+ 			
+ 			giiss041_pkg.set_user_grp_modules(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="checkAllUserGrpModules" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giis_users_pkg.app_user := #userId#;
+ 			giiss041_pkg.check_all_modules(#userGrp#, #tranCd#, #moduleId#, #moduleDesc#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="uncheckAllUserGrpModules" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giis_users_pkg.app_user := #userId#;
+ 			giiss041_pkg.uncheck_all_modules(#userGrp#, #tranCd#, #moduleId#, #moduleDesc#);
+ 		END;
+ 	</procedure>
+</sqlMap>

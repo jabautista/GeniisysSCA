@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIACCollectionDtl">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<!-- Add other properties here (emman 07.22.10) -->
+	<resultMap class="com.geniisys.giac.entity.GIACCollectionDtl" id="GIACCollectionDtlMap">
+		<result column="fc_gross_amt" property="fcGrossAmt" />
+		<result column="fcurrency_amt" property="fCurrencyAmt" />
+		<result column="gross_amt" property="grossAmt" />
+		<result column="amount" property="amt" />
+	</resultMap>
+	
+	<!-- Result map to load collection details {dennis 09-14-10} -->
+	<resultMap class="java.util.HashMap" id="GIACCollnDtlMap">
+		<result column="item_no" property="itemNo" />
+		<result column="currency_cd" property="currencyCd" />
+		<result column="currency_rt" property="currencyRt" />
+		<result column="pay_mode" property="payMode" />
+		<result column="amount" property="amt" />
+		<result column="check_date" property="checkDate" />
+		<result column="check_no" property="checkNo" />
+		<result column="particulars" property="particulars" />
+		<result column="bank_cd" property="bankCd" />
+		<result column="check_class" property="checkClass" />
+		<result column="fcurrency_amt" property="fCurrencyAmt" />
+		<result column="gross_amt" property="grossAmt" />
+		<result column="intm_no" property="intmNo" />
+		<result column="commission_amt" property="commAmt" />
+		<result column="vat_amt" property="vatAmt" />
+		<result column="fc_gross_amt" property="fcGrossAmt" />
+		<result column="fc_comm_amt" property="fcCommAmt" />
+		<result column="fc_tax_amt" property="taxAmt" />
+		<result column="bank_name" property="bankName" />
+		<result column="currency" property="currency" />
+		<result column="dcb_bank_cd" property="dcbBankCd" />
+		<result column="dcb_bank_name" property="dcbBankName" />
+		<result column="dcb_bank_acct_cd" property="dcbBankAcctCd" />
+		<result column="cm_tran_id" property="cmTranId" />
+		<result column="item_id" property="itemId" />
+		<result column="pdc_id" property="pdcId" /> <!-- added by john dolon; 6.3.2015; for disabling collection breakdown in GIACS001 if APDC -->
+	</resultMap>
+	
+	<procedure id="saveGiacCollectionDetails" parameterClass="com.geniisys.giac.entity.GIACCollectionDtl">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			giac_collection_dtl_pkg.set_giac_collection_dtl(
+				#gaccTranId#, 
+				#itemNo#,
+				#currencyCd#,
+				#currencyRt#,
+				#payMode#,
+				#amt#,
+				#checkDate#,
+				#checkNo#,
+				#particulars#,
+				#bankCd#,
+				#checkClass#,
+				#fCurrencyAmt#,
+				#grossAmt#,
+				#commAmt#,
+				#vatAmt#,
+				#fcGrossAmt#,
+				#fcCommAmt#,
+				#taxAmt#,
+				#dcbBankCd#,
+				#dcbBankAcctCd#,
+				#dueDcbNo#,
+				#dueDcbDate#,
+				#cmTranId#
+				);
+		END;
+	</procedure>
+	
+	<procedure id="deleteGiacCollectionDetails" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			giac_collection_dtl_pkg.delete_giac_collection_dtl(
+				#gaccTranId#, 
+				#itemNo#
+			);
+		END;
+	</procedure>
+
+	<procedure id="getGIACCollectionDtl" parameterClass="java.lang.Integer" resultMap="GIACCollectionDtlMap">  
+		SELECT * FROM TABLE(GIAC_COLLECTION_DTL_PKG.get_giac_collection_dtl(#tranId#))
+	</procedure>
+	
+	<procedure id="getGIACCollnDtl" parameterClass="java.lang.Integer" resultMap="GIACCollnDtlMap">  
+		SELECT * FROM TABLE(GIAC_COLLECTION_DTL_PKG.get_giac_colln_dtl(#tranId#))
+	</procedure>
+	
+	<!-- added by john 10.16.2014 -->
+	<procedure id="insertGiacPdcChecks" parameterClass="java.util.HashMap">
+		DECLARE
+			v_rec	giac_pdc_checks%ROWTYPE;
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			
+			v_rec.item_id 		:= 	#itemId#;
+			v_rec.gacc_tran_id 	:= 	#gaccTranId#;
+			v_rec.bank_cd		:=	#bankCd#;
+            v_rec.check_no 		:=	#checkNo#;
+            v_rec.check_date 	:=	#checkDate#;
+            v_rec.amount		:=	#amount#;
+            v_rec.currency_cd 	:=	#currencyCd#;
+            v_rec.currency_rt	:=	#currencyRt#;
+            v_rec.fcurrency_amt	:=	#fcurrencyAmt#;
+            v_rec.user_id 		:=	#userId#;
+            v_rec.particulars 	:=	#particulars#;
+            v_rec.item_no		:=	#itemNo#;
+            v_rec.ref_no 		:=	#refNo#;
+            v_rec.gfun_fund_cd	:=	#fundCd#;
+            v_rec.gibr_branch_cd :=	#branchCd#;
+            
+			giac_collection_dtl_pkg.insert_giac_pdc_checks(v_rec);
+		END;
+	</procedure>
+	
+	<procedure id="deletePdcChecks" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			giac_collection_dtl_pkg.delete_giac_pdc_checks(#itemId#);
+		END;
+	</procedure>
+	
+	<resultMap class="java.util.HashMap" id="GIACS035PayModeLOVMap" extends="BaseEntity.TableGridResultMap"> <!-- dren 07.16.2015 : SR 0017729 - Added GIACS035PayModeLOV - Start -->
+		<result column="pay_mode"		    property="payMode"		    jdbcType="VARCHAR" />
+		<result column="rv_meaning"			property="rvMeaning"		jdbcType="VARCHAR" />
+	</resultMap>		
+	
+	<select id="getGIACS035PayModeLOV" resultMap="GIACS035PayModeLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giac_collection_dtl_pkg.GET_GIACS035_PAY_MODE_LOV(#search#,#gibrBranchCd#,#gfunFundCd#,#dspDcbDate#,#dcbNo#))		                  
+		                 <isNotNull property="findText">
+					         WHERE (UPPER(pay_mode) LIKE (#findText#))
+				         </isNotNull>          
+			          	  <isNotNull property="sortColumn">
+				              <isEqual property="sortColumn" compareValue="payMode">
+				              		ORDER BY pay_mode
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="rvMeaning">
+				              		ORDER BY rv_meaning
+				              </isEqual>		                           				              
+				          	  <isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              </isNotNull>
+				          </isNotNull>    
+		                  ) a, 
+			               (SELECT count(*) count_ 
+		                   FROM TABLE (giac_collection_dtl_pkg.GET_GIACS035_PAY_MODE_LOV(#search#,#gibrBranchCd#,#gfunFundCd#,#dspDcbDate#,#dcbNo#))
+			              <isNotNull property="findText">
+					          WHERE (UPPER(pay_mode) LIKE (#findText#))
+				          </isNotNull> 
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>	<!-- dren 07.16.2015 : SR 0017729 - Added GIACS035PayModeLOV - End -->	
+
+</sqlMap>

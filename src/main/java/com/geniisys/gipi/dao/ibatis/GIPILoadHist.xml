@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPILoadHist">
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIPILoadHist" type="com.geniisys.gipi.entity.GIPILoadHist"/>
+	
+	<resultMap id="GIPILoadHistMap" class="GIPILoadHist">
+		<result column="upload_no" 		property="uploadNo" />
+		<result column="filename" 		property="filename" />
+		<result column="par_id" 		property="parId" />
+		<result column="date_loaded" 	property="dateLoaded" />
+		<result column="no_of_records" 	property="noOfRecords" />
+		<result column="user_id" 		property="userId" />
+		<result column="last_update" 	property="lastUpdate" />
+	</resultMap>
+	
+	<resultMap class="GIPILoadHist" id="GIPILoadHistResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="UPLOAD_NO" 		property="uploadNo" />
+		<result column="FILENAME" 		property="filename" />
+		<result column="PAR_ID" 		property="parId" />
+		<result column="DATE_LOADED" 	property="dateLoaded" />
+		<result column="NO_OF_RECORDS" 	property="noOfRecords" />
+		<result column="USER_ID" 		property="userId" />
+		<result column="LAST_UPDATE" 	property="lastUpdate" />
+	</resultMap>
+
+	<procedure id="getGIPILoadHist" resultMap="GIPILoadHistMap">
+		SELECT * FROM TABLE(GIPI_LOAD_HIST_PKG.get_gipi_load_hist)
+	</procedure>
+	
+	<select id="getGIPILoadHistTG" resultMap="GIPILoadHistResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(gipi_load_hist_pkg.get_gipi_load_hist_tg(#filename#))
+						  <isNull property="sortColumn">
+							ORDER BY upload_no ASC
+						  </isNull>
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="uploadNo">
+								ORDER BY upload_no
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="filename">
+								ORDER BY filename
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="noOfRecords">
+								ORDER BY no_of_records
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="userId">
+								ORDER BY user_id
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="dateLoaded">
+								ORDER BY date_loaded
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(gipi_load_hist_pkg.get_gipi_load_hist_tg(#filename#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="createToPar" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			GIPI_LOAD_HIST_PKG.insert_values(#uploadNo#,#parId#,#itemNo#,#polId#);
+		END;
+	</procedure>
+	
+	<procedure id="createInvoiceItemUpload" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GIPI_LOAD_HIST_PKG.CREATE_INVOICE_ITEM(
+				#parId#, #lineCd#, #issCd#
+				);
+		END;
+	</procedure>
+	
+	<procedure id="insertRecgrpWitemUpload" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GIPI_LOAD_HIST_PKG.insert_recgrp_witem(
+				#parId#, #lineCd#, #itemNo#
+				);
+		END;
+	</procedure>
+	
+</sqlMap>	

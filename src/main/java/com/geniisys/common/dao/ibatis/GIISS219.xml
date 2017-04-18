@@ -1,0 +1,645 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="GIISS219">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+
+	<resultMap class="java.util.HashMap" id="lineLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="line_cd"			property="lineCd" />
+		<result column="pack_line_cd"		property="packLineCd" />
+		<result column="line_name"			property="lineName" />
+	</resultMap>
+
+	<resultMap class="java.util.HashMap" id="sublineLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="subline_cd"			property="sublineCd" />
+		<result column="pack_subline_cd"	property="packSublineCd" />
+		<result column="subline_name"	    property="sublineName" />
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="perilLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="line_cd"			property="lineCd" />
+		<result column="subline_cd"			property="sublineCd" />
+		<result column="peril_type"			property="perilType" />
+		<result column="peril_cd"			property="perilCd" />
+		<result column="peril_name"			property="perilName" />
+	</resultMap>
+
+	<resultMap class="java.util.HashMap" id="giiss219RecListMap" extends="BaseEntity.TableGridResultMap">
+		<result column="plan_cd" 			property="planCd" />
+		<result column="plan_desc" 			property="planDesc" />
+		<result column="line_name" 			property="lineName" />
+		<result column="subline_name" 		property="sublineName" />
+		<result column="line_cd" 			property="lineCd" />
+		<result column="subline_cd" 		property="sublineCd" />
+		<result column="pack_line_cd" 		property="packLineCd" />
+		<result column="pack_subline_cd" 	property="packSublineCd" />
+		<result column="peril_name" 		property="perilName" />
+		<result column="peril_cd" 			property="perilCd" />
+		<result column="peril_type"			property="perilType" />
+		<result column="prem_rt" 			property="premRt" />
+		<result column="prem_amt" 			property="premAmt" />
+		<result column="no_of_days" 		property="noOfDays" />
+		<result column="base_amt" 			property="baseAmt" />
+		<result column="tsi_amt" 			property="tsiAmt" />
+		<result column="aggregate_sw" 		property="aggregateSw" />
+		<result column="total_tsi" 			property="totalTsi" />
+		<result column="total_prem" 		property="totalPrem" />
+		<result column="remarks" 			property="remarks" />
+		<result column="user_id"			property="userId"/>
+		<result column="last_update"		property="lastUpdate"/>
+	</resultMap>
+	
+	<parameterMap class="java.util.HashMap" id="setGIISPlanMap">
+		<parameter property="userId"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="planCd"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="INOUT" />
+		<parameter property="planDesc"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="lineCd"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="sublineCd"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="remarks"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="userId"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+	</parameterMap>
+	
+	<parameterMap class="java.util.HashMap" id="setGIISPackPlanMap">
+		<parameter property="userId"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="planCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="INOUT" />
+		<parameter property="planDesc"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="packLineCd"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="packSublineCd"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="remarks"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="userId"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+	</parameterMap>
+	
+	<select id="getGiiss219LineLOV" resultMap="lineLOVMap">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+			b.count_,
+			a.*
+			FROM (SELECT *
+				FROM TABLE(giiss219_pkg.get_giis_line_list(#userId#,#findText#))
+			<isNotNull property="sortColumn">
+				<isEqual property="sortColumn" compareValue="lineCd">
+					ORDER BY line_cd
+				</isEqual>
+				<isEqual property="sortColumn" compareValue="packLineCd">
+					ORDER BY pack_line_cd
+				</isEqual>
+				<isEqual property="sortColumn" compareValue="lineName">
+					ORDER BY line_name
+				</isEqual>
+				<isEqual property="ascDescFlg" compareValue="ASC">
+					ASC
+				</isEqual>
+				<isEqual property="ascDescFlg" compareValue="DESC">
+					DESC
+				</isEqual>
+			</isNotNull>
+			) a,
+			(SELECT count(*) count_
+				FROM TABLE(giiss219_pkg.get_giis_line_list(#userId#,#findText#))
+			) b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiiss219SublineLOV" resultMap="sublineLOVMap">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+			b.count_,
+			a.*
+			FROM (SELECT *
+				FROM TABLE(giiss219_pkg.get_giis_subline_list(#lineCd#,#findText#))
+			<isNotNull property="sortColumn">
+				<isEqual property="sortColumn" compareValue="sublineCd">
+					ORDER BY subline_cd
+				</isEqual>
+				<isEqual property="sortColumn" compareValue="packSublineCd">
+					ORDER BY pack_subline_cd
+				</isEqual>
+				<isEqual property="sortColumn" compareValue="sublineName">
+					ORDER BY subline_name
+				</isEqual>
+				<isEqual property="ascDescFlg" compareValue="ASC">
+					ASC
+				</isEqual>
+				<isEqual property="ascDescFlg" compareValue="DESC">
+					DESC
+				</isEqual>
+			</isNotNull>
+			) a,
+			(SELECT count(*) count_
+				FROM TABLE(giiss219_pkg.get_giis_subline_list(#lineCd#,#findText#))
+			) b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiiss219PerilLOV" resultMap="perilLOVMap">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+			b.count_,
+			a.*
+			FROM (SELECT *
+				FROM TABLE(giiss219_pkg.get_giis_peril_list(#lineCd#,#sublineCd#,#findText#))
+			<isNotNull property="sortColumn">
+				<isEqual property="sortColumn" compareValue="perilCd">
+					ORDER BY peril_cd
+				</isEqual>
+				<isEqual property="sortColumn" compareValue="perilName">
+					ORDER BY peril_name
+				</isEqual>
+				<isEqual property="ascDescFlg" compareValue="ASC">
+					ASC
+				</isEqual>
+				<isEqual property="ascDescFlg" compareValue="DESC">
+					DESC
+				</isEqual>
+			</isNotNull>
+			) a,
+			(SELECT count(*) count_
+				FROM TABLE(giiss219_pkg.get_giis_peril_list(#lineCd#,#sublineCd#,#findText#))
+			) b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiiss219LinePackLOV" resultMap="lineLOVMap">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+			b.count_,
+			a.*
+			FROM (SELECT *
+				FROM TABLE(giiss219_pkg.get_giis_line_pack_list(#userId#,#findText#))
+			<isNotNull property="sortColumn">
+				<isEqual property="sortColumn" compareValue="lineCd">
+					ORDER BY line_cd
+				</isEqual>
+				<isEqual property="sortColumn" compareValue="packLineCd">
+					ORDER BY pack_line_cd
+				</isEqual>
+				<isEqual property="sortColumn" compareValue="lineName">
+					ORDER BY line_name
+				</isEqual>
+				<isEqual property="ascDescFlg" compareValue="ASC">
+					ASC
+				</isEqual>
+				<isEqual property="ascDescFlg" compareValue="DESC">
+					DESC
+				</isEqual>
+			</isNotNull>
+			) a,
+			(SELECT count(*) count_
+				FROM TABLE(giiss219_pkg.get_giis_line_pack_list(#userId#,#findText#))
+			) b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiiss219SublinePackLOV" resultMap="sublineLOVMap">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+			b.count_,
+			a.*
+			FROM (SELECT *
+				FROM TABLE(giiss219_pkg.get_giis_subline_pack_list(#lineCd#,#findText#))
+			<isNotNull property="sortColumn">
+				<isEqual property="sortColumn" compareValue="sublineCd">
+					ORDER BY subline_cd
+				</isEqual>
+				<isEqual property="sortColumn" compareValue="packSublineCd">
+					ORDER BY pack_subline_cd
+				</isEqual>
+				<isEqual property="sortColumn" compareValue="sublineName">
+					ORDER BY subline_name
+				</isEqual>
+				<isEqual property="ascDescFlg" compareValue="ASC">
+					ASC
+				</isEqual>
+				<isEqual property="ascDescFlg" compareValue="DESC">
+					DESC
+				</isEqual>
+			</isNotNull>
+			) a,
+			(SELECT count(*) count_
+				FROM TABLE(giiss219_pkg.get_giis_subline_pack_list(#lineCd#,#findText#))
+			) b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiiss219PackLineLOV" resultMap="lineLOVMap">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+			b.count_,
+			a.*
+			FROM (SELECT *
+				FROM TABLE(giiss219_pkg.get_giis_pack_line_list(#lineCd#,#userId#,#findText#))
+			<isNotNull property="sortColumn">
+				<isEqual property="sortColumn" compareValue="lineCd">
+					ORDER BY line_cd
+				</isEqual>
+				<isEqual property="sortColumn" compareValue="packLineCd">
+					ORDER BY pack_line_cd
+				</isEqual>
+				<isEqual property="sortColumn" compareValue="lineName">
+					ORDER BY line_name
+				</isEqual>
+				<isEqual property="ascDescFlg" compareValue="ASC">
+					ASC
+				</isEqual>
+				<isEqual property="ascDescFlg" compareValue="DESC">
+					DESC
+				</isEqual>
+			</isNotNull>
+			) a,
+			(SELECT count(*) count_
+				FROM TABLE(giiss219_pkg.get_giis_pack_line_list(#lineCd#,#userId#,#findText#))
+			) b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiiss219PackSublineLOV" resultMap="sublineLOVMap">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+			b.count_,
+			a.*
+			FROM (SELECT *
+				FROM TABLE(giiss219_pkg.get_giis_pack_subline_list(#lineCd#,#packLineCd#,#findText#))
+			<isNotNull property="sortColumn">
+				<isEqual property="sortColumn" compareValue="sublineCd">
+					ORDER BY subline_cd
+				</isEqual>
+				<isEqual property="sortColumn" compareValue="packSublineCd">
+					ORDER BY pack_subline_cd
+				</isEqual>
+				<isEqual property="sortColumn" compareValue="sublineName">
+					ORDER BY subline_name
+				</isEqual>
+				<isEqual property="ascDescFlg" compareValue="ASC">
+					ASC
+				</isEqual>
+				<isEqual property="ascDescFlg" compareValue="DESC">
+					DESC
+				</isEqual>
+			</isNotNull>
+			) a,
+			(SELECT count(*) count_
+				FROM TABLE(giiss219_pkg.get_giis_pack_subline_list(#lineCd#,#packLineCd#,#findText#))
+			) b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiiss219PackPerilLOV" resultMap="perilLOVMap">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+			b.count_,
+			a.*
+			FROM (SELECT *
+				FROM TABLE(giiss219_pkg.get_giis_pack_peril_list(#packLineCd#,#packSublineCd#,#findText#))
+			<isNotNull property="sortColumn">
+				<isEqual property="sortColumn" compareValue="perilCd">
+					ORDER BY peril_cd
+				</isEqual>
+				<isEqual property="sortColumn" compareValue="perilName">
+					ORDER BY peril_name
+				</isEqual>
+				<isEqual property="ascDescFlg" compareValue="ASC">
+					ASC
+				</isEqual>
+				<isEqual property="ascDescFlg" compareValue="DESC">
+					DESC
+				</isEqual>
+			</isNotNull>
+			) a,
+			(SELECT count(*) count_
+				FROM TABLE(giiss219_pkg.get_giis_pack_peril_list(#packLineCd#,#packSublineCd#,#findText#))
+			) b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiiss219RecListRegular" resultMap="giiss219RecListMap">
+		SELECT * 
+			FROM (SELECT rownum rownum_,
+						 b.count_,
+						 a.*,
+						 (SELECT SUM(prem_amt) FROM TABLE (giiss219_pkg.get_rec_list_regular (#userId#,#planCd#,#planDesc#,#lineName#,#sublineName#,#perilName#,#mode#))) total_prem
+					FROM (SELECT * 
+							FROM TABLE (giiss219_pkg.get_rec_list_regular (#userId#,#planCd#,#planDesc#,#lineName#,#sublineName#,#perilName#,#mode#))
+							<isNotNull property="filter">
+								WHERE 1=1
+								<isNotEmpty prepend="AND"  property="premRt">
+									prem_rt = #premRt#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="premAmt">
+									prem_amt = #premAmt#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="noOfDays">
+									no_of_days = #noOfDays#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="baseAmt">
+									base_amt = #baseAmt#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="tsiAmt">
+									tsi_amt = #tsiAmt#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="aggregateSw">
+									aggregate_sw = UPPER(#aggregateSw#)
+								</isNotEmpty>
+							</isNotNull>
+							<isEqual property="sortColumn" compareValue="planCd">
+								ORDER BY plan_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="planDesc">
+								ORDER BY plan_desc
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="lineName">
+								ORDER BY line_name
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="sublineName">
+								ORDER BY subline_name
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="perilName">
+								ORDER BY peril_name
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="premRt">
+								ORDER BY prem_rt
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="premAmt">
+								ORDER BY prem_amt
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="noOfDays">
+								ORDER BY no_of_days
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="baseAmt">
+								ORDER BY base_amt
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="tsiAmt">
+								ORDER BY tsi_amt
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="aggregateSw">
+								ORDER BY aggregate_sw
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>) a, 
+							(SELECT count(*) count_
+							   FROM TABLE (giiss219_pkg.get_rec_list_regular (#userId#,#planCd#,#planDesc#,#lineName#,#sublineName#,#perilName#,#mode#))
+								 <isNotNull property="filter">
+									WHERE 1=1
+									<isNotEmpty prepend="AND"  property="premRt">
+										prem_rt = #premRt#
+									</isNotEmpty>
+									<isNotEmpty prepend="AND"  property="premAmt">
+										prem_amt = #premAmt#
+									</isNotEmpty>
+									<isNotEmpty prepend="AND"  property="noOfDays">
+										no_of_days = #noOfDays#
+									</isNotEmpty>
+									<isNotEmpty prepend="AND"  property="baseAmt">
+										base_amt = #baseAmt#
+									</isNotEmpty>
+									<isNotEmpty prepend="AND"  property="tsiAmt">
+										tsi_amt = #tsiAmt#
+									</isNotEmpty>
+									<isNotEmpty prepend="AND"  property="aggregateSw">
+										aggregate_sw = UPPER(#aggregateSw#)
+									</isNotEmpty>
+								</isNotNull>
+							 ) b)
+		WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiiss219RecListPackage" resultMap="giiss219RecListMap">
+		SELECT * 
+			FROM (SELECT rownum rownum_,
+						 b.count_,
+						 a.*,
+						 (SELECT SUM(prem_amt) FROM TABLE (giiss219_pkg.get_rec_list_package (#userId#,#planCd#,#planDesc#,#packLineCd#,#packSublineCd#,#lineName#,#sublineName#,#perilName#,#mode#))) total_prem
+					FROM (SELECT * 
+							FROM TABLE (giiss219_pkg.get_rec_list_package (#userId#,#planCd#,#planDesc#,#packLineCd#,#packSublineCd#,#lineName#,#sublineName#,#perilName#,#mode#))
+							<isNotNull property="filter">
+								WHERE 1=1
+								<isNotEmpty prepend="AND"  property="premRt">
+									prem_rt = #premRt#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="premAmt">
+									prem_amt = #premAmt#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="noOfDays">
+									no_of_days = #noOfDays#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="baseAmt">
+									base_amt = #baseAmt#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="tsiAmt">
+									tsi_amt = #tsiAmt#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="aggregateSw">
+									aggregate_sw = UPPER(#aggregateSw#)
+								</isNotEmpty>
+							</isNotNull>
+							<isEqual property="sortColumn" compareValue="planCd">
+								ORDER BY plan_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="planDesc">
+								ORDER BY plan_desc
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="lineName">
+								ORDER BY line_name
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="sublineName">
+								ORDER BY subline_name
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="packLineCd lineName">
+								ORDER BY pack_line_cd 
+								<isNotNull property="sortColumn">
+							          <isEqual property="ascDescFlg" compareValue="ASC">
+							              	ASC
+							           </isEqual>
+							           <isEqual property="ascDescFlg" compareValue="DESC">
+							            	DESC
+							           </isEqual>
+							    </isNotNull>, 
+							            line_name
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="packSublineCd sublineName">
+								ORDER BY pack_subline_cd 
+								<isNotNull property="sortColumn">
+							          <isEqual property="ascDescFlg" compareValue="ASC">
+							              	ASC
+							           </isEqual>
+							           <isEqual property="ascDescFlg" compareValue="DESC">
+							            	DESC
+							           </isEqual>
+							    </isNotNull>, 
+							            subline_name
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="perilName">
+								ORDER BY peril_name
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="premRt">
+								ORDER BY prem_rt
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="premAmt">
+								ORDER BY prem_amt
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="noOfDays">
+								ORDER BY no_of_days
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="baseAmt">
+								ORDER BY base_amt
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="tsiAmt">
+								ORDER BY tsi_amt
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="aggregateSw">
+								ORDER BY aggregate_sw
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>) a, 
+							(SELECT count(*) count_
+							   FROM TABLE (giiss219_pkg.get_rec_list_package (#userId#,#planCd#,#planDesc#,#packLineCd#,#packSublineCd#,#lineName#,#sublineName#,#perilName#,#mode#))
+								 <isNotNull property="filter">
+									WHERE 1=1
+									<isNotEmpty prepend="AND"  property="premRt">
+										prem_rt = #premRt#
+									</isNotEmpty>
+									<isNotEmpty prepend="AND"  property="premAmt">
+										prem_amt = #premAmt#
+									</isNotEmpty>
+									<isNotEmpty prepend="AND"  property="noOfDays">
+										no_of_days = #noOfDays#
+									</isNotEmpty>
+									<isNotEmpty prepend="AND"  property="baseAmt">
+										base_amt = #baseAmt#
+									</isNotEmpty>
+									<isNotEmpty prepend="AND"  property="tsiAmt">
+										tsi_amt = #tsiAmt#
+									</isNotEmpty>
+									<isNotEmpty prepend="AND"  property="aggregateSw">
+										aggregate_sw = UPPER(#aggregateSw#)
+									</isNotEmpty>
+								</isNotNull>
+							 ) b)
+		WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+  	<procedure id="setGIISPlan" parameterMap="setGIISPlanMap">
+ 		BEGIN	
+ 			giis_users_pkg.app_user := ?;	     
+ 			giiss219_pkg.set_giis_plan(?,?,?,?,?,?);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="setGIISPlanDtl" parameterClass="java.util.HashMap">
+	    DECLARE
+	    	v_rec giis_plan_dtl%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.plan_cd := #planCd#;
+ 			v_rec.peril_cd := #perilCd#;
+ 			v_rec.line_cd := #lineCd#; 
+ 			v_rec.prem_rt := #premRt#;
+ 			v_rec.prem_amt := #premAmt#;
+ 			v_rec.tsi_amt := #tsiAmt#;
+ 			v_rec.aggregate_sw := #aggregateSw#;
+ 			v_rec.no_of_days := #noOfDays#;
+ 			v_rec.base_amt := #baseAmt#;
+ 			v_rec.user_id := #userId#;
+ 			giiss219_pkg.set_giis_plan_dtl(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+  	<procedure id="setGIISPackPlan" parameterMap="setGIISPackPlanMap">
+ 		BEGIN	
+ 			giis_users_pkg.app_user := ?;	     
+ 			giiss219_pkg.set_giis_pack_plan(?,?,?,?,?,?);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="setGIISPackPlanCover" parameterClass="java.util.HashMap">
+	    DECLARE
+	    	v_rec giis_pack_plan_cover%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.plan_cd := #planCd#;
+			v_rec.pack_line_cd := #packLineCd#; 
+			v_rec.pack_subline_cd := #packSublineCd#; 
+ 			v_rec.user_id := #userId#;
+ 			giiss219_pkg.set_giis_pack_plan_cover(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="setGIISPackPlanCoverDtl" parameterClass="java.util.HashMap">
+	    DECLARE
+	    	v_rec giis_pack_plan_cover_dtl%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.plan_cd := #planCd#;
+ 			v_rec.pack_line_cd := #packLineCd#; 
+ 			v_rec.pack_subline_cd := #packSublineCd#; 
+ 			v_rec.peril_cd := #perilCd#;
+ 			v_rec.prem_rt := #premRt#;
+ 			v_rec.prem_amt := #premAmt#;
+ 			v_rec.tsi_amt := #tsiAmt#;
+ 			v_rec.aggregate_sw := #aggregateSw#;
+ 			v_rec.no_of_days := #noOfDays#;
+ 			v_rec.base_amt := #baseAmt#;
+ 			v_rec.user_id := #userId#;
+ 			giiss219_pkg.set_giis_pack_plan_cover_dtl(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<delete id="delGIISPlan" parameterClass="java.util.HashMap">
+		BEGIN
+ 			giiss219_pkg.del_giis_plan(#planCd#);
+ 		END;
+ 	</delete>
+ 	
+ 	<delete id="delGIISPlanDtl" parameterClass="java.util.HashMap">
+		BEGIN
+ 			giiss219_pkg.del_giis_plan_dtl(#perilCd#,#planCd#);
+ 		END;
+ 	</delete>
+ 	
+ 	<delete id="delGIISPackPlan" parameterClass="java.util.HashMap">
+		BEGIN
+ 			giiss219_pkg.del_giis_pack_plan(#planCd#);
+ 		END;
+ 	</delete>
+ 	
+ 	<delete id="delGIISPackPlanCover" parameterClass="java.util.HashMap">
+		BEGIN
+ 			giiss219_pkg.del_giis_pack_plan_cover(#planCd#,#packLineCd#,#packSublineCd#);
+ 		END;
+ 	</delete>
+ 	
+ 	<delete id="delGIISPackPlanCoverDtl" parameterClass="java.util.HashMap">
+		BEGIN
+ 			giiss219_pkg.del_giis_pack_plan_cover_dtl(#perilCd#,#planCd#,#packLineCd#,#packSublineCd#);
+ 		END;
+ 	</delete>
+ 	
+ 	<procedure id="valAddGiiss219" parameterClass="java.util.Map">
+ 		BEGIN
+ 			giiss219_pkg.val_add_rec(#packLineCd#,#packSublineCd#,#recId#,#recId2#,#mode#);
+ 		END;
+ 	</procedure> 	
+ 	
+ 	<procedure id="valDeleteGiiss219" parameterClass="java.util.Map">
+ 		BEGIN
+ 			giiss219_pkg.val_del_rec(#packLineCd#,#packSublineCd#,#recId#);
+ 		END;
+ 	</procedure> 	
+</sqlMap>

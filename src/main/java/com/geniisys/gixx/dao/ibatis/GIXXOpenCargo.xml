@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap>
+	<typeAlias alias="GIXXOpenCargo" type="com.geniisys.gixx.entity.GIXXOpenCargo" />
+	
+	<resultMap id="getGIXXOpenCargoMap" class="GIXXOpenCargo" extends="BaseEntity.TableGridResultMap">
+		<result column="EXTRACT_ID"				property="extractId" />
+		<result column="GEOG_CD"				property="geogCd" />
+		<result column="CARGO_CLASS_CD"			property="cargoClassCd" />
+		<result column="REC_FLAG"				property="recFlag" />
+		<result column="POLICY_ID"				property="policyId" />
+		<result column="CARGO_CLASS_DESC"		property="cargoClassDesc" />
+	</resultMap>
+	
+	<select id="getGIXXOpenCargoList" resultMap="getGIXXOpenCargoMap" parameterClass="java.util.HashMap">
+		SELECT *       
+          FROM (SELECT rownum rownum_ ,b.count_,a.*     
+                  FROM (SELECT * FROM TABLE(gixx_open_cargo_pkg.get_open_cargo_list(#extractId#, #geogCd#))) a,
+	               	   (SELECT count(*) count_ FROM TABLE(gixx_open_cargo_pkg.get_open_cargo_list(#extractId#, #geogCd#))) b)         
+	     WHERE rownum_ BETWEEN NVL(#from#,rownum_) AND NVL(#to#,rownum_)		
+	</select>
+</sqlMap>

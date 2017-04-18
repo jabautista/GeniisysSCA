@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIPIR110_DTL" language="groovy" pageWidth="970" pageHeight="23" columnWidth="970" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="Crosstab Data Text" isDefault="false" hAlign="Center"/>
+	<style name="table" isDefault="false">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_TH" isDefault="false" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_CH" isDefault="false" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_TD" isDefault="false" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<parameter name="P_LINE_CD" class="java.lang.String"/>
+	<parameter name="P_SUBLINE_CD" class="java.lang.String"/>
+	<parameter name="P_ISS_CD" class="java.lang.String"/>
+	<parameter name="P_ISSUE_YY" class="java.math.BigDecimal"/>
+	<parameter name="P_POL_SEQ_NO" class="java.math.BigDecimal"/>
+	<parameter name="P_RENEW_NO" class="java.math.BigDecimal"/>
+	<parameter name="P_EFF_TAG" class="java.lang.String"/>
+	<parameter name="P_EXPIRY_TAG" class="java.lang.String"/>
+	<parameter name="P_ITEM_NO" class="java.math.BigDecimal"/>
+	<queryString>
+		<![CDATA[SELECT   *
+    FROM TABLE (gipir110_pkg.get_trty_dtl ($P{P_LINE_CD},
+                                           $P{P_SUBLINE_CD},
+                                           $P{P_ISS_CD},
+                                           $P{P_ISSUE_YY},
+                                           $P{P_POL_SEQ_NO},
+                                           $P{P_RENEW_NO},
+					   $P{P_ITEM_NO},
+				           'N',
+                                           $P{P_EFF_TAG},
+                                           $P{P_EXPIRY_TAG}
+                                          )
+               )
+ORDER BY share_cd]]>
+	</queryString>
+	<field name="DIST_TSI" class="java.math.BigDecimal"/>
+	<field name="SHARE_CD" class="java.math.BigDecimal"/>
+	<field name="SHARE_TYPE" class="java.lang.String"/>
+	<field name="TRTY_NAME" class="java.lang.String"/>
+	<variable name="V_DUMMY" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<summary>
+		<band height="11" splitType="Immediate">
+			<crosstab>
+				<reportElement x="0" y="0" width="970" height="11"/>
+				<rowGroup name="V_DUMMY" width="0">
+					<bucket>
+						<bucketExpression class="java.lang.String"><![CDATA[$V{V_DUMMY}]]></bucketExpression>
+					</bucket>
+					<crosstabRowHeader>
+						<cellContents backcolor="#F0F8FF" mode="Transparent"/>
+					</crosstabRowHeader>
+					<crosstabTotalRowHeader>
+						<cellContents/>
+					</crosstabTotalRowHeader>
+				</rowGroup>
+				<columnGroup name="SHARE_CD" height="0">
+					<bucket>
+						<bucketExpression class="java.math.BigDecimal"><![CDATA[$F{SHARE_CD}]]></bucketExpression>
+					</bucket>
+					<crosstabColumnHeader>
+						<cellContents backcolor="#F0F8FF" mode="Transparent"/>
+					</crosstabColumnHeader>
+					<crosstabTotalColumnHeader>
+						<cellContents/>
+					</crosstabTotalColumnHeader>
+				</columnGroup>
+				<measure name="DIST_TSIMeasure" class="java.math.BigDecimal" calculation="Sum">
+					<measureExpression><![CDATA[$F{DIST_TSI}]]></measureExpression>
+				</measure>
+				<crosstabCell width="83" height="11">
+					<cellContents>
+						<textField isStretchWithOverflow="true" pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+							<reportElement style="Crosstab Data Text" x="0" y="0" width="80" height="11">
+								<printWhenExpression><![CDATA[$V{DIST_TSIMeasure} == 0? "" : $V{DIST_TSIMeasure}]]></printWhenExpression>
+							</reportElement>
+							<textElement textAlignment="Right" verticalAlignment="Middle">
+								<font fontName="Arial" size="7"/>
+							</textElement>
+							<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{DIST_TSIMeasure}]]></textFieldExpression>
+						</textField>
+					</cellContents>
+				</crosstabCell>
+			</crosstab>
+		</band>
+	</summary>
+</jasperReport>

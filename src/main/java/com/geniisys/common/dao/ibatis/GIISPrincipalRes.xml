@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISPrincipalRes">
+	<typeAlias alias="GIISPrincipalRes" type="com.geniisys.common.entity.GIISPrincipalRes"/>
+	
+	<resultMap class="GIISPrincipalRes" id="assuredPrincipalResInfoMap">
+		<result property="principalResNo" column="principal_res_no"/>
+		<result property="principalResDate" column="principal_res_date"/>
+		<result property="principalResPlace" column="principal_res_place"/>
+		<result property="controlTypeCd" column="control_type_cd"/>  <!-- added by Halley 10.07.2013 -->
+	</resultMap>
+	
+	<select id="getAssuredPrincipalResInfo" resultMap="assuredPrincipalResInfoMap">
+		SELECT principal_res_no, to_char(principal_res_date, 'MM-DD-YYYY')principal_res_date, principal_res_place, control_type_cd <!-- added control_type_cd - Halley 10.07.2013 -->
+		  FROM giis_principal_res
+		 WHERE assd_no = #assdNo#
+	</select>
+	
+	<procedure id="saveGIISPrincipalRes" parameterClass="GIISPrincipalRes">
+		begin
+			giis_users_pkg.app_user := #userId#;
+			giis_principal_res_pkg.save_giis_principal_res (
+		      #principalResNo#,
+		      to_date(#principalResDate#,'MM-DD-YYYY'),
+		      #principalResPlace#,
+		      #controlTypeCd#, <!-- added by steven 11/27/2012 -->
+		      #assdNo#,
+		      #userId#
+		   );
+		end;   
+	</procedure>
+</sqlMap>

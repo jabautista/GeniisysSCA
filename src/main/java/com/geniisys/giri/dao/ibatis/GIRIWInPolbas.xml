@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIRIWInPolbas">
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference_type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIRIWInPolbas" type="com.geniisys.giri.entity.GIRIWInPolbas"/>
+	
+	<resultMap class="GIRIWInPolbas" id="giriWInPolbasResultMap">
+		<result column="accept_no" 				property="acceptNo" />
+		<result column="par_id" 				property="parId" />
+		<result column="ri_cd" 					property="riCd" />
+		<result column="accept_date" 			property="acceptDate" />
+		<result column="ri_policy_no" 			property="riPolicyNo" />
+		<result column="ri_endt_no" 			property="riEndtNo" />
+		<result column="ri_binder_no" 			property="riBinderNo" />
+		<result column="writer_cd" 				property="writerCd" />
+		<result column="offer_date" 			property="offerDate" />
+		<result column="accept_by" 				property="acceptBy" />
+		<result column="orig_tsi_amt" 			property="origTsiAmt" />
+		<result column="orig_prem_amt" 			property="origPremAmt" />
+		<result column="remarks" 				property="remarks" />
+		<result column="ref_accept_no" 			property="refAcceptNo" />
+		<result column="offered_by" 			property="offeredBy" />
+		<result column="amount_offered" 		property="amountOffered" />
+		<result column="writer_cd_sname" 		property="writerCdName" />
+		<result column="ri_cd_sname" 			property="riCdName" />
+	</resultMap>
+	
+	<select id="getGIRIWInPolbasRecords" resultMap="giriWInPolbasResultMap">
+		SELECT par_id, accept_no, ri_cd, 
+			   TO_CHAR(accept_date, 'mm-dd-yyyy') accept_date, 
+               ri_policy_no, ri_endt_no, ri_binder_no, writer_cd, 
+               TO_CHAR(offer_date, 'mm-dd-yyyy') offer_date, 
+               accept_by, orig_tsi_amt, orig_prem_amt, 
+               <!-- ESCAPE_VALUE_CLOB(remarks)  -->remarks, ref_accept_no, <!--removed escape_value, handle escapetags in GIRIWInPolbasServiceImpl - christian 04/16/2013-->
+               <!-- ESCAPE_VALUE(offered_by)  -->offered_by, amount_offered,
+               <!-- ESCAPE_VALUE(writer_cd_sname)  -->writer_cd_sname, 
+               <!-- ESCAPE_VALUE(ri_cd_sname)  -->ri_cd_sname
+        FROM TABLE(GIRI_WINPOLBAS_PKG.get_giri_winpolbas(#parId#))
+	</select>
+	
+	<procedure id="setGIRIWInPolbas" parameterClass="map" >
+		BEGIN
+			GIRI_WINPOLBAS_PKG.set_giri_winpolbas(
+				#parId#, #acceptNo#, #riCd#, TO_DATE(#acceptDate#, 'mm-dd-yyyy'), #riPolicyNo#,
+				#riEndtNo#, #riBinderNo#, #writerCd#, TO_DATE(#offerDate#, 'mm-dd-yyyy'), 
+				#acceptBy#, #origTsiAmt#, #origPremAmt#, #remarks#,
+				#refAcceptNo#, #offeredBy#, #amountOffered#, #updateCedant#); <!-- bonok :: 10.03.2014 :: added updateCedant to update GIUW_POL_DIST.DIST_FLAG to 1 and GIPI_PARLIST.PAR_STATUS to 5 if cedant is changed -->
+				<!-- #refAcceptNo#, #offeredBy#, #amountOffered#); -->
+		END;
+	</procedure>
+	
+	<select id="getNewAcceptNo" resultClass="java.lang.Integer">
+		SELECT GIRI_WINPOLBAS_PKG.get_last_accept_no FROM DUAL
+	</select>
+	
+	<select id="checkForPostedBinder" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT GIRI_WINPOLBAS_PKG.check_posted_binder(#parId#) FROM dual
+	</select>
+	
+	<select id="checkIfInvoiceExistsRI" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT GIRI_WINPOLBAS_PKG.check_invoice_exists(#parId#) FROM dual
+	</select>
+	
+	<procedure id="recreateWInvoiceGiris005" parameterClass="java.lang.Integer">
+    	BEGIN
+    		GIRI_WINPOLBAS_PKG.recreate_winvoice(#parId#);
+    	END;
+    </procedure>
+</sqlMap>

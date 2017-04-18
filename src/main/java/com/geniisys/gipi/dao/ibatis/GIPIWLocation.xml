@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIWLocation">
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<resultMap id="gipiWLocationMap" class="com.geniisys.gipi.entity.GIPIWLocation">
+		<result column="PAR_ID" 		property="parId"/>
+		<result column="ITEM_NO" 		property="itemNo"/>
+		<result column="REGION_CD" 		property="regionCd"/>
+		<result column="PROVINCE_CD" 	property="provinceCd"/>
+	</resultMap>
+	
+	<select id="getItemWLocations" resultMap="gipiWLocationMap">
+		SELECT * FROM TABLE(GIPI_WLOCATION_PKG.get_item_wlocations(#parId#))
+	</select>
+	
+	<select id="getLocationForPackPolicyItems" resultMap="gipiWLocationMap">
+		SELECT * FROM TABLE(gipi_wlocation_pkg.get_gipi_wlocation_pack_pol(#parId#, #itemNo#))
+	</select>
+	
+	<procedure id="setItemWLocations" parameterClass="com.geniisys.gipi.entity.GIPIWLocation">
+		BEGIN
+			GIPI_WLOCATION_PKG.set_gipi_wlocation(#parId#, #itemNo#, #regionCd#, #provinceCd#);
+		END;
+	</procedure>
+	
+	<procedure id="delGipiWLocation" parameterClass="java.util.HashMap">
+		BEGIN
+			GIPI_WLOCATION_PKG.del_gipi_wlocation2(#parId#, #itemNo#);
+		END;
+	</procedure>
+</sqlMap>

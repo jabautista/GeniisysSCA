@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap>
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIPIQuoteMHItem" type="com.geniisys.quote.entity.GIPIQuoteMHItem" />
+	
+	<resultMap id="GIPIQuoteItemMHMap" class="GIPIQuoteMHItem">
+		<result column="QUOTE_ID" 			property="quoteId" />
+		<result column="ITEM_NO" 			property="itemNo" />
+		<result column="GEOG_LIMIT" 		property="geogLimit" />
+		<result column="DRY_PLACE" 			property="dryPlace" />
+		<result column="DRY_DATE" 			property="dryDate" />
+		<result column="REC_FLAG" 			property="recFlag" />
+		<result column="DEDUCT_TEXT" 		property="deductText" />
+		<result column="VESSEL_CD" 			property="vesselCd" />
+		<result column="VESSEL_NAME" 		property="dspVesselName" />
+		<result column="VESTYPE_DESC" 		property="dspVestypeDesc" />
+		<result column="VES_CLASS_DESC" 	property="dspVessClassDesc" />
+		<result column="REG_OWNER" 			property="dspRegOwner" />
+		<result column="GROSS_TON"			property="dspGrossTon" />
+		<result column="NET_TON" 			property="dspNetTon" />
+		<result column="DEADWEIGHT" 		property="dspDeadWeight" />
+		<result column="VESSEL_LENGTH" 		property="dspVesselLength" />
+		<result column="VESSEL_BREADTH" 	property="dspVesselBreadth" />
+		<result column="VESSEL_DEPTH" 		property="dspVesselDepth" />
+		<result column="VESSEL_OLD_NAME" 	property="dspVesselOldName" />
+		<result column="PROPEL_SW" 			property="dspPropelSw" />
+		<result column="HULL_DESC" 			property="dspHullDesc" />
+		<result column="REG_PLACE" 			property="dspRegPlace" />
+		<result column="YEAR_BUILT" 		property="dspYearBuilt" />
+		<result column="NO_CREW" 			property="dspNoCrew" />
+		<result column="CREW_NAT" 			property="dspCrewNat" />
+		<result column="USER_ID" 			property="userId" />
+		<result column="LAST_UPDATE" 		property="lastUpdate" />
+	</resultMap>
+	
+	<select id="getGIPIQuoteMHItemDetails" resultMap="GIPIQuoteItemMHMap" parameterClass="java.util.HashMap">
+		SELECT 
+			quote_id,           item_no,                 ESCAPE_VALUE(geog_limit) geog_limit, 
+		    ESCAPE_VALUE(dry_place) dry_place,           dry_date,
+		    ESCAPE_VALUE(rec_flag) rec_flag,             rec_flag,
+		    ESCAPE_VALUE(deduct_text) deduct_text,       ESCAPE_VALUE(vessel_cd) vessel_cd,
+		    ESCAPE_VALUE(vessel_name) vessel_name,       ESCAPE_VALUE(vessel_old_name) vessel_old_name,
+		    ESCAPE_VALUE(vestype_desc) vestype_desc,     ESCAPE_VALUE(propel_sw) propel_sw,
+		    ESCAPE_VALUE(hull_desc) hull_desc,           gross_ton,      year_built,
+		    ESCAPE_VALUE(ves_class_desc) ves_class_desc, ESCAPE_VALUE(reg_owner) reg_owner, 
+		    ESCAPE_VALUE(reg_place) reg_place,           no_crew,
+		    net_ton,    deadweight,                      ESCAPE_VALUE(crew_nat) crew_nat,
+		    ESCAPE_VALUE(vessel_length) vessel_length,   ESCAPE_VALUE(vessel_breadth) vessel_breadth,
+		    ESCAPE_VALUE(vessel_depth) vessel_depth,     ESCAPE_VALUE(user_id) user_id,     last_update 
+		FROM TABLE(Gipi_Quote_Item_Dtls.Get_Gipi_Quote_MH(#quoteId#, #itemNo#))
+	</select>
+	
+	<procedure id="saveGIPIQuoteMHItem" parameterClass="GIPIQuoteMHItem">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			Gipi_Quote_Item_Dtls.Set_Gipi_Quote_MH(#quoteId#,#itemNo#,#geogLimit#,
+				#dryPlace#,#dryDate#,#recFlag#,#deductText#,#vesselCd#);
+		END;
+	</procedure>
+	
+</sqlMap>

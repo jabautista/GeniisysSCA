@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIQuoteItemPeril">
+
+  	<cacheModel id="oneDayClient" type="MEMORY">
+	    <flushInterval hours="24"/>
+	    <property name="reference-type" value="WEAK"/>
+ 	</cacheModel>
+  
+  	<resultMap class="com.geniisys.gipi.entity.GIPIQuoteItemPeril" id="GIPIQuoteItemPeril">
+    	<result column="QUOTE_ID"		property="quoteId"		jdbcType="NUMBER" />
+    	<result column="ITEM_NO"		property="itemNo"		jdbcType="NUMBER" />
+  		<result column="PERIL_CD"		property="perilCd"		jdbcType="NUMBER" />
+  		<result column="PREM_RT"		property="premRt"		jdbcType="NUMBER" />
+  		<result column="COMP_REM"		property="compRem"		jdbcType="VARCHAR" />
+  		<result column="TSI_AMT"		property="tsiAmt"		jdbcType="NUMBER" />
+  		<result column="PREM_AMT"		property="premAmt"		jdbcType="NUMBER" />
+  		<result column="CPI_REC_NO"		property="cpiRecNo"		jdbcType="NUMBER" />
+  		<result column="CPI_BRANCH_CD"	property="cpiBranchCd"	jdbcType="VARCHAR" />
+  		<result column="ANN_PREM_AMT"	property="annPremAmt"	jdbcType="NUMBER" />
+  		<result column="ANN_TSI_AMT"	property="annTsiAmt"	jdbcType="NUMBER" />
+  		<result column="AS_CHARGED_SW"	property="asChargedSw"	jdbcType="VARCHAR" />
+  		<result column="DISCOUNT_SW"	property="discountSw"	jdbcType="VARCHAR" />
+  		<result column="LINE_CD"		property="lineCd"		jdbcType="VARCHAR" />
+  		<result column="PRT_FLAG"		property="prtFlag"		jdbcType="VARCHAR" />
+  		<result column="REC_FLAG"		property="recFlag"		jdbcType="VARCHAR" />
+  		<result column="RI_COMM_AMT"	property="riCommAmt"	jdbcType="NUMBER" />
+  		<result column="RI_COMM_RT"		property="riCommRt"		jdbcType="NUMBER" />
+  		<result column="PREM_RT"		property="premRt"		jdbcType="NUMBER" />
+  		<result column="SURCHARGE_SW"	property="surchargeSw"	jdbcType="VARCHAR" />
+  		<result column="TARF_CD"		property="tarfCd"		jdbcType="VARCHAR" />
+  		
+  		<result column="BASIC_PERIL_CD" property="basicPerilCd"		jdbcType="NUMBER"/>
+  		<result column="PERIL_TYPE" 	property="perilType"		jdbcType="VARCHAR"/>
+  	</resultMap>
+  
+  	<resultMap class="com.geniisys.gipi.entity.GIPIQuoteItemPerilSummary" id="GIPIQuoteItemPerilSummary">
+  		<result column="QUOTE_ID"		property="quoteId"			jdbcType="NUMBER" />
+    	<result column="ITEM_NO"		property="itemNo"			jdbcType="NUMBER" />
+    	<result column="ITEM_TITLE"		property="itemTitle"		jdbcType="VARCHAR" />
+  		<result column="ITEM_DESC"		property="itemDesc"			jdbcType="VARCHAR" />
+  		<result column="CURRENCY_CD"	property="currencyCd"		jdbcType="NUMBER" />
+  		<result column="CURRENCY_DESC"	property="currencyDesc"		jdbcType="VARCHAR" />
+  		<result column="CURRENCY_RATE"	property="currencyRate"		jdbcType="NUMBER" />
+  		<result column="COVERAGE_CD"	property="coverageCd"		jdbcType="NUMBER" />
+  		<result column="COVERAGE_DESC"	property="coverageDesc"		jdbcType="VARCHAR" />
+  		<result column="PERIL_CD"		property="perilCd"			jdbcType="NUMBER" />
+  		<result column="PERIL_NAME"		property="perilName"		jdbcType="VARCHAR" />
+  		<result column="PREM_RT"		property="premiumRate"		jdbcType="NUMBER" />
+  		<result column="TSI_AMT"		property="tsiAmount"		jdbcType="NUMBER" />
+  		<result column="PREM_AMT"		property="premiumAmount"	jdbcType="NUMBER" />
+  		<result column="COMP_REM"		property="compRem"			jdbcType="VARCHAR" />
+  		<result column="ANN_PREM_AMT"	property="annPremAmt"		jdbcType="NUMBER" />
+  		<result column="PERIL_TYPE" 	property="perilType"		jdbcType="VARCHAR"/>
+  		<result column="BASIC_PERIL_CD" property="basicPerilCd"		jdbcType="NUMBER"/>
+  		
+  	</resultMap>
+
+  	<select id="getGIPIQuoteItemPerilSummaryList"	resultMap="GIPIQuoteItemPerilSummary">  	
+  		SELECT * FROM TABLE(Gipi_Quote_Dtls.get_gipi_quote_dtls(#value#))
+  	</select>
+  
+  	<procedure id="delGIPIQuoteItemPeril"	parameterClass="java.util.HashMap">
+  		BEGIN
+  			Gipi_Quote_Dtls.del_gipi_quote_dtls(#quoteId#,#itemNo#,#perilCd#);
+  		END;
+  	</procedure>
+  
+  	<delete id="delPerilsOfQuoteItem" parameterClass="java.util.HashMap">
+  		DELETE FROM GIPI_QUOTE_ITMPERIL
+	 		WHERE quote_id = #quoteId#
+	   		AND item_no  = #itemNo#
+  	</delete>
+  
+  	<procedure id="setGIPIQuoteItemPeril"	parameterClass="com.geniisys.gipi.entity.GIPIQuoteItemPeril">
+  		BEGIN
+	  		Gipi_Quote_Dtls.set_gipi_quote_dtls(
+		  		#quoteId#,    #itemNo#,         #perilCd#,    #premRt#,     	#compRem#,
+		  		#tsiAmt#,     #premAmt#,        #cpiRecNo#,   #cpiBranchCd#, 	#annPremAmt#, 
+		  		#annTsiAmt#,  #asChargedSw#,    #discountSw#, #lineCd#,         #prtFlag#,
+		  		#recFlag#,	  #riCommAmt#,      #riCommRt#,   #surchargeSw#,    #tarfCd#,
+		  		#basicPerilCd#,					#perilType#
+  			);
+  		END;
+  	</procedure>
+  	
+  	<procedure id="setGIPIQuoteItemPerilPremium"	parameterClass="java.util.HashMap">
+  		BEGIN
+	  		Gipi_Quote_Dtls.update_gipi_quote_prem(
+		  		#quoteId#,  #itemNo#,  #perilCd#, #premAmt#
+  			);
+  		END;
+  	</procedure>
+  
+  	<!--  whofeih -->
+	<procedure id="saveGIPIQuoteItemPeril" parameterClass="com.geniisys.gipi.entity.GIPIQuoteItemPeril">
+		DECLARE
+			itemPeril GIPI_QUOTE_ITMPERIL%ROWTYPE;
+		BEGIN
+			itemPeril.quote_id		:= #quoteId#;
+			itemPeril.item_no		:= #itemNo#;
+			itemPeril.peril_cd		:= #perilCd#;
+			itemPeril.prem_rt		:= #premRt#;
+			itemPeril.comp_rem		:= #compRem#;
+		  	itemPeril.tsi_amt		:= #tsiAmt#;    
+		  	itemPeril.prem_amt		:= #premAmt#;
+		  	itemPeril.cpi_rec_no	:= #cpiRecNo#;
+		  	itemPeril.cpi_branch_cd	:= #cpiBranchCd#;
+		  	itemPeril.ann_prem_amt	:= #annPremAmt#;
+		  	itemPeril.ann_tsi_amt	:= #annTsiAmt#;
+		  	itemPeril.as_charged_sw	:= #asChargedSw#;
+		  	itemPeril.discount_sw	:= #discountSw#;
+		  	itemPeril.line_cd		:= #lineCd#;
+		  	itemPeril.prt_flag		:= #prtFlag#;
+		  	itemPeril.rec_flag		:= #recFlag#;
+		  	itemPeril.ri_comm_amt	:= #riCommAmt#;
+		  	itemPeril.ri_comm_rt	:= #riCommRt#;
+		  	itemPeril.surcharge_sw	:= #surchargeSw#;   
+		  	itemPeril.tarf_cd		:= #tarfCd#;
+		  	itemPeril.basic_peril_cd:= #basicPerilCd#;
+		  	itemPeril.peril_type	:= #perilType#;
+		  	
+		  	Gipi_Quote_Dtls.set_gipi_quote_itmperil_dtls(itemPeril);
+		END;
+	</procedure>
+  
+  	<procedure id="deleteGIPIQuoteItemAllPerils"	parameterClass="java.util.HashMap">
+  		BEGIN
+  			Gipi_Quote_Dtls.del_gipi_quote_all_dtls(#quoteId#, #itemNo#);
+  		END;
+  	</procedure>
+	<!-- end of whofeih -->  
+	
+	
+	<!-- BEGIN royencela  -->
+	
+	<select id="computePremiumAmount" resultClass="java.math.BigDecimal" parameterClass="java.util.HashMap">
+		SELECT	COMPUTE_PREM_AMT(#prorateFlag#, #inceptionDate#, #expiryDate#, null, #premiumRate#, #tsiAmount#) PREM_AMT 
+		FROM	DUAL
+	</select>
+	
+	<!-- END royencela -->
+	
+	<!-- BEGIN tonio  -->
+	<procedure id="updateItemPerilPremAmt"	parameterClass="java.util.HashMap">
+  		BEGIN
+  			Gipi_Quote_Dtls.update_gipi_quote_prem(#quoteId#, #itemNo#, #perilCd#, #premAmt#);
+  		END;
+  	</procedure>
+	<!-- END tonio -->
+	
+	<select id="getGipiQuoteItemPerilsForPack" resultMap="GIPIQuoteItemPerilSummary">
+		SELECT * FROM TABLE(GIPI_QUOTE_DTLS.get_quote_dtls_for_pack(#packQuoteId#))
+	</select>
+	
+	<procedure id="deleteGipiQuoteItmPeril"	parameterClass="java.util.HashMap">
+  		BEGIN
+  			Gipi_Quote_Dtls.del_gipi_quote_itmperil_dtls(#quoteId#,#itemNo#,#perilCd#, #lineCd#);
+  		END;
+  	</procedure>
+  
+	
+</sqlMap>

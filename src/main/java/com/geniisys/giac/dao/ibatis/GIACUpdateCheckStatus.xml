@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GIACBatchAcctEntry">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIACUpdateCheckStatus" type="com.geniisys.giac.entity.GIACUpdateCheckStatus"/>
+	
+	<resultMap class="GIACUpdateCheckStatus" id="bankInfoMap" extends="BaseEntity.TableGridResultMap">
+		<result column="bank_name" 		property="bankName" />
+		<result column="bank_cd" 		property="bankCd" />
+		<result column="bank_acct_no" 	property="bankAcctNo" />
+		<result column="bank_acct_cd" 	property="bankAcctCd" />
+	</resultMap>
+	<resultMap class="GIACUpdateCheckStatus" id="disbursementInfoMap" extends="BaseEntity.TableGridResultMap">
+		<result column="bank_cd" 			property="bankCd" />
+		<result column="bank_acct_cd" 		property="bankAcctCd" />
+		<result column="gacc_tran_id" 		property="gaccTranId" />
+		<result column="item_no" 			property="itemNo" />
+		<result column="check_pref_suf" 	property="checkPrefSuf" />
+		<result column="check_no" 			property="checkNo" />
+		<result column="check_date" 		property="checkDate" />
+		<result column="payee" 				property="payee" />
+		<result column="amount" 			property="amount" />
+		<result column="check_release_date" property="checkReleaseDate" />
+		<result column="clearing_date" 		property="clearingDate" />
+		<result column="gibr_branch_cd" 	property="gibrBranchCd" />
+		<result column="branch_name" 		property="branchName" />
+	</resultMap>
+	<parameterMap class="GIACUpdateCheckStatus" id="updateClearingDateMap">
+		<parameter property="clearingDate"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="checkReleaseDate"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="gaccTranId"		jdbcType="NUMERIC"		javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="userId"		    jdbcType="VARCHAR"		javaType="java.lang.String"	    mode="IN" />
+	</parameterMap>	
+	
+	<select id="getBankInfo" resultMap="bankInfoMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*
+		          FROM (SELECT * 
+		          			FROM TABLE(GIAC_CHECK_STATUS_PKG.get_bank_info(#branchCd#))
+		          	 	<isNotNull property="filter">
+							WHERE 1=1
+							<isNotEmpty prepend="AND"  property="bankName">
+								UPPER(bank_name) LIKE UPPER(#bankName#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="bankAcctNo">
+								UPPER(bank_acct_no) LIKE UPPER(#bankAcctNo#)
+							</isNotEmpty>
+						</isNotNull>
+			            <isEqual property="sortColumn" compareValue="bankName">
+		              		ORDER BY bank_name
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="bankAcctNo">
+		              		ORDER BY bank_acct_no
+			            </isEqual> 
+			            <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	 </isNotNull>) a,
+		               (SELECT count(*) count_
+		                FROM TABLE(GIAC_CHECK_STATUS_PKG.get_bank_info(#branchCd#))
+                 		<isNotNull property="filter">
+							WHERE 1=1
+							<isNotEmpty prepend="AND"  property="bankName">
+								UPPER(bank_name) LIKE UPPER(#bankName#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="bankAcctNo">
+								UPPER(bank_acct_no) LIKE UPPER(#bankAcctNo#)
+							</isNotEmpty>
+						</isNotNull>) b)
+               WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getDisbursementInfo" resultMap="disbursementInfoMap">
+				SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*
+		          FROM (SELECT * 
+		          			FROM TABLE(GIAC_CHECK_STATUS_PKG.get_chk_disbursement(#bankCd#,#bankAcctCd#,#branchCd#,TO_DATE(#fromDate#,'MM-DD-YYYY'),TO_DATE(#toDate#,'MM-DD-YYYY'),#status#))
+		          	 	<isNotNull property="filter">
+							WHERE 1=1
+							<isNotEmpty prepend="AND"  property="checkNo">
+								check_no = TO_NUMBER(#checkNo#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="checkPrefSuf">
+								UPPER(check_pref_suf) LIKE UPPER(#checkPrefSuf#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="checkDate">
+								check_date LIKE #checkDate#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="payee">
+								UPPER(payee) LIKE UPPER(#payee#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="amount">
+								amount = #amount#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="checkReleaseDate">
+								check_release_date LIKE #checkReleaseDate#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="clearingDate">
+								clearing_date LIKE #clearingDate#
+							</isNotEmpty>
+						</isNotNull>
+			            <isEqual property="sortColumn" compareValue="checkPrefSuf checkNo">
+		              		ORDER BY check_pref_suf
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>,
+								check_no
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="checkDate">
+		              		ORDER BY check_date
+			            </isEqual> 
+			            <isEqual property="sortColumn" compareValue="payee">
+		              		ORDER BY payee
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="amount">
+		              		ORDER BY amount
+			            </isEqual> 
+			            <isEqual property="sortColumn" compareValue="checkReleaseDate">
+		              		ORDER BY check_release_date
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="clearingDate">
+		              		ORDER BY clearing_date
+			            </isEqual> 
+			            <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	 </isNotNull>) a,
+		               (SELECT count(*) count_
+		                FROM TABLE(GIAC_CHECK_STATUS_PKG.get_chk_disbursement(#bankCd#,#bankAcctCd#,#branchCd#,TO_DATE(#fromDate#,'MM-DD-YYYY'),TO_DATE(#toDate#,'MM-DD-YYYY'),#status#))
+                 		<isNotNull property="filter">
+							WHERE 1=1
+							<isNotEmpty prepend="AND"  property="checkNo">
+								check_no = TO_NUMBER(#checkNo#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="checkPrefSuf">
+								UPPER(check_pref_suf) LIKE UPPER(#checkPrefSuf#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="checkDate">
+								check_date LIKE #checkDate#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="payee">
+								UPPER(payee) LIKE UPPER(#payee#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="amount">
+								amount = #amount#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="checkReleaseDate">
+								check_release_date LIKE #checkReleaseDate#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="clearingDate">
+								clearing_date LIKE #clearingDate#
+							</isNotEmpty>
+						</isNotNull>) b)
+               WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="updateClearingDate" parameterMap="updateClearingDateMap">
+		BEGIN
+			GIAC_CHECK_STATUS_PKG.update_date(TO_DATE(?,'MM-DD-YYYY'),TO_DATE(?,'MM-DD-YYYY'),?,?);
+		END;
+	</procedure>
+</sqlMap>

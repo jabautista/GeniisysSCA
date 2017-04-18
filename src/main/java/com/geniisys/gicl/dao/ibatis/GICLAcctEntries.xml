@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GICLAcctEntries">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GICLAcctEntries" type="com.geniisys.gicl.entity.GICLAccountEntries"/>
+	
+	<resultMap id="GICLAcctEntriesTableGridMap" class="GICLAcctEntries">
+		<result property="claimId" 				column="CLAIM_ID"/>
+		<result property="adviceId" 			column="ADVICE_ID"/>
+		<result property="accountEntryId" 		column="ACCT_ENTRY_ID"/>
+		<result property="claimLossId" 			column="CLM_LOSS_ID"/>
+		<result property="glAccountId" 			column="GL_ACCT_ID"/>
+		<result property="glAccountCategory" 	column="GL_ACCT_CATEGORY"/>
+		<result property="glControlAccount" 	column="GL_CONTROL_ACCT"/>
+		<result property="glSubAccount1" 		column="GL_SUB_ACCT_1"/>
+		<result property="glSubAccount2" 		column="GL_SUB_ACCT_2"/>
+		<result property="glSubAccount3" 		column="GL_SUB_ACCT_3"/>
+		<result property="glSubAccount4" 		column="GL_SUB_ACCT_4"/>
+		<result property="glSubAccount5" 		column="GL_SUB_ACCT_5"/>
+		<result property="glSubAccount6" 		column="GL_SUB_ACCT_6"/>
+		<result property="glSubAccount7" 		column="GL_SUB_ACCT_7"/>
+		<result property="slCode" 		 		column="SL_CD"/>
+		<result property="debitAmount" 	 		column="DEBIT_AMT"/>
+		<result property="creditAmount"  		column="CREDIT_AMT"/>
+		<result property="generationType" 		column="GENERATION_TYPE"/>
+		<result property="slTypeCode" 	 		column="SL_TYPE_CD"/>
+		<result property="slSourceCode"  		column="SL_SOURCE_CD"/>
+		<result property="batchCsrId" 			column="BATCH_CSR_ID"/>
+		<result property="remarks" 				column="REMARKS"/>
+		<result property="userId" 				column="USER_ID"/>
+		<result property="lastUpdate" 			column="LAST_UPDATE"/>
+		<result property="payeeClassCode" 		column="PAYEE_CLASS_CD"/>
+		<result property="payeeCode" 			column="PAYEE_CD"/>
+		<result property="batchDvId" 			column="BATCH_DV_ID"/>
+		<result property="nbtGlAcctName" 		column="NBT_GL_ACCT_NAME"/>
+		<result property="glAcctCode" 			column="NBT_GL_ACCT_CODE"/>
+		<result property="rowNum"				column="ROWNUM_"/>
+		<result property="rowCount"				column="COUNT_"	/>
+	</resultMap>
+		
+	<resultMap class="java.util.HashMap" id="GICLRecAcctEntriesTGMap">
+		<result property="recoveryAcctId" 		column="RECOVERY_ACCT_ID"/>
+		<result property="acctEntryId" 			column="ACCT_ENTRY_ID"/>
+		<result property="glAcctId" 			column="GL_ACCT_ID"/>
+		<result property="glAcctCategory" 		column="GL_ACCT_CATEGORY"/>
+		<result property="glControlAcct" 		column="GL_CONTROL_ACCT"/>
+		<result property="glSubAccount1" 		column="GL_SUB_ACCT_1"/>
+		<result property="glSubAccount2" 		column="GL_SUB_ACCT_2"/>
+		<result property="glSubAccount3" 		column="GL_SUB_ACCT_3"/>
+		<result property="glSubAccount4" 		column="GL_SUB_ACCT_4"/>
+		<result property="glSubAccount5" 		column="GL_SUB_ACCT_5"/>
+		<result property="glSubAccount6" 		column="GL_SUB_ACCT_6"/>
+		<result property="glSubAccount7" 		column="GL_SUB_ACCT_7"/>
+		<result property="slCd" 		 		column="SL_CD"/>
+		<result property="debitAmt" 	 		column="DEBIT_AMT"/>
+		<result property="creditAmt"  			column="CREDIT_AMT"/>
+		<result property="generationType" 		column="GENERATION_TYPE"/>
+		<result property="slTypeCd" 	 		column="SL_TYPE_CD"/>
+		<result property="slSourceCd"  			column="SL_SOURCE_CD"/>
+		<result property="remarks" 				column="REMARKS"/>
+		<result property="dspGlAcctCd" 			column="DSP_GL_ACCT_CD"/>
+		<result property="dspGlAcctName" 		column="DSP_GL_ACCT_NAME"/>
+		<result property="dspPayorName" 		column="DSP_PAYOR_NAME"/>
+		<result property="dspSlName" 			column="DSP_SL_NAME"/>
+		<result property="rowNum" 				column="rownum_" />
+		<result property="rowCount" 			column="count_" />
+	</resultMap>
+	
+	<select id="getGiclAcctEntriesTableGrid" resultMap="GICLAcctEntriesTableGridMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*
+		          FROM (SELECT * 
+		                  FROM TABLE (GICL_ACCT_ENTRIES_PKG.get_gicl_acct_entries(#adviceId#, #claimId#, #glAccountCategory#, #glControlAccount#, #glSubAccount1#, #glSubAccount2#, #glSubAccount3#, #glSubAccount4#, #glSubAccount5#, #glSubAccount6#, #glSubAccount7#, #slCode#, #debitAmount#, #creditAmount#))
+			            <isEqual property="sortColumn" compareValue="glAcctCode">
+		              		ORDER BY nbt_gl_acct_code
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="slCode">
+		              		ORDER BY sl_cd
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="debitAmount">
+		              		ORDER BY debit_amt
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="creditAmount">
+		              		ORDER BY credit_amt
+			            </isEqual>
+			            <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	</isNotNull>) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GICL_ACCT_ENTRIES_PKG.get_gicl_acct_entries(#adviceId#, #claimId#, #glAccountCategory#, #glControlAccount#, #glSubAccount1#, #glSubAccount2#, #glSubAccount3#, #glSubAccount4#, #glSubAccount5#, #glSubAccount6#, #glSubAccount7#, #slCode#, #debitAmount#, #creditAmount#))) b)
+		WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<update id="updateGICLAcctEntriesByAdvice" parameterClass="map">
+		UPDATE gicl_acct_entries
+	       SET batch_dv_id = #batchDvId#
+	     WHERE claim_id = #claimId#
+	       AND advice_id = #adviceId#
+	       AND payee_class_cd = #payeeClassCd#
+	       AND payee_cd = #payeeCd#
+	</update>
+	
+	<select id="getGICLAcctEntriesList" resultMap="GICLAcctEntriesTableGridMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*
+		          FROM (SELECT * 
+		                  FROM TABLE (GICL_ACCT_ENTRIES_PKG.get_gicl_acct_entries_list(#claimId#, #adviceId#, #payeeCd#, #payeeClassCd#))
+			            <isEqual property="sortColumn" compareValue="glAcctCode">
+		              		ORDER BY nbt_gl_acct_code
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="slCode">
+		              		ORDER BY sl_cd
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="debitAmount">
+		              		ORDER BY debit_amt
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="creditAmount">
+		              		ORDER BY credit_amt
+			            </isEqual>
+			            <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	</isNotNull>) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GICL_ACCT_ENTRIES_PKG.get_gicl_acct_entries_list(#claimId#, #adviceId#, #payeeCd#, #payeeClassCd#))) b)
+		WHERE rownum_ BETWEEN #from# AND #to#
+	</select>	
+	
+	<select id="getGiclRecAcctEntriesTableGrid" resultMap="GICLRecAcctEntriesTGMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*
+		          FROM (SELECT * 
+		                  FROM TABLE (GICL_REC_ACCT_ENTRIES_PKG.get_rec_acct_entries_list(#recoveryAcctId#, #payorCd#, #payorClassCd#))
+			            <isEqual property="sortColumn" compareValue="dspGlAcctCd">
+		              		ORDER BY dsp_gl_acct_cd
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="slCd"> <!-- lara 1/10/2014  -->
+		              		ORDER BY sl_cd
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="debitAmt"> <!-- lara 1/10/2014  -->
+		              		ORDER BY debit_amt
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="creditAmt"> <!-- lara 1/10/2014  -->
+		              		ORDER BY credit_amt
+			            </isEqual>
+			            <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	</isNotNull>) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GICL_REC_ACCT_ENTRIES_PKG.get_rec_acct_entries_list(#recoveryAcctId#, #payorCd#, #payorClassCd#))) b)
+		WHERE rownum_ BETWEEN #from# AND #to#
+	</select>	
+	
+	<procedure id="setGICLRecAcctgEntries" parameterClass="map">
+		BEGIN
+			GICL_REC_ACCT_ENTRIES_PKG.set_rec_acct_entries(
+				#recoveryAcctId#,
+				#acctEntryId#,
+				#glAcctId#,
+				#glAcctCategory#,
+				#glControlAcct#,
+				#glSubAccount1#,
+				#glSubAccount2#,
+				#glSubAccount3#,
+				#glSubAccount4#,
+				#glSubAccount5#,
+				#glSubAccount6#,
+				#glSubAccount7#,
+				#slCd#,
+				#debitAmt#,
+				#creditAmt#,
+				#generationType#,
+				#slTypeCd#,
+				#slSourceCd#,
+				#userId#
+			);
+		END;
+	</procedure>
+	
+	<procedure id="delGICLRecAcctgEntries" parameterClass="map">
+		BEGIN
+			GICL_REC_ACCT_ENTRIES_PKG.del_rec_acct_entries(#recoveryAcctId#, #acctEntryId#);
+		END;
+	</procedure>
+</sqlMap>

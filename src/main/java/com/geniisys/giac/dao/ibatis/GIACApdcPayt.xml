@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="GIACApdcPayt">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIACApdcPaytEntriesClass" type="com.geniisys.giac.entity.GIACApdcPayt" />
+	
+	<resultMap id="GIACApdcPaytEntriesResultMap" class="GIACApdcPaytEntriesClass">
+		<result column="apdc_id" 				property="apdcId" />
+		<result column="fund_cd" 				property="fundCd" />
+		<result column="branch_cd" 				property="branchCd"	/>
+		<result column="apdc_date"				property="apdcDate"	/>
+		<result column="apdc_pref"				property="apdcPref"	/>
+		<result column="apdc_no"				property="apdcNo" />
+		<result column="cashier_cd" 			property="cashierCd" />
+		<result column="payor"					property="payor" />
+		<result column="apdc_flag" 				property="apdcFlag" />
+		<result column="apdc_flag_meaning" 		property="apdcFlagMeaning"/>
+		<result column="user_id"				property="userId"/>
+		<result column="last_update"			property="lastUpdate" />
+		<result column="particulars"			property="particulars" />
+		<result column="ref_apdc_no"			property="refApdcNo" />
+		<result column="cic_print_tag"			property="cicPrintTag" />
+		<result column="address_1"				property="address1" />
+		<result column="address_2"				property="address2" />
+		<result column="address_3"				property="address3" />
+	</resultMap>
+	
+	<resultMap class="GIACApdcPaytEntriesClass" id="GIACApdcPaytResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="apdc_id" 				property="apdcId" />
+		<result column="fund_cd" 				property="fundCd" />
+		<result column="branch_cd" 				property="branchCd"	/>
+		<result column="apdc_date"				property="apdcDate"	/>
+		<result column="apdc_pref"				property="apdcPref"	/>
+		<result column="apdc_no"				property="apdcNo" />
+		<result column="cashier_cd" 			property="cashierCd" />
+		<result column="payor"					property="payor" />
+		<result column="apdc_flag" 				property="apdcFlag" />
+		<result column="apdc_flag_meaning" 		property="apdcFlagMeaning"/>
+		<result column="user_id"				property="userId"/>
+		<result column="last_update"			property="lastUpdate" />
+		<result column="particulars"			property="particulars" />
+		<result column="ref_apdc_no"			property="refApdcNo" />
+		<result column="cic_print_tag"			property="cicPrintTag" />
+		<result column="address_1"				property="address1" />
+		<result column="address_2"				property="address2" />
+		<result column="address_3"				property="address3" />		
+	</resultMap>
+	
+	<parameterMap id="popApdcParameterMap" class="map">
+		<parameter property="appUser" 		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="fundCd" 		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="branchCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="apdcFlag"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="docPrefSuf"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+		<parameter property="dspStatus"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+		<parameter property="defaultCurrency" jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+		<parameter property="orParticularsText" jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+		<parameter property="premTaxPriority" jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+	</parameterMap>
+
+	<parameterMap class="java.util.Map" id="CancelApdcPaytParamMap">
+		<parameter property="appUser" 		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="apdcId" 		jdbcType="NUMBER"		javaType="java.lang.Integer"	mode="IN" />
+	</parameterMap>
+
+	<parameterMap class="java.util.Map" id="DocSeqNoParamMap">
+		<parameter property="branchCd" 		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="fundCd" 		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="docSeqNo" 		jdbcType="NUMERIC"		javaType="java.lang.Integer"		mode="OUT" />
+	</parameterMap>
+
+	<parameterMap class="java.util.Map" id="BreakdownParamMap">
+		<parameter property="transactionType" jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="issCd" 		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="premSeqNo" 	jdbcType="NUMERIC"		javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="instNo" 		jdbcType="NUMERIC"		javaType="java.lang.Integer"	mode="IN" />		
+		<parameter property="collectionAmt" jdbcType="NUMERIC"		javaType="java.math.BigDecimal"	mode="INOUT" />
+		<parameter property="premiumAmt" 	jdbcType="NUMERIC"		javaType="java.math.BigDecimal"	mode="OUT" />
+		<parameter property="taxAmt" 		jdbcType="NUMERIC"		javaType="java.math.BigDecimal"	mode="OUT" />
+	</parameterMap>	
+
+	<select id="getGIACApdcPayt" parameterClass="java.lang.Integer" resultMap="GIACApdcPaytEntriesResultMap">
+		SELECT * FROM TABLE(GIAC_APDC_PAYT_PKG.get_giac_apdc_payt(#apdcId#))
+	</select>
+	
+	<procedure id="popApdc" parameterMap="popApdcParameterMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			GIAC_APDC_PAYT_PKG.pop_apdc(?, ?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<insert id="setGiacApdcPayt" parameterClass="GIACApdcPaytEntriesClass">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			GIAC_APDC_PAYT_PKG.set_giac_apdc_payt(#apdcId#, #fundCd#, #branchCd#, #apdcDate#, #apdcPref#, 
+												  #apdcNo#, #cashierCd#, #payor#, #apdcFlag#, #particulars#, 
+												  #refApdcNo#, #address1#, #address2#, #address3#, #cicPrintTag#);
+		END;
+	</insert>
+	
+	<procedure id="giacs090PostCommit" parameterClass="java.util.HashMap">
+		 BEGIN
+		 	giis_users_pkg.app_user := #appUser#;
+		 	GIAC_APDC_PAYT_PKG.giacs090_post_commit(#apdcId#);
+		 END;
+	</procedure>
+	
+	<select id="generateApdcId" resultClass="java.lang.Integer">
+		SELECT apdc_payt_apdc_id_s.NEXTVAL FROM DUAL
+	</select>
+	
+	<delete id="deleteGiacApdcPayt" parameterClass="java.lang.Integer">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			GIAC_APDC_PAYT_PKG.delete_giac_apdc_payt(#apdcId#);
+		END;
+	</delete>
+	
+	<select id="verifyApdcNo" parameterClass="map" resultClass="java.lang.String">
+		SELECT GIAC_APDC_PAYT_PKG.verify_apdc_no(#apdcNo#, #apdcPref#, #branchCd#, #fundCd#) FROM DUAL
+	</select>
+	
+	<procedure id="getDocSeqNo" parameterMap="DocSeqNoParamMap">
+		BEGIN
+		  GIAC_APDC_PAYT_PKG.get_doc_seq_no(?, ?, ?);
+		END;
+	</procedure>
+	
+	<update id="savePrintChanges">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			GIAC_APDC_PAYT_PKG.save_print_changes(#apdcId#, #apdcNo#, #newSeqNo#, #branchCd#, #fundCd#, #cicPrintTag#);
+		END;
+	</update>
+	
+	<procedure id="getApdcPaytList" resultMap="GIACApdcPaytResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIAC_APDC_PAYT_PKG.get_giac_apdc_payt_listing(#fundCd#, #branchCd#, #apdcDate#, #apdcNo#, #payor#, #refApdcNo#, #particulars#, #apdcFlagMeaning#, #apdcFlag#)) <!-- benjo 11.08.2016 SR-5802 -->
+		                  <isEqual property="sortColumn" compareValue="apdcPref apdcNo">
+			              		ORDER BY apdc_pref, apdc_no
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="apdcDate">
+			              		ORDER BY apdc_date
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="payor">
+			              		ORDER BY payor
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="refApdcNo">
+			              		ORDER BY ref_apdc_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="particulars">
+			              		ORDER BY particulars
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="apdcFlagMeaning">
+			              		ORDER BY apdc_flag_meaning
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIAC_APDC_PAYT_PKG.get_giac_apdc_payt_listing(#fundCd#, #branchCd#, #apdcDate#, #apdcNo#, #payor#, #refApdcNo#, #particulars#, #apdcFlagMeaning#, #apdcFlag#)) <!-- benjo 11.08.2016 SR-5802 -->	                   
+		                  )b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</procedure>
+	
+	<procedure id="cancelGIACApdcPayt" parameterMap="CancelApdcPaytParamMap">
+		BEGIN
+		  GIIS_USERS_PKG.app_user := ?;
+		  giac_apdc_payt_pkg.cancel_apdc_payt(?);
+		END;
+	</procedure>
+	
+	<procedure id="getBreakdownAmounts" parameterMap="BreakdownParamMap">
+	   BEGIN
+		 giacs090_breakdown(?, ?, ?, ?, ?, ?, ?);
+	   END;
+	</procedure>
+	
+</sqlMap>

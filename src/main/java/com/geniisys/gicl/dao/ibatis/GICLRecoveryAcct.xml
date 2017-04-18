@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GICLRecoveryAcct">
+
+	<resultMap class="java.util.HashMap" id="recoveryAcctResultMap">
+		<result property="recoveryAcctId" 		column="recovery_acct_id" />
+		<result property="issCd" 				column="iss_cd" />
+		<result property="recAcctYear" 			column="rec_acct_year" />
+		<result property="recAcctSeqNo" 		column="rec_acct_seq_no" />
+		<result property="recoveryAmt" 			column="recovery_amt" />
+		<result property="acctTranId" 			column="acct_tran_id" />
+		<result property="tranDate" 			column="tran_date" />
+		<result property="recAcctFlag"		    column="recovery_acct_flag" />
+		<result property="dspRecoveryAcctNo" 	column="dsp_recovery_acct_no" />
+		<result property="dspTranFlag"			column="dsp_tran_flag" />
+		<result property="acctExists"			column="acct_exists" />
+		<result property="nbtClaimId" 			column="nbt_claim_id" />
+	</resultMap>
+
+	<resultMap class="java.util.HashMap" id="recoveryAcctLOVResultMap" extends="recoveryAcctResultMap">
+		<result property="rowNum" 				column="rownum_" />
+		<result property="rowCount" 			column="count_" />
+	</resultMap>
+	
+	<parameterMap class="java.util.HashMap" id="generateRecAcctInfoMap">
+		<parameter property="issCd"				jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN" />
+		<parameter property="recoveryAcctId"	jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="OUT" />
+		<parameter property="recAcctYear"		jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="OUT" />
+		<parameter property="recAcctSeqNo"		jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="OUT" />
+	</parameterMap>
+	
+	<parameterMap class="java.util.HashMap" id="gicsl055AegParamMap">
+		<parameter property="userId"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN" />
+		<parameter property="recoveryAcctId"	jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="message"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT" />
+	</parameterMap>
+	
+	<parameterMap class="java.util.HashMap" id="setRecAcctMap">
+		<parameter property="recoveryAcctId"	jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="issCd"				jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN" />
+		<parameter property="recAcctYear"		jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="recAcctSeqNo"		jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="recoveryAmt"		jdbcType="NUMERIC"	javaType="java.math.BigDecimal"	mode="IN" />
+		<parameter property="recAcctFlag"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN" />
+		<parameter property="acctTranId"		jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="tranDate"			jdbcType="DATE"		javaType="java.util.Date"		mode="IN" />
+		<parameter property="userId"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN" />
+	</parameterMap>
+	
+	<select id="getRecoveryAcct" resultMap="recoveryAcctResultMap" parameterClass="map">
+		SELECT * FROM TABLE (GICL_RECOVERY_ACCT_PKG.get_gicl_recovery_acct_list(#claimId#, #userId#, #moduleId#, #recoveryAcctId#))
+	</select>
+	
+	<select id="getRecoveryAcctLOV" resultMap="recoveryAcctLOVResultMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE (GICL_RECOVERY_ACCT_PKG.get_gicl_recovery_acct_list(#claimId#, #userId#, #moduleId#, #recoveryAcctId#))        
+			          	<isNotNull property="findText">
+		                  WHERE TO_CHAR(rec_acct_year) LIKE #findText# 
+		                     OR UPPER(iss_cd) LIKE UPPER(#findText#) 
+		                     OR TO_CHAR(rec_acct_seq_no) LIKE #findText#
+		                     OR recovery_amt LIKE #findText#
+		                     OR UPPER(dsp_recovery_acct_no) LIKE UPPER(#findText#)
+		             	</isNotNull>
+                    	<isEqual property="sortColumn" compareValue="dspRecoveryAcctNo">
+			          		ORDER BY 
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="recoveryAmt">
+			          		ORDER BY 
+			          	</isEqual>
+			          	<isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	</isNotNull>) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GICL_RECOVERY_ACCT_PKG.get_gicl_recovery_acct_list(#claimId#, #userId#, #moduleId#, #recoveryAcctId#))
+		                  <isNotNull property="findText">
+		                  WHERE TO_CHAR(rec_acct_year) LIKE #findText# 
+		                     OR UPPER(iss_cd) LIKE UPPER(#findText#) 
+		                     OR TO_CHAR(rec_acct_seq_no) LIKE #findText#
+		                     OR recovery_amt LIKE #findText#
+		                     OR UPPER(dsp_recovery_acct_no) LIKE UPPER(#findText#)
+		             	</isNotNull>) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="generateRecAcctInfo" parameterMap="generateRecAcctInfoMap">
+		BEGIN
+			GICL_RECOVERY_ACCT_PKG.generate_recovery_acct_info(?,?,?,?);
+		END;
+	</procedure>
+	
+	<procedure id="aegParameterGICLS055" parameterMap="gicsl055AegParamMap">
+		BEGIN
+			GIIS_USERS_PKG.app_user := ?;
+			GICL_REC_ACCT_ENTRIES_PKG.AEG_Parameters_GICLS055(?, ?);
+		END;
+	</procedure>
+	
+	<procedure id="setRecoveryAcct" parameterClass="map">
+		BEGIN
+			GICL_RECOVERY_ACCT_PKG.set_generated_rec_acct(
+				#recoveryAcctId#, #issCd#, #recAcctYear#, 
+				#recAcctSeqNo#, #recoveryAmt#, #recAcctFlag#, 
+				#acctTranId#, #tranDate#, #userId#
+			);
+		END;
+	</procedure>
+	
+	<procedure id="setRecoveryAcct2" parameterMap="setRecAcctMap">
+		BEGIN
+			GICL_RECOVERY_ACCT_PKG.set_generated_rec_acct(?, ?, ?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+</sqlMap>

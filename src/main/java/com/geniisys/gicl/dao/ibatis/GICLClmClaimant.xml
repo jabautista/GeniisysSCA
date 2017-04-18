@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GICLClmClaimant">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GICLClmClaimantClass" type="com.geniisys.gicl.entity.GICLClmClaimant"/>
+	
+	<resultMap class="GICLClmClaimantClass" 	id="GICLClmClaimantResultMap">
+		<result property="claimId"				column="CLAIM_ID"/> 
+		<result property="clmClmntNo"			column="CLM_CLMNT_NO"/>
+		<result property="clmntNo"				column="CLMNT_NO"/>
+		<result property="payeeClassCd"			column="PAYEE_CLASS_CD"/>
+		<result property="payeeClassDesc"		column="PAYEE_CLASS_DESC"/>
+		<result property="payee"				column="PAYEE"/>
+		<result property="mailAddr1"			column="MAIL_ADDR1"/>
+		<result property="mailAddr2"			column="MAIL_ADDR2"/>
+		<result property="mailAddr3"			column="MAIL_ADDR3"/>
+		<result property="phoneNo"				column="PHONE_NO"/>
+		<result property="faxNo"				column="FAX_NO"/>
+		<result property="userId"				column="USER_ID"/>
+		<result property="lastUpdate"			column="LAST_UPDATE"/>
+		<result property="clmPaid"				column="CLM_PAID"/>
+		<result property="remarks"				column="REMARKS"/>
+		<result property="mcPayeeCd"			column="MC_PAYEE_CD"/>
+		<result property="mcPayeeName"			column="MC_PAYEE_NAME"/>
+	</resultMap>
+	
+	<resultMap id="GICLClmClaimantGridResultMap" class="java.util.HashMap" extends="GICLClmClaimantResultMap">
+		<result property="sdfLastUpdate"		column="sdf_last_update"/> <!-- added by steven 06.03.2013 -->
+  		<result property="rowNum"				column="ROWNUM_"/>
+		<result property="rowCount"				column="COUNT_"/>
+  	</resultMap>
+	
+	<select id="getGICLClmClaimantList" resultMap="GICLClmClaimantGridResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, a.*
+		          FROM (SELECT * 
+		                  FROM TABLE (GICL_CLM_CLAIMANT_PKG.get_gicl_clm_claimant(#claimId#))
+		                  <isNotNull property="filter">
+							WHERE 1=1
+							<isNotEmpty prepend="AND" property="payeeClassCd">
+							  UPPER(payee_class_cd) LIKE UPPER(#payeeClassCd#)
+						    </isNotEmpty>
+						    <isNotEmpty prepend="AND" property="payeeClassDesc">
+							  UPPER(payee_class_desc) LIKE UPPER(#payeeClassDesc#)
+						    </isNotEmpty>
+						    <isNotEmpty prepend="AND" property="clmntNo">
+							  clmnt_no LIKE #clmntNo#
+						    </isNotEmpty>
+						    <isNotEmpty prepend="AND" property="payee">
+							  UPPER(payee) LIKE UPPER(#payee#)
+						    </isNotEmpty>
+						  </isNotNull>
+			              <isEqual property="sortColumn" compareValue="payeeClassCd payeeClassDesc">
+			            		ORDER BY payee_class_cd
+			            		<isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              	</isNotNull>
+				              	,payee_class_desc
+			          		</isEqual> 
+			              <isEqual property="sortColumn" compareValue="clmntNo">
+		              		ORDER BY clmnt_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="payee">
+		              		ORDER BY payee
+			              </isEqual>
+		                  <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	  </isNotNull>) a, 
+		               (SELECT count(*) count_
+		                  FROM TABLE (GICL_CLM_CLAIMANT_PKG.get_gicl_clm_claimant(#claimId#))			                  	
+		                  <isNotNull property="filter">
+							WHERE 1=1
+							<isNotEmpty prepend="AND" property="payeeClassCd">
+							  UPPER(payee_class_cd) LIKE UPPER(#payeeClassCd#)
+						    </isNotEmpty>
+						    <isNotEmpty prepend="AND" property="payeeClassDesc">
+							  UPPER(payee_class_desc) LIKE UPPER(#payeeClassDesc#)
+						    </isNotEmpty>
+						    <isNotEmpty prepend="AND" property="clmntNo">
+							  clmnt_no LIKE #clmntNo#
+						    </isNotEmpty>
+						    <isNotEmpty prepend="AND" property="payee">
+							  UPPER(payee) LIKE UPPER(#payee#)
+						    </isNotEmpty>
+						  </isNotNull>) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#			
+	</select>
+	
+</sqlMap>	

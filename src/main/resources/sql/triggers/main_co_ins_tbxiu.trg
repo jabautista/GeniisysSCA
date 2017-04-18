@@ -1,0 +1,16 @@
+DROP TRIGGER CPI.MAIN_CO_INS_TBXIU;
+
+CREATE OR REPLACE TRIGGER CPI.MAIN_CO_INS_TBXIU
+BEFORE INSERT OR UPDATE
+ON CPI.GIPI_MAIN_CO_INS FOR EACH ROW
+DECLARE
+BEGIN
+  DECLARE
+  BEGIN
+    :new.user_id     := NVL (giis_users_pkg.app_user, USER);
+    :new.last_update := sysdate;
+  END;
+END;
+/
+
+

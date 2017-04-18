@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GIISRecoveryStatus">
+
+	<typeAlias alias="GIISRecoveryStatusClass" type="com.geniisys.common.entity.GIISRecoveryStatus"/>
+
+	<resultMap class="GIISRecoveryStatusClass" id="GIISRecoveryStatusResultMap">
+		<result column="rec_stat_cd" 			property="recStatCd"/>
+        <result column="rec_stat_desc" 			property="recStatDesc"/>
+        <result column="remarks" 				property="remarks"/>
+        <result column="cpi_rec_no" 			property="cpiRecNo"/>
+        <result column="cpi_branch_cd" 			property="cpiBranchCd"/>
+        <result column="user_id" 				property="userId"/>
+        <result column="last_update" 			property="lastUpdate"/>
+        <result column="rec_stat_type" 			property="recStatType"/>
+	</resultMap>
+	
+	<resultMap class="GIISRecoveryStatusClass" id="GIISRecoveryStatusResultMapGrid" extends="GIISRecoveryStatusResultMap">
+		<result column="rownum_"					property="rowNum"/>
+	    <result column="count_"						property="rowCount"/>
+	</resultMap>
+	
+	<select id="getRecoveryStatusLOV" resultMap="GIISRecoveryStatusResultMapGrid">
+		SELECT *
+			  FROM (SELECT rownum rownum_, 
+			               b.count_, a.*
+			          FROM (SELECT * 
+			                  FROM TABLE (giis_recovery_status_pkg.get_recovery_status)
+			                  <isNotNull property="findText">
+						         WHERE (UPPER(rec_stat_cd) LIKE UPPER(#findText#) 
+						         	 OR UPPER(rec_stat_desc) LIKE UPPER(#findText#)
+						         	 )
+					          </isNotNull>
+							  <isEqual property="sortColumn" compareValue="recStatCd">
+			              		ORDER BY rec_stat_cd
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="recStatDesc">
+			              		ORDER BY rec_stat_desc
+				              </isEqual> 
+				              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	  </isNotNull>		
+			                  ) a, 
+			               (SELECT count(*) count_
+			                  FROM TABLE (giis_recovery_status_pkg.get_recovery_status)	
+			                  <isNotNull property="findText">
+						         WHERE (UPPER(rec_stat_cd) LIKE UPPER(#findText#) 
+						         	 OR UPPER(rec_stat_desc) LIKE UPPER(#findText#)
+						         	 )
+					          </isNotNull>	                  	
+			                  ) b) 
+			 WHERE rownum_ BETWEEN #from# AND #to#		
+	</select>
+	
+	<!-- start of GICLS100;  by steven 11.08.2013 -->
+	<resultMap class="GIISRecoveryStatusClass" id="gicls100RecListMap" extends="BaseEntity.TableGridResultMap">
+		<result column="rec_stat_cd" 		property="recStatCd"/>
+        <result column="rec_stat_desc" 		property="recStatDesc"/>
+		<result column="remarks" 			property="remarks" />
+		<result column="user_id" 			property="userId" />
+		<result column="last_update" 		property="lastUpdate" />
+	</resultMap>
+	
+	<select id="getGicls100RecList" resultMap="gicls100RecListMap">
+		SELECT * 
+			FROM (SELECT rownum rownum_,
+						 b.count_,
+						 a.*
+					FROM (SELECT * 
+							FROM TABLE (gicls100_pkg.get_rec_list (#recStatCd#,#recStatDesc#))
+							<isEqual property="sortColumn" compareValue="recStatCd">
+								ORDER BY rec_stat_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="recStatDesc">
+								ORDER BY rec_stat_desc
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>) a, 
+							(SELECT count(*) count_
+							   FROM TABLE (gicls100_pkg.get_rec_list (#recStatCd#,#recStatDesc#))
+							 ) b)
+		WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="setGIISRecoveryStatus" parameterClass="GIISRecoveryStatusClass">
+	    DECLARE
+	    	v_rec giis_recovery_status%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+
+ 			v_rec.rec_stat_cd := #recStatCd#;
+ 			v_rec.rec_stat_desc := #recStatDesc#;
+ 			v_rec.remarks := #remarks#;
+ 			v_rec.user_id := #userId#;
+ 			
+ 			gicls100_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteGIISRecoveryStatus" parameterClass="java.lang.String">
+ 		BEGIN
+ 			gicls100_pkg.val_del_rec(#recId#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddGIISRecoveryStatus" parameterClass="java.util.Map">
+ 		BEGIN
+ 			gicls100_pkg.val_add_rec(#recStatCd#,#recStatDesc#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delGIISRecoveryStatus" parameterClass="java.lang.String">
+		BEGIN
+ 			gicls100_pkg.del_rec(#recId#);
+ 		END;
+ 	</delete>
+
+</sqlMap>

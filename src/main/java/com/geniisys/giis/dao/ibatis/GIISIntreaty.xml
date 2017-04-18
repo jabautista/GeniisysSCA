@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISIntreaty">
+    <typeAlias alias="giisIntreaty" type="com.geniisys.giis.entity.GIISIntreaty"/>
+    
+     <resultMap class="giisIntreaty" id="giisIntreatyListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="line_cd"        		property="lineCd"/>
+		<result column="trty_seq_no"       	 	property="trtySeqNo"/>
+		<result column="trty_yy"        		property="trtyYy"/>
+		<result column="uw_trty_type"        	property="uwTrtyType"/>
+		<result column="eff_date"        		property="effDate"/>
+		<result column="expiry_date"        	property="expiryDate"/>
+		<result column="ri_cd"        			property="riCd"/>
+		<result column="dsp_ri_sname"           property="dspRiSname"/>
+		<result column="ac_trty_type"        	property="acTrtyType"/>
+		<result column="trty_name"        		property="trtyName"/>
+		<result column="dsp_ac_type_sname"      property="dspAcTypeSname"/>
+		<result column="trty_limit"        		property="trtyLimit"/>
+		<result column="trty_shr_pct"        	property="trtyShrPct"/>
+		<result column="trty_shr_amt"        	property="trtyShrAmt"/>
+		<result column="est_prem_inc"        	property="estPremInc"/>
+		<result column="prtfolio_sw"        	property="prtfolioSw"/>
+		<result column="no_of_lines"        	property="noOfLines"/>
+		<result column="inxs_amt"        		property="inxsAmt"/>
+		<result column="exc_loss_rt"        	property="excLossRt"/>
+		<result column="ccall_limit"        	property="ccallLimit"/>
+		<result column="dep_prem"        		property="depPrem"/>
+		<result column="currency_cd"        	property="currencyCd"/>
+		<result column="dsp_currency_name"      property="dspCurrencyName"/>
+		<result column="remarks"     			property="remarks"/>
+		<result column="user_id"     			property="userId"/>
+		<result column="last_update" 			property="lastUpdate"/>
+	</resultMap>
+	
+    <select id="getGiiss032RecList" resultMap="giisIntreatyListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss032_pkg.get_rec_list(#lineCd#, #trtySeqNo#, #trtyYy#, #trtyName#, #userId#))
+		                  <isEqual property="sortColumn" compareValue="lineCd trtyYy trtySeqNo">
+			              		ORDER BY line_cd
+				          		<isNotNull property="sortColumn">
+					            	<isEqual property="ascDescFlg" compareValue="ASC">
+					              		ASC
+					              	</isEqual>
+					              	<isEqual property="ascDescFlg" compareValue="DESC">
+					              		DESC
+					              	</isEqual>
+					            </isNotNull>,
+					            trty_yy
+					            <isNotNull property="sortColumn">
+					            	<isEqual property="ascDescFlg" compareValue="ASC">
+					              		ASC
+					              	</isEqual>
+					              	<isEqual property="ascDescFlg" compareValue="DESC">
+					              		DESC
+					              	</isEqual>
+					            </isNotNull>,
+				            	trty_seq_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="trtyName">
+			              		ORDER BY trty_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="dspRiSname">
+			              		ORDER BY dsp_ri_sname
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss032_pkg.get_rec_list(#lineCd#, #trtySeqNo#, #trtyYy#, #trtyName#, #userId#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select> 
+	
+    <resultMap id="getGiiss032LineLovResultMap" class="java.util.HashMap"  extends="BaseEntity.TableGridResultMap">
+	  	<result column="line_cd"	property="lineCd"/>
+	  	<result column="line_name"	property="lineName"/>
+  	</resultMap>
+  	
+    <select id="getGiiss032LineLov" resultMap="getGiiss032LineLovResultMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+					   b.count_, 
+					   a.* 
+				  FROM (SELECT * 
+						  FROM TABLE (giiss032_pkg.get_line_lov(#userId#, #findText#))
+						  <isEqual property="sortColumn" compareValue="lineCd">
+								ORDER BY line_cd
+						  </isEqual>
+						  <isEqual property="sortColumn" compareValue="lineName">
+								ORDER BY line_name
+						  </isEqual>
+						  <isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+						  </isNotNull>
+						  ) a, 
+					   (SELECT count(*) count_ 
+						  FROM TABLE (giiss032_pkg.get_line_lov(#userId#, #findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+    <resultMap id="getGiiss032CedantLovResultMap" class="java.util.HashMap"  extends="BaseEntity.TableGridResultMap">
+	  	<result column="ri_sname"	property="riSname"/>
+	  	<result column="ri_name"	property="riName"/>
+	  	<result column="ri_cd"	    property="riCd"/>
+  	</resultMap>
+  	
+    <select id="getGiiss032CedantLov" resultMap="getGiiss032CedantLovResultMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+					   b.count_, 
+					   a.* 
+				  FROM (SELECT * 
+						  FROM TABLE (giiss032_pkg.get_cedant_lov(#userId#, #findText#))
+						  <isEqual property="sortColumn" compareValue="riSname">
+								ORDER BY ri_sname
+						  </isEqual>
+						  <isEqual property="sortColumn" compareValue="riName">
+								ORDER BY ri_name
+						  </isEqual>
+						  <isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+						  </isNotNull>
+						  ) a, 
+					   (SELECT count(*) count_ 
+						  FROM TABLE (giiss032_pkg.get_cedant_lov(#userId#, #findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+    <resultMap id="getGiiss032CurrencyLovResultMap" class="java.util.HashMap"  extends="BaseEntity.TableGridResultMap">
+	  	<result column="short_name"				property="shortName"/>
+	  	<result column="currency_desc"			property="currencyDesc"/>
+	  	<result column="main_currency_cd"	    property="mainCurrencyCd"/>
+  	</resultMap>
+  	
+    <select id="getGiiss032CurrencyLov" resultMap="getGiiss032CurrencyLovResultMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+					   b.count_, 
+					   a.* 
+				  FROM (SELECT * 
+						  FROM TABLE (giiss032_pkg.get_currency_lov(#userId#, #findText#))
+						  <isEqual property="sortColumn" compareValue="shortName">
+								ORDER BY short_name
+						  </isEqual>
+						  <isEqual property="sortColumn" compareValue="currencyDesc">
+								ORDER BY currency_desc
+						  </isEqual>
+						  <isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+						  </isNotNull>
+						  ) a, 
+					   (SELECT count(*) count_ 
+						  FROM TABLE (giiss032_pkg.get_currency_lov(#userId#, #findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+    <resultMap id="getGiiss032AcctgTypeLovResultMap" class="java.util.HashMap"  extends="BaseEntity.TableGridResultMap">
+	  	<result column="ca_trty_type"		property="caTrtyType"/>
+	  	<result column="trty_sname"			property="trtySname"/>
+	  	<result column="trty_lname"	    	property="trtyLname"/>
+  	</resultMap>
+  	
+    <select id="getGiiss032AcctgTypeLov" resultMap="getGiiss032AcctgTypeLovResultMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+					   b.count_, 
+					   a.* 
+				  FROM (SELECT * 
+						  FROM TABLE (giiss032_pkg.get_acctgtype_lov(#userId#, #findText#, #lineCd#))
+						  <isEqual property="sortColumn" compareValue="trtySname">
+								ORDER BY trty_sname
+						  </isEqual>
+						  <isEqual property="sortColumn" compareValue="trtyLname">
+								ORDER BY trty_lname
+						  </isEqual>
+						  <isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+						  </isNotNull>
+						  ) a, 
+					   (SELECT count(*) count_ 
+						  FROM TABLE (giiss032_pkg.get_acctgtype_lov(#userId#, #findText#, #lineCd#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+    <procedure id="valAddIntreaty" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss032_pkg.val_add_rec(#lineCd#, #trtyYy#, #trtySeqNo#, #riCd#);
+ 		END;
+ 	</procedure>
+ 	
+    <procedure id="valDeleteIntreaty" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss032_pkg.val_delete_rec(#lineCd#, #trtyYy#, #trtySeqNo#, #riCd#);
+ 		END;
+ 	</procedure>
+ 	
+    <procedure id="setIntreaty" parameterClass="giisIntreaty">
+	    DECLARE
+	    	v_rec giis_intreaty%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.line_cd := #lineCd#;
+ 			v_rec.trty_seq_no := #trtySeqNo#;
+ 			v_rec.trty_yy := #trtyYy#;
+ 			v_rec.uw_trty_type := #uwTrtyType#;
+ 			v_rec.eff_date := TO_DATE(#effDate#,'MM-DD-YYYY'); <!-- added by steven 07.10.2014 -->
+ 			v_rec.expiry_date := TO_DATE(#expiryDate#,'MM-DD-YYYY'); <!-- added by steven 07.10.2014 -->
+ 			v_rec.ri_cd := #riCd#;
+ 			v_rec.ac_trty_type := #acTrtyType#;
+ 			v_rec.trty_name := #trtyName#;
+ 			v_rec.trty_limit := #trtyLimit#;
+ 			v_rec.trty_shr_pct := #trtyShrPct#;
+ 			v_rec.trty_shr_amt := #trtyShrAmt#;
+ 			v_rec.est_prem_inc := #estPremInc#;
+ 			v_rec.prtfolio_sw := #prtfolioSw#;
+ 			v_rec.no_of_lines := #noOfLines#;
+ 			v_rec.inxs_amt := #inxsAmt#;
+ 			v_rec.exc_loss_rt := #excLossRt#;
+ 			v_rec.ccall_limit := #ccallLimit#;
+ 			v_rec.dep_prem := #depPrem#;
+ 			v_rec.currency_cd := #currencyCd#;
+ 			v_rec.remarks := #remarks#;
+ 			v_rec.user_id := #userId#;
+ 			giiss032_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+     <delete id="delIntreaty" parameterClass="giisIntreaty">
+		BEGIN
+ 			giiss032_pkg.del_rec(#lineCd#, #trtyYy#, #trtySeqNo#, #riCd#);
+ 		END;
+ 	</delete>
+</sqlMap>

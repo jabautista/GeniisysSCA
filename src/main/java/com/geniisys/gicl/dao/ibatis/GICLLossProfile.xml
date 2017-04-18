@@ -1,0 +1,786 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GICLLossProfile">
+
+	<resultMap id="newFormInstanceMap" class="java.util.HashMap">
+		<result column="line_cd_mc" 			property="lineCdMC" />
+		<result column="line_cd_fi" 			property="lineCdFI" />
+		<result column="cur_exist" 				property="curExist" />
+	</resultMap>
+
+	<select id="whenNewFormInstance" resultMap="newFormInstanceMap">
+  		SELECT *
+  		  FROM TABLE(GICLS211_PKG.when_new_form_instance)
+  	</select>
+
+	<resultMap class="java.util.HashMap" id="giclLossProfileParamMap"  extends="BaseEntity.TableGridResultMap">
+		<result column="line_cd" 				property="lineCd" />
+		<result column="subline_cd" 			property="sublineCd" />
+		<result column="dsp_line_name" 			property="dspLineName" />
+		<result column="dsp_subline_name" 		property="dspSublineName" />
+		<result column="date_from" 				property="dateFrom" />
+		<result column="date_to" 				property="dateTo" />
+		<result column="loss_date_from" 		property="lossDateFrom" />
+		<result column="loss_date_to" 			property="lossDateTo" />
+		<result column="cur_exist" 				property="curExist" />
+		<result column="cg$ctrl_line_cd" 		property="cg$CtrlLineCd" />
+		<result column="no_of_range" 			property="noOfRange" />
+		<result column="user_id" 				property="userId" />
+		<result column="gicls212_access" 		property="gicls212Access" />
+		<result column="rownum_" 				property="rowNum" />
+		<result column="count_" 				property="rowCount" />
+	</resultMap>
+	
+	<select id="getLossProfileParamList" resultMap="giclLossProfileParamMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, a.*
+		          FROM (SELECT * 
+		                  FROM TABLE (gicls211_pkg.get_risk_profile_list(#userId#,#moduleId#))
+		                  <isEqual property="sortColumn" compareValue="dspLineName">
+			              		ORDER BY dsp_line_name
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="dspSublineName">
+			              		ORDER BY dsp_subline_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="dateFrom">
+			              		ORDER BY date_from
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="dateTo">
+			              		ORDER BY date_to
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="lossDateFrom">
+			              		ORDER BY loss_date_from
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="lossDateTo">
+			              		ORDER BY loss_date_to
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>) a, 
+		               (SELECT count(*) count_
+		                  FROM TABLE (gicls211_pkg.get_risk_profile_list(#userId#,#moduleId#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="rangeListingMap"  extends="BaseEntity.TableGridResultMap">
+		<result column="LINE_CD" 			property="lineCd" 			jdbcType="VARCHAR" />
+		<result column="SUBLINE_CD" 		property="sublineCd" 		jdbcType="VARCHAR" />
+	  	<result column="RANGE_FROM" 		property="rangeFrom" 		jdbcType="VARCHAR" />
+	  	<result column="RANGE_TO"			property="rangeTo"			jdbcType="VARCHAR" />
+	  	<result column="USER_ID"			property="userId"			jdbcType="VARCHAR" />
+	  	<result column="ROWNUM_"			property="rowNum" />
+	  	<result column="COUNT_"				property="rowCount" />
+  	</resultMap>
+  	
+  	<select id="getRangeList" resultMap="rangeListingMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, a.*
+		          FROM (SELECT * 
+		                  FROM TABLE (gicls211_pkg.get_range_list(#lineCd#, #sublineCd#, #userId#, #moduleId#))
+		                 WHERE range_from = TO_NUMBER(NVL(#rangeFrom#, range_from))
+		                   AND range_to = TO_NUMBER(NVL(#rangeTo#, range_to))
+		                  <isEqual property="sortColumn" compareValue="rangeFrom">
+			              		ORDER BY range_from
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="rangeTo">
+			              		ORDER BY range_to
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_
+		                  FROM TABLE (gicls211_pkg.get_range_list(#lineCd#, #sublineCd#, #userId#, #moduleId#))
+		                 WHERE range_from = TO_NUMBER(NVL(#rangeFrom#, range_from))
+		                   AND range_to = TO_NUMBER(NVL(#rangeTo#, range_to))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<resultMap id="gicls211SublineListingMap" class="com.geniisys.common.entity.GIISSubline" >
+	  	<result column="SUBLINE_CD" 		property="sublineCd" 		jdbcType="VARCHAR" />
+	  	<result column="SUBLINE_NAME"		property="sublineName"		jdbcType="VARCHAR" />
+	  	<result column="LINE_CD" 			property="lineCd" 			jdbcType="VARCHAR" />
+	  	<result column="ROWNUM_"			property="rowNum" />
+	  	<result column="COUNT_"				property="rowCount" />
+  	</resultMap>
+	
+	<select id="getGicls211SublineLOV"	resultMap="gicls211SublineListingMap" parameterClass="java.util.HashMap">  	
+  		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT subline_cd, subline_name, line_cd FROM TABLE(gicls211_pkg.get_subline_lov(#lineCd#,#moduleId#,#userId#))
+		          		  <isNotNull property="findText">
+				         		WHERE (UPPER(subline_cd) LIKE UPPER(#findText#) 
+				         	 	   OR UPPER(subline_name) LIKE UPPER(#findText#)
+				         	 	   OR UPPER(line_cd) LIKE UPPER(#findText#)
+				         	   )
+				          </isNotNull>
+		          		  <isEqual property="sortColumn" compareValue="sublineCd">
+			              		ORDER BY subline_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="sublineName">
+			              		ORDER BY subline_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="lineCd">
+			              		ORDER BY line_cd
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (gicls211_pkg.get_subline_lov(#lineCd#,#moduleId#,#userId#))
+		                  <isNotNull property="findText">
+				         		WHERE (UPPER(subline_cd) LIKE UPPER(#findText#) 
+				         	 	   OR UPPER(subline_name) LIKE UPPER(#findText#)
+				         	 	   OR UPPER(line_cd) LIKE UPPER(#findText#)
+				         	   )
+				          </isNotNull>
+				          ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+  	
+  	<parameterMap id="deleteProfileLineSublineMap" class="map">
+		<parameter property="userId"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="dspLineName"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="dspSublineName"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="type"				jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="lineCd"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+		<parameter property="sublineCd"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+	</parameterMap>
+	
+	<procedure id="deleteProfileLineSubline" parameterMap="deleteProfileLineSublineMap">
+		BEGIN
+			gicls211_pkg.delete_profile_line_subline(?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<parameterMap id="saveLineSublineRangeMap" class="map">
+		<parameter property="userId"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="lineCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="sublineCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="rangeFrom"		jdbcType="NUMBER"		javaType="java.math.BigDecimal"	mode="IN" />
+		<parameter property="rangeTo"		jdbcType="NUMBER"		javaType="java.math.BigDecimal"	mode="IN" />
+		<parameter property="dateFrom"		jdbcType="Date"			javaType="java.util.Date"		mode="IN" />
+		<parameter property="dateTo"		jdbcType="Date"			javaType="java.util.Date"		mode="IN" />
+		<parameter property="lossDateFrom"	jdbcType="Date"			javaType="java.util.Date"		mode="IN" />
+		<parameter property="lossDateTo"	jdbcType="Date"			javaType="java.util.Date"		mode="IN" />
+		<parameter property="type"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+	</parameterMap>
+	
+	<procedure id="saveLineSublineRange" parameterMap="saveLineSublineRangeMap">
+		BEGIN
+			gicls211_pkg.save_line_subline_range(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<parameterMap id="deleteProfileLineMap" class="map">
+		<parameter property="dspLineName"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="lineCd"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+	</parameterMap>
+	
+	<procedure id="deleteProfileLine" parameterMap="deleteProfileLineMap">
+		BEGIN
+			gicls211_pkg.delete_profile_line(?, ?);
+		END;
+	</procedure>
+	
+	<parameterMap id="deleteProfileLineAndSublineMap" class="map">
+		<parameter property="userId"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="dspLineName"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="lineCd"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+	</parameterMap>
+	
+	<procedure id="deleteProfileLineAndSubline" parameterMap="deleteProfileLineAndSublineMap">
+		BEGIN
+			gicls211_pkg.delete_line_and_subline(?, ?, ?);
+		END;
+	</procedure>
+	
+	<parameterMap id="saveLineSublineRangeMap" class="map">
+		<parameter property="userId"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="lineCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="rangeFrom"		jdbcType="NUMBER"		javaType="java.math.BigDecimal"	mode="IN" />
+		<parameter property="rangeTo"		jdbcType="NUMBER"		javaType="java.math.BigDecimal"	mode="IN" />
+		<parameter property="dateFrom"		jdbcType="Date"			javaType="java.util.Date"		mode="IN" />
+		<parameter property="dateTo"		jdbcType="Date"			javaType="java.util.Date"		mode="IN" />
+		<parameter property="lossDateFrom"	jdbcType="Date"			javaType="java.util.Date"		mode="IN" />
+		<parameter property="lossDateTo"	jdbcType="Date"			javaType="java.util.Date"		mode="IN" />
+	</parameterMap>
+	
+	<procedure id="saveLineAndSublineRange" parameterMap="saveLineSublineRangeMap">
+		BEGIN
+			gicls211_pkg.save_line_and_subline_range(?, ?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<parameterMap id="deleteAllLineMap" class="map">
+		<parameter property="userId"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+	</parameterMap>
+	
+	<procedure id="deleteAllLine" parameterMap="deleteAllLineMap">
+		BEGIN
+			gicls211_pkg.delete_all_line(?);
+		END;
+	</procedure>
+	
+	<parameterMap id="saveAllLineRangeMap" class="map">
+		<parameter property="userId"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="rangeFrom"		jdbcType="NUMBER"		javaType="java.math.BigDecimal"	mode="IN" />
+		<parameter property="rangeTo"		jdbcType="NUMBER"		javaType="java.math.BigDecimal"	mode="IN" />
+		<parameter property="dateFrom"		jdbcType="Date"			javaType="java.util.Date"		mode="IN" />
+		<parameter property="dateTo"		jdbcType="Date"			javaType="java.util.Date"		mode="IN" />
+		<parameter property="lossDateFrom"	jdbcType="Date"			javaType="java.util.Date"		mode="IN" />
+		<parameter property="lossDateTo"	jdbcType="Date"			javaType="java.util.Date"		mode="IN" />
+	</parameterMap>
+	
+	<procedure id="saveAllLine" parameterMap="saveAllLineRangeMap">
+		BEGIN
+			gicls211_pkg.save_all_line(?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<parameterMap id="extractLossProfileMap" class="map">
+		<parameter property="userId"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="paramDate"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="claimDate"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="lineCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="sublineCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="dateFrom"		jdbcType="Date"			javaType="java.util.Date"		mode="IN" />
+		<parameter property="dateTo"		jdbcType="Date"			javaType="java.util.Date"		mode="IN" />
+		<parameter property="lossDateFrom"	jdbcType="Date"			javaType="java.util.Date"		mode="IN" />
+		<parameter property="lossDateTo"	jdbcType="Date"			javaType="java.util.Date"		mode="IN" />
+		<parameter property="extractByRg"	jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="eType"			jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="varExt"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+		<parameter property="message"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+	</parameterMap>
+	
+	<procedure id="extractLossProfile" parameterMap="extractLossProfileMap">
+		BEGIN
+			gicls211_pkg.extract_loss_profile(?, ?, ?, ?, ?,
+											  ?, ?, ?, ?, ?, 
+											  ?, ?, ?);
+		END;
+	</procedure>
+	
+	<resultMap class="java.util.HashMap" id="giclLossProfileSummaryMap"  extends="BaseEntity.TableGridResultMap">
+		<result column="RANGE_FROM" 			property="rangeFrom" />
+		<result column="RANGE_TO" 				property="rangeTo" />
+		<result column="POLICY_COUNT" 			property="policyCount" />
+		<result column="TOTAL_TSI_AMT" 			property="totalTsiAmt" />
+		<result column="NBT_GROSS_LOSS" 		property="nbtGrossLoss" />
+		<result column="NET_RETENTION" 			property="netRetention" />
+		<result column="SEC_NET_RETENTION_LOSS" property="secNetRetentionLoss" />
+		<result column="FACULTATIVE" 			property="facultative" />
+		<result column="TREATY1_LOSS" 			property="treaty1Loss" />
+		<result column="TREATY2_LOSS" 			property="treaty2Loss" />
+		<result column="TREATY3_LOSS" 			property="treaty3Loss" />
+		<result column="TREATY4_LOSS" 			property="treaty4Loss" />
+		<result column="TREATY5_LOSS" 			property="treaty5Loss" />
+		<result column="TREATY6_LOSS" 			property="treaty6Loss" />
+		<result column="TREATY7_LOSS" 			property="treaty7Loss" />
+		<result column="TREATY8_LOSS" 			property="treaty8Loss" />
+		<result column="TREATY9_LOSS" 			property="treaty9Loss" />
+		<result column="TREATY10_LOSS" 			property="treaty10Loss" />
+		<result column="TREATY" 				property="treaty" />
+		<result column="LBL1" 					property="lbl1" />
+		<result column="LBL2" 					property="lbl2" />
+		<result column="LBL3" 					property="lbl3" />
+		<result column="LBL4" 					property="lbl4" />
+		<result column="LBL5" 					property="lbl5" />
+		<result column="LBL6" 					property="lbl6" />
+		<result column="LBL7" 					property="lbl7" />
+		<result column="LBL8" 					property="lbl8" />
+		<result column="LBL9" 					property="lbl9" />
+		<result column="LBL10" 					property="lbl10" />
+		<result column="QUOTA_SHARE" 			property="quotaShare" />
+		<result column="SUM_POLICY_COUNT" 		property="sumPolicyCount" />
+		<result column="SUM_TOTAL_TSI_AMT" 		property="sumTotalTsiAmt" />
+		<result column="SUM_NBT_GROSS_LOSS" 	property="sumNbtGrossLoss" />
+		<result column="SUM_NET_RETENTION" 		property="sumNetRetention" />
+		<result column="SUM_FACULTATIVE" 		property="sumFacultative" />
+		<result column="SUM_TREATY" 			property="sumTreaty" />
+		<result column="ROWNUM_" 				property="rowNum" />
+		<result column="COUNT_" 				property="rowCount" />
+	</resultMap>
+	
+	<select id="getLossProfileSummaryList" resultMap="giclLossProfileSummaryMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, a.*
+		          FROM (SELECT * 
+		                  FROM TABLE (gicls212_pkg.get_summary_list(#globalChoice#,#globalTreaty#,#globalLineCd#,#globalSublineCd#,#userId#))
+		                 WHERE range_from = TO_NUMBER(NVL(#rangeFrom#, range_from))
+		                   AND range_to = TO_NUMBER(NVL(#rangeTo#, range_to))
+		                   AND policy_count = TO_NUMBER(NVL(#policyCount#, policy_count))
+		                   AND total_tsi_amt = TO_NUMBER(NVL(#totalTsiAmt#, total_tsi_amt))
+		                   AND nbt_gross_loss = TO_NUMBER(NVL(#nbtGrossLoss#, nbt_gross_loss))
+		                   AND net_retention = TO_NUMBER(NVL(#netRetention#, net_retention))
+		                   AND net_retention = TO_NUMBER(NVL(#netRetention#, net_retention))
+		                   AND facultative = TO_NUMBER(NVL(#facultative#, facultative))
+		                   AND treaty = TO_NUMBER(NVL(#treaty#, treaty))
+		                   AND treaty1_loss = TO_NUMBER(NVL(#treaty1Loss#, treaty1_loss))
+		                   AND treaty2_loss = TO_NUMBER(NVL(#treaty2Loss#, treaty2_loss))
+		                   AND treaty3_loss = TO_NUMBER(NVL(#treaty3Loss#, treaty3_loss))
+		                   AND treaty4_loss = TO_NUMBER(NVL(#treaty4Loss#, treaty4_loss))
+		                   AND treaty5_loss = TO_NUMBER(NVL(#treaty5Loss#, treaty5_loss))
+		                   AND treaty6_loss = TO_NUMBER(NVL(#treaty6Loss#, treaty6_loss))
+		                   AND treaty7_loss = TO_NUMBER(NVL(#treaty7Loss#, treaty7_loss))
+		                   AND treaty8_loss = TO_NUMBER(NVL(#treaty8Loss#, treaty8_loss))
+		                   AND treaty9_loss = TO_NUMBER(NVL(#treaty9Loss#, treaty9_loss))
+		                   AND treaty10_loss = TO_NUMBER(NVL(#treaty10Loss#, treaty10_loss))
+		                  <isEqual property="sortColumn" compareValue="rangeFrom rangeTo">
+			              		ORDER BY RANGE_FROM, RANGE_TO
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="policyCount">
+			              		ORDER BY POLICY_COUNT
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="totalTsiAmt">
+			              		ORDER BY TOTAL_TSI_AMT
+			              </isEqual>
+			               <isEqual property="sortColumn" compareValue="nbtGrossLoss">
+			              		ORDER BY NBT_GROSS_LOSS
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="netRetention">
+			              		ORDER BY NET_RETENTION
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="secNetRetentionLoss">
+			              		ORDER BY SEC_NET_RETENTION_LOSS
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="facultative">
+			              		ORDER BY FACULTATIVE
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="treaty">
+			              		ORDER BY TREATY
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="treaty1Loss">
+			              		ORDER BY TREATY1_LOSS
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="treaty2Loss">
+			              		ORDER BY TREATY2_LOSS
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="treaty3Loss">
+			              		ORDER BY TREATY3_LOSS
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="treaty4Loss">
+			              		ORDER BY TREATY4_LOSS
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="treaty5Loss">
+			              		ORDER BY TREATY5_LOSS
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="treaty6Loss">
+			              		ORDER BY TREATY6_LOSS
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="treaty7Loss">
+			              		ORDER BY TREATY7_LOSS
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="treaty8Loss">
+			              		ORDER BY TREATY8_LOSS
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="treaty9Loss">
+			              		ORDER BY TREATY9_LOSS
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="treaty10Loss">
+			              		ORDER BY TREATY10_LOSS
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>) a, 
+		               (SELECT count(*) count_
+		                  FROM TABLE (gicls212_pkg.get_summary_list(#globalChoice#,#globalTreaty#,#globalLineCd#,#globalSublineCd#,#userId#))
+		                 WHERE range_from = TO_NUMBER(NVL(#rangeFrom#, range_from))
+		                   AND range_to = TO_NUMBER(NVL(#rangeTo#, range_to))
+		                   AND policy_count = TO_NUMBER(NVL(#policyCount#, policy_count))
+		                   AND total_tsi_amt = TO_NUMBER(NVL(#totalTsiAmt#, total_tsi_amt))
+		                   AND nbt_gross_loss = TO_NUMBER(NVL(#nbtGrossLoss#, nbt_gross_loss))
+		                   AND net_retention = TO_NUMBER(NVL(#netRetention#, net_retention))
+		                   AND net_retention = TO_NUMBER(NVL(#netRetention#, net_retention))
+		                   AND facultative = TO_NUMBER(NVL(#facultative#, facultative))
+		                   AND treaty = TO_NUMBER(NVL(#treaty#, treaty))
+		                   AND treaty1_loss = TO_NUMBER(NVL(#treaty1Loss#, treaty1_loss))
+		                   AND treaty2_loss = TO_NUMBER(NVL(#treaty2Loss#, treaty2_loss))
+		                   AND treaty3_loss = TO_NUMBER(NVL(#treaty3Loss#, treaty3_loss))
+		                   AND treaty4_loss = TO_NUMBER(NVL(#treaty4Loss#, treaty4_loss))
+		                   AND treaty5_loss = TO_NUMBER(NVL(#treaty5Loss#, treaty5_loss))
+		                   AND treaty6_loss = TO_NUMBER(NVL(#treaty6Loss#, treaty6_loss))
+		                   AND treaty7_loss = TO_NUMBER(NVL(#treaty7Loss#, treaty7_loss))
+		                   AND treaty8_loss = TO_NUMBER(NVL(#treaty8Loss#, treaty8_loss))
+		                   AND treaty9_loss = TO_NUMBER(NVL(#treaty9Loss#, treaty9_loss))
+		                   AND treaty10_loss = TO_NUMBER(NVL(#treaty10Loss#, treaty10_loss))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="giclLossProfileDetailMap"  extends="BaseEntity.TableGridResultMap">
+		<result column="CLAIM_ID" 				property="claimId" />
+		<result column="NBT_POL" 				property="nbtPol" />
+		<result column="TSI_AMT" 				property="tsiAmt" />
+		<result column="LOSS_AMT" 				property="lossAmt" />
+		<result column="NBT_CLAIM_NO" 			property="nbtClaimNo" />
+		<result column="ASSURED_NAME" 			property="assuredName" />
+		<result column="NBT_GROSS_LOSS" 		property="nbtGrossLoss" />
+		<result column="NBT_NET_RET" 			property="nbtNetRet" />
+		<result column="NBT_TREATY" 			property="nbtTreaty" />
+		<result column="NBT_FACUL" 				property="nbtFacul" />
+		<result column="SUM_NBT_GROSS_LOSS" 	property="sumNbtGrossLoss" />
+		<result column="SUM_NBT_NET_RET" 		property="sumNbtNetRet" />
+		<result column="SUM_NBT_TREATY" 		property="sumNbtTreaty" />
+		<result column="SUM_NBT_FACUL" 			property="sumNbtFacul" />
+		<result column="ROWNUM_" 				property="rowNum" />
+		<result column="COUNT_" 				property="rowCount" />
+	</resultMap>
+
+	<select id="getLossProfileDetailList" resultMap="giclLossProfileDetailMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, a.*
+		          FROM (SELECT * 
+		                  FROM TABLE (gicls212_pkg.get_detail_list(#globalExtr#,#rangeFrom#,#rangeTo#,#lineCd#,#sublineCd#,#userId#))
+		                  <isNotNull property="filter">
+				   		  	WHERE 1=1
+			   		  		<isNotEmpty prepend="AND" property="nbtPol">
+			   		  			UPPER(NBT_POL) LIKE UPPER(#nbtPol#)
+			   		  		</isNotEmpty>
+			   		  		<isNotEmpty prepend="AND" property="nbtClaimNo">
+			   		  			UPPER(NBT_CLAIM_NO) LIKE UPPER(#nbtClaimNo#)
+			   		  		</isNotEmpty>
+			   		  		<isNotEmpty prepend="AND" property="assuredName">
+			   		  			UPPER(ASSURED_NAME) LIKE UPPER(#assuredName#)
+			   		  		</isNotEmpty>
+				   		  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="nbtPol">
+			              		ORDER BY NBT_POL
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="tsiAmt">
+			              		ORDER BY TSI_AMT
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="lossAmt">
+			              		ORDER BY LOSS_AMT
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="nbtClaimNo">
+			              		ORDER BY NBT_CLAIM_NO
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="assuredName">
+			              		ORDER BY ASSURED_NAME
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="nbtGrossLoss">
+			              		ORDER BY NBT_GROSS_LOSS
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="nbtNetRet">
+			              		ORDER BY NBT_NET_RET
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="nbtTreaty">
+			              		ORDER BY NBT_TREATY
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="nbtFacul">
+			              		ORDER BY NBT_FACUL
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>) a, 
+		               (SELECT count(*) count_
+		                  FROM TABLE (gicls212_pkg.get_detail_list(#globalExtr#,#rangeFrom#,#rangeTo#,#lineCd#,#sublineCd#,#userId#))
+		                  <isNotNull property="filter">
+				   		  	WHERE 1=1
+			   		  		<isNotEmpty prepend="AND" property="nbtPol">
+			   		  			UPPER(NBT_POL) LIKE UPPER(#nbtPol#)
+			   		  		</isNotEmpty>
+			   		  		<isNotEmpty prepend="AND" property="nbtClaimNo">
+			   		  			UPPER(NBT_CLAIM_NO) LIKE UPPER(#nbtClaimNo#)
+			   		  		</isNotEmpty>
+			   		  		<isNotEmpty prepend="AND" property="assuredName">
+			   		  			UPPER(ASSURED_NAME) LIKE UPPER(#assuredName#)
+			   		  		</isNotEmpty>
+				   		  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<select id="checkRecovery" resultClass="java.lang.String" parameterClass="java.lang.Integer">
+		SELECT gicls212_pkg.check_recovery(#claimId#) FROM DUAL
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="giclLossProfileRecoveryMap"  extends="BaseEntity.TableGridResultMap">
+		<result column="NBT_REC_NO" 			property="nbtRecNo" />
+		<result column="NBT_GROSS_LOSS" 		property="nbtGrossLoss" />
+		<result column="NBT_NET_RET" 			property="nbtNetRet" />
+		<result column="NBT_TREATY" 			property="nbtTreaty" />
+		<result column="NBT_FACUL" 				property="nbtFacul" />
+		<result column="SUM_NBT_GROSS_LOSS" 	property="sumNbtGrossLoss" />
+		<result column="SUM_NBT_NET_RET" 		property="sumNbtNetRet" />
+		<result column="SUM_NBT_TREATY" 		property="sumNbtTreaty" />
+		<result column="SUM_NBT_FACUL" 			property="sumNbtFacul" />
+		<result column="ROWNUM_" 				property="rowNum" />
+		<result column="COUNT_" 				property="rowCount" />
+	</resultMap>
+
+	<select id="getRecoveryList" resultMap="giclLossProfileRecoveryMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, a.*
+		          FROM (SELECT * 
+		                  FROM TABLE (gicls212_pkg.get_recovery_list(#claimId#,#globalExtr#))
+		                  <isNotNull property="filter">
+				   		  	WHERE 1=1
+			   		  		<isNotEmpty prepend="AND" property="nbtRecNo">
+			   		  			UPPER(NBT_REC_NO) LIKE UPPER(#nbtRecNo#)
+			   		  		</isNotEmpty>
+				   		  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="nbtRecNo">
+			              		ORDER BY NBT_REC_NO
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="nbtGrossLoss">
+			              		ORDER BY NBT_GROSS_LOSS
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="nbtNetRet">
+			              		ORDER BY NBT_NET_RET
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="nbtTreaty">
+			              		ORDER BY NBT_TREATY
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="nbtFacul">
+			              		ORDER BY NBT_FACUL
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>) a, 
+		               (SELECT count(*) count_
+		                  FROM TABLE (gicls212_pkg.get_recovery_list(#claimId#,#globalExtr#))
+		                  <isNotNull property="filter">
+				   		  	WHERE 1=1
+			   		  		<isNotEmpty prepend="AND" property="nbtRecNo">
+			   		  			UPPER(NBT_REC_NO) LIKE UPPER(#nbtRecNo#)
+			   		  		</isNotEmpty>
+				   		  </isNotNull>
+				   		  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<typeAlias alias="GICLLossProfile" type="com.geniisys.gicl.entity.GICLLossProfile"/>
+	
+	<resultMap id="gicls211LineLOVMap" class="com.geniisys.common.entity.GIISLine" >
+	  	<result column="LINE_CD" 			property="lineCd" 			jdbcType="VARCHAR" />
+	  	<result column="LINE_NAME"			property="lineName"			jdbcType="VARCHAR" />
+	  	<result column="ROWNUM_"			property="rowNum" />
+	  	<result column="COUNT_"				property="rowCount" />
+  	</resultMap>
+  	
+  	<select id="getGicls211LineLOV"	resultMap="gicls211LineLOVMap" parameterClass="java.util.HashMap">  	
+  		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT line_cd, line_name FROM TABLE(gicls204_pkg.get_line_gicls204_lov(#issCd#,#moduleId#,#userId#))
+		          		 WHERE 1 = 1
+		          		  <isNotNull property="notIn">
+				         		AND line_cd NOT IN $notIn$
+				          </isNotNull>
+		          		  <isNotNull property="findText">
+				         		AND (UPPER(line_cd) LIKE UPPER(#findText#) 
+				         	 	 OR UPPER(line_name) LIKE UPPER(#findText#)
+				         	   )
+				          </isNotNull>
+		          		  <isEqual property="sortColumn" compareValue="lineCd">
+			              		ORDER BY line_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="lineName">
+			              		ORDER BY line_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (gicls204_pkg.get_line_gicls204_lov(#issCd#,#moduleId#,#userId#))
+		                  WHERE 1 = 1
+		          		  <isNotNull property="notIn">
+				         		AND line_cd NOT IN $notIn$
+				          </isNotNull>
+		          		  <isNotNull property="findText">
+				         		AND (UPPER(line_cd) LIKE UPPER(#findText#) 
+				         	 	 OR UPPER(line_name) LIKE UPPER(#findText#)
+				         	   )
+				          </isNotNull>
+				          ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+	
+	<procedure id="gicls211ValidateRange" parameterClass="java.util.HashMap">
+		BEGIN
+			gicls211_pkg.validate_range(#lineCd#, #sublineCd#, #rangeFrom#, #rangeTo#, #oldFrom#, #oldTo#, #userId#);
+		END;
+	</procedure>
+	
+	<procedure id="deleteLossProfile" parameterClass="GICLLossProfile">
+		DECLARE
+	    	v_rec gicl_loss_profile%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.line_cd := #lineCd#;
+ 			v_rec.subline_cd := #sublineCd#;
+ 			v_rec.user_id := #userId#;
+ 			
+ 			gicls211_pkg.delete_loss_profile(v_rec);
+ 		END;
+	</procedure>
+	
+	<procedure id="updateLossProfile" parameterClass="GICLLossProfile">
+		DECLARE
+	    	v_rec gicl_loss_profile%ROWTYPE;
+ 		BEGIN
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.line_cd := #lineCd#;
+ 			v_rec.subline_cd := #sublineCd#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.date_from := TO_DATE(#dateFrom#, 'mm-dd-yyyy');
+ 			v_rec.date_to := TO_DATE(#dateTo#, 'mm-dd-yyyy');
+ 			v_rec.loss_date_from := TO_DATE(#lossDateFrom#, 'mm-dd-yyyy');
+ 			v_rec.loss_date_to := TO_DATE(#lossDateTo#, 'mm-dd-yyyy');
+ 		
+ 			gicls211_pkg.update_loss_profile(v_rec);
+ 		END;
+	</procedure>
+	
+	<procedure id="setLossProfile" parameterClass="GICLLossProfile">
+		DECLARE
+	    	v_rec gicl_loss_profile%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.line_cd := #lineCd#;
+ 			v_rec.subline_cd := #sublineCd#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.date_from := TO_DATE(#dateFrom#, 'mm-dd-yyyy');
+ 			v_rec.date_to := TO_DATE(#dateTo#, 'mm-dd-yyyy');
+ 			v_rec.loss_date_from := TO_DATE(#lossDateFrom#, 'mm-dd-yyyy');
+ 			v_rec.loss_date_to := TO_DATE(#lossDateTo#, 'mm-dd-yyyy');
+ 			v_rec.range_from := #rangeFrom#;
+ 			v_rec.range_to := #rangeTo#;
+ 			
+ 			gicls211_pkg.set_loss_profile(v_rec, #type#);
+ 		END;
+	</procedure>
+	
+	<procedure id="setLossProfileRange" parameterClass="GICLLossProfile">
+		DECLARE
+			v_rec gicl_loss_profile%ROWTYPE;
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			
+			v_rec.line_cd := #lineCd#;
+ 			v_rec.subline_cd := #sublineCd#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.range_from := #rangeFrom#;
+ 			v_rec.range_to := #rangeTo#;
+			
+			gicls211_pkg.update_loss_profile_range(v_rec, #oldFrom#, #oldTo#);
+		END;
+	</procedure>
+	
+	<procedure id="deleteLossProfileRange" parameterClass="GICLLossProfile">
+		DECLARE
+			v_rec gicl_loss_profile%ROWTYPE;
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			
+			v_rec.line_cd := #lineCd#;
+ 			v_rec.subline_cd := #sublineCd#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.range_from := #rangeFrom#;
+ 			v_rec.range_to := #rangeTo#;
+			
+			gicls211_pkg.delete_loss_profile_range(v_rec);
+		END;
+	</procedure>
+	
+	<procedure id="deleteLossLineSubline" parameterClass="GICLLossProfile">
+ 		BEGIN
+			DELETE
+              FROM gicl_loss_profile
+  	         WHERE line_cd = #lineCd#
+	           AND subline_cd = #sublineCd#
+	           AND user_id = #userId#;
+ 		END;
+	</procedure>
+	
+	<procedure id="deleteLossByLine" parameterClass="GICLLossProfile">
+ 		BEGIN
+			DELETE
+	          FROM gicl_loss_profile
+	         WHERE line_cd = #lineCd#
+	           AND subline_cd IS NULL
+	           AND user_id = #userId#;
+ 		END;
+	</procedure>
+	
+	<procedure id="deleteLossByLineSubline" parameterClass="GICLLossProfile">
+ 		BEGIN
+			DELETE
+	          FROM gicl_loss_profile
+	         WHERE line_cd = #lineCd#
+	           AND subline_cd IS NOT NULL
+	           AND user_id = #userId#;
+ 		END;
+	</procedure>
+	
+	<procedure id="deleteLossAllLines" parameterClass="GICLLossProfile">
+ 		BEGIN
+			DELETE
+              FROM gicl_loss_profile
+	         WHERE user_id = #userId#
+	           AND subline_cd IS NULL;
+ 		END;
+	</procedure>
+	
+	<procedure id="deleteLossAllSublines" parameterClass="GICLLossProfile">
+ 		BEGIN
+			DELETE
+	          FROM gicl_loss_profile
+	         WHERE user_id = #userId#
+	           AND subline_cd IS NOT NULL;
+ 		END;
+	</procedure>
+	
+</sqlMap>

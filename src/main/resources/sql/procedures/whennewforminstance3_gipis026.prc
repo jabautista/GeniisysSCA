@@ -1,0 +1,13 @@
+DROP PROCEDURE CPI.WHENNEWFORMINSTANCE3_GIPIS026;
+
+CREATE OR REPLACE PROCEDURE CPI.WHENNEWFORMINSTANCE3_GIPIS026(PV_V_OTH_CHARGES OUT GIIS_PARAMETERS.PARAM_VALUE_N%TYPE ) IS						
+BEGIN
+FOR oth_charge IN( SELECT param_value_n
+                    FROM giis_parameters
+                   WHERE param_name like 'OTHER_CHARGES_CODE') LOOP
+         PV_V_OTH_CHARGES := oth_charge.param_value_n;
+    END LOOP;
+END;
+/
+
+

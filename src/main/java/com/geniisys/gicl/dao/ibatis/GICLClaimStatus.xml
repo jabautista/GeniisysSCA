@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GICLClaimStatus">
+
+	<resultMap class="java.util.HashMap" id="ClaimStatusResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="claimId" column="claim_id"/>
+		<result property="policyNo" column="policy_no"/>
+		<result property="assuredName" column="assured_name"/>
+		<result property="claimStatus" column="claim_status"/>
+		<result property="closeDate" column="close_date"/>
+		<result property="dspLossDate" column="dsp_loss_date"/>
+		<result property="clmFileDate" column="clm_file_date"/>
+		<result property="remarks" column="remarks"/>
+		<result property="entryDate" column="entry_date"/>
+		<result property="inHouAdj" column="in_hou_adj"/>
+		<result property="lossResAmt" column="loss_res_amt"/>
+		<result property="expResAmt" column="exp_res_amt"/>
+		<result property="lossPdAmt" column="loss_pd_amt"/>
+		<result property="expPdAmt" column="exp_pd_amt"/>
+		<result property="lineCd" column="line_cd"/>
+		<result property="sublineCd" column="subline_cd"/>
+		<result property="issueYy" column="issue_yy"/>
+		<result property="polSeqNo" column="pol_seq_no"/>
+		<result property="renewNo" column="renew_no"/>
+		<result property="polIssCd" column="pol_iss_cd"/>
+		<result property="clmYy" column="clm_yy"/>
+		<result property="clmSeqNo" column="clm_seq_no"/>
+		<result property="issCd" column="iss_cd"/>
+	</resultMap>
+
+	<select id="getClaimStatus" resultMap="ClaimStatusResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, a.*
+		          FROM (SELECT * 
+		                  FROM TABLE (GICLS252_PKG.get_clm_status
+		                  				(#appUser#, #clmStatusType#,#dateBy#,#dateAsOf#,#dateFrom#,#dateTo#))
+		                <isNotNull property="filter">
+                            WHERE 1 = 1
+                           	<isNotEmpty prepend="AND" property="lineCd">
+								line_cd LIKE UPPER(#lineCd#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="sublineCd">
+								subline_cd LIKE UPPER(#sublineCd#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="issueYy">
+								issue_yy LIKE #issueYy#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="polSeqNo">
+								pol_seq_no LIKE #polSeqNo#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="renewNo">
+								renew_no LIKE #renewNo#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="clmYy">
+								clm_yy LIKE #clmYy#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="clmSeqNo">
+								clm_seq_no LIKE #clmSeqNo#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="issCd">
+								iss_cd LIKE UPPER(#issCd#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="assuredName">
+								assured_name LIKE UPPER(#assuredName#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="claimStatus">
+								claim_status LIKE UPPER(#claimStatus#)
+							</isNotEmpty>
+                        </isNotNull>
+			            <isEqual property="sortColumn" compareValue="claimId">
+		              		ORDER BY claim_id
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="policyNo">
+		              		ORDER BY policy_no
+			            </isEqual>
+			        	<isEqual property="sortColumn" compareValue="assuredName">
+		              		ORDER BY assured_name
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="claimStatus">
+		              		ORDER BY claim_status
+			            </isEqual>
+			            <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	 </isNotNull>) a, 
+		               (SELECT count(*) count_
+		                  FROM TABLE (GICLS252_PKG.get_clm_status
+		                  				(#appUser#, #clmStatusType#,#dateBy#,#dateAsOf#,#dateFrom#,#dateTo#))
+		                <isNotNull property="filter">
+                            WHERE 1 = 1
+                           	<isNotEmpty prepend="AND" property="lineCd">
+								line_cd LIKE UPPER(#lineCd#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="sublineCd">
+								subline_cd LIKE UPPER(#sublineCd#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="issueYy">
+								issue_yy LIKE #issueYy#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="polSeqNo">
+								pol_seq_no LIKE #polSeqNo#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="renewNo">
+								renew_no LIKE #renewNo#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="clmYy">
+								clm_yy LIKE #clmYy#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="clmSeqNo">
+								clm_seq_no LIKE #clmSeqNo#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="issCd">
+								iss_cd LIKE UPPER(#issCd#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="assuredName">
+								assured_name LIKE UPPER(#assuredName#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="claimStatus">
+								claim_status LIKE UPPER(#claimStatus#)
+							</isNotEmpty>
+                        </isNotNull>
+                        ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+
+<!-- Gzelle 08.05.2013 -->
+	<resultMap class="java.util.HashMap" id="reportedClaimsStatLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="clm_stat_cd"			property="clmStatCd" />
+		<result column="clm_stat_desc"			property="clmStatDesc" />
+		<result column="clm_stat_type"			property="clmStatType" />
+	</resultMap>
+	
+	<select id="getReportedClmStatLOV" resultMap="reportedClaimsStatLOVResultMap" parameterClass="java.util.HashMap">		 
+		SELECT *
+  		  FROM (SELECT ROWNUM rownum_, b.count_, a.*
+  		  		  FROM (SELECT * FROM TABLE(gicls540_pkg.get_rep_clm_stat_lov)
+						<isNull property="findText">
+						 WHERE upper(clm_stat_cd) LIKE upper(NVL(#search#, clm_stat_cd))
+						</isNull>
+						<isNotNull property="findText">
+						 WHERE upper(clm_stat_cd) LIKE upper(#findText#)
+						    OR upper(clm_stat_desc) LIKE upper(#findText#)
+						</isNotNull>
+	            	<isEqual property="sortColumn" compareValue="clmStatCd">
+              			ORDER BY clm_stat_cd
+	            	</isEqual>
+	            	<isEqual property="sortColumn" compareValue="clmStatDesc">
+              			ORDER BY clm_stat_desc
+	            	</isEqual>
+	            	<isNotNull property="sortColumn">
+              			<isEqual property="ascDescFlg" compareValue="ASC">
+              				ASC
+              			</isEqual>
+              			<isEqual property="ascDescFlg" compareValue="DESC">
+              				DESC
+              			</isEqual>
+              		</isNotNull>) a,
+              (SELECT count(*) count_
+	          	 FROM TABLE(gicls540_pkg.get_rep_clm_stat_lov)
+				 <isNull property="findText">
+				WHERE upper(clm_stat_cd) LIKE upper(NVL(#search#, clm_stat_cd))
+				 </isNull>
+				 <isNotNull property="findText">
+				WHERE upper(clm_stat_cd) LIKE upper(#findText#)
+				   OR upper(clm_stat_desc) LIKE upper(#findText#)
+				 </isNotNull>
+				)b) 
+	    	WHERE rownum_ BETWEEN #from# AND #to# 	
+ 	</select>	
+ <!--End-->	
+ 
+</sqlMap>

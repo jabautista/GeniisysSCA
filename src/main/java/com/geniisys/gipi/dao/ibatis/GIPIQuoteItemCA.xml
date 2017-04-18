@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap>
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIPIQuoteItemCA" type="com.geniisys.gipi.entity.GIPIQuoteItemCA" />
+	
+	<resultMap id="GIPIQuoteItemCAMap" class="GIPIQuoteItemCA">
+		<result column="QUOTE_ID" 				property="quoteId" />
+		<result column="ITEM_NO"				property="itemNo" />
+		<result column="LOCATION" 				property="location" />
+		<result column="SECTION_OR_HAZARD_CD" 	property="sectionOrHazardCd" />
+		<result column="CAPACITY_CD" 			property="capacityCd" />
+		<result column="LIMIT_OF_LIABILITY" 	property="limitOfLiability" />
+	</resultMap>
+	
+	<select id="getGIPIQuoteItemCADetails" resultMap="GIPIQuoteItemCAMap" parameterClass="java.util.HashMap">
+		SELECT DISTINCT QUOTE_ID, ITEM_NO, LOCATION, 
+			   SECTION_OR_HAZARD_CD, CAPACITY_CD, LIMIT_OF_LIABILITY 
+		  FROM TABLE(Gipi_Quote_Item_Dtls.Get_Gipi_Quote_CA(#quoteId#, #itemNo#))
+	</select>
+	
+	<procedure id="saveGIPIQuoteItemCA" parameterClass="GIPIQuoteItemCA">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			Gipi_Quote_Item_Dtls.Set_Gipi_Quote_CA(#quoteId#,
+	 			#itemNo#,
+				#location#,
+				#sectionOrHazardCd#,	 
+				#capacityCd#,
+				#limitOfLiability#,
+				#sectionLineCd#,
+				#sectionSublineCd#,
+				#propertyNoType#,
+				#propertyNo#,
+				#conveyanceInfo#,
+				#interestOnPremises#,
+				#sectionOrHazardInfo#);
+		END;
+	</procedure>
+	
+	<procedure id="deleteGIPIQuoteItemCA">
+		BEGIN
+			GIPI_QUOTE_ITEM_DTLS.Del_gipi_quote_ca(#quoteId#, #itemNo#);
+		END;
+	</procedure>
+	
+	
+</sqlMap>

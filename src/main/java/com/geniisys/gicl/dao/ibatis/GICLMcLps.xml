@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISIndustry">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GICLMcLps" type="com.geniisys.gicl.entity.GICLMcLps"/>
+	
+	<resultMap class="java.util.HashMap" id="gicls171RecListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="loss_exp_cd"    	property="lossExpCd"/>
+		<result column="loss_exp_desc"  	property="lossExpDesc"/>
+		<result column="user_id"     		property="userId"/>
+		<result column="last_update" 		property="lastUpdate"/>
+		<result column="remarks"     		property="remarks"/>
+		<result column="tinsmith_light"  	property="tinsmithLight"/>
+		<result column="tinsmith_medium"	property="tinsmithMedium"/>
+		<result column="tinsmith_heavy"  	property="tinsmithHeavy"/>
+		<result column="painting"     		property="painting"/>
+		<result column="hist_tag"     		property="histTag"/>
+	</resultMap>
+	
+	<select id="getGicls171RecList" resultMap="gicls171RecListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(gicls171_pkg.get_rec_list(#lossExpCd#, #lossExpDesc#))
+						  WHERE 1 = 1
+						  <isNotEmpty property="tinsmithLight">
+						  	AND tinsmith_light = #tinsmithLight#
+						  </isNotEmpty>
+						  <isNotEmpty property="tinsmithMedium">
+						  	AND tinsmith_medium = #tinsmithMedium#
+						  </isNotEmpty>
+						  <isNotEmpty property="tinsmithHeavy">
+						  	AND tinsmith_heavy = #tinsmithHeavy#
+						  </isNotEmpty>
+						  <isNotEmpty property="painting">
+						  	AND painting = #painting#
+						  </isNotEmpty>
+		                  <isEqual property="sortColumn" compareValue="lossExpCd lossExpDesc">
+			              		ORDER BY loss_exp_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="tinsmithLight">
+			              		ORDER BY tinsmith_light
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="tinsmithMedium">
+			              		ORDER BY tinsmith_medium
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="tinsmithHeavy">
+			              		ORDER BY tinsmith_heavy
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="painting">
+			              		ORDER BY painting
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(gicls171_pkg.get_rec_list(#lossExpCd#, #lossExpDesc#))
+		                  WHERE 1 = 1
+		                  <isNotEmpty property="tinsmithLight">
+						  	AND tinsmith_light = #tinsmithLight#
+						  </isNotEmpty>
+						  <isNotEmpty property="tinsmithMedium">
+						  	AND tinsmith_medium = #tinsmithMedium#
+						  </isNotEmpty>
+						  <isNotEmpty property="tinsmithHeavy">
+						  	AND tinsmith_heavy = #tinsmithHeavy#
+						  </isNotEmpty>
+						  <isNotEmpty property="painting">
+						  	AND painting = #painting#
+						  </isNotEmpty>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<procedure id="saveGicls171" parameterClass="GICLMcLps">
+		DECLARE
+	    	v_rec gicl_mc_lps%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.loss_exp_cd := #lossExpCd#;
+ 			v_rec.tinsmith_light := #tinsmithLight#;
+ 			v_rec.tinsmith_medium := #tinsmithMedium#;
+ 			v_rec.tinsmith_heavy := #tinsmithHeavy#;
+ 			v_rec.painting := #painting#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			gicls171_pkg.save_rec(v_rec);
+ 		END;
+	</procedure>
+	
+	<resultMap class="java.util.HashMap" id="gicls171LpsHistoryResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="history_id"    		property="historyId"/>
+		<result column="loss_exp_cd"    	property="lossExpCd"/>
+		<result column="user_id"     		property="userId"/>
+		<result column="last_update" 		property="lastUpdate"/>
+		<result column="remarks"     		property="remarks"/>
+		<result column="tinsmith_light"  	property="tinsmithLight"/>
+		<result column="tinsmith_medium"	property="tinsmithMedium"/>
+		<result column="tinsmith_heavy"  	property="tinsmithHeavy"/>
+		<result column="painting"     		property="painting"/>
+	</resultMap>
+	
+	<select id="getGicls171LpsHist" resultMap="gicls171LpsHistoryResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(gicls171_pkg.get_lps_hist(#lossExpCd#))
+		                  <isEqual property="sortColumn" compareValue="historyId">
+			              		ORDER BY history_id
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="tinsmithLight">
+			              		ORDER BY tinsmith_light
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="tinsmithMedium">
+			              		ORDER BY tinsmith_medium
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="tinsmithHeavy">
+			              		ORDER BY tinsmith_heavy
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="painting">
+			              		ORDER BY painting
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="userId">
+			              		ORDER BY user_id
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="lastUpdate">
+			              		ORDER BY TO_DATE(last_update, 'MM-DD-YYYY HH:MI:SS AM')
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(gicls171_pkg.get_lps_hist(#lossExpCd#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+</sqlMap>

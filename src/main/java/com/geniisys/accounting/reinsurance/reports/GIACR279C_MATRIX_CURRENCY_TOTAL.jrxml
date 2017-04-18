@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIACR_MATRIX_LINE_TOTAL" language="groovy" pageWidth="1120" pageHeight="752" columnWidth="1120" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="1.9487171000000014"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="Crosstab Data Text" isDefault="false" hAlign="Center"/>
+	<style name="S_NUMBER" isDefault="false" hAlign="Right" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true" fontName="Arial" fontSize="7"/>
+	<parameter name="P_AS_OF_DATE" class="java.lang.String"/>
+	<parameter name="P_CUT_OFF_DATE" class="java.lang.String"/>
+	<parameter name="P_RI_CD" class="java.math.BigDecimal"/>
+	<parameter name="P_LINE_CD" class="java.lang.String"/>
+	<parameter name="P_USER_ID" class="java.lang.String"/>
+	<parameter name="P_POLICY_NO" class="java.lang.String"/>
+	<parameter name="P_PAYEE_TYPE" class="java.lang.String"/>
+	<parameter name="P_FLA_NO" class="java.lang.String"/>
+	<parameter name="P_CLAIM_NO" class="java.lang.String"/>
+	<parameter name="P_AMOUNT_DUE" class="java.math.BigDecimal"/>
+	<parameter name="P_PAYEE_TYPE2" class="java.lang.String"/>
+	<parameter name="P_CONVERT_RATE" class="java.math.BigDecimal"/>
+	<parameter name="P_SHORT_NAME" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT * FROM TABLE(GIACR279C_PKG.get_giacr279c_matrix_details(
+$P{P_AS_OF_DATE},
+$P{P_CUT_OFF_DATE},
+$P{P_RI_CD},
+$P{P_LINE_CD},
+$P{P_USER_ID},
+$P{P_POLICY_NO},
+$P{P_CLAIM_NO},
+$P{P_PAYEE_TYPE},
+$P{P_PAYEE_TYPE2},
+$P{P_FLA_NO},
+$P{P_AMOUNT_DUE},
+$P{P_CONVERT_RATE},
+$P{P_SHORT_NAME}
+))]]>
+	</queryString>
+	<field name="COLUMN_NO" class="java.math.BigDecimal"/>
+	<field name="CONVERT_AMT" class="java.math.BigDecimal"/>
+	<field name="CLAIM_NO" class="java.lang.String"/>
+	<field name="CONVERT_RATE" class="java.math.BigDecimal"/>
+	<field name="SHORT_NAME" class="java.lang.String"/>
+	<field name="LINE_CD" class="java.lang.String"/>
+	<field name="RI_CD" class="java.math.BigDecimal"/>
+	<summary>
+		<band height="25" splitType="Stretch">
+			<crosstab>
+				<reportElement positionType="Float" x="0" y="0" width="1120" height="20"/>
+				<rowGroup name="CURRENCY_CD" width="0" totalPosition="End">
+					<bucket>
+						<bucketExpression class="java.lang.String"><![CDATA[$F{SHORT_NAME}]]></bucketExpression>
+					</bucket>
+					<crosstabRowHeader>
+						<cellContents backcolor="#F0F8FF" mode="Opaque"/>
+					</crosstabRowHeader>
+					<crosstabTotalRowHeader>
+						<cellContents backcolor="#BFE1FF" mode="Opaque"/>
+					</crosstabTotalRowHeader>
+				</rowGroup>
+				<columnGroup name="COLUMN_NO" height="0">
+					<bucket>
+						<bucketExpression class="java.math.BigDecimal"><![CDATA[$F{COLUMN_NO}]]></bucketExpression>
+					</bucket>
+					<crosstabColumnHeader>
+						<cellContents backcolor="#F0F8FF" mode="Opaque"/>
+					</crosstabColumnHeader>
+					<crosstabTotalColumnHeader>
+						<cellContents/>
+					</crosstabTotalColumnHeader>
+				</columnGroup>
+				<measure name="CONVERT_AMTMeasure" class="java.math.BigDecimal" calculation="Sum">
+					<measureExpression><![CDATA[$F{CONVERT_AMT}]]></measureExpression>
+				</measure>
+				<crosstabCell width="80" height="20">
+					<cellContents>
+						<textField isStretchWithOverflow="true">
+							<reportElement style="S_NUMBER" positionType="Float" stretchType="RelativeToTallestObject" x="0" y="0" width="75" height="11"/>
+							<textElement/>
+							<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{CONVERT_AMTMeasure}]]></textFieldExpression>
+						</textField>
+						<staticText>
+							<reportElement style="Crosstab Data Text" x="2" y="11" width="73" height="9"/>
+							<textElement textAlignment="Right">
+								<font size="7"/>
+							</textElement>
+							<text><![CDATA[--------------------------------------]]></text>
+						</staticText>
+					</cellContents>
+				</crosstabCell>
+				<crosstabCell width="80" height="0" rowTotalGroup="CURRENCY_CD">
+					<cellContents backcolor="#BFE1FF" mode="Opaque"/>
+				</crosstabCell>
+			</crosstab>
+		</band>
+	</summary>
+</jasperReport>

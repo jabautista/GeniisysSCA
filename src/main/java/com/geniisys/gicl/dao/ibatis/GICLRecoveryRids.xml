@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GICLRecoveryRids">
+
+	<typeAlias alias="GICLRecoveryRidsClass" type="com.geniisys.gicl.entity.GICLRecoveryRids"/>
+	
+	<resultMap class="GICLRecoveryRidsClass" id="GICLRecoveryRidsResultMap">
+		<result column="recovery_id" 				property="recoveryId"/>
+        <result column="recovery_payt_id" 			property="recoveryPaytId"/>
+        <result column="rec_dist_no" 				property="recDistNo"/>
+        <result column="line_cd" 					property="lineCd"/>
+        <result column="grp_seq_no" 				property="grpSeqNo"/>
+        <result column="dist_year" 					property="distYear"/>
+        <result column="share_type" 				property="shareType"/>
+        <result column="acct_trty_type" 			property="acctTrtyType"/>
+        <result column="ri_cd" 						property="riCd"/>
+        <result column="share_ri_pct" 				property="shareRiPct"/>
+        <result column="shr_ri_recovery_amt" 		property="shrRiRecoveryAmt"/>
+        <result column="share_ri_pct_real" 			property="shareRiPctReal"/>
+        <result column="negate_tag" 				property="negateTag"/>
+        <result column="negate_date" 				property="negateDate"/> 
+        <result column="dsp_ri_name" 				property="dspRiName"/>
+	</resultMap>
+	
+	<resultMap class="GICLRecoveryRidsClass" id="GICLRecoveryRidsResultMapGrid" extends="GICLRecoveryRidsResultMap">
+		<result column="rownum_" 					property="rowNum" />
+		<result column="count_"						property="rowCount"/>
+	</resultMap>
+	
+	<resultMap class="GICLRecoveryRidsClass" id="getFlaRecoveryMap">
+        <result column="grp_seq_no" 				property="grpSeqNo"/>
+        <result column="share_type" 				property="shareType"/>
+        <result column="ri_cd" 						property="riCd"/>
+        <result column="shr_ri_recovery_amt" 		property="shrRiRecoveryAmt"/>
+        <result column="shr_recovery_amt" 			property="shrRecoveryAmt"/>
+        <result column="recovered_amt" 				property="recoveredAmt"/>
+	</resultMap>
+	
+	<select id="getGiclRecoveryRidsGrid" resultMap="GICLRecoveryRidsResultMapGrid"> 
+ 		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GICL_RECOVERY_RIDS_PKG.get_gicl_recovery_rids(#recoveryId#, #recoveryPaytId#, #recDistNo#, #grpSeqNo#))           
+			          	  <isEqual property="sortColumn" compareValue="riCd dspRiName">
+			              		ORDER BY ri_cd
+			              		<isNotNull property="sortColumn">
+				            	<isEqual property="ascDescFlg" compareValue="ASC">
+				              		ASC
+				              	</isEqual>
+				              	<isEqual property="ascDescFlg" compareValue="DESC">
+				              		DESC
+				              	</isEqual>
+				            </isNotNull>, dsp_ri_name
+			              </isEqual>
+			               <isEqual property="sortColumn" compareValue="shareRiPct">
+			              		ORDER BY share_ri_pct
+			              </isEqual> 
+			              <isEqual property="sortColumn" compareValue="shrRiRecoveryAmt">
+			              		ORDER BY shr_ri_recovery_amt
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GICL_RECOVERY_RIDS_PKG.get_gicl_recovery_rids(#recoveryId#, #recoveryPaytId#, #recDistNo#, #grpSeqNo#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+
+	<select id="getFlaRecovery" resultMap="getFlaRecoveryMap">
+  		SELECT * FROM TABLE(GICL_RECOVERY_RIDS_PKG.get_fla_recovery(#claimId#, #advFlaId#))
+  	</select>
+  	
+  	<resultMap class="GICLRecoveryRidsClass" id="GICLRecoveryRIDistResultMap" extends="BaseEntity.TableGridResultMap"> 
+		<result property="recoveryId"		column="recovery_id"/>
+		<result property="recoveryPaytId"	column="recovery_payt_id"/>
+		<result property="recDistNo"		column="rec_dist_no"/>
+		<result property="dspLineCd"		column="dsp_line_cd"/>
+		<result property="distYear" 		column="dist_year"/>
+		<result property="grpSeqNo"			column="grp_seq_no"/>
+		<result property="shareType"		column="share_type"/>
+		<result property="acctTrtyType"		column="acct_trty_type"/>
+		<result property="riCd"				column="ri_cd"/>
+		<result property="dspRiName"		column="dsp_ri_name"/>
+		<result property="shareRiPct"		column="share_ri_pct"/>
+		<result property="shareRiPctReal"	column="share_ri_pct_real"/>
+		<result property="shrRiRecoveryAmt"	column="shr_ri_recovery_amt"/>
+		<result property="negateTag"		column="negate_tag"/>
+		<result property="negateDate"		column="negate_date"/>
+	</resultMap>
+	
+	<select id="getClmRecoveryRIDistGrid" resultMap="GICLRecoveryRIDistResultMap">
+		SELECT * 
+		  FROM (SELECT rownum rownum_, 
+		        	   b.count_, 
+		               a.*  
+		         FROM (SELECT * 
+                         FROM TABLE(GICL_RECOVERY_RIDS_PKG.get_recovery_ri_dist(#recoveryId#, #recoveryPaytId#, #recDistNo#, #grpSeqNo#))
+                         <isEqual property="sortColumn" compareValue="riCd">
+			              		ORDER BY ri_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="dspRiName">
+			              		ORDER BY dsp_ri_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="shareRiPct">
+			              		ORDER BY share_ri_pct
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="shrRiRecoveryAmt">
+			              		ORDER BY shr_ri_recovery_amt
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+                         ) a,
+                      (SELECT count(*) count_
+                         FROM TABLE(GICL_RECOVERY_RIDS_PKG.get_recovery_ri_dist(#recoveryId#, #recoveryPaytId#, #recDistNo#, #grpSeqNo#))) b)
+         WHERE rownum_ BETWEEN #from# AND #to#                    					 			 		
+	</select>
+	
+	<procedure id="updGiclRecovRids">
+		BEGIN
+			giis_users_pkg.app_user := #userId#; 
+			gicl_recovery_rids_pkg.upd_ridist_recovery(#recoveryId#, #recoveryPaytId#, #recDistNo#, #grpSeqNo#, #riCd#, #shareRiPct#, #shrRiRecoveryAmt#);
+		END;	
+	</procedure>
+	
+	<delete id="delGiclRecovRids">
+		BEGIN
+			giis_users_pkg.app_user := #userId#; 
+			gicl_recovery_rids_pkg.del_ridist_recovery(#recoveryId#, #recoveryPaytId#, #recDistNo#, #grpSeqNo#);
+		END;	
+	</delete>
+</sqlMap>

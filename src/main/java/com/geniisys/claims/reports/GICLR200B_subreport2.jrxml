@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GICLR200_SUMMARY_TRTY" language="groovy" pageWidth="340" pageHeight="15" columnWidth="340" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="9523c31b-dbb0-4ca3-a123-1221750f9d81">
+	<property name="ireport.zoom" value="1.9487171000000045"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="P_SESSION_ID" class="java.lang.Integer"/>
+	<parameter name="P_CATASTROPHIC_CD" class="java.lang.Integer"/>
+	<parameter name="P_LINE_CD" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT *
+  FROM TABLE(GICLR200B_PKG.get_giclr200b_treaty($P{P_SESSION_ID}, $P{P_CATASTROPHIC_CD}, $P{P_LINE_CD}))
+ ORDER BY catastrophic_cd, share_type, line_cd, grp_seq_no]]>
+	</queryString>
+	<field name="CATASTROPHIC_CD" class="java.math.BigDecimal"/>
+	<field name="GRP_SEQ_NO" class="java.math.BigDecimal"/>
+	<field name="SHARE_TYPE" class="java.lang.String"/>
+	<field name="LINE_CD" class="java.lang.String"/>
+	<field name="TRTY_NAME" class="java.lang.String"/>
+	<field name="OS_DS" class="java.math.BigDecimal"/>
+	<field name="PD_DS" class="java.math.BigDecimal"/>
+	<field name="TOTAL_DS" class="java.math.BigDecimal"/>
+	<variable name="V_TOTAL_PD_DS_PER_TRTY" class="java.math.BigDecimal" resetType="Group" resetGroup="G_TREATY_NAME" calculation="Sum">
+		<variableExpression><![CDATA[$F{PD_DS}]]></variableExpression>
+	</variable>
+	<variable name="V_TOTAL_OS_DS_PER_TRTY" class="java.math.BigDecimal" resetType="Group" resetGroup="G_TREATY_NAME" calculation="Sum">
+		<variableExpression><![CDATA[$F{OS_DS}]]></variableExpression>
+	</variable>
+	<variable name="V_TOTAL_DS_PER_TRTY" class="java.math.BigDecimal" resetType="Group" resetGroup="G_TREATY_NAME" calculation="Sum">
+		<variableExpression><![CDATA[$F{TOTAL_DS}]]></variableExpression>
+	</variable>
+	<group name="G_TREATY_NAME">
+		<groupExpression><![CDATA[$F{TRTY_NAME}]]></groupExpression>
+	</group>
+	<detail>
+		<band height="15" splitType="Stretch">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="0" y="0" width="120" height="15" uuid="2ea37284-d503-4995-99f2-76d037a5cac1"/>
+				<textElement verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{TRTY_NAME}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="120" y="0" width="70" height="15" uuid="44568eb6-fe3b-43bb-8ece-f4f811a3db05"/>
+				<textElement textAlignment="Right" verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{V_TOTAL_PD_DS_PER_TRTY}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="260" y="0" width="80" height="15" uuid="a2ab0cd9-b012-4548-8aad-ae896873cd95"/>
+				<textElement textAlignment="Right" verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{V_TOTAL_DS_PER_TRTY}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="190" y="0" width="70" height="15" uuid="be513f7c-5a93-409b-b443-74186e3a6bde"/>
+				<textElement textAlignment="Right" verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{V_TOTAL_OS_DS_PER_TRTY}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

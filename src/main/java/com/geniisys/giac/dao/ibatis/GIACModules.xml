@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIACModules">
+	
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<!-- Tonio September 3, 2010  Validates user module access-->
+	<select id="validateUserFunc" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+	 	SELECT Giac_Validate_User_Fn(#user#, #funcCode#, #moduleName#) FROM DUAL
+	</select>
+	
+	<select id="validateUserFunc2" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+	 	SELECT Giac_Validate_User_Fn2(#user#, #funcName#, #moduleName#) FROM DUAL
+	</select>
+	
+	<select id="validateUserFunc3" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+	 	SELECT check_user_override_function2(#user#, #moduleName#, #funcCode#) FROM DUAL
+	</select>
+	
+	<typeAlias alias="giacModules" type="com.geniisys.giac.entity.GIACModules"/>
+  	
+	<resultMap class="java.util.HashMap" id="giacModuleResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="module_id"		property="moduleId"/>
+		<result column="module_name"  	property="moduleName"/>
+		<result column="scrn_rep_name"	property="scrnRepName"/>
+		<result column="scrn_rep_tag"	property="scrnRepTag"/>
+		<result column="scrn_rep_tag_name"	property="scrnRepTagName"/>
+		<result column="generation_type"	property="genType"/>
+		<result column="mod_entries_tag"	property="modEntTag"/>
+		<result column="functions_tag"	property="funcTag"/>
+		<result column="user_id"     	property="userId"/>
+		<result column="last_update" 	property="lastUpdate"/>
+		<result column="remarks"     	property="remarks"/>
+	</resultMap>
+	
+	<select id="getGiacs317RecList" resultMap="giacModuleResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giacs317_pkg.get_rec_list)
+		  	      <isNotNull property="filter">
+		  	      	WHERE 1 = 1 
+		  	      		<isNotEmpty prepend="AND" property="moduleName">
+		  	      			UPPER(module_name) LIKE UPPER(#moduleName#)
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="scrnRepName">
+                            UPPER(scrn_rep_name) LIKE UPPER(#scrnRepName#)
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="scrnRepTagName">
+                        	UPPER(scrn_rep_tag_name) LIKE UPPER(#scrnRepTagName#)
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="genType">
+                            UPPER(generation_type) LIKE UPPER(#genType#)
+                        </isNotEmpty>
+		  	      </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="moduleName">
+			              		ORDER BY module_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="scrnRepName">
+			              		ORDER BY scrn_rep_name
+			              </isEqual>
+			               <isEqual property="sortColumn" compareValue="scrnRepTagName">
+			              		ORDER BY scrn_rep_tag_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="genType">
+			              		ORDER BY generation_type
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giacs317_pkg.get_rec_list)
+		                   <isNotNull property="filter">
+					  	      	WHERE 1 = 1 
+					  	      		<isNotEmpty prepend="AND" property="moduleName">
+					  	      			UPPER(module_name) LIKE UPPER(#moduleName#)
+			                        </isNotEmpty>
+			                        <isNotEmpty prepend="AND" property="scrnRepName">
+			                            UPPER(scrn_rep_name) LIKE UPPER(#scrnRepName#)
+			                        </isNotEmpty>
+			                        <isNotEmpty prepend="AND" property="scrnRepTagName">
+			                        	UPPER(scrn_rep_tag_name) LIKE UPPER(#scrnRepTagName#)
+			                        </isNotEmpty>
+			                        <isNotEmpty prepend="AND" property="genType">
+			                            UPPER(generation_type) LIKE UPPER(#genType#)
+			                        </isNotEmpty>
+					  	      </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setModules" parameterClass="giacModules">
+	    DECLARE
+	    	v_rec giac_modules%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.module_id := #moduleId#;
+ 			v_rec.module_name := #moduleName#;
+ 			v_rec.scrn_rep_name := #scrnRepName#;
+ 			v_rec.scrn_rep_tag := #scrnRepTag#;
+ 			v_rec.generation_type := #genType#;
+ 			v_rec.mod_entries_tag := #modEntTag#;
+ 			v_rec.functions_tag := #funcTag#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			giacs317_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<!-- <procedure id="valDeleteAirType" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giacs317_pkg.val_del_rec(#recId#);
+ 		END;
+ 	</procedure> -->
+ 	
+ 	<select id="valDelModules" resultClass="java.lang.String">
+		SELECT giacs317_pkg.val_del_rec(#moduleId#) FROM dual							
+	</select>
+ 	
+ 	<procedure id="valAddModules" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giacs317_pkg.val_add_rec(#moduleName#,#genType#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delModules" parameterClass="java.lang.Integer">
+		BEGIN
+ 			giacs317_pkg.del_rec(#moduleId#);
+ 		END;
+ 	</delete>
+ 	
+ 	<parameterMap class="map" id="validateGiacs317ScreenRepTagMap">
+		<parameter property="scrnRepTagName"	jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="INOUT"/>
+		<parameter property="scrnRepTag"		jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="validateGiacs317ScreenRepTag" parameterMap="validateGiacs317ScreenRepTagMap">
+		BEGIN
+ 			giacs317_pkg.val_scrn_rep_tag(?,?);
+ 		END;
+	</procedure>
+	
+	<resultMap class="java.util.HashMap" id="giacs317ScrnRepTagLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result property="rvLowValue" 		column="rv_low_value" />
+		<result property="rvMeaning"		column="rv_meaning" />
+		<result property="rowNum" 			column="rownum_"/>
+		<result property="rowCount" 		column="count_"/>
+	</resultMap>
+	
+	<select id="getGiacs317ScrnRepTagLOV" resultMap="giacs317ScrnRepTagLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giacs317_pkg.get_scrn_rep_tag_lov)
+		                 <isNotNull property="findText">
+					         WHERE (UPPER(rv_low_value) = (#findText#) 
+					         	 OR UPPER(rv_meaning) LIKE UPPER(#findText#)
+					         	 )
+				         </isNotNull>          
+			          	  <isNotNull property="sortColumn">
+			                  <isEqual property="sortColumn" compareValue="rvLowValue">
+				              		ORDER BY rv_low_value
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="rvMeaning">
+				              		ORDER BY rv_meaning
+				              </isEqual>
+				          	  <isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              </isNotNull>
+				          </isNotNull>    
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (giacs317_pkg.get_scrn_rep_tag_lov)
+			              <isNotNull property="findText">
+					         WHERE (UPPER(rv_low_value) = (#findText#) 
+					         	 OR UPPER(rv_meaning) LIKE UPPER(#findText#)
+					         	 )
+				          </isNotNull> 
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+</sqlMap>	

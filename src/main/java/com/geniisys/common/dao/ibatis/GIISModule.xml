@@ -1,0 +1,405 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISModule">
+	<cacheModel id="oneDayClient" type="MEMORY">
+    	<flushInterval hours="24"/>
+    	<property name="reference-type" value="WEAK"/>
+  	</cacheModel>
+  	
+	<typeAlias alias="GIISModule" type="com.geniisys.common.entity.GIISModule" />
+	
+  	<resultMap id="ModulesListMap" class="GIISModule">
+  		<result column="MODULE_ID" 		property="moduleId" />
+  		<result column="MODULE_DESC" 	property="moduleDesc" />
+  		<result column="USER_ID" 		property="userId" />
+  		<result column="LAST_UPDATE" 	property="lastUpdate" />
+  		<result column="REMARKS" 		property="remarks" />
+  		<result column="MOD_ACCESS_TAG" property="accessTag" />
+  		<result column="MODULE_TYPE"	property="moduleType" />
+  		<result column="MODULE_GRP" 	property="moduleGrp" />
+  	</resultMap>
+  	
+  	<resultMap id="ModulesListMap2" class="GIISModule">
+  		<result column="MODULE_ID" 		property="moduleId" />
+  		<result column="MODULE_DESC" 	property="moduleDesc" />
+  		<result column="USER_ID" 		property="userId" />
+  		<result column="LAST_UPDATE" 	property="lastUpdate" />
+  		<result column="TRAN_CD" 		property="tranCd" />
+  	</resultMap>
+  	
+  	<resultMap id="ModuleTranList" class="GIISModule">
+  		<result column="TRAN_DESC" 		property="moduleDesc" />
+  		<result column="TRAN_CD" 		property="tranCd" />
+  	</resultMap>
+  	
+  	<insert id="setGiisModule" parameterClass="GIISModule">
+  		BEGIN
+  			giis_users_pkg.app_user := #appUser#;
+  			GIIS_MODULES_PKG.set_giis_module(#moduleId#,
+  											 #moduleDesc#,
+											 #userId#,
+											 #remarks#,
+											 #moduleGrp#,
+											 #moduleType#,
+											 #accessTag#);
+  		END;
+  	</insert>
+  	
+  	<insert id="updateGiisModule" parameterClass="GIISModule">
+  		BEGIN
+  			giis_users_pkg.app_user := #appUser#;
+  			GIIS_MODULES_PKG.update_giis_module(#moduleId#,
+  											    #moduleDesc#,
+											 	#userId#,
+												#remarks#,
+											 	#moduleGrp#,
+											 	#moduleType#,
+											 	#accessTag#);
+  		END;
+  	</insert>
+  	
+  	<select id="getGiisModulesList" resultMap="ModulesListMap2">
+  		select * from table(giis_modules_tran_pkg.get_giis_modules_tran_list) order by module_desc
+  	</select>
+  	
+  	<select id="getModuleTranList" resultMap="ModuleTranList" parameterClass="java.lang.String">
+  		select tran_cd, tran_desc from table(giis_modules_tran_pkg.get_giis_modules_tran_list) where module_id = #moduleId# order by tran_desc
+  	</select>
+  	
+  	<select id="getCompleteModuleList" resultMap="ModulesListMap">
+  		select * from table(giis_modules_pkg.get_giis_modules_list(#keyword#)) order by module_desc
+  	</select>
+  	
+  	<select id="getGiisModule" resultMap="ModulesListMap">
+  		SELECT * from table(GIIS_MODULES_PKG.get_giis_modules(#moduleId#))
+  	</select>
+  	
+  	<!-- Created by : J. Diago 12.20.2013
+  	Remarks : To reconstruct GIISS081 -->
+  	
+  	<typeAlias alias="giisModule" type="com.geniisys.common.entity.GIISModule" />
+  	<typeAlias alias="giisModuleTran" type="com.geniisys.common.entity.GIISModulesTran" />
+  	
+  	<resultMap class="giisModule" id="giisModuleListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="module_id"        			property="moduleId"/>
+		<result column="module_desc"        		property="moduleDesc"/>
+		<result column="module_type"        		property="moduleType"/>
+		<result column="dsp_module_type_desc"       property="dspModuleTypeDesc"/>
+		<result column="module_grp"        			property="moduleGrp"/>
+		<result column="mod_access_tag"     		property="modAccessTag"/>
+		<result column="web_enabled"        		property="webEnabled"/>
+		<result column="remarks"     				property="remarks"/>
+		<result column="user_id"     				property="userId"/>
+		<result column="last_update" 				property="lastUpdate"/>
+	</resultMap>
+	
+  	<resultMap class="giisModuleTran" id="giisModuleTranResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="module_id"        			property="moduleId"/>
+		<result column="tran_cd"        			property="tranCd"/>
+		<result column="tran_desc"        			property="tranDesc"/>
+		<result column="user_id"     				property="userId"/>
+		<result column="last_update" 				property="lastUpdate"/>
+	</resultMap>
+	
+  	<select id="getGiiss081RecList" resultMap="giisModuleListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss081_pkg.get_rec_list(#moduleId#, #moduleDesc#, #moduleType#))
+		                  <isEqual property="sortColumn" compareValue="moduleId">
+			              		ORDER BY module_id
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="moduleDesc">
+			              		ORDER BY module_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="moduleType">
+			              		ORDER BY module_type
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss081_pkg.get_rec_list(#moduleId#, #moduleDesc#, #moduleType#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+  	<procedure id="valDelGeniisysModule" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss081_pkg.val_del_rec(#moduleId#);
+ 		END;
+ 	</procedure>
+ 	
+  	<procedure id="valAddGeniisysModule" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss081_pkg.val_add_rec(#moduleId#, #moduleDesc#);
+ 		END;
+ 	</procedure>
+ 	
+  	<resultMap class="java.util.HashMap" id="moduleTypeLovMap" extends="BaseEntity.TableGridResultMap">
+		<result column="module_type"		property="moduleType" />
+		<result column="module_type_desc"	property="moduleTypeDesc" />
+	</resultMap>
+	
+  	<select id="getGiiss081ModuleType" resultMap="moduleTypeLovMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+					   b.count_, 
+					   a.* 
+				  FROM (SELECT * 
+						  FROM TABLE (giiss081_pkg.get_moduletype_lov(#findText#))
+						  <isEqual property="sortColumn" compareValue="moduleType">
+								ORDER BY module_type
+						  </isEqual>
+						  <isEqual property="sortColumn" compareValue="moduleTypeDesc">
+								ORDER BY module_type_desc
+						  </isEqual>
+						  <isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+						  </isNotNull>
+						  ) a, 
+					   (SELECT count(*) count_ 
+						  FROM TABLE (giiss081_pkg.get_moduletype_lov(#findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+  	<procedure id="setGiisModule081" parameterClass="giisModule">
+	    DECLARE
+	    	v_rec giis_modules%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.module_id := #moduleId#;
+ 			v_rec.module_desc := #moduleDesc#;
+ 			v_rec.module_type := #moduleType#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			giiss081_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+  	<delete id="delGiisModule081" parameterClass="giisModule">
+		BEGIN
+ 			giiss081_pkg.del_rec(#moduleId#);
+ 		END;
+ 	</delete>
+ 	
+  	<select id="getGeniisysModuleTranRecList" resultMap="giisModuleTranResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss081_pkg.get_tranrec_list(#moduleId#, #tranCd#, #tranDesc#))
+		                  <isEqual property="sortColumn" compareValue="tranCd">
+			              		ORDER BY tran_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="tranDesc">
+			              		ORDER BY tran_desc
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss081_pkg.get_tranrec_list(#moduleId#, #tranCd#, #tranDesc#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+  	<resultMap class="java.util.HashMap" id="tranCdLovMap" extends="BaseEntity.TableGridResultMap">
+		<result column="tran_cd"			property="tranCd" />
+		<result column="tran_desc"			property="tranDesc" />
+	</resultMap>
+	
+  	<select id="getGiiss081TranLov" resultMap="tranCdLovMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+					   b.count_, 
+					   a.* 
+				  FROM (SELECT * 
+						  FROM TABLE (giiss081_pkg.get_tran_lov(#findText#))
+						  <isEqual property="sortColumn" compareValue="tranCd">
+								ORDER BY tran_cd
+						  </isEqual>
+						  <isEqual property="sortColumn" compareValue="tranDesc">
+								ORDER BY tran_desc
+						  </isEqual>
+						  <isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+						  </isNotNull>
+						  ) a, 
+					   (SELECT count(*) count_ 
+						  FROM TABLE (giiss081_pkg.get_tran_lov(#findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+  	<procedure id="valDelGeniisysModuleTran" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss081_pkg.val_deltran_rec(#moduleId#, #tranCd#);
+ 		END;
+ 	</procedure>
+ 	
+  	<procedure id="valAddTranRec" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss081_pkg.val_addtran_rec(#moduleId#, #tranCd#);
+ 		END;
+ 	</procedure>
+ 	
+  	<procedure id="setGiisModulesTran081" parameterClass="giisModule">
+	    DECLARE
+	    	v_rec giis_modules_tran%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.module_id := #moduleId#;
+ 			v_rec.tran_cd := #tranCd#;
+ 			v_rec.user_id := #userId#;
+ 			
+ 			giiss081_pkg.set_tran_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+  	<delete id="delGiisModulesTran081" parameterClass="giisModule">
+		BEGIN
+ 			giiss081_pkg.del_tran_rec(#moduleId#, #tranCd#);
+ 		END;
+ 	</delete>
+ 	
+  	<resultMap class="java.util.HashMap" id="giisUserModulesResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="userid"					property="userid" />
+		<result column="user_name"				property="userName" />
+		<result column="access_tag"				property="accessTag" />
+		<result column="user_id"				property="userId" />
+		<result column="last_update"			property="lastUpdate" />
+	</resultMap>
+	
+  	<select id="getGiisUserModulesRecList" resultMap="giisUserModulesResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss081_pkg.get_usermodules_list(#moduleId#, #userid#, #userName#, #accessTag#))
+		                  <isEqual property="sortColumn" compareValue="userid">
+			              		ORDER BY userid
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="userName">
+			              		ORDER BY user_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="accessTag">
+			              		ORDER BY access_tag
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss081_pkg.get_usermodules_list(#moduleId#, #userid#, #userName#, #accessTag#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+  	<resultMap class="java.util.HashMap" id="giisUserGrpModulesResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="user_grp"				property="userGrp" />
+		<result column="access_tag"				property="accessTag" />
+		<result column="tran_cd"				property="tranCd" />
+		<result column="user_grp_desc"			property="userGrpDesc" />
+		<result column="remarks"				property="remarks" />
+		<result column="user_id"				property="userId" />
+		<result column="last_update"			property="lastUpdate" />
+	</resultMap>
+	
+  	<select id="getGiisUserGrpModulesRecList" resultMap="giisUserGrpModulesResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss081_pkg.get_usergrpmodules_list(#moduleId#, #userGrp#, #userGrpDesc#, #accessTag#, #tranCd#))
+		                  <isEqual property="sortColumn" compareValue="userGrp">
+			              		ORDER BY user_grp
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="userGrpDesc">
+			              		ORDER BY user_grp_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="accessTag">
+			              		ORDER BY access_tag
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="tranCd">
+			              		ORDER BY tran_cd
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss081_pkg.get_usergrpmodules_list(#moduleId#, #userGrp#, #userGrpDesc#, #accessTag#, #tranCd#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+  	<resultMap class="java.util.HashMap" id="giisUsersResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="user_id"				property="userId" />
+		<result column="user_name"				property="userName" />
+	</resultMap>
+	
+  	<select id="getGiisUsersRecList" resultMap="giisUsersResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss081_pkg.get_users_list(#userGrp#, #userId#, #userName#))
+		                  <isEqual property="sortColumn" compareValue="userId">
+			              		ORDER BY user_id
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="userName">
+			              		ORDER BY user_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss081_pkg.get_users_list(#userGrp#, #userId#, #userName#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+</sqlMap>

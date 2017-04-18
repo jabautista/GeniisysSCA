@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIACR137B_RECAP" language="groovy" pageWidth="990" pageHeight="802" columnWidth="990" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="cbf68fb7-4e6c-4840-ac51-de266ed6cbad">
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="Crosstab Data Text" hAlign="Center"/>
+	<parameter name="P_QUARTER" class="java.lang.Integer"/>
+	<parameter name="P_CESSION_YEAR" class="java.lang.Integer"/>
+	<parameter name="P_LINE_CD" class="java.lang.String"/>
+	<parameter name="P_SHARE_CD" class="java.lang.Integer"/>
+	<parameter name="P_USER_ID" class="java.lang.String"/>
+	<parameter name="P_TREATY_YY" class="java.lang.Integer"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="P_CESSION_MM" class="java.lang.Integer"/>
+	<parameter name="P_TRTY_COM_RT" class="java.math.BigDecimal"/>
+	<queryString>
+		<![CDATA[SELECT * FROM TABLE(GIACR137B_pkg.get_report_recap($P{P_QUARTER}, $P{P_CESSION_YEAR}, $P{P_LINE_CD}, $P{P_USER_ID}))
+WHERE share_cd = $P{P_SHARE_CD}]]>
+	</queryString>
+	<field name="SHARE_CD" class="java.math.BigDecimal"/>
+	<field name="LINE_CD_GRAND" class="java.lang.String"/>
+	<field name="TRTY_NAME1" class="java.lang.String"/>
+	<field name="CESSION_YEAR1" class="java.math.BigDecimal"/>
+	<field name="CESSION_MM1" class="java.math.BigDecimal"/>
+	<field name="MONTH_GRAND" class="java.lang.String"/>
+	<field name="TRTY_COM_RT1" class="java.math.BigDecimal"/>
+	<field name="RI_SNAME_GRAND" class="java.lang.String"/>
+	<field name="COMMISSION_GRAND" class="java.math.BigDecimal"/>
+	<variable name="V_MONTH_GRAND" class="java.lang.String">
+		<variableExpression><![CDATA[$F{MONTH_GRAND}]]></variableExpression>
+	</variable>
+	<variable name="V_CS_MONTH_GRAND" class="java.math.BigDecimal" resetType="Group" resetGroup="MONTH_GRP" calculation="Sum">
+		<variableExpression><![CDATA[$F{COMMISSION_GRAND}]]></variableExpression>
+	</variable>
+	<group name="MONTH_GRP">
+		<groupExpression><![CDATA[$F{CESSION_MM1}]]></groupExpression>
+		<groupFooter>
+			<band height="22">
+				<staticText>
+					<reportElement x="81" y="11" width="74" height="11" uuid="1721c2c1-2133-4b27-a68e-67fba3f665d9"/>
+					<textElement textAlignment="Right" verticalAlignment="Top">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[Total Per Month :  ]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="162" y="0" width="74" height="11" uuid="b892ca8e-4ce9-4974-98e7-1b0421d5187c"/>
+					<textElement textAlignment="Right">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[-----------------------------------]]></text>
+				</staticText>
+				<textField pattern="#,##0.00;(-#,##0.00)" isBlankWhenNull="true">
+					<reportElement x="162" y="11" width="73" height="11" uuid="373e8408-f4b5-485c-aa7f-76d85ca9cbc6"/>
+					<textElement textAlignment="Right">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{V_CS_MONTH_GRAND}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<group name="BRANCH_GRP">
+		<groupExpression><![CDATA[]]></groupExpression>
+	</group>
+	<detail>
+		<band height="11">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement isPrintRepeatedValues="false" x="0" y="0" width="162" height="11" uuid="3c3ac03d-7d45-4827-99eb-e77ae58037af"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{MONTH_GRAND}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(-#,##0.00)" isBlankWhenNull="true">
+				<reportElement x="447" y="0" width="73" height="11" uuid="7f3549fd-1dbe-4a3f-b2a1-90000842d423"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COMMISSION_GRAND}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="162" y="0" width="285" height="11" uuid="7c80febc-686b-4981-8152-c278a67a4d16"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{RI_SNAME_GRAND}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

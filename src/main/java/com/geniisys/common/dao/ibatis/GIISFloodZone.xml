@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISFloodZone">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIISFloodZone" type="com.geniisys.common.entity.GIISFloodZone"/>
+	
+	<resultMap id="GIISFloodZoneLOVResultMap" class="com.geniisys.common.entity.GIISFloodZone" extends="BaseEntity.TableGridResultMap">
+		<result property="floodZone" 		column="FLOOD_ZONE" />
+		<result property="floodZoneDesc" 	column="FLOOD_ZONE_DESC"/>
+	</resultMap>
+	
+	<select id="getFloodZoneLOV" resultMap="GIISFloodZoneLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+		  		  	   b.count_,
+		  		  	   a.*
+		  		  FROM (SELECT *
+		  		  		  FROM TABLE(giis_flood_zone_pkg.get_flood_zone_listing(#findText#))
+		  		  		  <isEqual property="sortColumn" compareValue="floodZoneDesc">
+		  		  		  	ORDER flood_zone_desc
+		  		  		  </isEqual>
+		  		  		  <isNotNull property="sortColumn">
+		  		  		  	<isEqual property="ascDescFlag" compareValue="ASC">
+		  		  		  		ASC
+		  		  		  	</isEqual>
+		  		  		  	<isEqual property="ascDescFlag" compareValue="DESC">
+		  		  		  		DESC
+		  		  		  	</isEqual>
+		  		  		  </isNotNull>
+		  		  		  ) a,
+		  		  	   (SELECT count(*) count_
+		  		  	      FROM TABLE(giis_flood_zone_pkg.get_flood_zone_listing(#findText#))) b)
+		  		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	
+	<select id="getFloodZoneLOV2" resultMap="GIISFloodZoneLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+		  		  	   b.count_,
+		  		  	   a.*
+		  		  FROM (SELECT *
+		  		  		  FROM TABLE(giis_flood_zone_pkg.get_flood_zone_listing(#findText#))
+						  <isNull property="findText">
+		                  	WHERE UPPER(flood_zone) LIKE UPPER(NVL(#searchString#, flood_zone))
+		                  	   OR UPPER(flood_zone_desc) LIKE UPPER(NVL(#searchString#, flood_zone_desc))
+		                  </isNull>
+		  		  		  <isEqual property="sortColumn" compareValue="floodZoneDesc">
+		  		  		  	ORDER flood_zone_desc
+		  		  		  </isEqual>
+		  		  		  <isNotNull property="sortColumn">
+		  		  		  	<isEqual property="ascDescFlag" compareValue="ASC">
+		  		  		  		ASC
+		  		  		  	</isEqual>
+		  		  		  	<isEqual property="ascDescFlag" compareValue="DESC">
+		  		  		  		DESC
+		  		  		  	</isEqual>
+		  		  		  </isNotNull>
+		  		  		  ) a,
+		  		  	   (SELECT count(*) count_
+		  		  	      FROM TABLE(giis_flood_zone_pkg.get_flood_zone_listing(#findText#))
+						  <isNull property="findText">
+		                  	WHERE UPPER(flood_zone) LIKE UPPER(NVL(#searchString#, flood_zone))
+		                  	   OR UPPER(flood_zone_desc) LIKE UPPER(NVL(#searchString#, flood_zone_desc))
+		                  </isNull>
+		               ) b)
+		  		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<!-- for GIISS053 -->
+	<resultMap class="GIISFloodZone" id="giisFloodZoneListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="FLOOD_ZONE"   		property="floodZone"/>
+		<result column="FLOOD_ZONE_DESC" 	property="floodZoneDesc"/>
+		<result column="ZONE_GRP"	 	 	property="zoneGrp"/>
+		<result column="USER_ID"     		property="userId"/>
+		<result column="LAST_UPDATE" 		property="lastUpdate"/>
+		<result column="REMARKS"     		property="remarks"/>
+	</resultMap>
+	
+	<select id="getGiiss053RecList" resultMap="giisFloodZoneListResultMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss053_pkg.get_rec_list(#floodZone#, #floodZoneDesc#, #zoneGrp#))
+		                  <isEqual property="sortColumn" compareValue="floodZone">
+			              		ORDER BY flood_zone
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="floodZoneDesc">
+			              		ORDER BY flood_zone_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="zoneGrp">
+			              		ORDER BY zone_grp
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss053_pkg.get_rec_list(#floodZone#, #floodZoneDesc#, #zoneGrp#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setFloodZone" parameterClass="GIISFloodZone">
+	    DECLARE
+	    	v_rec giis_flood_zone%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.flood_zone 		:= #floodZone#;
+ 			v_rec.flood_zone_desc 	:= #floodZoneDesc#;
+ 			v_rec.zone_grp		 	:= #zoneGrp#;
+ 			v_rec.user_id 			:= #userId#;
+ 			v_rec.remarks 			:= #remarks#;
+ 			
+ 			giiss053_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteFloodZone" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss053_pkg.val_del_rec(#recId#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddFloodZone" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss053_pkg.val_add_rec(#floodZone#, #floodZoneDesc#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delFloodZone" parameterClass="java.lang.String">
+		BEGIN
+ 			giiss053_pkg.del_rec(#floodZone#);
+ 		END;
+ 	</delete>
+ 	
+	<select id="getGiiss007FloodZoneLOV" resultMap="GIISFloodZoneLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIISS007_PKG.get_flood_zone_lov)		                 
+		                  	<isNull property="findText">
+				                 WHERE UPPER(flood_zone) LIKE UPPER(#searchString#)
+				                 OR UPPER(flood_zone_desc) LIKE UPPER(#searchString#)					                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(flood_zone) LIKE UPPER(#findText#)
+				                 OR UPPER(flood_zone_desc) LIKE UPPER(#findText#)				  				         		
+			             	</isNotNull>		             
+			              	<isEqual property="sortColumn" compareValue="floodZone">
+			              		ORDER BY flood_zone
+			              	</isEqual>	
+			              	<isEqual property="sortColumn" compareValue="floodZoneDesc">
+			              		ORDER BY flood_zone_desc
+			              	</isEqual>			              		                      
+			          	  	<isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	</isNotNull>
+		                  ) a, 
+		               (SELECT count (*) count_ 
+		                  FROM TABLE(GIISS007_PKG.get_flood_zone_lov)		                 
+		                  	<isNull property="findText">
+				                 WHERE UPPER(flood_zone) LIKE UPPER(#searchString#)
+				                 OR UPPER(flood_zone_desc) LIKE UPPER(#searchString#)					                      		
+			             	</isNull>          	
+		                	<isNotNull property="findText">
+		                		WHERE UPPER(flood_zone) LIKE UPPER(#findText#)
+				                 OR UPPER(flood_zone_desc) LIKE UPPER(#findText#)				  				         		
+			             	</isNotNull>		
+			             	) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+</sqlMap>

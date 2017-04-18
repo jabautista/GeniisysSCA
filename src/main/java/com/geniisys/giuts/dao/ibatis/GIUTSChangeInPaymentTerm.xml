@@ -1,0 +1,409 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="ChangeInPaymentTerm">
+ 
+	<resultMap class="java.util.HashMap" id="getGIUTS022InvoiceInfoMap" extends="BaseEntity.TableGridResultMap">
+		<result column="iss_cd"					property="issCd"/>
+		<result column="prem_seq_no"			property="premSeqNo"/>
+		<result column="item_grp"				property="itemGrp"/>
+		<result column="property"				property="property"/>
+		<result column="remarks"				property="remarks"/>
+		<result column="prem_amt"				property="premAmt"/>
+		<result column="tax_amt"				property="taxAmt"/>
+		<result column="other_charges"			property="otherCharges"/>
+		<result column="notarial_fee"			property="notarialFee"/>
+		<result column="due_date"				property="dueDate"/>
+		<result column="payt_terms"				property="paytTerms"/>
+		<result column="expiry_date"			property="expiryDate"/>
+		<result column="policy_id"				property="policyId"/>
+		<result column="payt_terms_desc"		property="paytTermsDesc"/>
+		<result column="no_of_payt"				property="noOfPayt"/>
+		<result column="total_amt"				property="totalAmt"/>
+		<result property="rowNum" 				column="rownum_"/>
+		<result property="rowCount" 			column="count_"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="getInstallmentDetailsMap" extends="BaseEntity.TableGridResultMap">
+		<result property="issCd" 				column="iss_cd"/>
+		<result property="premSeqNo" 			column="prem_seq_no"/>		
+		<result property="instNo" 				column="inst_no"/>
+		<result property="sharePercentage"  	column="share_pct"/>
+		<result property="taxAmount" 			column="tax_amt"/>		
+		<result property="premAmount" 			column="prem_amt"/>
+		<result property="itemGrp" 				column="item_grp"/>		
+		<result property="dueDate" 				column="due_date"/>
+	</resultMap>
+	
+	<resultMap id="getInstallmentChangeMap" class="com.geniisys.gipi.entity.GIPIInstallment" >
+		<result property="issCd" 				column="iss_cd"/>
+		<result property="premSeqNo" 			column="prem_seq_no"/>		
+		<result property="instNo" 				column="inst_no"/>
+		<result property="sharePercentage" 	    column="share_pct"/>
+		<result property="taxAmount" 			column="tax_amt"/>		
+		<result property="premAmount" 			column="prem_amt"/>
+		<result property="itmGrp" 				column="item_grp"/>		
+		<result property="dueDate" 				column="due_date"/>
+	</resultMap>
+	
+	<resultMap id="getDatesMap" class="java.util.HashMap" >
+		<result column="incept_date" 			property="inceptDate"/>
+		<result column="expiry_date" 			property="expiryDate"/>	
+		<result column="line_cd" 				property="lineCd"/>
+		<result column="subline_cd" 			property="sublineCd"/>
+		<result column="iss_cd" 				property="issCd"/>
+		<result column="issue_yy" 				property="issueYy"/>
+		<result column="pol_seq_no" 			property="polSeqNo"/>
+		<result column="renew_no" 				property="renewNo"/>
+		<result column="message" 				property="message"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="getTaxAllocationMap" extends="BaseEntity.TableGridResultMap">
+		<result property="taxId" 				column="tax_id"/>
+		<result property="premSeqNo" 			column="prem_seq_no"/>		
+		<result property="taxCd" 				column="tax_cd"/>
+		<result property="taxAmt"  				column="tax_amt"/>
+		<result property="taxDescription" 		column="tax_description"/>		
+		<result property="lineCd" 				column="line_cd"/>
+		<result property="issCd" 				column="iss_cd"/>		
+		<result property="rate" 				column="rate"/>
+		<result property="taxAllocation"		column="tax_allocation"/>
+		<result property="taxAllocationDesc" 	column="tax_allocation_desc"/>
+		<result property="fixedTaxAllocation" 	column="fixed_tax_allocation"/>
+	</resultMap>
+	
+	<!-- <select id="getGIUTS022InvoiceInfo" resultMap="getGIUTS022InvoiceInfoMap" >
+  		SELECT * FROM TABLE(GIUTS022_PKG.GET_PAYTERM_INFO(#policyId#))
+  	</select>  by kenneth L. changed to table grid-->
+  	
+	<select id="showChangeInPaymentTerm" resultMap="getGIUTS022InvoiceInfoMap" >
+  		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, a.*
+		          FROM (SELECT * FROM TABLE(GIUTS022_PKG.GET_PAYTERM_INFO(#policyId#))
+		          		<isNotNull property="filter">
+							WHERE 1=1
+							<isNotEmpty prepend="AND"  property="issCd">
+								UPPER(iss_cd) = UPPER(#issCd#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="itemGrp">
+								item_grp = #itemGrp#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="property">
+								UPPER(property) = UPPER(#property#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="paytTerms">
+								UPPER(payt_terms) = UPEPR(#paytTerms#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="dueDate">
+								due_date = TO_DATE(#dueDate#, 'MM-DD-YYYY')
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="premAmt">
+								prem_amt = #premAmt#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="taxAmt">
+								tax_amt = #taxAmt#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="otherCharges">
+								other_charges = #otherCharges#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="notarialFee">
+								notarial_fee = #notarialFee#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="totalAmt">
+								total_amt = #totalAmt#
+							</isNotEmpty>
+						</isNotNull>
+						<isEqual property="sortColumn" compareValue="issCd premSeqNo">
+		              		ORDER BY iss_cd, prem_seq_no
+			            </isEqual>	
+		                 <isEqual property="sortColumn" compareValue="itemGrp">
+		              		ORDER BY item_grp
+			            </isEqual>		
+		                <isEqual property="sortColumn" compareValue="property">
+		              		ORDER BY property
+			            </isEqual>
+						<isEqual property="sortColumn" compareValue="paytTerms">
+		              		ORDER BY payt_terms
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="dueDate">
+		              		ORDER BY due_date
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="premAmt">
+		              		ORDER BY prem_amt
+			            </isEqual>	
+			             <isEqual property="sortColumn" compareValue="taxAmt">
+		              		ORDER BY tax_amt
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="otherCharges">
+		              		ORDER BY other_charges
+			            </isEqual>			            
+						<isEqual property="sortColumn" compareValue="notarialFee">
+		              		ORDER BY notarial_fee
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="totalAmt">
+		              		ORDER BY total_amt
+			            </isEqual>
+			            <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	 </isNotNull>) a, 
+		               (SELECT count(*) count_
+		                  FROM TABLE (GIUTS022_PKG.GET_PAYTERM_INFO(#policyId#))
+		                  <isNotNull property="filter">
+							WHERE 1=1
+							<isNotEmpty prepend="AND"  property="issCd">
+								UPPER(iss_cd) = UPPER(#issCd#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="itemGrp">
+								item_grp = #itemGrp#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="property">
+								UPPER(property) = UPPER(#property#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="paytTerms">
+								UPPER(payt_terms) = UPEPR(#paytTerms#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="dueDate">
+								due_date = TO_DATE(#dueDate#, 'MM-DD-YYYY')
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="premAmt">
+								prem_amt = #premAmt#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="taxAmt">
+								tax_amt = #"taxAmt"#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="otherCharges">
+								other_charges = #otherCharges#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="notarialFee">
+								notarial_fee = #notarialFee#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND"  property="totalAmt">
+								total_amt = #totalAmt#
+							</isNotEmpty>
+						</isNotNull>
+		             	) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+  	</select>
+  	
+	<select id="getInstallmentDetails" resultMap="getInstallmentDetailsMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, a.*
+		          FROM (SELECT * 
+		                  FROM TABLE (GIUTS022_PKG.get_installment_info(#issCd#, #premSeqNo#, #itemGrp#))
+		                   <isNotNull property="filter">
+								WHERE 1=1
+								<isNotEmpty prepend="AND"  property="instNo">
+									inst_no = #instNo#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="sharePercentage">
+									share_pct = #sharePercentage#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="taxAmount">
+									tax_amt = #taxAmount#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="premAmount">
+									prem_amt = #premAmount#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="dueDate">
+									due_date = TO_DATE(#dueDate#, 'MM-DD-YYYY')
+								</isNotEmpty>
+							</isNotNull>
+		                <isEqual property="sortColumn" compareValue="instNo">
+		              		ORDER BY inst_no
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="sharePercentage">
+		              		ORDER BY share_pct
+			            </isEqual>			            
+						<isEqual property="sortColumn" compareValue="taxAmount">
+		              		ORDER BY tax_amt
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="premAmount">
+		              		ORDER BY prem_amt
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="dueDate">
+		              		ORDER BY due_date
+			            </isEqual>	
+			            <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	 </isNotNull>) a, 
+		               (SELECT count(*) count_
+		                  FROM TABLE (GIUTS022_PKG.get_installment_info(#issCd#, #premSeqNo#, #itemGrp#))
+		                  <isNotNull property="filter">
+								WHERE 1=1
+								<isNotEmpty prepend="AND"  property="instNo">
+									inst_no = #instNo#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="sharePercentage">
+									share_pct = #sharePercentage#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="taxAmount">
+									tax_amt = #taxAmount#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="premAmount">
+									prem_amt = #premAmount#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="dueDate">
+									due_date = TO_DATE(#dueDate#, 'MM-DD-YYYY')
+								</isNotEmpty>
+							</isNotNull>
+		             	) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<select id="getInstallmentChange" resultMap="getInstallmentChangeMap" parameterClass="java.util.HashMap">
+		SELECT * FROM TABLE (GIUTS022_PKG.get_installment_info(#issCd#, #premSeqNo#, #itemGrp#))
+	</select>
+	
+	<procedure id="updatePaymentTerm" parameterClass="java.util.HashMap">
+		BEGIN
+			GIUTS022_PKG.update_payment_term(#userId#, #issCd#, #premSeqNo#, #itemGrp#, #policyId#, #dueDate#, #paytTermsDesc#, #premAmt#, #otherCharges#, #notarialFee#, #taxAmt#);
+		END;
+	</procedure>
+		
+	<insert id="updateDueDate" parameterClass="com.geniisys.gipi.entity.GIPIInstallment">
+  		DECLARE
+  		  v_installment   gipi_installment%ROWTYPE;
+		BEGIN
+		  v_installment.due_date := #dueDate#;
+		  v_installment.share_pct := #sharePercentage#;
+		  v_installment.tax_amt := #taxAmount#;
+		  v_installment.prem_amt := #premAmount#;
+		  v_installment.prem_seq_no := #premSeqNo#;
+		  v_installment.iss_cd := #issCd#;
+		  v_installment.inst_no := #instNo#;
+		  
+		  GIUTS022_PKG.update_due_date (v_installment);
+		END;
+  	</insert>
+	
+	<select id="getTaxAllocation" resultMap="getTaxAllocationMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, a.*
+		          FROM (SELECT * 
+		                  FROM TABLE (GIUTS022_PKG.get_tax_allocation_info(#issCd#, #premSeqNo#, #itemGrp#))
+		                  <isNotNull property="filter">
+								WHERE 1=1
+								<isNotEmpty prepend="AND"  property="taxCd">
+									tax_cd = #taxCd#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="taxDescription">
+									UPPER(tax_description) LIKE UPPER(#taxDescription#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="taxAmt">
+									tax_amt = #taxAmt#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="taxAllocationDesc">
+									UPPER(tax_allocation_desc) LIKE UPPER(#taxAllocationDesc#)
+								</isNotEmpty>
+							</isNotNull>
+		                <isEqual property="sortColumn" compareValue="taxCd">
+		              		ORDER BY tax_cd
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="taxDescription">
+		              		ORDER BY tax_description
+			            </isEqual>			            
+						<isEqual property="sortColumn" compareValue="taxAmt">
+		              		ORDER BY tax_amt
+			            </isEqual>
+			            <isEqual property="sortColumn" compareValue="taxAllocationDesc">
+		              		ORDER BY tax_allocation_desc
+			            </isEqual>
+			            <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	 </isNotNull>) a, 
+		               (SELECT count(*) count_
+		                  FROM TABLE (GIUTS022_PKG.get_tax_allocation_info(#issCd#, #premSeqNo#, #itemGrp#))
+		                   <isNotNull property="filter">
+								WHERE 1=1
+								<isNotEmpty prepend="AND"  property="taxCd">
+									tax_cd = #taxCd#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="taxDescription">
+									UPPER(tax_description) LIKE UPPER(#taxDescription#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="taxAmt">
+									tax_amt = #taxAmt#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="taxAllocationDesc">
+									UPPER(tax_allocation_desc) LIKE UPPER(#taxAllocationDesc#)
+								</isNotEmpty>
+							</isNotNull>
+		             	) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<select id="validateFullyPaid" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+			SELECT giuts022_pkg.validate_fully_paid (#issCd#, #premSeqNo#) FROM DUAL
+	</select>
+	
+	<select id="getDates" resultMap="getDatesMap" parameterClass="java.util.HashMap">
+		SELECT * FROM TABLE(giuts022_pkg.get_incept_expiry(#lineCd#, #sublineCd#, #issCd#, #issueYy#, #polSeqNo#, #renewNo#, #invDueDate#))
+	</select>
+	
+	<procedure id="updateDueDateInvoice" parameterClass="java.util.HashMap">
+		BEGIN
+			GIUTS022_PKG.update_due_date_invoice(#dueDate#, #policyId#);
+		END;
+	</procedure>
+	
+	<select id="checkIfCanChange" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT GIUTS022_PKG.CHECK_IF_CAN_CHANGE (#lineCd#, #policyId#, #issCd#, #premSeqNo#) FROM DUAL
+	</select>
+	
+	<procedure id="updateWorkflowSwitch" parameterClass="java.util.HashMap">
+		BEGIN
+			GIUTS022_PKG.update_workflow_switch(#eventDesc#, #moduleId#, #userId#);
+		END;
+	</procedure>
+	
+	<insert id="updateTaxAllocation" parameterClass="com.geniisys.giuts.entity.GIUTSChangeInPaymentTerm">
+		DECLARE
+  		  v_inv_tax   gipi_inv_tax%ROWTYPE;
+		BEGIN
+		  v_inv_tax.tax_allocation := #taxAllocation#;
+		  v_inv_tax.iss_cd := #issCd#;
+		  v_inv_tax.prem_seq_no := #premSeqNo#;
+		  v_inv_tax.tax_cd := #taxCd#;
+		  
+		  GIUTS022_PKG.update_tax_allocation (v_inv_tax);
+		END;
+	</insert>
+	
+	<procedure id="updateTaxAmt" parameterClass="java.util.HashMap">
+		BEGIN
+			GIUTS022_PKG.update_tax_amt(#policyId#, #paytTermsDesc#, #issCd#, #premSeqNo#, #taxAmt#);
+		END;
+	</procedure>
+	
+	<!-- Added by carlo SR 5929 O2-14-2017-->
+	<parameterMap id="dueDateMap" class="map">
+		<parameter property="policyId"	    jdbcType="INTEGER"	javaType="java.lang.Integer"		mode="IN" />
+		<parameter property="paytTerm"	    jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN" />
+		<parameter property="premSeqNo"	    jdbcType="INTEGER"	javaType="java.lang.Integer"		mode="IN" />
+		<parameter property="dueDate"	    jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT" />
+	</parameterMap>
+	
+	<procedure id="getDueDate" parameterMap="dueDateMap">
+		CALL GIUTS022_PKG.GET_DUE_DATE(?, ?, ?, ?)
+	</procedure>
+	
+</sqlMap>	

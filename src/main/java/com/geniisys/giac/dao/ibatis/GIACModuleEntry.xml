@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="GIACModuleEntry">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+
+	<typeAlias alias="GIACModuleEntry" type="com.geniisys.giac.entity.GIACModuleEntry"/>
+	
+	<resultMap class="java.util.HashMap" id="getGiacs321GiacModulesLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="MODULE_ID" 			property="moduleId" />
+		<result column="MODULE_NAME" 		property="moduleName" />
+		<result column="SCRN_REP_NAME"		property="scrnRepName" />
+	</resultMap>
+	
+	<select id="getGiacs321GiacModulesLOV" resultMap="getGiacs321GiacModulesLOVMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		          FROM (SELECT * 
+		  		   		  FROM TABLE (giacs321_pkg.get_giac_modules(#findText#))
+		  		   		 <isNull property="findText">
+		  		   		 	WHERE (UPPER(module_name) LIKE NVL(UPPER(#filterText#), '%')
+		  		   		 	       OR UPPER(scrn_rep_name) LIKE NVL(UPPER(#filterText#), '%'))
+		  		   		 </isNull>
+                         <isEqual property="sortColumn" compareValue="moduleName">
+                         	ORDER BY module_name
+                         </isEqual>
+                          <isEqual property="sortColumn" compareValue="scrnRepName">
+                            ORDER BY scrn_rep_name
+                         </isEqual>
+		  				 <isNotNull property="sortColumn">
+                            <isEqual property="ascDescFlg" compareValue="ASC">
+                                ASC
+                            </isEqual> 
+                            <isEqual property="ascDescFlg" compareValue="DESC">
+                                DESC
+                            </isEqual>
+                         </isNotNull>) a,
+		          	   (SELECT count(*) count_ 
+		  		   		    FROM TABLE (giacs321_pkg.get_giac_modules(#findText#))
+		  		   		 <isNull property="findText">
+		  		   		   WHERE (UPPER(module_name) LIKE NVL(UPPER(#filterText#), '%')
+		  		   		 	      OR UPPER(scrn_rep_name) LIKE NVL(UPPER(#filterText#), '%'))
+		  		   		 </isNull>) b
+               )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="GIACModuleEntry" id="giacs321RecListMap" extends="BaseEntity.TableGridResultMap">
+		<result column="MODULE_ID" 				property="moduleId" />
+		<result column="ITEM_NO" 				property="itemNo" />
+		<result column="GL_ACCT_CATEGORY" 		property="glAcctCategory" />
+		<result column="GL_CONTROL_ACCT" 		property="glControlAcct" />
+		<result column="POL_TYPE_TAG" 			property="polTypeTag" />
+		<result column="DR_CR_TAG" 				property="drCrTag" />
+		<result column="GL_SUB_ACCT_1" 			property="glSubAcct1" />
+		<result column="GL_SUB_ACCT_2" 			property="glSubAcct2" />
+		<result column="GL_SUB_ACCT_3" 			property="glSubAcct3" />
+		<result column="GL_SUB_ACCT_4" 			property="glSubAcct4" />
+		<result column="GL_SUB_ACCT_5" 			property="glSubAcct5" />
+		<result column="GL_SUB_ACCT_6" 			property="glSubAcct6" />
+		<result column="GL_SUB_ACCT_7" 			property="glSubAcct7" />
+		<result column="SL_TYPE_CD" 			property="slTypeCd" />
+		<result column="DESCRIPTION" 			property="description" />
+		<result column="LINE_DEPENDENCY_LEVEL" 	property="lineDependencyLevel" />
+		<result column="INTM_TYPE_LEVEL" 		property="intmTypeLevel" />
+		<result column="OLD_NEW_ACCT_LEVEL" 	property="oldNewAcctLevel" />
+		<result column="CA_TREATY_TYPE_LEVEL" 	property="caTreatyTypeLevel" />
+		<result column="USER_ID" 				property="userId" />
+		<result column="LAST_UPDATE" 			property="lastUpdate" />
+		<result column="CPI_REC_NO" 			property="cpiRecNo" />
+		<result column="CPI_BRANCH_CD" 			property="cpiBranchCd" />
+		<result column="SUBLINE_LEVEL" 			property="sublineLevel" />
+		<result column="NEG_ITEM_NO" 			property="negItemNo" />
+		<result column="BRANCH_LEVEL" 			property="branchLevel" />
+		<result column="MAX_ITEM_NO" 			property="maxItemNo" />
+	</resultMap>
+	
+	<select id="getGiacs321RecList" resultMap="giacs321RecListMap">
+		SELECT * 
+			FROM (SELECT rownum rownum_,
+						 b.count_,
+						 a.*
+					FROM (SELECT * 
+							FROM TABLE (giacs321_pkg.get_rec_list(#moduleId#,#itemNo#,#glAcctCategory#,#glControlAcct#,#glSubAcct1#,#glSubAcct2#,
+								#glSubAcct3#,#glSubAcct4#,#glSubAcct5#,#glSubAcct6#,#glSubAcct7#,#slTypeCd#,#lineDependencyLevel#,#sublineLevel#,
+								#branchLevel#,#intmTypeLevel#,#caTreatyTypeLevel#,#oldNewAcctLevel#,#drCrTag#,#polTypeTag#))
+							<isNotNull property="sortColumn">
+								<isEqual property="sortColumn" compareValue="itemNo">
+									ORDER BY ITEM_NO
+								</isEqual>
+								<isEqual property="sortColumn" compareValue="glAcctCategory glControlAcct glSubAcct1 glSubAcct2 glSubAcct3 glSubAcct4 glSubAcct5 glSubAcct6 glSubAcct7">
+									ORDER BY GL_ACCT_CATEGORY
+									<isEqual property="ascDescFlg" compareValue="ASC">
+										ASC
+									</isEqual>
+									<isEqual property="ascDescFlg" compareValue="DESC">
+										DESC
+									</isEqual>, GL_CONTROL_ACCT
+									<isEqual property="ascDescFlg" compareValue="ASC">
+										ASC
+									</isEqual>
+									<isEqual property="ascDescFlg" compareValue="DESC">
+										DESC
+									</isEqual>, GL_SUB_ACCT_1
+									<isEqual property="ascDescFlg" compareValue="ASC">
+										ASC
+									</isEqual>
+									<isEqual property="ascDescFlg" compareValue="DESC">
+										DESC
+									</isEqual>, GL_SUB_ACCT_2
+									<isEqual property="ascDescFlg" compareValue="ASC">
+										ASC
+									</isEqual>
+									<isEqual property="ascDescFlg" compareValue="DESC">
+										DESC
+									</isEqual>, GL_SUB_ACCT_3
+									<isEqual property="ascDescFlg" compareValue="ASC">
+										ASC
+									</isEqual>
+									<isEqual property="ascDescFlg" compareValue="DESC">
+										DESC
+									</isEqual>, GL_SUB_ACCT_4
+									<isEqual property="ascDescFlg" compareValue="ASC">
+										ASC
+									</isEqual>
+									<isEqual property="ascDescFlg" compareValue="DESC">
+										DESC
+									</isEqual>, GL_SUB_ACCT_5
+									<isEqual property="ascDescFlg" compareValue="ASC">
+										ASC
+									</isEqual>
+									<isEqual property="ascDescFlg" compareValue="DESC">
+										DESC
+									</isEqual>, GL_SUB_ACCT_6
+									<isEqual property="ascDescFlg" compareValue="ASC">
+										ASC
+									</isEqual>
+									<isEqual property="ascDescFlg" compareValue="DESC">
+										DESC
+									</isEqual>, GL_SUB_ACCT_7
+								</isEqual>
+								<isEqual property="sortColumn" compareValue="slTypeCd">
+									ORDER BY SL_TYPE_CD
+								</isEqual>
+								<isEqual property="sortColumn" compareValue="lineDependencyLevel">
+									ORDER BY LINE_DEPENDENCY_LEVEL
+								</isEqual>
+								<isEqual property="sortColumn" compareValue="sublineLevel">
+									ORDER BY SUBLINE_LEVEL
+								</isEqual>
+								<isEqual property="sortColumn" compareValue="branchLevel">
+									ORDER BY BRANCH_LEVEL
+								</isEqual>
+								<isEqual property="sortColumn" compareValue="intmTypeLevel">
+									ORDER BY INTM_TYPE_LEVEL
+								</isEqual>
+								<isEqual property="sortColumn" compareValue="caTreatyTypeLevel">
+									ORDER BY CA_TREATY_TYPE_LEVEL
+								</isEqual>
+								<isEqual property="sortColumn" compareValue="oldNewAcctLevel">
+									ORDER BY OLD_NEW_ACCT_LEVEL
+								</isEqual>
+								<isEqual property="sortColumn" compareValue="drCrTag">
+									ORDER BY DR_CR_TAG
+								</isEqual>
+								<isEqual property="sortColumn" compareValue="polTypeTag">
+									ORDER BY POL_TYPE_TAG
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>) a, 
+							(SELECT count(*) count_
+							   FROM TABLE (giacs321_pkg.get_rec_list(#moduleId#,#itemNo#,#glAcctCategory#,#glControlAcct#,#glSubAcct1#,#glSubAcct2#,
+								#glSubAcct3#,#glSubAcct4#,#glSubAcct5#,#glSubAcct6#,#glSubAcct7#,#slTypeCd#,#lineDependencyLevel#,#sublineLevel#,
+								#branchLevel#,#intmTypeLevel#,#caTreatyTypeLevel#,#oldNewAcctLevel#,#drCrTag#,#polTypeTag#))) b)
+		WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="valAddRec" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giacs321_pkg.val_add_rec(#moduleId#,#itemNo#);
+ 		END;
+ 	</procedure>
+	
+	<procedure id="setModuleEntry" parameterClass="GIACModuleEntry">
+	    DECLARE
+	    	v_rec giac_module_entries%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.module_id := #moduleId#;
+ 			v_rec.item_no := #itemNo#;
+ 			v_rec.gl_acct_category := #glAcctCategory#;
+ 			v_rec.gl_control_acct := #glControlAcct#;
+ 			v_rec.pol_type_tag := #polTypeTag#;
+ 			v_rec.dr_cr_tag := #drCrTag#;
+ 			v_rec.gl_sub_acct_1 := #glSubAcct1#;
+ 			v_rec.gl_sub_acct_2 := #glSubAcct2#;
+ 			v_rec.gl_sub_acct_3 := #glSubAcct3#;
+ 			v_rec.gl_sub_acct_4 := #glSubAcct4#;
+ 			v_rec.gl_sub_acct_5 := #glSubAcct5#;
+ 			v_rec.gl_sub_acct_6 := #glSubAcct6#;
+ 			v_rec.gl_sub_acct_7 := #glSubAcct7#;
+ 			v_rec.sl_type_cd := #slTypeCd#;
+ 			v_rec.description := #description#;
+ 			v_rec.line_dependency_level := #lineDependencyLevel#;
+ 			v_rec.intm_type_level := #intmTypeLevel#;
+ 			v_rec.old_new_acct_level := #oldNewAcctLevel#;
+ 			v_rec.ca_treaty_type_level := #caTreatyTypeLevel#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.cpi_rec_no := #cpiRecNo#;
+ 			v_rec.cpi_branch_cd := #cpiBranchCd#;
+ 			v_rec.subline_level := #sublineLevel#;
+ 			v_rec.neg_item_no := #negItemNo#;
+ 			v_rec.branch_level := #branchLevel#;
+ 			
+ 			giacs321_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure> 	
+</sqlMap>

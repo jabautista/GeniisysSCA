@@ -1,0 +1,476 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIEXBusConservation">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIEXExpiry" type="com.geniisys.giex.entity.GIEXExpiry"/>
+
+	<parameterMap class="map" id="extractPoliciesMap">
+		<parameter property="lineCd"		jdbcType="VARCHAR"/>
+		<parameter property="sublineCd"		jdbcType="VARCHAR"/>
+		<parameter property="issCd"			jdbcType="VARCHAR"/>
+		<parameter property="intmNo"		jdbcType="VARCHAR"/>
+		<parameter property="fromDate"		jdbcType="VARCHAR"/>
+		<parameter property="toDate"		jdbcType="VARCHAR"/>
+		<parameter property="delTable"		jdbcType="VARCHAR"/>
+		<parameter property="incPack"		jdbcType="VARCHAR"/>
+		<parameter property="credCd"		jdbcType="VARCHAR"/>
+		<parameter property="intmType"		jdbcType="VARCHAR"/>
+		<parameter property="fromMonth"		jdbcType="VARCHAR"/>
+		<parameter property="userId"		jdbcType="VARCHAR"/>
+		<parameter property="msg"			jdbcType="VARCHAR" javaType="String" mode="OUT"/> <!-- added by Daniel Marasigan 07.11.2016 SR 22330 -->
+	</parameterMap>
+	
+	<resultMap class="GIEXExpiry" id="busConDetailsMap" extends="BaseEntity.TableGridResultMap">
+		<result column="POLICY_ID" 			property="policyId"			jdbcType="NUMBER"/>
+		<result column="PACK_POLICY_ID" 	property="packPolicyId"		jdbcType="NUMBER"/>
+		<result column="LINE_CD" 			property="lineCd"			jdbcType="VARCHAR"/>
+		<result column="ISS_CD" 			property="issCd"			jdbcType="VARCHAR"/>
+		<result column="ISS_NAME" 			property="issName"			jdbcType="VARCHAR"/>
+		<result column="LINE_NAME" 			property="lineName"			jdbcType="VARCHAR"/>
+		<result column="SUBLINE_NAME"		property="sublineName"		jdbcType="VARCHAR"/>
+		<result column="INTM_NUMBER" 		property="intmNum"			jdbcType="VARCHAR"/>
+		<result column="ASSURED_NO" 		property="assdNo"			jdbcType="NUMBER"/>
+		<result column="ASSURED_NAME" 		property="assdName"			jdbcType="VARCHAR"/>
+		<result column="EXP_DATE" 			property="expDate"			jdbcType="VARCHAR"/>
+		<result column="POLICY_NO" 			property="policyNo"			jdbcType="VARCHAR"/>
+		<result column="PREMIUM_AMT" 		property="premAmt"			jdbcType="NUMBER"/>
+		<result column="PREMIUM_RENEW_AMT" 	property="premRenewAmt"		jdbcType="NUMBER"/>
+		<result column="REMARKS" 			property="remarks"			jdbcType="VARCHAR"/>
+		<result column="RENEWAL_POLICY" 	property="renewalId"		jdbcType="VARCHAR"/>
+		<result column="REF_POL_NO" 		property="refPolNo"			jdbcType="VARCHAR"/>
+		<result column="PREM_AMT" 			property="fmPremAmt"		jdbcType="VARCHAR"/>
+		<result column="PREM_RENEW_AMT" 	property="fmPremRenewAmt"	jdbcType="VARCHAR"/>
+		<result column="PREM_TOTAL"			property="premTotal"		jdbcType="VARCHAR"/>
+		<result column="PREM_RENEW_TOTAL"	property="premRenewTotal"	jdbcType="VARCHAR"/>
+		<result column="RENEWAL_COUNT"		property="renewalCount"		jdbcType="NUMBER"/>
+		<result column="ROWNUM_"			property="rowNum"/>
+		<result column="COUNT_"				property="rowCount"/>
+	</resultMap>
+	
+  	<resultMap id="GIEXLineListMapGrid" class="com.geniisys.common.entity.GIISLine" >
+	  	<result column="LINE_CD" 			property="lineCd" />
+	  	<result column="LINE_NAME"			property="lineName" />
+	  	<result column="PACK_POL_FLAG"		property="packPolFlag"/>
+		<result column="ROWNUM_" 			property="rowNum"/>
+		<result column="COUNT_" 			property="rowCount"/>
+  	</resultMap>
+  	
+  	<resultMap id="GIEXDetailLineMapGrid" class="com.geniisys.common.entity.GIISLine" >
+	  	<result column="LINE_CD" 			property="lineCd" />
+	  	<result column="LINE_NAME"			property="lineName" />
+		<result column="ROWNUM_" 			property="rowNum"/>
+		<result column="COUNT_" 			property="rowCount"/>
+  	</resultMap>
+
+	<resultMap id="GIEXSublineListMapGrid" class="com.geniisys.common.entity.GIISSubline" >
+	  	<result column="SUBLINE_CD" 		property="sublineCd" />
+	  	<result column="SUBLINE_NAME"		property="sublineName" />
+		<result column="ROWNUM_" 			property="rowNum"/>
+		<result column="COUNT_" 			property="rowCount"/>
+  	</resultMap>
+  	
+  	<resultMap id="GIEXIssueListMapGrid" class="com.geniisys.common.entity.GIISISSource" >
+	  	<result column="ISS_CD" 			property="issCd" />
+	  	<result column="ISS_NAME"			property="issName" />
+		<result column="ROWNUM_" 			property="rowNum"/>
+		<result column="COUNT_" 			property="rowCount"/>
+  	</resultMap>
+  	
+  	<resultMap id="GIEXIntmTypeListMapGrid" class="com.geniisys.common.entity.GIISIntermediary" >
+	  	<result column="INTM_TYPE" 			property="intmType" />
+	  	<result column="INTM_DESC"			property="intmDesc" />
+		<result column="ROWNUM_" 			property="rowNum"/>
+		<result column="COUNT_" 			property="rowCount"/>
+  	</resultMap>
+  	
+  	<resultMap id="GIEXIntmListMapGrid" class="com.geniisys.common.entity.GIISIntermediary" >
+	  	<result column="INTM_NO" 			property="busIntmNo"/>
+	  	<result column="INTM_NAME"			property="intmName"/>
+		<result column="ROWNUM_" 			property="rowNum"/>
+		<result column="COUNT_" 			property="rowCount"/>
+  	</resultMap>
+
+	<procedure id="extractPolicies"  parameterMap="extractPoliciesMap">
+		CALL GIEX_BUSINESS_CONSERVATION_PKG.extract_policies(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	</procedure>
+	
+	<select id="getBusConDetails" resultMap="busConDetailsMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, b.count_, a.*
+		          FROM (SELECT * FROM TABLE(GIEX_BUSINESS_CONSERVATION_PKG.get_bus_con_details(#lineCd#, #issCd#))
+		         WHERE UPPER(line_cd) LIKE UPPER(NVL(#filter.lineCd#, line_cd))
+		           AND UPPER(iss_cd) LIKE UPPER(NVL(#filter.issCd#, iss_cd))
+		           AND UPPER(policy_no) LIKE UPPER(NVL(#filter.policyNo#, policy_no))
+		           AND UPPER(NVL(renewal_policy, '*')) LIKE UPPER(NVL(#filter.renewalId#, DECODE(renewal_policy, NULL, '*', renewal_policy)))
+		           AND UPPER(assured_name) LIKE UPPER(NVL(#filter.assdName#, assured_name))
+		           AND UPPER(NVL(intm_number, '*')) LIKE UPPER(NVL(#filter.intmNo#, DECODE(intm_number, NULL, '*', intm_number)))
+		         <isEqual property="sortColumn" compareValue="intmNo">
+		         		ORDER BY intm_number
+		         </isEqual>
+		         <isEqual property="sortColumn" compareValue="assdName">
+		         		ORDER BY assured_name
+		         </isEqual>
+		         <isEqual property="sortColumn" compareValue="expDate">
+		         		ORDER BY expiry_date
+		         </isEqual>
+		         <isEqual property="sortColumn" compareValue="policyNo">
+		         		ORDER BY policy_no
+		         </isEqual>
+		         <isEqual property="sortColumn" compareValue="fmPremAmt">
+		         		ORDER BY premium_amt
+		         </isEqual>
+		         <isEqual property="sortColumn" compareValue="renewalId">
+		         		ORDER BY renewal_policy
+		         </isEqual>
+		         <isEqual property="sortColumn" compareValue="fmPremRenewAmt">
+		         		ORDER BY premium_renew_amt
+		         </isEqual>
+		         <isNotNull property="sortColumn">
+		         <isEqual property="ascDescFlg" compareValue="ASC">
+		         		ASC
+		         </isEqual>
+		         <isEqual property="ascDescFlg" compareValue="DESC">
+		         		DESC
+		         </isEqual>
+		         </isNotNull>) a,
+		    (SELECT count(*) count_ FROM TABLE(GIEX_BUSINESS_CONSERVATION_PKG.get_bus_con_details(#lineCd#, #issCd#))
+		      WHERE UPPER(line_cd) LIKE UPPER(NVL(#filter.lineCd#, line_cd))
+		        AND UPPER(iss_cd) LIKE UPPER(NVL(#filter.issCd#, iss_cd))
+		        AND UPPER(policy_no) LIKE UPPER(NVL(#filter.policyNo#, policy_no))
+		        AND UPPER(NVL(renewal_policy, '*')) LIKE UPPER(NVL(#filter.renewalId#, DECODE(renewal_policy, NULL, '*', renewal_policy)))
+	            AND UPPER(assured_name) LIKE UPPER(NVL(#filter.assdName#, assured_name))
+	            AND UPPER(NVL(intm_number, '*')) LIKE UPPER(NVL(#filter.intmNo#, DECODE(intm_number, NULL, '*', intm_number)))
+	     	 ) b)
+		WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getBusConservationDetails" resultMap="busConDetailsMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+		               b.count_,
+		               a.*
+		          FROM (SELECT * FROM TABLE(GIEX_BUSINESS_CONSERVATION_PKG.get_bus_con_details(#lineCd#, #issCd#, #mode#,
+		          																			   #assdName#, #policyNo#, #renewalId#, #premAmt#, #premRenewAmt#, #userId#))
+		         <isNotNull property="sortColumn">
+		         <isEqual property="sortColumn" compareValue="intmNum">
+		         		ORDER BY intm_number
+		         </isEqual>
+		         <isEqual property="sortColumn" compareValue="assdName">
+		         		ORDER BY assured_name
+		         </isEqual>
+		         <isEqual property="sortColumn" compareValue="expDate">
+		         		ORDER BY expiry_date
+		         </isEqual>
+		         <isEqual property="sortColumn" compareValue="policyNo">
+		         		ORDER BY policy_no
+		         </isEqual>
+		         <isEqual property="sortColumn" compareValue="fmPremAmt">
+		         		ORDER BY premium_amt
+		         </isEqual>
+		         <isEqual property="sortColumn" compareValue="renewalId">
+		         		ORDER BY renewal_policy
+		         </isEqual>
+		         <isEqual property="sortColumn" compareValue="fmPremRenewAmt">
+		         		ORDER BY premium_renew_amt
+		         </isEqual>
+		         <isEqual property="ascDescFlg" compareValue="ASC">
+		         		ASC
+		         </isEqual>
+		         <isEqual property="ascDescFlg" compareValue="DESC">
+		         		DESC
+		         </isEqual>
+		         </isNotNull>) a,
+		    (SELECT count(*) count_
+		       FROM TABLE(GIEX_BUSINESS_CONSERVATION_PKG.get_bus_con_details(#lineCd#, #issCd#, #mode#,
+		       																 #assdName#, #policyNo#, #renewalId#, #premAmt#, #premRenewAmt#, #userId#))
+	     	   )b)
+		WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getBusConservationPackDetails" resultMap="busConDetailsMap" parameterClass="java.util.HashMap">
+		SELECT * 
+		  FROM (SELECT rownum rownum_,
+		  			   b.count_,
+		  			   a.*
+		          FROM (SELECT * FROM TABLE(GIEX_BUSINESS_CONSERVATION_PKG.get_bus_con_pack_details(#packPolId#, #assdName#, #policyNo#, #renewalId#, #premAmt#, #premRenewAmt#, #userId#))
+		         <isNotNull property="sortColumn">
+		         <isEqual property="sortColumn" compareValue="intmNum">
+		         		ORDER BY intm_number
+		         </isEqual>
+		         <isEqual property="sortColumn" compareValue="assdName">
+		         		ORDER BY assured_name
+		         </isEqual>
+		         <isEqual property="sortColumn" compareValue="expDate">
+		         		ORDER BY expiry_date
+		         </isEqual>
+		         <isEqual property="sortColumn" compareValue="policyNo">
+		         		ORDER BY policy_no
+		         </isEqual>
+		         <isEqual property="sortColumn" compareValue="fmPremAmt">
+		         		ORDER BY premium_amt
+		         </isEqual>
+		         <isEqual property="sortColumn" compareValue="renewalId">
+		         		ORDER BY renewal_policy
+		         </isEqual>
+		         <isEqual property="sortColumn" compareValue="fmPremRenewAmt">
+		         		ORDER BY premium_renew_amt
+		         </isEqual>
+		         <isEqual property="ascDescFlg" compareValue="ASC">
+		         		ASC
+		         </isEqual>
+		         <isEqual property="ascDescFlg" compareValue="DESC">
+		         		DESC
+		         </isEqual>
+		         </isNotNull>) a,
+		    (SELECT count(*) count_ FROM TABLE(GIEX_BUSINESS_CONSERVATION_PKG.get_bus_con_pack_details(#packPolId#, #assdName#, #policyNo#, #renewalId#, #premAmt#, #premRenewAmt#, #userId#))
+		     ) b)
+		WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getBusConservationLOV" resultMap="GIEXLineListMapGrid" parameterClass="java.util.HashMap" >
+ 		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(GIEX_BUSINESS_CONSERVATION_PKG.get_bus_con_line_lov)
+		  	      		 WHERE UPPER(line_cd) LIKE UPPER(NVL(#findText#, line_cd))
+		  	      		    OR UPPER(line_name) LIKE UPPER(NVL(#findText#, line_name))
+		                  <isEqual property="sortColumn" compareValue="lineCd">
+			              		ORDER BY line_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="lineName">
+			              		ORDER BY line_name
+			              </isEqual> 
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GIEX_BUSINESS_CONSERVATION_PKG.get_bus_con_line_lov)
+		                 WHERE UPPER(line_cd) LIKE UPPER(NVL(#findText#, line_cd))
+		  	      		    OR UPPER(line_name) LIKE UPPER(NVL(#findText#, line_name))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+  	
+  	<select id="getBusSublineLOV" resultMap="GIEXSublineListMapGrid" parameterClass="java.util.HashMap" >
+ 		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIEX_BUSINESS_CONSERVATION_PKG.get_bus_con_subline_lov(#mainLineCd#))
+		          		  WHERE UPPER(subline_cd) LIKE UPPER(NVL(#findText#, subline_cd))
+    						 OR UPPER(subline_name) LIKE UPPER(NVL(#findText#, subline_name))
+		                  <isEqual property="sortColumn" compareValue="sublineCd">
+			              		ORDER BY subline_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="sublineName">
+			              		ORDER BY subline_name
+			              </isEqual> 
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GIEX_BUSINESS_CONSERVATION_PKG.get_bus_con_subline_lov(#mainLineCd#))
+		          		 WHERE UPPER(subline_cd) LIKE UPPER(NVL(#findText#, subline_cd))
+    						OR UPPER(subline_name) LIKE UPPER(NVL(#findText#, subline_name))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+  	
+  	<select id="getBusIssueLOV" resultMap="GIEXIssueListMapGrid" parameterClass="java.util.HashMap" >
+ 		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIEX_BUSINESS_CONSERVATION_PKG.get_bus_con_issue_lov)
+		          	     WHERE UPPER(iss_cd) LIKE UPPER(NVL(#findText#, iss_cd))
+    						OR UPPER(iss_name) LIKE UPPER(NVL(#findText#, iss_name))
+		                  <isEqual property="sortColumn" compareValue="issCd">
+			              		ORDER BY iss_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="issName">
+			              		ORDER BY iss_name
+			              </isEqual> 
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GIEX_BUSINESS_CONSERVATION_PKG.get_bus_con_issue_lov)
+		          	     WHERE UPPER(iss_cd) LIKE UPPER(NVL(#findText#, iss_cd))
+    						OR UPPER(iss_name) LIKE UPPER(NVL(#findText#, iss_name))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+  	
+  	<select id="getBusCreditLOV" resultMap="GIEXIssueListMapGrid" parameterClass="java.util.HashMap" >
+ 		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIEX_BUSINESS_CONSERVATION_PKG.get_bus_con_credit_lov)
+		          	     WHERE UPPER(iss_cd) LIKE UPPER(NVL(#findText#, iss_cd))
+    						OR UPPER(iss_name) LIKE UPPER(NVL(#findText#, iss_name))
+		                  <isEqual property="sortColumn" compareValue="issCd">
+			              		ORDER BY iss_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="issName">
+			              		ORDER BY iss_name
+			              </isEqual> 
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a,
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GIEX_BUSINESS_CONSERVATION_PKG.get_bus_con_credit_lov)
+		          	     WHERE UPPER(iss_cd) LIKE UPPER(NVL(#findText#, iss_cd))
+    						OR UPPER(iss_name) LIKE UPPER(NVL(#findText#, iss_name))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+  	
+  	<select id="getBusIntmTypeLOV" resultMap="GIEXIntmTypeListMapGrid" parameterClass="java.util.HashMap" >
+ 		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIEX_BUSINESS_CONSERVATION_PKG.get_bus_con_intm_type_lov)
+		          	     WHERE UPPER(intm_type) LIKE UPPER(NVL(#findText#, intm_type))
+    						OR UPPER(intm_desc) LIKE UPPER(NVL(#findText#, intm_desc))
+		                  <isEqual property="sortColumn" compareValue="intmType">
+			              		ORDER BY intm_type
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="intmDesc">
+			              		ORDER BY intm_desc
+			              </isEqual> 
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a,
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GIEX_BUSINESS_CONSERVATION_PKG.get_bus_con_intm_type_lov)
+		          	     WHERE UPPER(intm_type) LIKE UPPER(NVL(#findText#, intm_type))
+    						OR UPPER(intm_desc) LIKE UPPER(NVL(#findText#, intm_desc))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+  	
+  	<select id="getBusIntmLOV" resultMap="GIEXIntmListMapGrid" parameterClass="java.util.HashMap" >
+ 		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIEX_BUSINESS_CONSERVATION_PKG.get_bus_con_intm_lov(#intmMainType#))
+		          		 WHERE UPPER(intm_no) LIKE UPPER(NVL(#findText#, intm_no))
+    						OR UPPER(intm_name) LIKE UPPER(NVL(#findText#, intm_name))
+		                  <isEqual property="sortColumn" compareValue="busIntmNo">
+			              		ORDER BY intm_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="intmName">
+			              		ORDER BY intm_name
+			              </isEqual> 
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a,
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GIEX_BUSINESS_CONSERVATION_PKG.get_bus_con_intm_lov(#intmMainType#))
+		          		 WHERE UPPER(intm_no) LIKE UPPER(NVL(#findText#, intm_no))
+    						OR UPPER(intm_name) LIKE UPPER(NVL(#findText#, intm_name))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+  	
+  	<select id="getBusDetailLineLOV" resultMap="GIEXDetailLineMapGrid" parameterClass="java.util.HashMap" >
+ 		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(GIEX_BUSINESS_CONSERVATION_PKG.get_bus_con_details_line_lov(#userId#))
+		  	      		 WHERE UPPER(line_cd) LIKE UPPER(NVL(#findText#, line_cd))
+    						OR UPPER(line_name) LIKE UPPER(NVL(#findText#, line_name))
+		                  <isEqual property="sortColumn" compareValue="lineCd">
+			              		ORDER BY line_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="lineName">
+			              		ORDER BY line_name
+			              </isEqual> 
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GIEX_BUSINESS_CONSERVATION_PKG.get_bus_con_details_line_lov(#userId#))
+		                 WHERE UPPER(line_cd) LIKE UPPER(NVL(#findText#, line_cd))
+    						OR UPPER(line_name) LIKE UPPER(NVL(#findText#, line_name))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+  	
+  	<select id="getBusDetailIssLOV" resultMap="GIEXIssueListMapGrid" parameterClass="java.util.HashMap" >
+ 		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(GIEX_BUSINESS_CONSERVATION_PKG.get_bus_con_details_iss_lov(#userId#))
+		  	     	 	 WHERE UPPER(iss_cd) LIKE UPPER(NVL(#findText#, iss_cd))
+    						OR UPPER(iss_name) LIKE UPPER(NVL(#findText#, iss_name)) 
+		                  <isEqual property="sortColumn" compareValue="issCd">
+			              		ORDER BY iss_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="issName">
+			              		ORDER BY iss_name
+			              </isEqual> 
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GIEX_BUSINESS_CONSERVATION_PKG.get_bus_con_details_iss_lov(#userId#))
+		                 WHERE UPPER(iss_cd) LIKE UPPER(NVL(#findText#, iss_cd))
+    						OR UPPER(iss_name) LIKE UPPER(NVL(#findText#, iss_name))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+</sqlMap>

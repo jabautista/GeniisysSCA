@@ -1,0 +1,758 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISLossTaxes">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIISLossTaxes" type="com.geniisys.common.entity.GIISLossTaxes"/>
+	<typeAlias alias="GIISLossTaxLine" type="com.geniisys.common.entity.GIISLossTaxLine"/>
+	
+	<resultMap class="GIISLossTaxes" 	id="GIISLossTaxesResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="lossTaxId"	column="LOSS_TAX_ID"/>
+		<result property="taxType"		column="TAX_TYPE"/>
+		<result property="taxCd"		column="TAX_CD"/>
+		<result property="taxName"		column="TAX_NAME"/>
+		<result property="branchCd"		column="BRANCH_CD"/>
+		<result property="taxRate"		column="TAX_RATE"/>
+		<result property="startDate"	column="START_DATE"/>
+		<result property="endDate"		column="END_DATE"/>
+		<result property="glAcctId"		column="GL_ACCT_ID"/>
+		<result property="slTypeCd"		column="SL_TYPE_CD"/>
+		<result property="remarks"		column="REMARKS"/>
+		<result property="userId"		column="USER_ID"/>
+		<result property="lastUpdate"	column="LAST_UPDATE"/>
+	</resultMap>
+	
+	<select id="getGiisLossTaxesLOV" resultMap="GIISLossTaxesResultMap" parameterClass="java.util.HashMap">
+		SELECT * 
+			FROM (SELECT rownum rownum_,
+						 b.count_,
+						 a.*
+					FROM (SELECT * 
+							FROM TABLE(GIIS_LOSS_TAXES_PKG.get_giis_loss_taxes(#taxType#, #issCd#, #findText#))
+						    <isEqual property="sortColumn" compareValue="taxCd">
+								ORDER BY tax_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="taxName">
+								ORDER BY tax_name
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="taxRate">
+								ORDER BY tax_rate
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>) a, 
+							(SELECT count(*) count_
+								FROM TABLE(GIIS_LOSS_TAXES_PKG.get_giis_loss_taxes(#taxType#, #issCd#, #findText#))) b)
+		WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="getGicls106TaxTypeLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result property="rvLowValue" 		column="rv_low_value" />
+		<result property="rvMeaning" 		column="rv_meaning" />
+		<result property="rowNum" 			column="rownum_"/>
+		<result property="rowCount" 		column="count_"/>
+	</resultMap>
+	
+	<select id="getGicls106TaxTypeLOV" resultMap="getGicls106TaxTypeLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (gicls106_pkg.get_gicls106_tax_lov(#search#))
+		                 <isNotNull property="findText">
+					         WHERE (UPPER(rv_low_value) LIKE UPPER(#findText#)
+					         	 OR UPPER(rv_meaning) LIKE UPPER(#findText#)
+					         	 )
+				         </isNotNull>          
+			          	  <isNotNull property="sortColumn">
+			                  <isEqual property="sortColumn" compareValue="rvLowValue">
+				              		ORDER BY rv_low_value
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="rvMeaning">
+				              		ORDER BY rv_meaning
+				              </isEqual>
+				          	  <isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              </isNotNull>
+				          </isNotNull>    
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (gicls106_pkg.get_gicls106_tax_lov(#search#))
+			              <isNotNull property="findText">
+					          WHERE (UPPER(rv_low_value) LIKE UPPER(#findText#)
+					         	 OR UPPER(rv_meaning) LIKE UPPER(#findText#)
+					         	 )
+				          </isNotNull> 
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="getGicls106BranchLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result property="issCd" 			column="iss_cd" />
+		<result property="issName" 			column="iss_name" />
+		<result property="rowNum" 			column="rownum_"/>
+		<result property="rowCount" 		column="count_"/>
+	</resultMap>
+	
+	<select id="getGicls106BranchLOV" resultMap="getGicls106BranchLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (gicls106_pkg.get_gicls106_branch_lov(#search#, #userId#))
+		                 <isNotNull property="findText">
+					         WHERE (UPPER(iss_cd) LIKE UPPER(#findText#)
+					         	 OR UPPER(iss_name) LIKE UPPER(#findText#)
+					         	 )
+				         </isNotNull>          
+			          	  <isNotNull property="sortColumn">
+			                  <isEqual property="sortColumn" compareValue="issCd">
+				              		ORDER BY iss_cd
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="issName">
+				              		ORDER BY iss_name
+				              </isEqual>
+				          	  <isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              </isNotNull>
+				          </isNotNull>    
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (gicls106_pkg.get_gicls106_branch_lov(#search#, #userId#))
+			              <isNotNull property="findText">
+					          WHERE (UPPER(iss_cd) LIKE UPPER(#findText#)
+					         	 OR UPPER(iss_name) LIKE UPPER(#findText#)
+					         	 )
+				          </isNotNull> 
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<parameterMap class="map" id="validateGicls106TaxMap">
+		<parameter property="taxCd" 	jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="INOUT"/>
+		<parameter property="taxName"   jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="validateGicls106Tax" parameterMap="validateGicls106TaxMap">
+		BEGIN
+ 			gicls106_pkg.validate_tax(?,?);
+ 		END;
+	</procedure>
+	
+	<parameterMap class="map" id="validateGicls106BranchMap">
+		<parameter property="issCd" 	jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="INOUT"/>
+		<parameter property="issName"  	jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="OUT"/>
+		<parameter property="userId"  	jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="IN"/>
+	</parameterMap>
+	
+	<procedure id="validateGicls106Branch" parameterMap="validateGicls106BranchMap">
+		BEGIN
+ 			gicls106_pkg.validate_branch(?,?,?);
+ 		END;
+	</procedure>
+	
+	<resultMap class="java.util.HashMap" id="giisLossTaxesResultMap2" extends="BaseEntity.TableGridResultMap">
+		<result column="loss_tax_id"    	property="lossTaxId"/>
+		<result column="tax_type"  			property="taxType"/>
+		<result column="branch_cd"    		property="branchCd"/>
+		<result column="tax_cd"  			property="taxCd"/>
+		<result column="tax_name"    		property="taxName"/>
+		<result column="tax_rate"  			property="taxRate"/>
+		<result column="start_date"    		property="startDate"/>
+		<result column="end_date"  			property="endDate"/>
+		<result column="gl_acct_id"  		property="glAcctId"/>
+		<result column="gl_acct_category"   property="glAcctCategory"/>
+		<result column="gl_control_acct"  	property="glControlAcct"/>
+		<result column="gl_sub_acct_1"    	property="glSubAcct1"/>
+		<result column="gl_sub_acct_2"    	property="glSubAcct2"/>
+		<result column="gl_sub_acct_3"    	property="glSubAcct3"/>
+		<result column="gl_sub_acct_4"    	property="glSubAcct4"/>
+		<result column="gl_sub_acct_5"   	property="glSubAcct5"/>
+		<result column="gl_sub_acct_6"    	property="glSubAcct6"/>
+		<result column="gl_sub_acct_7"    	property="glSubAcct7"/>
+		<result column="gl_acct_name"  		property="glAcctName"/>
+		<result column="sl_type_cd"  		property="slTypeCd"/>
+		<result column="sl_type_name"  		property="slTypeName"/>
+		<result column="user_id"     		property="userId"/>
+		<result column="last_update" 		property="lastUpdate"/>
+		<result column="remarks"     		property="remarks"/>
+	</resultMap>
+	
+	<select id="getGicls106RecList" resultMap="giisLossTaxesResultMap2">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(gicls106_pkg.get_rec_list(#taxType#,#branchCd#))
+				  	      <isNotNull property="filter">
+		                  	WHERE 1 = 1 
+				  	      		<isNotEmpty prepend="AND" property="taxCd">
+		                        	tax_cd = #taxCd#
+		                        </isNotEmpty>
+		                        <isNotEmpty prepend="AND" property="taxName">
+		                            UPPER(tax_name) LIKE UPPER(#taxName#)
+		                        </isNotEmpty>
+		                        <isNotEmpty prepend="AND" property="taxRate">
+		                        	tax_rate = #taxRate#
+		                        </isNotEmpty>
+		                        <isNotEmpty prepend="AND" property="startDate">
+		                            TRUNC(start_date) =  TO_DATE(#startDate#,'MM-DD-YYYY')
+		                        </isNotEmpty>
+		                        <isNotEmpty prepend="AND" property="endDate">
+		                            TRUNC(end_date) =  TO_DATE(#endDate#,'MM-DD-YYYY')
+		                        </isNotEmpty>
+				  	      </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="taxCd">
+			              		ORDER BY tax_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="taxName">
+			              		ORDER BY tax_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="taxRate">
+			              		ORDER BY tax_rate
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="startDate">
+			              		ORDER BY start_date
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="endDate">
+			              		ORDER BY end_date
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(gicls106_pkg.get_rec_list(#taxType#,#branchCd#))
+		                  <isNotNull property="filter">
+		                  	WHERE 1 = 1 
+				  	      		<isNotEmpty prepend="AND" property="taxCd">
+		                        	tax_cd = #taxCd#
+		                        </isNotEmpty>
+		                        <isNotEmpty prepend="AND" property="taxName">
+		                            UPPER(tax_name) LIKE UPPER(#taxName#)
+		                        </isNotEmpty>
+		                        <isNotEmpty prepend="AND" property="taxRate">
+		                        	tax_rate = #taxRate#
+		                        </isNotEmpty>
+		                        <isNotEmpty prepend="AND" property="startDate">
+		                            TRUNC(start_date) =  TO_DATE(#startDate#,'MM-DD-YYYY')
+		                        </isNotEmpty>
+		                        <isNotEmpty prepend="AND" property="endDate">
+		                            TRUNC(end_date) =  TO_DATE(#endDate#,'MM-DD-YYYY')
+		                        </isNotEmpty>
+				  	      </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setLossExpTaxes" parameterClass="GIISLossTaxes">
+	    DECLARE
+	    	v_rec giis_loss_taxes%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.loss_tax_id := #lossTaxId#;
+ 			v_rec.tax_rate := #taxRate#;
+ 			v_rec.start_date := #startDate#;
+ 			v_rec.end_date := #endDate#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			gicls106_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<delete id="delLossExpTaxes" parameterClass="java.lang.String">
+		BEGIN
+ 			gicls106_pkg.del_rec(#airTypeCd#);
+ 		END;
+ 	</delete>
+ 	
+ 	<resultMap class="java.util.HashMap" id="gicls106TaxRateHistoryMap" extends="BaseEntity.TableGridResultMap">
+		<result column="tax_rate"  			property="taxRate"/>
+		<result column="start_date"    		property="startDate"/>
+		<result column="end_date"  			property="endDate"/>
+		<result column="user_id"  			property="userId"/>
+		<result column="last_update"  		property="lastUpdate"/>
+	</resultMap>
+	
+	<select id="gicls106TaxRateHistory" resultMap="gicls106TaxRateHistoryMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(gicls106_pkg.get_tax_rate_history(#lossTaxId#))
+		  	      <isNotNull property="filter">
+		  	      	WHERE 1 = 1 
+                        <isNotEmpty prepend="AND" property="taxRate">
+                        	tax_rate = #taxRate#
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="startDate">
+                            start_date = #startDate#
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="endDate">
+                            end_date = #endDate#
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="userId">
+                            UPPER(user_id) LIKE UPPER(#userId#)
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="lastUpdate">
+                            last_update = #lastUpdate#
+                        </isNotEmpty>
+		  	      </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="taxRate">
+			              		ORDER BY tax_rate
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="startDate">
+			              		ORDER BY start_date
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="endDate">
+			              		ORDER BY end_date
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="userId">
+			              		ORDER BY user_id
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="lastUpdate">
+			              		ORDER BY last_update
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(gicls106_pkg.get_tax_rate_history(#lossTaxId#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="gicls106CopyTaxMap" extends="BaseEntity.TableGridResultMap">
+		<result column="iss_cd"  			property="issCd"/>
+		<result column="iss_name"    		property="issName"/>
+	</resultMap>
+	
+	<select id="gicls106CopyTax" resultMap="gicls106CopyTaxMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(gicls106_pkg.get_copy_tax(#issCd#, #userId#))
+		                  <isEqual property="sortColumn" compareValue="issCd">
+			              		ORDER BY iss_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="issName">
+			              		ORDER BY iss_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(gicls106_pkg.get_copy_tax(#issCd#, #userId#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<procedure id="copyTaxToIssuingSource" parameterClass="java.util.HashMap">
+	    DECLARE
+	    	v_rec giis_loss_taxes%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.tax_type := #taxType#;
+ 			v_rec.tax_cd := #taxCd#;
+ 			v_rec.tax_name := #taxName#;
+ 			v_rec.branch_cd := #issCd#;
+ 			v_rec.tax_rate := #taxRate#;
+ 		 	v_rec.start_date := TO_DATE(#startDate#, 'yyyy-mm-dd');
+ 			v_rec.end_date := TO_DATE(#endDate#, 'yyyy-mm-dd');
+ 			v_rec.gl_acct_id := #glAcctId#;
+ 			v_rec.sl_type_cd := #slTypeCd#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			gicls106_pkg.copy_tax_to_issue_cd(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<parameterMap class="map" id="validateGicls106LossTaxesMap">
+		<parameter property="taxCd" 	jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="IN"/>
+		<parameter property="issCd"   	jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="IN"/>
+		<parameter property="taxType"  	jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="IN"/>
+		<parameter property="output"   	jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="validateGicls106LossTaxes" parameterMap="validateGicls106LossTaxesMap">
+		BEGIN
+ 			gicls106_pkg.validate_loss_taxes(?,?,?,?);
+ 		END;
+	</procedure>
+	
+	<resultMap class="java.util.HashMap" id="gicls106LineLossExpMap" extends="BaseEntity.TableGridResultMap">
+		<result column="line"  			property="line"/>
+		<result column="loss_exp"    	property="lossExp"/>
+		<result column="line_cd"  		property="lineCd"/>
+		<result column="line_name"    	property="lineName"/>
+		<result column="loss_exp_cd"  	property="lossExpCd"/>
+		<result column="loss_exp_desc"  property="lossExpDesc"/>
+		<result column="loss_exp_type"  property="lossExpType"/>
+		<result column="tax_rate"  		property="taxRate"/>
+	</resultMap>
+	
+	<select id="gicls106LineLossExp" resultMap="gicls106LineLossExpMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(gicls106_pkg.line_loss_exp(#issCd#, #lossTaxId#, #userId#))
+				  	      <isNotNull property="filter">
+		                  	WHERE 1 = 1 
+				  	      		<isNotEmpty prepend="AND" property="lineCd">
+		                        	UPPER(line_cd) LIKE UPPER(#lineCd#)
+		                        </isNotEmpty>
+		                        <isNotEmpty prepend="AND" property="lineName">
+		                            UPPER(line_name) LIKE UPPER(#lineName#)
+		                        </isNotEmpty>
+		                        <isNotEmpty prepend="AND" property="lossExpCd">
+		                        	UPPER(loss_exp_cd) LIKE UPPER(#lossExpCd#)
+		                        </isNotEmpty>
+		                        <isNotEmpty prepend="AND" property="lossExpDesc">
+		                            UPPER(loss_exp_desc) LIKE UPPER(#lossExpDesc#)
+		                        </isNotEmpty>
+		                        <isNotEmpty prepend="AND" property="taxRate">
+		                            tax_rate = #taxRate#
+		                        </isNotEmpty>
+				  	      </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="lineCd lineName">
+			              		ORDER BY line
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="lossExpCd lossExpDesc">
+			              		ORDER BY loss_exp
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="taxRate">
+			              		ORDER BY tax_rate
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(gicls106_pkg.line_loss_exp(#issCd#, #lossTaxId#, #userId#))
+		                  <isNotNull property="filter">
+		                  	WHERE 1 = 1 
+				  	      		<isNotEmpty prepend="AND" property="lineCd">
+		                        	UPPER(line_cd) LIKE UPPER(#lineCd#)
+		                        </isNotEmpty>
+		                        <isNotEmpty prepend="AND" property="lineName">
+		                            UPPER(line_name) LIKE UPPER(#lineName#)
+		                        </isNotEmpty>
+		                        <isNotEmpty prepend="AND" property="lossExpCd">
+		                        	UPPER(loss_exp_cd) LIKE UPPER(#lossExpCd#)
+		                        </isNotEmpty>
+		                        <isNotEmpty prepend="AND" property="lossExpDesc">
+		                            UPPER(loss_exp_desc) LIKE UPPER(#lossExpDesc#)
+		                        </isNotEmpty>
+		                        <isNotEmpty prepend="AND" property="taxRate">
+		                            tax_rate = #taxRate#
+		                        </isNotEmpty>
+				  	      </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="getGicls106LineLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result property="lineCd" 			column="line_cd" />
+		<result property="lineName"			column="line_name" />
+		<result property="rowNum" 			column="rownum_"/>
+		<result property="rowCount" 		column="count_"/>
+	</resultMap>
+	
+	<select id="getGicls106LineLOV" resultMap="getGicls106LineLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (gicls106_pkg.get_gicls106_line_lov(#search#, #userId#, #issCd#))
+		                 <isNotNull property="findText">
+					         WHERE (UPPER(line_cd) LIKE UPPER(#findText#)
+					         	 OR UPPER(line_name) LIKE UPPER(#findText#)
+					         	 )
+				         </isNotNull>          
+			          	  <isNotNull property="sortColumn">
+			                  <isEqual property="sortColumn" compareValue="lineCd">
+				              		ORDER BY line_cd
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="lineName">
+				              		ORDER BY line_name
+				              </isEqual>
+				          	  <isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              </isNotNull>
+				          </isNotNull>    
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (gicls106_pkg.get_gicls106_line_lov(#search#, #userId#, #issCd#))
+			              <isNotNull property="findText">
+					          WHERE (UPPER(line_cd) LIKE UPPER(#findText#)
+					         	 OR UPPER(line_name) LIKE UPPER(#findText#)
+					         	 )
+				          </isNotNull> 
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="getGicls106LossExpLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result property="lossExpCd" 		column="loss_exp_cd" />
+		<result property="lossExpDesc"		column="loss_exp_desc" />
+		<result property="lossExpType"		column="loss_exp_type" />
+		<result property="rowNum" 			column="rownum_"/>
+		<result property="rowCount" 		column="count_"/>
+	</resultMap>
+	
+	<select id="getGicls106LossExpLOV" resultMap="getGicls106LossExpLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (gicls106_pkg.get_gicls106_loss_exp_lov(#lineCd#, #search#))
+		                  WHERE 1 = 1
+		                 <isNotNull property="search">
+					         AND UPPER(loss_exp_cd) LIKE UPPER(#search#)
+				         </isNotNull> 
+		                 <isNotNull property="findText">
+					         AND (UPPER(loss_exp_cd) LIKE UPPER(#findText#)
+					         	 OR UPPER(loss_exp_desc) LIKE UPPER(#findText#)
+					         	 OR UPPER(loss_exp_type) LIKE UPPER(#findText#)
+					         	 )
+				         </isNotNull>          
+			          	  <isNotNull property="sortColumn">
+			                  <isEqual property="sortColumn" compareValue="lossExpCd">
+				              		ORDER BY loss_exp_cd
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="lossExpDesc">
+				              		ORDER BY loss_exp_desc
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="lossExpType">
+				              		ORDER BY loss_exp_type
+				              </isEqual>
+				          	  <isNotNull property="sortColumn">
+				              		<isEqual property="ascDescFlg" compareValue="ASC">
+				              			ASC
+				              		</isEqual>
+				              		<isEqual property="ascDescFlg" compareValue="DESC">
+				              			DESC
+				              		</isEqual>
+				              </isNotNull>
+				          </isNotNull>    
+		                  ) a, 
+			               (SELECT count(*) count_ 
+			                  FROM TABLE (gicls106_pkg.get_gicls106_loss_exp_lov(#lineCd#, #search#))
+			              WHERE 1 = 1
+		                 <isNotNull property="search">
+					         AND UPPER(loss_exp_cd) LIKE UPPER(#search#)
+				         </isNotNull> 
+		                 <isNotNull property="findText">
+					         AND (UPPER(loss_exp_cd) LIKE UPPER(#findText#)
+					         	 OR UPPER(loss_exp_desc) LIKE UPPER(#findText#)
+					         	 OR UPPER(loss_exp_type) LIKE UPPER(#findText#)
+					         	 )
+				         </isNotNull>  
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<procedure id="saveLineLossExp" parameterClass="GIISLossTaxLine">
+	    DECLARE
+	    	v_rec giis_loss_tax_line%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.loss_tax_id := #lossTaxId#;
+ 			v_rec.line_cd := #lineCd#;
+ 			v_rec.loss_exp_cd := #lossExpCd#;
+ 			v_rec.tax_rate := #taxRate#;
+ 			v_rec.loss_exp_type := #lossExpType#;
+ 			v_rec.user_id := #userId#;
+ 			
+ 			gicls106_pkg.save_line_loss_exp(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<select id="valLineLossExp" resultClass="java.lang.String">
+		SELECT gicls106_pkg.val_line_loss_exp(#lossTaxId#,#lineCd#,#lossExpCd#) FROM dual					
+	</select>
+	
+	<parameterMap class="map" id="validateGicls106LineMap">
+		<parameter property="lineCd" 	jdbcType="VARCHAR"	javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="lineName"  jdbcType="VARCHAR"	javaType="java.lang.String"	mode="OUT"/>
+		<parameter property="userId"  	jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+		<parameter property="issCd"  	jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+	</parameterMap>
+	
+	<procedure id="validateGicls106Line" parameterMap="validateGicls106LineMap">
+		BEGIN
+ 			gicls106_pkg.validate_line(?,?,?,?);
+ 		END;
+	</procedure>
+	
+	<parameterMap class="map" id="validateGicls106LossExpMap">
+		<parameter property="lineCd" 		jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+		<parameter property="lossExpCd" 	jdbcType="VARCHAR"	javaType="java.lang.String"	mode="INOUT"/>
+		<parameter property="lossExpDesc" 	jdbcType="VARCHAR"	javaType="java.lang.String"	mode="OUT"/>
+		<parameter property="lossExpType"  	jdbcType="VARCHAR"	javaType="java.lang.String"	mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="validateGicls106LossExp" parameterMap="validateGicls106LossExpMap">
+		BEGIN
+ 			gicls106_pkg.validate_loss_exp(?,?,?,?);
+ 		END;
+	</procedure>
+	
+	<resultMap class="java.util.HashMap" id="gicls106LineLossExpHistoryMap" extends="BaseEntity.TableGridResultMap">
+		<result column="line_cd"  			property="lineCd"/>
+		<result column="loss_exp_cd"  		property="lossExpCd"/>
+		<result column="line_name"  		property="lineName"/>
+		<result column="loss_exp_desc"		property="lossExpDesc"/>
+		<result column="tax_rate"  			property="taxRate"/>
+		<result column="user_id"  			property="userId"/>
+		<result column="last_update"  		property="lastUpdate"/>
+	</resultMap>
+	
+	<select id="gicls106LineLossExpHistory" resultMap="gicls106LineLossExpHistoryMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(gicls106_pkg.get_line_loss_exp_history(#lossTaxId#, #lineCd#, #lossExpCd#))
+		  	      <isNotNull property="filter">
+		  	      	WHERE 1 = 1 
+                        <isNotEmpty prepend="AND" property="taxRate">
+                        	tax_rate = #taxRate#
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="userId">
+                            UPPER(user_id) LIKE UPPER(#userId#)
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="lastUpdate">
+                            last_update = #lastUpdate#
+                        </isNotEmpty>
+		  	      </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="taxRate">
+			              		ORDER BY tax_rate
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="userId">
+			              		ORDER BY user_id
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="lastUpdate">
+			              		ORDER BY last_update
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(gicls106_pkg.get_line_loss_exp_history(#lossTaxId#, #lineCd#, #lossExpCd#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<procedure id="copyTaxToIssuingSourceAndTaxLine" parameterClass="java.util.HashMap">
+	    DECLARE
+	    	v_rec giis_loss_taxes%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.tax_type := #taxType#;
+ 			v_rec.tax_cd := #taxCd#;
+ 			v_rec.tax_name := #taxName#;
+ 			v_rec.branch_cd := #issCd#;
+ 			v_rec.tax_rate := #taxRate#;
+ 		 	v_rec.start_date := TO_DATE(#startDate#, 'yyyy-mm-dd');
+ 			v_rec.end_date := TO_DATE(#endDate#, 'yyyy-mm-dd');
+ 			v_rec.gl_acct_id := #glAcctId#;
+ 			v_rec.sl_type_cd := #slTypeCd#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			gicls106_pkg.copy_tax_line_to_issue_cd(v_rec,#origIssCd#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<parameterMap class="map" id="populateLineLossExpHistFieldMap">
+		<parameter property="lineCd" 		jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+		<parameter property="lossExpCd" 	jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+		<parameter property="lineName" 		jdbcType="VARCHAR"	javaType="java.lang.String"	mode="OUT"/>
+		<parameter property="lossExpDesc"  	jdbcType="VARCHAR"	javaType="java.lang.String"	mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="populateLineLossExpHistField" parameterMap="populateLineLossExpHistFieldMap">
+		BEGIN
+ 			gicls106_pkg.populate_line_loss_exp_field(?,?,?,?);
+ 		END;
+	</procedure>
+	
+	<parameterMap class="map" id="checkCopyTaxLineBtnMap">
+		<parameter property="lossTaxId" jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="IN"/>
+		<parameter property="issCd" 	jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="IN"/>
+		<parameter property="userId" 	jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="IN"/>
+		<parameter property="output"   	jdbcType="VARCHAR"	javaType="java.lang.String"	  mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="checkCopyTaxLineBtn" parameterMap="checkCopyTaxLineBtnMap">
+		BEGIN
+ 			gicls106_pkg.check_copy_tax_line_btn(?,?,?,?);
+ 		END;
+	</procedure>
+</sqlMap>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap>
+	<typeAlias alias="GIXXMcacc" type="com.geniisys.gixx.entity.GIXXMcacc" />
+	
+	<resultMap id="getGIXXMcaccTGMap" class="GIXXMcacc" extends="BaseEntity.TableGridResultMap">
+		<result column="EXTRACT_ID"				property="extractId" />
+		<result column="ITEM_NO"				property="itemNo" />
+		<result column="ACCESSORY_CD"			property="accessoryCd" />
+		<result column="ACC_AMT"				property="accAmt" />
+		<result column="POLICY_ID"				property="policyId" />
+		<result column="ACCESSORY_DESC"			property="accessoryDesc" />
+		<result column="TOTAL_ACC_AMT"			property="totalAccAmt" />
+	</resultMap>
+	
+	<select id="getGIXXMcaccTG" resultMap="getGIXXMcaccTGMap" parameterClass="java.util.HashMap">
+		SELECT *
+  		  FROM (SELECT ROWNUM rownum_, b.count_, a.*
+          		  FROM (SELECT * FROM TABLE (gixx_mcacc_pkg.get_mcacc_list(#extractId#,#itemNo#))) a,
+               (SELECT COUNT (*) count_ FROM TABLE (gixx_mcacc_pkg.get_mcacc_list(#extractId#,#itemNo#))) b)
+         WHERE rownum_ BETWEEN NVL(#from#,rownum_) AND NVL(#to#,rownum_)
+	</select>
+</sqlMap>

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIACOrPref">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIACOrPref" type="com.geniisys.common.entity.GIACOrPref"/>
+	
+	<!-- for GIACS355 -->
+	<resultMap class="GIACOrPref" id="giacOrPrefListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="FUND_CD"   		property="fundCd"/>
+		<result column="BRANCH_CD" 		property="branchCd"/>
+		<result column="BRANCH_NAME" 	property="branchName"/>
+		<result column="OR_PREF_SUF"	property="orPrefSuf"/>
+		<result column="OR_TYPE"	 	property="orType"/>
+		<result column="OR_TYPE_MEAN" 	property="orTypeMean"/>
+		<result column="USER_ID"     	property="userId"/>
+		<result column="LAST_UPDATE" 	property="lastUpdate"/>
+		<result column="REMARKS"     	property="remarks"/>
+	</resultMap>
+	
+	<select id="getGiacs355RecList" resultMap="giacOrPrefListResultMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giacs355_pkg.get_rec_list(#fundCd#, #branchCd#, #orPrefSuf#, #orType#, #moduleId#, #userId#))
+		                  <isEqual property="sortColumn" compareValue="fundCd">
+			              		ORDER BY FUND_CD
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="branchCd">
+			              		ORDER BY BRANCH_CD
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="orPrefSuf">
+			              		ORDER BY OR_PREF_SUF
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="orType orTypeMean">
+			              		ORDER BY OR_TYPE
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giacs355_pkg.get_rec_list(#fundCd#, #branchCd#, #orPrefSuf#, #orType#, #moduleId#, #userId#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setOrPref" parameterClass="GIACOrPref">
+	    DECLARE
+	    	v_rec giac_or_pref%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.fund_cd 		:= #fundCd#;
+ 			v_rec.branch_cd 	:= #branchCd#;
+ 			v_rec.or_pref_suf 	:= #orPrefSuf#;
+ 			v_rec.or_type	 	:= #orType#;
+ 			v_rec.user_id 		:= #userId#;
+ 			v_rec.remarks 		:= #remarks#;
+ 			
+ 			giacs355_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteOrPref" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giacs355_pkg.val_del_rec(#fundCd#, #branchCd#, #orPrefSuf#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddOrPref" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giacs355_pkg.val_add_rec(#fundCd#, #branchCd#, #orPrefSuf#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delOrPref" parameterClass="GIACOrPref">
+		BEGIN
+ 			giacs355_pkg.del_rec(#fundCd#, #branchCd#, #orPrefSuf#);
+ 		END;
+ 	</delete>
+</sqlMap>

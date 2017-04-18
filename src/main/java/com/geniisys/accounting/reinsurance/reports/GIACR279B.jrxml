@@ -1,0 +1,509 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIACR279B" language="groovy" pageWidth="990" pageHeight="612" columnWidth="950" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="2193f164-f918-4bfb-9719-fa2739664e5a">
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="1241"/>
+	<property name="ireport.y" value="342"/>
+	<parameter name="P_AS_OF_DATE" class="java.lang.String"/>
+	<parameter name="P_CUT_OFF_DATE" class="java.lang.String"/>
+	<parameter name="P_RI_CD" class="java.lang.String"/>
+	<parameter name="P_LINE_CD" class="java.lang.String"/>
+	<parameter name="P_PAYEE_TYPE" class="java.lang.String"/>
+	<parameter name="P_PAYEE_TYPE2" class="java.lang.String"/>
+	<parameter name="P_USER_ID" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT * FROM TABLE(giacr279b_pkg.get_giacr279b_records($P{P_AS_OF_DATE},$P{P_CUT_OFF_DATE}, $P{P_LINE_CD},$P{P_PAYEE_TYPE},$P{P_PAYEE_TYPE2},$P{P_RI_CD},$P{P_USER_ID}))
+order by ri_name, line_cd, short_name, claim_no, fla_no]]>
+	</queryString>
+	<field name="RI_CD" class="java.math.BigDecimal"/>
+	<field name="RI_NAME" class="java.lang.String"/>
+	<field name="LINE_CD" class="java.lang.String"/>
+	<field name="LINE_NAME" class="java.lang.String"/>
+	<field name="CLAIM_NO" class="java.lang.String"/>
+	<field name="FLA_NO" class="java.lang.String"/>
+	<field name="POLICY_NO" class="java.lang.String"/>
+	<field name="ASSD_NO" class="java.math.BigDecimal"/>
+	<field name="ASSD_NAME" class="java.lang.String"/>
+	<field name="FLA_DATE" class="java.sql.Timestamp"/>
+	<field name="AS_OF_DATE" class="java.sql.Timestamp"/>
+	<field name="CUT_OFF_DATE" class="java.sql.Timestamp"/>
+	<field name="PAYEE_TYPE" class="java.lang.String"/>
+	<field name="AMOUNT_DUE" class="java.math.BigDecimal"/>
+	<field name="CURRENCY_CD" class="java.math.BigDecimal"/>
+	<field name="ORIG_CURR_RATE" class="java.math.BigDecimal"/>
+	<field name="CONVERT_RATE" class="java.math.BigDecimal"/>
+	<field name="SHORT_NAME" class="java.lang.String"/>
+	<field name="COMPANY_NAME" class="java.lang.String"/>
+	<field name="COMPANY_ADDRESS" class="java.lang.String"/>
+	<field name="LOSS_EXP" class="java.lang.String"/>
+	<field name="AS_OF" class="java.lang.String"/>
+	<field name="CUT_OFF" class="java.lang.String"/>
+	<field name="AMT_DUE" class="java.math.BigDecimal"/>
+	<field name="V_AS_OF_DATE" class="java.sql.Timestamp"/>
+	<field name="V_CUT_OFF_DATE" class="java.sql.Timestamp"/>
+	<field name="PRINT_BAND" class="java.lang.String"/>
+	<variable name="V_SUM_AMTDUE_CONVERTRATE" class="java.math.BigDecimal" resetType="Group" resetGroup="convert_rate" calculation="Sum">
+		<variableExpression><![CDATA[$F{AMT_DUE}]]></variableExpression>
+	</variable>
+	<variable name="V_SUM_AMTDUE_CURRENCY" class="java.math.BigDecimal" resetType="Group" resetGroup="currency" calculation="Sum">
+		<variableExpression><![CDATA[$F{AMT_DUE}]]></variableExpression>
+	</variable>
+	<variable name="V_SUM_AMTDUE_LINE" class="java.math.BigDecimal" resetType="Group" resetGroup="line_cd" calculation="Sum">
+		<variableExpression><![CDATA[$F{AMT_DUE}]]></variableExpression>
+	</variable>
+	<variable name="V_SUM_AMTDUE_REINSURER" class="java.math.BigDecimal" resetType="Group" resetGroup="ri_cd" calculation="Sum">
+		<variableExpression><![CDATA[$F{AMT_DUE}]]></variableExpression>
+	</variable>
+	<group name="ri_cd" isStartNewPage="true" isResetPageNumber="true" isReprintHeaderOnEachPage="true">
+		<groupExpression><![CDATA[$F{RI_CD}]]></groupExpression>
+		<groupHeader>
+			<band height="12">
+				<printWhenExpression><![CDATA[$F{PRINT_BAND} == "Y"]]></printWhenExpression>
+				<staticText>
+					<reportElement positionType="Float" x="1" y="0" width="65" height="11" uuid="d004a526-a7b3-4e91-828a-75868040cc68"/>
+					<textElement>
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[Reinsurer         :]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement positionType="Float" x="66" y="0" width="339" height="11" uuid="249780ce-dca5-4b89-9567-7d456bde3383"/>
+					<textElement>
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{RI_NAME}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="25">
+				<printWhenExpression><![CDATA[$F{PRINT_BAND} == "Y"]]></printWhenExpression>
+				<staticText>
+					<reportElement positionType="Float" x="733" y="1" width="105" height="11" uuid="935d68d2-57e4-441e-8994-1c9c65b3825b"/>
+					<textElement>
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[Totals per Reinsurer        :]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+					<reportElement positionType="Float" x="845" y="1" width="100" height="11" uuid="2c5d565f-267a-47d5-90ad-9966972501f3"/>
+					<textElement textAlignment="Right">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{V_SUM_AMTDUE_REINSURER}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement positionType="Float" x="845" y="12" width="100" height="11" uuid="baa95fbb-ecb1-48a4-96cc-06b98fddfcee"/>
+					<textElement textAlignment="Right">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[=========================]]></text>
+				</staticText>
+			</band>
+		</groupFooter>
+	</group>
+	<group name="line_cd" isStartNewPage="true" isReprintHeaderOnEachPage="true">
+		<groupExpression><![CDATA[$F{LINE_CD}]]></groupExpression>
+		<groupHeader>
+			<band height="12">
+				<printWhenExpression><![CDATA[$F{PRINT_BAND} == "Y"]]></printWhenExpression>
+				<staticText>
+					<reportElement positionType="Float" x="1" y="0" width="65" height="11" uuid="e41da9be-f184-4370-bc29-9e9dfc267f6a"/>
+					<textElement>
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[Line                  :]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement positionType="Float" x="66" y="1" width="185" height="11" uuid="703484d5-34d1-4c96-aa8f-abc84a7ffd37"/>
+					<textElement>
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{LINE_NAME}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="23">
+				<printWhenExpression><![CDATA[$F{PRINT_BAND} == "Y"]]></printWhenExpression>
+				<staticText>
+					<reportElement positionType="Float" x="733" y="1" width="105" height="11" uuid="8bd0e2a5-b0f0-4e8d-afb1-e33f589bddf4"/>
+					<textElement>
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[Totals per Line                 :]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+					<reportElement positionType="Float" x="845" y="1" width="100" height="11" uuid="07c79239-d88f-47f9-a3de-66b546035989"/>
+					<textElement textAlignment="Right">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{V_SUM_AMTDUE_LINE}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement positionType="Float" x="845" y="12" width="100" height="11" uuid="80e7a490-544f-4376-bee1-3631bf9ea0e9"/>
+					<textElement textAlignment="Right">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[-------------------------------------------]]></text>
+				</staticText>
+			</band>
+		</groupFooter>
+	</group>
+	<group name="currency" isStartNewPage="true" isReprintHeaderOnEachPage="true">
+		<groupExpression><![CDATA[$F{SHORT_NAME}]]></groupExpression>
+		<groupHeader>
+			<band height="41">
+				<printWhenExpression><![CDATA[$F{PRINT_BAND} == "Y"]]></printWhenExpression>
+				<staticText>
+					<reportElement positionType="Float" x="1" y="0" width="65" height="11" uuid="a2456cca-2ae2-4947-a19e-953edb580a14"/>
+					<textElement>
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[Currency          :]]></text>
+				</staticText>
+				<staticText>
+					<reportElement positionType="Float" x="1" y="19" width="65" height="11" uuid="8e31ff16-bd2c-4109-8ef3-9258a402ba5e"/>
+					<textElement>
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[FLA Date]]></text>
+				</staticText>
+				<staticText>
+					<reportElement positionType="Float" x="85" y="19" width="90" height="11" uuid="a5f17d8a-bada-4570-a419-5342f38113bd"/>
+					<textElement>
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[FLA Number]]></text>
+				</staticText>
+				<staticText>
+					<reportElement positionType="Float" x="193" y="19" width="110" height="11" uuid="7903ed48-25f1-4c70-82bd-a8f9a353bb92"/>
+					<textElement>
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[Claim Number]]></text>
+				</staticText>
+				<staticText>
+					<reportElement positionType="Float" x="319" y="19" width="110" height="11" uuid="e814cae0-4a02-463d-b377-62a6f12e7ece"/>
+					<textElement>
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[Policy Number]]></text>
+				</staticText>
+				<staticText>
+					<reportElement positionType="Float" x="444" y="19" width="316" height="11" uuid="dc155ecd-d280-4e4f-8903-bf032614769d"/>
+					<textElement>
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[Assured]]></text>
+				</staticText>
+				<staticText>
+					<reportElement positionType="Float" x="783" y="19" width="40" height="11" uuid="902f67e4-d465-4aca-b82d-90492424a3d8"/>
+					<textElement>
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[Type]]></text>
+				</staticText>
+				<staticText>
+					<reportElement positionType="Float" x="845" y="19" width="100" height="11" uuid="99eccfe0-35eb-4dbb-9939-5c60798a1f18"/>
+					<textElement textAlignment="Right">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[Amount Due]]></text>
+				</staticText>
+				<staticText>
+					<reportElement positionType="Float" x="0" y="30" width="66" height="11" uuid="a1b61b2c-9653-4f8b-9d50-1f4b28810d1f"/>
+					<textElement>
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[--------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement positionType="Float" x="85" y="30" width="90" height="11" uuid="06989ba8-cf79-458c-bbab-b2434df70f3c"/>
+					<textElement>
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[-----------------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement positionType="Float" x="193" y="30" width="110" height="11" uuid="f2e2f294-8239-473a-a72d-654b6b6674e6"/>
+					<textElement>
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[-------------------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement positionType="Float" x="319" y="30" width="110" height="11" uuid="83a2f9dd-880f-4e80-a3ec-e3291226cabb"/>
+					<textElement>
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[-------------------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement positionType="Float" x="444" y="30" width="316" height="11" uuid="f8a24cf8-6284-4509-8aee-4674a6685b86"/>
+					<textElement>
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[-----------------------------------------------------------------------------------------------------------------------------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement positionType="Float" x="783" y="30" width="40" height="11" uuid="c2d40bd3-08f0-495e-b1c0-45084b0b329d"/>
+					<textElement>
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[---------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement positionType="Float" x="845" y="30" width="100" height="11" uuid="110c86e3-ccf1-45b2-b191-606d7ba840cf"/>
+					<textElement textAlignment="Right">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[-------------------------------------------------]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement positionType="Float" x="66" y="0" width="185" height="11" uuid="4ceb806b-948a-4c5a-ac35-bff8a072599b"/>
+					<textElement>
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{SHORT_NAME}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="23">
+				<printWhenExpression><![CDATA[$F{PRINT_BAND} == "Y"]]></printWhenExpression>
+				<staticText>
+					<reportElement positionType="Float" x="733" y="1" width="105" height="11" uuid="bf209aa6-a7bf-4253-937f-77b61a8b16ba"/>
+					<textElement>
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[Totals per Currency          :]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+					<reportElement positionType="Float" x="845" y="1" width="100" height="11" uuid="ae705281-a076-4a36-89f5-17f9e7ba2cba"/>
+					<textElement textAlignment="Right">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{V_SUM_AMTDUE_CURRENCY}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement positionType="Float" x="845" y="12" width="100" height="11" uuid="595076ee-f52c-4d58-a9f7-b512ce2fa966"/>
+					<textElement textAlignment="Right">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[-------------------------------------------]]></text>
+				</staticText>
+			</band>
+		</groupFooter>
+	</group>
+	<group name="convert_rate">
+		<groupExpression><![CDATA[$F{CONVERT_RATE}]]></groupExpression>
+		<groupHeader>
+			<band height="12">
+				<printWhenExpression><![CDATA[$F{PRINT_BAND} == "Y"]]></printWhenExpression>
+				<staticText>
+					<reportElement positionType="Float" x="0" y="0" width="66" height="11" uuid="2b8cae27-7d99-4c93-b5e2-e2ec0e002f5f"/>
+					<textElement>
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[Currency Rate :]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" pattern="#,##0.000000000;(#,##0.000000000)" isBlankWhenNull="true">
+					<reportElement positionType="Float" x="66" y="0" width="100" height="11" uuid="3ca76439-cbf3-414c-a466-7e2dbde35e8a"/>
+					<textElement>
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{CONVERT_RATE}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="34">
+				<printWhenExpression><![CDATA[$F{PRINT_BAND} == "Y"]]></printWhenExpression>
+				<staticText>
+					<reportElement positionType="Float" x="733" y="11" width="105" height="11" uuid="614731f7-e8b3-46a6-b8d9-ea77d0642e1a"/>
+					<textElement>
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[Totals per Currency Rate  :]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+					<reportElement positionType="Float" x="845" y="11" width="100" height="11" uuid="02a46c8d-c717-43ca-a890-c2e0af8a843e"/>
+					<textElement textAlignment="Right">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{V_SUM_AMTDUE_CONVERTRATE}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement positionType="Float" x="845" y="0" width="100" height="11" uuid="fc1e11b7-db12-4abf-b442-8e3b99a773f6"/>
+					<textElement textAlignment="Right">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[-------------------------------------------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement positionType="Float" x="845" y="22" width="100" height="11" uuid="6ab38267-62c3-4549-9a0c-bb4a1b546406"/>
+					<textElement textAlignment="Right">
+						<font fontName="Arial" size="7"/>
+					</textElement>
+					<text><![CDATA[-------------------------------------------]]></text>
+				</staticText>
+			</band>
+		</groupFooter>
+	</group>
+	<pageHeader>
+		<band height="89" splitType="Stretch">
+			<staticText>
+				<reportElement x="1" y="0" width="54" height="11" uuid="0981ca5a-6e0b-4a9d-b69f-53f6595cbf9e"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[RUNDATE   :]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1" y="11" width="54" height="11" uuid="c1a05572-eb94-49bb-a224-21d33355306c"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[RUNTIME    :]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" pattern="MM-dd-yyyy" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="55" y="0" width="100" height="11" uuid="e47250b7-cd5d-46b5-91bb-24ff83fbd3fe"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="hh:mm:ss a" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="55" y="11" width="100" height="11" uuid="36020381-ed42-4697-9e90-e7b1356af2fa"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="217" y="0" width="517" height="11" uuid="94dbb88a-88b5-408f-beb9-4547fd8141e0"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COMPANY_NAME}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="217" y="11" width="517" height="11" uuid="cba165f3-cb09-41c7-8c85-dce35373869d"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COMPANY_ADDRESS}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement positionType="Float" x="862" y="0" width="88" height="11" uuid="e6bd1c0b-ad40-4628-af17-edf1bf2c9f11"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[GIACR279B]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="882" y="11" width="48" height="11" uuid="c948bf27-c59a-464d-9c5c-44da0c425c98"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Group" evaluationGroup="ri_cd">
+				<reportElement x="930" y="11" width="20" height="11" uuid="d120cf09-734f-4d9f-8ba9-c4ffa5a0bd47"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement positionType="Float" x="217" y="32" width="517" height="11" uuid="1e39e471-d68f-4e62-9172-23f968770319"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[STATEMENT OF ACCOUNT]]></text>
+			</staticText>
+			<staticText>
+				<reportElement positionType="Float" x="217" y="43" width="312" height="11" uuid="eef2092f-11e9-4d44-add1-3884bfa07866"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[Losses Recoverable from Facultative RI]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="530" y="43" width="179" height="11" uuid="ba9e045a-ebbd-456f-b9b3-7bbe4c809eaf"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{LOSS_EXP}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="217" y="54" width="517" height="11" uuid="309f9bc1-840f-40a1-a374-1f589a923938"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{AS_OF}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="217" y="65" width="517" height="11" uuid="53849930-e8df-41f5-a579-784f66338923"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CUT_OFF}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="12" splitType="Stretch">
+			<printWhenExpression><![CDATA[$F{PRINT_BAND} == "Y"]]></printWhenExpression>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="844" y="0" width="100" height="11" uuid="e2940039-8030-48cb-9070-0a15b13b57e0"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{AMT_DUE}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="783" y="0" width="40" height="11" uuid="a5989d20-7d9c-4561-be8c-53d5363b4f03"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PAYEE_TYPE}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="444" y="0" width="316" height="11" uuid="e13312f6-382d-4192-96dd-72868ed83107"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ASSD_NAME}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="319" y="0" width="110" height="11" uuid="dd4d3fda-9e74-42ac-871e-bca798aea1ee"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{POLICY_NO}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="193" y="0" width="110" height="11" uuid="d37e8250-c8bf-4e14-b522-42fe1fae8436"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CLAIM_NO}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="85" y="0" width="90" height="11" uuid="d504d5af-a1ce-4475-b142-59f9112a80fe"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{FLA_NO}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="MM-dd-yyyy" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="0" y="0" width="65" height="11" uuid="4f42729e-0ffe-40b8-bf79-8dea8eac5022"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{FLA_DATE}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

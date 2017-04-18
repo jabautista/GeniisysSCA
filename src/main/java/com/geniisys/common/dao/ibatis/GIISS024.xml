@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="GIISS024">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+
+	<typeAlias alias="GIISRegion" type="com.geniisys.common.entity.GIISRegion"/>
+	<typeAlias alias="GIISProvince" type="com.geniisys.common.entity.GIISProvince"/>
+	<typeAlias alias="GIISCity" type="com.geniisys.common.entity.GIISCity"/>
+
+	<resultMap class="java.util.HashMap" id="giiss024RecListMap">
+		<result column="region_cd" 			property="regionCd" />
+		<result column="region_desc" 		property="regionDesc" />
+		<result column="province_cd" 		property="provinceCd" />
+		<result column="province_desc" 		property="provinceDesc" />
+		<result column="city_cd" 			property="cityCd" />
+		<result column="city" 				property="city" />
+		<result column="remarks" 			property="remarks" />
+		<result column="user_id" 			property="userId" />
+		<result column="last_update" 		property="lastUpdate" />
+		<result column="rownum_" 			property="rowNum" />
+		<result column="count_"				property="rowCount"/>
+	</resultMap>
+	
+	<select id="getGiiss024RecList" resultMap="giiss024RecListMap">
+		SELECT * 
+			FROM (SELECT rownum rownum_,
+						 b.count_,
+						 a.*
+					FROM (SELECT * 
+							FROM TABLE (giiss024_pkg.get_rec_list (#regionCd#,#regionDesc#,#provinceCd#,#provinceDesc#,#cityCd#,#city#,#mode#))
+							<isEqual property="sortColumn" compareValue="regionCd">
+								ORDER BY region_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="regionDesc">
+								ORDER BY region_desc
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="provinceCd">
+								ORDER BY province_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="provinceDesc">
+								ORDER BY province_desc
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="cityCd">
+								ORDER BY city_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="city">
+								ORDER BY city
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>) a, 
+							(SELECT count(*) count_
+							   FROM TABLE (giiss024_pkg.get_rec_list (#regionCd#,#regionDesc#,#provinceCd#,#provinceDesc#,#cityCd#,#city#,#mode#))
+							 ) b)
+		WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiiss024AllRec" resultMap="giiss024RecListMap">
+		SELECT * 
+			FROM (SELECT rownum rownum_,
+						 '1' count_,
+						 a.*
+					FROM (SELECT * 
+							FROM TABLE (giiss024_pkg.get_rec_list (#regionCd#,#regionDesc#,#provinceCd#,#provinceDesc#,#cityCd#,#city#,#mode#))) a)
+	</select>
+	
+ 	<procedure id="setGIISRegion" parameterClass="GIISRegion">
+	    DECLARE
+	    	v_rec giis_region%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.region_cd := #regionCd#;
+ 			v_rec.region_desc := #regionDesc#;
+ 			v_rec.user_id := #userId#;
+ 			
+ 			giiss024_pkg.set_giis_region(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="setGIISProvince" parameterClass="GIISProvince">
+	    DECLARE
+	    	v_rec giis_province%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.province_cd := #provinceCd#;
+ 			v_rec.province_desc := #provinceDesc#;
+ 			v_rec.region_cd := #regionCd#;
+ 			v_rec.remarks := #remarks#;
+ 			v_rec.user_id := #userId#;
+ 			
+ 			giiss024_pkg.set_giis_province(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="setGIISCity" parameterClass="GIISCity">
+	    DECLARE
+	    	v_rec giis_city%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.city_cd := #cityCd#;
+ 			v_rec.city := #city#;
+ 			v_rec.province_cd := #provinceCd#;
+ 			v_rec.remarks := #remarks#;
+ 			v_rec.user_id := #userId#;
+ 			
+ 			giiss024_pkg.set_giis_city(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<delete id="delGIISRegion" parameterClass="java.lang.String">
+		BEGIN
+ 			giiss024_pkg.del_giis_region(#recId#);
+ 		END;
+ 	</delete>
+ 	
+ 	<delete id="delGIISProvince" parameterClass="java.lang.String">
+		BEGIN
+ 			giiss024_pkg.del_giis_province(#recId#);
+ 		END;
+ 	</delete>
+ 	
+ 	<delete id="delGIISCity" parameterClass="GIISCity">
+		BEGIN
+ 			giiss024_pkg.del_giis_city(#cityCd#,#provinceCd#);
+ 		END;
+ 	</delete>
+ 	
+ 	<procedure id="valDeleteGiiss024" parameterClass="java.util.Map">
+ 		BEGIN
+ 			giiss024_pkg.val_del_rec(#recId#,#recId2#,#mode#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddGiiss024" parameterClass="java.util.Map">
+ 		BEGIN
+ 			giiss024_pkg.val_add_rec(#recId#,#recId2#,#mode#);
+ 		END;
+ 	</procedure> 	
+</sqlMap>

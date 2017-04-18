@@ -1,0 +1,1807 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIACBranch">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIACBranch" type="com.geniisys.giac.entity.GIACBranch"/>
+	
+	<resultMap class="com.geniisys.giac.entity.GIACBranch" id="giacBranchMap">
+		<result column="gfun_fund_cd" property="gfunFundCd"></result>
+		<result column="branch_cd" property="branchCd"></result>
+		<result column="acct_branch_cd" property="acctBranchCd"></result>
+		<result column="branch_name" property="branchName"></result>
+		<result column="user_id" property="userId"></result>
+		<result column="last_update" property="lastUpdate"></result>
+		<result column="remarks" property="remarks"></result>
+		<result column="cpi_rec_no" property="cpiRecNo"></result>
+		<result column="cpi_branch_cd" property="cpiBranchCd"></result>
+		<result column="prnt_branch_cd" property="prntBranchCd"></result>
+		<result column="bank_cd" property="bankCd"></result>
+		<result column="bank_acct_cd" property="bankAcctCd"></result>
+		<result column="comp_cd" property="compCd"></result>
+		<result column="fund_desc" property="fundDesc"></result>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="branchCdLOVMap">
+		<result column="branch_cd"		property="branchCd" />
+		<result column="branch_name"	property="branchName" />
+	</resultMap>
+	
+	<resultMap class="com.geniisys.giac.entity.GIACBranch" id="branchLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="branch_cd"		property="branchCd" />
+		<result column="branch_name"	property="branchName" />
+	</resultMap>
+	
+	<resultMap class="com.geniisys.giac.entity.GIACBranch" id="giacs002BranchMap" extends="BaseEntity.TableGridResultMap">
+		<result column="branch_cd"		property="branchCd" />
+		<result column="branch_name"	property="branchName" />
+		<result column="gfun_fund_cd"	property="gfunFundCd" />
+	</resultMap>
+	
+	<parameterMap class="map" id="defBankAcctListMap">
+		<parameter property="branchCd"			jdbcType="VARCHAR"	javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="fundCd"			jdbcType="VARCHAR"	javaType="java.lang.String" 	mode="IN"/>
+		<parameter property="userId"			jdbcType="VARCHAR"  javaType="java.lang.String"		mode="IN" />
+		<parameter property="bankCd"			jdbcType="VARCHAR"	javaType="java.lang.String" 	mode="OUT"/>
+		<parameter property="bankAcctCd"		jdbcType="VARCHAR"	javaType="java.lang.String" 	mode="OUT"/>
+		<parameter property="bankName"			jdbcType="VARCHAR"	javaType="java.lang.String" 	mode="OUT"/>
+		<parameter property="bankAcctNo"		jdbcType="VARCHAR"	javaType="java.lang.String" 	mode="OUT"/>
+		<parameter property="message"			jdbcType="VARCHAR"	javaType="java.lang.String" 	mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="getBranchDetails" resultMap="giacBranchMap">
+		SELECT * FROM TABLE(giac_branches_pkg.get_branch_details)
+	</procedure>
+	
+	<procedure id="getBranchDetails2" resultMap="giacBranchMap">
+		SELECT * FROM TABLE(GIAC_BRANCHES_PKG.get_branch_details2(#branchCd#))
+	</procedure>
+
+	<procedure id="getOtherBranchOR" resultMap="giacBranchMap" parameterClass="java.util.HashMap">
+		SELECT * FROM TABLE(GIAC_BRANCHES_PKG.get_other_branch_or(#moduleId#, #userId#))
+	</procedure>
+	
+	<procedure id="defBankAcctList" parameterMap="defBankAcctListMap">
+		{CALL giac_branches_pkg.get_dflt_bank_acct(?, ?, ?, ?, ?, ?, ?, ?)}
+	</procedure>
+	
+	<select id="getBranchCdLOV" resultMap="branchCdLOVMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM TABLE(giac_branches_pkg.get_branch_cd_lov(#gfunFundCd#, #controlModule#, #keyword#, #appUser#))
+	</select>
+	
+	<select id="getBranchesGIACS333" resultMap="giacBranchMap" parameterClass="java.lang.String">
+		SELECT * FROM
+			TABLE(GIAC_BRANCHES_PKG.get_giac_branches(#userId#))
+	</select>
+	
+	<select id="getGIACBranchLOV" resultMap="branchLOVMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giac_branches_pkg.get_branch_lov(#gfunFundCd#, #moduleId#, #userId#, #findText#))
+		                  <isEqual property="sortColumn" compareValue="branchCd">
+			              		ORDER BY branch_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="branchName">
+			              		ORDER BY branch_name
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giac_branches_pkg.get_branch_lov(#gfunFundCd#, #moduleId#, #userId#, #findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="otherBranchDisbRequestMap">
+		<result column="gfun_fund_cd"		property="gfunFundCd"/>
+		<result column="branch_cd"			property="branchCd"/>
+		<result column="branch_name"		property="branchName"/>
+		<result column="rownum_"			property="rowNum"/>
+		<result column="count_"				property="rowCount"/>
+	</resultMap>
+	<select id="getOtherBranchDisbRequestGrid" resultMap="otherBranchDisbRequestMap">
+		SELECT * 
+		  FROM (SELECT rownum rownum_, 
+		        	   b.count_, 
+		               a.*
+		         FROM (SELECT * 
+		                 FROM TABLE (GIAC_BRANCHES_PKG.get_other_branch_listing(#moduleId#, #appUser#,#clmSw#))
+                         ) a,
+                      (SELECT count(*) count_
+                         FROM TABLE (GIAC_BRANCHES_PKG.get_other_branch_listing(#moduleId#, #appUser#,#clmSw#))
+                         ) b)
+         WHERE rownum_ BETWEEN #from# AND #to#
+		<isEqual property="sortColumn" compareValue="branchCd">
+			ORDER BY branch_cd
+         </isEqual>  
+         <isEqual property="sortColumn" compareValue="gfunFundCd">
+			ORDER BY gfun_fund_cd
+         </isEqual>
+         <isEqual property="sortColumn" compareValue="branchName">
+			ORDER BY branch_name
+         </isEqual>
+         <isNotNull property="sortColumn">
+			<isEqual property="ascDescFlg" compareValue="ASC">
+				ASC
+			</isEqual>
+			<isEqual property="ascDescFlg" compareValue="DESC">
+				DESC
+			</isEqual>
+		</isNotNull>
+	</select>
+	
+	<select id="getBranchCd2LOV" resultMap="branchLOVMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT *
+		                  FROM TABLE(giac_branches_pkg.get_branch_cd_lov2(#fundCd#, #moduleId#, #userId#))              
+			          	  <isNotNull property="findText">
+		                  WHERE (UPPER(branch_cd) LIKE UPPER(#findText#) OR UPPER(branch_name) LIKE UPPER(#findText#))
+		             	  </isNotNull>
+			          	  <isNotNull property="sortColumn">
+			          	  	  <isEqual property="sortColumn" compareValue="branchCd">
+				              		ORDER BY branch_cd
+				              </isEqual>
+			                  <isEqual property="sortColumn" compareValue="branchName">
+				              		ORDER BY branch_name
+				              </isEqual>	
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">	
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giac_branches_pkg.get_branch_cd_lov2(#fundCd#, #moduleId#, #userId#))
+		                  <isNotNull property="findText">
+		                  WHERE (UPPER(branch_cd) LIKE UPPER(#findText#) OR UPPER(branch_name) LIKE UPPER(#findText#))
+		             	  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#		  
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="GIACSInquiryBranchLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="branch_cd"				property="branchCd" />
+		<result column="branch_name"			property="branchName" />
+		<result column="fund_cd" 				property="fundCd" />
+		<result column="fund_desc" 				property="fundDesc" />
+	</resultMap>
+	
+	<select id="getGIACSInquiryBranchLOV" resultMap="GIACSInquiryBranchLOVResultMap">
+	    SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT *
+		                  FROM TABLE(giac_branches_pkg.get_branch_lov_list(#moduleId#,#branch#,#fundCd#,#userId#))
+			          	  <isNotNull property="findText">
+		                  WHERE (UPPER(branch_cd) LIKE UPPER(#findText#) 
+		                  	 		OR UPPER(branch_name) LIKE UPPER(#findText#))
+		             	  </isNotNull>
+			          	  <isNotNull property="sortColumn">
+			          	  	  <isEqual property="sortColumn" compareValue="branchCd">
+				              		ORDER BY branch_cd
+				              </isEqual>
+			                  <isEqual property="sortColumn" compareValue="branchName">
+				              		ORDER BY branch_name
+				              </isEqual>	
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">	
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+							) a,
+							(SELECT count(*) count_
+							FROM TABLE(giac_branches_pkg.get_branch_lov_list(#moduleId#,#branch#,#fundCd#,#userId#))
+							<isNotNull property="findText">
+			                  WHERE (UPPER(branch_cd) LIKE UPPER(#findText#) 
+			                  		OR UPPER(branch_name) LIKE UPPER(#findText#))
+			             	</isNotNull>
+			                ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+
+	<!-- lara  -->
+	<resultMap class="java.util.HashMap" id="GIACS237BranchLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="branch_cd"	property="branchCd" />
+		<result column="branch_name"		property="branchName" />
+	</resultMap>
+	
+	<select id="getGIACS237BranchLOV" resultMap="GIACS237BranchLOVResultMap">
+	    SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT *
+		                  FROM TABLE(GIACS237_PKG.get_branch_cd_lov(#fundCd#, #userId#))
+			          	  	    <isNull property="findText">
+				                	WHERE UPPER(branch_name) LIKE UPPER(#searchString#)
+				          			OR UPPER(branch_cd) LIKE UPPER(#searchString#)
+				                </isNull>
+				                <isNotNull property="findText">
+				                	WHERE UPPER(branch_name) LIKE UPPER(#findText#)
+				          			OR UPPER(branch_cd) LIKE UPPER(#findText#)
+				                </isNotNull>
+								<isNotNull property="sortColumn">
+									<isEqual property="sortColumn" compareValue="branchCd">
+										ORDER BY branch_cd
+									</isEqual>
+									<isEqual property="sortColumn" compareValue="branchName">
+										ORDER BY branch_name
+									</isEqual>
+									<isEqual property="ascDescFlg" compareValue="ASC">
+										ASC
+									</isEqual>
+									<isEqual property="ascDescFlg" compareValue="DESC">
+										DESC
+									</isEqual>
+								</isNotNull>
+							) a,
+							(SELECT count(*) count_
+							FROM TABLE(GIACS237_PKG.get_branch_cd_lov(#fundCd#, #userId#))
+							   <isNull property="findText">
+				                	WHERE UPPER(branch_name) LIKE UPPER(#searchString#)
+				          			OR UPPER(branch_cd) LIKE UPPER(#searchString#)
+				                </isNull>
+				                <isNotNull property="findText">
+				                	WHERE UPPER(branch_name) LIKE UPPER(#findText#)
+				          			OR UPPER(branch_cd) LIKE UPPER(#findText#)
+				                </isNotNull>
+				                <isNotNull property="sortColumn">
+									<isEqual property="sortColumn" compareValue="branchCd">
+										ORDER BY branch_cd
+									</isEqual>
+									<isEqual property="sortColumn" compareValue="branchName">
+										ORDER BY branch_name
+									</isEqual>
+									<isEqual property="ascDescFlg" compareValue="ASC">
+										ASC
+									</isEqual>
+									<isEqual property="ascDescFlg" compareValue="DESC">
+										DESC
+									</isEqual>
+								</isNotNull>
+			                ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+
+	<select id="getGIACS002BranchLOV" parameterClass="java.util.HashMap" resultMap="giacs002BranchMap">
+		SELECT *
+ 		  FROM (SELECT rownum rownum_,
+ 		  			   b.count_,
+ 		  			   a.*
+ 		  		  FROM (SELECT *
+ 		  		  		  FROM TABLE(giac_branches_pkg.get_branch_cd_lov4(#fundCd#, #branchCd#))
+ 		  		  		 	<isNull property="findText">
+				               	WHERE UPPER(branch_name) LIKE '%' || UPPER(#findText#) || '%'
+				          		   OR UPPER(branch_cd) LIKE '%' || UPPER(#findText#) || '%'
+				          		   OR UPPER(gfun_fund_cd) LIKE '%' || UPPER(#findText#) || '%'
+				            </isNull>
+				            <isNotNull property="sortColumn">
+									<isEqual property="sortColumn" compareValue="branchCd">
+										ORDER BY branch_cd
+									</isEqual>
+									<isEqual property="sortColumn" compareValue="branchName">
+										ORDER BY branch_name
+									</isEqual>
+									<isEqual property="sortColumn" compareValue="gfunFundCd">
+										ORDER BY gfun_fund_cd
+									</isEqual>
+									<isEqual property="ascDescFlg" compareValue="ASC">
+										ASC
+									</isEqual>
+									<isEqual property="ascDescFlg" compareValue="DESC">
+										DESC
+									</isEqual>
+								</isNotNull>) a,
+ 		  		  	   (SELECT count(*) count_
+ 		  		  	      FROM TABLE(giac_branches_pkg.get_branch_cd_lov4(#fundCd#, #branchCd#))
+ 		  		  	      <isNull property="findText">
+				               	WHERE UPPER(branch_name) LIKE '%' || UPPER(#findText#) || '%'
+				          		   OR UPPER(branch_cd) LIKE '%' || UPPER(#findText#) || '%'
+				          		   OR UPPER(gfun_fund_cd) LIKE '%' || UPPER(#findText#) || '%'
+				            </isNull>
+				            <isNotNull property="sortColumn">
+									<isEqual property="sortColumn" compareValue="branchCd">
+										ORDER BY branch_cd
+									</isEqual>
+									<isEqual property="sortColumn" compareValue="branchName">
+										ORDER BY branch_name
+									</isEqual>
+									<isEqual property="sortColumn" compareValue="gfunFundCd">
+										ORDER BY gfun_fund_cd
+									</isEqual>
+									<isEqual property="ascDescFlg" compareValue="ASC">
+										ASC
+									</isEqual>
+									<isEqual property="ascDescFlg" compareValue="DESC">
+										DESC
+									</isEqual>
+								</isNotNull>) b)
+ 		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+
+	<select id="getGIACS092BranchLOV" resultMap="branchLOVMap">
+	    SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT *
+		                  FROM TABLE(GIACS092_PKG.get_branch_lov(#fundCd#, #userId#))
+			          	  	    <isNull property="findText">
+				                	WHERE UPPER(branch_name) LIKE UPPER(NVL(#searchString#, branch_name))
+				          			OR UPPER(branch_cd) LIKE UPPER(NVL(#searchString#, branch_cd))
+				                </isNull>
+				                <isNotNull property="findText">
+				                	WHERE UPPER(branch_name) LIKE UPPER(#findText#)
+				          			OR UPPER(branch_cd) LIKE UPPER(#findText#)
+				                </isNotNull>
+								<isNotNull property="sortColumn">
+									<isEqual property="sortColumn" compareValue="branchCd">
+										ORDER BY branch_cd
+									</isEqual>
+									<isEqual property="sortColumn" compareValue="branchName">
+										ORDER BY branch_name
+									</isEqual>
+									<isEqual property="ascDescFlg" compareValue="ASC">
+										ASC
+									</isEqual>
+									<isEqual property="ascDescFlg" compareValue="DESC">
+										DESC
+									</isEqual>
+								</isNotNull>
+							) a,
+							(SELECT count(*) count_
+							FROM TABLE(GIACS092_PKG.get_branch_lov(#fundCd#, #userId#))
+							   <isNull property="findText">
+				                	WHERE UPPER(branch_name) LIKE UPPER(NVL(#searchString#, branch_name))
+				          			OR UPPER(branch_cd) LIKE UPPER(NVL(#searchString#, branch_cd))
+				                </isNull>
+				                <isNotNull property="findText">
+				                	WHERE UPPER(branch_name) LIKE UPPER(#findText#)
+				          			OR UPPER(branch_cd) LIKE UPPER(#findText#)
+				                </isNotNull>
+			                ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+
+	<resultMap class="java.util.HashMap" id="giacs045BranchCdLov" extends="BaseEntity.TableGridResultMap">
+		<result column="branch_cd"		property="branchCd" />
+		<result column="branch_name"    property="branchName" />
+		<result column="line_cd_tag"    property="lineCdTag" />
+	</resultMap>
+
+	<select id="getGIACS230BranchLOV" resultMap="otherBranchDisbRequestMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giac_branches_pkg.get_branch_lov2(#gfunFundCd#, #moduleId#, #keyword#, #userId#))
+		                 <isNotNull property="findText">
+		                  	WHERE UPPER(branch_cd) LIKE UPPER(#findText#)
+		                  	   OR UPPER(branch_name) LIKE UPPER(#findText#)
+		                  </isNotNull>
+		                  <isNull property="findText">
+		                  	WHERE UPPER(branch_cd) LIKE UPPER(NVL(#searchString#, '%'))
+		                  	   OR UPPER(branch_name) LIKE UPPER(NVL(#searchString#, '%'))
+		                  </isNull>		                
+			             <isNotNull property="sortColumn"> 
+				             <isEqual property="sortColumn" compareValue="branchCd">
+				              		ORDER BY branch_cd
+				             </isEqual>
+				             <isEqual property="sortColumn" compareValue="branchName">
+				              		ORDER BY branch_name
+				             </isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			             </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giac_branches_pkg.get_branch_lov2(#gfunFundCd#, #moduleId#, #keyword#, #userId#))
+		                 <isNotNull property="findText">
+		                  	WHERE UPPER(branch_cd) LIKE UPPER(#findText#)
+		                  	   OR UPPER(branch_name) LIKE UPPER(#findText#)
+		                  </isNotNull>
+		                  <isNull property="findText">
+		                  	WHERE UPPER(branch_cd) LIKE UPPER(NVL(#searchString#, '%'))
+		                  	   OR UPPER(branch_name) LIKE UPPER(NVL(#searchString#, '%'))
+		                  </isNull>
+		                ) b
+		        ) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>	
+	
+	<select id="getGIACS045BranchCdLov" resultMap="giacs045BranchCdLov">
+		SELECT *
+            FROM (SELECT ROWNUM rownum_, b.count_, a.*
+                  FROM (SELECT *
+                          FROM TABLE(GIACS045_PKG.get_branch_cd_lov(#userId#, #documentCd#))
+                            <isNull property="findText">
+			                	WHERE UPPER(branch_cd) LIKE UPPER(NVL(#searchString#, branch_cd))
+			                </isNull>
+			                <isNotNull property="findText">
+			                	WHERE UPPER(branch_cd) LIKE UPPER(#findText#)
+			                	OR UPPER(branch_name) LIKE UPPER(#findText#)
+			                </isNotNull>
+                            <isEqual property="sortColumn" compareValue="branchCd">
+                                     ORDER BY branch_cd
+                            </isEqual>
+                            <isEqual property="sortColumn" compareValue="branchName">
+                                     ORDER BY branch_name
+                            </isEqual>
+                            <isNotNull property="sortColumn">
+                                 <isEqual property="ascDescFlg" compareValue="ASC">
+                                     ASC
+                                 </isEqual>
+                                 <isEqual property="ascDescFlg" compareValue="DESC">
+                                     DESC
+                                 </isEqual>
+                            </isNotNull>) a,
+               (SELECT COUNT (*) count_
+                  FROM TABLE
+                          (GIACS045_PKG.get_branch_cd_lov(#userId#, #documentCd#))
+                            <isNull property="findText">
+			                	WHERE UPPER(branch_cd) LIKE UPPER(NVL(#searchString#, branch_cd))
+			                </isNull>
+			                <isNotNull property="findText">
+			                	WHERE UPPER(branch_cd) LIKE UPPER(#findText#)
+			                	OR UPPER(branch_name) LIKE UPPER(#findText#)
+			                </isNotNull>
+                          ) b)
+          WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGIACS117BranchLOV" resultMap="branchLOVMap" parameterClass="java.util.HashMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		          FROM (SELECT * FROM TABLE (GIAC_BRANCHES_PKG.GET_BRANCH_LOV3(#moduleId#, #userId#))
+		          		<isNotNull property="findText">
+		          			WHERE UPPER(branch_cd) LIKE UPPER(#findText#)
+		  		  		  	 OR UPPER(branch_name) LIKE UPPER(#findText#)
+		          		</isNotNull>
+		          		<isNull property="findText">
+		          			WHERE UPPER(branch_cd) LIKE UPPER(#searchString#)
+		  		  		  	 OR UPPER(branch_name) LIKE UPPER(#searchString#)
+		          		</isNull>
+		          		<isNotNull property="sortColumn">
+		          			<isEqual property="sortColumn" compareValue="branchCd">
+		          				ORDER BY branch_cd
+		          			</isEqual>
+		          			<isEqual property="sortColumn" compareValue="branchName">
+		          				ORDER BY branch_name
+		          			</isEqual>
+		          			<isEqual property="ascDescFlg" compareValue="ASC">
+		          				ASC
+		          			</isEqual>
+		          			<isEqual property="ascDescFlg" compareValue="DESC">
+		          				DESC
+		          			</isEqual>
+		          		</isNotNull>
+		          		) a,
+		          		(SELECT count(*) count_ 
+		          		   FROM TABLE (GIAC_BRANCHES_PKG.GET_BRANCH_LOV3(#moduleId#, #userId#))
+			          		<isNotNull property="findText">
+			          			WHERE UPPER(branch_cd) LIKE UPPER(#findText#)
+			  		  		  	 OR UPPER(branch_name) LIKE UPPER(#findText#)
+			          		</isNotNull>
+			          		<isNull property="findText">
+			          			WHERE UPPER(branch_cd) LIKE UPPER(#searchString#)
+			  		  		  	 OR UPPER(branch_name) LIKE UPPER(#searchString#)
+			          		</isNull>
+		          		) b		  
+		  )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<!-- Joms for Simple Branch LOV -->
+	<select id="fetchSimpleBranchLOV" resultMap="branchLOVMap" parameterClass="java.util.HashMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		          FROM (SELECT * FROM TABLE (GIAC_BRANCHES_PKG.FETCH_BRANCH_LIST(#moduleId#, #userId#))
+		         WHERE 1 = 1
+		           AND branch_cd = NVL(#branchCd#, branch_cd)
+		          		<isNotNull property="findText">
+		          			  AND UPPER(branch_cd) LIKE UPPER(NVL(#findText# || '%', branch_cd))
+		          			   OR UPPER(branch_name) LIKE UPPER(NVL(#findText# || '%', branch_name))
+		          		</isNotNull>
+		          		<isNotNull property="sortColumn">
+		          			<isEqual property="sortColumn" compareValue="branchCd">
+		          				ORDER BY branch_cd
+		          			</isEqual>
+		          			<isEqual property="sortColumn" compareValue="branchName">
+		          				ORDER BY branch_name
+		          			</isEqual>
+		          			<isEqual property="ascDescFlg" compareValue="ASC">
+		          				ASC
+		          			</isEqual>
+		          			<isEqual property="ascDescFlg" compareValue="DESC">
+		          				DESC
+		          			</isEqual>
+		          		</isNotNull>
+		          		) a,
+		          		(SELECT count(*) count_ 
+		          		   FROM TABLE (GIAC_BRANCHES_PKG.FETCH_BRANCH_LIST(#moduleId#, #userId#))
+		          		  WHERE 1 = 1
+		                    AND branch_cd = NVL(#branchCd#, branch_cd)
+		          		 <isNotNull property="findText">
+		          			  AND UPPER(branch_cd) LIKE UPPER(NVL(#findText# || '%', branch_cd))
+		          			   OR UPPER(branch_name) LIKE UPPER(NVL(#findText# || '%', branch_name))
+		          		 </isNotNull>
+		          		) b		  
+		  )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	<!-- vondanix 10.07.2015 SR 5019 -->
+	<select id="fetchSimpleBranchLOVNoRI" resultMap="branchLOVMap" parameterClass="java.util.HashMap">
+		SELECT * 
+          FROM (SELECT a.*, b.count_, rownum rownum_
+                  FROM (SELECT * FROM GIAC_BRANCHES
+                 WHERE 1 = 1
+                   AND branch_cd IN (SELECT branch_cd FROM TABLE(security_access.get_branch_line('AC', #moduleId#, #userId#)))
+                          <isNotNull property="findText">
+                                AND (UPPER(branch_cd) LIKE UPPER(NVL(#findText#, branch_cd))
+                                 OR UPPER(branch_name) LIKE UPPER(NVL(#findText#, branch_name)))
+                          </isNotNull>
+                          <isNotNull property="sortColumn">
+                              <isEqual property="sortColumn" compareValue="branchCd">
+                                  ORDER BY branch_cd
+                              </isEqual>
+                              <isEqual property="sortColumn" compareValue="branchName">
+                                  ORDER BY branch_name
+                              </isEqual>
+                              <isEqual property="ascDescFlg" compareValue="ASC">
+                                  ASC
+                              </isEqual>
+                              <isEqual property="ascDescFlg" compareValue="DESC">
+                                  DESC
+                              </isEqual>
+                          </isNotNull>
+                          ) a,
+                          (SELECT count(*) count_ 
+                             FROM GIAC_BRANCHES
+                            WHERE 1 = 1
+                            AND branch_cd IN (SELECT branch_cd FROM TABLE(security_access.get_branch_line('AC', #moduleId#, #userId#)))
+                           <isNotNull property="findText">
+                                AND (UPPER(branch_cd) LIKE UPPER(NVL(#findText#, branch_cd))
+                                 OR UPPER(branch_name) LIKE UPPER(NVL(#findText#, branch_name)))
+                           </isNotNull>
+                          ) b          
+          )
+         WHERE rownum_ BETWEEN #from# AND #to#
+           AND branch_cd NOT IN (#riIssCd#)
+	</select>
+	
+	<select id="validateGIACS117BranchCd" resultClass="java.lang.String" parameterClass="java.util.HashMap">
+		SELECT GIAC_BRANCHES_PKG.validate_giacs117_branch_cd(#branchCd#, #moduleId#, #userId#) FROM DUAL
+	</select>
+	
+	<select id="validateGIACS170BranchCd" resultClass="java.lang.String" parameterClass="java.util.HashMap">
+		SELECT GIAC_BRANCHES_PKG.validate_giacs170_branch_cd(#branchCd#, #moduleId#, #userId#) FROM DUAL
+	</select>
+	
+	<select id="validateGIACS078BranchCd" resultClass="java.lang.String" parameterClass="java.util.HashMap">
+		SELECT GIAC_BRANCHES_PKG.validate_giacs078_branch_cd(#branchCd#, #moduleId#, #userId#) FROM DUAL
+	</select>
+	
+	
+	<select id="getGIACS072BranchLOV" resultMap="branchLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIAC_BRANCHES_PKG.get_branch_cd_lov5(#userId#, #moduleId#))
+		                  <isNull property="findText">
+                             WHERE UPPER(branch_cd) LIKE UPPER(NVL(#searchString#, branch_cd))
+                                OR UPPER(branch_name) LIKE UPPER(NVL(#searchString#, branch_name))
+                          </isNull>
+                          <isNotNull property="findText">
+                             WHERE UPPER(branch_cd) LIKE UPPER(NVL(#findText#, branch_cd))
+                                OR UPPER(branch_name) LIKE UPPER(NVL(#findText#, branch_name))
+                          </isNotNull>
+                          <isNull property="findText">
+                          	<isEmpty property="searchString">
+                          		UNION SELECT NULL, 'ALL BRANCHES' FROM DUAL
+                          	</isEmpty>	
+                          </isNull>
+		                  <isEqual property="sortColumn" compareValue="branchCd">
+			              		ORDER BY 1
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="branchName">
+			              		ORDER BY 2
+			              </isEqual>			                      
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*)  count_ 
+		                  FROM (SELECT * FROM TABLE (GIAC_BRANCHES_PKG.get_branch_cd_lov5(#userId#, #moduleId#))
+		                  <isNull property="findText">
+                             WHERE UPPER(branch_cd) LIKE UPPER(NVL(#searchString#, branch_cd))
+                                OR UPPER(branch_name) LIKE UPPER(NVL(#searchString#, branch_name))
+                          </isNull>
+                          <isNotNull property="findText">
+                             WHERE UPPER(branch_cd) LIKE UPPER(NVL(#findText#, branch_cd))
+                                OR UPPER(branch_name) LIKE UPPER(NVL(#findText#, branch_name))
+                          </isNotNull>
+		                  UNION SELECT NULL, 'ALL BRANCHES' FROM DUAL ORDER BY 1)) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGIACS281BranchLOV" resultMap="branchLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIAC_BRANCHES_PKG.get_branch_cd_lov5(#userId#, #moduleId#))
+		                  <isNull property="findText">
+                             WHERE UPPER(branch_cd) LIKE UPPER(NVL(#searchString#, branch_cd))
+                                OR UPPER(branch_name) LIKE UPPER(NVL(#searchString#, branch_name))
+                          </isNull>
+                          <isNotNull property="findText">
+                             WHERE UPPER(branch_cd) LIKE UPPER(NVL(#findText#, branch_cd))
+                                OR UPPER(branch_name) LIKE UPPER(NVL(#findText#, branch_name))
+                          </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="branchCd">
+			              		ORDER BY 1
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="branchName">
+			              		ORDER BY 2
+			              </isEqual>			                      
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*)  count_ 
+		                  FROM TABLE (GIAC_BRANCHES_PKG.get_branch_cd_lov5(#userId#, #moduleId#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="validateGIACBranchCd" resultClass="java.lang.String">
+		SELECT giac_branches_pkg.validate_branch_cd(#userId#, #moduleId#, #branchCd#) FROM DUAL
+	</select>
+	
+
+	<select id="getGIACS170BranchLOV" resultMap="branchLOVMap" parameterClass="java.util.HashMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		          FROM (SELECT * FROM TABLE(GIAC_BRANCHES_PKG.get_branch_lov4(#moduleId#, #userId#))
+		          		<isNotNull property="findText">
+		          			WHERE UPPER(branch_cd) LIKE UPPER(NVL(#findText#, branch_cd))
+		          			   OR UPPER(branch_name) LIKE UPPER(NVL(#findText# , branch_name))
+		          		</isNotNull>		          		
+		          		<!-- shan 10.07.2013 -->
+		          		<isNull property="findText">
+		          			WHERE UPPER(branch_cd) LIKE UPPER(NVL(#searchString#, branch_cd))
+		          			   OR UPPER(branch_name) LIKE UPPER(NVL(#searchString# , branch_name))
+		          		</isNull>
+		          		<!-- <isNull property="findText">		
+		          			UNION select null, 'ALL BRANCHES' from dual order by 1
+		          		</isNull>
+		          		<isNotNull property="findText">
+			          		<isEmpty property="findText">
+			          			UNION select null, 'ALL BRANCHES' from dual order by 1
+			          		</isEmpty>		          		
+		          		</isNotNull>  -->		          		
+		          		<!-- end shan 10.07.2013 -->
+		          		<isNotNull property="sortColumn">
+		          			<isEqual property="sortColumn" compareValue="branchCd">
+		          				ORDER BY 1
+		          			</isEqual>
+		          			<isEqual property="sortColumn" compareValue="branchName">
+		          				ORDER BY 2
+		          			</isEqual>
+		          			<isEqual property="ascDescFlg" compareValue="ASC">
+		          				ASC
+		          			</isEqual>
+		          			<isEqual property="ascDescFlg" compareValue="DESC">
+		          				DESC
+		          			</isEqual>
+		          		</isNotNull>
+		          		) a,
+		               	(SELECT count(*) count_ 
+		               	   FROM (SELECT * FROM TABLE(GIAC_BRANCHES_PKG.get_branch_lov4(#moduleId#, #userId#))
+				          		<isNotNull property="findText">
+				          			WHERE UPPER(branch_cd) LIKE UPPER(NVL(#findText#, branch_cd))
+				          			   OR UPPER(branch_name) LIKE UPPER(NVL(#findText#, branch_name))
+				          		</isNotNull>          		
+				          		<!-- shan 10.07.2013 -->
+				          		<isNull property="findText">
+				          			WHERE UPPER(branch_cd) LIKE UPPER(NVL(#searchString#, branch_cd))
+				          			   OR UPPER(branch_name) LIKE UPPER(NVL(#searchString# , branch_name))
+				          		</isNull>
+				          		<!-- <isNull property="findText">		
+				          			UNION select null, 'ALL BRANCHES' from dual order by 1
+				          		</isNull>
+				          		<isNotNull property="findText">
+					          		<isEmpty property="findText">
+					          			UNION select null, 'ALL BRANCHES' from dual order by 1
+					          		</isEmpty>		          		
+				          		</isNotNull>  -->		          		
+				          		<!-- end shan 10.07.2013 --> )
+		               	)b
+		  )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+
+
+	<select id="getGIACS178BranchLOV" resultMap="branchLOVMap">
+		SELECT *
+            FROM (SELECT ROWNUM rownum_, b.count_, a.*
+                  FROM (SELECT *
+                          FROM TABLE(GIAC_BRANCHES_PKG.get_giacs178_branch_lov(#userId#, #moduleId#))
+                            <isNull property="findText">
+                             WHERE UPPER(branch_cd) LIKE UPPER(NVL(#searchString#, branch_cd))
+                                OR UPPER(branch_name) LIKE UPPER(NVL(#searchString#, branch_name))
+                          </isNull>
+                          <isNotNull property="findText">
+                             WHERE UPPER(branch_cd) LIKE UPPER(NVL(#findText#, branch_cd))
+                                OR UPPER(branch_name) LIKE UPPER(NVL(#findText#, branch_name))
+                          </isNotNull>
+                            <isEqual property="sortColumn" compareValue="branchCd">
+                                     ORDER BY branch_cd
+                            </isEqual>
+                            <isEqual property="sortColumn" compareValue="branchName">
+                                     ORDER BY branch_name
+                            </isEqual>
+                            <isNotNull property="sortColumn">
+                                 <isEqual property="ascDescFlg" compareValue="ASC">
+                                     ASC
+                                 </isEqual>
+                                 <isEqual property="ascDescFlg" compareValue="DESC">
+                                     DESC
+                                 </isEqual>
+                            </isNotNull>) a,
+               (SELECT COUNT (*) count_
+                  FROM TABLE
+                          (GIAC_BRANCHES_PKG.get_giacs178_branch_lov(#userId#, #moduleId#))
+                            <isNull property="findText">
+                             WHERE UPPER(branch_cd) LIKE UPPER(NVL(#searchString#, branch_cd))
+                                OR UPPER(branch_name) LIKE UPPER(NVL(#searchString#, branch_name))
+                          </isNull>
+                          <isNotNull property="findText">
+                             WHERE UPPER(branch_cd) LIKE UPPER(NVL(#findText#, branch_cd))
+                                OR UPPER(branch_name) LIKE UPPER(NVL(#findText#, branch_name))
+                          </isNotNull>
+                          ) b)
+          WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="validateGIACS178BranchCd" resultClass="java.lang.String">
+		SELECT giac_branches_pkg.validate_giacs178_branch_cd(#userId#, #moduleId#, #branchCd#) FROM DUAL
+	</select>
+	
+	<select id="getGIACS118BranchLOV" resultMap="branchLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIAC_BRANCHES_PKG.get_branch_cd_lov6(#userId#, #moduleId#))
+		                  <isNull property="findText">
+                             WHERE UPPER(branch_cd) LIKE UPPER(NVL(#searchString#, branch_cd))
+                                OR UPPER(branch_name) LIKE UPPER(NVL(#searchString#, branch_name))
+                          </isNull>
+                          <isNotNull property="findText">
+                             WHERE UPPER(branch_cd) LIKE UPPER(NVL(#findText#, branch_cd))
+                                OR UPPER(branch_name) LIKE UPPER(NVL(#findText#, branch_name))
+                          </isNotNull>            
+		                  <isEqual property="sortColumn" compareValue="branchCd">
+			              		ORDER BY 1
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="branchName">
+			              		ORDER BY 2
+			              </isEqual>			                      
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*)  count_ 
+		                  FROM (SELECT * FROM TABLE (GIAC_BRANCHES_PKG.get_branch_cd_lov6(#userId#, #moduleId#))
+		                  		<isNull property="findText">
+	                             WHERE UPPER(branch_cd) LIKE UPPER(NVL(#searchString#, branch_cd))
+	                                OR UPPER(branch_name) LIKE UPPER(NVL(#searchString#, branch_name))
+	                          </isNull>
+	                          <isNotNull property="findText">
+	                             WHERE UPPER(branch_cd) LIKE UPPER(NVL(#findText#, branch_cd))
+	                                OR UPPER(branch_name) LIKE UPPER(NVL(#findText#, branch_name))
+	                          </isNotNull>)) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	<select id="getGIACS135BranchLOV" resultMap="branchLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIAC_BRANCHES_PKG.get_branch_cd_lov6(#userId#, #moduleId#))
+                          <isNotNull property="findText">
+                             WHERE UPPER(branch_cd) LIKE UPPER(NVL(#findText#, branch_cd))
+                                OR UPPER(branch_name) LIKE UPPER(NVL(#findText#, branch_name))
+                          </isNotNull>            
+		                  <isEqual property="sortColumn" compareValue="branchCd">
+			              		ORDER BY 1
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="branchName">
+			              		ORDER BY 2
+			              </isEqual>			                      
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*)  count_ 
+		                  FROM (SELECT * FROM TABLE (GIAC_BRANCHES_PKG.get_branch_cd_lov6(#userId#, #moduleId#))
+	                          <isNotNull property="findText">
+	                             WHERE UPPER(branch_cd) LIKE UPPER(NVL(#findText#, branch_cd))
+	                                OR UPPER(branch_name) LIKE UPPER(NVL(#findText#, branch_name))
+	                          </isNotNull>)) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	<!-- added by Kris 07.09.2013 for GIACS184 -->
+	<select id="getGIACS184BranchLOV" resultMap="branchLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIAC_BRANCHES_PKG.get_branch_cd_lov7(#userId#, #moduleId#))
+		                  <isNull property="findText">
+                             WHERE UPPER(branch_cd) LIKE UPPER(NVL(#searchString#, branch_cd))
+                                OR UPPER(branch_name) LIKE UPPER(NVL(#searchString#, branch_name))
+                          </isNull>
+                          <isNotNull property="findText">
+                             WHERE UPPER(branch_cd) LIKE UPPER(NVL(#findText#, branch_cd))
+                                OR UPPER(branch_name) LIKE UPPER(NVL(#findText#, branch_name))
+                          </isNotNull>            
+		                  <isEqual property="sortColumn" compareValue="branchCd">
+			              		ORDER BY 1
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="branchName">
+			              		ORDER BY 2
+			              </isEqual>			                      
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*)  count_ 
+		                  FROM (SELECT * FROM TABLE (GIAC_BRANCHES_PKG.get_branch_cd_lov7(#userId#, #moduleId#))
+		                  		<isNull property="findText">
+	                             WHERE UPPER(branch_cd) LIKE UPPER(NVL(#searchString#, branch_cd))
+	                                OR UPPER(branch_name) LIKE UPPER(NVL(#searchString#, branch_name))
+	                          </isNull>
+	                          <isNotNull property="findText">
+	                             WHERE UPPER(branch_cd) LIKE UPPER(NVL(#findText#, branch_cd))
+	                                OR UPPER(branch_name) LIKE UPPER(NVL(#findText#, branch_name))
+	                          </isNotNull>)) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+
+	<!-- added by kenneth L. for Print Premium Deposit 06.25.2013 -->
+	<select id="getGIACS147BranchLov" resultMap="branchLOVMap">
+		SELECT *
+  		  FROM (SELECT ROWNUM rownum_, 
+	               	   b.count_, 
+	              	   a.* 
+	          	  FROM (SELECT * FROM TABLE(GIACS147_PKG.get_branch_lov(#userId#))
+	          	  
+	          	  
+	          	  <isNull property="findText">
+					WHERE branch_cd LIKE upper(NVL(#search#, branch_cd))
+					</isNull>
+					<isNotNull property="findText">
+					WHERE branch_cd LIKE upper(#findText#)
+					</isNotNull>
+					
+	            <isEqual property="sortColumn" compareValue="branchCd">
+              		ORDER BY branch_cd
+	            </isEqual>
+	            <isEqual property="sortColumn" compareValue="branchName">
+              		ORDER BY branch_name
+	            </isEqual>
+	            <isNotNull property="sortColumn">
+              		<isEqual property="ascDescFlg" compareValue="ASC">
+              			ASC
+              		</isEqual>
+              		<isEqual property="ascDescFlg" compareValue="DESC">
+              			DESC
+              		</isEqual>
+              	</isNotNull>) a,
+              (SELECT count(*) count_
+	          	 FROM TABLE(GIACS147_PKG.get_branch_lov(#userId#))
+	          		  <isNull property="findText">
+					WHERE branch_cd LIKE upper(NVL(#search#, branch_cd))
+					</isNull>
+					<isNotNull property="findText">
+					WHERE branch_cd LIKE upper(#findText#)
+					</isNotNull>
+				)b) 
+	    	WHERE rownum_ BETWEEN #from# AND #to# 	
+	</select>
+	
+	<select id="getGIACS078BranchLOV" resultMap="branchLOVMap" parameterClass="java.util.HashMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		          FROM (SELECT * FROM TABLE(GIAC_BRANCHES_PKG.get_branch_lov5(#moduleId#, #userId#))
+		          		<isNotNull property="findText">
+		          			WHERE UPPER(branch_cd) LIKE UPPER(NVL(#findText#, branch_cd))
+		          			   OR UPPER(branch_name) LIKE UPPER(NVL(#findText# , branch_name))
+		          		</isNotNull>
+		          		<isNull property="findText">
+		          			WHERE UPPER(branch_cd) LIKE UPPER(NVL(#searchString#, branch_cd))
+		          			   OR UPPER(branch_name) LIKE UPPER(NVL(#searchString# , branch_name))
+		          		</isNull>
+		          		<isNotNull property="sortColumn">
+		          			<isEqual property="sortColumn" compareValue="branchCd">
+		          				ORDER BY 1
+		          			</isEqual>
+		          			<isEqual property="sortColumn" compareValue="branchName">
+		          				ORDER BY 2
+		          			</isEqual>
+		          			<isEqual property="ascDescFlg" compareValue="ASC">
+		          				ASC
+		          			</isEqual>
+		          			<isEqual property="ascDescFlg" compareValue="DESC">
+		          				DESC
+		          			</isEqual>
+		          		</isNotNull>
+		          		) a,
+		               	(SELECT count(*) count_ FROM TABLE(GIAC_BRANCHES_PKG.get_branch_lov4(#moduleId#, #userId#))
+		          		 <isNotNull property="findText">
+		          			WHERE UPPER(branch_cd) LIKE UPPER(NVL(#findText#, branch_cd))
+		          			   OR UPPER(branch_name) LIKE UPPER(NVL(#findText#, branch_name))
+		          		 </isNotNull>
+		          		<isNull property="findText">
+		          			WHERE UPPER(branch_cd) LIKE UPPER(NVL(#searchString#, branch_cd))
+		          			   OR UPPER(branch_name) LIKE UPPER(NVL(#searchString# , branch_name))
+		          		</isNull>
+		               	)b
+		  )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+
+	
+	<!-- GIACS273 -->
+	<select id="getGIACS273BranchLOV" resultMap="branchLOVMap" parameterClass="java.util.HashMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		          FROM (SELECT * FROM TABLE(GIAC_BRANCHES_PKG.get_giacs273_branch_lov(#fundCd#, #moduleId#, #userId#))
+		          		<isNotNull property="findText">
+		          			WHERE UPPER(branch_cd) LIKE UPPER(NVL(#findText#, branch_cd))
+		          			   OR UPPER(branch_name) LIKE UPPER(NVL(#findText# , branch_name))
+		          		</isNotNull>
+		          		<isNull property="findText">
+		          			WHERE UPPER(branch_cd) LIKE UPPER(NVL(#searchString#, branch_cd))
+		          			   OR UPPER(branch_name) LIKE UPPER(NVL(#searchString# , branch_name))
+		          		</isNull>
+		          		<isNotNull property="sortColumn">
+		          			<isEqual property="sortColumn" compareValue="branchCd">
+		          				ORDER BY 1
+		          			</isEqual>
+		          			<isEqual property="sortColumn" compareValue="branchName">
+		          				ORDER BY 2
+		          			</isEqual>
+		          			<isEqual property="ascDescFlg" compareValue="ASC">
+		          				ASC
+		          			</isEqual>
+		          			<isEqual property="ascDescFlg" compareValue="DESC">
+		          				DESC
+		          			</isEqual>
+		          		</isNotNull>
+		          		) a,
+		               	(SELECT count(*) count_ FROM TABLE(GIAC_BRANCHES_PKG.get_giacs273_branch_lov(#fundCd#, #moduleId#, #userId#))
+		          		 <isNotNull property="findText">
+		          			WHERE UPPER(branch_cd) LIKE UPPER(NVL(#findText#, branch_cd))
+		          			   OR UPPER(branch_name) LIKE UPPER(NVL(#findText#, branch_name))
+		          		 </isNotNull>
+		          		<isNull property="findText">
+		          			WHERE UPPER(branch_cd) LIKE UPPER(NVL(#searchString#, branch_cd))
+		          			   OR UPPER(branch_name) LIKE UPPER(NVL(#searchString# , branch_name))
+		          		</isNull>
+		               	)b
+		  )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="validateGIACS273BranchCd" resultClass="java.lang.String" parameterClass="java.util.HashMap">
+		SELECT GIAC_BRANCHES_PKG.validate_giacs273_branch_cd(#branchCd#, #fundCd#, #moduleId#, #userId#) FROM DUAL
+	</select>
+	
+	<!-- end GIACS273 -->
+	
+	<select id="getBranchPerFundLOV" resultMap="branchLOVMap" parameterClass="java.util.HashMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		          FROM (SELECT * FROM TABLE(GIAC_BRANCHES_PKG.get_branch_per_fund_lov(#fundCd#, #userId#, #moduleId#))
+		          		<isNotNull property="findText">
+		          			WHERE UPPER(branch_cd) LIKE UPPER(NVL(#findText#, branch_cd))
+		          			   OR UPPER(branch_name) LIKE UPPER(NVL(#findText# , branch_name))
+		          		</isNotNull>
+		          		<isNull property="findText">
+		          			WHERE UPPER(branch_cd) LIKE UPPER(NVL(#searchString#, branch_cd))
+		          			   OR UPPER(branch_name) LIKE UPPER(NVL(#searchString# , branch_name))
+		          		</isNull>
+		          		<isNotNull property="sortColumn">
+		          			<isEqual property="sortColumn" compareValue="branchCd">
+		          				ORDER BY 1
+		          			</isEqual>
+		          			<isEqual property="sortColumn" compareValue="branchName">
+		          				ORDER BY 2
+		          			</isEqual>
+		          			<isEqual property="ascDescFlg" compareValue="ASC">
+		          				ASC
+		          			</isEqual>
+		          			<isEqual property="ascDescFlg" compareValue="DESC">
+		          				DESC
+		          			</isEqual>
+		          		</isNotNull>
+		          		) a,
+		               	(SELECT count(*) count_ FROM TABLE(GIAC_BRANCHES_PKG.get_branch_per_fund_lov(#fundCd#, #userId#, #moduleId#))
+		          		 <isNotNull property="findText">
+		          			WHERE UPPER(branch_cd) LIKE UPPER(NVL(#findText#, branch_cd))
+		          			   OR UPPER(branch_name) LIKE UPPER(NVL(#findText#, branch_name))
+		          		 </isNotNull>
+		          		 <isNull property="findText">
+		          			WHERE UPPER(branch_cd) LIKE UPPER(NVL(#searchString#, branch_cd))
+		          			   OR UPPER(branch_name) LIKE UPPER(NVL(#searchString# , branch_name))
+		          		</isNull>
+		               	)b
+		  )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+
+	<!-- added by : Kenneth L. 07.26.2013 :for GIACS502 -->
+	<select id="getGiacs502BranchLov" resultMap="branchLOVMap" parameterClass="java.util.HashMap">		
+		SELECT *
+  		  FROM (SELECT ROWNUM rownum_, 
+	               	   b.count_, 
+	              	   a.* 
+	          	  FROM (SELECT * FROM TABLE(giacs502_pkg.get_branch_lov(#userId#))
+          	   	 <isNull property="findText">
+					WHERE branch_cd LIKE upper(NVL(#search#, branch_cd)) OR branch_name LIKE upper(NVL(#search#, branch_name))
+				 </isNull>
+				 <isNotNull property="findText">
+					WHERE branch_cd LIKE upper(#findText#) OR branch_name LIKE upper(#findText#)
+				 </isNotNull>
+					
+	            <isEqual property="sortColumn" compareValue="branchCd">
+              		ORDER BY branch_cd
+	            </isEqual>
+	            <isEqual property="sortColumn" compareValue="branchName">
+              		ORDER BY branch_name
+	            </isEqual>
+	            <isNotNull property="sortColumn">
+              		<isEqual property="ascDescFlg" compareValue="ASC">
+              			ASC
+              		</isEqual>
+              		<isEqual property="ascDescFlg" compareValue="DESC">
+              			DESC
+              		</isEqual>
+              	</isNotNull>) a,
+              (SELECT count(*) count_
+	          	 FROM TABLE(giacs502_pkg.get_branch_lov(#userId#))
+	            <isNull property="findText">
+			   		WHERE branch_cd LIKE upper(NVL(#search#, branch_cd)) OR branch_name LIKE upper(NVL(#search#, branch_name))
+				</isNull>
+				<isNotNull property="findText">
+					WHERE branch_cd LIKE upper(#findText#) OR branch_name LIKE upper(#findText#)
+				</isNotNull>)b) 
+	    	WHERE rownum_ BETWEEN #from# AND #to# 	
+ 	</select>	
+ 	
+ 	<parameterMap class="java.util.HashMap" id="GIACS303NewFormParamMap">
+ 		<parameter property="fundCd" javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT"/>
+ 		<parameter property="fundDesc" javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT"/>
+ 		<parameter property="sapIntegrationSw" javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT"/>
+ 	</parameterMap>
+ 	
+ 	<procedure id="giacs303NewFormInstance" parameterMap="GIACS303NewFormParamMap">
+ 		BEGIN
+ 			giacs303_pkg.new_form_instance(?, ?, ?);
+ 		END;
+ 	</procedure>
+ 	
+ 	<resultMap class="GIACBranch" id="GIACBranchResultMap" extends="BaseEntity.TableGridResultMap">
+ 		<result property="gfunFundCd" column="gfun_fund_cd"/>
+ 		<result property="branchCd" column="branch_cd"/>
+ 		<result property="acctBranchCd" column="acct_branch_cd"/>
+ 		<result property="branchName" column="branch_name"/>
+ 		<result property="checkDvPrint" column="check_dv_print"/>
+ 		<result property="dspCheckDvPrint" column="dsp_check_dv_print"/>
+ 		<result property="compCd" column="comp_cd"/>
+ 		<result property="bankCd" column="bank_cd"/>
+ 		<result property="dspBankName" column="dsp_bank_name"/>
+ 		<result property="bankAcctCd" column="bank_acct_cd"/>
+ 		<result property="dspBankAcctNo" column="dsp_bank_acct_no"/>
+ 		<result property="birPermit" column="bir_permit"/>
+ 		<result property="branchTin" column="branch_tin"/>
+ 		<result property="address1" column="address1"/>
+ 		<result property="address2" column="address2"/> 		
+ 		<result property="address3" column="address3"/>
+ 		<result property="remarks" column="remarks"/>
+ 		<result property="telNo" column="tel_no"/>
+ 		<result property="userId" column="user_id"/>
+ 		<result property="lastUpdate" column="last_update"/>
+ 	</resultMap>
+ 	
+	<select id="getGiacs303BranchList" resultMap="GIACBranchResultMap">		
+		SELECT *
+  		  FROM (SELECT ROWNUM rownum_, 
+	               	   b.count_, 
+	              	   a.* 
+	          	  FROM (SELECT * FROM TABLE(giacs303_pkg.get_branch_list(#fundCd#, #branchCd#, #acctBranchCd#, #branchName#, #compCd#, #dspCheckDvPrint#))
+         	 		<isNotNull property="sortColumn">
+	          			<isEqual property="sortColumn" compareValue="branchCd">
+	          				ORDER BY branch_cd
+	          			</isEqual>
+	          			<isEqual property="sortColumn" compareValue="acctBranchCd">
+	          				ORDER BY acct_branch_cd
+	          			</isEqual>
+	          			<isEqual property="sortColumn" compareValue="branchName">
+	          				ORDER BY branch_name
+	          			</isEqual>
+	          			<isEqual property="sortColumn" compareValue="compCd">
+	          				ORDER BY comp_cd
+	          			</isEqual>
+	          			<isEqual property="sortColumn" compareValue="dspCheckDvPrint">
+	          				ORDER BY check_dv_print
+	          			</isEqual>
+	          			<isEqual property="ascDescFlg" compareValue="ASC">
+	          				ASC
+	          			</isEqual>
+	          			<isEqual property="ascDescFlg" compareValue="DESC">
+	          				DESC
+	          			</isEqual>
+	          		</isNotNull>
+          	   	) a,
+              (SELECT count(*) count_
+	          	 FROM TABLE(giacs303_pkg.get_branch_list(#fundCd#, #branchCd#, #acctBranchCd#, #branchName#, #compCd#, #dspCheckDvPrint#))
+	            )b) 
+	    	WHERE rownum_ BETWEEN #from# AND #to# 
+ 	</select>
+ 	
+ 	<procedure id="giacs303ValDeleteBranch">
+ 		BEGIN
+ 			giacs303_pkg.val_delete_branch(TRUE, #branchCd#, #fundCd#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<update id="giacs303UpdateBranch" parameterClass="GIACBranch">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			giacs303_pkg.update_branch(#gfunFundCd#, #branchCd#, #bankCd#, #bankAcctCd#, #birPermit#, #checkDvPrint#, #compCd#, #remarks#);
+		END;
+	</update>
+	
+	
+	
+	 	
+	 	
+	 <select id="getBranchLOVInAcctrans" resultMap="branchLOVMap" parameterClass="java.util.HashMap">		
+		SELECT *
+  		  FROM (SELECT ROWNUM rownum_, b.count_, a.* 
+  		  	      FROM (SELECT * FROM TABLE(GIAC_BRANCHES_PKG.get_branch_lov_in_acctrans(#moduleId#, #userId#))
+          	  <isNull property="findText">
+			     WHERE UPPER(branch_cd) LIKE UPPER(NVL(#searchString#, branch_cd))
+			        OR UPPER(branch_name) LIKE UPPER(NVL(#searchString#, branch_name))
+			  </isNull>
+			  <isNotNull property="findText">
+			     WHERE UPPER(branch_cd) LIKE UPPER(NVL(#findText#, branch_cd))
+			       OR UPPER(branch_name) LIKE UPPER(NVL(#findText#, branch_name))
+			  </isNotNull>
+			  <isEqual property="sortColumn" compareValue="branchCd">
+			     ORDER BY 1
+			  </isEqual>
+			  <isEqual property="sortColumn" compareValue="branchName">
+			 	 ORDER BY 2
+			  </isEqual>			                      
+			  <isNotNull property="sortColumn">
+			     <isEqual property="ascDescFlg" compareValue="ASC">
+			 	    ASC
+			     </isEqual>
+			 	 <isEqual property="ascDescFlg" compareValue="DESC">
+			 		DESC
+			 	 </isEqual>
+			  </isNotNull>) a,
+              (SELECT count(*) count_
+	          	 FROM TABLE(GIAC_BRANCHES_PKG.get_branch_lov_in_acctrans(#moduleId#, #userId#))
+	            <isNull property="findText">
+			     WHERE UPPER(branch_cd) LIKE UPPER(NVL(#searchString#, branch_cd))
+			        OR UPPER(branch_name) LIKE UPPER(NVL(#searchString#, branch_name))
+			    </isNull>
+			    <isNotNull property="findText">
+			     WHERE UPPER(branch_cd) LIKE UPPER(NVL(#findText#, branch_cd))
+			       OR UPPER(branch_name) LIKE UPPER(NVL(#findText#, branch_name))
+			  </isNotNull>)b) 
+	    	WHERE rownum_ BETWEEN #from# AND #to# 	
+ 	</select>
+ 	
+ 	<select id="validateBranchCdInAcctrans" resultClass="java.lang.String" parameterClass="java.util.HashMap">
+		SELECT GIAC_BRANCHES_PKG.val_branch_cd_in_acctrans(#moduleId#, #userId#, #branchCd#) FROM DUAL
+	</select>
+	
+	<select id="getGIACS054BranchLOV" resultMap="branchLOVMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giac_branches_pkg.get_branch_lov(#gfunFundCd#, #moduleId#, #userId#, #findText#))
+		                  <isNull property="findText">
+		                	WHERE UPPER(branch_name) LIKE UPPER(NVL(#searchString#, branch_name))
+		          			   OR UPPER(branch_cd) LIKE UPPER(NVL(#searchString#, branch_cd))
+		                  </isNull>
+		                  <isEqual property="sortColumn" compareValue="branchCd">
+			              		ORDER BY branch_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="branchName">
+			              		ORDER BY branch_name
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giac_branches_pkg.get_branch_lov(#gfunFundCd#, #moduleId#, #userId#, #findText#))
+	                  <isNull property="findText">
+	                	WHERE UPPER(branch_name) LIKE UPPER(NVL(#searchString#, branch_name))
+		          		   OR UPPER(branch_cd) LIKE UPPER(NVL(#searchString#, branch_cd))
+	                  </isNull>) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGIACS127BranchLOV" resultMap="branchLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIAC_BRANCHES_PKG.get_giacs127_branch_lov(#userId#, #moduleId#))
+		                  <isNull property="findText">
+                             WHERE UPPER(branch_cd) LIKE UPPER(NVL(#searchString#, branch_cd))
+                                OR UPPER(branch_name) LIKE UPPER(NVL(#searchString#, branch_name))
+                          </isNull>
+                          <isNotNull property="findText">
+                             WHERE UPPER(branch_cd) LIKE UPPER(NVL(#findText#, branch_cd))
+                                OR UPPER(branch_name) LIKE UPPER(NVL(#findText#, branch_name))
+                          </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="branchCd">
+			              		ORDER BY 1
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="branchName">
+			              		ORDER BY 2
+			              </isEqual>			                      
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giac_branches_pkg.get_branch_lov(#gfunFundCd#, #moduleId#, #userId#, #findText#))
+	                  <isNull property="findText">
+	                	WHERE UPPER(branch_name) LIKE UPPER(NVL(#searchString#, branch_name))
+		          		   OR UPPER(branch_cd) LIKE UPPER(NVL(#searchString#, branch_cd))
+	                  </isNull>) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+ 	
+ 	<select id="getGIACS240BranchLOV" resultMap="branchLOVMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		              COUNT(1) OVER() count_,  <!-- added by MarkS 12.12.2016 SR5862 optimization -->
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giac_branches_pkg.get_branch_giacs240_lov(#gfunFundCd#, #moduleId#, #userId#))
+		                  <isNotNull property="findText">
+							WHERE (UPPER(branch_cd) LIKE UPPER(#findText#) 
+								   	OR UPPER(branch_name) LIKE UPPER(#findText#))
+						  </isNotNull>
+						  <isNull property="findText">
+							WHERE (UPPER(branch_cd) LIKE UPPER(NVL(#searchString#, branch_cd))
+								  	OR UPPER(branch_name) LIKE UPPER(NVL(#searchString#, branch_name)))
+						  </isNull>
+		                  <isEqual property="sortColumn" compareValue="branchCd">
+			              		ORDER BY branch_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="branchName">
+			              		ORDER BY branch_name
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+		
+		<!-- commented by MarkS 12.12.2016 SR5862 optimization -->
+		<!-- SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giac_branches_pkg.get_branch_giacs240_lov(#gfunFundCd#, #moduleId#, #userId#))
+		                  <isNotNull property="findText">
+							WHERE (UPPER(branch_cd) LIKE UPPER(#findText#) 
+								   	OR UPPER(branch_name) LIKE UPPER(#findText#))
+						  </isNotNull>
+						  <isNull property="findText">
+							WHERE (UPPER(branch_cd) LIKE UPPER(NVL(#searchString#, branch_cd))
+								  	OR UPPER(branch_name) LIKE UPPER(NVL(#searchString#, branch_name)))
+						  </isNull>
+		                  <isEqual property="sortColumn" compareValue="branchCd">
+			              		ORDER BY branch_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="branchName">
+			              		ORDER BY branch_name
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giac_branches_pkg.get_branch_giacs240_lov(#gfunFundCd#, #moduleId#, #userId#))
+		                  <isNotNull property="findText">
+							WHERE (UPPER(branch_cd) LIKE UPPER(#findText#) 
+								   	OR UPPER(branch_name) LIKE UPPER(#findText#))
+						  </isNotNull>
+						  <isNull property="findText">
+							WHERE (UPPER(branch_cd) LIKE UPPER(NVL(#searchString#, branch_cd))
+								  	OR UPPER(branch_name) LIKE UPPER(NVL(#searchString#, branch_name)))
+						  </isNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to# -->
+	</select>
+	
+ 	<select id="getGiacs414BranchLOV" resultMap="branchLOVMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		          FROM (SELECT * 
+		  		   		  FROM TABLE(giac_branches_pkg.get_branch_lovgiacs414(#userId#))
+						 <isNotNull property="findText">
+							WHERE (UPPER(branch_cd) LIKE UPPER(#findText#)
+							OR UPPER(branch_name) LIKE UPPER(#findText#))
+						 </isNotNull>
+						 <isNull property="findText">
+							WHERE (UPPER(branch_cd) LIKE UPPER(#findText2#)
+							OR UPPER(branch_name) LIKE UPPER(#findText2#))
+						 </isNull>
+                         <isEqual property="sortColumn" compareValue="branchCd">
+                                ORDER BY branch_cd
+                         </isEqual>
+                          <isEqual property="sortColumn" compareValue="branchName">
+                                ORDER BY branch_name
+                         </isEqual>
+		  				 <isNotNull property="sortColumn">
+                                 <isEqual property="ascDescFlg" compareValue="ASC">
+                                     ASC
+                                 </isEqual> 
+                                 <isEqual property="ascDescFlg" compareValue="DESC">
+                                     DESC
+                                 </isEqual>
+                         </isNotNull> 
+		  		   		) a,
+		          	   (SELECT count(*) count_ 
+		  		   		  FROM TABLE(giac_branches_pkg.get_branch_lovgiacs414(#userId#))
+	  		   		     <isNotNull property="findText">
+							WHERE (UPPER(branch_cd) LIKE UPPER(#findText#)
+							OR UPPER(branch_name) LIKE UPPER(#findText#))
+						 </isNotNull>
+						 <isNull property="findText">
+							WHERE (UPPER(branch_cd) LIKE UPPER(#findText2#)
+							OR UPPER(branch_name) LIKE UPPER(#findText2#))
+						 </isNull>
+		  		   		) b
+               )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+ 	<select id="getGiacsDynamicBranchLOV" resultMap="branchLOVMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		          FROM (SELECT * 
+		  		   		  FROM TABLE(giac_branches_pkg.get_dynamic_branch_lov(#userId#, #moduleId#))
+						 <isNotNull property="findText">
+							WHERE (UPPER(branch_cd) LIKE UPPER(#findText#)
+							OR UPPER(branch_name) LIKE UPPER(#findText#))
+						 </isNotNull>
+						 <isNull property="findText">
+							WHERE (UPPER(branch_cd) LIKE UPPER(#findText2#)
+							OR UPPER(branch_name) LIKE UPPER(#findText2#))
+						 </isNull>
+                         <isEqual property="sortColumn" compareValue="branchCd">
+                                ORDER BY branch_cd
+                         </isEqual>
+                          <isEqual property="sortColumn" compareValue="branchName">
+                                ORDER BY branch_name
+                         </isEqual>
+		  				 <isNotNull property="sortColumn">
+                                 <isEqual property="ascDescFlg" compareValue="ASC">
+                                     ASC
+                                 </isEqual> 
+                                 <isEqual property="ascDescFlg" compareValue="DESC">
+                                     DESC
+                                 </isEqual>
+                         </isNotNull> 
+		  		   		) a,
+		          	   (SELECT count(*) count_ 
+		  		   		  FROM TABLE(giac_branches_pkg.get_dynamic_branch_lov(#userId#, #moduleId#))
+	  		   		     <isNotNull property="findText">
+							WHERE (UPPER(branch_cd) LIKE UPPER(#findText#)
+							OR UPPER(branch_name) LIKE UPPER(#findText#))
+						 </isNotNull>
+						 <isNull property="findText">
+							WHERE (UPPER(branch_cd) LIKE UPPER(#findText2#)
+							OR UPPER(branch_name) LIKE UPPER(#findText2#))
+						 </isNull>
+		  		   		) b
+               )
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getBranchLOV" resultMap="branchLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIAC_BRANCHES_PKG.get_branch_cd_lov7(#userId#, #moduleId#))
+                          <isNotNull property="findText">
+                             WHERE UPPER(branch_cd) LIKE UPPER(NVL(#findText#, branch_cd))
+                                OR UPPER(branch_name) LIKE UPPER(NVL(#findText#, branch_name))
+                          </isNotNull>            
+		                  <isEqual property="sortColumn" compareValue="branchCd">
+			              		ORDER BY 1
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="branchName">
+			              		ORDER BY 2
+			              </isEqual>			                      
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*)  count_ 
+		                  FROM (SELECT * FROM TABLE (GIAC_BRANCHES_PKG.get_branch_cd_lov7(#userId#, #moduleId#))
+	                          <isNotNull property="findText">
+	                             WHERE UPPER(branch_cd) LIKE UPPER(NVL(#findText#, branch_cd))
+	                                OR UPPER(branch_name) LIKE UPPER(NVL(#findText#, branch_name))
+	                          </isNotNull>)) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>	
+	
+	<select id="getGIACS202BranchLOV" resultMap="GIACS237BranchLOVResultMap">
+	    SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT *
+		                  FROM TABLE(GIACS202_pkg.get_branch_cd_lov(#fundCd#, #userId#))
+			          	  	    <isNull property="findText">
+				                	WHERE UPPER(branch_name) LIKE UPPER(#searchString#)
+				          			OR UPPER(branch_cd) LIKE UPPER(#searchString#)
+				                </isNull>
+				                <isNotNull property="findText">
+				                	WHERE UPPER(branch_name) LIKE UPPER(#findText#)
+				          			OR UPPER(branch_cd) LIKE UPPER(#findText#)
+				                </isNotNull>
+								<isNotNull property="sortColumn">
+									<isEqual property="sortColumn" compareValue="branchCd">
+										ORDER BY branch_cd
+									</isEqual>
+									<isEqual property="sortColumn" compareValue="branchName">
+										ORDER BY branch_name
+									</isEqual>
+									<isEqual property="ascDescFlg" compareValue="ASC">
+										ASC
+									</isEqual>
+									<isEqual property="ascDescFlg" compareValue="DESC">
+										DESC
+									</isEqual>
+								</isNotNull>
+							) a,
+							(SELECT count(*) count_
+							FROM TABLE(GIACS202_pkg.get_branch_cd_lov(#fundCd#, #userId#))
+							   <isNull property="findText">
+				                	WHERE UPPER(branch_name) LIKE UPPER(#searchString#)
+				          			OR UPPER(branch_cd) LIKE UPPER(#searchString#)
+				                </isNull>
+				                <isNotNull property="findText">
+				                	WHERE UPPER(branch_name) LIKE UPPER(#findText#)
+				          			OR UPPER(branch_cd) LIKE UPPER(#findText#)
+				                </isNotNull>
+				                <isNotNull property="sortColumn">
+									<isEqual property="sortColumn" compareValue="branchCd">
+										ORDER BY branch_cd
+									</isEqual>
+									<isEqual property="sortColumn" compareValue="branchName">
+										ORDER BY branch_name
+									</isEqual>
+									<isEqual property="ascDescFlg" compareValue="ASC">
+										ASC
+									</isEqual>
+									<isEqual property="ascDescFlg" compareValue="DESC">
+										DESC
+									</isEqual>
+								</isNotNull>
+			                ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<!-- kenneth L. 10.14.2013 -->
+	<select id="getBatchBranchList" resultMap="branchLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+				          FROM TABLE(GIAC_BRANCHES_PKG.GET_GIARPR001_BRANCH_LOV(#userId#, #batchMonth#, #batchYear#))			          
+				    	  <isEqual property="sortColumn" compareValue="branchCd">
+				    	   		ORDER BY branch_cd
+				    	  </isEqual>
+				    	  <isEqual property="sortColumn" compareValue="branchName"> 
+				    	   		ORDER BY branch_name
+				    	  </isEqual>
+				    	  <isNotNull property="sortColumn">
+				    	  		<isEqual property="ascDescFlg" compareValue="ASC">
+				    	  			ASC
+				    	  		</isEqual>
+				    	  		<isEqual property="ascDescFlg" compareValue="DESC">
+				    	  			DESC
+				    	  		</isEqual>
+				    	  </isNotNull>
+				    	) a,
+				  (SELECT count(*) count_
+				     FROM TABLE(GIAC_BRANCHES_PKG.GET_GIARPR001_BRANCH_LOV(#userId#, #batchMonth#, #batchYear#))
+			      ) b)
+	     WHERE rownum_ BETWEEN #from# AND #to# 
+	</select>
+
+	<!-- start || pol cruz, 10.14.2013 for modification of giacs156 -->
+	<resultMap class="java.util.HashMap" id="giacs156BranchResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="gfun_fund_cd" 	property="gfunFundCd" />
+		<result column="branch_cd" 		property="branchCd" />
+		<result column="acct_branch_cd" property="acctBranchCd" />
+		<result column="branch_name" 	property="branchName" />
+		<result column="user_id" 		property="userId" />
+		<result column="last_update" 	property="lastUpdate" />
+		<result column="remarks" 		property="remarks" />
+		<result column="cpi_rec_no" 	property="cpiRecNo" />
+		<result column="cpi_branch_cd" 	property="cpiBranchCd" />
+		<result column="prnt_branch_cd" property="prntBranchCd" />
+		<result column="bank_cd" 		property="bankCd" />
+		<result column="bank_acct_cd" 	property="bankAcctCd" />
+		<result column="comp_cd" 		property="compCd" />
+		<result column="fund_desc" 		property="fundDesc" />
+	</resultMap>
+	
+	<select id="getGIACS156Branches" resultMap="giacs156BranchResultMap">
+		<!-- SELECT * FROM TABLE(GIAC_BRANCHES_PKG.get_other_branch_or(#moduleId#, #userId#)) -->
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GIAC_BRANCHES_PKG.get_other_branch_or(#moduleId#, #userId#))
+          		  <isNotNull property="filter">
+				  	WHERE 1=1
+		  			<isNotEmpty prepend="AND" property="gfunFundCd">
+		  				UPPER(gfun_fund_cd) LIKE UPPER(#gfunFundCd#)
+		  			</isNotEmpty>
+		  			<isNotEmpty prepend="AND" property="branchCd">
+		  				UPPER(branch_cd) LIKE UPPER(#branchCd#)
+		  			</isNotEmpty>
+		  			<isNotEmpty prepend="AND" property="branchName">
+		  				UPPER(branch_name) LIKE UPPER(#branchName#)
+		  			</isNotEmpty>
+				  </isNotNull>
+          		  <isEqual property="sortColumn" compareValue="gfunFundCd">
+		            	ORDER BY gfun_fund_cd
+		          	</isEqual>
+		          	<isEqual property="sortColumn" compareValue="branchCd branchName">
+		            	ORDER BY branch_cd || branch_name
+		          	</isEqual>
+		           	<isNotNull property="sortColumn">
+		              	<isEqual property="ascDescFlg" compareValue="ASC">
+		              		ASC
+		              	</isEqual>
+		              	<isEqual property="ascDescFlg" compareValue="DESC">
+		              		DESC
+		              	</isEqual>
+		            </isNotNull>) a,
+			            (SELECT count(*) count_ 
+		                  FROM TABLE(GIAC_BRANCHES_PKG.get_other_branch_or(#moduleId#, #userId#))
+               		   <isNotNull property="filter">
+					  	WHERE 1=1
+			  			<isNotEmpty prepend="AND" property="gfunFundCd">
+			  				UPPER(gfun_fund_cd) LIKE UPPER(#gfunFundCd#)
+			  			</isNotEmpty>
+			  			<isNotEmpty prepend="AND" property="branchCd">
+			  				UPPER(branch_cd) LIKE UPPER(#branchCd#)
+			  			</isNotEmpty>
+			  			<isNotEmpty prepend="AND" property="branchName">
+			  				UPPER(branch_name) LIKE UPPER(#branchName#)
+			  			</isNotEmpty>
+					  </isNotNull>) b)
+          WHERE rownum_ BETWEEN #from# AND #to#
+	</select>	
+	<!-- end || pol cruz, 10.14.2013 for modification of giacs156 -->
+	
+	<select id="getGIACS053BranchLOV" resultMap="branchLOVMap">
+		SELECT *
+	      FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+					      FROM TABLE(GIAC_BRANCHES_PKG.get_giacs053_branch_lov(#fundCd#, #moduleId#, #userId#, #findText#))
+				<isNotNull property="sortColumn">
+					<isEqual property="sortColumn" compareValue="branchCd">
+						ORDER BY branch_cd
+					</isEqual>
+					<isEqual property="sortColumn" compareValue="branchName">
+						ORDER BY branch_name
+					</isEqual>
+					<isEqual property="ascDescFlg" compareValue="ASC">
+						ASC
+					</isEqual>
+					<isEqual property="ascDescFlg" compareValue="DESC">
+						DESC
+					</isEqual>
+				</isNotNull>) a,
+				(SELECT count(*) count_
+				  FROM TABLE(GIAC_BRANCHES_PKG.get_giacs053_branch_lov(#fundCd#, #moduleId#, #userId#, #findText#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGeneralBranchLOV" resultMap="branchLOVMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giac_branches_pkg.get_generalbranch_lov(#moduleId#, #userId#, #findText#))
+		                  <isEqual property="sortColumn" compareValue="branchCd">
+			              		ORDER BY branch_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="branchName">
+			              		ORDER BY branch_name
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giac_branches_pkg.get_generalbranch_lov(#moduleId#, #userId#, #findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="branchCdLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="branch_cd"		property="branchCd" />
+		<result column="branch_name"	property="branchName" />
+	</resultMap>
+	
+	<select id="showGiacs104BranchLov" resultMap="branchCdLOVMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+					   b.count_, 
+					   a.* 
+				  FROM (SELECT * 
+						  FROM TABLE (giac_branches_pkg.get_giacs104branch_lov(#userId#, #findText#))
+						  <isEqual property="sortColumn" compareValue="branchCd">
+								ORDER BY branch_cd
+						  </isEqual>
+						  <isEqual property="sortColumn" compareValue="branchName">
+								ORDER BY branch_name
+						  </isEqual>
+						  <isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+						  </isNotNull>
+						  ) a, 
+					   (SELECT count(*) count_ 
+						  FROM TABLE (giac_branches_pkg.get_giacs104branch_lov(#userId#, #findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="showGiacs480BranchLov" resultMap="branchCdLOVMap" parameterClass="map">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+					   b.count_, 
+					   a.* 
+				  FROM (SELECT * 
+						  FROM TABLE (giacs480_pkg.get_branch_lov(#userId#, #findText#))
+						  <isEqual property="sortColumn" compareValue="branchCd">
+								ORDER BY branch_cd
+						  </isEqual>
+						  <isEqual property="sortColumn" compareValue="branchName">
+								ORDER BY branch_name
+						  </isEqual>
+						  <isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+						  </isNotNull>
+						  ) a, 
+					   (SELECT count(*) count_ 
+						  FROM TABLE (giacs480_pkg.get_branch_lov(#userId#, #findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+</sqlMap>

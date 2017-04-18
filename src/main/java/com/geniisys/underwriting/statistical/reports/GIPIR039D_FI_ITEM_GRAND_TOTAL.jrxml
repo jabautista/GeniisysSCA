@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIPIR039D_FI_ITEM_GRAND_TOTAL" language="groovy" columnCount="7" printOrder="Horizontal" pageWidth="838" pageHeight="36" columnWidth="118" columnSpacing="2" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="3.993000000000001"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="style1" isDefault="false" fontName="Arial" fontSize="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false"/>
+	<parameter name="P_ZONE_TYPE" class="java.lang.Integer"/>
+	<parameter name="P_AS_OF_SW" class="java.lang.String"/>
+	<parameter name="P_USER_ID" class="java.lang.String"/>
+	<parameter name="P_BY_COUNT" class="java.lang.String"/>
+	<parameter name="P_TABLE" class="java.lang.String"/>
+	<parameter name="P_COLUMN" class="java.lang.String"/>
+	<parameter name="P_AS_OF" class="java.lang.String"/>
+	<parameter name="P_FROM_DATE" class="java.lang.String"/>
+	<parameter name="P_TO_DATE" class="java.lang.String"/>
+	<parameter name="P_ROWNUM_1" class="java.math.BigDecimal"/>
+	<parameter name="P_ROWNUM_2" class="java.math.BigDecimal"/>
+	<queryString>
+		<![CDATA[SELECT a.*
+  FROM
+    (
+    SELECT rownum row_num, share_cd, share_name, total_tsi, total_prem
+      FROM(
+        SELECT -1 share_cd, fi_item_grp_desc share_name, total_tsi, total_prem
+        FROM (
+            SELECT fi_item_grp, fi_item_grp_desc, SUM(total_tsi) total_tsi, SUM(total_prem) total_prem
+            FROM (
+                    SELECT fi_item_grp, fi_item_grp_desc, SUM(total_tsi) total_tsi, SUM(total_prem) total_prem
+                      FROM TABLE (gipir039d_pkg.get_fi_gipir039d_details ($P{P_ZONE_TYPE},
+                                                                      $P{P_AS_OF},
+                                                                      $P{P_FROM_DATE},
+                                                                      $P{P_TO_DATE},
+                                                                      $P{P_AS_OF_SW},
+                                                                      $P{P_BY_COUNT},
+                                                                      $P{P_USER_ID}
+                                                                     )
+                                 )
+                    GROUP BY zone_no, occupancy_cd, occ_code, fi_item_grp, fi_item_grp_desc
+                    UNION
+                    SELECT DISTINCT fi_item_grp, fi_item_grp_desc, 0 total_tsi, 0 total_prem
+                      FROM TABLE (gipir039d_pkg.get_fi_gipir039d_details ($P{P_ZONE_TYPE},
+                                                                      $P{P_AS_OF},
+                                                                      $P{P_FROM_DATE},
+                                                                      $P{P_TO_DATE},
+                                                                      $P{P_AS_OF_SW},
+                                                                      $P{P_BY_COUNT},
+                                                                      $P{P_USER_ID}
+                                                                     )
+                                 )
+                   )
+            GROUP BY  fi_item_grp, fi_item_grp_desc
+            ORDER BY  fi_item_grp, fi_item_grp_desc)
+        UNION
+        SELECT 0 fi_item_grp, 'GROSS' fi_item_grp_desc, SUM(total_tsi) total_tsi, SUM(total_prem) total_prem
+          FROM TABLE (gipir039d_pkg.get_fi_gipir039d_details ($P{P_ZONE_TYPE},
+                                                          $P{P_AS_OF},
+                                                          $P{P_FROM_DATE},
+                                                          $P{P_TO_DATE},
+                                                          $P{P_AS_OF_SW},
+                                                          $P{P_BY_COUNT},
+                                                          $P{P_USER_ID}
+                                                         )
+                     )
+        UNION
+        SELECT share_cd, share_name, SUM(total_tsi) total_tsi, SUM(total_prem) total_prem
+        FROM (
+                SELECT share_cd, share_name, SUM(total_tsi) total_tsi, SUM(total_prem) total_prem
+                  FROM TABLE (gipir039d_pkg.get_fi_gipir039d_details ($P{P_ZONE_TYPE},
+                                                                  $P{P_AS_OF},
+                                                                  $P{P_FROM_DATE},
+                                                                  $P{P_TO_DATE},
+                                                                  $P{P_AS_OF_SW},
+                                                                  $P{P_BY_COUNT},
+                                                                  $P{P_USER_ID}
+                                                                 )
+                             )
+                GROUP BY zone_no, occupancy_cd, share_cd, share_name
+                UNION
+                SELECT distinct share_cd, share_name, 0 total_tsi, 0 total_prem
+                  FROM TABLE (gipir039d_pkg.get_fi_gipir039d_details ($P{P_ZONE_TYPE},
+                                                                  $P{P_AS_OF},
+                                                                  $P{P_FROM_DATE},
+                                                                  $P{P_TO_DATE},
+                                                                  $P{P_AS_OF_SW},
+                                                                  $P{P_BY_COUNT},
+                                                                  $P{P_USER_ID}
+                                                                 )
+                             )
+            )
+        GROUP BY  share_cd, share_name
+        ORDER BY 1
+        )
+    ) a
+WHERE row_num BETWEEN $P{P_ROWNUM_1} AND $P{P_ROWNUM_2}]]>
+	</queryString>
+	<field name="ROW_NUM" class="java.math.BigDecimal"/>
+	<field name="SHARE_CD" class="java.math.BigDecimal"/>
+	<field name="SHARE_NAME" class="java.lang.String"/>
+	<field name="TOTAL_TSI" class="java.math.BigDecimal"/>
+	<field name="TOTAL_PREM" class="java.math.BigDecimal"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="36">
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)">
+				<reportElement x="0" y="14" width="59" height="11"/>
+				<textElement textAlignment="Right">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{TOTAL_TSI}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)">
+				<reportElement x="59" y="14" width="59" height="11"/>
+				<textElement textAlignment="Right">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{TOTAL_PREM}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="2" y="0" width="116" height="6"/>
+				<box>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed"/>
+				</box>
+				<textElement textAlignment="Right">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="2" y="25" width="116" height="5"/>
+				<box>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed"/>
+				</box>
+				<textElement textAlignment="Right">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="2" y="31" width="116" height="5"/>
+				<box>
+					<topPen lineWidth="0.5" lineStyle="Dashed"/>
+					<bottomPen lineWidth="0.0" lineStyle="Dashed"/>
+				</box>
+				<textElement textAlignment="Right">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+		</band>
+	</detail>
+</jasperReport>

@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISCosignorRes">
+	<typeAlias alias="GIISCosignorRes" type="com.geniisys.common.entity.GIISCosignorRes"/>
+	
+	<resultMap class="GIISCosignorRes" id="GIISCosignorResMap" extends="BaseEntity.TableGridResultMap">
+		<result property="cosignName"		column="cosign_name"/>
+		<result property="designation"		column="designation"/>
+		<result property="cosignId"			column="cosign_id"/>
+		<result property="cosignResNo"		column="cosign_res_no"/>
+		<result property="cosignResDate"	column="cosign_res_date"/>
+		<result property="cosignResPlace"	column="cosign_res_place"/>
+		<result property="address"			column="address"/>
+		<result property="remarks"			column="remarks"/>
+		<result property="userId"			column="user_id"/>
+		<result property="lastUpdate"		column="last_update"/>
+		<result property="controlTypeCd"	column="control_type_cd"/>
+		<result property="controlTypeDesc"	column="control_type_desc"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="GIISCosignorResMap2" extends="GIISCosignorResMap">
+		<result property="dummyCosignId"			column="cosign_id"/>
+	</resultMap>
+	
+	<resultMap class="java.lang.Integer" id="getCoSignatoryIDListMap">
+		<result property="cosignId" column="cosign_id"/>
+	</resultMap>
+	
+	<select id="getCosignorRes" resultMap="GIISCosignorResMap2">
+		SELECT *
+		  FROM (SELECT a.*, b.count_, ROWNUM rownum_
+		          FROM (SELECT *
+		                  FROM TABLE (giis_cosignor_res_pkg.get_cosignor_res (#assdNo#))
+ 							<isNotNull property="filter">
+								WHERE 1=1
+								<isNotEmpty prepend="AND"  property="cosignId">
+									upper(cosign_id) LIKE upper(#cosignId#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="controlTypeDesc">
+									upper(control_type_desc) LIKE upper(#controlTypeDesc#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="cosignName">
+									upper(cosign_name) LIKE upper(#cosignName#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="designation">
+									upper(designation) LIKE upper(#designation#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="cosignResNo">
+									upper(cosign_res_no) LIKE upper(#cosignResNo#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="cosignResDate">
+									cosign_res_date LIKE #cosignResDate#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="cosignResPlace">
+									upper(cosign_res_place) LIKE upper(#cosignResPlace#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="address">
+									upper(address) LIKE upper(#address#)
+								</isNotEmpty>
+							</isNotNull>		                  
+		                  <isEqual property="sortColumn" compareValue="cosignId">
+			              		ORDER BY cosign_id
+			              </isEqual>
+                          <isEqual property="sortColumn" compareValue="cosignName">
+			              		ORDER BY cosign_Name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="designation">
+			              		ORDER BY designation
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="cosignResNo">
+			              		ORDER BY cosign_Res_No
+			              </isEqual>
+			               <isEqual property="sortColumn" compareValue="cosignResDate">
+			              		ORDER BY cosign_Res_Date
+			              </isEqual>	
+			               <isEqual property="sortColumn" compareValue="cosignResPlace">
+			              		ORDER BY cosign_Res_Place
+			              </isEqual>	
+			               <isEqual property="sortColumn" compareValue="controlTypeDesc">
+			              		ORDER BY control_type_desc
+			              </isEqual>	
+			               <isEqual property="sortColumn" compareValue="address">
+			              		ORDER BY address
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="idNumber">
+			              		ORDER BY control_type_cd
+			              </isEqual>				              
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a,
+		               (SELECT COUNT (*) count_
+		                  FROM TABLE (giis_cosignor_res_pkg.get_cosignor_res (#assdNo#))
+		                  <isNotNull property="filter">
+								WHERE 1=1
+								<isNotEmpty prepend="AND"  property="cosignId">
+									upper(cosign_id) LIKE upper(#cosignId#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="controlTypeDesc">
+									upper(control_type_desc) LIKE upper(#controlTypeDesc#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="cosignName">
+									upper(cosign_name) LIKE upper(#cosignName#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="designation">
+									upper(designation) LIKE upper(#designation#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="cosignResNo">
+									upper(cosign_res_no) LIKE upper(#cosignResNo#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="cosignResDate">
+									cosign_res_date LIKE #cosignResDate#
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="cosignResPlace">
+									upper(cosign_res_place) LIKE upper(#cosignResPlace#)
+								</isNotEmpty>
+								<isNotEmpty prepend="AND"  property="address">
+									upper(address) LIKE upper(#address#)
+								</isNotEmpty>
+							</isNotNull>	
+		                  ) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getCoSignatoryIDList" parameterClass="java.lang.Integer" resultMap="getCoSignatoryIDListMap">
+		SELECT cosign_id
+		       FROM TABLE (giis_cosignor_res_pkg.get_cosignor_res (#assdNo#))
+	</select>
+	
+	<select id="validateCosignorId" parameterClass="java.util.Map" resultClass="String">
+		select count(*) prin_signor from GIIS_PRIN_SIGNTRY 
+		 where prin_signor = #id#
+		   and assd_no = #assdNo#  <!-- added by Halley 10.07.13 -->
+	</select>
+	
+	<procedure id="saveGIISCosignor" parameterClass="map">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			giis_cosignor_res_pkg.set_cosignor (
+								    #cosignName#,
+								    #designation#,
+									#cosignId#,
+								    #cosignResNo#,
+								    #cosignResPlace#,
+								    to_date(#cosignResDate#,'MM-DD-YYYY'),
+								    #userId#,
+								    #remarks#,
+								    #address#,
+								    #assdNo#,
+								    #controlTypeCd#);
+		END;
+	</procedure>
+	
+<!-- 	added by steven 05.28.2014 -->
+	<select id="getGiiss022CoSign" resultMap="GIISCosignorResMap2">
+		SELECT '1' count_, '1' rownum_, a.*
+		                  FROM TABLE (giis_cosignor_res_pkg.get_cosignor_res (#assdNo#)) a
+ 							
+	</select>
+</sqlMap>

@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISUserTran">
+	<typeAlias alias="GIISUserTran" type="com.geniisys.common.entity.GIISUserTran" />
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<resultMap id="GIISUserTranMap" class="GIISUserTran">
+		<result column="TRAN_CD"		property="tranCd" />
+		<result column="TRAN_DESC"		property="tranDesc" />
+		<result column="USERID"			property="userID" />
+		<result column="ACCESS_TAG"		property="accessTag" />
+	</resultMap>
+	
+	<select id="getGiisUserTranList" resultMap="GIISUserTranMap">
+		select *
+		  from table(Giis_User_Tran_Pkg.get_giis_user_tran_list(#userID#)) 
+	  order by tran_desc
+	</select>
+	
+	<insert id="setGiisUserTran" parameterClass="GIISUserTran">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			Giis_User_Tran_Pkg.set_giis_user_tran(#userID#, #tranCd#, #accessTag#, #userId#);
+		END;
+	</insert>
+	
+	<delete id="deleteGiisUserTran" parameterClass="java.lang.String">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			Giis_User_Tran_Pkg.del_giis_user_tran(#userID#);
+		END;
+	</delete>
+	
+	<typeAlias alias="giisUserTran" type="com.geniisys.common.entity.GIISUserTran" />
+	
+	<resultMap id="giisUserTranResultMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result column="tran_cd"		property="tranCd" />
+		<result column="tran_desc"		property="tranDesc" />
+		<result column="inc_all_tag"	property="incAllTag" />
+		<result column="not_in"	property="notIn" />
+	</resultMap>	
+	
+	<select id="getUserTran" resultMap="giisUserTranResultMap">
+		SELECT *
+		   FROM (SELECT rownum rownum_, 
+		                b.count_, 
+		                a.* 
+		           FROM (SELECT * 
+		                   FROM TABLE (GIISS040_PKG.get_user_tran(#userId#, #tranCd#, #tranDesc#, #incAllTag#))
+		                  <isNotNull property="filter">
+							WHERE 1 = 1  							
+							<isNotEmpty prepend="AND" property="incAllTag">
+							   inc_all_tag = UPPER(#incAllTag#)
+							</isNotEmpty>
+						  </isNotNull>	
+		                  <isEqual property="sortColumn" compareValue="tranCd">
+			              		ORDER BY tran_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="tranDesc">
+			              		ORDER BY tran_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="incAllTag">
+			              		ORDER BY inc_all_tag
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               	  (SELECT count(*) count_ 
+		                     FROM TABLE (GIISS040_PKG.get_user_tran(#userId#, #tranCd#, #tranDesc#, #incAllTag#))
+		                     <isNotNull property="filter">
+							    WHERE 1 = 1  							
+							    <isNotEmpty prepend="AND" property="incAllTag">
+							       inc_all_tag = UPPER(#incAllTag#)
+							    </isNotEmpty>
+						     </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+
+    <select id="getGiiss040TranLOV" resultMap="giisUserTranResultMap">
+		SELECT *
+		   FROM (SELECT rownum rownum_, 
+		                b.count_, 
+		                a.* 
+		           FROM (SELECT * 
+		                   FROM TABLE (GIISS040_PKG.get_tran_lov(#findText#))
+	                      <isNotNull property="notIn">
+					  		WHERE tran_cd NOT IN ($notIn$)
+					  	  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="tranCd">
+			              		ORDER BY tran_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="tranDesc">
+			              		ORDER BY tran_desc
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               	  (SELECT count(*) count_ 
+		                     FROM TABLE (GIISS040_PKG.get_tran_lov(#findText#))
+							<isNotNull property="notIn">
+								WHERE tran_cd NOT IN ($notIn$)
+							</isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>	
+		
+	<delete id="delGiiss040UserTran" parameterClass="java.util.HashMap">
+		BEGIN
+ 			giiss040_pkg.del_user_tran(#tranCd#, #gutUserId#);
+ 		END;
+ 	</delete>		
+
+	<procedure id="setGiiss040UserTran" parameterClass="GIISUserTran">
+		BEGIN
+		    giis_users_pkg.app_user := #appUser#;
+ 			giiss040_pkg.set_user_tran(#gutUserId#, #tranCd#, #incAllTag#);
+ 		END;
+ 	</procedure>
+</sqlMap>

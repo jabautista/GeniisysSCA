@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GIPIReassignParPolicy">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	<typeAlias alias="GIPIReassignParPolicy" type="com.geniisys.gipi.entity.GIPIReassignParPolicy"/>
+	
+	<resultMap class="GIPIReassignParPolicy" id="GIPIReassignParPolicyMap">
+		<result column="par_id" 			property="parId"/>
+		<result column="pack_par_id" 		property="packParId"/>
+		<result column="line_cd" 			property="lineCd"/>
+		<result column="iss_cd" 			property="issCd"/>
+		<result column="par_yy" 			property="parYY"/>
+		<result column="par_seq_no" 		property="parSeqNo"/>
+		<result column="quote_seq_no" 		property="quoteSeqNo"/>
+		<result column="assd_no" 			property="assdNo"/>
+		<result column="assign_sw" 			property="assignSw"/>
+		<result column="underwriter" 		property="underwriter"/>
+		<result column="remarks" 			property="remarks"/>
+		<result column="par_status" 		property="parStatus"/>
+		<result column="par_type" 			property="parType"/>
+		<result column="assd_name" 			property="assdName"/>
+		<result column="parstat_date" 		property="parstatDate"/>
+		<result column="pack_pol_flag" 		property="packPolFlag"/>
+		<result column="underwriter" 		property="cond"/>
+		<result column="rownum_" 			property="rowNum"/>
+		<result column="count_" 			property="rowCount"/>
+	</resultMap>
+	
+	<resultMap id="GIPIReassignParPolicyLOVMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result column="USER_ID" 		property="userId"/>
+		<result column="USER_GRP" 		property="userGrp"/>
+		<result column="USER_NAME"		property="userName"/>
+		<result column="rownum_" 		property="rowNum" />
+		<result column="count_"			property="rowCount"/>
+	</resultMap>
+	
+	<resultMap id="getUserSwMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result column="mgr_sw" 		property="mgrSw"/>
+		<result column="mis_sw" 		property="misSw"/>
+		<result column="all_user_sw"	property="allUserSw"/>
+	</resultMap>
+	
+		<select id="getReassignParPolicyListing" resultMap="GIPIReassignParPolicyMap">
+			SELECT *
+			  FROM (SELECT rownum rownum_, 
+			               b.count_, 
+			               a.*
+			          FROM (SELECT * 
+			          			FROM TABLE(gipi_reassign_policy_pkg.get_reassign_par_policy(#userId#)) <!--Added userId parameter christian 03/12/2013  -->
+			          			<!-- FROM TABLE(gipi_reassign_policy_pkg.get_reassign_par_policy) -->
+			          		<isNotNull property="filter">
+								WHERE 1=1
+								<isNotEmpty prepend="AND"  property="lineCd">
+									UPPER(line_cd) LIKE UPPER(#lineCd#)
+								</isNotEmpty>	
+								<isNotEmpty prepend="AND"  property="issCd">
+									UPPER(iss_cd) LIKE UPPER(#issCd#)
+								</isNotEmpty>	
+								<isNotEmpty prepend="AND"  property="parYY">
+									par_yy LIKE #parYY#
+								</isNotEmpty>	
+								<isNotEmpty prepend="AND"  property="parSeqNo">
+									par_seq_no LIKE #parSeqNo#
+								</isNotEmpty>	
+								<isNotEmpty prepend="AND"  property="quoteSeqNo">
+									quote_seq_no LIKE #quoteSeqNo#
+								</isNotEmpty>	
+								<isNotEmpty prepend="AND"  property="assdName">
+									UPPER(assd_name) LIKE UPPER(#assdName#)
+								</isNotEmpty>	
+								<isNotEmpty prepend="AND"  property="underwriter">
+									UPPER(underwriter) LIKE UPPER(#underwriter#)
+								</isNotEmpty>	
+							</isNotNull>
+				            <isEqual property="sortColumn" compareValue="parNo">
+			              		ORDER BY line_cd
+			              			<isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	 </isNotNull>,
+			              	 iss_cd
+			              	 <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	 </isNotNull>,
+			              	 par_yy
+			              	 <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	 </isNotNull>,
+			              	 par_seq_no
+			              	 <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	 </isNotNull>,quote_seq_no
+				            </isEqual>
+				             <isEqual property="sortColumn" compareValue="assdName">
+			              		ORDER BY assd_name
+				            </isEqual>
+				             <isEqual property="sortColumn" compareValue="underwriter">
+			              		ORDER BY underwriter
+				            </isEqual>
+				              <isEqual property="sortColumn" compareValue="parstatDate">
+			              		ORDER BY parstat_date
+				            </isEqual>
+				             <isEqual property="sortColumn" compareValue="remarks">
+			              		ORDER BY remarks
+				            </isEqual>
+				            <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              	 </isNotNull>) a,
+			               (SELECT count(*) count_
+			                FROM TABLE(gipi_reassign_policy_pkg.get_reassign_par_policy(#userId#))
+			                <!-- FROM TABLE(gipi_reassign_policy_pkg.get_reassign_par_policy) -->
+	                      		<isNotNull property="filter">
+									WHERE 1=1
+									<isNotEmpty prepend="AND"  property="lineCd">
+										UPPER(line_cd) LIKE UPPER(#lineCd#)
+									</isNotEmpty>	
+									<isNotEmpty prepend="AND"  property="issCd">
+										UPPER(iss_cd) LIKE UPPER(#issCd#)
+									</isNotEmpty>	
+									<isNotEmpty prepend="AND"  property="parYY">
+										par_yy LIKE #parYY#
+									</isNotEmpty>	
+									<isNotEmpty prepend="AND"  property="parSeqNo">
+										par_seq_no LIKE #parSeqNo#
+									</isNotEmpty>	
+									<isNotEmpty prepend="AND"  property="quoteSeqNo">
+										quote_seq_no LIKE #quoteSeqNo#
+									</isNotEmpty>	
+									<isNotEmpty prepend="AND"  property="assdName">
+										UPPER(assd_name) LIKE UPPER(#assdName#)
+									</isNotEmpty>	
+									<isNotEmpty prepend="AND"  property="underwriter">
+										UPPER(underwriter) LIKE UPPER(#underwriter#)
+									</isNotEmpty>	
+								</isNotNull>) b)
+                WHERE rownum_ BETWEEN #from# AND #to#	
+		</select>
+		
+		<select id="getReassignParPolicyLOV" resultMap="GIPIReassignParPolicyLOVMap">
+			SELECT *
+			      FROM (SELECT rownum rownum_, 
+                           b.count_, 
+                           a.*
+                      FROM (SELECT * 
+                                  FROM TABLE(gipi_reassign_policy_pkg.get_reassign_par_policy_LOV(#lineCd#, #issCd#))
+                             		<isNotNull property="findText">
+	                                 	WHERE UPPER(USER_ID) like UPPER(#findText#)
+	                                 		OR USER_Grp like #findText#
+	                                 		OR UPPER(USER_NAME) like UPPER(#findText#)
+                                 	</isNotNull>
+	                                <isEqual property="sortColumn" compareValue="userId">
+					              		ORDER BY USER_ID
+						            </isEqual>
+						             <isEqual property="sortColumn" compareValue="userGrp">
+					              		ORDER BY USER_GRP
+						            </isEqual>
+						             <isEqual property="sortColumn" compareValue="userName">
+					              		ORDER BY USER_NAME
+						            </isEqual>
+						            <isNotNull property="sortColumn">
+					              		<isEqual property="ascDescFlg" compareValue="ASC">
+					              			ASC
+					              		</isEqual>
+					              		<isEqual property="ascDescFlg" compareValue="DESC">
+					              			DESC
+					              		</isEqual>
+					              	 </isNotNull>) a,
+                           (SELECT count(*) count_
+                            FROM TABLE(gipi_reassign_policy_pkg.get_reassign_par_policy_LOV(#lineCd#, #issCd#))
+                       	         <isNotNull property="findText">
+                                 	WHERE UPPER(USER_ID) like UPPER(#findText#)
+                                 		OR USER_Grp like #findText#
+                                 		OR UPPER(USER_NAME) like UPPER(#findText#)
+                                 </isNotNull>) b)
+                WHERE rownum_ BETWEEN #from# AND #to#	
+		</select>
+		
+	<insert id="setReassignParPolicy" parameterClass="GIPIReassignParPolicy">
+		BEGIN
+			GIPI_REASSIGN_POLICY_PKG.set_gipis_reassign_parlist(#underwriter#,
+																#remarks#,
+																#parId#,
+																#parStatus#,
+																#lineCd#,
+																#cond#);
+		END;
+	</insert>
+	
+	<select id="getUserSw" resultMap="getUserSwMap">
+		SELECT '1' rownum_, 
+               '1' count_, 
+               a.*
+         			FROM TABLE(gipi_reassign_policy_pkg.get_user_sw(#userId#)) a
+	</select>
+</sqlMap>

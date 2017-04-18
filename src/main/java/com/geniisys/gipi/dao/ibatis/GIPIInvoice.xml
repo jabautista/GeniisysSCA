@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIInvoice">
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIPIInvoice" type="com.geniisys.gipi.entity.GIPIInvoice"/>
+
+	<resultMap class="java.util.HashMap" id="polInvoiceMap">
+	
+		<result property="policyId" 		column="policy_id"/>
+		<result property="itemGrp" 			column="item_grp"/>
+		<result property="issCd" 			column="iss_cd"/>
+		<result property="insured"			column="insured"/>
+		<result property="remarks"			column="remarks"/>
+		<result property="taxAmt"			column="tax_amt"/>
+		<result property="premAmt"			column="prem_amt"/>
+		<result property="property"			column="property"/>
+		<result property="refInvNo"			column="ref_inv_no"/>
+		<result property="otherCharges"		column="other_charges"/>
+		<result property="currencyDesc"		column="currency_desc"/>
+		<result property="premSeqNo" 		column="prem_seq_no"/>
+		<result property="amountDue" 		column="amount_due"/>
+		
+		<result property="origIssCd" 		column="orig_iss_cd"/>
+		<result property="origInsured" 		column="orig_insured"/>
+		<result property="origTaxAmt" 		column="orig_tax_amt"/>
+		<result property="origRemarks" 		column="orig_remarks"/>
+		<result property="origPremAmt" 		column="orig_prem_amt"/>
+		<result property="origRefInvNo" 	column="orig_ref_inv_no"/>
+		<result property="origPremSeqNo" 	column="orig_prem_seq_no"/>
+		<result property="origOtherCharges" column="orig_other_charges"/>
+		<result property="origCurrencyDesc" column="orig_currency_desc"/>
+		<result property="origAmountDue" 	column="orig_amount_due"/>
+		
+		<result property="premCollMode" 	column="prem_coll_mode"/>
+		<result property="rowNum"			column="rownum_"/>
+		<result property="rowCount"			column="count_"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="populateBasicDetailsMap" extends="BaseEntity.TableGridResultMap">
+		<result property="invoiceNo" 	column="invoice_no"/>
+		<result property="balanceDue" column="balance_due"/>
+		<result property="dueDate" 		column="due_date"/>
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="GIACS408BillNoLOVResulMap" extends="BaseEntity.TableGridResultMap">
+		<result property="issCd" 		column="iss_cd"/>
+		<result property="premSeqNo" 	column="prem_seq_no"/>
+		<result property="policyId" 	column="policy_id"/>
+		<result property="premAmt" 		column="prem_amt"/>
+	</resultMap>
+	
+	<select id="getPolInvoice" resultMap="polInvoiceMap" parameterClass="java.util.HashMap">
+		SELECT *
+  		  FROM (SELECT ROWNUM rownum_, b.count_, a.*
+          		  FROM (SELECT * FROM TABLE (gipi_invoice_pkg.get_pol_invoice (#policyId#))) a,
+               (SELECT COUNT (*) count_ FROM TABLE (gipi_invoice_pkg.get_pol_invoice (#policyId#))) b)
+         WHERE rownum_ BETWEEN NVL(#from#,rownum_) AND NVL(#to#,rownum_)
+	</select>
+	
+	<select id="getMultiBookingDateByPolicy" resultClass="java.lang.String" parameterClass="java.util.HashMap">
+		SELECT GIPI_INVOICE_PKG.get_multi_booking_dt_by_policy(#policyId#, #distNo#) FROM dual
+	</select>
+	
+	<select id="populateBasicDetails" resultMap="populateBasicDetailsMap" parameterClass="java.util.HashMap">		
+	    SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (gipi_invoice_pkg.populate_basic_details(#packPolicyId#, #policyId#))
+		                  <isEqual property="sortColumn" compareValue="invoiceNo">
+			              		ORDER BY INVOICE_NO
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="balanceDue">
+			              		ORDER BY BALANCE_DUE
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="dueDate">
+			              		ORDER BY DUE_DATE
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (gipi_invoice_pkg.populate_basic_details(#packPolicyId#, #policyId#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGIACS408BillNoLOV" resultMap="GIACS408BillNoLOVResulMap" parameterClass="java.util.HashMap">		
+	    SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (gipi_invoice_pkg.get_giacs408_bill_no(#issCd#, #userId#))
+		                  <isNotNull property="findText">
+		                  	WHERE prem_seq_no LIKE NVL(#findText#,'%')
+		                  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="issCd">
+			              		ORDER BY iss_cd
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="premSeqNo">
+			              		ORDER BY prem_seq_no
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (gipi_invoice_pkg.get_giacs408_bill_no(#issCd#, #userId#))
+		                  <isNotNull property="findText">
+		                  	WHERE prem_seq_no LIKE NVL(#findText#,'%')
+		                  </isNotNull>) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	<!-- added by steven 10.16.2014 -->
+	<select id="getGIACS408IssCdLOV" resultMap="GIACS408BillNoLOVResulMap" parameterClass="java.util.HashMap">		
+	    SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (gipi_invoice_pkg.get_giacs408_iss_cd(#findText#, #userId#))
+		                  <isEqual property="sortColumn" compareValue="issCd">
+			              		ORDER BY iss_cd
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (gipi_invoice_pkg.get_giacs408_iss_cd(#findText#, #userId#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="gipis156InvoiceMap" extends="BaseEntity.TableGridResultMap">
+		<result column="prem_seq_no" 	 		property="premSeqNo"/>
+		<result column="policy_id" 			property="policyId"/>
+		<result column="multi_booking_yy" 		property="multiBookingYy"/>
+		<result column="multi_booking_mm" 			property="multiBookingMm"/>
+		<result column="acct_ent_date" 		property="acctEntDate"/>
+		<result column="takeup_seq_no" 			property="takeupSeqNo"/>
+		<result column="iss_cd" 			property="issCd"/>
+		<result column="item_grp" 			property="itemGrp"/>
+	</resultMap>
+	
+	<select id="getGIPIS156Invoice" resultMap="gipis156InvoiceMap">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+						 b.count_, 
+						 a.*
+					FROM (SELECT *
+							FROM TABLE (GIPI_INVOICE_PKG.get_gipis156_invoice(#policyId#))
+							<!-- <isEqual property="sortColumn" compareValue="histId">
+								ORDER BY hist_id
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="maxEndtSeqNo">
+								ORDER BY max_endt_seq_no
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="userId">
+								ORDER BY user_id
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="lastUpdate">
+								ORDER BY last_update
+							</isEqual>
+							<isNotNull property="sortColumn">
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull> -->
+						) a,
+						(SELECT count(*) count_
+						   FROM TABLE (GIPI_INVOICE_PKG.get_gipis156_invoice(#policyId#))
+						   ) b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	
+	<!-- for GIPIS137 -->
+	<resultMap class="java.util.HashMap" id="getInvoiceInformationListMap" extends="BaseEntity.TableGridResultMap">
+		<result column="CRED_BRANCH" 			property="credBranch"/>
+		<result column="ISS_CD"					property="issCd"/>
+		<result column="LINE_CD"				property="lineCd"/>
+		<result column="SUBLINE_CD"				property="sublineCd"/>
+		<result column="PREM_SEQ_NO"			property="premSeqNo"/>
+		<result column="ITEM_GRP"				property="itemGrp"/>
+		<result column="PREM_AMT"				property="premAmt"/>
+		<result column="TAX_AMT" 				property="taxAmt"/>
+		<result column="OTHER_CHARGES"			property="otherCharges"/>
+		<result column="TOTAL_AMT_DUE"			property="totalAmtDue"/>
+		<result column="POLICY_NO"				property="policyNo"/>
+		<result column="ENDT_NO"				property="endtNo"/>
+		<result column="INVOICE_NO"				property="invoiceNo"/>
+		<result column="CURRENCY_DESC"			property="currencyDesc"/>
+		<result column="CURRENCY_RATE"			property="currencyRate"/>
+		<result column="ASSD_NAME"				property="assdName"/>
+		<result column="PROPERTY"				property="property"/>
+		<result column="PAYT_TERMS"				property="paytTerms"/>
+		<result column="PAYT_TERMS_DESC"		property="paytTermsDesc"/>
+		<result column="REMARKS"				property="remarks"/>
+	</resultMap>
+	<select id="getInvoiceInformationList" resultMap="getInvoiceInformationListMap" parameterClass="map">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+						 b.count_, 
+						 a.*
+					FROM (SELECT *
+							FROM TABLE (GIPI_INVOICE_PKG.get_invoice_list(#userId#))
+							<isNotNull property="filter">
+						      WHERE 1=1
+              			        <isNotEmpty prepend="AND" property="invoiceNo">
+              					  UPPER(invoice_no) LIKE UPPER(#invoiceNo#)
+              			        </isNotEmpty>
+              			        <isNotEmpty prepend="AND" property="premAmt">
+              					  prem_amt = #premAmt#
+              			        </isNotEmpty>
+              			        <isNotEmpty prepend="AND" property="taxAmt">
+              					  tax_amt = #taxAmt#
+              			        </isNotEmpty>
+              			        <isNotEmpty prepend="AND" property="totalAmtDue">
+              					  total_amt_due = #totalAmtDue#
+              			        </isNotEmpty>
+                   		  	</isNotNull>
+                   		  	<isNotNull property="sortColumn">
+								<isEqual property="sortColumn" compareValue="invoiceNo">
+									ORDER BY invoice_no
+								</isEqual>
+								<isEqual property="sortColumn" compareValue="premAmt">
+									ORDER BY prem_amt
+								</isEqual>
+								<isEqual property="sortColumn" compareValue="taxAmt">
+									ORDER BY tax_amt
+								</isEqual>
+								<isEqual property="sortColumn" compareValue="totalAmtDue">
+									ORDER BY total_amt_due
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>
+						) a,
+						(SELECT count(*) count_
+						   FROM TABLE (GIPI_INVOICE_PKG.get_invoice_list(#userId#))
+							<isNotNull property="filter">
+						      WHERE 1=1
+              			        <isNotEmpty prepend="AND" property="invoiceNo">
+              					  UPPER(invoice_no) LIKE UPPER(#invoiceNo#)
+              			        </isNotEmpty>
+              			        <isNotEmpty prepend="AND" property="premAmt">
+              					  prem_amt = #premAmt#
+              			        </isNotEmpty>
+              			        <isNotEmpty prepend="AND" property="taxAmt">
+              					  tax_amt = #taxAmt#
+              			        </isNotEmpty>
+              			        <isNotEmpty prepend="AND" property="totalAmtDue">
+              					  total_amt_due = #totalAmtDue#
+              			        </isNotEmpty>
+                   		  	</isNotNull>
+						   ) b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="getInvoiceTaxDetailsMap" extends="BaseEntity.TableGridResultMap">
+		<result property="taxCd" 				column="tax_cd" />
+		<result property="lineCd"				column="line_cd" />
+		<result property="itemGrp"				column="item_grp" />
+		<result property="taxId" 				column="tax_id" />
+		<result property="issCd"				column="iss_cd" />
+		<result property="taxAmount"			column="tax_amt" />
+		<result property="premSeqNo"			column="prem_seq_no" />
+		<result property="taxDesc"				column="tax_desc" />
+	</resultMap>
+	<select id="getInvoiceTaxDetails" parameterClass="map" resultMap="getInvoiceTaxDetailsMap">
+		SELECT *
+			FROM (SELECT rownum rownum_,
+						 b.count_, 
+						 a.*
+					FROM (SELECT *
+							FROM TABLE (GIPI_INV_TAX_PKG.get_invoice_tax_list(#issCd#, #premSeqNo#, #itemGrp#))
+							<isNotNull property="filter">
+						      WHERE 1=1
+              			        <isNotEmpty prepend="AND" property="taxDesc">
+              					  UPPER(tax_desc) LIKE UPPER(#taxDesc#)
+              			        </isNotEmpty>
+              			        <isNotEmpty prepend="AND" property="taxAmount">
+              					  tax_amt = #taxAmount#
+              			        </isNotEmpty>
+                   		  	</isNotNull>
+                   		  	<isNotNull property="sortColumn">
+								<isEqual property="sortColumn" compareValue="taxDesc">
+									ORDER BY tax_desc
+								</isEqual>
+								<isEqual property="sortColumn" compareValue="taxAmount">
+									ORDER BY tax_amt
+								</isEqual>								
+								<isEqual property="ascDescFlg" compareValue="ASC">
+									ASC
+								</isEqual>
+								<isEqual property="ascDescFlg" compareValue="DESC">
+									DESC
+								</isEqual>
+							</isNotNull>
+						) a,
+						(SELECT count(*) count_
+						   FROM TABLE (GIPI_INV_TAX_PKG.get_invoice_tax_list(#issCd#, #premSeqNo#, #itemGrp#))
+							<isNotNull property="filter">
+						      WHERE 1=1
+              			        <isNotEmpty prepend="AND" property="taxDesc">
+              					  UPPER(tax_desc) LIKE UPPER(#taxDesc#)
+              			        </isNotEmpty>
+              			        <isNotEmpty prepend="AND" property="taxAmount">
+              					  tax_amt = #taxAmount#
+              			        </isNotEmpty>
+                   		  	</isNotNull>
+						   ) b)
+			WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<parameterMap id="updateGIPIS156InvoiceParamMap" class="map">
+	    <parameter property="userId"			jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+	    <parameter property="policyId"			jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+		<parameter property="issCd"				jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+		<parameter property="premSeqNo"			jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+		<parameter property="multiBookingYy"	jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+		<parameter property="multiBookingMm"	jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+	</parameterMap>
+	
+	<procedure id="updateGIPIS156Invoice" parameterClass="java.util.HashMap">
+	    BEGIN
+	       GIIS_USERS_PKG.app_user := #userId#;
+		   GIPIS156_PKG.update_gipis156_invoice(#policyId#, #issCd#, #premSeqNo#, #multiBookingYy#, #multiBookingMm#);
+		END;
+	</procedure>
+
+</sqlMap>

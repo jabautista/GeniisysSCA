@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GIACGlAcctRefNo">
+
+	<typeAlias alias="giacGlAcctRefNo" type="com.geniisys.giac.entity.GIACGlAcctRefNo"/>
+
+	<resultMap class="giacGlAcctRefNo" id="giacGlAcctRefNoResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="gaccTranId"		column="gacc_tran_id"/>
+		<result property="glAcctId"			column="gl_acct_id"/>
+		<result property="ledgerCd" 		column="ledger_cd"/>
+		<result property="subLedgerCd" 		column="subledger_cd"/>
+		<result property="transactionCd" 	column="transaction_cd"/>
+		<result property="slCd"				column="sl_cd"/>
+		<result property="acctSeqNo"		column="acct_seq_no"/>
+		<result property="acctTranType"		column="acct_tran_type"/>
+	</resultMap>
+
+	<resultMap class="java.util.HashMap" id="knockOffAcctsResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="glAcctId"			column="gl_acct_id"/>
+		<result property="gaccTranId"		column="gacc_tran_id"/>
+		<result property="ledgerCd" 		column="ledger_cd"/>
+		<result property="subLedgerCd" 		column="subledger_cd"/>
+		<result property="drCrTag"			column="dr_cr_tag"/>				
+		<result property="acctSeqNo"		column="acct_seq_no"/>		
+		<result property="acctRefNo"		column="acct_ref_no"/>
+		<result property="transactionCd" 	column="transaction_cd"/>
+		<result property="transactionDesc"	column="transaction_desc"/>
+		<result property="particulars"		column="particulars"/>
+		<result property="refNo"			column="ref_no"/>
+		<result property="outstandingBal"	column="outstanding_bal"/>
+	</resultMap>	
+
+	<resultMap class="java.util.HashMap" id="valGlAcctIdResultMap">
+		<result property="ledgerCd" 		column="ledger_cd"/>
+		<result property="subLedgerCd"		column="subledger_cd"/>
+		<result property="dspIsExisting"	column="dsp_is_existing"/>
+		<result property="drCrTag"			column="dr_cr_tag"/>
+		<result property="dspSlExisting"	column="dsp_sl_existing"/>
+	</resultMap>	
+
+	<resultMap class="java.util.HashMap" id="giacs030TranTypeLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="transactionCd" 	column="transaction_cd"/>
+		<result property="transactionDesc" 	column="transaction_desc"/>	
+	</resultMap>	
+
+	<resultMap class="java.util.HashMap" id="valRemainingBalResultMap">
+		<result property="remainingBal" 		column="remaining_bal"/>
+		<result property="dspIsRecExisting"		column="dsp_rec_existing"/>
+	</resultMap>		
+	
+	<procedure id="setGlAcctRefNo" parameterClass="giacGlAcctRefNo">
+	    DECLARE
+	    	v_rec giac_gl_acct_ref_no%ROWTYPE;
+ 		BEGIN		  
+ 			v_rec.gacc_tran_id		:= #gaccTranId#;
+ 			v_rec.gl_acct_id		:= #glAcctId#;
+ 			v_rec.ledger_cd 	 	:= #ledgerCd#;
+ 			v_rec.subledger_cd 	 	:= #subLedgerCd#;
+ 			v_rec.transaction_cd 	:= #transactionCd#;
+ 			v_rec.sl_cd				:= #slCd#;
+ 			v_rec.acct_seq_no		:= #acctSeqNo#;
+ 			v_rec.acct_tran_type	:= #acctTranType#;
+ 			
+ 			giac_gl_acct_ref_no_pkg.set_gl_acct_ref_no(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+	<procedure id="delGlAcctRefNo" parameterClass="giacGlAcctRefNo">
+		DECLARE
+	    	v_rec giac_gl_acct_ref_no%ROWTYPE;
+		BEGIN
+ 			v_rec.gacc_tran_id		:= #gaccTranId#;
+ 			v_rec.gl_acct_id		:= #glAcctId#;
+ 			v_rec.ledger_cd 	 	:= #ledgerCd#;
+ 			v_rec.subledger_cd 	 	:= #subLedgerCd#;
+ 			v_rec.transaction_cd 	:= #transactionCd#;
+ 			v_rec.sl_cd				:= #slCd#;
+ 			v_rec.acct_seq_no		:= #acctSeqNo#;
+ 			v_rec.acct_tran_type	:= #acctTranType#;
+ 					
+			giac_gl_acct_ref_no_pkg.del_gl_acct_ref_no(v_rec);
+		END;
+	</procedure> 		
+
+	<procedure id="updateAcctSeqNoGIACS030" parameterClass="java.util.HashMap">
+		BEGIN
+			giac_gl_acct_ref_no_pkg.upd_acct_seq_no(#gaccTranId#);
+		END;
+	</procedure> 	
+
+	<select id="getKnockOffAccts" resultMap="knockOffAcctsResultMap">
+		SELECT * FROM TABLE(giac_gl_acct_ref_no_pkg.get_rec_to_knock_off(#glAcctId#, #slCd#, #transactionCd#, #acctRefNo#, #tranCd#, #tranDesc#,
+																		 #particulars#, #refNo#, #outstandingBal#, 
+																		 #sortColumn#, #ascDescFlg#, #from#, #to#,
+																		 #addedAcctRefNo1#, #addedAcctRefNo2#, #addedAcctRefNo3#,
+																		 #gaccTranId#))
+	</select>	
+
+ 	<select id="valGlAcctIdGiacs030" resultMap="valGlAcctIdResultMap">
+		SELECT * FROM TABLE(giac_gl_acct_ref_no_pkg.val_gl_acct_id(#glAcctId#))
+	</select>	
+
+ 	<select id="getGiacs030TranTypeLOV" resultMap="giacs030TranTypeLOVResultMap">
+		SELECT * FROM TABLE(giac_gl_acct_ref_no_pkg.get_gl_tran_type_lov(#ledgerCd#, #subLedgerCd#, #findText#, #sortColumn#, #ascDescFlg#, #from#, #to#))
+	</select> 	
+	
+	 <select id="getOutstandingBalanceGiacs030" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT giac_gl_acct_ref_no_pkg.get_remaining_balance(#glAcctId#, #slCd#, #acctRefNo#) FROM DUAL
+	</select>	
+	
+	<procedure id="valAddGlAcctRefNo" parameterClass="java.util.HashMap">
+		BEGIN
+			giac_gl_acct_ref_no_pkg.val_add_gl(#gaccTranId#, #glAcctId#, #ledgerCd#, #subLedgerCd#, #transactionCd#, #slCd#, #acctSeqNo#, #acctTranType#);
+		END;
+	</procedure>
+
+	 <select id="valRemainingBalGiacs30" resultMap="valRemainingBalResultMap">
+		SELECT  * FROM TABLE(giac_gl_acct_ref_no_pkg.val_remaining_balance(#gaccTranId#, #glAcctId#, #slCd#, #acctTranType#, #acctRefNo#, #transactionCd#, #acctSeqNo#))
+	</select>		
+
+</sqlMap>

@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISTariffRatesHdr">
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+
+	<typeAlias alias="GIISTariffRatesDtl" type="com.geniisys.common.entity.GIISTariffRatesDtl" />
+
+	<resultMap class="GIISTariffRatesDtl" id="giiss106FixedSIResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="TARIFF_CD"  		property="tariffCd"/>
+		<result column="TARIFF_DTL_CD"		property="tariffDtlCd"/>
+		<result column="FIXED_SI"  			property="fixedSI"/>
+		<result column="FIXED_PREMIUM"		property="fixedPremium"/>
+		<result column="HIGHER_RANGE"		property="higherRange"/>
+		<result column="LOWER_RANGE"		property="lowerRange"/>
+		<result column="REMARKS" 			property="remarks"/>
+		<result column="USER_ID" 			property="userId"/>
+		<result column="LAST_UPDATE"		property="lastUpdate"/>
+	</resultMap>
+	
+	<select id="getGiiss106FixedSIList" resultMap="giiss106FixedSIResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(GIISS106_PKG.GET_FIXED_SI_LIST(#tariffCd#))
+		  	      		  <isNotNull property="filter">
+		  	      		  	WHERE 1=1
+		  	      		  		<isNotEmpty prepend="AND" property="fixedSI">
+		  	      		  			fixed_si = #fixedSI#
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="fixedPremium">
+		  	      		  			fixed_premium = #fixedPremium#
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="higherRange">
+		  	      		  			higher_range = #higherRange#
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="lowerRange">
+		  	      		  			lower_range = #lowerRange#
+		  	      		  		</isNotEmpty>
+		  	      		  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="fixedSI">
+			              		ORDER BY fixed_si
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="fixedPremium">
+			              		ORDER BY fixed_premium
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="higherRange">
+			              		ORDER BY higher_range
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="lowerRange">
+			              		ORDER BY lower_range
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GIISS106_PKG.GET_FIXED_SI_LIST(#tariffCd#))
+		  	      		  <isNotNull property="filter">
+		  	      		  	WHERE 1=1
+		  	      		  		<isNotEmpty prepend="AND" property="fixedSI">
+		  	      		  			fixed_si = #fixedSI#
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="fixedPremium">
+		  	      		  			fixed_premium = #fixedPremium#
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="higherRange">
+		  	      		  			higher_range = #higherRange#
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="lowerRange">
+		  	      		  			lower_range = #lowerRange#
+		  	      		  		</isNotEmpty>
+		  	      		  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<select id="getGiiss106AllFixedSIList" resultMap="giiss106FixedSIResultMap">
+		SELECT '1' rownum_, 
+		       '1' count_, 
+		       a.* FROM TABLE(GIISS106_PKG.GET_FIXED_SI_LIST(#tariffCd#)) a
+	</select>	
+	<!-- remove by steven 07.04.2014 -->
+<!-- 	<resultMap class="java.util.HashMap" id="giiss106WithCompResultMap">
+		<result column="TARIFF_CD"  		property="tariffCd"/>
+		<result column="TARIFF_DTL_CD"		property="tariffDtlCd"/>
+		<result column="SI_DEDUCTIBLE"		property="siDeductible"/>
+		<result column="FIXED_PREMIUM"		property="fixedPremium"/>
+		<result column="EXCESS_RATE"		property="excessRate"/>
+		<result column="LOADING_RATE"		property="loadingRate"/>
+		<result column="DISCOUNT_RATE"		property="discountRate"/>
+		<result column="ADDITIONAL_PREMIUM"	property="additionalPremium"/>
+		<result column="TARIFF_RATE"		property="tariffRate"/>
+		<result column="REMARKS" 			property="remarks"/>
+		<result column="USER_ID" 			property="userId"/>
+		<result column="LAST_UPDATE"		property="lastUpdate"/>
+	</resultMap>
+	
+	<select id="getGiiss106WithCompDtl" resultMap="giiss106WithCompResultMap" parameterClass="java.lang.String">
+		SELECT *
+  		  FROM TABLE(GIISS106_PKG.GET_WITH_COMP_DTL(#tariffCd#) )
+	</select>
+	
+ 	<resultMap class="java.util.HashMap" id="giiss106FixedPremResultMap">
+		<result column="TARIFF_CD"  		property="tariffCd"/>
+		<result column="TARIFF_DTL_CD"		property="tariffDtlCd"/>
+		<result column="FIXED_PREMIUM"		property="fixedPremium"/>
+		<result column="TARIFF_RATE"		property="tariffRate"/>
+		<result column="REMARKS" 			property="remarks"/>
+		<result column="USER_ID" 			property="userId"/>
+		<result column="LAST_UPDATE"		property="lastUpdate"/>
+	</resultMap>
+	
+	<select id="getGiiss106FixedPremDtl" resultMap="giiss106FixedPremResultMap"  parameterClass="java.lang.String">
+		SELECT *
+  		  FROM TABLE(GIISS106_PKG.GET_FIXED_PREM_DTL(#tariffCd#) )
+	</select> -->
+	
+ 	
+ 	<procedure id="valTariffRatesFixedSIRec" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss106_pkg.val_add_fixed_si_rec(#tariffCd#, #tariffDtlCd#, #fixedSI#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<!-- <select id="getGiiss106MinMaxAmt" parameterClass="java.lang.Integer" resultClass="java.util.HashMap">
+ 		SELECT MIN(fixed_si) minSumInsured, MAX(fixed_si) maxSumInsured, 
+ 		       MIN(higher_range) minHigherRange, MAX(higher_range) maxHigherRange 
+ 		  FROM GIIS_TARIFF_RATES_DTL
+ 		 WHERE tariff_cd = #tariffCd#
+ 	</select> -->
+ 	
+ 	<!-- <select id="getNextTariffDtlCd" parameterClass="java.lang.Integer" resultClass="java.lang.Integer">
+ 		SELECT nvl(max(TARIFF_DTL_CD),0) + 1
+          FROM GIIS_TARIFF_RATES_DTL
+         WHERE TARIFF_CD = #tariffCd#
+ 	</select> -->
+ 	
+ 	<procedure id="valAddRecDtl" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss106_pkg.val_add_rec_dtl(#tariffCd#, #higherRange#, #lowerRange#, #tariffRate#, #additionalPremium#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="delTariffRatesDtl" parameterClass="GIISTariffRatesDtl">
+ 		BEGIN
+ 			giiss106_pkg.del_rec_dtl(#tariffCd#, #tariffDtlCd#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="setTariffRatesDtl" parameterClass="GIISTariffRatesDtl">
+	    DECLARE
+	    	v_rec giis_tariff_rates_dtl%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user 	:= #userId#;
+ 			
+ 			v_rec.tariff_cd				:= #tariffCd#;
+ 			v_rec.tariff_dtl_cd			:= #tariffDtlCd#;
+ 			v_rec.fixed_premium			:= #fixedPremium#;
+ 			v_rec.fixed_si				:= #fixedSI#;
+ 			v_rec.higher_range			:= #higherRange#;
+ 			v_rec.lower_range			:= #lowerRange#;
+ 			v_rec.si_deductible			:= #siDeductible#;
+ 			v_rec.excess_rate			:= #excessRate#;
+ 			v_rec.loading_rate			:= #loadingRate#;
+ 			v_rec.discount_rate			:= #discountRate#;
+ 			v_rec.tariff_rate			:= #tariffRate#;
+ 			v_rec.additional_premium	:= #additionalPremium#;
+ 			v_rec.user_id 				:= #userId#;
+ 			v_rec.remarks 				:= #remarks#;
+ 			
+ 			giiss106_pkg.set_rec_dtl(v_rec);
+ 		END;
+ 	</procedure>
+	
+<!-- end GIISS106 : shan -->
+	
+</sqlMap>

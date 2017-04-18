@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIWCargoCarrier">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIPIWCargoCarrierClass" type="com.geniisys.gipi.entity.GIPIWCargoCarrier"/>
+	
+	<resultMap class="GIPIWCargoCarrierClass" id="GipiWCargoCarrierMap">
+		<result column="vessel_cd"                	property="vesselCd"/>
+		<result column="vessel_name" 				property="vesselName"/>
+		<result column="motor_no" 					property="motorNo"/>
+		<result column="serial_no" 					property="serialNo"/>
+		<result column="plate_no" 					property="plateNo"/>
+		<result column="par_id" 					property="parId"/>
+		<result column="item_no" 					property="itemNo"/>
+		<result column="vessel_limit_of_liab"     	property="vesselLimitOfLiab"/>
+		<result column="eta" 						property="eta"/>
+		<result column="etd" 						property="etd"/>
+		<result column="origin" 					property="origin"/>
+		<result column="destn" 						property="destn"/>
+		<result column="delete_sw" 					property="deleteSw"/>
+		<result column="voy_limit" 					property="voyLimit"/>
+		<result column="user_id"					property="userId" />
+	</resultMap>
+	
+	<resultMap class="GIPIWCargoCarrierClass" id="CargoCarriersByItemTableGridResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="vessel_cd"                	property="vesselCd" />
+		<result column="vessel_name" 				property="vesselName" />
+		<result column="motor_no" 					property="motorNo" />
+		<result column="serial_no" 					property="serialNo" />
+		<result column="plate_no" 					property="plateNo" />
+		<result column="par_id" 					property="parId" />
+		<result column="item_no" 					property="itemNo" />
+		<result column="vessel_limit_of_liab"     	property="vesselLimitOfLiab" />
+		<result column="eta" 						property="eta" />
+		<result column="etd" 						property="etd" />
+		<result column="origin" 					property="origin" />
+		<result column="destn" 						property="destn" />
+		<result column="delete_sw" 					property="deleteSw" />
+		<result column="voy_limit" 					property="voyLimit" />
+		<result column="user_id"					property="userId" />
+	</resultMap>
+	
+	<procedure id="delGIPIWCargoCarrier" parameterClass="java.util.HashMap">
+		BEGIN
+			GIPI_WCARGO_CARRIER_PKG.del_gipi_wcargo_carrier(#parId#,#itemNo#);
+		END;
+	</procedure>
+	
+	<procedure id="delGIPIWCargoCarrier2" parameterClass="java.util.HashMap">
+		BEGIN
+			GIPI_WCARGO_CARRIER_PKG.del_gipi_wcargo_carrier2(#parId#,#itemNo#,#vesselCd#);
+		END;
+	</procedure>
+	
+	<procedure id="getGipiWCargoCarrier" resultMap="GipiWCargoCarrierMap">
+		SELECT par_id,							item_no,							vessel_cd, 							ESCAPE_VALUE(vessel_name) vessel_name,
+			   ESCAPE_VALUE(motor_no) motor_no, ESCAPE_VALUE(serial_no) serial_no, 	ESCAPE_VALUE(plate_no) plate_no, 	vessel_limit_of_liab,
+			   eta,								etd,								ESCAPE_VALUE(origin) origin,		ESCAPE_VALUE(destn) destn,
+			   delete_sw,						ESCAPE_VALUE(voy_limit) voy_limit,	user_id,							ESCAPE_VALUE(plate_no) plate_no,
+			   ESCAPE_VALUE(motor_no) motor_no,	ESCAPE_VALUE(serial_no) serial_no
+		  FROM TABLE(GIPI_WCARGO_CARRIER_PKG.get_gipi_wcargo_carrier(#parId#))
+	</procedure>
+	
+	<insert id="setGIPIWCargoCarrier" parameterClass="com.geniisys.gipi.entity.GIPIWCargoCarrier">
+		BEGIN
+			GIPI_WCARGO_CARRIER_PKG.set_gipi_cargo_carrier(
+					#parId#,#itemNo#,#vesselCd#,#vesselLimitOfLiab#,
+					#eta#,#etd#,#origin#,#destn#,
+					#deleteSw#,#voyLimit#,#userId#);
+		END;
+	</insert>
+	
+	<select id="getGIPIWCargoCarrierTableGrid" resultMap="CargoCarriersByItemTableGridResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(gipi_wcargo_carrier_pkg.get_gipi_wcargo_carrier_tg(#parId#, #itemNo#, #vesselName#, #plateNo#, #motorNo#, #serialNo#))
+						  <isNull property="sortColumn">
+							ORDER BY vessel_name ASC
+						  </isNull>
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="vesselCd">
+								ORDER BY vessel_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="vesselName">
+								ORDER BY vessel_name
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="plateNo">
+								ORDER BY plate_no
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="motorNo">
+								ORDER BY motor_no
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="serialNo">
+								ORDER BY serial_no
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(gipi_wcargo_carrier_pkg.get_gipi_wcargo_carrier_tg(#parId#, #itemNo#, #vesselName#, #plateNo#, #motorNo#, #serialNo#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+</sqlMap>	

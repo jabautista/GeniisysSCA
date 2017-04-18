@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GICLLossExpDedDtl">
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GICLLossExpDedDtl" type="com.geniisys.gicl.entity.GICLLossExpDedDtl"/>
+	
+	<resultMap class="GICLLossExpDedDtl" 	id="getGiclLossExpDedDtlListMap">
+		<result property="claimId"			column="CLAIM_ID"/>
+		<result property="clmLossId"		column="CLM_LOSS_ID"/>
+		<result property="lineCd"			column="LINE_CD"/>
+		<result property="sublineCd"		column="SUBLINE_CD"/>
+		<result property="lossExpType"		column="LOSS_EXP_TYPE"/>
+		<result property="lossExpCd"		column="LOSS_EXP_CD"/>
+		<result property="dspExpDesc"		column="DSP_EXP_DESC"/>
+		<result property="lossAmt"			column="LOSS_AMT"/>
+		<result property="dedCd"			column="DED_CD"/>
+		<result property="dspDedDesc"		column="DSP_DED_DESC"/>
+		<result property="dedAmt"			column="DED_AMT"/>
+		<result property="dedRate"			column="DED_RATE"/>
+		<result property="userId"			column="USER_ID"/>
+		<result property="lastUpdate"		column="LAST_UPDATE"/>
+		<result property="aggregateSw"		column="AGGREGATE_SW"/>
+		<result property="ceilingSw"		column="CEILING_SW"/>
+		<result property="minAmt"			column="MIN_AMT"/>
+		<result property="maxAmt"			column="MAX_AMT"/>
+		<result property="rangeSw"			column="RANGE_SW"/>
+	</resultMap>
+	
+	<resultMap class="GICLLossExpDedDtl" 	id="getGiclLossExpDedDtlTableGridMap" extends="getGiclLossExpDedDtlListMap">
+		<result property="rowNum"			column="ROWNUM_"/>
+		<result property="rowCount"			column="COUNT_"/>
+	</resultMap>
+	
+	<select id="getGiclLossExpDedDtlList" resultMap="getGiclLossExpDedDtlTableGridMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GICL_LOSS_EXP_DED_DTL_PKG.get_gicl_loss_exp_ded_dtl_list(#claimId#, #clmLossId#, #lossExpCd#, #lineCd#, #sublineCd#, #payeeType#))
+		                <isEqual property="sortColumn" compareValue="dspDedDesc">
+			            	ORDER BY dsp_ded_desc
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="dedRate">
+			            	ORDER BY ded_rate
+			          	</isEqual>
+		                <isEqual property="sortColumn" compareValue="lossAmt">
+			            	ORDER BY loss_amt
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="dtlAmt">
+			            	ORDER BY dtl_amt
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="dedAmt">
+			            	ORDER BY ded_Amt
+			          	</isEqual>
+		                <isNotNull property="sortColumn">
+		              		<isEqual property="ascDescFlg" compareValue="ASC">
+		              			ASC
+		              		</isEqual>
+		              		<isEqual property="ascDescFlg" compareValue="DESC">
+		              			DESC
+		              		</isEqual>
+		              	</isNotNull>  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GICL_LOSS_EXP_DED_DTL_PKG.get_gicl_loss_exp_ded_dtl_list(#claimId#, #clmLossId#, #lossExpCd#, #lineCd#, #sublineCd#, #payeeType#))) b)
+	</select>
+
+	<select id="checkExistLossExpDedDtl" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT GICL_LOSS_EXP_DED_DTL_PKG.check_exist_loss_exp_ded_dtl(#claimId#, #clmLossId#, #lossExpCd#) FROM dual
+	</select>
+	
+	<procedure id="deleteLossExpDedDtl" parameterClass="java.util.HashMap">
+		BEGIN
+			GICL_LOSS_EXP_DED_DTL_PKG.delete_loss_exp_ded_dtl(#claimId#, #clmLossId#, #lossExpCd#);
+		END;
+	</procedure>
+	
+	<procedure id="deleteLossExpDedDtl2" parameterClass="java.util.HashMap">
+		BEGIN
+			GICL_LOSS_EXP_DED_DTL_PKG.delete_loss_exp_ded_dtl_2(#claimId#, #clmLossId#, #lossExpCd#);
+		END;
+	</procedure>
+	
+	<procedure id="insertLeDedDtlForAll" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GICL_LOSS_EXP_DED_DTL_PKG.insert_le_ded_dtl_for_all
+			(#claimId#,     #clmLossId#,    #lineCd#,   #sublineCd#,
+			 #payeeType#,   #lossExpCd#,    #dtlAmt#,   #dedRate#,
+			 #aggregateSw#, #ceilingSw#,    #minAmt#,   #maxAmt#,
+			 #rangeSw#,     #userId#);
+		END;
+	</procedure>
+	
+	<procedure id="insertLeDedDtlNotForAll" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GICL_LOSS_EXP_DED_DTL_PKG.insert_le_ded_dtl_not_for_all
+			(#claimId#,     #clmLossId#,    #lineCd#,       #sublineCd#,
+			 #payeeType#,   #lossExpCd#,    #dedLossExpCd#, #dtlAmt#,   
+			 #dedRate#,     #aggregateSw#,  #ceilingSw#,    #minAmt#,       
+			 #maxAmt#,      #rangeSw#,      #userId#);
+		END;
+	</procedure>
+	
+	<procedure id="deleteExcessLossExpDedDtl" parameterClass="java.util.HashMap">
+		BEGIN
+			GICL_LOSS_EXP_DED_DTL_PKG.delete_excess_loss_exp_ded_dtl(#claimId#, #clmLossId#);
+		END;
+	</procedure>
+	
+</sqlMap>

@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GICLRepSignatory">
+	
+	<typeAlias alias="giclRepSignatory" type="com.geniisys.gicl.entity.GICLRepSignatory"/>
+  	
+	<resultMap class="java.util.HashMap" id="getGicls181ReportLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result column="REPORT_ID" 		property="reportId"/>
+		<result column="REPORT_NAME" 	property="reportName"/>
+		<result column="REMARKS"	 	property="remarks"/>
+		<result column="USER_ID"     	property="userId"/>
+		<result column="LAST_UPDATE" 	property="lastUpdate"/>
+		<result column="REPORT_NO"     	property="reportNo"/>
+		<result column="LINE_CD"	 	property="lineCd"/>
+		<result column="LINE_NAME"	 	property="lineName"/>
+		<result column="DOCUMENT_TAG"   property="documentTag"/>
+		<result column="BRANCH_CD" 		property="branchCd"/>
+		<result column="BRANCH_NAME"	property="branchName"/>
+		<result column="DOCUMENT_CD"    property="documentCd"/>
+		<result column="DOCUMENT_NAME"  property="documentName"/>
+	</resultMap>
+	
+	<select id="getGicls181ReportLOV" resultMap="getGicls181ReportLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(gicls181_pkg.get_documents_lov(#moduleId#, #userId#, #findText#))
+		                  <isEqual property="sortColumn" compareValue="reportNo">
+			              		ORDER BY report_no
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="reportId">
+			              		ORDER BY report_id
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="reportName">
+			              		ORDER BY report_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(gicls181_pkg.get_documents_lov(#moduleId#, #userId#, #findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="giclRepSignatoryResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="REPORT_ID" 		property="reportId"/>
+		<result column="ITEM_NO" 		property="itemNo"/>
+		<result column="LABEL"	 		property="label"/>
+		<result column="SIGNATORY_ID"   property="signatoryId"/>
+		<result column="SIGNATORY"		property="signatory"/>
+		<result column="DESIGNATION"	property="designation"/>
+		<result column="REMARKS" 		property="remarks"/>
+		<result column="USER_ID" 		property="userId"/>
+		<result column="LAST_UPDATE"    property="lastUpdate"/>
+		<result column="SNAME_FLAG"	 	property="snameFlag"/>
+		<result column="REPORT_NO"	 	property="reportNo"/>
+		<result column="LINE_NAME"	 	property="lineName"/>
+		<result column="BRANCH_NAME"	property="branchName"/>
+		<result column="DOCUMENT_NAME"	property="documentName"/>
+		<result column="READONLY"		property="readonly"/>
+	</resultMap>
+
+	<select id="getRepSignatoryGicls181List" resultMap="giclRepSignatoryResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(gicls181_pkg.get_rep_signatory_list(#reportId#, #reportNo#))
+		  	      		  <isNotNull property="filter">
+							WHERE 1 = 1 
+							<isNotEmpty prepend="AND" property="itemNo">
+								item_no LIKE #itemNo#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="label">
+								UPPER(label) LIKE UPPER(#label#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="signatory">
+								UPPER(signatory) LIKE UPPER(#signatory#)
+							</isNotEmpty>
+						  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="itemNo">
+			              		ORDER BY item_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="label">
+			              		ORDER BY label
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="signatory">
+			              		ORDER BY signatory
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(gicls181_pkg.get_rep_signatory_list(#reportId#, #reportNo#))
+		                  <isNotNull property="filter">
+							WHERE 1 = 1 
+							<isNotEmpty prepend="AND" property="itemNo">
+								item_no LIKE #itemNo#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="label">
+								UPPER(label) LIKE UPPER(#label#)
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="signatory">
+								UPPER(signatory) LIKE UPPER(#signatory#)
+							</isNotEmpty>
+						  </isNotNull>) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<select id="getGicls181SignatoryLOV" resultMap="giclRepSignatoryResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(gicls181_pkg.get_signatory_lov(#findText#))
+		                  <isEqual property="sortColumn" compareValue="signatoryId">
+			              		ORDER BY signatory_id
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="signatory">
+			              		ORDER BY signatory
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="designation">
+			              		ORDER BY designation
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(gicls181_pkg.get_signatory_lov(#findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>
+	
+	<procedure id="valAddRepSignatoryGicls181" parameterClass="java.util.HashMap">
+		BEGIN
+ 			gicls181_pkg.val_add_rec(#reportId#,#itemNo#,#reportNo#);
+ 		END;
+ 	</procedure>
+	
+	<procedure id="setRepSignatoryGicls181" parameterClass="giclRepSignatory">
+	    DECLARE
+	    	v_rec giac_rep_signatory%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.report_id := #reportId#;
+ 			v_rec.item_no := #itemNo#;
+ 			v_rec.label := #label#;
+ 			v_rec.signatory_id := #signatoryId#;
+ 			v_rec.remarks := #remarks#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.report_no := #reportNo#;
+ 			
+ 			gicls181_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="delRepSignatoryGicls181" parameterClass="giclRepSignatory">
+	    DECLARE
+	    	v_rec giac_rep_signatory%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.report_id := #reportId#;
+ 			v_rec.report_no := #reportNo#;
+ 			v_rec.item_no := #itemNo#;
+ 			
+ 			gicls181_pkg.del_rec(v_rec);
+ 		END;
+ 	</procedure>
+</sqlMap>

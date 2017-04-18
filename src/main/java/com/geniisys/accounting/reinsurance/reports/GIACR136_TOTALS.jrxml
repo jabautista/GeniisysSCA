@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIACR136_TOTALS" language="groovy" pageWidth="990" pageHeight="25" columnWidth="990" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="0e7591f1-ec8d-4479-b79b-85b74c4dc300">
+	<property name="ireport.zoom" value="1.9487171000000014"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="Crosstab Data Text" hAlign="Center"/>
+	<parameter name="P_LINE_CD" class="java.lang.String"/>
+	<parameter name="P_TREATY_YY" class="java.lang.Integer"/>
+	<parameter name="P_SHARE_CD" class="java.lang.Integer"/>
+	<parameter name="P_CESSION_YEAR" class="java.lang.Integer"/>
+	<parameter name="P_CESSION_MM" class="java.lang.Integer"/>
+	<parameter name="P_BRANCH_CD" class="java.lang.String"/>
+	<parameter name="P_USER_ID" class="java.lang.String"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="P_QUARTER" class="java.lang.Integer"/>
+	<queryString>
+		<![CDATA[SELECT * FROM TABLE(GIACR136_PKG.get_giacr136_dtls2($P{P_QUARTER}, $P{P_LINE_CD}, $P{P_TREATY_YY}, $P{P_SHARE_CD}, $P{P_CESSION_YEAR}, $P{P_USER_ID}))
+WHERE cession_mm = $P{P_CESSION_MM} AND premium_shr IS NOT NULL]]>
+	</queryString>
+	<field name="COMPANY_NAME" class="java.lang.String"/>
+	<field name="COMPANY_ADDRESS" class="java.lang.String"/>
+	<field name="QUARTER_YEAR" class="java.lang.String"/>
+	<field name="LINE_TREATY" class="java.lang.String"/>
+	<field name="LINE_CD" class="java.lang.String"/>
+	<field name="CF_MONTH" class="java.lang.String"/>
+	<field name="BRANCH_CD" class="java.lang.String"/>
+	<field name="PREMIUM_PER_BRANCH" class="java.math.BigDecimal"/>
+	<field name="RI_SNAME" class="java.lang.String"/>
+	<field name="SHR_PCT" class="java.math.BigDecimal"/>
+	<field name="PREMIUM_SHR" class="java.math.BigDecimal"/>
+	<field name="TREATY_YY" class="java.math.BigDecimal"/>
+	<field name="SHARE_CD" class="java.math.BigDecimal"/>
+	<field name="CESSION_MM" class="java.math.BigDecimal"/>
+	<field name="CESSION_YEAR" class="java.math.BigDecimal"/>
+	<variable name="V_PREM_SHR" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{PREMIUM_SHR}]]></variableExpression>
+	</variable>
+	<summary>
+		<band height="25" splitType="Stretch">
+			<crosstab>
+				<reportElement x="0" y="0" width="990" height="25" uuid="ba8206a6-4f59-47f4-9761-26cae62a091b"/>
+				<rowGroup name="P_SHARE_CD" width="0" totalPosition="End">
+					<bucket class="java.lang.String">
+						<bucketExpression><![CDATA[$P{P_SHARE_CD}]]></bucketExpression>
+					</bucket>
+					<crosstabRowHeader>
+						<cellContents backcolor="#F0F8FF" mode="Opaque"/>
+					</crosstabRowHeader>
+					<crosstabTotalRowHeader>
+						<cellContents backcolor="#FFFFFF" mode="Opaque"/>
+					</crosstabTotalRowHeader>
+				</rowGroup>
+				<rowGroup name="P_CESSION_MM" width="0" totalPosition="End">
+					<bucket class="java.lang.String">
+						<bucketExpression><![CDATA[$P{P_CESSION_MM}]]></bucketExpression>
+					</bucket>
+					<crosstabRowHeader>
+						<cellContents/>
+					</crosstabRowHeader>
+					<crosstabTotalRowHeader>
+						<cellContents backcolor="#FFFFFF" mode="Opaque"/>
+					</crosstabTotalRowHeader>
+				</rowGroup>
+				<columnGroup name="RI_SNAME" height="0" totalPosition="End">
+					<bucket class="java.lang.String">
+						<bucketExpression><![CDATA[$F{RI_SNAME}]]></bucketExpression>
+					</bucket>
+					<crosstabColumnHeader>
+						<cellContents backcolor="#F0F8FF" mode="Opaque"/>
+					</crosstabColumnHeader>
+					<crosstabTotalColumnHeader>
+						<cellContents backcolor="#BFE1FF" mode="Opaque"/>
+					</crosstabTotalColumnHeader>
+				</columnGroup>
+				<measure name="PREMIUM_SHRMeasure" class="java.math.BigDecimal" calculation="Sum">
+					<measureExpression><![CDATA[$F{PREMIUM_SHR}]]></measureExpression>
+				</measure>
+				<crosstabCell width="80" height="0">
+					<cellContents/>
+				</crosstabCell>
+				<crosstabCell width="100" height="0" columnTotalGroup="RI_SNAME">
+					<cellContents backcolor="#BFE1FF" mode="Opaque"/>
+				</crosstabCell>
+				<crosstabCell width="80" height="0" rowTotalGroup="P_CESSION_MM">
+					<cellContents/>
+				</crosstabCell>
+				<crosstabCell width="100" height="0" rowTotalGroup="P_CESSION_MM" columnTotalGroup="RI_SNAME">
+					<cellContents/>
+				</crosstabCell>
+				<crosstabCell width="80" height="35" rowTotalGroup="P_SHARE_CD">
+					<cellContents backcolor="#FFFFFF" mode="Opaque">
+						<textField pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+							<reportElement style="Crosstab Data Text" x="0" y="11" width="73" height="11" uuid="fd90b465-057d-4cde-bf1c-3136fe6d52b2"/>
+							<textElement textAlignment="Right">
+								<font fontName="Arial" size="7"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$V{PREMIUM_SHRMeasure}]]></textFieldExpression>
+						</textField>
+						<staticText>
+							<reportElement style="Crosstab Data Text" x="0" y="0" width="74" height="11" uuid="a083df35-f639-437b-93fd-f947a7f31f28"/>
+							<textElement textAlignment="Right">
+								<font fontName="Arial" size="7"/>
+							</textElement>
+							<text><![CDATA[-------------------------------------------------------------------------------]]></text>
+						</staticText>
+						<staticText>
+							<reportElement style="Crosstab Data Text" x="0" y="22" width="74" height="11" uuid="0e3e1918-7dc0-440c-872c-034e35e48278"/>
+							<textElement textAlignment="Right">
+								<font fontName="Arial" size="7"/>
+							</textElement>
+							<text><![CDATA[=============================================]]></text>
+						</staticText>
+					</cellContents>
+				</crosstabCell>
+				<crosstabCell width="100" height="35" rowTotalGroup="P_SHARE_CD" columnTotalGroup="RI_SNAME">
+					<cellContents backcolor="#FFFFFF" mode="Opaque">
+						<textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+							<reportElement style="Crosstab Data Text" x="0" y="11" width="73" height="11" isPrintWhenDetailOverflows="true" uuid="038858cd-ac95-47f7-ad7b-f7c811356b96"/>
+							<textElement textAlignment="Right">
+								<font fontName="Arial" size="7"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$V{PREMIUM_SHRMeasure_P_SHARE_CD_ALL}]]></textFieldExpression>
+						</textField>
+						<staticText>
+							<reportElement style="Crosstab Data Text" x="0" y="0" width="74" height="11" uuid="fdff19c3-f253-46d7-8eeb-839532b7a0ff"/>
+							<textElement textAlignment="Right">
+								<font fontName="Arial" size="7"/>
+							</textElement>
+							<text><![CDATA[-------------------------------------------------------------------------------]]></text>
+						</staticText>
+						<staticText>
+							<reportElement style="Crosstab Data Text" x="0" y="22" width="74" height="11" uuid="45735baa-1798-4fe7-aa33-ae2952430b39"/>
+							<textElement textAlignment="Right">
+								<font fontName="Arial" size="7"/>
+							</textElement>
+							<text><![CDATA[=============================================]]></text>
+						</staticText>
+					</cellContents>
+				</crosstabCell>
+			</crosstab>
+		</band>
+	</summary>
+</jasperReport>

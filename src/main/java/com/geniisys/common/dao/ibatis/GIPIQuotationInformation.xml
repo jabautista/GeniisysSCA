@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIQuotationInformation">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+
+	<resultMap class="java.util.HashMap" id="GIIMMPackQuotationLOV" extends="BaseEntity.TableGridResultMap">
+		<result column="line_cd"				property="lineCd" />
+		<result column="subline_cd"				property="sublineCd" />
+		<result column="iss_cd" 				property="issCd" />
+		<result column="quotation_yy" 			property="quotationYy" />
+		<result column="quotation_no" 			property="quotationNo" />
+		<result column="proposal_no" 			property="proposalNo" />
+		<result column="dsp_mean_status" 		property="dspMeanStatus" />
+		<result column="client"			 		property="client" />
+		<result column="incept_date" 	 		property="inceptDate" />
+		<result column="expiry_date"	 		property="expiryDate" />
+		<result column="accept_date"	 		property="acceptDate" />
+		<result column="days"	 				property="days" />
+		<result column="pack_quote_id"			property="packQuoteId" />
+		<result column="pack_quotation"			property="packQuotation" />
+		<result column="assd_name"		     	property="assdName" />
+		<result column="status"		     		property="status" />
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="GIIMMQuotationNoInfo" extends="BaseEntity.TableGridResultMap">
+		<result column="dv_quote"				property="dvQuote" />
+		<result column="quote_id"				property="quoteId" />
+		<result column="line_cd"				property="lineCd" />
+	</resultMap>
+	
+	<select id="getPackQuoteLOV" resultMap="GIIMMPackQuotationLOV">		
+	    SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT *
+		                  FROM TABLE(GIIMM014_PKG.get_pack_quote_lov(#lineCd#, #sublineCd#, #issCd#, #quotationYy#,
+		                  #quotationNo#, #proposalNo#, #assdName#, #userId#))
+		                <isNotNull property="filter">
+		                 WHERE 1 = 1
+							<isNotEmpty prepend="AND" property="packQuotation">
+								pack_quotation like #packQuotation#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="lineCd">
+								line_cd like #lineCd#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="sublineCd">
+								subline_cd like #sublineCd#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="quotationYy">
+								quotation_yy like #quotationYy#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="quotationNo">
+								quotation_no like #quotationNo#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="proposalNo">
+								proposal_no like #proposalNo#
+							</isNotEmpty>	
+							<isNotEmpty prepend="AND" property="inceptDate">
+								TO_DATE(incept_date,'MM-DD-YYYY') = TO_DATE(#inceptDate#,'MM-DD-YYYY')
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="expiryDate">
+								TO_DATE(expiry_date,'MM-DD-YYYY') = TO_DATE(#expiryDate#,'MM-DD-YYYY')
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="acceptDate">
+								TO_DATE(accept_date,'MM-DD-YYYY') = TO_DATE(#acceptDate#,'MM-DD-YYYY')
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="days">
+								days like #days#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="dspMeanStatus">
+								dsp_mean_status like #dspMeanStatus#
+							</isNotEmpty>
+						</isNotNull>
+			          	  	  <isEqual property="sortColumn" compareValue="packQuotation">
+				              		ORDER BY pack_quotation
+				              </isEqual>
+			                  <isEqual property="sortColumn" compareValue="assdName">
+				              		ORDER BY assd_name
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="inceptDate">
+				              		ORDER BY TO_DATE(incept_date,'MM-DD-YYYY')
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="expiryDate">
+				              		ORDER BY TO_DATE(expiry_date,'MM-DD-YYYY')
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="acceptDate">
+				              		ORDER BY TO_DATE(accept_date,'MM-DD-YYYY')
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="days">
+				              		ORDER BY days
+				              </isEqual>
+				              <isEqual property="sortColumn" compareValue="dspMeanStatus">
+				              		ORDER BY dsp_mean_status
+				              </isEqual>
+				              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">	
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+							) a,
+							(SELECT count(*) count_
+							FROM TABLE(GIIMM014_PKG.get_pack_quote_lov(#lineCd#, #sublineCd#, #issCd#, #quotationYy#,
+		                  #quotationNo#, #proposalNo#, #assdName#, #userId#))
+		                  <isNotNull property="filter">
+		                   WHERE 1 = 1
+							<isNotEmpty prepend="AND" property="packQuotation">
+								pack_quotation like #packQuotation#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="lineCd">
+								line_cd like #lineCd#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="sublineCd">
+								subline_cd like #sublineCd#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="quotationYy">
+								quotation_yy like #quotationYy#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="quotationNo">
+								quotation_no like #quotationNo#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="proposalNo">
+								proposal_no like #proposalNo#
+							</isNotEmpty>	
+							<isNotEmpty prepend="AND" property="inceptDate">
+								TO_DATE(incept_date,'MM-DD-YYYY') = TO_DATE(#inceptDate#,'MM-DD-YYYY')
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="expiryDate">
+								TO_DATE(expiry_date,'MM-DD-YYYY') = TO_DATE(#expiryDate#,'MM-DD-YYYY')
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="acceptDate">
+								TO_DATE(accept_date,'MM-DD-YYYY') = TO_DATE(#acceptDate#,'MM-DD-YYYY')
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="days">
+								days like #days#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="dspMeanStatus">
+								dsp_mean_status like #dspMeanStatus#
+							</isNotEmpty>
+						</isNotNull>
+			                ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getQuotationNoInfo" resultMap="GIIMMQuotationNoInfo">
+	    SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT *
+		                  FROM TABLE(GIIMM014_PKG.get_GIIMM014_quotation_no(#packQuoteId#))
+		                 
+			          	  	  <isEqual property="sortColumn" compareValue="dvQuote">
+				              		ORDER BY dv_quote
+				              </isEqual>
+				                <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">	
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+							) a,
+							(SELECT count(*) count_
+							FROM TABLE(GIIMM014_PKG.get_GIIMM014_quotation_no(#packQuoteId#))
+							<isNotNull property="sortColumn">
+			          	  	  <isEqual property="sortColumn" compareValue="dvQuote">
+				              		ORDER BY dv_quote
+				              </isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">	
+			              			DESC
+			              		</isEqual>
+			              	</isNotNull>
+			                ) b) 			                
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+
+</sqlMap>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap>
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIPIQuoteItemAV" type="com.geniisys.gipi.entity.GIPIQuoteItemAV" />
+	
+	<resultMap id="GIPIQuoteItemAVMap" class="GIPIQuoteItemAV">
+		<result column="QUOTE_ID" 		property="quoteId" 			/>
+		<result column="ITEM_NO"		property="itemNo" 			/>
+		<result column="VESSEL_CD" 		property="vesselCd" 		/>
+		<result column="REC_FLAG" 		property="recFlag" 			/>
+		<result column="FIXED_WING" 	property="fixedWing" 		/>
+		<result column="ROTOR" 			property="rotor" 			/>
+		<result column="PURPOSE" 		property="purpose" 			/>
+		<result column="DEDUCT_TEXT" 	property="deductText" 		/>
+		<result column="PREV_UTIL_HRS" 	property="prevUtilHrs" 		/>
+		<result column="EST_UTIL_HRS" 	property="estUtilHrs" 		/>
+		<result column="TOTAL_FLY_TIME" property="totalFlyTime" 	/>
+		<result column="QUALIFICATION" 	property="qualification" 	/>
+		<result column="GEOG_LIMIT" 	property="geogLimit" 		/>
+	</resultMap>
+	
+	<select id="getGIPIQuoteItemAVDetails" resultMap="GIPIQuoteItemAVMap" parameterClass="java.util.HashMap">
+		SELECT QUOTE_ID, ITEM_NO, VESSEL_CD, REC_FLAG,
+			   FIXED_WING, ROTOR, PURPOSE, DEDUCT_TEXT, PREV_UTIL_HRS,
+			   EST_UTIL_HRS, TOTAL_FLY_TIME, QUALIFICATION, GEOG_LIMIT
+		  FROM TABLE(Gipi_Quote_Item_Dtls.Get_Gipi_Quote_AV(#quoteId#, #itemNo#))
+	</select>
+	
+	<procedure id="saveGIPIQuoteItemAV" parameterClass="GIPIQuoteItemAV">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			Gipi_Quote_Item_Dtls.Set_Gipi_Quote_AV(
+				#quoteId#,		 	#itemNo#,			 	#vesselCd#,		 	#recFlag#,
+			 	#fixedWing#,	 	#rotor#,			 	#purpose#,		 	#deductText#,
+			 	#prevUtilHrs#,	 	#estUtilHrs#,		 	#totalFlyTime#,	 	#qualification#,
+			 	#geogLimit#);
+		END;
+	</procedure>
+	
+	<procedure id="deleteGIPIQuoteItemAV">
+		BEGIN
+			Gipi_Quote_Item_Dtls.Del_Gipi_Quote_av(#quoteId#, #itemNo#);
+		END;
+	</procedure>
+	
+</sqlMap>

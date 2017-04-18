@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap>
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIPIQuoteENItem" type="com.geniisys.quote.entity.GIPIQuoteENItem" />
+	
+	<resultMap id="GIPIQuoteItemENMap" class="GIPIQuoteENItem">
+		<result column="QUOTE_ID" 					property="quoteId" />
+		<result column="ENGG_BASIC_INFONUM" 		property="enggBasicInfonum" />
+		<result column="CONTRACT_PROJ_BUSS_TITLE"	property="contractProjBussTitle" />
+		<result column="SITE_LOCATION" 				property="siteLocation" />
+		<result column="CONSTRUCT_START_DATE" 		property="constructStartDate" />
+		<result column="CONSTRUCT_END_DATE" 		property="constructEndDate" />
+		<result column="MAINTAIN_START_DATE" 		property="maintainStartDate" />
+		<result column="MAINTAIN_END_DATE" 			property="maintainEndDate" />
+		<result column="TESTING_START_DATE" 		property="testingStartDate" />
+		<result column="TESTING_END_DATE" 			property="testingEndDate" />
+		<result column="WEEKS_TEST" 				property="weeksTest" />
+		<result column="TIME_EXCESS" 				property="timeExcess" />
+		<result column="MBI_POLICY_NO" 				property="mbiPolicyNo" />
+		<result column="USER_ID" 					property="userId" />
+		<result column="LAST_UPDATE" 				property="lastUpdate" />
+	</resultMap>
+	
+	<select id="getGIPIQuoteENItemDetails" resultMap="GIPIQuoteItemENMap" parameterClass="java.util.HashMap">
+		SELECT
+			   quote_id,   engg_basic_infonum,            ESCAPE_VALUE(contract_proj_buss_title) contract_proj_buss_title, 
+               ESCAPE_VALUE(site_location) site_location, construct_start_date construct_start_date,     
+               construct_end_date construct_end_date,     maintain_start_date maintain_start_date,      
+               maintain_end_date maintain_end_date,       testing_start_date testing_start_date,     
+               testing_end_date testing_end_date,         weeks_test weeks_test,              
+               time_excess time_excess,                   ESCAPE_VALUE(mbi_policy_no) mbi_policy_no,
+               ESCAPE_VALUE(user_id) user_id,             last_update  
+		FROM TABLE(Gipi_Quote_Item_Dtls.Get_Gipi_Quote_EN2(#quoteId#))
+	</select>
+	
+	<procedure id="saveGIPIQuoteENItem" parameterClass="GIPIQuoteENItem">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			Gipi_Quote_Item_Dtls.Set_Gipi_Quote_EN(#quoteId#,#enggBasicInfonum#,#contractProjBussTitle#,
+	 			#siteLocation#,#constructStartDate#,#constructEndDate#,#maintainStartDate#,#maintainEndDate#,
+				#testingStartDate#,#testingEndDate#,#weeksTest#,#timeExcess#,#mbiPolicyNo#);
+		END;
+	</procedure>
+	
+</sqlMap>

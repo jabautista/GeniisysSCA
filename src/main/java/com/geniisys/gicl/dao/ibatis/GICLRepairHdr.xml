@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GICLRepairHdr">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GICLRepairHdr" type="com.geniisys.gicl.entity.GICLRepairHdr"/>
+	
+	<resultMap class="GICLRepairHdr" id="giclRepairHdrMap">
+		<result property="evalId" column="eval_id"/>
+		<result property="payeeTypeCd" column="payee_type_cd"/>
+		<result property="payeeCd" column="payee_cd"/>
+		<result property="lpsRepairAmt" column="lps_repair_Amt"/>
+		<result property="actualTotalAmt" column="actual_total_amt"/>
+		<result property="actualTinsmithAmt" column="actual_tinsmith_amt"/>
+		<result property="actualPaintingAmt" column="actual_painting_amt"/>
+		<result property="otherLaborAmt" column="other_labor_amt"/>
+		<result property="withVat" column="with_vat"/>
+		<result property="updateSw" column="update_sw"/>
+		<result property="userId" column="user_id"/>
+		<result property="lastUpdate" column="last_update"/>
+		<result property="dspCompanyType" column="dsp_company_type"/>
+		<result property="dspCompany" column="dsp_company"/>
+		<result property="dspLaborComType" column="dsp_Labor_Com_Type"/>
+		<result property="dspLaborCompany" column="dsp_labor_company"/>
+		<result property="dspTotalLabor" column="dsp_total_labor"/>
+	</resultMap>
+	
+	<resultMap class="GICLRepairHdr" id="repairHdrDtlMap" extends="giclRepairHdrMap">
+		<result property="dspCompanyType" column="dsp_company_type"/>
+		<result property="dspCompany" column="dsp_company"/>
+		<result property="dspLaborComType" column="dsp_Labor_Com_Type"/>
+		<result property="dspLaborCompany" column="dsp_labor_company"/>
+		<result property="dspTotalLabor" column="dsp_total_labor"/>
+		<result property="dspTotalT" column="dsp_total_t"/>
+		<result property="dspTotalP" column="dsp_total_p"/>
+	</resultMap>
+	
+	<select id="getRepairDtl" parameterClass="Integer" resultMap="repairHdrDtlMap">
+		SELECT * FROM TABLE(gicl_repair_hdr_pkg.get_repair_dtl(#evalId#))
+	</select>
+	
+	<select id="validateRepairBeforeSave" parameterClass="map" resultClass="String">
+		SELECT gicl_repair_hdr_pkg.validate_before_save(#evalMasterId#,#evalId#,#actualTotalAmt#,#payeeTypeCd#,#payeeCd#) from dual
+	</select>
+	
+	<procedure id="saveGiclRepairHdr" parameterClass="GICLRepairHdr">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			gicl_repair_hdr_pkg.save_gicl_repair_hdr(#evalId#,#payeeTypeCd#,#payeeCd#,#lpsRepairAmt#,#actualTotalAmt#,#actualTinsmithAmt#,
+				#actualPaintingAmt#,#otherLaborAmt#,#withVat#
+			);
+		END; 
+	</procedure>
+	
+	<procedure id="updateGiclRepairDtls" parameterClass="map">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			gicl_repair_hdr_pkg.update_gicl_repair_dtls(#evalId#,#actualTotalAmt#,#payeeTypeCd#,#payeeCd#,#dspTotalLabor#);
+		END;	
+	</procedure>
+</sqlMap>

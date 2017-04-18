@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISAirType">
+	
+	<typeAlias alias="giisAirType" type="com.geniisys.common.entity.GIISAirType"/>
+  	
+	<resultMap class="giisAirType" id="giisAirTypeResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="air_type_cd"    property="airTypeCd"/>
+		<result column="air_desc"  		property="airDesc"/>
+		<result column="user_id"     	property="userId"/>
+		<result column="last_update" 	property="lastUpdate"/>
+		<result column="remarks"     	property="remarks"/>
+	</resultMap>
+	
+	<select id="getGiiss048RecList" resultMap="giisAirTypeResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss048_pkg.get_rec_list)
+		  	      <isNotNull property="filter">
+		  	      	WHERE 1 = 1 
+		  	      		<isNotEmpty prepend="AND" property="airTypeCd">
+                        	air_type_cd = #airTypeCd#
+                        </isNotEmpty>
+                        <isNotEmpty prepend="AND" property="airDesc">
+                            UPPER(air_desc) LIKE UPPER(#airDesc#)
+                        </isNotEmpty>
+		  	      </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="airTypeCd">
+			              		ORDER BY air_type_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="airDesc">
+			              		ORDER BY air_desc
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss048_pkg.get_rec_list)
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setAirType" parameterClass="giisAirType">
+	    DECLARE
+	    	v_rec giis_air_type%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.air_type_cd := #airTypeCd#;
+ 			v_rec.air_desc := #airDesc#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			giiss048_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<!-- <procedure id="valDeleteAirType" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss048_pkg.val_del_rec(#recId#);
+ 		END;
+ 	</procedure> -->
+ 	
+ 	<select id="valDeleteAirType" resultClass="java.lang.String">
+		SELECT giiss048_pkg.val_del_rec(#airTypeCd#)FROM dual							
+	</select>
+ 	
+ 	<procedure id="valAddAirType" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss048_pkg.val_add_rec(#recId#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delAirType" parameterClass="java.lang.String">
+		BEGIN
+ 			giiss048_pkg.del_rec(#airTypeCd#);
+ 		END;
+ 	</delete>
+</sqlMap>

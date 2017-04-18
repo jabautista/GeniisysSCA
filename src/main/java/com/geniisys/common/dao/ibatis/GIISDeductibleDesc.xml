@@ -1,0 +1,409 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISDeductibleDesc">
+
+ 	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<resultMap id="giiss010LineLOVResultMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result property="lineCd"		column="LINE_CD"/>
+		<result property="lineName"		column="LINE_NAME"/>
+	</resultMap>
+	
+	<select id="getGiiss010LineLOV" resultMap="giiss010LineLOVResultMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giiss010_pkg.get_line_lov(#userId#))
+		                  <isNotNull property="findText">
+		                  	WHERE UPPER(line_cd) LIKE UPPER(#findText#)
+		                  	   OR UPPER(line_name) LIKE UPPER(#findText#)
+		                  </isNotNull>
+		                  <isNull property="findText">
+		                  	WHERE UPPER(line_cd) LIKE UPPER(NVL(#searchString#, line_Cd))
+		                  	   OR UPPER(line_name) LIKE UPPER(NVL(#searchString#, line_Name))
+		                  </isNull>
+		                  <isEqual property="sortColumn" compareValue="lineCd">
+			              		ORDER BY line_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="lineName">
+			              		ORDER BY line_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giiss010_pkg.get_line_lov(#userId#))
+		                  <isNotNull property="findText">
+		                  	WHERE UPPER(line_cd) LIKE UPPER(#findText#)
+		                  	   OR UPPER(line_name) LIKE UPPER(#findText#)
+		                  </isNotNull>
+		                  <isNull property="findText">
+		                  	WHERE UPPER(line_cd) LIKE UPPER(NVL(#searchString#, line_Cd))
+		                  	   OR UPPER(line_name) LIKE UPPER(NVL(#searchString#, line_Name))
+		                  </isNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap id="giiss010SublineLOVResultMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result property="sublineCd"		column="SUBLINE_CD"/>
+		<result property="sublineName"		column="SUBLINE_NAME"/>
+	</resultMap>
+	
+	<select id="getGiiss010SublineLOV" resultMap="giiss010SublineLOVResultMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giiss010_pkg.get_subline_lov(#lineCd#))
+		                  <isNotNull property="findText">
+		                  	WHERE UPPER(subline_cd) LIKE UPPER(#findText#)
+		                  	   OR UPPER(subline_name) LIKE UPPER(#findText#)
+		                  </isNotNull>
+		                  <isNull property="findText">
+		                  	WHERE UPPER(subline_cd) LIKE UPPER(NVL(#searchString#, subline_Cd))
+		                  	   OR UPPER(subline_name) LIKE UPPER(NVL(#searchString#, subline_Name))
+		                  </isNull>
+		                  <isEqual property="sortColumn" compareValue="sublineCd">
+			              		ORDER BY subline_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="sublineName">
+			              		ORDER BY subline_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giiss010_pkg.get_subline_lov(#lineCd#))
+		                  <isNotNull property="findText">
+		                  	WHERE UPPER(subline_cd) LIKE UPPER(#findText#)
+		                  	   OR UPPER(subline_name) LIKE UPPER(#findText#)
+		                  </isNotNull>
+		                  <isNull property="findText">
+		                  	WHERE UPPER(subline_cd) LIKE UPPER(NVL(#searchString#, subline_Cd))
+		                  	   OR UPPER(subline_name) LIKE UPPER(NVL(#searchString#, subline_Name))
+		                  </isNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap id="DeductibleLOVResultMap" class="com.geniisys.common.entity.GIISDeductibleDesc" extends="BaseEntity.TableGridResultMap">
+		<result column="DEDUCTIBLE_CD" 		property="deductibleCd" />
+		<result column="DEDUCTIBLE_TITLE" 	property="deductibleTitle" />
+		<result column="DEDUCTIBLE_AMT" 	property="deductibleAmt" />
+		<result column="DEDUCTIBLE_RT" 		property="deductibleRate" />
+		<result column="DEDUCTIBLE_TEXT" 	property="deductibleText" />
+		<result column="DED_TYPE" 			property="deductibleType" />
+		<result column="DED_TYPE_DESC" 		property="deductibleTypeDesc" />
+		<result column="MIN_AMT" 			property="minimumAmount" />
+		<result column="MAX_AMT" 			property="maximumAmount" />
+		<result column="RANGE_SW" 			property="rangeSw" />
+	</resultMap>
+	
+	<resultMap id="deductiblesLOVMap" class="java.util.HashMap">
+  		<result column="DEDUCTIBLE_CD" 		property="deductibleCd" />
+  		<result column="DEDUCTIBLE_AMT" 	property="deductibleAmt" />
+		<result column="DEDUCTIBLE_RT" 		property="deductibleRate" />
+		<result column="DEDUCTIBLE_TEXT" 	property="deductibleText" />
+		<result column="DED_TYPE" 			property="deductibleType" />
+		<result column="DEDUCTIBLE_TITLE" 	property="deductibleTitle" />		
+  		<result property="rowNum" 				column="rownum_" />
+		<result property="rowCount"				column="count_" />
+  	</resultMap>
+
+	<select id="getGIISDeductibleLOV" resultMap="DeductibleLOVResultMap">
+		SELECT * 
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIIS_DEDUCTIBLE_DESC_PKG.get_ded_deductible_list2(#lineCd#, #sublineCd#, #findText#))
+		                  <isNotNull property="notIn">
+		                  		WHERE deductible_cd NOT IN $notIn$
+		                  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="deductibleCd">
+			              		ORDER BY deductible_cd
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="deductibleTitle">
+			              		ORDER BY deductible_title
+			              </isEqual>		
+		                  <isEqual property="sortColumn" compareValue="deductibleAmt">
+			              		ORDER BY deductible_amt
+			              </isEqual>	
+		                  <isEqual property="sortColumn" compareValue="deductibleRate">
+			              		ORDER BY deductible_rt
+			              </isEqual>		
+		                  <isEqual property="sortColumn" compareValue="deductibleTypeDesc">
+			              		ORDER BY ded_type_desc
+			              </isEqual>			              	              		              	              
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIIS_DEDUCTIBLE_DESC_PKG.get_ded_deductible_list2(#lineCd#, #sublineCd#, #findText#))
+		                	<isNotNull property="notIn">
+		                  		WHERE deductible_cd NOT IN $notIn$
+		                  	</isNotNull>) b
+		                ) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getDeductiblesLOV" resultMap="deductiblesLOVMap">
+		SELECT * 
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT deductible_cd , ded_type, deductible_rt , deductible_amt , deductible_text, deductible_title
+							      FROM giis_deductible_desc
+							   WHERE line_cd    = #lineCd#
+							         AND subline_cd = #sublineCd#
+		                  <isEqual property="sortColumn" compareValue="deductibleCd">
+			              		ORDER BY deductible_cd
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="deductibleText">
+			              		ORDER BY deductible_text
+			              </isEqual>		
+		                  <isEqual property="sortColumn" compareValue="deductibleAmt">
+			              		ORDER BY deductible_amt
+			              </isEqual>	
+		                  <isEqual property="sortColumn" compareValue="deductibleRate">
+			              		ORDER BY deductible_rt
+			              </isEqual>		
+		                  <isEqual property="sortColumn" compareValue="deductibleType">
+			              		ORDER BY ded_type
+			              </isEqual>			              	              		              	              
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                   FROM giis_deductible_desc
+						WHERE line_cd    = #lineCd#
+							  AND subline_cd = #sublineCd#) b
+		                  ) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getQuoteDeductibleLOV" resultMap="DeductibleLOVResultMap">
+		SELECT * 
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIIS_DEDUCTIBLE_DESC_PKG.get_quote_deductible_list(#lineCd#, #sublineCd#, #findText#))
+		                  <isNotNull property="notIn">
+		                  		WHERE deductible_cd NOT IN $notIn$
+		                  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="deductibleCd">
+			              		ORDER BY deductible_cd
+			              </isEqual>
+		                  <isEqual property="sortColumn" compareValue="deductibleTitle">
+			              		ORDER BY deductible_title
+			              </isEqual>		
+		                  <isEqual property="sortColumn" compareValue="deductibleAmt">
+			              		ORDER BY deductible_amt
+			              </isEqual>	
+		                  <isEqual property="sortColumn" compareValue="deductibleRate">
+			              		ORDER BY deductible_rt
+			              </isEqual>		
+		                  <isEqual property="sortColumn" compareValue="deductibleTypeDesc">
+			              		ORDER BY ded_type_desc
+			              </isEqual>			              	              		              	              
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIIS_DEDUCTIBLE_DESC_PKG.get_quote_deductible_list(#lineCd#, #sublineCd#, #findText#))
+		                	<isNotNull property="notIn">
+		                  		WHERE deductible_cd NOT IN $notIn$
+		                  	</isNotNull>) b
+		                ) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	
+<!-- GIISS010 : shan 10.24.2013 -->
+	<resultMap id="giiss010ResultMap" class="com.geniisys.common.entity.GIISDeductibleDesc" extends="BaseEntity.TableGridResultMap">
+		<result column="LINE_CD" 			property="lineCd" />
+		<result column="SUBLINE_CD" 		property="sublineCd" />
+		<result column="DEDUCTIBLE_CD" 		property="deductibleCd" />
+		<result column="DEDUCTIBLE_TITLE" 	property="deductibleTitle" />
+		<result column="DEDUCTIBLE_AMT" 	property="deductibleAmt" />
+		<result column="DEDUCTIBLE_RT" 		property="deductibleRate" />
+		<result column="DEDUCTIBLE_TEXT" 	property="deductibleText" />
+		<result column="DED_TYPE" 			property="deductibleType" />
+		<result column="MIN_AMT" 			property="minimumAmount" />
+		<result column="MAX_AMT" 			property="maximumAmount" />
+		<result column="RANGE_SW" 			property="rangeSw" />
+		<result column="REMARKS" 			property="remarks" />
+		<result column="USER_ID" 			property="userId" />
+		<result column="LAST_UPDATE"		property="lastUpdate" />
+	</resultMap>
+	
+	<select id="getGiiss010RecList" resultMap="giiss010ResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * 
+		  	      		  FROM TABLE(giiss010_pkg.get_rec_list(#lineCd#, #sublineCd#, #deductibleCd#, #deductibleType#, 
+		  	      												#deductibleTitle#, #userId#))
+		  	      		  <isNotNull property="filter">
+		  	      		  	WHERE 1=1
+		  	      		  		<isNotEmpty prepend="AND" property="deductibleAmt">
+		  	      		  			deductible_amt = #deductibleAmt#
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="deductibleRate">
+		  	      		  			deductible_rt = #deductibleRate#
+		  	      		  		</isNotEmpty>
+		  	      		  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="totalTag">
+			              		ORDER BY total_tag
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="deductibleCd deductibleTitle">
+			              		ORDER BY deductible_cd
+			              			<isNotNull property="sortColumn">
+					              		<isEqual property="ascDescFlg" compareValue="ASC">
+					              			ASC
+					              		</isEqual>
+					              		<isEqual property="ascDescFlg" compareValue="DESC">
+					              			DESC
+					              		</isEqual>
+					              	</isNotNull>, 
+			              		deductible_title
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="deductibleType">
+			              		ORDER BY ded_type
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="deductibleAmt">
+			              		ORDER BY deductible_amt
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="deductibleRate">
+			              		ORDER BY deductible_rt
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss010_pkg.get_rec_list(#lineCd#, #sublineCd#, #deductibleCd#, #deductibleType#, 
+		  	      												#deductibleTitle#, #userId#))
+		  	      		  <isNotNull property="filter">
+		  	      		  	WHERE 1=1
+		  	      		  		<isNotEmpty prepend="AND" property="deductibleAmt">
+		  	      		  			deductible_amt = #deductibleAmt#
+		  	      		  		</isNotEmpty>
+		  	      		  		<isNotEmpty prepend="AND" property="deductibleRate">
+		  	      		  			deductible_rt = #deductibleRate#
+		  	      		  		</isNotEmpty>
+		  	      		  </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="setDeductibleDesc" parameterClass="com.geniisys.common.entity.GIISDeductibleDesc">
+	    DECLARE
+	    	v_rec giis_deductible_desc%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.line_cd := #lineCd#;
+ 			v_rec.subline_cd := #sublineCd#;
+ 			v_rec.deductible_cd := #deductibleCd#;
+ 			v_rec.ded_type := #deductibleType#;
+ 			v_rec.deductible_title := #deductibleTitle#;
+ 			v_rec.deductible_text := #deductibleText#;
+ 			v_rec.deductible_rt := #deductibleRate#;
+ 			v_rec.deductible_amt := #deductibleAmt#;
+ 			v_rec.min_amt := #minimumAmount#;
+ 			v_rec.max_amt := #maximumAmount#;
+ 			v_rec.range_sw := #rangeSw#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			giiss010_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteDeductibleDesc" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss010_pkg.val_del_rec(#checkBoth#, #lineCd#, #sublineCd#, #deductibleCd#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddDeductibleDesc" parameterClass="java.util.HashMap">
+ 		BEGIN
+ 			giiss010_pkg.val_add_rec(#lineCd#, #sublineCd#, #deductibleCd#, #deductibleTitle#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delDeductibleDesc" parameterClass="java.util.HashMap">
+		BEGIN
+ 			giiss010_pkg.del_rec(#lineCd#, #sublineCd#, #deductibleCd#);
+ 		END;
+ 	</delete>
+
+
+<!--  end GIIS010 : shan 10.24.2013 -->
+<!-- start Gzelle 08272015 SR4851  -->
+	<resultMap id="allTDedTypeResultMap" class="java.util.HashMap">
+		<result column="DEDUCTIBLE_CD" 		property="deductibleCd" />
+		<result column="DEDUCTIBLE_TITLE" 	property="deductibleTitle" />
+		<result column="DEDUCTIBLE_AMT" 	property="deductibleAmt" />
+		<result column="DEDUCTIBLE_RT" 		property="deductibleRate" />
+		<result column="DEDUCTIBLE_TEXT" 	property="deductibleText" />
+		<result column="DED_TYPE" 			property="deductibleType" />
+		<result column="DED_TYPE_DESC" 		property="deductibleTypeDesc" />
+		<result column="MIN_AMT" 			property="minimumAmount" />
+		<result column="MAX_AMT" 			property="maximumAmount" />
+		<result column="RANGE_SW" 			property="rangeSw" />
+	</resultMap>
+
+	<select id="getAllTDedType" resultMap="allTDedTypeResultMap">
+		SELECT * FROM TABLE(giis_deductible_desc_pkg.get_all_t_type_ded(#lineCd#, #sublineCd#, #deductibleType#)) 
+	</select>
+<!-- end Gzelle 08272015 SR4851  -->
+
+</sqlMap>

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISMCEngSeries">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIISMCEngineSeries" type="com.geniisys.common.entity.GIISMCEngineSeries"/>
+	
+	<resultMap class="GIISMCEngineSeries" id="GIISMCEngSeriesLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="carCompanyCd" column="CAR_COMPANY_CD" />
+		<result property="carCompany"	column="CAR_COMPANY"	/>
+		<result property="makeCd"		column="MAKE_CD" />
+		<result property="make"			column="MAKE" />
+		<result property="seriesCd"		column="SERIES_CD" />
+		<result property="engineSeries"	column="ENGINE_SERIES" />
+	</resultMap>
+	
+	<select id="getEngineSeriesLOV" parameterClass="java.util.HashMap" resultMap="GIISMCEngSeriesLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giis_mc_eng_series_pkg.get_eng_series_list_tg(#sublineCd#, #carCompanyCd#, #makeCd#, #findText#))
+						  <isNull property="sortColumn">
+							ORDER BY engine_series ASC
+						  </isNull>
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="seriesCd">
+								ORDER BY series_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="engineSeries">
+								ORDER BY engine_series
+							</isEqual>							
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(giis_mc_eng_series_pkg.get_eng_series_list_tg(#sublineCd#, #carCompanyCd#, #makeCd#, #findText#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="engineSeriesAdverseLOVMap" extends="BaseEntity.TableGridResultMap">
+		<result property="seriesCd"		column="SERIES_CD" />
+		<result property="engineSeries"	column="ENGINE_SERIES" />
+	</resultMap>
+	
+	<select id="getEngineSeriesAdverseLOV" parameterClass="java.util.HashMap" resultMap="engineSeriesAdverseLOVMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giis_mc_eng_series_pkg.get_eng_series_adverse_lov(#carCompanyCd#, #makeCd#, #findText#))
+						  <isNull property="sortColumn">
+							ORDER BY engine_series ASC
+						  </isNull>
+						  <isNotNull property="sortColumn">
+							<isEqual property="sortColumn" compareValue="seriesCd">
+								ORDER BY series_cd
+							</isEqual>
+							<isEqual property="sortColumn" compareValue="engineSeries">
+								ORDER BY engine_series
+							</isEqual>							
+							<isEqual property="ascDescFlg" compareValue="ASC">
+								ASC
+							</isEqual>
+							<isEqual property="ascDescFlg" compareValue="DESC">
+								DESC
+							</isEqual>
+						</isNotNull>) a,
+						(SELECT COUNT(*) count_
+						   FROM TABLE(giis_mc_eng_series_pkg.get_eng_series_adverse_lov(#carCompanyCd#, #makeCd#, #findText#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getEngineSeriesLOV2" parameterClass="java.util.HashMap" resultMap="GIISMCEngSeriesLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giis_mc_eng_series_pkg.get_eng_series_list2(#carCompanyCd#, #makeCd#))
+						  <isNotNull property="findText">
+		                  	WHERE UPPER(ENGINE_SERIES) LIKE UPPER(#findText#)
+		                  </isNotNull>
+					   )a,
+					   (SELECT COUNT(*) count_
+						  FROM TABLE(giis_mc_eng_series_pkg.get_eng_series_list2(#carCompanyCd#, #makeCd#))
+						  <isNotNull property="findText">
+		                  	WHERE UPPER(ENGINE_SERIES) LIKE UPPER(#findText#)
+		                  </isNotNull>
+		                  ) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+</sqlMap>

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GICLLossExpPayees">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GICLLossExpPayees" type="com.geniisys.gicl.entity.GICLLossExpPayees"/>
+	
+	<resultMap class="GICLLossExpPayees" id="GICLLossExpPayeesResultMap">
+		<result property="claimId"			column="CLAIM_ID"/>
+		<result property="itemNo"			column="ITEM_NO"/>
+		<result property="perilCd"			column="PERIL_CD"/>
+		<result property="groupedItemNo"	column="GROUPED_ITEM_NO"/>
+		<result property="payeeType"		column="PAYEE_TYPE"/>
+		<result property="payeeTypeDesc"	column="PAYEE_TYPE_DESC"/>
+		<result property="payeeClassCd"		column="PAYEE_CLASS_CD"/>
+		<result property="className"		column="CLASS_DESC"/>
+		<result property="payeeCd"			column="PAYEE_CD"/>
+		<result property="dspPayeeName"		column="PAYEE_LAST_NAME"/>
+		<result property="clmClmntNo"		column="CLM_CLMNT_NO"/>
+		<result property="userId"			column="USER_ID"/>
+		<result property="lastUpdate"		column="LAST_UPDATE"/>
+		<result property="existClmLossExp"	column="EXIST_CLM_LOSS_EXP"/>
+		<result property="rowNum"			column="ROWNUM_"/>
+		<result property="rowCount"			column="COUNT_"/>
+	</resultMap>
+	
+	<select id="getGiclLossExpPayeesList" resultMap="GICLLossExpPayeesResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * FROM TABLE(GICL_LOSS_EXP_PAYEES_PKG.get_gicl_loss_exp_payees(#claimId#, #itemNo#, #perilCd#, #groupedItemNo#, #dspPayeeName#, #className#, #payeeTypeDesc#))
+		          		<isNotNull property="filter">
+			      			WHERE 1=1
+			      			<isNotEmpty prepend="AND" property="payeeClassCd">
+           					  UPPER(payee_class_cd) LIKE UPPER(#payeeClassCd#)
+           			        </isNotEmpty>
+           			        <isNotEmpty prepend="AND" property="payeeTypeDesc">
+           					  UPPER(payee_type_desc) LIKE UPPER(#payeeTypeDesc#)
+           			        </isNotEmpty>
+           			        <isNotEmpty prepend="AND" property="className">
+           					  UPPER(class_desc) LIKE UPPER(#className#)
+           			        </isNotEmpty>
+           			        <isNotEmpty prepend="AND" property="payeeCd">
+           					  payee_cd LIKE #payeeCd#
+           			        </isNotEmpty>
+           			        <isNotEmpty prepend="AND" property="dspPayeeName">
+           					  UPPER(payee_last_name) LIKE UPPER(#dspPayeeName#)
+           			        </isNotEmpty>
+                		</isNotNull>
+		          		<isEqual property="sortColumn" compareValue="payeeTypeDesc">
+			            	ORDER BY payee_type_desc
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="payeeClassCd className">
+			            	ORDER BY payee_class_cd
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="className">
+			            	ORDER BY class_desc
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="payeeCd dspPayeeName">
+			            	ORDER BY payee_cd
+			          	</isEqual>
+			          	<isEqual property="sortColumn" compareValue="dspPayeeName">
+			            	ORDER BY payee_last_name
+			          	</isEqual>
+			           	<isNotNull property="sortColumn">
+			              	<isEqual property="ascDescFlg" compareValue="ASC">
+			              		ASC
+			              	</isEqual>
+			              	<isEqual property="ascDescFlg" compareValue="DESC">
+			              		DESC
+			              	</isEqual>
+			            </isNotNull>  
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(GICL_LOSS_EXP_PAYEES_PKG.get_gicl_loss_exp_payees(#claimId#, #itemNo#, #perilCd#, #groupedItemNo#, #dspPayeeName#, #className#, #payeeTypeDesc#))
+		                <isNotNull property="filter">
+			      			WHERE 1=1
+			      			<isNotEmpty prepend="AND" property="payeeClassCd">
+           					  UPPER(payee_class_cd) LIKE UPPER(#payeeClassCd#)
+           			        </isNotEmpty>
+           			        <isNotEmpty prepend="AND" property="payeeTypeDesc">
+           					  UPPER(payee_type_desc) LIKE UPPER(#payeeTypeDesc#)
+           			        </isNotEmpty>
+           			        <isNotEmpty prepend="AND" property="className">
+           					  UPPER(class_desc) LIKE UPPER(#className#)
+           			        </isNotEmpty>
+           			        <isNotEmpty prepend="AND" property="payeeCd">
+           					  payee_cd LIKE #payeeCd#
+           			        </isNotEmpty>
+           			        <isNotEmpty prepend="AND" property="dspPayeeName">
+           					  UPPER(payee_last_name) LIKE UPPER(#dspPayeeName#)
+           			        </isNotEmpty>
+                		</isNotNull>) b) 
+	</select>
+	
+	<select id="getPayeeClmClmntNo" parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+		SELECT get_clm_claimant_no(#claimId#, #payeeClassCd#, #payeeCd#) FROM dual
+	</select>
+	
+	<select id="validateAssdClassCd" parameterClass="java.util.HashMap" resultClass="java.lang.String">
+		SELECT NVL(validate_assd_class_cd(#claimId#, #payeeType#, #itemNo#, #perilCd#, #payeeClassCd#, #assdNo#), 'EMPTY') FROM dual
+	</select>
+	
+	<procedure id="insertGiclLossExpPayees" parameterClass="GICLLossExpPayees">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			
+			GICL_LOSS_EXP_PAYEES_PKG.insert_loss_exp_payees
+             (#claimId#,   #itemNo#,       #perilCd#,   #groupedItemNo#,
+              #payeeType#, #payeeClassCd#, #payeeCd#,   #clmClmntNo#,    #userId#);
+	    END;
+	</procedure>
+	
+</sqlMap>

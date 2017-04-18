@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISUserGrpHist">
+
+	<typeAlias alias="GIISUserGrpHist" type="com.geniisys.common.entity.GIISUserGrpHist" />
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<resultMap id="GIISUserGrpHistMap" class="GIISUserGrpHist" extends="BaseEntity.TableGridResultMap">
+		<result column="HIST_ID"			property="histId" />
+		<result column="OLD_USER_GRP"		property="oldUserGrp" />
+		<result column="OLD_USER_DESC"		property="oldUserDesc" />
+		<result column="NEW_USER_GRP"		property="newUserGrp" />
+		<result column="NEW_USER_DESC"		property="newUserDesc" />
+		<result column="LAST_UPDATE"		property="lastUpdate" />
+		<result column="LAST_UPDATE_CHAR"	property="lastUpdateChar" />
+	</resultMap>
+	
+	<select id="getUserHistory"  resultMap="GIISUserGrpHistMap">
+		SELECT *
+		   FROM (SELECT rownum rownum_, 
+		                b.count_, 
+		                a.* 
+		           FROM (SELECT * 
+		                   FROM TABLE (GIIS_GRP_HIST_PKG.get_user_history(#userId#, #histId#, #oldUserGrp#, #newUserGrp#))
+		                  <isEqual property="sortColumn" compareValue="histId">
+			              		ORDER BY hist_id
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="lastUpdateChar">
+			              		ORDER BY last_update
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="oldUserGrp oldUserDesc">
+			              		ORDER BY old_user_grp
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="newUserGrp newUserDesc">
+			              		ORDER BY new_user_grp
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               	  (SELECT count(*) count_ 
+		                     FROM TABLE (GIIS_GRP_HIST_PKG.get_user_history(#userId#, #histId#, #oldUserGrp#, #newUserGrp#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+</sqlMap>

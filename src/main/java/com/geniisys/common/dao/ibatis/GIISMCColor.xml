@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISMCColor">
+
+ 	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIISMCColor" type="com.geniisys.common.entity.GIISMCColor"/>
+	
+	<resultMap id="MCBasicColorLOVResultMap" class="com.geniisys.common.entity.GIISMCColor" extends="BaseEntity.TableGridResultMap">
+		<result column="BASIC_COLOR_CD"		property="basicColorCd"/>
+		<result column="BASIC_COLOR"		property="basicColor"/>
+	</resultMap>
+
+	<select id="getBasicColorLOV" resultMap="MCBasicColorLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (Giis_Mc_Color_Pkg.get_basic_color_list1(#findText#))
+		                  <isEqual property="sortColumn" compareValue="basicColorCd">
+		                  		ORDER BY basic_color_cd
+		                  </isEqual>
+		                  <isEqual property="sortColumn" compareValue="basicColor">
+			              		ORDER BY basic_color
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (Giis_Mc_Color_Pkg.get_basic_color_list1(#findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap id="MCColorLOVResultMap" class="com.geniisys.common.entity.GIISMCColor" extends="BaseEntity.TableGridResultMap">
+		<result column="COLOR_CD" 			property="colorCd" />
+		<result column="COLOR" 				property="color" />
+		<result column="BASIC_COLOR" 		property="basicColor" />
+		<result column="BASIC_COLOR_CD" 	property="basicColorCd" />
+	</resultMap>
+
+	<select id="getColorLOV" resultMap="MCColorLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (Giis_Mc_Color_Pkg.get_color_list1(#basicColorCd#, #findText#))
+		                  <isEqual property="sortColumn" compareValue="colorCd">
+		                  	ORDER BY color_cd
+		                  </isEqual>
+		                  <isEqual property="sortColumn" compareValue="color">
+			              		ORDER BY color
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (Giis_Mc_Color_Pkg.get_color_list1(#basicColorCd#, #findText#))) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+
+<!--Gzelle 02.15.2013 LOV with search-->	
+	<select id="getColorListLOV" resultMap="MCColorLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIIS_MC_COLOR_PKG.get_color_list_lov(#basicColorCd#, #color#))
+		            	  <isNotNull property="findText">
+					  			WHERE 1=1	                  	
+								<isNotEmpty prepend="AND"  property="findText">
+									UPPER(color) LIKE upper(#findText#)
+								</isNotEmpty>
+								<!-- added by jeffdojello 12.09.2013 SR-832 -->
+								<isNotEmpty prepend="OR" property="findText">
+									UPPER(color_Cd) LIKE upper(#findText#)
+								</isNotEmpty>
+						  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="colorCd">
+		                  	ORDER BY color_cd
+		                  </isEqual>
+		                  <isEqual property="sortColumn" compareValue="color">
+			              		ORDER BY color
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIIS_MC_COLOR_PKG.get_color_list_lov(#basicColorCd#, #color#))
+		            	  <isNotNull property="findText">
+					  			WHERE 1=1	                  	
+								<isNotEmpty prepend="AND"  property="findText">
+									UPPER(color) LIKE upper(#findText#)
+								</isNotEmpty>
+						  </isNotNull>		                  
+		                ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getBasicColorListLOV" resultMap="MCColorLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (GIIS_MC_COLOR_PKG.get_basic_color_list_lov(#basicColor#))
+		            	  <isNotNull property="findText">
+					  			WHERE 1=1	                  	
+								<isNotEmpty prepend="AND"  property="findText">
+									UPPER(basic_color) LIKE upper(#findText#)
+								</isNotEmpty>
+								<!-- added by jeffdojello 12.09.2013 SR-832 -->
+								<isNotEmpty prepend="OR" property="findText">
+									UPPER(basic_color_Cd) LIKE upper(#findText#)
+								</isNotEmpty>
+						  </isNotNull>			                  
+		                  <isEqual property="sortColumn" compareValue="basicColorCd">
+		                  		ORDER BY basic_color_cd
+		                  </isEqual>
+		                  <isEqual property="sortColumn" compareValue="basicColor">
+			              		ORDER BY basic_color
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIIS_MC_COLOR_PKG.get_basic_color_list_lov(#findText#))
+		            	  <isNotNull property="findText">
+					  			WHERE 1=1	                  	
+								<isNotEmpty prepend="AND"  property="findText">
+									UPPER(basic_color) LIKE upper(#findText#)
+								</isNotEmpty>
+						  </isNotNull>	               
+		               ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>		
+<!--end Gzelle 02.15.2013-->
+	
+<!-- fons 10/22/2013 -->	
+	<resultMap class="java.util.HashMap" id="giisMCColorListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="basic_color_cd"  	property="basicColorCd"/>	
+		<result column="basic_color"  	 	property="basicColor"/>
+		<result column="color_cd"     		property="colorCd"/>	
+		<result column="color"  	 		property="color"/>
+		<result column="remarks"     		property="remarks"/>
+		<result column="user_id"     		property="userId"/>
+		<result column="last_update"    	property="lastUpdate"/>
+		<result column="count_rec"    		property="countRec"/>
+	</resultMap>
+	
+	<select id="getGiiss114BasicColorRecList" resultMap="giisMCColorListResultMap">		
+		 SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss114_pkg.get_basic_color_rec_list(#basicColorCd#, #basicColor#))
+		                  <isEqual property="sortColumn" compareValue="basicColorCd">
+			              		ORDER BY basic_color_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="basicColor">
+			              		ORDER BY basic_color
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss114_pkg.get_basic_color_rec_list(#basicColorCd#, #basicColor#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<select id="getGiiss114RecList" resultMap="giisMCColorListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss114_pkg.get_rec_list(#basicColorCd#, #colorCd#, #color#))		              
+			              <isEqual property="sortColumn" compareValue="colorCd">
+			              		ORDER BY color_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="color">
+			              		ORDER BY color
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss114_pkg.get_rec_list(#basicColorCd#, #colorCd#, #color#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+		
+	<procedure id="updateMCBasicColor" parameterClass="GIISMCColor">
+	    DECLARE
+	    	v_rec giis_mc_color%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			 			
+ 			v_rec.basic_color_cd := #basicColorCd#;
+ 			v_rec.basic_color := #basicColor#;
+ 			
+ 			giiss114_pkg.update_basic_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+	<procedure id="setMCColor" parameterClass="GIISMCColor">
+	    DECLARE
+	    	v_rec giis_mc_color%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.basic_color_cd := #basicColorCd#;
+ 			v_rec.basic_color := #basicColor#;
+ 			v_rec.color_cd := #colorCd#;
+ 			v_rec.color := #color#;
+ 			v_rec.user_id := #userId#;
+ 			v_rec.remarks := #remarks#;
+ 			
+ 			giiss114_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteMCBasicColor" parameterClass="java.lang.String">
+	    BEGIN
+ 			giiss114_pkg.val_del_rec_basic(#recId#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valDeleteMCColor" parameterClass="java.lang.Integer">
+	    BEGIN
+ 			giiss114_pkg.val_del_rec(#recId#);
+ 		END;
+ 	</procedure>
+ 	
+ 	<procedure id="valAddMCBasicColor" parameterClass="java.util.HashMap">
+ 	<!-- andrew - 08052015 - SR 19241 -->
+ 		BEGIN		     		
+ 			giiss114_pkg.val_add_rec_basic(#action#, #basicColorCd#,#basicColor#);
+ 		END;
+ 	</procedure> 
+ 	
+ 	<procedure id="valAddMCColor" parameterClass="java.util.HashMap">
+ 	<!-- andrew - 08052015 - SR 19241 -->
+ 		BEGIN
+ 			giiss114_pkg.val_add_rec(#action#, #basicColorCd#,#colorCd#, #color#);
+ 		END;
+ 	</procedure> 	
+ 	
+	<delete id="delMCColor" parameterClass="GIISMCColor">
+		DECLARE
+	    	v_rec giis_mc_color%ROWTYPE;	
+	    BEGIN
+	    	v_rec.basic_color_cd := #basicColorCd#;
+	    	v_rec.color_cd := #colorCd#;
+ 			giiss114_pkg.del_rec(v_rec);
+ 		END;
+ 	</delete>
+ 	
+ 	<delete id="delMCBasicColor" parameterClass="java.lang.String">
+	    BEGIN
+ 			giiss114_pkg.del_rec_basic(#basicColorCd#);
+ 		END;
+ 	</delete>
+ <!--end Fons 11.12.2013-->
+</sqlMap>

@@ -1,0 +1,701 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIACR284" language="groovy" pageWidth="1008" pageHeight="612" orientation="Landscape" columnWidth="752" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="371"/>
+	<property name="ireport.y" value="0"/>
+	<style name="Crosstab Data Text" isDefault="false" hAlign="Center"/>
+	<parameter name="P_DATE" class="java.lang.Integer"/>
+	<parameter name="P_FROM_DATE" class="java.lang.String"/>
+	<parameter name="P_TO_DATE" class="java.lang.String"/>
+	<parameter name="P_BRANCH_CD" class="java.lang.String"/>
+	<parameter name="P_USER_ID" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT *
+  FROM TABLE (giacr284_pkg.get_giacr284_details ($P{P_DATE},
+                                                 TO_DATE ($P{P_FROM_DATE}, 'MM-DD-RRRR'),
+                                                 TO_DATE ($P{P_TO_DATE}, 'MM-DD-RRRR'),
+                                                 $P{P_BRANCH_CD},
+	                            $P{P_USER_ID}
+                                                )
+             )]]>
+	</queryString>
+	<field name="COMPANY_NAME" class="java.lang.String"/>
+	<field name="COMPANY_ADDRESS" class="java.lang.String"/>
+	<field name="FROM_TO_DATE" class="java.lang.String"/>
+	<field name="BRANCH_CD" class="java.lang.String"/>
+	<field name="BRANCH_NAME" class="java.lang.String"/>
+	<field name="ISS_CD" class="java.lang.String"/>
+	<field name="GACC_TRAN_ID" class="java.math.BigDecimal"/>
+	<field name="OR_NO" class="java.lang.String"/>
+	<field name="PAYOR" class="java.lang.String"/>
+	<field name="PARTICULARS" class="java.lang.String"/>
+	<field name="PAY_MODE" class="java.lang.String"/>
+	<field name="CHECK_NO" class="java.lang.String"/>
+	<field name="COLLECTION_AMT" class="java.math.BigDecimal"/>
+	<field name="DIRECT_COLLECTION_AMT" class="java.math.BigDecimal"/>
+	<field name="POLICY_NO" class="java.lang.String"/>
+	<field name="BILL_NO" class="java.lang.String"/>
+	<field name="PREMIUM_AMT" class="java.math.BigDecimal"/>
+	<field name="TAX_AMT" class="java.math.BigDecimal"/>
+	<field name="INTM_NO" class="java.math.BigDecimal"/>
+	<field name="COMM_AMT" class="java.math.BigDecimal"/>
+	<field name="WTAX_AMT" class="java.math.BigDecimal"/>
+	<field name="INPUT_VAT_AMT" class="java.math.BigDecimal"/>
+	<field name="ITEM_NO" class="java.lang.String"/>
+	<variable name="V_PREM_AMT" class="java.math.BigDecimal" resetType="Group" resetGroup="GRP_BRANCH" calculation="Sum">
+		<variableExpression><![CDATA[$F{PREMIUM_AMT}]]></variableExpression>
+	</variable>
+	<variable name="V_COMM_AMT" class="java.math.BigDecimal" resetType="Group" resetGroup="GRP_BRANCH" calculation="Sum">
+		<variableExpression><![CDATA[$F{COMM_AMT}]]></variableExpression>
+	</variable>
+	<variable name="V_INPUT_VAT_AMT" class="java.math.BigDecimal" resetType="Group" resetGroup="GRP_BRANCH" calculation="Sum">
+		<variableExpression><![CDATA[$F{INPUT_VAT_AMT}]]></variableExpression>
+	</variable>
+	<variable name="V_COLLECTION_AMT" class="java.math.BigDecimal" resetType="Group" resetGroup="GRP_BRANCH" calculation="Sum">
+		<variableExpression><![CDATA[$F{DIRECT_COLLECTION_AMT}]]></variableExpression>
+	</variable>
+	<variable name="V_TAX_AMT" class="java.math.BigDecimal" resetType="Group" resetGroup="GRP_BRANCH" calculation="Sum">
+		<variableExpression><![CDATA[$F{TAX_AMT}]]></variableExpression>
+	</variable>
+	<variable name="V_WHOLDING_TAX_AMT" class="java.math.BigDecimal" resetType="Group" resetGroup="GRP_BRANCH" calculation="Sum">
+		<variableExpression><![CDATA[$F{WTAX_AMT}]]></variableExpression>
+	</variable>
+	<variable name="V_GRAND_PREM_AMT" class="java.math.BigDecimal" incrementType="Group" incrementGroup="GRP_BRANCH" calculation="Sum">
+		<variableExpression><![CDATA[$V{V_PREM_AMT}]]></variableExpression>
+	</variable>
+	<variable name="V_GRAND_COMM_AMT" class="java.math.BigDecimal" incrementType="Group" incrementGroup="GRP_BRANCH" calculation="Sum">
+		<variableExpression><![CDATA[$V{V_COMM_AMT}]]></variableExpression>
+	</variable>
+	<variable name="V_GRAND_INPUT_VAT_AMT" class="java.math.BigDecimal" incrementType="Group" incrementGroup="GRP_BRANCH" calculation="Sum">
+		<variableExpression><![CDATA[$V{V_INPUT_VAT_AMT}]]></variableExpression>
+	</variable>
+	<variable name="V_GRAND_COLLECTION_AMT" class="java.math.BigDecimal" incrementType="Group" incrementGroup="GRP_BRANCH" calculation="Sum">
+		<variableExpression><![CDATA[$V{V_COLLECTION_AMT}]]></variableExpression>
+	</variable>
+	<variable name="V_GRAND_TAX_AMT" class="java.math.BigDecimal" incrementType="Group" incrementGroup="GRP_BRANCH" calculation="Sum">
+		<variableExpression><![CDATA[$V{V_TAX_AMT}]]></variableExpression>
+	</variable>
+	<variable name="V_GRAND_WHOLDING_TAX_AMT" class="java.math.BigDecimal" incrementType="Group" incrementGroup="GRP_BRANCH" calculation="Sum">
+		<variableExpression><![CDATA[$V{V_WHOLDING_TAX_AMT}]]></variableExpression>
+	</variable>
+	<group name="GRP_BRANCH" isStartNewPage="true" isReprintHeaderOnEachPage="true">
+		<groupExpression><![CDATA[$F{BRANCH_CD}]]></groupExpression>
+		<groupHeader>
+			<band height="46">
+				<staticText>
+					<reportElement x="0" y="0" width="57" height="20"/>
+					<textElement>
+						<font size="8"/>
+					</textElement>
+					<text><![CDATA[BRANCH :]]></text>
+				</staticText>
+				<textField>
+					<reportElement x="57" y="0" width="100" height="20"/>
+					<textElement>
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{BRANCH_NAME}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="349" y="20" width="70" height="22" isPrintWhenDetailOverflows="true"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<text><![CDATA[Amount Received]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="151" y="20" width="78" height="22"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<text><![CDATA[Particulars]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="531" y="20" width="75" height="22"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<text><![CDATA[Bill No.]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="274" y="20" width="73" height="22"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<text><![CDATA[Check No.]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="607" y="20" width="65" height="22"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<text><![CDATA[Premium Amount]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="424" y="20" width="104" height="22"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<text><![CDATA[Policy No.]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="233" y="20" width="37" height="22"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<text><![CDATA[Pay Mode]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="75" y="20" width="70" height="22"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<text><![CDATA[Payor]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="0" y="20" width="70" height="22"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<text><![CDATA[O.R. No.]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="673" y="20" width="70" height="22"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<text><![CDATA[Tax Amount]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="916" y="20" width="52" height="22" isPrintWhenDetailOverflows="true"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<text><![CDATA[Input Vat Amount]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="858" y="20" width="54" height="22" isPrintWhenDetailOverflows="true"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<text><![CDATA[WHolding Tax Amount]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="793" y="20" width="60" height="22" isPrintWhenDetailOverflows="true"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<text><![CDATA[Commission Amount]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="745" y="20" width="45" height="22"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<text><![CDATA[Intm No]]></text>
+				</staticText>
+				<line>
+					<reportElement x="1" y="42" width="69" height="1"/>
+					<graphicElement>
+						<pen lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="76" y="42" width="69" height="1"/>
+					<graphicElement>
+						<pen lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="151" y="42" width="78" height="1"/>
+					<graphicElement>
+						<pen lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="233" y="42" width="35" height="1"/>
+					<graphicElement>
+						<pen lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="274" y="42" width="72" height="1"/>
+					<graphicElement>
+						<pen lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="349" y="42" width="69" height="1"/>
+					<graphicElement>
+						<pen lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="424" y="42" width="103" height="1"/>
+					<graphicElement>
+						<pen lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="531" y="42" width="73" height="1"/>
+					<graphicElement>
+						<pen lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="609" y="42" width="63" height="1"/>
+					<graphicElement>
+						<pen lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="676" y="42" width="66" height="1"/>
+					<graphicElement>
+						<pen lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="747" y="42" width="43" height="1"/>
+					<graphicElement>
+						<pen lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="795" y="42" width="57" height="1"/>
+					<graphicElement>
+						<pen lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="860" y="42" width="52" height="1"/>
+					<graphicElement>
+						<pen lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="916" y="42" width="51" height="1"/>
+					<graphicElement>
+						<pen lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="40">
+				<textField isStretchWithOverflow="true" evaluationTime="Group" evaluationGroup="GRP_BRANCH" pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement x="607" y="13" width="65" height="20" isPrintWhenDetailOverflows="true" printWhenGroupChanges="GRP_BRANCH"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_PREM_AMT}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" evaluationTime="Group" evaluationGroup="GRP_BRANCH" pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement x="349" y="13" width="70" height="20" isPrintWhenDetailOverflows="true" printWhenGroupChanges="GRP_BRANCH"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_COLLECTION_AMT}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="273" y="14" width="71" height="20"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<text><![CDATA[Branch Totals :]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" evaluationTime="Group" evaluationGroup="GRP_BRANCH" pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement x="673" y="13" width="70" height="20" isPrintWhenDetailOverflows="true" printWhenGroupChanges="GRP_BRANCH"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_TAX_AMT}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" evaluationTime="Group" evaluationGroup="GRP_BRANCH" pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement x="793" y="13" width="60" height="20" isPrintWhenDetailOverflows="true" printWhenGroupChanges="GRP_BRANCH"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_COMM_AMT}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" evaluationTime="Group" evaluationGroup="GRP_BRANCH" pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement x="859" y="13" width="54" height="20" isPrintWhenDetailOverflows="true" printWhenGroupChanges="GRP_BRANCH"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_WHOLDING_TAX_AMT}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" evaluationTime="Group" evaluationGroup="GRP_BRANCH" pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement x="916" y="13" width="52" height="20" isPrintWhenDetailOverflows="true" printWhenGroupChanges="GRP_BRANCH"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_INPUT_VAT_AMT}]]></textFieldExpression>
+				</textField>
+				<line>
+					<reportElement x="349" y="13" width="70" height="1"/>
+					<graphicElement>
+						<pen lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="349" y="33" width="70" height="1"/>
+					<graphicElement>
+						<pen lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="609" y="13" width="63" height="1"/>
+					<graphicElement>
+						<pen lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="676" y="13" width="66" height="1"/>
+					<graphicElement>
+						<pen lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="676" y="34" width="66" height="1"/>
+					<graphicElement>
+						<pen lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="793" y="13" width="60" height="1"/>
+					<graphicElement>
+						<pen lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="792" y="33" width="60" height="1"/>
+					<graphicElement>
+						<pen lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="860" y="13" width="52" height="1"/>
+					<graphicElement>
+						<pen lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="860" y="33" width="52" height="1"/>
+					<graphicElement>
+						<pen lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="917" y="13" width="50" height="1"/>
+					<graphicElement>
+						<pen lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="917" y="33" width="50" height="1"/>
+					<graphicElement>
+						<pen lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement x="609" y="34" width="63" height="1"/>
+					<graphicElement>
+						<pen lineStyle="Dashed"/>
+					</graphicElement>
+				</line>
+			</band>
+		</groupFooter>
+	</group>
+	<group name="GRP_GTID">
+		<groupExpression><![CDATA[$F{GACC_TRAN_ID}]]></groupExpression>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band height="76" splitType="Stretch">
+			<textField>
+				<reportElement x="239" y="0" width="526" height="13"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{COMPANY_NAME}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="239" y="13" width="526" height="13"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{COMPANY_ADDRESS}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="868" y="0" width="100" height="13"/>
+				<textElement textAlignment="Right"/>
+				<text><![CDATA[GIACR284]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1" y="13" width="62" height="20"/>
+				<textElement/>
+				<text><![CDATA[RUNTIME :]]></text>
+			</staticText>
+			<staticText>
+				<reportElement positionType="Float" x="239" y="26" width="526" height="25"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom"/>
+				<text><![CDATA[PREMIUM COLLECTIONS PER BRANCH]]></text>
+			</staticText>
+			<textField>
+				<reportElement positionType="Float" x="239" y="51" width="526" height="20"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{FROM_TO_DATE}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="0" width="62" height="13"/>
+				<textElement/>
+				<text><![CDATA[RUNDATE :]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="868" y="13" width="79" height="20"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression class="java.lang.String"><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="946" y="13" width="22" height="20"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression class="java.lang.String"><![CDATA["" + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField pattern="MM/dd/yyyy">
+				<reportElement x="62" y="0" width="100" height="13"/>
+				<textElement/>
+				<textFieldExpression class="java.util.Date"><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField pattern="hh:mm:ss a">
+				<reportElement x="62" y="13" width="100" height="20"/>
+				<textElement/>
+				<textFieldExpression class="java.util.Date"><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="29">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement isPrintRepeatedValues="false" x="0" y="0" width="70" height="20" isPrintWhenDetailOverflows="true" printWhenGroupChanges="GRP_GTID"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{OR_NO}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement isPrintRepeatedValues="false" x="75" y="0" width="70" height="20" isPrintWhenDetailOverflows="true" printWhenGroupChanges="GRP_GTID"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{PAYOR}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement isPrintRepeatedValues="false" x="151" y="0" width="78" height="20" isPrintWhenDetailOverflows="true" printWhenGroupChanges="GRP_GTID"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{PARTICULARS}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement isPrintRepeatedValues="false" x="233" y="0" width="37" height="20" isPrintWhenDetailOverflows="true" printWhenGroupChanges="GRP_GTID"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{PAY_MODE}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="530" y="0" width="75" height="20" isPrintWhenDetailOverflows="true"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{BILL_NO}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="607" y="0" width="65" height="20" isPrintWhenDetailOverflows="true" printWhenGroupChanges="GRP_BRANCH"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{PREMIUM_AMT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="673" y="0" width="70" height="20" isPrintWhenDetailOverflows="true" printWhenGroupChanges="GRP_BRANCH"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{TAX_AMT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement isPrintRepeatedValues="false" x="274" y="0" width="73" height="20" isPrintWhenDetailOverflows="true" printWhenGroupChanges="GRP_GTID"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{CHECK_NO}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement isPrintRepeatedValues="false" x="349" y="0" width="70" height="20" isPrintWhenDetailOverflows="true" printWhenGroupChanges="GRP_GTID"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{DIRECT_COLLECTION_AMT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="424" y="0" width="104" height="20" isPrintWhenDetailOverflows="true"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{POLICY_NO}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="false">
+				<reportElement x="858" y="0" width="54" height="20" isPrintWhenDetailOverflows="true"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{WTAX_AMT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="false">
+				<reportElement x="916" y="0" width="52" height="20" isPrintWhenDetailOverflows="true"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{INPUT_VAT_AMT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="745" y="0" width="45" height="20" isPrintWhenDetailOverflows="true"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{INTM_NO}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="793" y="0" width="60" height="20" isPrintWhenDetailOverflows="true"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{COMM_AMT}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<summary>
+		<band height="33" splitType="Stretch">
+			<staticText>
+				<reportElement x="273" y="5" width="71" height="20"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Grand Totals :]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="349" y="5" width="70" height="20" isPrintWhenDetailOverflows="true"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_GRAND_COLLECTION_AMT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="607" y="5" width="65" height="20" isPrintWhenDetailOverflows="true"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_GRAND_PREM_AMT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="673" y="5" width="70" height="20" isPrintWhenDetailOverflows="true"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_GRAND_TAX_AMT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="false">
+				<reportElement x="792" y="5" width="60" height="20" isPrintWhenDetailOverflows="true"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_GRAND_COMM_AMT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="false">
+				<reportElement x="859" y="5" width="53" height="20" isPrintWhenDetailOverflows="true"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_GRAND_WHOLDING_TAX_AMT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="916" y="5" width="52" height="20" isPrintWhenDetailOverflows="true"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{V_INPUT_VAT_AMT}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="674" y="25" width="68" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="793" y="25" width="64" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="793" y="28" width="64" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="860" y="25" width="52" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="860" y="28" width="52" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="916" y="25" width="50" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="916" y="28" width="50" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="349" y="25" width="70" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="349" y="28" width="70" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="674" y="28" width="68" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="609" y="25" width="65" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="609" y="28" width="65" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+		</band>
+	</summary>
+</jasperReport>

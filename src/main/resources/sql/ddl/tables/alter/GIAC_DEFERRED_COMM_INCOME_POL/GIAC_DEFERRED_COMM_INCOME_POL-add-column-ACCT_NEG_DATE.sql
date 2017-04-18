@@ -1,0 +1,15 @@
+SET SERVEROUTPUT ON
+
+BEGIN
+   EXECUTE IMMEDIATE
+      'ALTER TABLE cpi.GIAC_DEFERRED_COMM_INCOME_POL ADD acct_neg_date DATE';
+
+   DBMS_OUTPUT.PUT_LINE (
+      'Successfully added acct_neg_date column to GIAC_DEFERRED_COMM_INCOME_POL table.');
+
+EXCEPTION
+   WHEN OTHERS
+   THEN
+      DBMS_OUTPUT.PUT_LINE (SQLERRM || '-' || SQLCODE);
+END;
+/

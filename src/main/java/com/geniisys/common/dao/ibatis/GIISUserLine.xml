@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISUserLine">
+	<typeAlias alias="GIISUserLine" type="com.geniisys.common.entity.GIISUserLine" />
+
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<resultMap id="GIISUserLineMap" class="GIISUserLine">
+		<result column="USERID"			property="userID" />
+		<result column="TRAN_CD"		property="tranCd" />
+		<result column="ISS_CD"			property="issCd" />
+		<result column="LINE_CD"		property="lineCd" />
+		<result column="LINE_NAME"		property="lineName" />
+	</resultMap>
+	
+	<select id="getGiisUserLineList" resultMap="GIISUserLineMap">
+		select USERID, TRAN_CD, ISS_CD, LINE_CD, escape_value(LINE_NAME) LINE_NAME
+		  from table(Giis_User_Line_Pkg.get_giis_user_line_list(#userID#))
+      order by line_name
+	</select>
+	
+	<insert id="setGiisUserLine" parameterClass="GIISUserLine">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			Giis_User_Line_Pkg.set_giis_user_line(#userID#, #tranCd#, #lineCd#, #issCd#, #userId#);
+		END;
+	</insert>
+	
+	<delete id="deleteGiisUserLine" parameterClass="java.lang.String">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			Giis_User_Line_Pkg.del_giis_user_line(#userID#);
+		END;
+	</delete>
+	
+	<resultMap id="giisUserLineResultMap" class="java.util.HashMap" extends="BaseEntity.TableGridResultMap">
+		<result column="tran_cd"	property="tranCd" />
+		<result column="iss_cd"		property="issCd" />
+		<result column="line_cd"	property="lineCd" />
+		<result column="line_name"	property="lineName" />
+		<result column="not_in"		property="notIn" />
+	</resultMap>	
+	
+	<select id="getUserLine"  resultMap="giisUserLineResultMap">
+		SELECT *
+		   FROM (SELECT rownum rownum_, 
+		                b.count_, 
+		                a.* 
+		           FROM (SELECT * 
+		                   FROM TABLE (GIISS040_PKG.get_user_line(#userId#, #tranCd#, #issCd#, #lineCd#, #lineName#))
+		                  <isEqual property="sortColumn" compareValue="lineCd">
+			              		ORDER BY line_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="lineName">
+			              		ORDER BY line_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               	  (SELECT count(*) count_ 
+		                     FROM TABLE (GIISS040_PKG.get_user_line(#userId#, #tranCd#, #issCd#, #lineCd#, #lineName#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiiss040LineLOV"  resultMap="giisUserLineResultMap">
+		SELECT *
+		   FROM (SELECT rownum rownum_, 
+		                b.count_, 
+		                a.* 
+		           FROM (SELECT * 
+		                   FROM TABLE (GIISS040_PKG.get_line_lov(#findText#))
+		                  <isNotNull property="notIn">
+					  		WHERE line_cd NOT IN ($notIn$)
+					  	  </isNotNull>
+		                  <isEqual property="sortColumn" compareValue="lineCd">
+			              		ORDER BY line_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="lineName">
+			              		ORDER BY line_name
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               	  (SELECT count(*) count_ 
+		                     FROM TABLE (GIISS040_PKG.get_line_lov(#findText#))
+		                  <isNotNull property="notIn">
+					  		WHERE line_cd NOT IN ($notIn$)
+					  	  </isNotNull>		                     
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+
+	<delete id="delGiiss040UserLine" parameterClass="java.util.HashMap">
+		BEGIN
+ 			giiss040_pkg.del_user_line(#gutUserId#, #tranCd#, #issCd#, #lineCd#);
+ 		END;
+ 	</delete>
+ 		
+	<procedure id="setGiiss040UserLine" parameterClass="GIISUserLine">
+		BEGIN
+		    giis_users_pkg.app_user := #appUser#;
+ 			giiss040_pkg.set_user_line(#gutUserId#, #tranCd#, #issCd#, #lineCd#);
+ 		END;
+ 	</procedure>
+
+	<resultMap id="allUserLineCdResultMap" class="GIISUserLine">
+		<result column="line_cd"		property="lineCd" />
+		<result column="line_name"	property="lineName" />
+	</resultMap>	
+
+	<select id="includeAllLineCodes" resultMap="allUserLineCdResultMap">
+		SELECT * FROM TABLE (GIISS040_PKG.include_all_line_codes)
+	</select> 		
+</sqlMap>

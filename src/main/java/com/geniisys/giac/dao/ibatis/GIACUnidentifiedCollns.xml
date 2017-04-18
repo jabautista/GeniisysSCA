@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIACUnidentifiedCollns">
+
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIACUnidentifiedCollns" type="com.geniisys.giac.entity.GIACUnidentifiedCollns" />
+	
+	<resultMap id="getOldItemDtlsMap" class="java.util.HashMap">
+		<result column="tran_year" 		property="tranYear" />		
+		<result column="tran_month" 	property="tranMonth" />
+		<result column="tran_seq_no" 	property="tranSeqNo" />
+		<result column="item_no" 		property="itemNo" />
+		<result column="collection_amt" property="collectionAmt" />
+		<result column="collection_amt2" property="collectionAmt2" />
+		<result column="particulars" 	property="particulars" />
+		<result column="gacc_tran_id" 	property="gaccTranId" />
+		<result column="gunc_tran_id" 	property="guncTranId" />
+		<result column="gunc_item_no" 	property="guncItemNo" />
+		<result column="gl_acct_id" 	property="glAcctId" />
+		<result column="gl_acct_category" property="glAcctCategory" />
+		<result column="gl_control_acct" property="glCtrlAcct" />
+		<result column="gl_sub_acct_1" 	property="glSubAcct1" />
+		<result column="gl_sub_acct_2" 	property="glSubAcct2" />
+		<result column="gl_sub_acct_3" 	property="glSubAcct3" />
+		<result column="gl_sub_acct_4" 	property="glSubAcct4" />
+		<result column="gl_sub_acct_5" 	property="glSubAcct5" />
+		<result column="gl_sub_acct_6" 	property="glSubAcct6" />
+		<result column="gl_sub_acct_7" 	property="glSubAcct7" />
+		<result column="or_print_tag" 	property="orPrintTag" />
+		<result column="sl_cd" 			property="slCd" />
+		<result column="gl_acct_name" 	property="glAcctName" />
+		<result column="gslt_sl_type_cd" 	property="gsltSlTypeCd" />
+	</resultMap>
+	
+	<resultMap id="getOldItemDtlsMap2" class="java.util.HashMap" extends="getOldItemDtlsMap">
+		<result column="sl_name" 		property="slName" />
+		<result column="rownum_" 		property="rowNum" />
+		<result column="count_"			property="rowCount"/>
+	</resultMap>
+
+	<resultMap id="getUnidentifiedCollnsListMap" class="com.geniisys.giac.entity.GIACUnidentifiedCollns">
+		<result column="gacc_tran_id" 	property="gaccTranId" /> 
+		<result column="item_no" 		property="itemNo" />
+		<result column="transaction_type" property="tranType" />
+		<result column="collection_amt" property="collAmt" />
+		<result column="gl_acct_id" 	property="glAcctId" />
+		<result column="gl_acct_category" property="glAcctCategory" />
+		<result column="gl_control_acct" property="glCtrlAcct" />
+		<result column="gl_sub_acct_1" 	property="glSubAcct1" />
+		<result column="gl_sub_acct_2" 	property="glSubAcct2" />
+		<result column="gl_sub_acct_3" 	property="glSubAcct3" />
+		<result column="gl_sub_acct_4" 	property="glSubAcct4" />
+		<result column="gl_sub_acct_5" 	property="glSubAcct5" />
+		<result column="gl_sub_acct_6" 	property="glSubAcct6" />
+		<result column="gl_sub_acct_7" 	property="glSubAcct7" />
+		<result column="or_print_tag" 	property="orPrintTag" />
+		<result column="sl_cd" 			property="slCd" />
+		<result column="sl_name" 		property="slName" />
+		<result column="gunc_gacc_tran_id" property="guncTranId" />
+		<result column="gunc_item_no" 	property="guncItemNo" />
+		<result column="particulars" 	property="particulars" />
+		<result column="gl_acct_name" 	property="glAcctName" />
+		<!-- <result column="old_tran_no"	property="oldTranNos"/> -->
+		<result column="old_tran_no2"	property="oldTranNos2"/>
+		<result column="fund_cd"	property="fundCode"/>
+	</resultMap>
+	
+	<resultMap id="getUnidentifiedCollnsListMap2" class="java.util.HashMap" extends="getUnidentifiedCollnsListMap">
+		<result column="transaction_type_desc" 	property="tranTypeDesc" />
+		<result column="tran_year" 		property="tranYear" />
+		<result column="tran_month" 	property="tranMonth" />
+		<result column="tran_seq_no" 	property="tranSeqNo" />
+		<result column="max_item_no" 	property="maxItemNo" />
+		<result column="total_colln_amt"	property="totalCollnAmt" />
+		<result column="rownum_" 		property="rowNum" />
+		<result column="count_"			property="rowCount"/>
+	</resultMap>
+	
+	<resultMap id="getItemNoListResultMap" class="java.lang.Integer">
+		<result property="itemNo" column="item_no"/>
+	</resultMap>
+
+	<select id="getUnidentifiedCollnsList" parameterClass="java.util.HashMap" resultMap="getUnidentifiedCollnsListMap2">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*,
+		               (SELECT SUM(collection_amt)FROM TABLE(giac_unidentified_collns_pkg.get_unidentified_colls_list(#gaccTranId#, #fundCd#))) total_colln_amt,
+		               (SELECT MAX(item_no) FROM TABLE(giac_unidentified_collns_pkg.get_unidentified_colls_list(#gaccTranId#, #fundCd#))) max_item_no
+		          FROM (SELECT * 
+		          		  FROM TABLE(giac_unidentified_collns_pkg.get_unidentified_colls_list(#gaccTranId#, #fundCd#))
+		          		  <dynamic prepend="WHERE ">
+					  		  	<isNotNull property="itemNo" prepend="AND">
+					  		  		item_no LIKE #itemNo#
+					  		  	</isNotNull>
+					  		  	<isNotNull property="tranTypeDesc" prepend="AND">
+					  		  		UPPER(transaction_type||'-'||transaction_type_desc) LIKE UPPER(#tranTypeDesc#)
+					  		  	</isNotNull>
+					  		  	<isNotNull property="fundCode" prepend="AND">
+					  		  		fund_cd LIKE UPPER(#fundCode#)
+					  		  	</isNotNull>
+					  		  	<isNotNull property="oldTranNos2" prepend="AND">
+					  		  		old_tran_no2 LIKE #oldTranNos2#
+					  		  	</isNotNull>
+					  		  	<isNotNull property="guncItemNo" prepend="AND">
+					  		  		gunc_item_no LIKE #guncItemNo#
+					  		  	</isNotNull>
+					  		  	<isNotNull property="glAcctName" prepend="AND">
+					  		  		gl_acct_name LIKE UPPER(#glAcctName#)
+					  		  	</isNotNull>
+					  		  	<isNotNull property="particulars" prepend="AND">
+					  		  		particulars LIKE #particulars#
+					  		  	</isNotNull>
+					  		  	<isNotNull property="collAmt" prepend="AND">
+					  		  		collection_amt LIKE #collAmt#
+					  		  	</isNotNull>
+					  		  </dynamic>
+		                  <isEqual property="sortColumn" compareValue="itemNo">
+			              		ORDER BY item_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="tranTypeDesc">
+			              		ORDER BY transaction_type_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="fundCode">
+			              		ORDER BY fund_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="oldTranNos2">
+			              		ORDER BY old_tran_no2
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="guncItemNo">
+			              		ORDER BY gunc_item_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="glAcctName">
+			              		ORDER BY gl_acct_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="particulars">
+			              		ORDER BY particulars
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="collAmt">
+			              		ORDER BY collection_amt
+			              </isEqual>
+			              
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giac_unidentified_collns_pkg.get_unidentified_colls_list(#gaccTranId#, #fundCd#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getOldItemDtlsLOV" resultMap="getOldItemDtlsMap2" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * 
+		                  FROM TABLE (giac_unidentified_collns_pkg.get_old_item_dtls(#gaccTranId#, #tranYear#, #tranMonth#, #tranSeqNo#, #oldItemNo#, #findText#)) 
+		                  <isEqual property="sortColumn" compareValue="tranYear">
+			              		ORDER BY tran_year
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="tranMonth">
+			              		ORDER BY tran_month
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="tranSeqNo">
+			              		ORDER BY tran_seq_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="itemNo">
+			              		ORDER BY item_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="collectionAmt">
+			              		ORDER BY collection_amt
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="particulars">
+			              		ORDER BY particulars
+			              </isEqual>
+			              <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giac_unidentified_collns_pkg.get_old_item_dtls(#gaccTranId#, #tranYear#, #tranMonth#, #tranSeqNo#, #oldItemNo#, #findText#))) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getOldTranNos" resultMap="getOldItemDtlsMap">
+		SELECT * FROM TABLE(giac_unidentified_collns_pkg.get_old_tran_nos_list(#gaccTranId#, #guncTranId#))
+	</select>
+	
+	<procedure id="saveGIACUnidentifiedCollns" parameterClass="GIACUnidentifiedCollns"> 
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			giac_unidentified_collns_pkg.set_unidentified_collns_dtls(#gaccTranId#, #itemNo#, #tranType#, #collAmt#, 
+																	  #glAcctId#, #glAcctCategory#, #glCtrlAcct#, #glSubAcct1#,
+																	  #glSubAcct2#, #glSubAcct3#, #glSubAcct4#, #glSubAcct5#,
+																	  #glSubAcct6#, #glSubAcct7#, #orPrintTag#, #slCd#,
+																	  #guncTranId#, #guncItemNo#, #particulars#);
+		END;	
+	</procedure>
+	
+	<procedure id="deleteUnidentifiedCollns" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			giac_unidentified_collns_pkg.delete_collns_dtls(#gaccTranId#, #itemNo#);
+		END;
+	</procedure>
+	
+	<procedure id="postFormsCommitGiacs014" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #appUser#;
+			giac_unidentified_collns_pkg.post_forms_commit_giacs014(#gaccTranId#, #fundCd#, #branchCd#, #user#, #moduleName#, #orFlag#, #tranSource#);
+		END;
+	</procedure> 
+	
+	<select id="getUcItemNoList" resultClass="integer" parameterClass="java.util.HashMap" >   <!-- resultMap="getItemNoListResultMap" -->
+		SELECT item_no FROM TABLE(giac_unidentified_collns_pkg.get_unidentified_colls_list(#gaccTranId#, #fundCd#))
+	</select>
+	
+	<select id="validateItemNo" resultClass="string" parameterClass="java.util.HashMap">
+		 SELECT 'Y' FROM giac_unidentified_collns 
+          WHERE item_no = #itemNo#
+            AND gacc_tran_id = #gaccTranId#
+	</select>
+	
+	<select id="validateOldTranNo" resultClass="string" parameterClass="java.util.HashMap">
+		SELECT (giac_unidentified_collns_pkg.validate_old_tran_no(#gaccFundCd#, #gibrBranchCd#, #gaccTranId#, #tranYear#, #tranMonth#, #tranSeqNo#, #itemNo#)) FROM DUAL
+	</select>
+	
+	<select id="validateOldItemNo" resultClass="string" parameterClass="java.util.HashMap">
+		SELECT (giac_unidentified_collns_pkg.validate_old_item_no(#gaccTranId#, #itemNo#)) FROM DUAL
+	</select>
+	
+	<!-- 
+	<select id="searchOldItemDtls" parameterClass="java.util.HashMap" resultMap="getOldItemDtlsMap">
+		SELECT * FROM TABLE(giac_unidentified_collns_pkg.search_old_item_dtls(#gaccTranId#, #keyword#))
+	</select> -->
+	
+	<!-- shan 10.30.2013 -->
+	<procedure id="valDelRecGiacs014" parameterClass="java.util.HashMap">
+		BEGIN
+ 			GIAC_UNIDENTIFIED_COLLNS_PKG.VALIDATE_DEL_REC(#gaccTranId#, #itemNo#);
+ 		END;
+	</procedure>
+	<!-- end shan 10.30.2013 -->
+</sqlMap>	

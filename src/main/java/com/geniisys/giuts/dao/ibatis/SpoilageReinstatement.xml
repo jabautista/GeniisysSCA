@@ -1,0 +1,885 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="SpoilageReinstatement">
+
+	<resultMap class="java.util.HashMap" id="whenNewFormInstanceGiuts003Map">
+		<result column="ALLOW_SPOILAGE" 	property="allowSpoilage"/>
+		<result column="CLM_STAT_CANCEL" 	property="clmStatCancel"/>
+		<result column="REQUIRE_REASON" 	property="requireReason"/>
+	</resultMap>
+
+	<select id="whenNewFormInstanceGiuts003" resultMap="whenNewFormInstanceGiuts003Map">
+		SELECT * FROM TABLE(giuts003_pkg.when_new_form_giuts003())		
+	</select>
+	
+	<parameterMap id="spoilPolicyGiuts003Map" class="map">
+		<parameter property="userId"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="policyId"		jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="lineCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="sublineCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="issCd"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="issueYy"		jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="polSeqNo"		jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="renewNo"		jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="endtSeqNo"		jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="effDate"		jdbcType="DATE"			javaType="java.util.Date"		mode="IN" />
+		<parameter property="acctEntDate"	jdbcType="DATE"			javaType="java.util.Date"		mode="IN" />
+		<parameter property="spldFlag"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="INOUT" />
+		<parameter property="spoilCd"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="requireReason"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="polFlag"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="message"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+		<parameter property="cont"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+		<parameter property="policyStatus"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+		<parameter property="spldUserId"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+		<parameter property="spldDate"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+	</parameterMap>
+	
+	<procedure id="spoilPolicyGiuts003" parameterMap="spoilPolicyGiuts003Map">
+		BEGIN
+			giuts003_pkg.spoil_policy_giuts003(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<resultMap class="java.util.HashMap" id="getPolicyGiuts003LOVMap">
+		<result column="POLICY_ID" 			property="policyId"/>
+		<result column="POLICY_NO" 			property="policyNo"/>
+		<result column="ENDT_NO" 			property="endtNo"/>
+		<result column="ASSD_NAME" 			property="assdName"/>
+		<result column="LINE_CD" 			property="lineCd"/>
+		<result column="SUBLINE_CD" 		property="sublineCd"/>
+		<result column="ISS_CD" 			property="issCd"/>
+		<result column="ISSUE_YY" 			property="issueYy"/>
+		<result column="POL_SEQ_NO" 		property="polSeqNo"/>
+		<result column="RENEW_NO" 			property="renewNo"/>
+		<result column="ACCT_ENT_DATE" 		property="acctEntDate"/>
+		<result column="EFF_DATE" 			property="effDate"/>
+		<result column="EXPIRY_DATE" 		property="expiryDate"/>
+		<result column="SPLD_FLAG" 			property="spldFlag"/>
+		<result column="SPLD_USER_ID" 		property="spldUserId"/>
+		<result column="SPLD_DATE" 			property="spldDate"/>
+		<result column="POLICY_STATUS" 		property="policyStatus"/>
+		<result column="SPLD_APPROVAL" 		property="spldApproval"/>
+		<result column="ENDT_SEQ_NO" 		property="endtSeqNo"/>
+		<result column="SPOIL_CD" 			property="spoilCd"/>
+		<result column="SPOIL_DESC" 		property="spoilDesc"/>
+		<result column="POL_FLAG" 			property="polFlag"/>
+		<result column="ENDT_EXPIRY_DATE" 	property="endtExpiryDate"/>
+		<result column="PRORATE_FLAG" 		property="prorateFlag"/>
+		<result column="SHORT_RT_PERCENT" 	property="shortRtPercent"/>
+		<result column="ROWNUM_"			property="rowNum"/>
+		<result column="COUNT_"				property="rowCount"/>
+	</resultMap>
+	
+	<!-- added userId by reymon 05062013 -->
+	<select id="getPolicyGiuts003LOV"	resultMap="getPolicyGiuts003LOVMap" parameterClass="java.util.HashMap">  	
+  		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * from table(giuts003_pkg.get_policy_giuts003_lov(#lineCd#,#sublineCd#,#issCd#,#issueYy#,#polSeqNo#,#renewNo#, #userId#))
+		          		  <isNotNull property="findText">
+				         		WHERE (UPPER(policy_no) LIKE UPPER(#findText#) 
+				         	 	   OR UPPER(endt_no) LIKE UPPER(#findText#)
+				         	 	   OR UPPER(assd_name) LIKE UPPER(#findText#)
+				         	 	   OR UPPER(policy_status) LIKE UPPER(#findText#)
+								)
+				          </isNotNull>
+		          		  <isEqual property="sortColumn" compareValue="policyNo">
+			              		ORDER BY policy_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="endtNo">
+			              		ORDER BY endt_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="assdName">
+			              		ORDER BY assd_name
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="policyStatus">
+			              		ORDER BY policy_status
+			              </isEqual>  
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giuts003_pkg.get_policy_giuts003_lov(#lineCd#,#sublineCd#,#issCd#,#issueYy#,#polSeqNo#,#renewNo#, #userId#))
+		                  <isNotNull property="findText">
+				         		WHERE (UPPER(policy_no) LIKE UPPER(#findText#) 
+				         	 	   OR UPPER(endt_no) LIKE UPPER(#findText#)
+				         	 	   OR UPPER(assd_name) LIKE UPPER(#findText#)
+				         	 	   OR UPPER(policy_status) LIKE UPPER(#findText#)
+								)
+				          </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+  	
+  	<resultMap class="java.util.HashMap" id="getSpoilCdGiuts003LOVMap">
+		<result column="SPOIL_CD" 			property="spoilCd"/>
+		<result column="SPOIL_DESC" 		property="spoilDesc"/>
+		<result column="ROWNUM_"			property="rowNum"/>
+		<result column="COUNT_"				property="rowCount"/>
+	</resultMap>
+	
+	<select id="getSpoilCdGiuts003LOV"	resultMap="getSpoilCdGiuts003LOVMap">  	
+  		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * from table(giuts003_pkg.get_spoil_cd_giuts003_lov)
+		          		  <isNotNull property="findText">
+				         		WHERE (UPPER(spoil_cd) LIKE UPPER(#findText#) 
+				         	 	   OR UPPER(spoil_desc) LIKE UPPER(#findText#)
+								)
+				          </isNotNull>
+		          		  <isEqual property="sortColumn" compareValue="spoilCd">
+			              		ORDER BY spoil_cd
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="spoilDesc">
+			              		ORDER BY spoil_desc
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (giuts003_pkg.get_spoil_cd_giuts003_lov)
+		                  <isNotNull property="findText">
+				         		WHERE (UPPER(spoil_cd) LIKE UPPER(#findText#) 
+				         	 	   OR UPPER(spoil_desc) LIKE UPPER(#findText#)
+								)
+				          </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+  	
+  	<parameterMap id="unspoilPolicyGiuts003Map" class="map">
+		<parameter property="issCd"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="spldFlag"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="policyId"		jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="policyStatus"	jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+	</parameterMap>
+	
+	<procedure id="unspoilPolicyGiuts003" parameterMap="unspoilPolicyGiuts003Map">
+		BEGIN
+			giuts003_pkg.unspoil_policy_giuts003(?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<parameterMap id="postPolicyGiuts003Map" class="map">
+		<parameter property="lineCd"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="sublineCd"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="issCd"				jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="issueYy"			jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="polSeqNo"			jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="renewNo"			jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="effDate"			jdbcType="DATE"			javaType="java.util.Date"		mode="IN" />
+		<parameter property="acctEntDate"		jdbcType="DATE"			javaType="java.util.Date"		mode="IN" />
+		<parameter property="spldFlag"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="INOUT" />
+		<parameter property="policyId"			jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="endtExpiryDate"	jdbcType="DATE"			javaType="java.util.Date"		mode="IN" />
+		<parameter property="prorateFlag"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="compSw"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="shortRtPercent"	jdbcType="INTEGER"		javaType="java.math.BigDecimal"	mode="IN" />
+		<parameter property="userId"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="claimExist"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+		<parameter property="message"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+		<parameter property="cont"				jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+		<parameter property="policyStatus"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+		<parameter property="spldUserId"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+		<parameter property="spldDate"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+		<parameter property="spldApproval"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+	</parameterMap>
+	
+	<procedure id="postPolicyGiuts003" parameterMap="postPolicyGiuts003Map">
+		BEGIN
+			giuts003_pkg.post_policy_giuts003(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<parameterMap id="postPolicy2Giuts003Map" class="map">
+		<parameter property="lineCd"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="sublineCd"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="issCd"				jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="issueYy"			jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="polSeqNo"			jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="renewNo"			jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="effDate"			jdbcType="DATE"			javaType="java.util.Date"		mode="IN" />
+		<parameter property="acctEntDate"		jdbcType="DATE"			javaType="java.util.Date"		mode="IN" />
+		<parameter property="spldFlag"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="INOUT" />
+		<parameter property="policyId"			jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="IN" />
+		<parameter property="endtExpiryDate"	jdbcType="DATE"			javaType="java.util.Date"		mode="IN" />
+		<parameter property="prorateFlag"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="compSw"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="shortRtPercent"	jdbcType="INTEGER"		javaType="java.math.BigDecimal"	mode="IN" />
+		<parameter property="userId"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="alert"				jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+		<parameter property="message"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+		<parameter property="cont"				jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+		<parameter property="policyStatus"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+		<parameter property="spldUserId"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+		<parameter property="spldDate"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+		<parameter property="spldApproval"		jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+	</parameterMap>
+	
+	<procedure id="postPolicy2Giuts003" parameterMap="postPolicyGiuts003Map">
+		BEGIN
+			giuts003_pkg.post_policy2_giuts003(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+
+
+
+	<resultMap class="java.util.HashMap" id="whenNewFormGiuts003aResultMap">
+  		<result property="allowSpoilage"	column="allow_spoilage"/>
+  		<result property="clmStatCancel"	column="clm_stat_cancel"/>
+  		<result property="reqSplReason"		column="req_spl_reason"/>
+  	</resultMap>
+  	
+  	<select id="whenNewFormGiuts003a" resultMap="whenNewFormGiuts003aResultMap">
+  		SELECT * FROM TABLE(GIUTS003A_PKG.when_new_form_giuts003a)
+  	</select>
+  	
+  	<resultMap class="java.util.HashMap" id="getGiuts003aPackPolicyResultMap">
+		<result property="packPolicyId"			column="pack_policy_id"/>
+		<result property="packParId"			column="pack_par_id"/>
+		<result property="lineCd"				column="line_cd"/>
+		<result property="sublineCd"			column="subline_cd"/>
+		<result property="issCd"				column="iss_cd"/>
+		<result property="issueYy"				column="issue_yy"/>
+		<result property="polSeqNo"				column="pol_seq_no"/>
+		<result property="renewNo"				column="renew_no"/>
+		<result property="policyStatus"			column="policy_status"/>
+		<result property="endtIssCd"			column="endt_iss_cd"/>
+		<result property="endtYy"				column="endt_yy"/>
+		<result property="endtSeqNo"			column="endt_seq_no"/>
+		<result property="acctEntDate"			column="acct_ent_date"/>
+		<result property="assdNo"				column="assd_no"/>
+		<result property="assdName"				column="assd_name"/>
+		<result property="effDate"				column="eff_date"/>
+		<result property="expiryDate"			column="expiry_date"/>
+		<result property="endtExpiryDate"		column="endt_expiry_date"/>
+		<result property="spldDate"				column="spld_date"/>
+		<result property="userId"				column="user_id"/>
+		<result property="distFlag"				column="dist_flag"/>
+		<result property="spldUserId"			column="spld_user_id"/>
+		<result property="spldApproval"			column="spld_approval"/>
+		<result property="spldFlag"				column="spld_flag"/>
+		<result property="meanPolFlag"			column="mean_pol_flag"/>
+		<result property="policyNo"				column="policy_no"/>
+		<result property="endtNo"				column="endt_no"/>
+		<result property="compSw"				column="comp_sw"/>
+		<result property="prorateFlag"			column="prorate_flag"/>
+		<result property="shortRtPercent"		column="short_rt_percent"/>
+		<result property="spldAcctEntDate"		column="spld_acct_ent_date"/>
+		<result property="polFlag"				column="pol_flag"/>
+		<result property="lastUpdDate"			column="last_upd_date"/>
+		<result property="annTsiAmt"			column="ann_tsi_amt"/>
+		<result property="annPremAmt"			column="ann_prem_amt"/>
+		<result property="eisFlag"				column="eis_flag"/>
+		<result property="spoilCd"				column="spoil_cd"/>
+		<result property="spoilDesc"			column="spoil_desc"/>
+	</resultMap>
+	
+  	<resultMap class="java.util.HashMap" id="getGiuts003aPackPolicyLOVResultMap" extends="getGiuts003aPackPolicyResultMap">
+		<result property="rowNum"				column="rownum_"/>
+		<result property="rowCount"				column="count_"/>
+	</resultMap>
+	
+	<select id="getGiuts003aPackPolicyLOV" resultMap="getGiuts003aPackPolicyLOVResultMap" parameterClass="java.util.HashMap">
+		SELECT * 
+		  FROM (SELECT a.*, b.count_, rownum rownum_
+		          FROM (SELECT * 
+		            	  FROM TABLE(giuts003a_pkg.get_pack_policy_giuts003a(#moduleId#, TO_NUMBER(#packPolicyId#), #lineCd#, #sublineCd#, #issCd#, TO_NUMBER(#issueYy#), TO_NUMBER(#polSeqNo#), TO_NUMBER(#renewNo#), #userId#))
+		            	  <isNotNull property="filter">
+		            	  		WHERE 1=1
+		            	  		<isNotEmpty prepend="AND" property="lineCd">
+		            	  			UPPER(line_cd) LIKE UPPER(#lineCd#)		            	  		
+		            	  		</isNotEmpty>
+		            	  		<isNotEmpty prepend="AND" property="sublineCd">
+		            	  			UPPER(subline_cd) LIKE UPPER(#sublineCd#)
+		            	  		</isNotEmpty>
+		            	  		<isNotEmpty prepend="AND" property="issCd">
+		            	  			UPPER(iss_cd) LIKE UPPER(#issCd#)
+		            	  		</isNotEmpty>		
+		            	  		<isNotEmpty prepend="AND" property="issueYy">
+		            	  			issue_yy = #issueYy#
+		            	  		</isNotEmpty>           
+		            	  		<isNotEmpty prepend="AND" property="polSeqNo">
+		            	  			pol_seq_no = #polSeqNo#
+		            	  		</isNotEmpty> 	  		
+		            	  		<isNotEmpty prepend="AND" property="renewNo">
+		            	  			renew_no = #renewNo#
+		            	  		</isNotEmpty>
+		            	  		<isNotEmpty prepend="AND" property="endtIssCd">
+		            	  			UPPER(endt_iss_cd) LIKE UPPER(#endtIssCd#)
+		            	  		</isNotEmpty>
+		            	  		<isNotEmpty prepend="AND" property="endtYy">
+		            	  			endt_yy = #endtYy#
+		            	  		</isNotEmpty>
+		            	  		<isNotEmpty prepend="AND" property="endtSeqNo">
+		            	  			endt_seq_no = #endtSeqNo#
+		            	  		</isNotEmpty>
+		            	  		<isNotEmpty prepend="AND" property="assdName">
+		            	  			UPPER(assd_name) LIKE UPPER(#assdName#)
+		            	  		</isNotEmpty>
+		            	  		<isNotEmpty prepend="AND" property="acctEntDate">
+		            	  			TO_DATE(acct_ent_date, 'MM-DD'YYYY') = TO_DATE(#acctEntDate#, 'MM-DD-YYYY')
+		            	  		</isNotEmpty>
+		            	  </isNotNull>
+		            	  <isEqual property="sortColumn" compareValue="policyNo">
+		            	  		ORDER BY policy_no
+		            	  </isEqual>
+		            	  <isEqual property="sortColumn" compareValue="endtNo">
+		            	  		ORDER BY endt_no
+		            	  </isEqual>
+		            	  <isEqual property="sortColumn" compareValue="assdName">
+		            	  		ORDER by assd_name
+		            	  </isEqual>
+		            	  <isEqual property="sortColumn" compareValue="acctEntDate">
+		            	  		ORDER BY acct_ent_date
+		            	  </isEqual>
+		            	  <isEqual property="sortColumn" compareValue="policyStatus">
+		            	  		ORDER BY policy_status
+		            	  </isEqual>
+		            	  <isNotNull property="sortColumn">
+		            	  		<isEqual property="ascDescFlg" compareValue="ASC">
+		            	  			ASC
+		            	  		</isEqual>
+		            	  		<isEqual property="ascDescFlg" compareValue="DESC">
+		            	  			DESC
+		            	  		</isEqual>
+		            	  </isNotNull>
+		               ) a,
+		               (SELECT count(*) count_ 
+		            	  FROM TABLE(giuts003a_pkg.get_pack_policy_giuts003a(#moduleId#, TO_NUMBER(#packPolicyId#), #lineCd#, #sublineCd#, #issCd#, TO_NUMBER(#issueYy#), TO_NUMBER(#polSeqNo#), TO_NUMBER(#renewNo#), #userId#))
+		            	  <isNotNull property="filter">
+		            	  		WHERE 1=1
+		            	  		<isNotEmpty prepend="AND" property="lineCd">
+		            	  			UPPER(line_cd) LIKE UPPER(#lineCd#)		            	  		
+		            	  		</isNotEmpty>
+		            	  		<isNotEmpty prepend="AND" property="sublineCd">
+		            	  			UPPER(subline_cd) LIKE UPPER(#sublineCd#)
+		            	  		</isNotEmpty>
+		            	  		<isNotEmpty prepend="AND" property="issCd">
+		            	  			UPPER(iss_cd) LIKE UPPER(#issCd#)
+		            	  		</isNotEmpty>		
+		            	  		<isNotEmpty prepend="AND" property="issueYy">
+		            	  			issue_yy = #issueYy#
+		            	  		</isNotEmpty>           
+		            	  		<isNotEmpty prepend="AND" property="polSeqNo">
+		            	  			pol_seq_no = #polSeqNo#
+		            	  		</isNotEmpty> 	  		
+		            	  		<isNotEmpty prepend="AND" property="renewNo">
+		            	  			renew_no = #renewNo#
+		            	  		</isNotEmpty>
+		            	  		<isNotEmpty prepend="AND" property="endtIssCd">
+		            	  			UPPER(endt_iss_cd) LIKE UPPER(#endtIssCd#)
+		            	  		</isNotEmpty>
+		            	  		<isNotEmpty prepend="AND" property="endtYy">
+		            	  			endt_yy = #endtYy#
+		            	  		</isNotEmpty>
+		            	  		<isNotEmpty prepend="AND" property="endtSeqNo">
+		            	  			endt_seq_no = #endtSeqNo#
+		            	  		</isNotEmpty>
+		            	  		<isNotEmpty prepend="AND" property="assdName">
+		            	  			UPPER(assd_name) LIKE UPPER(#assdName#)
+		            	  		</isNotEmpty>
+		            	  		<isNotEmpty prepend="AND" property="acctEntDate">
+		            	  			TO_DATE(acct_ent_date, 'MM-DD'YYYY') = TO_DATE(#acctEntDate#, 'MM-DD-YYYY')
+		            	  		</isNotEmpty>
+		            	  </isNotNull>
+		            	) b
+		  		)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+  	
+	<select id="getGiuts003aPackPolicyDetails" resultMap="getGiuts003aPackPolicyResultMap" parameterClass="java.util.HashMap">
+		SELECT * 
+		  FROM TABLE(giuts003a_pkg.get_pack_policy_giuts003a(#moduleId#, TO_NUMBER(#packPolicyId#), #lineCd#, #sublineCd#, #issCd#, TO_NUMBER(#issueYy#), TO_NUMBER(#polSeqNo#), TO_NUMBER(#renewNo#), #userId#))
+	</select>
+	  	
+  	<resultMap id="getSpoilageReasonGiuts003aLOVResultMap" class="java.util.HashMap">
+  		<result property="spoilCd"		column="spoil_cd"/>
+  		<result property="spoilDesc"	column="spoil_desc"/>
+  		<result property="rowNum"		column="rownum_"/>
+  		<result property="rowCount"		column="count_"/>
+  	</resultMap>
+  	
+  	<select id="getSpoilageReasonGiuts003aLOV" resultMap="getSpoilageReasonGiuts003aLOVResultMap">
+  		SELECT * 
+  		  FROM (SELECT a.*, b.count_, rownum rownum_
+  		          FROM (SELECT *
+  		  				  FROM TABLE(GIUTS003A_PKG.get_spoil_giuts003a(#findText#))
+  		  				  <isNotNull property="filter">
+  		  				  		WHERE 1=1
+  		  				  		<isNotEmpty prepend="AND" property="spoilCd">
+  		  				  			UPPER(spoil_cd) LIKE UPPER(#spoilCd#)
+  		  				  		</isNotEmpty>
+  		  				  		<isNotEmpty prepend="AND" property="spoilDesc">
+  		  				  			UPPER(spoil_desc) LIKE UPPER(#spoilDesc#)
+  		  				  		</isNotEmpty>
+  		  				  </isNotNull>
+  		  				  <isEqual property="sortColumn" compareValue="spoilCd">
+  		  				  		ORDER BY spoil_cd
+  		  				  </isEqual>
+  		  				  <isEqual property="sortColumn" compareValue="spoilDesc">
+  		  				  		ORDER BY spoil_desc
+  		  				  </isEqual>
+  		  				  <isNotNull property="sortColumn">
+  		  				  		<isEqual property="ascDescFlg" compareValue="ASC">
+  		  				  			ASC
+  		  				  		</isEqual>
+  		  				  		<isEqual property="ascDescFlg" compareValue="DESC">
+  		  				  			DESC
+  		  				  		</isEqual>
+  		  				  </isNotNull>
+  		  				) a,
+  		  				(SELECT count(*) count_
+  		  				   FROM TABLE(GIUTS003A_PKG.get_spoil_giuts003a(#findText#))
+  		  				  <isNotNull property="filter">
+  		  				  		WHERE 1=1
+  		  				  		<isNotEmpty prepend="AND" property="spoilCd">
+  		  				  			UPPER(spoil_cd) LIKE UPPER(#spoilCd#)
+  		  				  		</isNotEmpty>
+  		  				  		<isNotEmpty prepend="AND" property="spoilDesc">
+  		  				  			UPPER(spoil_desc) LIKE UPPER(#spoilDesc#)
+  		  				  		</isNotEmpty>
+  		  				  </isNotNull>
+  		  				)b
+  		    		   
+  		  )
+  		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+  	
+  <!-- 	<parameterMap class="map" id="chkPackPolicyForSpoilageGiuts003aMap">
+  		<parameter property="packPolicyId"	jdbcType="INTEGER"	javaType="java.lang.Integer" mode="IN"/>
+  		<parameter property="issCd"			jdbcType="VARCHAR"	javaType="java.lang.String" mode="IN"/>
+  		<parameter property="msgConsidered" jdbcType="VARCHAR"	javaType="java.lang.String"	mode="OUT"/>
+  		<parameter property="msgSpoiled"	jdbcType="VARCHAR"	javaType="java.lang.String"	mode="OUT"/>
+  	</parameterMap>
+  	
+  	<select id="chkPackPolicyForSpoilageGiuts003a" parameterClass="java.util.HashMap" resultClass="java.util.HashMap">
+  		SELECT * FROM TABLE(GIUTS003A_PKG.chk_pack_policy_for_spoilage(#packPolicyId#, #issCd#)) 
+  	</select> -->
+  	
+  	<!-- changed by kenneth 07132015 SR 4753 -->
+  	<parameterMap class="map" id="chkPackPolicyForSpoilageGiuts003aMap">
+  		<parameter property="packPolicyId"	jdbcType="INTEGER"	javaType="java.lang.Integer" mode="IN"/>
+  		<parameter property="issCd"			jdbcType="VARCHAR"	javaType="java.lang.String" mode="IN"/>
+  		<parameter property="pMessage"		jdbcType="VARCHAR"	javaType="java.lang.String" mode="OUT"/> <!-- apollo cruz 11.13.2015 sr#20906  -->
+  	</parameterMap>
+  	
+  	<procedure id="chkPackPolicyForSpoilageGiuts003a" parameterMap="chkPackPolicyForSpoilageGiuts003aMap">
+  		BEGIN
+  			GIUTS003A_PKG.chk_pack_policy2(?, ?, ?);
+  		END;
+  	</procedure>
+  	
+  	<parameterMap class="map" id="packSpoilGiuts003aMap">
+  		<parameter property="userId"		jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN" />
+  		<parameter property="spoilCd"		jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+  		<parameter property="packPolicyId"	jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+  		<parameter property="spldFlag"		jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+  		<parameter property="userId"		jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN" />
+  		<parameter property="meanPolFlag"	jdbcType="VARCHAR"	javaType="java.lang.String"	mode="OUT"/>
+  	</parameterMap>
+  	
+  	<procedure id="packSpoilGiuts003a" parameterMap="packSpoilGiuts003aMap">
+  		BEGIN
+  		    giis_users_pkg.app_user := ?;
+  			GIUTS003A_PKG.pack_spoil(?, TO_NUMBER(?), ?, ?, ?);
+  		END;
+  	</procedure>
+  	
+  	<parameterMap class="map" id="packUnspoilGiuts003aMap">
+  		<parameter property="userId"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+  		<parameter property="issCd"			jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+  		<parameter property="packPolicyId"	jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+  		<parameter property="spldFlag"		jdbcType="VARCHAR"	javaType="java.lang.String"	mode="IN"/>
+  		<parameter property="meanPolFlag"	jdbcType="VARCHAR"	javaType="java.lang.String"	mode="OUT"/>
+  	</parameterMap>
+  	
+  	<procedure id="packUnspoilGiuts003a" parameterMap="packUnspoilGiuts003aMap">
+  		BEGIN
+  			giis_users_pkg.app_user := ?;
+  			GIUTS003A_PKG.pack_unspoil(?, TO_NUMBER(?), ?, ?);
+  		END;
+  		
+  	</procedure>
+  	
+  	<parameterMap class="map" id="chkPackPolicyPostGiuts003aMap">
+  		<parameter property="userId"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+  		<parameter property="moduleId"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+  		<parameter property="lineCd"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+  		<parameter property="issCd"				jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+  		<parameter property="packPolicyId"		jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="IN"/>
+  		<parameter property="userId"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+  		<parameter property="continueSpoilage"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+  		<parameter property="start"				jdbcType="INTEGER"	javaType="java.lang.Integer"	mode="INOUT"/>
+  		<parameter property="policyNo"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+  		<parameter property="meanPolFlag"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+  		<parameter property="annPremAmt"		jdbcType="NUMERIC"	javaType="java.math.BigDecimal"	mode="OUT"/>
+  		<parameter property="annTsiAmt"			jdbcType="NUMERIC"	javaType="java.math.BigDecimal"	mode="OUT"/>
+  		<parameter property="msgConsidered"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/> 
+  		<parameter property="finalMsg"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/> 		
+  	</parameterMap>	
+  	
+  	<procedure id="chkPackPolicyPostGiuts003a"	parameterMap="chkPackPolicyPostGiuts003aMap">
+  		BEGIN
+  			giis_users_pkg.app_user := ?;
+  			GIUTS003A_PKG.chk_pack_policy_post(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+  		END;
+  	</procedure>
+  	
+  	<!-- For GIUTS028 - Policy Reinstatement 07.25.2013 jomsdiago -->
+  	<resultMap class="java.util.HashMap" id="whenNewFormInstanceGiuts028Map">
+		<result column="ALLOW_SPOILAGE" 	property="allowSpoilage"/>
+		<result column="V_ISS_CD_PARAM" 	property="vIssCdParam"/>
+		<result column="V_HO" 	            property="vHo"/>
+		<result column="V_RESTRICT" 	    property="vRestrict"/>
+		<result column="V_SUBLINE" 	        property="vSubline"/>
+		<result column="V_RENEW" 	        property="vRenew"/>
+	</resultMap>
+
+	<select id="whenNewFormInstanceGIUTS028" resultMap="whenNewFormInstanceGiuts028Map">
+		SELECT * FROM TABLE(GIUTS028_PKG.WHEN_NEW_FORM_GIUTS028())		
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="getPolicyGiuts028LOVMap">
+	    <result column="POLICY_ID" 			property="policyId"/>
+		<result column="POLICY_NO" 			property="policyNo"/>
+		<result column="ASSD_NAME" 			property="assdName"/>
+		<result column="LINE_CD" 			property="lineCd"/>
+		<result column="SUBLINE_CD" 		property="sublineCd"/>
+		<result column="ISS_CD" 			property="issCd"/>
+		<result column="ISSUE_YY" 			property="issueYy"/>
+		<result column="POL_SEQ_NO" 		property="polSeqNo"/>
+		<result column="RENEW_NO" 			property="renewNo"/>
+		<result column="PACK_POLICY_ID" 	property="packPolicyId"/>
+		<result column="IS_CANCELLED" 	    property="isCancelled"/>
+		<result column="PACK_POLICY_NO" 	property="packPolicyNo"/>
+		<result column="POL_FLAG" 			property="polFlag"/>
+		<result column="OLD_POL_FLAG" 	    property="oldPolFlag"/>
+		<result column="ROWNUM_"			property="rowNum"/>
+		<result column="COUNT_"				property="rowCount"/>
+	</resultMap>
+	
+	<select id="getGIUTS028PolicyLOV"	resultMap="getPolicyGiuts028LOVMap" parameterClass="java.util.HashMap">  	
+  		<!-- Modified by pjsantos 10/27/2017, for optimization GENQA 5807 -->
+  		<!--  SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (-->SELECT * from table(GIUTS028_pkg.GET_POLICY_GIUTS028_LOV(#userId#, #lineCd#, #sublineCd#, #issCd#, #issueYy#,
+		                                        #polSeqNo#, #renewNo#, #findText#, #sortColumn#, #ascDescFlg#, #from#, #to#))
+		         <!--  WHERE 1 = 1
+		           AND line_cd = NVL(#lineCd#, line_cd)
+		           AND subline_cd = NVL(#sublineCd#, subline_cd)
+		           AND iss_cd = NVL(#issCd#, iss_cd)
+		           AND issue_yy = NVL(#issueYy#, issue_yy)
+		           AND pol_seq_no = NVL(#polSeqNo#, pol_seq_no)
+		           AND renew_no = NVL(#renewNo#, renew_no)
+		          		  <isNotNull property="findText">
+				         		  AND (UPPER(policy_no) LIKE UPPER(#findText#) 
+				         	 	   OR UPPER(assd_name) LIKE UPPER(#findText#)
+								)
+				          </isNotNull>
+		          		  <isEqual property="sortColumn" compareValue="policyNo">
+			              		ORDER BY policy_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="assdName">
+			              		ORDER BY assd_name
+			              </isEqual> 
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIUTS028_pkg.GET_POLICY_GIUTS028_LOV(#userId#))
+		                 WHERE 1 = 1
+		                   AND line_cd = NVL(#lineCd#, line_cd)
+		           		   AND subline_cd = NVL(#sublineCd#, subline_cd)
+		                   AND iss_cd = NVL(#issCd#, iss_cd)
+		                   AND issue_yy = NVL(#issueYy#, issue_yy)
+		                   AND pol_seq_no = NVL(#polSeqNo#, pol_seq_no)
+		                   AND renew_no = NVL(#renewNo#, renew_no)
+		                  <isNotNull property="findText">
+				         		  AND (UPPER(policy_no) LIKE UPPER(#findText#) 
+				         	 	   OR UPPER(assd_name) LIKE UPPER(#findText#)
+								)
+				          </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#-->
+  	</select>
+  	
+	<resultMap class="java.util.HashMap" id="validateGIUTS028EndtRecordMap">
+		<result column="V_CANCEL_POLICY" 	property="vCancelPolicy"/>
+		<result column="V_ACCT_ENT_DATE" 	property="vAcctEntDate"/>
+		<result column="V_SPLD_FLAG" 	    property="vSpldFlag"/>
+		<result column="V_MAX_ENDT" 	    property="vMaxEndt"/>
+		<result column="V_SW" 	            property="vSw"/>
+	</resultMap>
+
+	<select id="validateGIUTS028EndtRecord" resultMap="validateGIUTS028EndtRecordMap">
+		SELECT * FROM TABLE(GIUTS028_PKG.VALIDATE_GIUTS028_ENDT_REC(#lineCd#, #sublineCd#, #issCd#, #issueYy#, #polSeqNo#, #renewNo#, #policyId#))		
+	</select>
+	
+	<parameterMap class="map" id="validateGIUTS028CheckPaidMap">
+	    <parameter property="vCancelPolicy"			jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="IN" />
+	    <parameter property="issCd"			        jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+	    <parameter property="vMsgAlert1"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+	    <parameter property="vMsgAlert2"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+	    <parameter property="vMsgAlert3"			jdbcType="VARCHAR"		javaType="java.lang.String"	    mode="OUT" />
+	</parameterMap>
+	
+	<procedure id="validateGIUTS028CheckPaid" parameterMap="validateGIUTS028CheckPaidMap">
+		CALL GIUTS028_PKG.CHECK_PAID_POLICY(?, ?, ?, ?, ?)
+	</procedure>
+	
+	<parameterMap class="map" id="validateGIUTS028CheckRIPaytMap">
+	    <parameter property="vCancelPolicy"			jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="IN" />
+	    <parameter property="lineCd"			    jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+	    <parameter property="vMsgAlert1"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+	    <parameter property="vMsgAlert2"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+	    <parameter property="vMsgAlert3"			jdbcType="VARCHAR"		javaType="java.lang.String"	    mode="OUT" />
+	</parameterMap>
+	
+	<procedure id="validateGIUTS028CheckRIPayt" parameterMap="validateGIUTS028CheckRIPaytMap">
+		CALL GIUTS028_PKG.CHECK_REINSURANCE_PAYMENT(?, ?, ?, ?, ?)
+	</procedure>
+	
+	<parameterMap class="map" id="validateGIUTS028RenewPolMap">
+	    <parameter property="lineCd"			    jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+	    <parameter property="sublineCd"			    jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+	    <parameter property="issCd"			        jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+	    <parameter property="issueYy"			    jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="IN" />
+	    <parameter property="polSeqNo"			    jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="IN" />
+	    <parameter property="renewNo"			    jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="IN" />
+	    <parameter property="vRenew"			    jdbcType="VARCHAR"		javaType="java.lang.String"	    mode="IN" />
+	    <parameter property="vAlert"			    jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+	</parameterMap>
+	
+	<procedure id="validateGIUTS028RenewPol" parameterMap="validateGIUTS028RenewPolMap">
+		CALL VALIDATE_REINSTATEMENT.VALIDATE_RENEWAL_POLICY(?, ?, ?, ?, ?, ?, ?, ?)
+	</procedure>
+	
+	<parameterMap class="map" id="validateGIUTS028CheckAcctEntDateMap">
+	    <parameter property="vAcctEntDate"			jdbcType="DATE"		    javaType="java.util.Date"	    mode="IN" />
+	    <parameter property="vRestrict"			    jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+	    <parameter property="vMsgAlert1"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+	    <parameter property="vMsgAlert2"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="OUT" />
+	    <parameter property="vMsgAlert3"			jdbcType="VARCHAR"		javaType="java.lang.String"	    mode="OUT" />
+	</parameterMap>
+	
+	<procedure id="validateGIUTS028CheckAcctEntDate" parameterMap="validateGIUTS028CheckAcctEntDateMap">
+		CALL GIUTS028_PKG.CHECK_ACCT_ENT_DATE(?, ?, ?, ?, ?)
+	</procedure>
+	
+	<resultMap class="java.util.HashMap" id="checkMrnMap">
+		<result column="V_EXIST" 	        property="vExist"/>
+		<result column="V_SUBLINE" 	        property="vSubline"/>
+	</resultMap>
+
+	<select id="checkMrn" resultMap="checkMrnMap">
+		SELECT * FROM TABLE(GIUTS028_PKG.CHK_MARINE(#lineCd#, #sublineCd#, #issCd#, #issueYy#, #polSeqNo#, #renewNo#))		
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="checkEndtOnProcessMap">
+		<result column="V_EXIST" 	        property="vExist"/>
+	</resultMap>
+
+	<select id="checkEndtOnProcess" resultMap="checkEndtOnProcessMap">
+		SELECT * FROM TABLE(GIUTS028_PKG.CHK_ON_GOING_ENDT(#lineCd#, #sublineCd#, #issCd#, #issueYy#, #polSeqNo#, #renewNo#))		
+	</select>
+	
+	<parameterMap id="processGIUTS028ReinstateMap" class="map">
+	    <parameter property="userId"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+	    <parameter property="userId"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+	    <parameter property="vCancelPolicy"		jdbcType="INTEGER"		javaType="java.lang.Integer"	mode="IN" />
+	    <parameter property="oldPolFlag"        jdbcType="VARCHAR"      javaType="java.lang.String"     mode="IN" />
+	    <parameter property="lineCd"            jdbcType="VARCHAR"      javaType="java.lang.String"     mode="IN" />
+	    <parameter property="sublineCd"         jdbcType="VARCHAR"      javaType="java.lang.String"     mode="IN" />
+	    <parameter property="issCd"             jdbcType="VARCHAR"      javaType="java.lang.String"     mode="IN" />
+	    <parameter property="issueYy"           jdbcType="INTEGER"      javaType="java.lang.Integer"    mode="IN" />
+	    <parameter property="polSeqNo"          jdbcType="INTEGER"      javaType="java.lang.Integer"    mode="IN" />
+	    <parameter property="renewNo"           jdbcType="INTEGER"      javaType="java.lang.Integer"    mode="IN" />
+	    <parameter property="vMaxEndt"          jdbcType="INTEGER"      javaType="java.lang.Integer"    mode="IN" />
+	    <parameter property="policyId"          jdbcType="INTEGER"      javaType="java.lang.Integer"    mode="IN" />
+	</parameterMap>
+	
+	<procedure id="processGIUTS028Reinstate" parameterMap="processGIUTS028ReinstateMap">
+		BEGIN
+		    giis_users_pkg.app_user := ?;
+		    
+			GIUTS028_PKG.PROCESS_REINSTATE(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<!-- benjo 09.03.2015 UW-SPECS-2015-080 -->
+	<resultMap class="java.util.HashMap" id="checkOrigRenewStatusMap">
+		<result column="INVALID_ORIG" 	        property="vInvalidOrig"/>
+		<result column="VALID_RENEW" 	        property="vValidRenew"/>
+		<result column="CANCEL_RENEW" 	        property="vCancelRenew"/>
+	</resultMap>
+
+	<select id="checkOrigRenewStatus" resultMap="checkOrigRenewStatusMap">
+		SELECT * FROM TABLE(GIUTS028_PKG.chk_orig_renew_status(#policyId#))
+	</select>
+	<!-- benjo end -->
+	<!-- End For GIUTS028 - Policy Reinstatement 07.25.2013 jomsdiago -->
+	
+	<!-- For GIUTS028A - Package Policy Reinstatement 07.29.2013 jomsdiago -->
+	<resultMap class="java.util.HashMap" id="whenNewFormInstanceGiuts028AMap">
+		<result column="ALLOW_SPOILAGE" 	property="allowSpoilage"/>
+		<result column="V_ISS_CD_PARAM" 	property="vIssCdParam"/>
+		<result column="V_HO" 	            property="vHo"/>
+		<result column="V_RESTRICT" 	    property="vRestrict"/>
+		<result column="V_SUBLINE" 	        property="vSubline"/>
+		<result column="V_RENEW" 	        property="vRenew"/>
+	</resultMap>
+	
+	<select id="whenNewFormInstanceGIUTS028A" resultMap="whenNewFormInstanceGiuts028AMap">
+		SELECT * FROM TABLE(GIUTS028A_PKG.WHEN_NEW_FORM_GIUTS028A())		
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="getPolicyGiuts028ALOVMap">
+	    <result column="PACK_POLICY_ID" 			property="packPolicyId"/>
+	    <result column="PACK_POLICY_NO" 			property="packPolicyNo"/>
+	    <result column="ASSD_NAME" 					property="assdName"/>
+		<result column="LINE_CD" 					property="lineCd"/>
+		<result column="SUBLINE_CD" 				property="sublineCd"/>
+		<result column="ISS_CD" 					property="issCd"/>
+		<result column="ISSUE_YY" 					property="issueYy"/>
+		<result column="POL_SEQ_NO" 				property="polSeqNo"/>
+		<result column="RENEW_NO" 					property="renewNo"/>
+		<result column="V_SUBCANCEL" 				property="vSubcancel"/>
+		<result column="PACK_POL_FLAG" 				property="packPolFlag"/>
+		<result column="V_HIST" 				    property="vHist"/>
+		<result column="ROWNUM_"					property="rowNum"/>
+		<result column="COUNT_"						property="rowCount"/>
+	</resultMap>
+	
+	<select id="getGIUTS028APolicyLOV"	resultMap="getPolicyGiuts028ALOVMap" parameterClass="java.util.HashMap">  	
+  		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.* 
+		          FROM (SELECT * from table(GIUTS028A_pkg.GET_POLICY_GIUTS028A_LOV(#userId#))
+		         WHERE 1 = 1
+		           AND line_cd = NVL(#lineCd#, line_cd)
+		           AND subline_cd = NVL(#sublineCd#, subline_cd)
+		           AND iss_cd = NVL(#issCd#, iss_cd)
+		           AND issue_yy = NVL(#issueYy#, issue_yy)
+		           AND pol_seq_no = NVL(#polSeqNo#, pol_seq_no)
+		           AND renew_no = NVL(#renewNo#, renew_no)
+		          		  <isNotNull property="findText">
+				         		WHERE (UPPER(pack_policy_no) LIKE UPPER(#findText#) 
+				         	 	   OR UPPER(assd_name) LIKE UPPER(#findText#)
+								)
+				          </isNotNull>
+		          		  <isEqual property="sortColumn" compareValue="packPolicyNo">
+			              		ORDER BY pack_policy_no
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="assdName">
+			              		ORDER BY assd_name
+			              </isEqual> 
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE (GIUTS028A_pkg.GET_POLICY_GIUTS028A_LOV(#userId#))
+		                 WHERE 1 = 1
+				           AND line_cd = NVL(#lineCd#, line_cd)
+				           AND subline_cd = NVL(#sublineCd#, subline_cd)
+				           AND iss_cd = NVL(#issCd#, iss_cd)
+				           AND issue_yy = NVL(#issueYy#, issue_yy)
+				           AND pol_seq_no = NVL(#polSeqNo#, pol_seq_no)
+				           AND renew_no = NVL(#renewNo#, renew_no)
+		                  <isNotNull property="findText">
+				         		WHERE (UPPER(pack_policy_no) LIKE UPPER(#findText#) 
+				         	 	   OR UPPER(assd_name) LIKE UPPER(#findText#)
+								)
+				          </isNotNull>
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#
+  	</select>
+  	
+	<parameterMap id="reinstatePackageGIUTS028AMap" class="map">
+	    <parameter property="userId"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+	    <parameter property="userId"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+	    <parameter property="lineCd"            jdbcType="VARCHAR"      javaType="java.lang.String"     mode="IN" />
+	    <parameter property="sublineCd"         jdbcType="VARCHAR"      javaType="java.lang.String"     mode="IN" />
+	    <parameter property="issCd"             jdbcType="VARCHAR"      javaType="java.lang.String"     mode="IN" />
+	    <parameter property="issueYy"           jdbcType="INTEGER"      javaType="java.lang.Integer"    mode="IN" />
+	    <parameter property="polSeqNo"          jdbcType="INTEGER"      javaType="java.lang.Integer"    mode="IN" />
+	    <parameter property="renewNo"           jdbcType="INTEGER"      javaType="java.lang.Integer"    mode="IN" />
+	    <parameter property="packPolicyId"      jdbcType="INTEGER"      javaType="java.lang.Integer"    mode="IN" />
+	    <parameter property="vSubpolCheck"      jdbcType="VARCHAR"      javaType="java.lang.String"     mode="OUT" />
+	</parameterMap>
+	
+	<procedure id="reinstatePackageGIUTS028A" parameterMap="reinstatePackageGIUTS028AMap">
+		BEGIN
+		    giis_users_pkg.app_user := ?;
+		    
+			GIUTS028A_PKG.PROCESS_REINSTATE(?, ?, ?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<parameterMap id="postGIUTS028AReinstateMap" class="map">
+	    <parameter property="userId"			jdbcType="VARCHAR"		javaType="java.lang.String"		mode="IN" />
+	    <parameter property="lineCd"            jdbcType="VARCHAR"      javaType="java.lang.String"     mode="IN" />
+	    <parameter property="sublineCd"         jdbcType="VARCHAR"      javaType="java.lang.String"     mode="IN" />
+	    <parameter property="issCd"             jdbcType="VARCHAR"      javaType="java.lang.String"     mode="IN" />
+	    <parameter property="issueYy"           jdbcType="INTEGER"      javaType="java.lang.Integer"    mode="IN" />
+	    <parameter property="polSeqNo"          jdbcType="INTEGER"      javaType="java.lang.Integer"    mode="IN" />
+	    <parameter property="renewNo"           jdbcType="INTEGER"      javaType="java.lang.Integer"    mode="IN" />
+	    <parameter property="packPolicyId"      jdbcType="INTEGER"      javaType="java.lang.Integer"    mode="IN" />
+	</parameterMap>
+	
+	<procedure id="postGIUTS028AReinstate" parameterMap="postGIUTS028AReinstateMap">
+		BEGIN
+			GIUTS028A_PKG.POST_REINSTATE(?, ?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	<!-- End for GIUTS028A - Package Policy Reinstatement 07.29.2013 -->
+	
+	<select id="validateSpoilCdGiuts003" parameterClass="java.lang.String" resultClass="java.lang.String">
+		SELECT giuts003_pkg.validate_spoil_cd(#spoilCd#) FROM DUAL
+	</select>
+	
+	<!-- benjo 09.03.2015 UW-SPECS-2015-080 -->
+	<resultMap class="java.util.HashMap" id="checkPackOrigRenewStatusMap">
+		<result column="INVALID_ORIG" 	        property="vInvalidOrig"/>
+		<result column="VALID_RENEW" 	        property="vValidRenew"/>
+		<result column="CANCEL_RENEW" 	        property="vCancelRenew"/>
+	</resultMap>
+
+	<select id="checkPackOrigRenewStatus" resultMap="checkPackOrigRenewStatusMap">
+		SELECT * FROM TABLE(GIUTS028A_PKG.chk_orig_renew_status(#packPolicyId#))
+	</select>
+	<!-- benjo end -->
+</sqlMap>

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIACR218_POL_PERIL_TSI_AMT" language="groovy" pageWidth="990" pageHeight="842" columnWidth="990" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="Crosstab Data Text" isDefault="false" hAlign="Center"/>
+	<parameter name="P_USER" class="java.lang.String"/>
+	<parameter name="P_ISS_CD" class="java.lang.String"/>
+	<parameter name="P_LINE_CD" class="java.lang.String"/>
+	<parameter name="P_SUBLINE_CD" class="java.lang.String"/>
+	<parameter name="P_POLICY_NO" class="java.lang.String"/>
+	<parameter name="P_TOGGLE" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT SUM(f_tr_dist_tsi) f_tr_dist_tsi, trty_name, iss_cd, line_cd,  subline_cd, peril_sname
+  FROM TABLE (giacr218_pkg.get_giacr218_polamt($P{P_USER}, $P{P_ISS_CD}, $P{P_LINE_CD}, $P{P_SUBLINE_CD}, $P{P_POLICY_NO}, $P{P_TOGGLE}))
+GROUP BY trty_name, iss_cd, line_cd,  subline_cd, peril_sname]]>
+	</queryString>
+	<field name="F_TR_DIST_TSI" class="java.math.BigDecimal"/>
+	<field name="TRTY_NAME" class="java.lang.String"/>
+	<field name="ISS_CD" class="java.lang.String"/>
+	<field name="LINE_CD" class="java.lang.String"/>
+	<field name="SUBLINE_CD" class="java.lang.String"/>
+	<field name="PERIL_SNAME" class="java.lang.String"/>
+	<summary>
+		<band height="11" splitType="Stretch">
+			<crosstab>
+				<reportElement x="25" y="0" width="75" height="11"/>
+				<rowGroup name="ISS_CD" width="0" totalPosition="End">
+					<bucket>
+						<bucketExpression class="java.lang.String"><![CDATA[$F{ISS_CD}]]></bucketExpression>
+					</bucket>
+					<crosstabRowHeader>
+						<cellContents backcolor="#FFFFFF" mode="Opaque"/>
+					</crosstabRowHeader>
+					<crosstabTotalRowHeader>
+						<cellContents/>
+					</crosstabTotalRowHeader>
+				</rowGroup>
+				<rowGroup name="LINE_CD" width="0" totalPosition="End">
+					<bucket>
+						<bucketExpression class="java.lang.String"><![CDATA[$F{LINE_CD}]]></bucketExpression>
+					</bucket>
+					<crosstabRowHeader>
+						<cellContents backcolor="#FFFFFF" mode="Opaque"/>
+					</crosstabRowHeader>
+					<crosstabTotalRowHeader>
+						<cellContents/>
+					</crosstabTotalRowHeader>
+				</rowGroup>
+				<rowGroup name="PERIL_SNAME" width="0" totalPosition="End">
+					<bucket>
+						<bucketExpression class="java.lang.String"><![CDATA[$F{PERIL_SNAME}]]></bucketExpression>
+					</bucket>
+					<crosstabRowHeader>
+						<cellContents/>
+					</crosstabRowHeader>
+					<crosstabTotalRowHeader>
+						<cellContents/>
+					</crosstabTotalRowHeader>
+				</rowGroup>
+				<columnGroup name="TRTY_NAME" height="0">
+					<bucket>
+						<bucketExpression class="java.lang.String"><![CDATA[$F{TRTY_NAME}]]></bucketExpression>
+					</bucket>
+					<crosstabColumnHeader>
+						<cellContents backcolor="#FFFFFF" mode="Opaque"/>
+					</crosstabColumnHeader>
+					<crosstabTotalColumnHeader>
+						<cellContents/>
+					</crosstabTotalColumnHeader>
+				</columnGroup>
+				<measure name="F_TR_DIST_TSIMeasure" class="java.math.BigDecimal" calculation="Sum">
+					<measureExpression><![CDATA[$F{F_TR_DIST_TSI}]]></measureExpression>
+				</measure>
+				<crosstabCell width="50" height="11">
+					<cellContents>
+						<textField pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+							<reportElement style="Crosstab Data Text" x="0" y="0" width="50" height="11"/>
+							<textElement textAlignment="Right">
+								<font fontName="Arial" size="7"/>
+							</textElement>
+							<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{F_TR_DIST_TSIMeasure}]]></textFieldExpression>
+						</textField>
+					</cellContents>
+				</crosstabCell>
+				<crosstabCell height="0" rowTotalGroup="PERIL_SNAME">
+					<cellContents/>
+				</crosstabCell>
+				<crosstabCell height="1" rowTotalGroup="LINE_CD">
+					<cellContents backcolor="#FFBFBF" mode="Transparent"/>
+				</crosstabCell>
+				<crosstabCell height="0" rowTotalGroup="ISS_CD">
+					<cellContents backcolor="#B30000" mode="Transparent"/>
+				</crosstabCell>
+			</crosstab>
+		</band>
+	</summary>
+</jasperReport>

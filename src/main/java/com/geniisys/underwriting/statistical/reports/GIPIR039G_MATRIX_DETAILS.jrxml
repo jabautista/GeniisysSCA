@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GIPIR039G_MATRIX_DETAILS" language="groovy" pageWidth="1152" pageHeight="752" columnWidth="1152" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="Crosstab Data Text" isDefault="false" hAlign="Center"/>
+	<parameter name="P_ZONE_TYPE" class="java.lang.String"/>
+	<parameter name="P_DATE" class="java.lang.String"/>
+	<parameter name="P_AS_OF_SW" class="java.lang.String"/>
+	<parameter name="P_FROM_DATE" class="java.lang.String"/>
+	<parameter name="P_TO_DATE" class="java.lang.String"/>
+	<parameter name="P_AS_OF_DATE" class="java.lang.String"/>
+	<parameter name="P_USER_ID" class="java.lang.String"/>
+	<parameter name="P_ZONE_GRP" class="java.lang.String"/>
+	<parameter name="P_POLICY_ID" class="java.lang.Integer"/>
+	<parameter name="P_ZONE_NO" class="java.lang.String"/>
+	<parameter name="P_TOTAL_TSI" class="java.math.BigDecimal"/>
+	<parameter name="P_TOTAL_PREM" class="java.math.BigDecimal"/>
+	<queryString>
+		<![CDATA[SELECT zone_no, zone_grp, policy_id,
+	dummy_cd, share_tsi, share_prem
+  FROM TABLE(GIPIR039G_PKG.POPULATE_MATRIX_DETAILS(
+	$P{P_ZONE_TYPE}, $P{P_DATE}, $P{P_AS_OF_SW},
+	$P{P_FROM_DATE}, $P{P_TO_DATE}, $P{P_AS_OF_DATE},
+	$P{P_USER_ID}, $P{P_POLICY_ID}, $P{P_ZONE_NO} ))
+UNION
+SELECT TO_CHAR($P{P_ZONE_NO}), TO_CHAR($P{P_ZONE_GRP}),
+	$P{P_POLICY_ID}, '',
+	$P{P_TOTAL_TSI}, $P{P_TOTAL_PREM}
+  FROM DUAL]]>
+	</queryString>
+	<field name="ZONE_NO" class="java.lang.String"/>
+	<field name="ZONE_GRP" class="java.lang.String"/>
+	<field name="POLICY_ID" class="java.lang.Integer"/>
+	<field name="DUMMY_CD" class="java.lang.String"/>
+	<field name="SHARE_TSI" class="java.math.BigDecimal"/>
+	<field name="SHARE_PREM" class="java.math.BigDecimal"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<summary>
+		<band height="12" splitType="Stretch">
+			<crosstab>
+				<reportElement x="0" y="0" width="1152" height="12"/>
+				<rowGroup name="ZONE_GRP" width="0">
+					<bucket>
+						<bucketExpression class="java.lang.String"><![CDATA[$F{ZONE_GRP}]]></bucketExpression>
+					</bucket>
+					<crosstabRowHeader>
+						<cellContents backcolor="#F0F8FF" mode="Opaque"/>
+					</crosstabRowHeader>
+					<crosstabTotalRowHeader>
+						<cellContents/>
+					</crosstabTotalRowHeader>
+				</rowGroup>
+				<rowGroup name="ZONE_NO" width="0">
+					<bucket>
+						<bucketExpression class="java.lang.String"><![CDATA[$F{ZONE_NO}]]></bucketExpression>
+					</bucket>
+					<crosstabRowHeader>
+						<cellContents/>
+					</crosstabRowHeader>
+					<crosstabTotalRowHeader>
+						<cellContents/>
+					</crosstabTotalRowHeader>
+				</rowGroup>
+				<rowGroup name="POLICY_ID" width="0">
+					<bucket>
+						<bucketExpression class="java.lang.String"><![CDATA[$F{POLICY_ID}]]></bucketExpression>
+					</bucket>
+					<crosstabRowHeader>
+						<cellContents/>
+					</crosstabRowHeader>
+					<crosstabTotalRowHeader>
+						<cellContents/>
+					</crosstabTotalRowHeader>
+				</rowGroup>
+				<columnGroup name="DUMMY_CD" height="0">
+					<bucket>
+						<bucketExpression class="java.lang.String"><![CDATA[$F{DUMMY_CD}]]></bucketExpression>
+					</bucket>
+					<crosstabColumnHeader>
+						<cellContents backcolor="#F0F8FF" mode="Opaque"/>
+					</crosstabColumnHeader>
+					<crosstabTotalColumnHeader>
+						<cellContents/>
+					</crosstabTotalColumnHeader>
+				</columnGroup>
+				<measure name="SHARE_TSIMeasure" class="java.math.BigDecimal">
+					<measureExpression><![CDATA[$F{SHARE_TSI}]]></measureExpression>
+				</measure>
+				<measure name="SHARE_PREMMeasure" class="java.lang.Object">
+					<measureExpression><![CDATA[$F{SHARE_PREM}]]></measureExpression>
+				</measure>
+				<crosstabCell width="177" height="12">
+					<cellContents>
+						<textField pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+							<reportElement style="Crosstab Data Text" x="0" y="0" width="85" height="11"/>
+							<textElement textAlignment="Right">
+								<font fontName="Arial" size="7"/>
+							</textElement>
+							<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{SHARE_TSIMeasure}]]></textFieldExpression>
+						</textField>
+						<textField pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+							<reportElement style="Crosstab Data Text" x="87" y="0" width="85" height="11"/>
+							<textElement textAlignment="Right">
+								<font fontName="Arial" size="7"/>
+							</textElement>
+							<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{SHARE_PREMMeasure}]]></textFieldExpression>
+						</textField>
+					</cellContents>
+				</crosstabCell>
+			</crosstab>
+		</band>
+	</summary>
+</jasperReport>

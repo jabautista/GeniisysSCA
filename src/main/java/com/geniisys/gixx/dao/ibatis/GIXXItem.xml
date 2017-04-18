@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIXXItem">
+
+	<typeAlias alias="GIXXItem" type="com.geniisys.gixx.entity.GIXXItem" />
+	
+	<resultMap id="getGIXXItemInfoMap" class="GIXXItem">
+		<result column="EXTRACT_ID" 		property="extractId" />
+		<result column="POLICY_ID" 			property="policyId" />
+		<result column="ITEM_GRP" 			property="itemGrp" />
+		<result column="ITEM_NO" 			property="itemNo" />
+		<result column="ITEM_TITLE" 		property="itemTitle" />
+		<result column="ITEM_DESC" 			property="itemDesc" />
+		<result column="ITEM_DESC2" 		property="itemDesc2" />
+		<result column="COVERAGE_CD" 		property="coverageCd" />
+		<result column="COVERAGE_DESC" 		property="coverageDesc" />
+		<result column="CURRENCY_CD" 		property="currencyCd" />
+		<result column="CURRENCY_DESC" 		property="currencyDesc" />
+		<result column="CURRENCY_RT" 		property="currencyRt" />
+		<result column="TSI_AMT" 			property="tsiAmt" />
+		<result column="PREM_AMT" 			property="premAmt" />
+		<result column="PACK_LINE_CD" 		property="packLineCd" />
+		<result column="PACK_SUBLINE_CD" 	property="packSublineCd" />
+		<result column="GROUP_CD" 			property="groupCd" />
+		<result column="PERIL_VIEW_TYPE" 	property="perilViewType" />
+		<result column="ITEM_TYPE" 			property="itemType" />
+		<result column="PACK_POL_FLAG" 		property="packPolFlag" />
+	</resultMap>
+	
+	<select id="getGIXXItemInfo" parameterClass="java.util.HashMap" resultMap="getGIXXItemInfoMap" >
+		SELECT * 
+		  FROM (SELECT rownum rownum_, b.count_, a.*
+		          FROM (SELECT * FROM TABLE(GIXX_ITEM_PKG.get_related_item_info(#extractId#, #policyId#))) a,
+		          	   (SELECT count(*) count_ FROM TABLE(GIXX_ITEM_PKG.get_related_item_info(#extractId#, #policyId#))) b)
+		 WHERE rownum_ BETWEEN NVL(#from#,rownum_) AND NVL(#to#,rownum_)
+	</select>
+
+</sqlMap>

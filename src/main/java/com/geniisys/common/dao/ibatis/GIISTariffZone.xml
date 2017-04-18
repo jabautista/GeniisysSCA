@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIISTariffZone">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24"/>
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+	
+	<typeAlias alias="GIISTariffZone" type="com.geniisys.common.entity.GIISTariffZone"/>
+	
+	<resultMap class="GIISTariffZone" id="GIISTariffZoneLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="tariffZone"		column="TARIFF_ZONE" />
+		<result property="tariffZoneDesc"	column="TARIFF_ZONE_DESC" />
+	</resultMap>
+	
+	<resultMap class="java.util.HashMap" id="giisTariffZoneLOV2ResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="tariffZone"		column="TARIFF_ZONE" />
+		<result property="tariffZoneDesc"	column="TARIFF_ZONE_DESC" />
+	</resultMap>
+	
+	<!-- fons 11/19/2013 -->
+	<resultMap class="java.util.HashMap" id="giisTariffZoneListResultMap" extends="BaseEntity.TableGridResultMap">
+		<result column="tariff_zone"     	property="tariffZone"/>	
+		<result column="tariff_zone_desc"  	property="tariffZoneDesc"/>
+		<result column="line_cd"  			property="lineCd"/>
+		<result column="line_name"  		property="lineName"/>
+		<result column="subline_cd"  		property="sublineCd"/>
+		<result column="subline_name"  		property="sublineName"/>
+		<result column="tarf_cd"  			property="tariffCd"/>
+		<result column="tarf_desc"  		property="tarfDesc"/>
+		<result column="remarks"     		property="remarks"/>
+		<result column="user_id"     		property="userId"/>
+		<result column="last_update"    	property="lastUpdate"/>
+	</resultMap>
+	<!-- end -->
+	
+	<select id="getTariffZoneLOV" resultMap="GIISTariffZoneLOVResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giis_tariff_zone_pkg.get_all_tariff_zone_list)
+						  <isNotNull property="findText">
+		                  	WHERE UPPER(TARIFF_ZONE_DESC) LIKE UPPER(#findText#)
+		                  </isNotNull>
+					   )a,
+					   (SELECT COUNT(*) count_
+						  FROM TABLE(giis_tariff_zone_pkg.get_all_tariff_zone_list)
+						  <isNotNull property="findText">
+		                  	WHERE UPPER(TARIFF_ZONE_DESC) LIKE UPPER(#findText#)
+		                  </isNotNull>
+		                  ) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getTariffZoneLOV2" resultMap="giisTariffZoneLOV2ResultMap" parameterClass="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_,
+					   b.count_,
+					   a.*
+				  FROM (SELECT *
+						  FROM TABLE(giis_tariff_zone_pkg.get_all_tariff_zone_list)
+						  <isNotNull property="findText">
+		                  	WHERE UPPER(TARIFF_ZONE) LIKE UPPER(#findText#)
+		                  	   OR UPPER(TARIFF_ZONE_DESC) LIKE UPPER(#findText#)
+		                  </isNotNull>
+		                  <isNull property="findText">
+		                  	WHERE UPPER(TARIFF_ZONE) LIKE UPPER(NVL(#searchString#, tariff_zone))
+		                  	   OR UPPER(TARIFF_ZONE_DESC) LIKE UPPER(NVL(#searchString#, tariff_zone_desc))
+		                  </isNull>
+		                  <isEqual property="sortColumn" compareValue="tariffZone">
+			              		ORDER BY tariff_zone
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="tariffZoneDesc">
+			              		ORDER BY tariff_zone_desc
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+					   )a,
+					   (SELECT COUNT(*) count_
+						  FROM TABLE(giis_tariff_zone_pkg.get_all_tariff_zone_list)
+						  <isNotNull property="findText"> <!-- added by steven 07.07.2014-->
+		                  	WHERE UPPER(TARIFF_ZONE) LIKE UPPER(#findText#)
+		                  	   OR UPPER(TARIFF_ZONE_DESC) LIKE UPPER(#findText#)
+		                  </isNotNull>
+		                  <isNull property="findText">
+		                  	WHERE UPPER(TARIFF_ZONE) LIKE UPPER(NVL(#searchString#, tariff_zone))
+		                  	   OR UPPER(TARIFF_ZONE_DESC) LIKE UPPER(NVL(#searchString#, tariff_zone_desc))
+		                  </isNull>
+						  ) b)
+		 WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="getGiiss054RecList" resultMap="giisTariffZoneListResultMap">
+		SELECT *
+		  FROM (SELECT rownum rownum_, 
+		               b.count_, 
+		               a.*  
+		  	      FROM (SELECT * FROM TABLE(giiss054_pkg.get_rec_list(#tariffZone#, #tariffZoneDesc#, #lineCd#, #sublineCd#, #userId#))
+		                  <isEqual property="sortColumn" compareValue="tariffZone">
+			              		ORDER BY tariff_zone
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="tariffZoneDesc">
+			              		ORDER BY tariff_zone_desc
+			              </isEqual>
+			              <isEqual property="sortColumn" compareValue="lineCd">
+			              		ORDER BY line_cd
+			              </isEqual>
+			                <isEqual property="sortColumn" compareValue="sublineCd">
+			              		ORDER BY subline_cd
+			              </isEqual>
+			          	  <isNotNull property="sortColumn">
+			              		<isEqual property="ascDescFlg" compareValue="ASC">
+			              			ASC
+			              		</isEqual>
+			              		<isEqual property="ascDescFlg" compareValue="DESC">
+			              			DESC
+			              		</isEqual>
+			              </isNotNull>
+		                  ) a, 
+		               (SELECT count(*) count_ 
+		                  FROM TABLE(giiss054_pkg.get_rec_list(#tariffZone#, #tariffZoneDesc#, #lineCd#, #sublineCd#, #userId#))
+		                  ) b) 
+		 WHERE rownum_ BETWEEN #from# AND #to#	
+	</select>	
+	
+	<procedure id="valAddTariffZone" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss054_pkg.val_add_rec(#recId#);
+ 		END;
+ 	</procedure> 	
+	
+	<procedure id="valDeleteTariffZone" parameterClass="java.lang.String">
+ 		BEGIN
+ 			giiss054_pkg.val_del_rec(#recId#);
+ 		END;
+ 	</procedure>
+ 	
+	<procedure id="setTariffZone" parameterClass="GIISTariffZone">
+	    DECLARE
+	    	v_rec giis_tariff_zone%ROWTYPE;
+ 		BEGIN		     
+ 			giis_users_pkg.app_user := #userId#;
+ 			
+ 			v_rec.tariff_zone := #tariffZone#;
+ 			v_rec.tariff_zone_desc := #tariffZoneDesc#;
+ 			v_rec.line_cd := #lineCd#;
+ 			v_rec.subline_cd := #sublineCd#;
+ 			v_rec.tarf_cd := #tariffCd#;
+			v_rec.remarks := #remarks#;
+ 			v_rec.user_id := #userId#;
+ 			
+ 			giiss054_pkg.set_rec(v_rec);
+ 		END;
+ 	</procedure>
+ 	 	 	
+	<delete id="delTariffZone" parameterClass="java.lang.String">
+		BEGIN
+ 			giiss054_pkg.del_rec(#tariffZone#);
+ 		END;
+ 	</delete>	
+ 	
+ 	<select id="checkGiiss054UserAccess" resultClass="java.lang.Integer">
+  		SELECT giiss054_pkg.check_giiss054_user_access(#userId#) FROM dual
+  	</select>
+</sqlMap>

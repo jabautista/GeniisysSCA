@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIPIMortgagee">
+	
+	<cacheModel id="oneDayClient" type="MEMORY">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK" />
+	</cacheModel>
+	
+	<typeAlias alias="GIPIMortgagee" type="com.geniisys.gipi.entity.GIPIMortgagee"/>
+	
+	<resultMap class="GIPIMortgagee" id="mortgageeListMap">
+	
+		<result property="policyId" 	column="policy_id"/>
+		<result property="mortgCd" 		column="mortg_cd"/>
+		<result property="amount" 		column="amount"/>
+		<result property="itemNo"		column="item_no"/>
+		<result property="issCd" 		column="iss_cd"/>
+		<result property="remarks" 		column="remarks"/>
+		<result property="deleteSw" 	column="delete_sw"/>
+		<result property="mortgName" 	column="mortg_name"/>
+		<result property="sumAmount" 	column="sum_amount"/>
+		<result property="rowNum" 		column="rownum_"/>
+		<result property="rowCount" 	column="count_"/>
+			
+	</resultMap>
+	
+	<resultMap class="GIPIMortgagee" id="itemMortgageesMap">
+	
+		<result property="policyId" 			column="policy_id"/>
+		<result property="itemNo" 				column="item_no"/>
+		<result property="mortgCd"	 			column="mortg_cd"/>
+		<result property="issCd" 				column="iss_cd"/>
+		<result property="amount" 				column="amount"/>
+		<result property="remarks" 				column="remarks"/>
+		<result property="sumAmount" 			column="total_mortgagee_amt"/>
+		<result property="itemNoDisplay" 		column="item_no_display"/>
+		<result property="deleteSw"	 			column="delete_sw_display"/>
+		<result property="mortgName" 			column="mortg_name"/>
+
+	</resultMap>
+	<select id="getMortgageeList" resultMap="mortgageeListMap" parameterClass="java.util.HashMap">
+		SELECT *
+            FROM (SELECT rownum rownum_,b.count_,a.*
+                    FROM (SELECT * FROM TABLE(gipi_mortgagee_pkg.get_mortgagee(#policyId#))) a,
+                          (SELECT count(*) count_ FROM TABLE(gipi_mortgagee_pkg.get_mortgagee(#policyId#))) b)
+          WHERE rownum_ BETWEEN NVL(#from#,rownum_) AND NVL(#to#,rownum_)
+	</select>
+	
+	<select id="getItemMortgagees" resultMap="itemMortgageesMap" parameterClass="java.util.HashMap">
+		SELECT *
+            FROM (SELECT rownum rownum_,b.count_,a.*
+                    FROM (SELECT * FROM TABLE(gipi_mortgagee_pkg.get_item_mortgagees(#policyId#,#itemNo#))
+                  <isEqual property="sortColumn" compareValue="mortgCd">
+	              		ORDER BY mortg_cd
+	              </isEqual>
+	              <isEqual property="sortColumn" compareValue="mortgName">
+	              		ORDER BY mortg_name
+	              </isEqual>
+	              <isEqual property="sortColumn" compareValue="amount">
+	              		ORDER BY amount
+	              </isEqual>
+	              <isEqual property="sortColumn" compareValue="itemNoDisplay">
+	              		ORDER BY item_no
+	              </isEqual>
+	              <isEqual property="sortColumn" compareValue="itemNo">
+	              		ORDER BY item_no
+	              </isEqual>
+	              <isEqual property="sortColumn" compareValue="deleteSw">
+	              		ORDER BY delete_sw_display
+	              </isEqual>
+	          	  <isNotNull property="sortColumn">
+	              		<isEqual property="ascDescFlg" compareValue="ASC">
+	              			ASC
+	              		</isEqual>
+	              		<isEqual property="ascDescFlg" compareValue="DESC">
+	              			DESC
+	              		</isEqual>
+	              </isNotNull>  
+                    ) a,
+                          (SELECT count(*) count_ FROM TABLE(gipi_mortgagee_pkg.get_item_mortgagees(#policyId#,#itemNo#))) b)
+          WHERE rownum_ BETWEEN NVL(#from#,rownum_) AND NVL(#to#,rownum_)
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="itemMortgageesMap">
+		<result property="policyId" 			column="policy_id"/>
+		<result property="itemNo" 				column="item_no"/>
+		<result property="mortgCd"	 			column="mortg_cd"/>
+		<result property="issCd" 				column="iss_cd"/>
+		<result property="amount" 				column="amount"/>
+		<result property="remarks" 				column="remarks"/>
+		<result property="sumAmount" 			column="total_mortgagee_amt"/>
+		<result property="itemNoDisplay" 		column="item_no_display"/>
+		<result property="deleteSw"	 			column="delete_sw_display"/>
+		<result property="mortgName" 			column="mortg_name"/>
+		<result property="totalAmount" 			column="total_amount"/>
+	</resultMap>
+	
+	<select id="getGIPIS100Mortgagees" resultMap="itemMortgageesMap" parameterClass="java.util.HashMap">
+		SELECT *
+            FROM (SELECT rownum rownum_,b.count_,a.*
+                    FROM (SELECT * FROM TABLE(gipi_mortgagee_pkg.get_gipis100_mortgagees(#policyId#))
+                  <isEqual property="sortColumn" compareValue="mortgCd">
+	              		ORDER BY mortg_cd
+	              </isEqual>
+	              <isEqual property="sortColumn" compareValue="mortgName">
+	              		ORDER BY mortg_name
+	              </isEqual>
+	              <isEqual property="sortColumn" compareValue="amount">
+	              		ORDER BY amount
+	              </isEqual>
+	              <isEqual property="sortColumn" compareValue="itemNoDisplay">
+	              		ORDER BY item_no
+	              </isEqual>
+	              <isEqual property="sortColumn" compareValue="itemNo">
+	              		ORDER BY item_no
+	              </isEqual>
+	              <isEqual property="sortColumn" compareValue="deleteSw">
+	              		ORDER BY delete_sw_display
+	              </isEqual>
+	          	  <isNotNull property="sortColumn">
+	              		<isEqual property="ascDescFlg" compareValue="ASC">
+	              			ASC
+	              		</isEqual>
+	              		<isEqual property="ascDescFlg" compareValue="DESC">
+	              			DESC
+	              		</isEqual>
+	              </isNotNull>  
+                    ) a,
+                          (SELECT count(*) count_ FROM TABLE(gipi_mortgagee_pkg.get_gipis100_mortgagees(#policyId#))) b)
+          WHERE rownum_ BETWEEN NVL(#from#,rownum_) AND NVL(#to#,rownum_)
+	</select>
+	
+	<resultMap class="java.util.HashMap" id="getMortgageesTableGridResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="policyId" 			column="policy_id"/>
+		<result property="itemNo" 				column="item_no"/>
+		<result property="mortgCd"	 			column="mortg_cd"/>
+		<result property="issCd" 				column="iss_cd"/>
+		<result property="amount" 				column="amount"/>
+		<result property="remarks" 				column="remarks"/>
+		<result property="sumAmount" 			column="total_mortgagee_amt"/>
+		<result property="itemNoDisplay" 		column="item_no_display"/>
+		<result property="deleteSw"	 			column="delete_sw_display"/>
+		<result property="mortgName" 			column="mortg_name"/>
+		<result property="totalAmount" 			column="total_amount"/>
+	</resultMap>
+	
+	<select id="getMortgageesTableGrid" resultMap="getMortgageesTableGridResultMap" parameterClass="java.util.HashMap">
+		SELECT *
+            FROM (SELECT rownum rownum_,b.count_,a.*
+                    FROM (SELECT * FROM TABLE(gipi_mortgagee_pkg.get_gipis100_mortgagees(#policyId#))
+                  <isEqual property="sortColumn" compareValue="mortgCd">
+	              		ORDER BY mortg_cd
+	              </isEqual>
+	              <isEqual property="sortColumn" compareValue="mortgName">
+	              		ORDER BY mortg_name
+	              </isEqual>
+	              <isEqual property="sortColumn" compareValue="amount">
+	              		ORDER BY amount
+	              </isEqual>
+	              <isEqual property="sortColumn" compareValue="itemNoDisplay">
+	              		ORDER BY item_no
+	              </isEqual>
+	              <isEqual property="sortColumn" compareValue="itemNo">
+	              		ORDER BY item_no
+	              </isEqual>
+	              <isEqual property="sortColumn" compareValue="deleteSw">
+	              		ORDER BY delete_sw_display
+	              </isEqual>
+	          	  <isNotNull property="sortColumn">
+	              		<isEqual property="ascDescFlg" compareValue="ASC">
+	              			ASC
+	              		</isEqual>
+	              		<isEqual property="ascDescFlg" compareValue="DESC">
+	              			DESC
+	              		</isEqual>
+	              </isNotNull>  
+                    ) a,
+                          (SELECT count(*) count_ FROM TABLE(gipi_mortgagee_pkg.get_gipis100_mortgagees(#policyId#))) b)
+          WHERE rownum_ BETWEEN NVL(#from#,rownum_) AND NVL(#to#,rownum_)
+	</select>
+	
+	<!-- kenneth SR 5483 05.26.2016 -->	
+	<select id="getPerItemAmount" resultClass="java.math.BigDecimal" parameterClass="java.util.HashMap">
+		SELECT sum_amount amount
+		  FROM TABLE (gipi_mortgagee_pkg.get_mortgagee_del_sw (nvl(#policyId#, get_policy_id(#lineCd#, #sublineCd#, #issCd#, #issueYy#, #polSeqNo#, #renewNo#)),#mortgCd#))
+		 WHERE mortg_cd = #mortgCd# AND item_no = #itemNo#
+	</select>
+	<!-- MarkS SR 5483,2743,3708 09.07.2016 -->
+	<select id="getPerItemMortgName" resultClass="String" parameterClass="java.util.HashMap">
+		SELECT mortg_name
+		  FROM TABLE (gipi_mortgagee_pkg.get_mortgagee_del_sw (nvl(#policyId#, get_policy_id(#lineCd#, #sublineCd#, #issCd#, #issueYy#, #polSeqNo#, #renewNo#)),#mortgCd#))
+		 WHERE mortg_cd = #mortgCd# AND item_no = #itemNo#
+	</select>
+</sqlMap>

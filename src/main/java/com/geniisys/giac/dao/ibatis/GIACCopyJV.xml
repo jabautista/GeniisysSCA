@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="GIACCopyJV">
+
+	<resultMap class="java.util.HashMap"  id="GIACS051BranchCdFromLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="gibrBranchCd" column="gibr_branch_cd" />
+		<result property="issName" column="iss_name" />
+	</resultMap>
+	
+	<select id="getGIACS051BranchCdFromLOV" resultMap="GIACS051BranchCdFromLOVResultMap">
+		SELECT *
+            FROM (SELECT ROWNUM rownum_, b.count_, a.*
+                  FROM (SELECT *
+                          FROM TABLE(GIACS051_pkg.get_branch_cd_from_lov(#userId#))
+                          <isNull property="findText">
+                             WHERE UPPER(gibr_branch_cd) LIKE UPPER(NVL(#searchString#, gibr_branch_cd))
+                          </isNull>
+                          <isNotNull property="findText">
+                             WHERE UPPER(gibr_branch_cd) LIKE UPPER(#findText#)
+                                OR UPPER(iss_name) LIKE UPPER(#findText#)
+                          </isNotNull>
+                            <isEqual property="sortColumn" compareValue="gibrBranchCd">
+                                     ORDER BY gibr_branch_cd
+                            </isEqual>
+                            <isEqual property="sortColumn" compareValue="issName">
+                                     ORDER BY iss_name
+                            </isEqual>
+                            <isNotNull property="sortColumn">
+                                 <isEqual property="ascDescFlg" compareValue="ASC">
+                                     ASC
+                                 </isEqual>
+                                 <isEqual property="ascDescFlg" compareValue="DESC">
+                                     DESC
+                                 </isEqual>
+                            </isNotNull>) a,
+               (SELECT COUNT (*) count_
+                  FROM TABLE
+                          (GIACS051_pkg.get_branch_cd_from_lov(#userId#))
+                          <isNull property="findText">
+                             WHERE UPPER(gibr_branch_cd) LIKE UPPER(NVL(#searchString#, gibr_branch_cd))
+                          </isNull>
+                          <isNotNull property="findText">
+                             WHERE UPPER(gibr_branch_cd) LIKE UPPER(#findText#)
+                                OR UPPER(iss_name) LIKE UPPER(#findText#)
+                          </isNotNull>
+                          ) b)
+          WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap"  id="GIACS051DocYearLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="docYear" column="doc_year" />
+		<result property="docMm" column="doc_mm" />
+	</resultMap>
+	
+	<select id="getGIACS051DocYearLOV" resultMap="GIACS051DocYearLOVResultMap">
+		SELECT *
+            FROM (SELECT ROWNUM rownum_, b.count_, a.*
+                  FROM (SELECT *
+                          FROM TABLE(GIACS051_PKG.get_doc_year_lov(#branchCdFrom#))
+                          <isNull property="findText">
+                             WHERE doc_year LIKE NVL(#searchString#, doc_year)
+                          </isNull>
+                          <isNotNull property="findText">
+                             WHERE doc_year LIKE #findText#
+                                OR doc_mm LIKE #findText#
+                          </isNotNull>
+                            <isEqual property="sortColumn" compareValue="docYear">
+                                     ORDER BY doc_year
+                            </isEqual>
+                            <isEqual property="sortColumn" compareValue="docMm">
+                                     ORDER BY doc_mm
+                            </isEqual>
+                            <isNotNull property="sortColumn">
+                                 <isEqual property="ascDescFlg" compareValue="ASC">
+                                     ASC
+                                 </isEqual>
+                                 <isEqual property="ascDescFlg" compareValue="DESC">
+                                     DESC
+                                 </isEqual>
+                            </isNotNull>) a,
+               (SELECT COUNT (*) count_
+                  FROM TABLE
+                          (GIACS051_PKG.get_doc_year_lov(#branchCdFrom#))
+                          <isNull property="findText">
+                             WHERE doc_year LIKE NVL(#searchString#, doc_year)
+                          </isNull>
+                          <isNotNull property="findText">
+                             WHERE doc_year LIKE #findText#
+                                OR doc_mm LIKE #findText#
+                          </isNotNull>
+                          ) b)
+          WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap"  id="GIACS051DocSeqNoLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="docSeqNo"			column="doc_seq_no" />
+		<result property="particulars"		column="particulars" />
+		<result property="tranId"			column="tran_id" />
+		<result property="gfunFundCd"		column="gfun_fund_cd" />
+		<result property="gibrBranchCd"		column="gibr_branch_cd" />
+		<result property="tranSeqNo"		column="tran_seq_no" />
+		<result property="tranDate"			column="tran_date" />
+	</resultMap>
+	
+	<select id="getGIACS051DocSeqNoLOV" resultMap="GIACS051DocSeqNoLOVResultMap">
+		SELECT *
+            FROM (SELECT ROWNUM rownum_, b.count_, a.*
+                  FROM (SELECT *
+                          FROM TABLE(GIACS051_PKG.get_doc_seq_no_lov(#branchCdFrom#, #docYear#, #docMm#, #docSeqNo#))
+                          <isNull property="findText">
+                             WHERE doc_seq_no = NVL(#searchString#, doc_seq_no)
+                          </isNull>
+                          <isNotNull property="findText">
+                             WHERE doc_seq_no LIKE #findText#
+                                OR UPPER(particulars) LIKE UPPER(#findText#)
+                          </isNotNull>
+                            <isEqual property="sortColumn" compareValue="docSeqNo">
+                                     ORDER BY doc_seq_no
+                            </isEqual>
+                            <isEqual property="sortColumn" compareValue="particulars">
+                                     ORDER BY particulars
+                            </isEqual>
+                            <isNotNull property="sortColumn">
+                                 <isEqual property="ascDescFlg" compareValue="ASC">
+                                     ASC
+                                 </isEqual>
+                                 <isEqual property="ascDescFlg" compareValue="DESC">
+                                     DESC
+                                 </isEqual>
+                            </isNotNull>) a,
+               (SELECT COUNT (*) count_
+                  FROM TABLE
+                          (GIACS051_PKG.get_doc_seq_no_lov(#branchCdFrom#, #docYear#, #docMm#, #docSeqNo#))
+                          <isNull property="findText">
+                             WHERE doc_seq_no = NVL(#searchString#, doc_seq_no)
+                          </isNull>
+                          <isNotNull property="findText">
+                             WHERE doc_seq_no LIKE #findText#
+                                OR UPPER(particulars) LIKE UPPER(#findText#)
+                          </isNotNull>
+                          ) b)
+          WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<resultMap class="java.util.HashMap"  id="GIACS051BranchCdToLOVResultMap" extends="BaseEntity.TableGridResultMap">
+		<result property="issCd" column="iss_cd" />
+		<result property="issName" column="iss_name" />
+	</resultMap>
+	
+	<select id="getGIACS051BranchCdToLOV" resultMap="GIACS051BranchCdToLOVResultMap">
+		SELECT *
+            FROM (SELECT ROWNUM rownum_, b.count_, a.*
+                  FROM (SELECT *
+                          FROM TABLE(giacs051_pkg.get_branch_cd_to_lov(#userId#))
+                          <isNull property="findText">
+                             WHERE UPPER(iss_cd) LIKE UPPER(NVL(#searchString#, iss_cd))
+                          </isNull>
+                          <isNotNull property="findText">
+                             WHERE UPPER(iss_cd) LIKE UPPER(#findText#)
+                                OR UPPER(iss_name) LIKE UPPER(#findText#)
+                          </isNotNull>
+                          <isEqual property="sortColumn" compareValue="issCd">
+                                     ORDER BY iss_cd
+                            </isEqual>
+                            <isEqual property="sortColumn" compareValue="issName">
+                                     ORDER BY iss_name
+                            </isEqual>
+                            <isNotNull property="sortColumn">
+                                 <isEqual property="ascDescFlg" compareValue="ASC">
+                                     ASC
+                                 </isEqual>
+                                 <isEqual property="ascDescFlg" compareValue="DESC">
+                                     DESC
+                                 </isEqual>
+                            </isNotNull>) a,
+               (SELECT COUNT (*) count_
+                  FROM TABLE
+                          (giacs051_pkg.get_branch_cd_to_lov(#userId#))
+                          <isNull property="findText">
+                             WHERE UPPER(iss_cd) LIKE UPPER(NVL(#searchString#, iss_cd))
+                          </isNull>
+                          <isNotNull property="findText">
+                             WHERE UPPER(iss_cd) LIKE UPPER(#findText#)
+                                OR UPPER(iss_name) LIKE UPPER(#findText#)
+                          </isNotNull>
+                          ) b)
+          WHERE rownum_ BETWEEN #from# AND #to#
+	</select>
+	
+	<select id="giacs051CheckCreateTransaction" resultClass="java.lang.String" >
+		SELECT giacs051_pkg.check_create_transaction(#tranDate#, #branchTo#) FROM DUAL
+	</select>
+	
+	<parameterMap class="map" id="giacs051InsertIntoAcctransParameterMap">
+		<parameter property="userId"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="fundCdFrom"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="branchTo"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="tranDateFrom"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="tranIdAcc"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+		<parameter property="docYearFrom"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="docMmFrom"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="docSeqNoFrom"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="branchFrom"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="docYearTo"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="docMmTo"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="userId"			jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+	</parameterMap>
+	
+	<procedure id="giacs051InsertIntoAcctrans" parameterMap="giacs051InsertIntoAcctransParameterMap">
+		BEGIN
+			giis_users_pkg.app_user := ?;
+			GIACS051_PKG.insert_into_acctrans(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+		END;
+	</procedure>
+	
+	<parameterMap class="map" id="giacs051CopyJVLooperParameterMap">
+		<parameter property="fundCdFrom"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="branchFrom"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="tranIdFrom"	jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="tranIdAcc"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="branchTo"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="userId"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="docYearTo"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="docMmTo"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="IN"/>
+		<parameter property="newTranNo"		jdbcType="VARCHAR"	javaType="java.lang.String"		mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="giacs051CopyJVLooper" parameterMap="giacs051CopyJVLooperParameterMap">
+		CALL GIACS051_PKG.copy_jv_looper(?, ?, ?, ?, ?, ?, ?, ?, ?)
+	</procedure>
+	
+	<select id="giacs051ValidateBranchCdFrom" resultClass="java.lang.String">
+		SELECT GIACS051_PKG.validate_branch_cd_from(#branchCdFrom#, #userId#) FROM DUAL
+	</select>
+	
+	<select id="giacs051ValidateDocYear" resultClass="java.lang.String">
+		SELECT GIACS051_PKG.validate_doc_year(#branchCdFrom#, #docYearFrom#) FROM DUAL
+	</select>
+	
+	<select id="giacs051ValidateDocMm" resultClass="java.lang.String">
+		SELECT GIACS051_PKG.validate_doc_mm(#branchCdFrom#, #docYearFrom#, #docMmFrom#) FROM DUAL
+	</select>
+	
+	<resultMap class="java.util.HashMap"  id="giacs051ValidateDocSeqNoResultMap" >
+		<result property="docSeqNo"			column="doc_seq_no" />
+		<result property="particulars"		column="particulars" />
+		<result property="tranId"			column="tran_id" />
+		<result property="gfunFundCd"		column="gfun_fund_cd" />
+		<result property="gibrBranchCd"		column="gibr_branch_cd" />
+		<result property="tranSeqNo"		column="tran_seq_no" />
+		<result property="tranDate"			column="tran_date" />
+		<result property="recCount"			column="rec_count" />
+	</resultMap>
+	
+	<select id="giacs051ValidateDocSeqNo" resultMap="giacs051ValidateDocSeqNoResultMap">
+		SELECT * FROM TABLE (GIACS051_PKG.validate_doc_seq_no(#branchCdFrom#, #docYearFrom#, #docMmFrom#, #docSeqNoFrom#))
+	</select>
+	
+	<select id="giacs051ValidateBranchCdTo" resultClass="java.lang.String">
+		SELECT GIACS051_PKG.validate_branch_cd_to(#branchCdTo#, #userId#) FROM DUAL
+	</select>
+
+</sqlMap>

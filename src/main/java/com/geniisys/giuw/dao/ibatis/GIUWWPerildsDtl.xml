@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="GIUWWPerildsDtl">
+	<cacheModel type="MEMORY" id="oneDayClient">
+		<flushInterval hours="24" />
+		<property name="reference-type" value="WEAK"/>
+	</cacheModel>
+
+	<typeAlias alias="GIUWWPerildsDtl" type="com.geniisys.giuw.entity.GIUWWPerildsDtl"/>
+	
+	<resultMap class="GIUWWPerildsDtl" id="GIUWWPerildsDtlResultMap">
+		<result property="distNo"		column="DIST_NO" />
+		<result property="distSeqNo"	column="DIST_SEQ_NO" />
+		<result property="lineCd"		column="LINE_CD" />
+		<result property="perilCd"		column="PERIL_CD" />
+		<result property="shareCd"		column="SHARE_CD" />
+		<result property="distSpct"		column="DIST_SPCT" />
+		<result property="distTsi"		column="DIST_TSI" />
+		<result property="distPrem"		column="DIST_PREM" />
+		<result property="annDistSpct"	column="ANN_DIST_SPCT" />
+		<result property="annDistTsi"	column="ANN_DIST_TSI" />
+		<result property="distGrp"		column="DIST_GRP" />
+		<result property="distSpct1"	column="DIST_SPCT1" />
+		<result property="arcExtData"	column="ARC_EXT_DATA" />
+		<result property="trtyName"		column="TRTY_NAME" />
+	</resultMap>
+	
+	<select id="getGIUWWPerildsDtl" resultMap="GIUWWPerildsDtlResultMap">
+		SELECT * FROM TABLE(GIUW_WPERILDS_DTL_PKG.GET_GIUW_WPERILDS_DTL(#distNo#, #distSeqNo#, #lineCd#, #perilCd#))		  
+	</select>
+	
+	<insert id="setGIUWWPerildsDtl" parameterClass="GIUWWPerildsDtl">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GIUW_WPERILDS_DTL_PKG.set_giuw_wperilds_dtl(<!-- added TO_NUMBER : shan 06.11.2014 -->
+				#distNo#,         #distSeqNo#,
+				#lineCd#,		  #perilCd#,
+				#shareCd#,		  TO_NUMBER(#distSpct#),
+				#distTsi#,		  #distPrem#,
+				TO_NUMBER(#annDistSpct#),	  #annDistTsi#,
+                #distGrp#,		  TO_NUMBER(#distSpct1#),
+                #arcExtData#);
+		END;	
+	</insert>
+	
+	<delete id="delGIUWWPerildsDtl" parameterClass="GIUWWPerildsDtl">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GIUW_WPERILDS_DTL_PKG.del_giuw_wperilds_dtl(#distNo#);
+		END;
+	</delete>
+	
+	<delete id="delGIUWWPerildsDtl2" parameterClass="GIUWWPerildsDtl">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GIUW_WPERILDS_DTL_PKG.del_giuw_wperilds_dtl2(#distNo#, #distSeqNo#, #lineCd#, #perilCd#, #shareCd#);
+		END;
+	</delete>
+	
+	<procedure id="postWperildsDtlGiuws015" parameterClass="java.util.HashMap">
+		BEGIN
+			giis_users_pkg.app_user := #userId#;
+			GIUW_WPERILDS_DTL_PKG.post_wperilds_dtl_giuws015(#batchId#, #distNo#);
+		END;	
+	</procedure>
+	
+</sqlMap>
