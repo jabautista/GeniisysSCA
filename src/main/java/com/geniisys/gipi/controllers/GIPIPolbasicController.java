@@ -87,7 +87,7 @@ public class GIPIPolbasicController extends BaseController {
 				} else if (message.trim().length() > 0){
 					message = "SUCCESS " + message;
 				}
-				
+				//Comment by Jerome
 				PAGE = "/pages/genericMessage.jsp";	
 			} else if("populateGixxTables".equals(ACTION)){
 				log.info("Populating related GIXX tables...");
