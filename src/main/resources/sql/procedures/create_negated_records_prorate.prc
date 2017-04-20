@@ -42,7 +42,6 @@ AS
     v_v_incept_date        DATE;
     v_menu_line	GIIS_LINE.menu_line_cd%TYPE;
 BEGIN
---comment by Jerome
     v_v_expiry_date := Extract_Expiry2(p_line_cd, p_subline_cd, p_iss_cd, p_issue_yy, p_pol_seq_no, p_renew_no);
     v_v_incept_date := Extract_Incept(p_line_cd, p_subline_cd, p_iss_cd, p_issue_yy, p_pol_seq_no, p_renew_no);
     

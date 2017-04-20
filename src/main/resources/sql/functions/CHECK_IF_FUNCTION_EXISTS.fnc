@@ -11,7 +11,7 @@ CREATE OR REPLACE FUNCTION CPI.check_if_function_exists(
      
    RETURN VARCHAR2 IS
       v_exists   VARCHAR2 (1);
-   BEGIN --comment by Jerome
+   BEGIN
       FOR i IN (SELECT '1'
                   FROM GIAC_FUNCTIONS a
                  WHERE module_id = p_module_id
