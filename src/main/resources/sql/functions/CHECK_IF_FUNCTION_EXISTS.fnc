@@ -4,7 +4,7 @@
    **  Description  :  Function to check if a certain accounting function exists or not.
    **
    */
-
+--Jerome
 CREATE OR REPLACE FUNCTION CPI.check_if_function_exists(
      p_module_id     giac_functions.module_id%TYPE,
      p_function_code giac_functions.function_code%TYPE)
