@@ -12,7 +12,7 @@ AS
       RETURN other_payments_tab PIPELINED
    IS
       v_other   other_payments_type;
-   BEGIN
+   BEGIN --Jerome
       FOR o IN (SELECT   or_print_tag, gacc_tran_id, item_no,
                          transaction_type, collection_amt, gl_acct_category,
                          gl_control_acct, gl_sub_acct_1, gl_sub_acct_2,
