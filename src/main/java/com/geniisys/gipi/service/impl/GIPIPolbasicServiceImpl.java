@@ -37,6 +37,7 @@ import com.seer.framework.util.StringFormatter;
 /**
  * The Class GIPIPolbasicServiceImpl.
  */
+//Comment by Jerome
 public class GIPIPolbasicServiceImpl implements GIPIPolbasicService {
 	
 	/** The gipi polbasic dao. */
