@@ -327,6 +327,11 @@ AS
 		p_hist_seq_no			GICL_CLM_LOSS_EXP.hist_seq_no%TYPE
 	)
  	 RETURN gicls260_advice_tab PIPELINED;
+     
+    PROCEDURE test_function(
+        p_claim_id              GICL_CLAIMS.claim_id%TYPE,
+        p_advice_id             GICL_ADVICE.advice_ID%TYPE
+    );
 
 END gicl_advice_pkg;
 /

@@ -258,4 +258,21 @@ public class GICLAdviceDAOImpl implements GICLAdviceDAO{
 			Map<String, Object> params) throws SQLException {
 		return (Map<String, Object>) this.getSqlMapClient().queryForObject("getGICLS260Advice", params);
 	}
+
+	@Override
+	public void gicls032TestFunction(Map<String, Object> params) throws SQLException {
+		try{
+			this.sqlMapClient.startTransaction();
+			this.sqlMapClient.getCurrentConnection().setAutoCommit(false);
+			
+			this.sqlMapClient.update("gicls032CreateOverrideRequest", params);
+			
+			this.sqlMapClient.getCurrentConnection().commit();
+		} catch(SQLException e){
+			this.sqlMapClient.getCurrentConnection().rollback();
+			throw e;
+		} finally {
+			this.sqlMapClient.endTransaction();
+		}
+	}
 }

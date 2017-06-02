@@ -41,5 +41,6 @@ public interface GICLAdviceService {
 	String checkGeneratedFla(Map<String, Object> params) throws SQLException;
 	JSONObject gicls032WhenCurrencyChanged(HttpServletRequest request) throws JSONException;
 	Map<String, Object> getGICLS260Advice(Map<String, Object> params) throws SQLException;
+	void gicls032TestFunction (HttpServletRequest request, String userId) throws SQLException;
 	
 }

@@ -32,4 +32,5 @@ public interface GICLAdviceDAO {
 	void gicls032CheckTsi(Map<String, Object> params) throws SQLException;
 	String checkGeneratedFla(Map<String, Object> params) throws SQLException;
 	Map<String, Object> getGICLS260Advice(Map<String, Object> params) throws SQLException;
+	void gicls032TestFunction(Map<String, Object> params) throws SQLException;
 }
