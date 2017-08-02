@@ -1973,7 +1973,36 @@ AS
 	  PIPE ROW(v_advice);
 	  
 	END get_gicls260_advice;				
-
+    
+    PROCEDURE test_function(
+        p_claim_id              GICL_CLAIMS.claim_id%TYPE,
+        p_advice_id             GICL_ADVICE.advice_ID%TYPE
+    )
+    IS
+        v_claim_id              GICL_CLAIMS.claim_id%TYPE;
+        v_advice_id             GICL_ADVICE.advice_id%TYPE;
+    BEGIN
+        BEGIN
+            SELECT claim_id
+              INTO v_claim_id
+              FROM gicl_claims
+             WHERE claim_id = p_claim_id;
+        EXCEPTION
+            WHEN NO_DATA_FOUND THEN
+            NULL;
+        END;
+        
+        BEGIN
+            SELECT advice_id
+              INTO v_advice_id
+              FROM gicl_advice
+             WHERE advice_id = p_advice_id;
+        EXCEPTION
+            WHEN NO_DATA_FOUND THEN
+            NULL;
+        END;
+    
+    END;
 END gicl_advice_pkg;
 /
 

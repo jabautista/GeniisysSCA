@@ -343,4 +343,15 @@ public class GICLAdviceServiceImpl implements GICLAdviceService{
 			Map<String, Object> params) throws SQLException {
 		return StringFormatter.escapeHTMLInMap(this.getGiclAdviceDAO().getGICLS260Advice(params));
 	}
+	
+	@Override
+	public void gicls032TestFunction(HttpServletRequest request,
+			String userId) throws SQLException {
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("userId", userId);
+		params.put("claimId", request.getParameter("claimId"));
+		params.put("adviceId", request.getParameter("adviceId"));
+		
+		this.giclAdviceDAO.gicls032CreateOverrideRequest(params);
+	}
 }

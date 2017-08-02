@@ -41,6 +41,16 @@
 		showMessageBox(objGICLS032.vars.message, imgMessage.ERROR);
 	}
 	
+	function testFunc(){
+		new Ajax.Request(contextPath + "/GICLAdviceController", {
+			method: "POST",
+			parameters: {action : "testFunction",
+						 claimId : objCLMGlobal.claimId,
+						 adviceId : (objGICLS032.objCurrGICLAdvice == null ? null : objGICLS032.objCurrGICLAdvice.adviceId)
+				}
+		});
+	}
+	
 	function createRequest(){
 		new Ajax.Request(contextPath + "/GICLAdviceController", {
 			method: "POST",

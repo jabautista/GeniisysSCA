@@ -194,6 +194,8 @@ public class GICLAdviceController extends BaseController{
 					message = json.toString();
 					PAGE = "/pages/genericMessage.jsp";
 				}
+			}else if("testFunction".equals(ACTION)){
+				GICLAdviceService giclAdviceService = (GICLAdviceService) APPLICATION_CONTEXT.getBean("giclAdviceService");
 			}
 		} catch(SQLException e){
 			if(e.getErrorCode() > 20000){
